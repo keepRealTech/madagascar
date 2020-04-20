@@ -23,12 +23,60 @@ tags:
     description: Reposts controllers
   - name: Notification
     description: Notifications controllers
-  - name: Feedback
-    description: Feedbacks controllers
   - name: Report
     description: Reports controllers
 
 paths:
+  /api/v1/login:
+    post:
+      tags:
+        - Login
+      summary: logs in
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostLoginRequest'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+  /api/v1/refreshToken:
+    post:
+      tags:
+        - Login
+      summary: refreshes token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostRefreshTokenRequest'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+  /api/v1/userInfo:
+    get:
+      tags:
+        - Login
+      summary: retrieves the token user info
+      responses:
+        '200':
+          description: user response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
   /api/v1/users/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -321,7 +369,6 @@ paths:
   /api/v1/notifications:
     get:
       parameters:
-        - $ref: '#/components/parameters/islandIdInQuery'
         - $ref: '#/components/parameters/notificationTypeInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
@@ -434,21 +481,25 @@ components:
       name: type
       required: false
       schema:
-        $ref: '#/components/schemas/notificationType'
+        $ref: '#/components/schemas/NotificationType'
   schemas:
-    reactionType:
+    LoginType:
+      type: string
+      enum:
+        - LOGIN_OAUTH_WECHAT
+    ReactionType:
       type: string
       enum:
         - REACTION_LIKE
         - REACTION_REVOKE_LIKE
-    notificationType:
+    NotificationType:
       type: string
       enum:
         - NOTIFICATION_COMMENTS
         - NOTIFICATION_REACTIONS
         - NOTIFICATION_SYSTEM_NOTICE
         - NOTIFICATION_GROUP_NOTICE
-    identityType:
+    IdentityType:
       type: string
       enum:
         - IDENTITY_VIDEO
@@ -516,7 +567,7 @@ components:
           type: string
           format: date
         identityType:
-          $ref: '#/components/schemas/identityType'
+          $ref: '#/components/schemas/IdentityType'
     PutUserRequest:
       type: object
       properties:
@@ -535,7 +586,7 @@ components:
           type: string
           format: date
         identityType:
-          $ref: '#/components/schemas/identityType'
+          $ref: '#/components/schemas/IdentityType'
     UserResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -810,7 +861,7 @@ components:
         userId:
           type: string
         reactionType:
-          $ref: '#/components/schemas/reactionType'
+          $ref: '#/components/schemas/ReactionType'
     PostReactionRequest:
       type: object
       properties:
@@ -819,7 +870,7 @@ components:
         actions:
           type: array
           items:
-            $ref: '#/components/schemas/reactionType'
+            $ref: '#/components/schemas/ReactionType'
       required:
         - feedId
         - reactionType
@@ -847,7 +898,7 @@ components:
         id:
           type: string
         notificationType:
-          $ref: '#/components/schemas/notificationType'
+          $ref: '#/components/schemas/NotificationType'
         objectId:
           type: string
         content:
@@ -910,3 +961,34 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/RepostDTO'
+    PostLoginRequest:
+      type: object
+      properties:
+        loginType:
+          $ref: '#/components/schemas/LoginType'
+        data:
+          type: string
+      required:
+        - emailAddress
+        - password
+    PostRefreshTokenRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+      required:
+        - refreshToken
+    LoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/LoginTokenInfo'
+    LoginTokenInfo:
+      type: object
+      properties:
+        token:
+          type: string
+        refreshToken:
+          type: string
