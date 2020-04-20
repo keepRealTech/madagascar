@@ -879,7 +879,7 @@ components:
       properties:
         feedId:
           type: string
-        actions:
+        reactions:
           type: array
           items:
             $ref: '#/components/schemas/ReactionType'
@@ -911,8 +911,12 @@ components:
           type: string
         notificationType:
           $ref: '#/components/schemas/NotificationType'
-        objectId:
-          type: string
+        feed:
+          $ref: '#/components/schemas/BriefFeedDTO'
+        comment:
+          $ref: '#/components/schemas/CommentDTO'
+        reactions:
+          $ref: '#/components/schemas/ReactionDTO'
         content:
           type: string
         createdAt:
