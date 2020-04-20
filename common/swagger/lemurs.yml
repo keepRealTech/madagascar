@@ -933,15 +933,15 @@ components:
             data:
               type: object
               properties:
-                hasNew:
+                hasUnread:
                   type: boolean
-                newCommentsCount:
+                UnreadCommentsCount:
                   type: integer
-                newReactionsCount:
+                UnreadReactionsCount:
                   type: integer
-                newGroupNoticesCount:
+                UnreadGroupNoticesCount:
                   type: integer
-                newSystemNoticesCount:
+                UnreadSystemNoticesCount:
                   type: integer
     NotificationsResponse:
       allOf:
