@@ -919,6 +919,8 @@ components:
           $ref: '#/components/schemas/ReactionDTO'
         content:
           type: string
+        hasRead:
+          type: boolean
         createdAt:
           type: integer
     NotificationsCountResponse:
