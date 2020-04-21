@@ -98,7 +98,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/PutUserRequest'
       responses:
@@ -128,7 +128,7 @@ paths:
                 $ref: '#/components/schemas/BriefIslandResponse'
     get:
       parameters:
-        - $ref: '#/components/parameters/nameInQuery'
+        - $ref: '#/components/parameters/nameInQueryOptional'
         - $ref: '#/components/parameters/subscribedInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
@@ -142,6 +142,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BriefIslandsResponse'
+  /api/v1/islands/checkName:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/nameInQuery'
+      tags:
+        - Island
+      summary: checks if island name exists
+      responses:
+        '200':
+          description: islands response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckIslandResponse'
   /api/v1/islands/myIslands:
     get:
       parameters:
@@ -178,7 +192,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/PutIslandRequest'
       responses:
@@ -188,6 +202,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BriefIslandResponse'
+  /api/v1/islands/{id}/profile:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Island
+      summary: retrieves a island with detailed profile by id
+      responses:
+        '200':
+          description: island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandProfileResponse'
   /api/v1/islands/{id}/subscribers:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -246,7 +274,8 @@ paths:
   /api/v1/feeds:
     get:
       parameters:
-        - $ref: '#/components/parameters/islandIdInQuery'
+        - $ref: '#/components/parameters/islandidInPath'
+        - $ref: '#/components/parameters/fromHostInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -266,7 +295,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/PostFeedRequest'
       responses:
@@ -304,7 +333,7 @@ paths:
   /api/v1/comments:
     get:
       parameters:
-        - $ref: '#/components/parameters/feedIdInQuery'
+        - $ref: '#/components/parameters/feedidInPath'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -351,7 +380,7 @@ paths:
   /api/v1/reactions:
     get:
       parameters:
-        - $ref: '#/components/parameters/feedIdInQuery'
+        - $ref: '#/components/parameters/feedidInPath'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -412,7 +441,7 @@ paths:
   /api/v1/reposts:
     get:
       parameters:
-        - $ref: '#/components/parameters/feedIdInQuery'
+        - $ref: '#/components/parameters/feedidInPath'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -475,21 +504,34 @@ components:
         format: int32
         minimum: 0
         maximum: 100
-    islandIdInQuery:
+    islandidInPath:
       in: query
       name: islandId
       description: island id
       required: false
       schema:
         type: string
-    feedIdInQuery:
+    feedidInPath:
       in: query
       name: feedId
       description: feed id
       required: true
       schema:
         type: string
+    fromHostInQuery:
+      in: query
+      name: fromHost
+      required: false
+      schema:
+        type: boolean
     nameInQuery:
+      in: query
+      name: name
+      description: name
+      required: true
+      schema:
+        type: string
+    nameInQueryOptional:
       in: query
       name: name
       description: name
@@ -581,6 +623,8 @@ components:
           type: string
         name:
           type: string
+        portraitImageUri:
+          type: string
         gender:
           type: integer
           minimum: 0
@@ -594,8 +638,10 @@ components:
           type: string
           format: date
         identityType:
-          $ref: '#/components/schemas/IdentityType'
-    PutUserRequest:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityType'
+    PutUserPayload:
       type: object
       properties:
         name:
@@ -613,7 +659,17 @@ components:
           type: string
           format: date
         identityType:
-          $ref: '#/components/schemas/IdentityType'
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityType'
+    PutUserRequest:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/PutUserPayload'
+        portraitImage:
+          type: string
+          format: binary
     UserResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -639,38 +695,52 @@ components:
           type: string
         name:
           type: string
+        hostId:
+          type: string
         portraitImageUri:
           type: string
         description:
           type: string
     IslandDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefIslandDTO'
+        - type: object
+          properties:
+            memberCount:
+              type: integer
+    IslandProfileDTO:
       type: object
       properties:
-        id:
-          type: string
-        name:
-          type: string
-        portraitImageUri:
-          type: string
-        description:
-          type: string
-        memberCount:
-          type: integer
-    PutIslandRequest:
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
+        host:
+          $ref: '#/components/schemas/UserDTO'
+    CheckIslandDTO:
+      type: object
+      properties:
+        isExisted:
+          type: boolean
+    PutIslandPayload:
       type: object
       properties:
         name:
           type: string
           description: island name
-        portraitImage:
-          type: string
-          description: portrait image
         description:
           type: string
           description: descriptions
-        secrtet:
+        secret:
           type: string
-          description: secrets for joining island
+          description: secrets for joining island      
+    PutIslandRequest:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/PutIslandPayload'
+        portraitImage:
+          type: string
+          description: portrait image
+          format: binary
     PostIslandRequest:
       type: object
       properties:
@@ -695,6 +765,13 @@ components:
           description: island secret
       required:
         - secret
+    CheckIslandResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CheckIslandDTO'
     BriefIslandResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -702,6 +779,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BriefIslandDTO'
+    IslandProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IslandProfileDTO'
     IslandResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -769,45 +853,43 @@ components:
           type: array
           items: 
             type: string
+        fromHost:
+          type: boolean
+          description: whether feed posted by the host of island
         createdAt:
           type: integer
     FeedDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefFeedDTO'
+        - type: object
+          properties:
+            likesCount:
+              type: integer
+            commentsCount:
+              type: integer
+            repostCount:
+              type: integer
+    PostFeedPayload:
       type: object
       properties:
-        id:
-          type: string
-        islandId:
-          type: string
-        userId:
-          type: string
-        content:
-          type: string
-        imagesUris:
+        islandIds:
           type: array
           items: 
             type: string
-        likesCount:
-          type: integer
-        commentsCount:
-          type: integer
-        repostCount:
-          type: integer
-        createdAt:
-          type: integer
+        content:
+          type: string
     PostFeedRequest:
       type: object
       properties:
-        islandId:
-          type: string
-        content:
-          type: string
+        payload:
+          $ref: '#/components/schemas/PostFeedPayload'
         images:
           type: array
           items:
             type: string
+            format: binary
       required:
-        - islandId
-        - userId
+        - payload
     BriefFeedResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
