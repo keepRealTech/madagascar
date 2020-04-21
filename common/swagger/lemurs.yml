@@ -142,6 +142,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BriefIslandsResponse'
+  /api/v1/islands/myIslands:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Island
+      summary: retrieves users' islands with pagination
+      responses:
+        '200':
+          description: islands response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandsResponse'
   /api/v1/islands/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -510,7 +525,7 @@ components:
         - NOTIFICATION_COMMENTS
         - NOTIFICATION_REACTIONS
         - NOTIFICATION_SYSTEM_NOTICE
-        - NOTIFICATION_GROUP_NOTICE
+        - NOTIFICATION_ISLAND_NOTICE
     IdentityType:
       type: string
       enum:
@@ -904,6 +919,13 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/ReactionDTO'
+    IslandNoticeDTO:
+      type: object
+      properties:
+        content:
+          type: string
+        islandId:
+          type: string
     NotificationDTO:
       type: object
       properties:
@@ -917,8 +939,8 @@ components:
           $ref: '#/components/schemas/CommentDTO'
         reactions:
           $ref: '#/components/schemas/ReactionDTO'
-        content:
-          type: string
+        islandNotice:
+          $ref: '#/components/schemas/IslandNoticeDTO'
         hasRead:
           type: boolean
         createdAt:
