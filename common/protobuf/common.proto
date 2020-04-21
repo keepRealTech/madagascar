@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.common";
+
+import "google/protobuf/wrappers.proto";
+
+message PageRequest {
+  int32 page = 1;
+  int32 pageSize = 2;
+  repeated Order orders = 3;
+}
+
+message PageResponse {
+  int32 page = 1;
+  int32 pageSize = 2;
+  int32 totalPageSize = 3;
+  int64 totalElementSize = 4;
+}
+
+enum IdentityType {
+  YituOperator = 0;
+  BrandAdmin = 1;
+  BrandIT = 2;
+  BrandOperator = 3;
+  BrandRegionOperator = 4;
+  OutletManager = 5;
+  OutletSales = 6;
+  SolutionEngineer = 7;
+  OutletIT = 8;
+}
+
+enum Gender {
+  UNKNOWN = 0;
+  MALE = 1;
+  FEMALE = 2;
+}
+
+message CommonStatus {
+  int32 rtn = 1;
+  string message = 2;
+}
+
+message EmptyMessage {
+}
+
+enum Direction {
+  DESC = 0;
+  ASC = 1;
+}
+
+message Order {
+  Property property = 1;
+  Direction direction = 2;
+}
