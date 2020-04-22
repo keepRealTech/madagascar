@@ -11,9 +11,6 @@ sourceSets {
             srcDirs 'src/main/madagascar-grpc-proto'
         }
     }
-    main.java.srcDirs += 'build/generated/source/proto/main/java'
-    main.java.srcDirs += 'build/generated/source/proto/main/grpc'
-    main.java.srcDirs += 'build/generated/source/proto/main/reactor'
 }
 
 dependencies {
