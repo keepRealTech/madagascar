@@ -1,0 +1,1136 @@
+openapi: 3.0.1
+info:
+  version: "1.0.0"
+  title: Keep Real API
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Login
+    description: Login controllers
+  - name: User
+    description: User related controllers
+  - name: Island
+    description: Island for KOL controllers
+  - name: Feed
+    description: Feed stream controllers
+  - name: Comment
+    description: Comments controllers
+  - name: Reaction
+    description: Reactions controllers such as likes 
+  - name: Repost
+    description: Reposts controllers
+  - name: Notification
+    description: Notifications controllers
+  - name: Report
+    description: Reports controllers
+
+paths:
+  /api/v1/login:
+    post:
+      tags:
+        - Login
+      summary: logs in
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostLoginRequest'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+  /api/v1/refreshToken:
+    post:
+      tags:
+        - Login
+      summary: refreshes token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostRefreshTokenRequest'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+  /api/v1/userInfo:
+    get:
+      tags:
+        - Login
+      summary: retrieves the token user info
+      responses:
+        '200':
+          description: user response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /api/v1/users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - User
+      summary: retrieves a user by id
+      responses:
+        '200':
+          description: user response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    put:
+      tags:
+        - User
+      summary: updates a user by id
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PutUserRequest'
+      responses:
+        '200':
+          description: user response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /api/v1/islands:
+    post:
+      tags:
+        - Island
+      summary: creates a new island
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostIslandRequest'
+      responses:
+        '200':
+          description: brief island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandResponse'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/nameInQueryOptional'
+        - $ref: '#/components/parameters/subscribedInQuery'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Island
+      summary: retrieves islands with pagination
+      responses:
+        '200':
+          description: islands response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandsResponse'
+  /api/v1/islands/checkName:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/nameInQuery'
+      tags:
+        - Island
+      summary: checks if island name exists
+      responses:
+        '200':
+          description: islands response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckIslandResponse'
+  /api/v1/islands/myIslands:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Island
+      summary: retrieves users' islands with pagination
+      responses:
+        '200':
+          description: islands response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandsResponse'
+  /api/v1/islands/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Island
+      summary: retrieves a island by id
+      responses:
+        '200':
+          description: island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandResponse'
+    put:
+      tags:
+        - Island
+      summary: updates a island by id
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PutIslandRequest'
+      responses:
+        '200':
+          description: island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandResponse'
+  /api/v1/islands/{id}/profile:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Island
+      summary: retrieves a island with detailed profile by id
+      responses:
+        '200':
+          description: island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandProfileResponse'
+  /api/v1/islands/{id}/subscribers:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Island
+      summary: retrieves a island subscribers with pagination
+      responses:
+        '200':
+          description: users response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersResponse'
+  /api/v1/islands/{id}/subscribe:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Island
+      summary: subscribe to a island
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeIslandRequest'
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/reports:
+    post:
+      tags:
+        - Report
+      summary: creates a new report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostReportRequest'
+      responses:
+        '200':
+          description: report response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportResponse'
+  /api/v1/feeds:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/islandidInPath'
+        - $ref: '#/components/parameters/fromHostInQuery'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Feed
+      summary: retrieves a list of feeds with pagination
+      responses:
+        '200':
+          description: feeds response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedsResponse'
+    post:
+      tags:
+        - Feed
+      summary: creates a new feed
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostFeedRequest'
+      responses:
+        '200':
+          description: brief feed response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefFeedResponse'
+  /api/v1/feeds/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Feed
+      summary: retrieves a feed by id
+      responses:
+        '200':
+          description: feed response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponse'
+    delete:
+      tags:
+        - Feed
+      summary: deletes a feed by id
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/comments:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/feedidInPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Comment
+      summary: retrieves a list of comments with pagination
+      responses:
+        '200':
+          description: comments response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentsResponse'
+    post:
+      tags:
+        - Comment
+      summary: creates a new comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCommentRequest'
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+  /api/v1/comments/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    delete:
+      tags:
+        - Comment
+      summary: deletes a comment by id
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/reactions:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/feedidInPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Reaction
+      summary: retrieves a list of reactions with pagination
+      responses:
+        '200':
+          description: reactions response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReactionsResponse'
+    post:
+      tags:
+        - Reaction
+      summary: creates a new reaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostReactionRequest'
+      responses:
+        '200':
+          description: reaction response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReactionResponse'
+  /api/v1/notifications:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/notificationTypeInQuery'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Notification
+      summary: retrieves a list of notification with pagination
+      responses:
+        '200':
+          description: notifications response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsResponse'
+  /api/v1/notifications/count:
+    get:
+      tags:
+        - Notification
+      summary: retrieves the count of unread notifications
+      responses:
+        '200':
+          description: notifications count response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsCountResponse'
+  /api/v1/reposts:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/feedidInPath'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Repost
+      summary: retrieves a list of reposts with pagination
+      responses:
+        '200':
+          description: reposts response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepostsResponse'
+    post:
+      tags:
+        - Repost
+      summary: creates a new repost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostRepostRequest'
+      responses:
+        '200':
+          description: reaction response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepostResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT  
+  parameters:
+    idInPath:
+      in: path
+      name: id
+      description: id 
+      required: true
+      schema:
+        type: string
+    page:
+      in: query
+      name: page
+      description: page number
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+    pageSize:
+      in: query
+      name: pageSize
+      description: size of a page
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        maximum: 100
+    islandidInPath:
+      in: query
+      name: islandId
+      description: island id
+      required: false
+      schema:
+        type: string
+    feedidInPath:
+      in: query
+      name: feedId
+      description: feed id
+      required: true
+      schema:
+        type: string
+    fromHostInQuery:
+      in: query
+      name: fromHost
+      required: false
+      schema:
+        type: boolean
+    nameInQuery:
+      in: query
+      name: name
+      description: name
+      required: true
+      schema:
+        type: string
+    nameInQueryOptional:
+      in: query
+      name: name
+      description: name
+      required: false
+      schema:
+        type: string
+    subscribedInQuery:
+      in: query
+      name: subscribed
+      description: whether subscribed
+      required: false
+      schema:
+        type: boolean
+    notificationTypeInQuery:
+      in: query
+      name: type
+      required: false
+      schema:
+        $ref: '#/components/schemas/NotificationType'
+  schemas:
+    LoginType:
+      type: string
+      enum:
+        - LOGIN_OAUTH_WECHAT
+    ReactionType:
+      type: string
+      enum:
+        - REACTION_LIKE
+        - REACTION_REVOKE_LIKE
+    NotificationType:
+      type: string
+      enum:
+        - NOTIFICATION_COMMENTS
+        - NOTIFICATION_REACTIONS
+        - NOTIFICATION_SYSTEM_NOTICE
+        - NOTIFICATION_ISLAND_NOTICE
+    IdentityType:
+      type: string
+      enum:
+        - IDENTITY_VIDEO
+        - IDENTITY_MUSIC
+        - IDENTITY_PAINTING
+        - IDENTITY_WRITING
+        - IDENTITY_GAMING
+        - IDENTITY_PHOTOGRAPH
+        - IDENTITY_VLOG
+        - IDENTITY_DANCING
+        - IDENTITY_GEEK
+        - IDENTITY_TRAVEL
+        - IDENTITY_FOOD
+        - IDENTITY_FASHION
+        - IDENTITY_COMIC
+        - IDENTITY_OTHERS
+    CommonResponse:
+      type: object
+      properties:
+        rtn:
+          type: integer
+          description: return code
+        msg:
+          type: string
+          description: return message
+    DummyResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: string
+    PageInfo:
+      type: object
+      properties:
+        hasMore:
+          type: boolean
+          description: if it has more pages
+        hasContent:
+          type: boolean
+          description: if it has content in current page
+        page:
+          type: integer
+          description: page number
+        pageSize:
+          type: integer
+          description: page size
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        portraitImageUri:
+          type: string
+        gender:
+          type: integer
+          minimum: 0
+          maximum: 1
+          enum: [0, 1]
+        description:
+          type: string
+        city:
+          type: string
+        birthday:
+          type: string
+          format: date
+        identityType:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityType'
+    PutUserPayload:
+      type: object
+      properties:
+        name:
+          type: string
+        gender:
+          type: integer
+          minimum: 0
+          maximum: 1
+          enum: [0, 1]
+        description:
+          type: string
+        city:
+          type: string
+        birthday:
+          type: string
+          format: date
+        identityType:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityType'
+    PutUserRequest:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/PutUserPayload'
+        portraitImage:
+          type: string
+          format: binary
+    UserResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UserDTO'
+    UsersResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserDTO'
+    BriefIslandDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        hostId:
+          type: string
+        portraitImageUri:
+          type: string
+        description:
+          type: string
+    IslandDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefIslandDTO'
+        - type: object
+          properties:
+            memberCount:
+              type: integer
+    IslandProfileDTO:
+      type: object
+      properties:
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
+        host:
+          $ref: '#/components/schemas/UserDTO'
+    CheckIslandDTO:
+      type: object
+      properties:
+        isExisted:
+          type: boolean
+    PutIslandPayload:
+      type: object
+      properties:
+        name:
+          type: string
+          description: island name
+        description:
+          type: string
+          description: descriptions
+        secret:
+          type: string
+          description: secrets for joining island      
+    PutIslandRequest:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/PutIslandPayload'
+        portraitImage:
+          type: string
+          description: portrait image
+          format: binary
+    PostIslandRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          description: island name
+        portraitImage:
+          type: string
+          description: portrait image
+        secrtet:
+          type: string
+          description: secrets for joining island
+      required:
+        - name
+        - portraitImage
+        - secret
+    SubscribeIslandRequest:
+      type: object
+      properties:
+        secret:
+          type: string
+          description: island secret
+      required:
+        - secret
+    CheckIslandResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CheckIslandDTO'
+    BriefIslandResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BriefIslandDTO'
+    IslandProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IslandProfileDTO'
+    IslandResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IslandDTO'
+    BriefIslandsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BriefIslandDTO'
+    ReportDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        feedId:
+          type: string
+        reporterId:
+          type: string
+    PostReportRequest:
+      type: object
+      properties:
+        reportType:
+          type: string
+          description: feedback content
+        feedId:
+          type: string
+          description: feed id to report
+        reporterId:
+          type: string
+          description: user id
+      required:
+        - reportType
+        - feedId
+        - reporterId
+    ReportResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ReportDTO'
+    BriefFeedDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        islandId:
+          type: string
+        userId:
+          type: string
+        text:
+          type: string
+        imagesUris:
+          type: array
+          items: 
+            type: string
+        fromHost:
+          type: boolean
+          description: whether feed posted by the host of island
+        createdAt:
+          type: integer
+    FeedDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefFeedDTO'
+        - type: object
+          properties:
+            likesCount:
+              type: integer
+            commentsCount:
+              type: integer
+            repostCount:
+              type: integer
+    PostFeedPayload:
+      type: object
+      properties:
+        islandIds:
+          type: array
+          items: 
+            type: string
+        content:
+          type: string
+    PostFeedRequest:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/PostFeedPayload'
+        images:
+          type: array
+          items:
+            type: string
+            format: binary
+      required:
+        - payload
+    BriefFeedResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BriefFeedDTO'
+    FeedResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FeedDTO'
+    FeedsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeedDTO'
+    CommentDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        feedId:
+          type: string
+        userId:
+          type: string
+        replyToId:
+          type: string
+        createdAt:
+          type: integer
+    PostCommentRequest:
+      type: object
+      properties:
+        feedId:
+          type: string
+        content:
+          type: string
+        replyToId:
+          type: string
+      required:
+        - feedId
+        - content
+    CommentResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CommentDTO'
+    CommentsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CommentDTO'
+    ReactionDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        feedId:
+          type: string
+        userId:
+          type: string
+        reactionType:
+          $ref: '#/components/schemas/ReactionType'
+    PostReactionRequest:
+      type: object
+      properties:
+        feedId:
+          type: string
+        reactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReactionType'
+      required:
+        - feedId
+        - reactionType
+    ReactionResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ReactionDTO'
+    ReactionsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReactionDTO'
+    IslandNoticeDTO:
+      type: object
+      properties:
+        content:
+          type: string
+        islandId:
+          type: string
+    NotificationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        notificationType:
+          $ref: '#/components/schemas/NotificationType'
+        feed:
+          $ref: '#/components/schemas/BriefFeedDTO'
+        comment:
+          $ref: '#/components/schemas/CommentDTO'
+        reactions:
+          $ref: '#/components/schemas/ReactionDTO'
+        islandNotice:
+          $ref: '#/components/schemas/IslandNoticeDTO'
+        hasRead:
+          type: boolean
+        createdAt:
+          type: integer
+    NotificationsCountResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: object
+              properties:
+                hasUnread:
+                  type: boolean
+                UnreadCommentsCount:
+                  type: integer
+                UnreadReactionsCount:
+                  type: integer
+                UnreadGroupNoticesCount:
+                  type: integer
+                UnreadSystemNoticesCount:
+                  type: integer
+    NotificationsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/NotificationDTO'
+    RepostDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        content:
+          type: string
+        feedId:
+          type: string
+        isSuccessful:
+          type: boolean
+        userId:
+          type: string
+        createdAt:
+          type: integer
+    PostRepostRequest:
+      type: object
+      properties:
+        feedId:
+          type: string
+        content:
+          type: string
+        isSuccessful:
+          type: boolean
+      required:
+        - feedId
+        - reactionType
+    RepostResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/RepostDTO'
+    RepostsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RepostDTO'
+    PostLoginRequest:
+      type: object
+      properties:
+        loginType:
+          $ref: '#/components/schemas/LoginType'
+        data:
+          type: string
+      required:
+        - emailAddress
+        - password
+    PostRefreshTokenRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+      required:
+        - refreshToken
+    LoginResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/LoginTokenInfo'
+    LoginTokenInfo:
+      type: object
+      properties:
+        token:
+          type: string
+        refreshToken:
+          type: string
