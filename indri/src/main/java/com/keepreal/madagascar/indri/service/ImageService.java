@@ -1,7 +1,6 @@
 package com.keepreal.madagascar.indri.service;
 
 import com.aliyun.oss.OSS;
-import com.google.protobuf.ByteString;
 import com.keepreal.madagascar.Indri.CommonStatus;
 import com.keepreal.madagascar.Indri.ReactorImageServiceGrpc;
 import com.keepreal.madagascar.Indri.UploadImagesRequest;
@@ -13,11 +12,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
-import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
