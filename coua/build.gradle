@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'com.google.protobuf'
+    id 'com.palantir.docker'
+}
+
+group 'com.keepreal'
+version 'unspecified'
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven {
+        url 'http://maven.aliyun.com/nexus/content/groups/public/'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    runtimeOnly 'mysql:mysql-connector-java'
+    implementation 'io.netty:netty-tcnative-boringssl-static'
+    implementation 'io.github.lognet:grpc-spring-boot-starter'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
