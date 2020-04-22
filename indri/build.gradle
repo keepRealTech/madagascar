@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'com.google.protobuf'
+    id 'com.palantir.docker'
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDirs 'src/main/madagascar-grpc-proto'
+        }
+    }
+    main.java.srcDirs += 'build/generated/source/proto/main/java'
+    main.java.srcDirs += 'build/generated/source/proto/main/grpc'
+    main.java.srcDirs += 'build/generated/source/proto/main/reactor'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'io.projectreactor:reactor-core'
+    implementation 'com.google.protobuf:protobuf-java'
+    implementation 'io.github.lognet:grpc-spring-boot-starter'
+    implementation 'com.salesforce.servicelibs:reactor-grpc-stub:0.10.0'
+    implementation 'com.aliyun.oss:aliyun-sdk-oss:3.9.0'
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+}
