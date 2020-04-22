@@ -3,8 +3,6 @@ syntax = "proto3";
 option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.common";
 
-import "google/protobuf/wrappers.proto";
-
 message PageRequest {
   int32 page = 1;
   int32 pageSize = 2;
@@ -60,6 +58,6 @@ enum Direction {
 }
 
 message Order {
-  Property property = 1;
+  string property = 1;
   Direction direction = 2;
 }

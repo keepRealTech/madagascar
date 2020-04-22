@@ -1,6 +1,6 @@
 package com.keepreal.madagascar.indri.util;
 
-import com.keepreal.madagascar.Indri.CommonStatus;
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.error.ErrorCode;
 import org.springframework.stereotype.Service;
 
