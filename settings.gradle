@@ -1,3 +1,5 @@
 rootProject.name = 'madagascar'
 
 include 'indri'
+include 'baobob'
+
