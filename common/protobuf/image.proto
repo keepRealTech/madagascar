@@ -3,10 +3,7 @@ syntax = "proto3";
 option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.Indri";
 
-message CommonStatus {
-  int32 rtn = 1;
-  string message = 2;
-}
+import "common.proto";
 
 message UploadImagesRequest {
   repeated bytes imageContent = 1;

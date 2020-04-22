@@ -1,7 +1,7 @@
 package com.keepreal.madagascar.indri.service;
 
 import com.aliyun.oss.OSS;
-import com.keepreal.madagascar.Indri.CommonStatus;
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.Indri.ReactorImageServiceGrpc;
 import com.keepreal.madagascar.Indri.UploadImagesRequest;
 import com.keepreal.madagascar.error.ErrorCode;
