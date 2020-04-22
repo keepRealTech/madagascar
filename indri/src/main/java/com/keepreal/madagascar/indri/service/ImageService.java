@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.indri.service;
 
 import com.aliyun.oss.OSS;
+import com.google.protobuf.ByteString;
 import com.keepreal.madagascar.Indri.CommonStatus;
 import com.keepreal.madagascar.Indri.ReactorImageServiceGrpc;
 import com.keepreal.madagascar.Indri.UploadImagesRequest;
@@ -12,8 +13,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -57,15 +61,12 @@ public class ImageService extends ReactorImageServiceGrpc.ImageServiceImplBase {
                                 uploadImagesRequest.getImageContent(i).toByteArray()))
                         .collect(Collectors.toList())))
                 .publishOn(Schedulers.elastic())
-                .flatMap(simpleEntry ->
-                        Mono.just(this.ossClient.putObject(
-                                this.bucketName,
-                                simpleEntry.getKey(),
-                                new ByteArrayInputStream(simpleEntry.getValue()))))
-                .filter(putObjectResult -> 200 != putObjectResult.getResponse().getStatusCode())
-                .next()
-                .map(putObjectResult -> this.commonStatusUtils.buildCommonStatus(ErrorCode.GRPC_IMAGE_UPLOAD_ERROR))
-                .switchIfEmpty(Mono.just(this.commonStatusUtils.buildCommonStatus(ErrorCode.GRPC_SUCC)))
+                .flatMap(simpleEntry -> Mono.just(this.ossClient.putObject(
+                        this.bucketName,
+                        simpleEntry.getKey(),
+                        new ByteArrayInputStream(simpleEntry.getValue()))))
+                .last()
+                .map(putObjectResult -> this.commonStatusUtils.buildCommonStatus(ErrorCode.GRPC_SUCC))
                 .onErrorReturn(this.commonStatusUtils.buildCommonStatus(ErrorCode.GRPC_IMAGE_UPLOAD_ERROR));
     }
 
