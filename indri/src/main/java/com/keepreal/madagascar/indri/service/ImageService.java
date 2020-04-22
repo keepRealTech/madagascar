@@ -7,7 +7,7 @@ import com.keepreal.madagascar.Indri.UploadImagesRequest;
 import com.keepreal.madagascar.error.ErrorCode;
 import com.keepreal.madagascar.indri.config.AliyunOssConfiguration;
 import com.keepreal.madagascar.indri.util.CommonStatusUtils;
-import org.springframework.stereotype.Service;
+import org.lognet.springboot.grpc.GRpcService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -20,7 +20,7 @@ import java.util.stream.IntStream;
 /**
  * Represents the image service logic.
  */
-@Service
+@GRpcService
 public class ImageService extends ReactorImageServiceGrpc.ImageServiceImplBase {
 
     private final OSS ossClient;

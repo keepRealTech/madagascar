@@ -16,7 +16,6 @@ sourceSets {
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'io.projectreactor:reactor-core'
-    implementation 'com.google.protobuf:protobuf-java'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
     implementation 'com.salesforce.servicelibs:reactor-grpc-stub:0.10.0'
     implementation 'com.aliyun.oss:aliyun-sdk-oss:3.9.0'
