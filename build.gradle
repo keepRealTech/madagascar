@@ -10,11 +10,14 @@ allprojects {
     group = 'com.keepreal'
 
     repositories {
+        maven {
+            url 'http://maven.aliyun.com/nexus/content/groups/public/'
+        }
         mavenCentral()
     }
 }
 
-ext['project.version'] = '1.0.0'
+ext['coua.version'] = '1.0.0'
 
 subprojects {
     apply plugin: 'io.spring.dependency-management'
