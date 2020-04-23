@@ -1,3 +1,4 @@
 rootProject.name = 'madagascar'
 include 'coua'
+include 'fossa'
 

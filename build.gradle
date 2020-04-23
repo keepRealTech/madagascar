@@ -18,6 +18,7 @@ allprojects {
 }
 
 ext['coua.version'] = '1.0.0'
+ext['fossa.version'] = '1.0.0'
 
 subprojects {
     apply plugin: 'io.spring.dependency-management'
