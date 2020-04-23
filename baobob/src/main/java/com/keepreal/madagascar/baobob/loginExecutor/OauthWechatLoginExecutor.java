@@ -21,7 +21,7 @@ import java.util.HashMap;
  */
 public class OauthWechatLoginExecutor implements LoginExecutor {
 
-    public final LocalTokenGranter tokenGranter;
+    private final LocalTokenGranter tokenGranter;
     private final UserService userService;
     private final OauthWechatLoginConfiguration oauthWechatLoginConfiguration;
     private final GrpcResponseUtils grpcResponseUtils;
