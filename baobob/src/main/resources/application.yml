@@ -1,0 +1,16 @@
+wechat:
+  oauth:
+    host: https://api.weixin.qq.com
+    app-id:
+    app-secret:
+
+grpc:
+  coua:
+    host: 127.0.0.1
+    port: 6000
+
+jwt:
+  token-secret: thisisatopsecret
+  access-token-validity-in-seconds: 600
+  refresh-token-validity-in-seconds: 6000
+  client-secret: secret
