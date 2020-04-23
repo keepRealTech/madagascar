@@ -19,13 +19,13 @@ import java.util.List;
  **/
 
 @GRpcService
-public class SystemUserServiceImpl extends SystemUserServiceGrpc.SystemUserServiceImplBase {
+public class SystemUserServiceImpl extends UserServiceGrpc.UserServiceImplBase {
 
     @Autowired
     private UserInfoRepository userInfoRepository;
 
     @Override
-    public void createSystemUser(NewSystemUserRequest request, StreamObserver<UserResponse> responseObserver) {
+    public void createUser(NewUserRequest request, StreamObserver<UserResponse> responseObserver) {
         UserInfo userInfo = new UserInfo();
         userInfo.setNickName(request.getName().getValue());
         userInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
@@ -38,25 +38,25 @@ public class SystemUserServiceImpl extends SystemUserServiceGrpc.SystemUserServi
         UserInfo save = userInfoRepository.save(userInfo);
 
         UserMessage userMessage = getUserMessage(save);
-        UserResponse userResponse = UserResponse.newBuilder().setSystemUser(userMessage).build();
+        UserResponse userResponse = UserResponse.newBuilder().setUser(userMessage).build();
         responseObserver.onNext(userResponse);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void retrieveSingleSystemUser(RetrieveSingleSystemUserRequest request, StreamObserver<UserResponse> responseObserver) {
-        String id = request.getCondition().getId();
+    public void retrieveSingleUser(RetrieveSingleUserRequest request, StreamObserver<UserResponse> responseObserver) {
+        String id = request.getCondition().getId().getValue();
 
         UserInfo userInfo = userInfoRepository.findByUserId(id);
         UserMessage userMessage = getUserMessage(userInfo);
 
-        UserResponse userResponse = UserResponse.newBuilder().setSystemUser(userMessage).build();
+        UserResponse userResponse = UserResponse.newBuilder().setUser(userMessage).build();
         responseObserver.onNext(userResponse);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void updateSystemUserById(UpdateSystemUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
+    public void updateUserById(UpdateUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
         UserInfo userInfo = userInfoRepository.findByUserId(request.getId());
         // todo: 如果是部分更新的话，需要判断request中每个参数是否为""，然后再set到userInfo对象中
         // 有没有更好的写法。。。

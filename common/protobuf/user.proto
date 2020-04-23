@@ -1,58 +1,61 @@
-//syntax = "proto3";
-//
-//option java_multiple_files = true;
-//option java_package = "com.keepreal.madagascar.coua";
-//
-//import "common.proto";
-//import "google/protobuf/wrappers.proto";
-//
-//message UserMessage {
-//  string id = 1;
-//  string name = 2;
-//  string portraitImageUri = 3;
-//  string description = 4;
-//  string city = 5;
-//  Gender gender = 6;
-//  string birthday = 7;
-//  repeated IdentityType identities = 8;
-//}
-//
-//message UserResponse {
-//  CommonStatus status = 1;
-//  UserMessage systemUser   = 2;
-//}
-//
-//message NewSystemUserRequest {
-//  google.protobuf.StringValue name = 1;
-//  google.protobuf.StringValue portraitImageUri = 2;
-//  google.protobuf.StringValue description = 3;
-//  google.protobuf.StringValue city = 4;
-//  GenderValue gender = 5;
-//  google.protobuf.StringValue birthday = 6;
-//  repeated IdentityType identities = 7;
-//}
-//
-//message UpdateSystemUserByIdRequest {
-//  string id = 1;
-//  google.protobuf.StringValue name = 2;
-//  google.protobuf.StringValue portraitImageUri = 3;
-//  google.protobuf.StringValue description = 4;
-//  google.protobuf.StringValue city = 5;
-//  GenderValue gender = 6;
-//  google.protobuf.StringValue birthday = 7;
-//  repeated IdentityType identities = 8;
-//}
-//
-//message QuerySystemUserCondition {
-//  string id = 1;
-//}
-//
-//message RetrieveSingleSystemUserRequest {
-//  QuerySystemUserCondition condition = 1;
-//}
-//
-//service SystemUserService {
-//  rpc CreateSystemUser(NewSystemUserRequest) returns (UserResponse) {};
-//  rpc RetrieveSingleSystemUser(RetrieveSingleSystemUserRequest) returns (UserResponse) {};
-//  rpc UpdateSystemUserById(UpdateSystemUserByIdRequest) returns (UserResponse) {};
-//}
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.coua";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message UserMessage {
+  string id = 1;
+  string unionId = 2;
+  string name = 3;
+  string portraitImageUri = 4;
+  string description = 5;
+  string city = 6;
+  Gender gender = 7;
+  string birthday = 8;
+  repeated IdentityType identities = 9;
+}
+
+message UserResponse {
+  CommonStatus status = 1;
+  UserMessage user = 2;
+}
+
+message NewUserRequest {
+  string unionId = 1;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue portraitImageUri = 3;
+  google.protobuf.StringValue description = 4;
+  google.protobuf.StringValue city = 5;
+  GenderValue gender = 6;
+  google.protobuf.StringValue birthday = 7;
+  repeated IdentityType identities = 8;
+}
+
+message UpdateUserByIdRequest {
+  string id = 1;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue portraitImageUri = 3;
+  google.protobuf.StringValue description = 4;
+  google.protobuf.StringValue city = 5;
+  GenderValue gender = 6;
+  google.protobuf.StringValue birthday = 7;
+  repeated IdentityType identities = 8;
+}
+
+message QueryUserCondition {
+  google.protobuf.StringValue id = 1;
+  google.protobuf.StringValue unionId = 2;
+}
+
+message RetrieveSingleUserRequest {
+  QueryUserCondition condition = 1;
+}
+
+service UserService {
+  rpc CreateUser(NewUserRequest) returns (UserResponse) {};
+  rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
+  rpc UpdateUserById(UpdateUserByIdRequest) returns (UserResponse) {};
+}
