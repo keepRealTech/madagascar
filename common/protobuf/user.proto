@@ -7,55 +7,55 @@ import "common.proto";
 import "google/protobuf/wrappers.proto";
 
 message UserMessage {
-  string id = 1;
-  string unionId = 2;
-  string name = 3;
-  string portraitImageUri = 4;
-  string description = 5;
-  string city = 6;
-  Gender gender = 7;
-  string birthday = 8;
-  repeated IdentityType identities = 9;
+    string id = 1;
+    string unionId = 2;
+    string name = 3;
+    string portraitImageUri = 4;
+    string description = 5;
+    string city = 6;
+    Gender gender = 7;
+    string birthday = 8;
+    repeated IdentityType identities = 9;
 }
 
 message UserResponse {
-  CommonStatus status = 1;
-  UserMessage user = 2;
+    CommonStatus status = 1;
+    UserMessage user = 2;
 }
 
 message NewUserRequest {
-  string unionId = 1;
-  google.protobuf.StringValue name = 2;
-  google.protobuf.StringValue portraitImageUri = 3;
-  google.protobuf.StringValue description = 4;
-  google.protobuf.StringValue city = 5;
-  GenderValue gender = 6;
-  google.protobuf.StringValue birthday = 7;
-  repeated IdentityType identities = 8;
+    string unionId = 1;
+    google.protobuf.StringValue name = 2;
+    google.protobuf.StringValue portraitImageUri = 3;
+    google.protobuf.StringValue description = 4;
+    google.protobuf.StringValue city = 5;
+    GenderValue gender = 6;
+    google.protobuf.StringValue birthday = 7;
+    repeated IdentityType identities = 8;
 }
 
 message UpdateUserByIdRequest {
-  string id = 1;
-  google.protobuf.StringValue name = 2;
-  google.protobuf.StringValue portraitImageUri = 3;
-  google.protobuf.StringValue description = 4;
-  google.protobuf.StringValue city = 5;
-  GenderValue gender = 6;
-  google.protobuf.StringValue birthday = 7;
-  repeated IdentityType identities = 8;
+    string id = 1;
+    google.protobuf.StringValue name = 2;
+    google.protobuf.StringValue portraitImageUri = 3;
+    google.protobuf.StringValue description = 4;
+    google.protobuf.StringValue city = 5;
+    GenderValue gender = 6;
+    google.protobuf.StringValue birthday = 7;
+    repeated IdentityType identities = 8;
 }
 
 message QueryUserCondition {
-  google.protobuf.StringValue id = 1;
-  google.protobuf.StringValue unionId = 2;
+    google.protobuf.StringValue id = 1;
+    google.protobuf.StringValue unionId = 2;
 }
 
 message RetrieveSingleUserRequest {
-  QueryUserCondition condition = 1;
+    QueryUserCondition condition = 1;
 }
 
 service UserService {
-  rpc CreateUser(NewUserRequest) returns (UserResponse) {};
-  rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
-  rpc UpdateUserById(UpdateUserByIdRequest) returns (UserResponse) {};
+    rpc CreateUser(NewUserRequest) returns (UserResponse) {};
+    rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
+    rpc UpdateUserById(UpdateUserByIdRequest) returns (UserResponse) {};
 }
