@@ -4,6 +4,7 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.coua";
 
 import "common.proto";
+import "user.proto";
 import "google/protobuf/wrappers.proto";
 
 message IslandMessage {
@@ -15,31 +16,22 @@ message IslandMessage {
     uint64 lastFeedAt = 6;
 }
 
-message UserMessage {
-    string id = 1;
-    string name = 2;
-    string portraitImageUri = 3;
-    Gender gender = 4;
-    string description = 5;
-    string city = 6;
-    string birthday = 7;
-    repeated IdentityType identities = 8;
-}
-
 message CreateNewIslandRequest {
-    google.protobuf.StringValue name = 1;
+    string name = 1;
     google.protobuf.StringValue portraitImage = 2;
     google.protobuf.StringValue secret = 3;
 }
 
 message CreateNewIslandResponse {
-    IslandMessage message = 1;
+    CommonStatus status = 1;
+    IslandMessage message = 2;
 }
 
 message ConditionalQueryIslandsRequest {
     google.protobuf.StringValue name = 1;
-    google.protobuf.BoolValue subscribed = 2;
-    PageRequest pageRequest = 3;
+    google.protobuf.StringValue userId = 2;
+    google.protobuf.BoolValue subscribed = 3;
+    PageRequest pageRequest = 4;
 }
 
 message ConditionalQueryIslandsResponse {
@@ -49,15 +41,16 @@ message ConditionalQueryIslandsResponse {
 }
 
 message CheckNameRequest {
-    google.protobuf.StringValue name = 1;
+    string name = 1;
 }
 
 message CheckNameResponse {
-    google.protobuf.BoolValue isExisted = 1;
+    bool isExisted = 1;
 }
 
 message MyIslandsRequest {
-    PageRequest pageRequest = 1;
+    string userId = 1;
+    PageRequest pageRequest = 2;
 }
 
 message MyIslandsResponse {
@@ -67,7 +60,7 @@ message MyIslandsResponse {
 }
 
 message RetrieveIslandByIdRequest {
-    google.protobuf.StringValue id = 1;
+    string id = 1;
 }
 
 message RetrieveIslandByIdResponse {
@@ -76,7 +69,7 @@ message RetrieveIslandByIdResponse {
 }
 
 message UpdateIslandByIdRequest {
-    google.protobuf.StringValue id = 1;
+    string id = 1;
     google.protobuf.StringValue name = 2;
     google.protobuf.StringValue portraitImage = 3;
     google.protobuf.StringValue secret = 4;
@@ -88,18 +81,18 @@ message UpdateIslandByIdResponse {
     IslandMessage message = 2;
 }
 
-message RetrieveIslandProfileByIdRequest {
+message RetrieveIslandProfileByNameRequest {
     google.protobuf.StringValue name = 1;
 }
 
-message RetrieveIslandProfileByIdResponse {
+message RetrieveIslandProfileByNameResponse {
     CommonStatus status = 1;
     IslandMessage islandMessage = 2;
     UserMessage userMessage = 3;
 }
 
 message RetrieveIslandSubscribersByIdRequest {
-    google.protobuf.StringValue id = 1;
+    string id = 1;
     PageRequest pageRequest = 2;
 }
 
@@ -110,23 +103,51 @@ message RetrieveIslandSubscribersByIdResponse {
 }
 
 message SubscribeIslandRequest {
-    google.protobuf.StringValue id = 1;
-    google.protobuf.StringValue secret = 2;
+    string id = 1;
+    string secret = 2;
 }
 
 message SubscribeIslandResponse {
     CommonStatus status = 1;
-    google.protobuf.StringValue data = 2;
+}
+
+message IslandRepostMessage {
+    BaseRepostMessage message = 1;
+    string islandId = 2;
+}
+
+message RetrieveRepostsByIslandIdRequest {
+    string id = 1;
+    PageRequest pageRequest = 2;
+}
+
+message RetrieveRepostsByIslandIdResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated IslandRepostMessage message = 3;
+}
+
+message CreateNewIslandRepostRequest {
+    string islandId = 1;
+    string content = 2;
+    bool isSuccessful = 3;
+}
+
+message CreateNewIslandRepostResponse {
+    CommonStatus status = 1;
+    IslandRepostMessage repostMessage = 2;
 }
 
 service IslandService {
-    rpc CreateIsland(CreateNewIslandRequest) returns (CreateNewIslandResponse) {};
-    rpc RetrieveIslandsByCondition(ConditionalQueryIslandsRequest) returns (ConditionalQueryIslandsResponse) {};
-    rpc CheckName(CheckNameRequest) returns (CheckNameResponse) {};
-    rpc RetrieveMyIslands(MyIslandsRequest) returns (MyIslandsResponse) {};
-    rpc RetrieveIslandById(RetrieveIslandByIdRequest) returns (RetrieveIslandByIdResponse) {};
-    rpc UpdateIslandById(UpdateIslandByIdRequest) returns (UpdateIslandByIdResponse) {};
-    rpc RetrieveIslandProfileById(RetrieveIslandProfileByIdRequest) returns (RetrieveIslandProfileByIdResponse) {};
-    rpc RetrieveIslandSubscribersById(RetrieveIslandSubscribersByIdRequest) returns (RetrieveIslandSubscribersByIdResponse) {};
-    rpc SubscribeIsland(SubscribeIslandRequest) returns (SubscribeIslandResponse) {};
+    rpc CreateIsland (CreateNewIslandRequest) returns (CreateNewIslandResponse) {};
+    rpc RetrieveIslandsByCondition (ConditionalQueryIslandsRequest) returns (ConditionalQueryIslandsResponse) {};
+    rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
+    rpc RetrieveMyIslands (MyIslandsRequest) returns (MyIslandsResponse) {};
+    rpc RetrieveIslandById (RetrieveIslandByIdRequest) returns (RetrieveIslandByIdResponse) {};
+    rpc UpdateIslandById (UpdateIslandByIdRequest) returns (UpdateIslandByIdResponse) {};
+    rpc RetrieveIslandProfileById (RetrieveIslandProfileByNameRequest) returns (RetrieveIslandProfileByNameResponse) {};
+    rpc RetrieveIslandSubscribersById (RetrieveIslandSubscribersByIdRequest) returns (RetrieveIslandSubscribersByIdResponse) {};
+    rpc SubscribeIsland (SubscribeIslandRequest) returns (SubscribeIslandResponse) {};
+    rpc RetrieveRepostsByIslandId(RetrieveRepostsByIslandIdRequest) returns (RetrieveRepostsByIslandIdResponse) {};
+    rpc CreateIslandRepost(CreateNewIslandRepostRequest) returns (CreateNewIslandRepostResponse) {};
 }
