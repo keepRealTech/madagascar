@@ -18,9 +18,7 @@ tags:
   - name: Comment
     description: Comments controllers
   - name: Reaction
-    description: Reactions controllers such as likes 
-  - name: Repost
-    description: Reposts controllers
+    description: Reactions controllers such as likes
   - name: Notification
     description: Notifications controllers
   - name: Report
@@ -253,6 +251,40 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/reposts:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Island
+      summary: retrieves a list of reposts with pagination
+      responses:
+        '200':
+          description: reposts response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepostsResponse'
+    post:
+      tags:
+        - Island
+      summary: creates a new repost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostRepostRequest'
+      responses:
+        '200':
+          description: reaction response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepostResponse'
   /api/v1/reports:
     post:
       tags:
@@ -330,14 +362,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
-  /api/v1/comments:
+  /api/v1/feeds/{id}/comments:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
     get:
       parameters:
-        - $ref: '#/components/parameters/feedidInPath'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Comment
+        - Feed
       summary: retrieves a list of comments with pagination
       responses:
         '200':
@@ -348,7 +381,7 @@ paths:
                 $ref: '#/components/schemas/CommentsResponse'
     post:
       tags:
-        - Comment
+        - Feed
       summary: creates a new comment
       requestBody:
         required: true
@@ -363,28 +396,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentResponse'
-  /api/v1/comments/{id}:
+  /api/v1/feeds/{id}/reactions:
     parameters:
       - $ref: '#/components/parameters/idInPath'
-    delete:
-      tags:
-        - Comment
-      summary: deletes a comment by id
-      responses:
-        '200':
-          description: common response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DummyResponse'
-  /api/v1/reactions:
     get:
       parameters:
-        - $ref: '#/components/parameters/feedidInPath'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Reaction
+        - Feed
       summary: retrieves a list of reactions with pagination
       responses:
         '200':
@@ -395,7 +415,7 @@ paths:
                 $ref: '#/components/schemas/ReactionsResponse'
     post:
       tags:
-        - Reaction
+        - Feed
       summary: creates a new reaction
       requestBody:
         required: true
@@ -410,6 +430,54 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReactionResponse'
+  /api/v1/feeds/{id}/reposts:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Feed
+      summary: retrieves a list of reposts with pagination
+      responses:
+        '200':
+          description: reposts response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepostsResponse'
+    post:
+      tags:
+        - Feed
+      summary: creates a new repost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostRepostRequest'
+      responses:
+        '200':
+          description: reaction response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepostResponse'
+  /api/v1/comments/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    delete:
+      tags:
+        - Comment
+      summary: deletes a comment by id
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/notifications:
     get:
       parameters:
@@ -438,50 +506,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotificationsCountResponse'
-  /api/v1/reposts:
-    get:
-      parameters:
-        - $ref: '#/components/parameters/feedidInPath'
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/pageSize'
-      tags:
-        - Repost
-      summary: retrieves a list of reposts with pagination
-      responses:
-        '200':
-          description: reposts response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RepostsResponse'
-    post:
-      tags:
-        - Repost
-      summary: creates a new repost
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostRepostRequest'
-      responses:
-        '200':
-          description: reaction response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RepostResponse'
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT  
+      bearerFormat: JWT
   parameters:
     idInPath:
       in: path
       name: id
-      description: id 
+      description: id
       required: true
       schema:
         type: string
@@ -509,13 +544,6 @@ components:
       name: islandId
       description: island id
       required: false
-      schema:
-        type: string
-    feedidInPath:
-      in: query
-      name: feedId
-      description: feed id
-      required: true
       schema:
         type: string
     fromHostInQuery:
@@ -731,7 +759,7 @@ components:
           description: descriptions
         secret:
           type: string
-          description: secrets for joining island      
+          description: secrets for joining island
     PutIslandRequest:
       type: object
       properties:
@@ -851,7 +879,7 @@ components:
           type: string
         imagesUris:
           type: array
-          items: 
+          items:
             type: string
         fromHost:
           type: boolean
@@ -874,7 +902,7 @@ components:
       properties:
         islandIds:
           type: array
-          items: 
+          items:
             type: string
         content:
           type: string
@@ -933,14 +961,11 @@ components:
     PostCommentRequest:
       type: object
       properties:
-        feedId:
-          type: string
         content:
           type: string
         replyToId:
           type: string
       required:
-        - feedId
         - content
     CommentResponse:
       allOf:
@@ -974,14 +999,11 @@ components:
     PostReactionRequest:
       type: object
       properties:
-        feedId:
-          type: string
         reactions:
           type: array
           items:
             $ref: '#/components/schemas/ReactionType'
       required:
-        - feedId
         - reactionType
     ReactionResponse:
       allOf:
@@ -1043,9 +1065,7 @@ components:
                   type: integer
                 UnreadReactionsCount:
                   type: integer
-                UnreadGroupNoticesCount:
-                  type: integer
-                UnreadSystemNoticesCount:
+                UnreadIslandNoticesCount:
                   type: integer
     NotificationsResponse:
       allOf:
@@ -1076,14 +1096,11 @@ components:
     PostRepostRequest:
       type: object
       properties:
-        feedId:
-          type: string
         content:
           type: string
         isSuccessful:
           type: boolean
       required:
-        - feedId
         - reactionType
     RepostResponse:
       allOf:
@@ -1111,8 +1128,7 @@ components:
         data:
           type: string
       required:
-        - emailAddress
-        - password
+        - loginType
     PostRefreshTokenRequest:
       type: object
       properties:
