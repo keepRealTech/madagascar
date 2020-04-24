@@ -61,3 +61,16 @@ message Order {
   string property = 1;
   Direction direction = 2;
 }
+
+message BriefUser {
+  string name = 1;
+  string portraitImageUri = 2;
+}
+
+message BaseRepostMessage {
+  string id = 1;
+  string content = 2;
+  bool isSuccessful = 3;
+  string userId = 4;
+  uint64 createAt = 5;
+}
