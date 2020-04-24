@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.Indri";
+
+import "common.proto";
+
+message UploadImagesRequest {
+  repeated bytes imageContent = 1;
+  repeated string imageNames = 2;
+}
+
+service ImageService {
+	rpc uploadImages (UploadImagesRequest) returns (CommonStatus) {};
+}
