@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.fossa";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message NewFeedRequest {
+    repeated google.protobuf.StringValue islandId = 1;
+    repeated google.protobuf.StringValue imageUris = 2;
+    google.protobuf.StringValue text = 3;
+}
+
+message RetrieveFeedByIdRequest {
+    string id = 1;
+}
+
+message RetrieveFeedsByConditionRequest {
+    QueryFeedCondition condition = 1;
+}
+
+message DeleteFeedByIdRequest {
+    string id = 1;
+}
+
+message FeedMessage {
+    string id = 1;
+    string islandId = 2;
+    string userId = 3; // 返回user的name和imageUrl
+    string text = 4;
+    repeated string imageUris = 5;
+    bool fromHost = 6;
+    uint64 createdAt = 7;
+    int32 likesCount = 8;
+    int32 commentsCount = 9;
+    int32 repostCount = 10;
+    //需要返回评论的前五条，评论人name和text
+}
+
+message QueryFeedCondition {
+    google.protobuf.StringValue islandId = 1;
+    google.protobuf.BoolValue fromHost = 2;
+    PageRequest pageRequest = 3;
+}
+
+message FeedResponse {
+    CommonStatus status = 1;
+    FeedMessage feed = 2;
+}
+
+message DeleteFeedResponse {
+    CommonStatus status = 1;
+}
+
+message RetrieveFeedsResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated FeedMessage feed = 3;
+}
+
+service FeedService {
+    rpc CreateFeed(NewFeedRequest) returns (FeedResponse) {};
+    rpc DeleteFeed(DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
+    rpc RetrieveFeedById(RetrieveFeedByIdRequest) returns (FeedResponse) {};
+    rpc RetrieveFeeds(RetrieveFeedsByConditionRequest) returns (RetrieveFeedsResponse) {};
+}
