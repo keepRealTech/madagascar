@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.coua";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message QueryIslandCondition {
+    google.protobuf.StringValue name = 1;
+    google.protobuf.StringValue hostId = 2;
+    google.protobuf.BoolValue subscribedUserId = 3;
+}
+
+message NewIslandRequest {
+    string name = 1;
+    google.protobuf.StringValue portraitImageUri = 2;
+    google.protobuf.StringValue secret = 3;
+}
+
+message IslandResponse {
+    CommonStatus status = 1;
+    IslandMessage message = 2;
+}
+
+message RetrieveMultipleIslandsRequest {
+    QueryIslandCondition condition = 1;
+    PageRequest pageRequest = 2;
+}
+
+message IslandsResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated IslandMessage message = 3;
+}
+
+message CheckNameRequest {
+    string name = 1;
+}
+
+message CheckNameResponse {
+    bool isExisted = 1;
+}
+
+message RetrieveIslandByIdRequest {
+    string id = 1;
+}
+
+message UpdateIslandByIdRequest {
+    string id = 1;
+    google.protobuf.StringValue name = 2;
+    google.protobuf.StringValue portraitImageUri = 3;
+    google.protobuf.StringValue secret = 4;
+    google.protobuf.StringValue description = 5;
+}
+
+message RetrieveIslandProfileByIdRequest {
+    string id = 1;
+}
+
+message IslandProfileResponse {
+    CommonStatus status = 1;
+    IslandMessage islandMessage = 2;
+    UserMessage userMessage = 3;
+}
+
+message RetrieveIslandSubscribersByIdRequest {
+    string id = 1;
+    PageRequest pageRequest = 2;
+}
+
+message RetrieveIslandSubscribersByIdResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated UserMessage userMessage = 3;
+}
+
+message SubscribeIslandByIdRequest {
+    string id = 1;
+    string secret = 2;
+    string userId = 3;
+}
+
+message SubscribeIslandResponse {
+    CommonStatus status = 1;
+}
+
+service IslandService {
+    rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
+    rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
+    rpc RetrieveIslandById (RetrieveIslandByIdRequest) returns (IslandResponse) {};
+    rpc RetrieveIslandsByCondition (RetrieveMultipleIslandsRequest) returns (IslandsResponse) {};
+    rpc UpdateIslandById (UpdateIslandByIdRequest) returns (IslandResponse) {};
+    rpc RetrieveIslandProfileById (RetrieveIslandProfileByIdRequest) returns (IslandProfileResponse) {};
+    rpc RetrieveIslandSubscribersById (RetrieveIslandSubscribersByIdRequest) returns (RetrieveIslandSubscribersByIdResponse) {};
+    rpc SubscribeIslandById (SubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
+}

@@ -28,6 +28,11 @@ message NotificationTypeValue {
     NotificationType value = 1;
 }
 
+enum ReactionType {
+    REACTION_NONE = 0;
+    REACTION_LIKE = 1;
+}
+
 enum IdentityType {
     IDENTITY_NONE = 0;
     IDENTITY_VIDEO = 1;
@@ -72,4 +77,72 @@ enum Direction {
 message Order {
     string property = 1;
     Direction direction = 2;
+}
+
+enum ReportType {
+    REPORT_TYPE_NONE = 0;
+}
+
+message BriefUserMessage {
+    string name = 1;
+    string portraitImageUri = 2;
+}
+
+message UserMessage {
+    string id = 1;
+    string unionId = 2;
+    string name = 3;
+    string portraitImageUri = 4;
+    string description = 5;
+    string city = 6;
+    Gender gender = 7;
+    string birthday = 8;
+    repeated IdentityType identities = 9;
+}
+
+message IslandMessage {
+    string id = 1;
+    string name = 2;
+    string hostId = 3;
+    string portraitImageUri = 4;
+    string description = 5;
+    uint64 lastFeedAt = 6;
+}
+
+message RepostMessage {
+    string id = 1;
+    string content = 2;
+    bool isSuccessful = 3;
+    string userId = 4;
+    uint64 createAt = 5;
+}
+
+message FeedMessage {
+    string id = 1;
+    string islandId = 2;
+    string userId = 3; // 返回user的name和imageUrl
+    string text = 4;
+    repeated string imageUris = 5;
+    bool fromHost = 6;
+    uint64 createdAt = 7;
+    int32 likesCount = 8;
+    int32 commentsCount = 9;
+    int32 repostCount = 10;
+    //需要返回评论的前五条，评论人name和text
+}
+
+message CommentMessage {
+    string id = 1;
+    string content = 2;
+    string feedId = 3;
+    string userId = 4;
+    string replyToId = 5;
+    uint64 createAt = 6;
+}
+
+message ReactionMessage {
+    string id = 1;
+    string feedId = 2;
+    string userId = 3;
+    repeated ReactionType reactionType = 4;
 }
