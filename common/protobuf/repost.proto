@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.coua";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message FeedRepostMessage {
+    RepostMessage message = 1;
+    string feedId = 2;
+}
+
+message IslandRepostMessage {
+    RepostMessage message = 1;
+    string islandId = 2;
+}
+
+message NewFeedRepostRequest {
+    string feedId = 1;
+    string content = 2;
+    bool isSuccessful = 3;
+    string userId = 4;
+}
+
+message FeedRepostResponse {
+    CommonStatus status = 1;
+    FeedRepostMessage feedRepost = 2;
+}
+
+message RetrieveFeedRepostsByFeedIdRequest {
+    string feedId = 1;
+    PageRequest pageRequest = 2;
+}
+
+message FeedRepostsResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated FeedRepostMessage feedReposts = 3;
+}
+
+message NewIslandRepostRequest {
+    string islandId = 1;
+    string content = 2;
+    bool isSuccessful = 3;
+    string userId = 4;
+}
+
+message IslandRepostResponse {
+    CommonStatus status = 1;
+    IslandRepostMessage islandRepost = 2;
+}
+
+message RetrieveIslandRepostsByIslandIdRequest {
+    string islandId = 1;
+    PageRequest pageRequest = 2;
+}
+
+message RetrieveRepostsByIslandIdResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated IslandRepostMessage islandReposts = 3;
+}
+
+service FeedService {
+    rpc CreateFeedRepost(NewFeedRepostRequest) returns (FeedRepostResponse) {};
+    rpc RetrieveFeedRepostsByFeedId(RetrieveFeedRepostsByFeedIdRequest) returns (FeedRepostsResponse) {};
+    rpc CreateIslandRepost(NewIslandRepostRequest) returns (IslandRepostResponse) {};
+    rpc RetrieveIslandRepostsByIslandId(RetrieveIslandRepostsByIslandIdRequest) returns (RetrieveRepostsByIslandIdResponse) {};
+}

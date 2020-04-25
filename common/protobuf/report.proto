@@ -13,19 +13,17 @@ message ReportMessage {
     string reporterId = 4;
 }
 
-message CreateNewReportRequest {
-    string reportType = 1;
+message NewReportRequest {
+    ReportType type = 1;
     string feedId = 2;
     string reporterId = 3;
 }
 
-message CreateNewReportResponse {
-    string id = 1;
-    string type = 2;
-    string feedId = 3;
-    string reporterId = 4;
+message ReportResponse {
+    CommonStatus status = 1;
+    ReportMessage report = 2;
 }
 
 service ReportService {
-    rpc CreateReport (CreateNewReportRequest) returns (CreateNewReportResponse) {};
+    rpc CreateReport(NewReportRequest) returns (ReportResponse) {};
 }

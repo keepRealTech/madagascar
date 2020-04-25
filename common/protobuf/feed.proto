@@ -6,6 +6,11 @@ option java_package = "com.keepreal.madagascar.fossa";
 import "common.proto";
 import "google/protobuf/wrappers.proto";
 
+message QueryFeedCondition {
+    google.protobuf.StringValue islandId = 1;
+    google.protobuf.BoolValue fromHost = 2;
+}
+
 message NewFeedRequest {
     string userId = 1;
     repeated string islandId = 2;
@@ -17,145 +22,34 @@ message RetrieveFeedByIdRequest {
     string id = 1;
 }
 
-message RetrieveFeedsByConditionRequest {
+message RetrieveMultipleFeedsRequest {
     QueryFeedCondition condition = 1;
+    PageRequest pageRequest = 2;
 }
 
 message DeleteFeedByIdRequest {
     string id = 1;
 }
 
-message FeedMessage {
-    string id = 1;
-    string islandId = 2;
-    string userId = 3; // 返回user的name和imageUrl
-    string text = 4;
-    repeated string imageUris = 5;
-    bool fromHost = 6;
-    uint64 createdAt = 7;
-    int32 likesCount = 8;
-    int32 commentsCount = 9;
-    int32 repostCount = 10;
-    //需要返回评论的前五条，评论人name和text
-}
-
-message QueryFeedCondition {
-    google.protobuf.StringValue islandId = 1;
-    google.protobuf.BoolValue fromHost = 2;
-    PageRequest pageRequest = 3;
-}
-
 message FeedResponse {
     CommonStatus status = 1;
     FeedMessage feed = 2;
-    BriefUser briefUser = 3;
+    BriefUserMessage briefUser = 3;
+}
+
+message FeedsResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated FeedMessage feed = 3;
 }
 
 message DeleteFeedResponse {
     CommonStatus status = 1;
 }
 
-message RetrieveFeedResponse {
-    CommonStatus status = 1;
-    PageResponse pageResponse = 2;
-    repeated FeedMessage feed = 3;
-}
-
-message CommentMessage {
-    string id = 1;
-    string content = 2;
-    string feedId = 3;
-    string userId = 4;
-    string replyToId = 5;
-    uint64 createAt = 6;
-}
-
-message RetrieveCommentsByFeedIdRequest {
-    string feedId = 1;
-    PageRequest pageRequest = 2;
-}
-
-message RetrieveCommentsByFeedIdResponse {
-    CommonStatus status = 1;
-    PageResponse pageResponse = 2;
-    repeated CommentMessage commentMessage = 3;
-}
-
-message CreateNewCommentRequest {
-    string feedId = 1;
-    string content = 2;
-    google.protobuf.StringValue replyToId = 3;
-}
-
-message CreateNewCommentResponse {
-    CommonStatus status = 1;
-    CommentMessage commentMessage = 2;
-}
-
-message ReactionMessage {
-    string id = 1;
-    string feedId = 2;
-    string userId = 3;
-    string reactionType = 4;
-}
-
-message RetrieveReactionsByFeedIdRequest {
-    string feedId = 1;
-    PageRequest pageRequest = 2;
-}
-
-message RetrieveReactionsByFeedIdResponse {
-    CommonStatus status = 1;
-    PageResponse pageResponse = 2;
-    repeated ReactionMessage reactionMessage = 3;
-}
-
-message CreateNewReactionRequest {
-    string feedId = 1;
-    repeated string reactions = 2;
-}
-
-message CreateNewReactionResponse {
-    CommonStatus status = 1;
-    ReactionMessage reactionMessage = 2;
-}
-
-message FeedRepostMessage {
-    BaseRepostMessage message = 1;
-    string feedId = 2;
-}
-
-message RetrieveRepostsByFeedIdRequest {
-    string id = 1;
-    PageRequest pageRequest = 2;
-}
-
-message RetrieveRepostsByFeedIdResponse {
-    CommonStatus status = 1;
-    PageResponse pageResponse = 2;
-    repeated FeedRepostMessage message = 3;
-}
-
-message CreateNewFeedRepostRequest {
-    string feedId = 1;
-    string content = 2;
-    bool isSuccessful = 3;
-}
-
-message CreateNewFeedRepostResponse {
-    CommonStatus status = 1;
-    FeedRepostMessage repostMessage = 2;
-}
-
 service FeedService {
     rpc CreateFeed (NewFeedRequest) returns (FeedResponse) {};
-    rpc DeleteFeed (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
+    rpc DeleteFeedNyId (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
-    rpc RetrieveFeeds (RetrieveFeedsByConditionRequest) returns (RetrieveFeedResponse) {};
-    rpc RetrieveCommentsByFeedId(RetrieveCommentsByFeedIdRequest) returns (RetrieveCommentsByFeedIdResponse) {};
-    rpc CreateComment(CreateNewCommentRequest) returns (CreateNewCommentResponse) {};
-    rpc RetrieveReactionsByFeedId(RetrieveReactionsByFeedIdRequest) returns (RetrieveReactionsByFeedIdResponse) {};
-    rpc CreateReaction(CreateNewReactionRequest) returns (CreateNewReactionResponse) {};
-    rpc RetrieveRepostsByFeedId(RetrieveRepostsByFeedIdRequest) returns (RetrieveRepostsByFeedIdResponse) {};
-    rpc CreateRepost(CreateNewFeedRepostRequest) returns (CreateNewFeedRepostResponse) {};
+    rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
 }

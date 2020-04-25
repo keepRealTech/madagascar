@@ -6,18 +6,6 @@ option java_package = "com.keepreal.madagascar.coua";
 import "common.proto";
 import "google/protobuf/wrappers.proto";
 
-message UserMessage {
-    string id = 1;
-    string unionId = 2;
-    string name = 3;
-    string portraitImageUri = 4;
-    string description = 5;
-    string city = 6;
-    Gender gender = 7;
-    string birthday = 8;
-    repeated IdentityType identities = 9;
-}
-
 message UserResponse {
     CommonStatus status = 1;
     UserMessage user = 2;

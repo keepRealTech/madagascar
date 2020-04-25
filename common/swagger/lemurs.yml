@@ -430,6 +430,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReactionResponse'
+  /api/v1/feeds/{id}/reactions/revoke:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Feed
+      summary: revokes a reaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RevokeReactionRequest'
+      responses:
+        '200':
+          description: reaction response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/feeds/{id}/reposts:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -588,7 +608,6 @@ components:
       type: string
       enum:
         - REACTION_LIKE
-        - REACTION_REVOKE_LIKE
     NotificationType:
       type: string
       enum:
@@ -995,8 +1014,19 @@ components:
         userId:
           type: string
         reactionType:
-          $ref: '#/components/schemas/ReactionType'
+          type: array
+          items:
+            $ref: '#/components/schemas/ReactionType'
     PostReactionRequest:
+      type: object
+      properties:
+        reactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReactionType'
+      required:
+        - reactionType
+    RevokeReactionRequest:
       type: object
       properties:
         reactions:
