@@ -4,7 +4,7 @@ import com.aliyun.oss.OSS;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.Indri.ReactorImageServiceGrpc;
 import com.keepreal.madagascar.Indri.UploadImagesRequest;
-import com.keepreal.madagascar.error.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.indri.config.AliyunOssConfiguration;
 import com.keepreal.madagascar.indri.util.CommonStatusUtils;
 import org.lognet.springboot.grpc.GRpcService;
@@ -62,8 +62,8 @@ public class ImageService extends ReactorImageServiceGrpc.ImageServiceImplBase {
                         simpleEntry.getKey(),
                         new ByteArrayInputStream(simpleEntry.getValue()))))
                 .last()
-                .map(putObjectResult -> this.commonStatusUtils.buildCommonStatus(ErrorCode.GRPC_SUCC))
-                .onErrorReturn(this.commonStatusUtils.buildCommonStatus(ErrorCode.GRPC_IMAGE_UPLOAD_ERROR));
+                .map(putObjectResult -> this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .onErrorReturn(this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_IMAGE_UPLOAD_ERROR));
     }
 
 }
