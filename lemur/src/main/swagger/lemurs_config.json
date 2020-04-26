@@ -1,0 +1,11 @@
+{
+  "library": "spring-boot",
+  "dateLibrary": "legacy",
+  "hideGenerationTimestamp": true,
+  "modelPackage": "swagger.model",
+  "apiPackage": "swagger.api",
+  "invokerPackage": "swagger",
+  "interfaceOnly": true,
+  "useTags": true,
+  "serializableModel": true
+}

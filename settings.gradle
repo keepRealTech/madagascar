@@ -1,4 +1,5 @@
 rootProject.name = 'madagascar'
 
-include 'indri'
 include 'common:exceptions'
+include 'indri'
+include 'lemur'

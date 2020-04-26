@@ -6,22 +6,6 @@ option java_package = "com.keepreal.madagascar.tenrecs";
 import "common.proto";
 import "google/protobuf/wrappers.proto";
 
-message FeedMessage {
-    string id = 1;
-}
-
-message CommentMessage {
-    string id = 1;
-}
-
-message ReactionMessage {
-    string id = 1;
-}
-
-message IslandNoticeMessage {
-    string id = 1;
-}
-
 message NotificationMessage {
     string id = 1;
     string userId = 2;
@@ -31,11 +15,11 @@ message NotificationMessage {
     CommentMessage comment = 6;
     ReactionMessage reaction = 7;
     IslandNoticeMessage islandNotice = 8;
-    boolean hasRead = 9;
+    bool hasRead = 9;
 }
 
 message UnreadNotificationsCountMessage {
-    boolean hasUnread = 1;
+    bool hasUnread = 1;
     int32 unreadCommentsCount = 2;
     int32 unreadReactionsCount = 3;
     int32 unreadIslandNoticesCount = 4;
@@ -63,7 +47,7 @@ message RetrieveMultipleNotificationsRequest {
 
 message NotificationsResponse {
     CommonStatus status = 1;
-    repeated Notification notification = 2;
+    repeated NotificationMessage notification = 2;
     PageResponse pageResponse = 3;
 }
 
