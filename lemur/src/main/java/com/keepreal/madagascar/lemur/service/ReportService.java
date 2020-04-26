@@ -58,10 +58,13 @@ public class ReportService {
         }
 
         if (Objects.isNull(reportResponse)
-                || !reportResponse.hasStatus()
-                || ErrorCode.REQUEST_SUCC_VALUE != reportResponse.getStatus().getRtn()) {
+                || !reportResponse.hasStatus()) {
             log.error(Objects.isNull(reportResponse) ? "Create report returned null." : reportResponse.toString());
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != reportResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(reportResponse.getStatus());
         }
 
         return reportResponse.getReport();

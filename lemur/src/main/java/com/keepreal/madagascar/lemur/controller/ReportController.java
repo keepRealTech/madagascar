@@ -44,7 +44,7 @@ public class ReportController implements ReportApi {
     @Override
     public ResponseEntity<ReportResponse> apiV1ReportsPost(@Valid PostReportRequest postReportRequest) {
         ReportMessage reportMessage = this.reportService.createReport(postReportRequest.getFeedId(),
-                postReportRequest.getReporterId(), postReportRequest.getReportType());
+                postReportRequest.getReporterId(), this.convertReportType(postReportRequest.getReportType()));
 
         ReportResponse response = new ReportResponse();
         response.setData(this.reportDTOFactory.valueOf(reportMessage));

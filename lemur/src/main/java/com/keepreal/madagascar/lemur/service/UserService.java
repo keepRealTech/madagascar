@@ -65,10 +65,13 @@ public class UserService {
         }
 
         if (Objects.isNull(userResponse)
-                || !userResponse.hasStatus()
-                || ErrorCode.REQUEST_SUCC_VALUE != userResponse.getStatus().getRtn()) {
-            log.error(Objects.isNull(userResponse) ? "Retrieve user info returned null." : userResponse.toString());
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
+                || !userResponse.hasStatus()) {
+            log.error(Objects.isNull(userResponse) ? "Retrieve user returned null." : userResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != userResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(userResponse.getStatus());
         }
 
         return userResponse.getUser();
@@ -136,10 +139,13 @@ public class UserService {
         }
 
         if (Objects.isNull(userResponse)
-                || !userResponse.hasStatus()
-                || ErrorCode.REQUEST_SUCC_VALUE != userResponse.getStatus().getRtn()) {
-            log.error(Objects.isNull(userResponse) ? "Retrieve user info returned null." : userResponse.toString());
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
+                || !userResponse.hasStatus()) {
+            log.error(Objects.isNull(userResponse) ? "Update user returned null." : userResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != userResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(userResponse.getStatus());
         }
 
         return userResponse.getUser();

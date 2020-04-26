@@ -52,10 +52,13 @@ public class LoginService {
         }
 
         if (Objects.isNull(loginResponse)
-                || !loginResponse.hasStatus()
-                || ErrorCode.REQUEST_SUCC_VALUE != loginResponse.getStatus().getRtn()) {
+                || !loginResponse.hasStatus()) {
             log.error(Objects.isNull(loginResponse) ? "GRpc login returned null." : loginResponse.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != loginResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(loginResponse.getStatus());
         }
 
         return loginResponse;
