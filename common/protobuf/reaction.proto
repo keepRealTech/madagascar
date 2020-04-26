@@ -4,7 +4,6 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.fossa";
 
 import "common.proto";
-import "google/protobuf/wrappers.proto";
 
 message NewReactionRequest {
   string feedId = 1;
@@ -34,7 +33,7 @@ message ReactionsResponse {
   repeated ReactionMessage reactions = 3;
 }
 
-service CommentService {
+service ReactionService {
   rpc CreateReaction(NewReactionRequest) returns (ReactionResponse) {};
   rpc RevokeReaction(RevokeReactionRequest) returns (ReactionResponse) {};
   rpc RetrieveReactionsByFeedId(RetrieveReactionsByFeedIdRequest) returns (ReactionsResponse) {};
