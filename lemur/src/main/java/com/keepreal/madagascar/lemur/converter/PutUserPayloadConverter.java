@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.lemur.util;
+package com.keepreal.madagascar.lemur.converter;
 
 import com.google.gson.Gson;
 import org.springframework.core.convert.converter.Converter;

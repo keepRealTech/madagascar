@@ -14,22 +14,6 @@ sourceSets {
     }
 }
 
-//openApiGenerate {
-//    generatorName = "spring"
-//    inputSpec = 'src/main/swagger/lemurs.yml'.toString()
-//    outputDir = "$rootDir/lemur/java"
-//    apiPackage = "swagger.lemur.api"
-//    modelPackage = "swagger.lemur.model"
-//    invokerPackage = "swagger"
-//    library = "spring-boot"
-//    modelFilesConstrainedTo = [
-//        "Error"
-//    ]
-//    configOptions = [
-//        dateLibrary: "java8"
-//    ]
-//}
-
 swaggerSources {
     lemur {
         inputFile = file('src/main/swagger/lemurs.yml')

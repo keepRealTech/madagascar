@@ -550,8 +550,8 @@ components:
       required: false
       schema:
         type: integer
-        format: int32
         minimum: 0
+        default: 0
     pageSize:
       in: query
       name: pageSize
@@ -559,9 +559,9 @@ components:
       required: false
       schema:
         type: integer
-        format: int32
         minimum: 0
         maximum: 100
+        default: 5
     islandidInPath:
       in: query
       name: islandId
