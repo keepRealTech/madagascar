@@ -11,5 +11,5 @@ message UploadImagesRequest {
 }
 
 service ImageService {
-	rpc uploadImages (UploadImagesRequest) returns (CommonStatus) {};
+	rpc uploadImages(UploadImagesRequest) returns (CommonStatus) {};
 }
