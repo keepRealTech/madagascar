@@ -1,0 +1,10 @@
+plugins {
+    id 'java-library'
+    id 'com.google.protobuf'
+}
+
+dependencies {
+    implementation "com.google.protobuf:protobuf-java"
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
