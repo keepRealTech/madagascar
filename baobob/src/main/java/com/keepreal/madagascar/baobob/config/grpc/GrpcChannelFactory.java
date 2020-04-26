@@ -20,7 +20,6 @@ public class GrpcChannelFactory {
      *
      * @param couaConfiguration Coua grpc configuration.
      */
-    @Autowired
     public GrpcChannelFactory(@Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration) {
         this.couaConfiguration = couaConfiguration;
     }

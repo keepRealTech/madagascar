@@ -17,7 +17,7 @@ public class GrpcConfigurationFactory {
      */
     @Bean(name = "couaConfiguration")
     @ConfigurationProperties(prefix = "grpc.coua", ignoreUnknownFields = false)
-    public GrpcConfiguration resourceManagerConfiguration() {
+    public GrpcConfiguration couaConfiguration() {
         return new GrpcConfiguration();
     }
 
