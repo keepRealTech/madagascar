@@ -1,0 +1,64 @@
+package com.keepreal.madagascar.lemur.controller;
+
+import com.keepreal.madagascar.common.ReportType;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.fossa.ReportMessage;
+import com.keepreal.madagascar.lemur.dtoFactory.ReportDTOFactory;
+import com.keepreal.madagascar.lemur.service.ReportService;
+import com.keepreal.madagascar.lemur.util.ResponseUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+import swagger.api.ReportApi;
+import swagger.model.PostReportRequest;
+import swagger.model.ReportResponse;
+
+import javax.validation.Valid;
+
+/**
+ * Represents the report controller.
+ */
+@RestController
+public class ReportController implements ReportApi {
+
+    private final ReportService reportService;
+    private final ReportDTOFactory reportDTOFactory;
+
+    /**
+     * Constructs the report controller.
+     *
+     * @param reportService    Report service.
+     * @param reportDTOFactory Report dto factory.
+     */
+    public ReportController(ReportService reportService, ReportDTOFactory reportDTOFactory) {
+        this.reportService = reportService;
+        this.reportDTOFactory = reportDTOFactory;
+    }
+
+    /**
+     * Implements the post new report api.
+     *
+     * @param postReportRequest {@link PostReportRequest}.
+     * @return {@link ReportResponse}.
+     */
+    @Override
+    public ResponseEntity<ReportResponse> apiV1ReportsPost(@Valid PostReportRequest postReportRequest) {
+        ReportMessage reportMessage = this.reportService.createReport(postReportRequest.getFeedId(),
+                postReportRequest.getReporterId(), postReportRequest.getReportType());
+
+        ReportResponse response = new ReportResponse();
+        response.setData(this.reportDTOFactory.valueOf(reportMessage));
+        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Converts the report type.
+     * @param type Type.
+     * @return {@link ReportType}.
+     */
+    private ReportType convertReportType(String type) {
+        return ReportType.valueOf(type);
+    }
+
+}
