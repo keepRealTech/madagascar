@@ -107,6 +107,7 @@ message IslandMessage {
     string portraitImageUri = 4;
     string description = 5;
     uint64 lastFeedAt = 6;
+    uint64 createdAt = 7;
 }
 
 message RepostMessage {
@@ -114,7 +115,7 @@ message RepostMessage {
     string content = 2;
     bool isSuccessful = 3;
     string userId = 4;
-    uint64 createAt = 5;
+    uint64 createdAt = 5;
 }
 
 message FeedMessage {
@@ -137,7 +138,7 @@ message CommentMessage {
     string feedId = 3;
     string userId = 4;
     string replyToId = 5;
-    uint64 createAt = 6;
+    uint64 createdAt = 6;
 }
 
 message ReactionMessage {
@@ -145,4 +146,12 @@ message ReactionMessage {
     string feedId = 2;
     string userId = 3;
     repeated ReactionType reactionType = 4;
+    uint64 createdAt = 5;
+}
+
+message IslandNoticeMessage {
+    string id = 1;
+    string islandId = 2;
+    string content = 3;
+    uint64 createdAt = 4;
 }
