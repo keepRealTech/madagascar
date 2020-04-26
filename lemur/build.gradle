@@ -1,0 +1,40 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'org.hidetake.swagger.generator'
+    id 'com.google.protobuf'
+    id 'com.palantir.docker'
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDirs 'src/main/madagascar-grpc-proto'
+        }
+    }
+}
+
+swaggerSources {
+    lemur {
+        inputFile = file('src/main/swagger/lemurs.yml')
+        code {
+            language = 'spring'
+            configFile = file('src/main/swagger/lemurs_config.json')
+        }
+    }
+}
+compileJava.dependsOn swaggerSources.lemur.code
+sourceSets.main.java.srcDir 'build/swagger-code-lemur/src/main/java'
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure'
+    implementation 'io.github.lognet:grpc-spring-boot-starter'
+    implementation 'io.swagger:swagger-annotations'
+    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

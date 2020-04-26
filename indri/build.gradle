@@ -14,6 +14,8 @@ sourceSets {
 }
 
 dependencies {
+    implementation project(":common:exceptions")
+
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.projectreactor:reactor-core'

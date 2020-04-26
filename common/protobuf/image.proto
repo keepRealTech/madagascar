@@ -6,8 +6,8 @@ option java_package = "com.keepreal.madagascar.Indri";
 import "common.proto";
 
 message UploadImagesRequest {
-  repeated bytes imageContent = 1;
-  repeated string imageNames = 2;
+    repeated bytes imageContent = 1;
+    repeated string imageNames = 2;
 }
 
 service ImageService {

@@ -1,16 +1,16 @@
 syntax = "proto3";
 option java_outer_classname = "MadagascarGrpcErrorCode";
 option java_multiple_files = true;
-package com.keepreal.madagascar.error;
+package com.keepreal.madagascar.common.exceptions;
 
 enum ErrorCode {
-    GRPC_SUCC = 0;
-    GRPC_SUCC_HTTP_KEEP_ALIVE = 1;
-    GRPC_TIME_OUT = 1000;
-    GRPC_NOT_IMPLEMENTED_FUNCTION_ERROR = 1108;
-    GRPC_UNEXPECTED_ERROR = 1999;
+    REQUEST_SUCC = 0;
+    REQUEST_SUCC_HTTP_KEEP_ALIVE = 1;
+    REQUEST_TIME_OUT = 1000;
+    REQUEST_NOT_IMPLEMENTED_FUNCTION_ERROR = 1108;
+    REQUEST_UNEXPECTED_ERROR = 1999;
 
-    GRPC_IMAGE_UPLOAD_ERROR = 2000;
+    REQUEST_GRPC_IMAGE_UPLOAD_ERROR = 2000;
 
-    GRPC_LOGIN_INVALID = 4000;
+    REQUEST_GRPC_LOGIN_INVALID = 4000;
 }

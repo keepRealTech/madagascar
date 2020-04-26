@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.tenrecs";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message NotificationMessage {
+    string id = 1;
+    string userId = 2;
+    int64 createdAt = 3;
+    NotificationType type = 4;
+    FeedMessage feed = 5;
+    CommentMessage comment = 6;
+    ReactionMessage reaction = 7;
+    IslandNoticeMessage islandNotice = 8;
+    bool hasRead = 9;
+}
+
+message UnreadNotificationsCountMessage {
+    bool hasUnread = 1;
+    int32 unreadCommentsCount = 2;
+    int32 unreadReactionsCount = 3;
+    int32 unreadIslandNoticesCount = 4;
+}
+
+message QueryNotificationCondition {
+    google.protobuf.StringValue id = 1;
+    google.protobuf.StringValue userId = 2;
+    NotificationTypeValue type = 3;
+}
+
+message CountUnreadNotificationsRequest {
+    string userId = 1;
+}
+
+message CountUnreadNotificationsResponse {
+    CommonStatus status = 1;
+    UnreadNotificationsCountMessage unreadCounts = 2;
+}
+
+message RetrieveMultipleNotificationsRequest {
+    QueryNotificationCondition condition = 1;
+    PageRequest pageRequest = 2;
+}
+
+message NotificationsResponse {
+    CommonStatus status = 1;
+    repeated NotificationMessage notification = 2;
+    PageResponse pageResponse = 3;
+}
+
+service NotificationService {
+    rpc RetrieveMultipleNotifications(RetrieveMultipleNotificationsRequest) returns (NotificationsResponse) {};
+    rpc CountUnreadNotifications(CountUnreadNotificationsRequest) returns (CountUnreadNotificationsResponse) {};
+}
