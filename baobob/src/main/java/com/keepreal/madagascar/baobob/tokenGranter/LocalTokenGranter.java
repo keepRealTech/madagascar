@@ -52,6 +52,7 @@ public class LocalTokenGranter extends AbstractTokenGranter {
                 .setStatus(this.grpcResponseUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .setToken(token.getValue())
                 .setRefreshToken(token.getRefreshToken().getValue())
+                .setUserId(userMessage.getId())
                 .build();
     }
 

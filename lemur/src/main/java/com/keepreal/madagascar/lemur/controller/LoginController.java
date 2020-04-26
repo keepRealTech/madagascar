@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.baobob.LoginRequest;
+import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
@@ -14,10 +15,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.LoginApi;
-import swagger.model.*;
+import swagger.model.LoginResponse;
+import swagger.model.LoginTokenInfo;
+import swagger.model.LoginType;
+import swagger.model.PostLoginRequest;
+import swagger.model.PostRefreshTokenRequest;
+import swagger.model.UserResponse;
 
 import javax.validation.Valid;
-import java.util.Objects;
 
 /**
  * Represents the login controllers.
@@ -46,7 +51,7 @@ public class LoginController implements LoginApi {
     }
 
     /**
-     * Overrides the login api.
+     * Implements the login api.
      *
      * @param body {@link PostLoginRequest}.
      * @return {@link LoginResponse}.
@@ -60,21 +65,16 @@ public class LoginController implements LoginApi {
                         .build();
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.login(loginRequest);
 
-        if (Objects.isNull(loginResponse)
-                || !loginResponse.hasStatus()
-                || ErrorCode.REQUEST_SUCC_VALUE != loginResponse.getStatus().getRtn()) {
-            log.error(Objects.isNull(loginResponse) ? "GRpc login returned null." : loginResponse.toString());
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID);
-        }
+        UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
 
         LoginResponse response = new LoginResponse();
-        response.setData(this.buildTokenInfo(loginResponse));
+        response.setData(this.buildTokenInfo(loginResponse, user));
         ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
-     * Overrides the refresh token api.
+     * Implements the refresh token api.
      *
      * @param body {@link PostRefreshTokenRequest}.
      * @return {@link LoginResponse}.
@@ -86,7 +86,7 @@ public class LoginController implements LoginApi {
     }
 
     /**
-     * Overrides the get user info api.
+     * Implements the get user info api.
      *
      * @return {@link UserResponse}.
      */
@@ -94,17 +94,10 @@ public class LoginController implements LoginApi {
     public ResponseEntity<UserResponse> apiV1UserInfoGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        com.keepreal.madagascar.coua.UserResponse userResponse = this.userService.retrieveUserById(userId);
-
-        if (Objects.isNull(userResponse)
-                || !userResponse.hasStatus()
-                || ErrorCode.REQUEST_SUCC_VALUE != userResponse.getStatus().getRtn()) {
-            log.error(Objects.isNull(userResponse) ? "Retrieve user info returned null." : userResponse.toString());
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
-        }
+        UserMessage user = this.userService.retrieveUserById(userId);
 
         UserResponse response = new UserResponse();
-        response.setData(this.userDTOFactory.valueOf(userResponse.getUser()));
+        response.setData(this.userDTOFactory.valueOf(user));
         ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -117,7 +110,7 @@ public class LoginController implements LoginApi {
      */
     private com.keepreal.madagascar.common.LoginType loginTypeOf(LoginType loginType) {
         switch (loginType) {
-            case WECHAT:
+            case LOGIN_OAUTH_WECHAT:
                 return com.keepreal.madagascar.common.LoginType.LOGIN_OAUTH_WECHAT;
             default:
                 throw new KeepRealBusinessException(ErrorCode.REQUEST_NOT_IMPLEMENTED_FUNCTION_ERROR);
@@ -128,12 +121,15 @@ public class LoginController implements LoginApi {
      * Builds the {@link LoginTokenInfo} from a {@link com.keepreal.madagascar.baobob.LoginResponse}.
      *
      * @param loginResponse {@link com.keepreal.madagascar.baobob.LoginResponse}.
+     * @param userMessage   {@link UserMessage}.
      * @return {@link LoginTokenInfo}.
      */
-    private LoginTokenInfo buildTokenInfo(com.keepreal.madagascar.baobob.LoginResponse loginResponse) {
+    private LoginTokenInfo buildTokenInfo(com.keepreal.madagascar.baobob.LoginResponse loginResponse,
+                                          UserMessage userMessage) {
         LoginTokenInfo loginTokenInfo = new LoginTokenInfo();
         loginTokenInfo.setToken(loginResponse.getToken());
         loginTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
+        loginTokenInfo.setUser(this.userDTOFactory.valueOf(userMessage));
         return loginTokenInfo;
     }
 

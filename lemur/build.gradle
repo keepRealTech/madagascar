@@ -14,6 +14,22 @@ sourceSets {
     }
 }
 
+//openApiGenerate {
+//    generatorName = "spring"
+//    inputSpec = 'src/main/swagger/lemurs.yml'.toString()
+//    outputDir = "$rootDir/lemur/java"
+//    apiPackage = "swagger.lemur.api"
+//    modelPackage = "swagger.lemur.model"
+//    invokerPackage = "swagger"
+//    library = "spring-boot"
+//    modelFilesConstrainedTo = [
+//        "Error"
+//    ]
+//    configOptions = [
+//        dateLibrary: "java8"
+//    ]
+//}
+
 swaggerSources {
     lemur {
         inputFile = file('src/main/swagger/lemurs.yml')
@@ -33,8 +49,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
+    implementation 'io.swagger.core.v3:swagger-annotations'
     implementation 'io.swagger:swagger-annotations'
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli'
+    swaggerCodegen 'org.openapitools:openapi-generator-cli'
     implementation 'io.micrometer:micrometer-registry-prometheus'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

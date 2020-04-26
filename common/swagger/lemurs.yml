@@ -99,6 +99,9 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PutUserRequest'
+            encoding:
+              payload:
+                contentType: application/json
       responses:
         '200':
           description: user response
@@ -684,7 +687,7 @@ components:
         birthday:
           type: string
           format: date
-        identityType:
+        identityTypes:
           type: array
           items:
             $ref: '#/components/schemas/IdentityType'
@@ -705,7 +708,7 @@ components:
         birthday:
           type: string
           format: date
-        identityType:
+        identityTypes:
           type: array
           items:
             $ref: '#/components/schemas/IdentityType'
@@ -1180,3 +1183,5 @@ components:
           type: string
         refreshToken:
           type: string
+        user:
+          $ref: '#/components/schemas/UserDTO'

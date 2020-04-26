@@ -1,0 +1,22 @@
+grpc:
+  coua:
+    host: 127.0.0.1
+    port: 12000
+  baobob:
+    host: 127.0.0.1
+    port: 12001
+  indri:
+    host: 127.0.0.1
+    port: 12002
+  fossa:
+    host: 127.0.0.1
+    port: 12003
+  tenrecs:
+    host: 127.0.0.1
+    port: 12004
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB

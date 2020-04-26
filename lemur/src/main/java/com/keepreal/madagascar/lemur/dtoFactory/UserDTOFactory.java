@@ -35,7 +35,7 @@ public class UserDTOFactory {
         userDTO.setDescription(user.getDescription());
         userDTO.setPortraitImageUri(user.getPortraitImageUri());
         userDTO.setGender(this.convertGender(user.getGender()));
-        userDTO.setIdentityType(user.getIdentitiesList()
+        userDTO.setIdentityTypes(user.getIdentitiesList()
                 .stream()
                 .map(this::convertIdentityType)
                 .collect(Collectors.toList()));

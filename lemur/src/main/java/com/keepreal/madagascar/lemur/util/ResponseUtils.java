@@ -15,7 +15,6 @@ public class ResponseUtils {
      * @param response  Response.
      * @param errorCode Error code.
      */
-
     public static void setRtnAndMessage(CommonResponse response, ErrorCode errorCode) {
         response.setRtn(errorCode.getNumber());
         response.setMsg(errorCode.getValueDescriptor().getName());
