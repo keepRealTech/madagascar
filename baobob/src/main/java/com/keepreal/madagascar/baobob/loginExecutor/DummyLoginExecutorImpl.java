@@ -3,7 +3,7 @@ package com.keepreal.madagascar.baobob.loginExecutor;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
-import com.keepreal.madagascar.error.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import reactor.core.publisher.Mono;
 
 /**
@@ -21,7 +21,7 @@ public class DummyLoginExecutorImpl implements LoginExecutor {
      */
     @Override
     public Mono<LoginResponse> login(LoginRequest loginRequest) {
-        return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.GRPC_NOT_IMPLEMENTED_FUNCTION_ERROR));
+        return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_NOT_IMPLEMENTED_FUNCTION_ERROR));
     }
 
 }

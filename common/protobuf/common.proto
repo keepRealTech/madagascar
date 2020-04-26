@@ -16,6 +16,11 @@ message PageResponse {
     bool hasContent = 4;
 }
 
+enum LoginType {
+    LOGIN_TYPE_NONE = 0;
+    LOGIN_OAUTH_WECHAT = 1;
+}
+
 enum NotificationType {
     NOTIFICATION_NONE = 0;
     NOTIFICATION_COMMENTS = 1;

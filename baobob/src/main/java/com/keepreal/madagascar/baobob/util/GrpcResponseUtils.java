@@ -2,7 +2,7 @@ package com.keepreal.madagascar.baobob.util;
 
 import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.common.CommonStatus;
-import com.keepreal.madagascar.error.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import org.springframework.stereotype.Service;
 
 /**

@@ -3,6 +3,7 @@ package com.keepreal.madagascar.baobob.service;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
 import com.keepreal.madagascar.common.GenderValue;
+import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.coua.*;
 import io.grpc.ManagedChannel;
 import org.springframework.beans.factory.annotation.Qualifier;

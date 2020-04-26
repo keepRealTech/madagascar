@@ -9,8 +9,8 @@ import com.keepreal.madagascar.baobob.service.UserService;
 import com.keepreal.madagascar.baobob.tokenGranter.LocalTokenGranter;
 import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
 import com.keepreal.madagascar.common.Gender;
-import com.keepreal.madagascar.coua.UserMessage;
-import com.keepreal.madagascar.error.ErrorCode;
+import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -51,7 +51,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
     @Override
     public Mono<LoginResponse> login(LoginRequest loginRequest) {
         if (!loginRequest.hasCode()) {
-            return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.GRPC_LOGIN_INVALID));
+            return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
         }
 
         return this.loginWechat(loginRequest.getCode().getValue())

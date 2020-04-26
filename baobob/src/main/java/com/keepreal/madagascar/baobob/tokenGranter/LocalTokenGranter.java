@@ -2,8 +2,8 @@ package com.keepreal.madagascar.baobob.tokenGranter;
 
 import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
-import com.keepreal.madagascar.coua.UserMessage;
-import com.keepreal.madagascar.error.ErrorCode;
+import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -49,7 +49,7 @@ public class LocalTokenGranter extends AbstractTokenGranter {
     public LoginResponse grant(UserMessage userMessage) {
         OAuth2AccessToken token = this.grant(LocalTokenGranter.GRANT_TYPE, this.buildTokenRequest(userMessage));
         return LoginResponse.newBuilder()
-                .setStatus(this.grpcResponseUtils.buildCommonStatus(ErrorCode.GRPC_SUCC))
+                .setStatus(this.grpcResponseUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .setToken(token.getValue())
                 .setRefreshToken(token.getRefreshToken().getValue())
                 .build();
