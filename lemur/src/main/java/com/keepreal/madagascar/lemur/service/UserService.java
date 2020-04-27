@@ -91,13 +91,13 @@ public class UserService {
      * @return {@link UserResponse}.
      */
     public UserMessage updateUser(String id,
-                                   String name,
-                                   String portraitImageUri,
-                                   Gender gender,
-                                   String description,
-                                   String city,
-                                   String birthday,
-                                   List<IdentityType> identityTypes) {
+                                  String name,
+                                  String portraitImageUri,
+                                  Gender gender,
+                                  String description,
+                                  String city,
+                                  String birthday,
+                                  List<IdentityType> identityTypes) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.managedChannel);
 
         UpdateUserByIdRequest.Builder requestBuilder = UpdateUserByIdRequest.newBuilder()

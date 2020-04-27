@@ -48,7 +48,7 @@ public class NotificationService {
      * @param pageSize Page size.
      * @return {@link NotificationsResponse}.
      */
-    public NotificationsResponse retrieveNotifications(String userId, NotificationType type, Integer page, Integer pageSize) {
+    public NotificationsResponse retrieveNotifications(String userId, NotificationType type, int page, int pageSize) {
         NotificationServiceGrpc.NotificationServiceBlockingStub stub = NotificationServiceGrpc.newBlockingStub(this.managedChannel);
 
         QueryNotificationCondition.Builder conditionBuilder = QueryNotificationCondition.newBuilder()
@@ -59,7 +59,7 @@ public class NotificationService {
         }
 
         RetrieveMultipleNotificationsRequest request = RetrieveMultipleNotificationsRequest.newBuilder()
-                .setCondition(conditionBuilder)
+                .setCondition(conditionBuilder.build())
                 .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
                 .build();
 

@@ -54,6 +54,7 @@ public class ReportController implements ReportApi {
 
     /**
      * Converts the report type.
+     *
      * @param type Type.
      * @return {@link ReportType}.
      */

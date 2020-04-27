@@ -117,7 +117,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/PostIslandRequest'
       responses:
@@ -782,6 +782,18 @@ components:
         secret:
           type: string
           description: secrets for joining island
+    PostIslandPayload:
+      type: object
+      properties:
+        name:
+          type: string
+          description: island name
+        secret:
+          type: string
+          description: secrets for joining island
+      required:
+        - name
+        - secret
     PutIslandRequest:
       type: object
       properties:
@@ -794,19 +806,14 @@ components:
     PostIslandRequest:
       type: object
       properties:
-        name:
-          type: string
-          description: island name
+        payload:
+          $ref: '#/components/schemas/PostIslandPayload'
         portraitImage:
           type: string
           description: portrait image
-        secrtet:
-          type: string
-          description: secrets for joining island
+          format: binary
       required:
-        - name
-        - portraitImage
-        - secret
+        - payload
     SubscribeIslandRequest:
       type: object
       properties:
@@ -1122,6 +1129,8 @@ components:
         content:
           type: string
         feedId:
+          type: string
+        islandId:
           type: string
         isSuccessful:
           type: boolean

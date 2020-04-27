@@ -6,9 +6,7 @@ import org.springframework.stereotype.Component;
 import swagger.model.ReportDTO;
 import swagger.model.UserDTO;
 
-import java.sql.Date;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Represents the report dto factory.

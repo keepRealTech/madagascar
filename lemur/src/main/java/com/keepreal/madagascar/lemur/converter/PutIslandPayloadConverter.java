@@ -3,21 +3,21 @@ package com.keepreal.madagascar.lemur.converter;
 import com.google.gson.Gson;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import swagger.model.PutUserPayload;
+import swagger.model.PutIslandPayload;
 
 /**
- * Represents a converter for {@link PutUserPayload}.
+ * Represents a converter for {@link PutIslandPayload}.
  * This is here because of the lack support of swagger code generator.
  */
 @Component
-public class PutUserPayloadConverter implements Converter<String, PutUserPayload> {
+public class PutIslandPayloadConverter implements Converter<String, PutIslandPayload> {
 
     private final Gson gson;
 
     /**
      * Constructs the converter.
      */
-    public PutUserPayloadConverter() {
+    public PutIslandPayloadConverter() {
         this.gson = new Gson();
     }
 
@@ -25,11 +25,11 @@ public class PutUserPayloadConverter implements Converter<String, PutUserPayload
      * Converts the string into entity.
      *
      * @param payload Payload in json.
-     * @return {@link PutUserPayload}.
+     * @return {@link PutIslandPayload}.
      */
     @Override
-    public PutUserPayload convert(String payload) {
-        return this.gson.fromJson(payload, PutUserPayload.class);
+    public PutIslandPayload convert(String payload) {
+        return this.gson.fromJson(payload, PutIslandPayload.class);
     }
 
 }

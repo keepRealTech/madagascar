@@ -24,7 +24,7 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
      * Handles the {@link KeepRealBusinessException}.
      *
      * @param exception {@link KeepRealBusinessException}.
-     * @param request Request.
+     * @param request   Request.
      * @return {@link CommonResponse}.
      */
     @ExceptionHandler(value = {KeepRealBusinessException.class})

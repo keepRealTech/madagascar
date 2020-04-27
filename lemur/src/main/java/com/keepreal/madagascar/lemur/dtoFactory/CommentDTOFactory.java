@@ -14,6 +14,7 @@ public class CommentDTOFactory {
 
     /**
      * Converts the {@link CommentMessage} to {@link CommentDTO}.
+     *
      * @param comment {@link CommentMessage}.
      * @return {@link CommentDTO}.
      */

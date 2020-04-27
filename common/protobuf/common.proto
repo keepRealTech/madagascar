@@ -113,6 +113,7 @@ message IslandMessage {
     string description = 5;
     uint64 lastFeedAt = 6;
     uint64 createdAt = 7;
+    int32 memberCount = 8;
 }
 
 message RepostMessage {
