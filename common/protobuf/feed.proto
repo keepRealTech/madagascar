@@ -71,5 +71,5 @@ service FeedService {
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
-    rpc CheckNewFeedsRequest (CheckNewFeedsRequest) returns (CheckNewFeedsResponse) {};
+    rpc CheckNewFeeds (CheckNewFeedsRequest) returns (CheckNewFeedsResponse) {};
 }
