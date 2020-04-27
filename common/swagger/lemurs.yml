@@ -339,7 +339,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BriefFeedResponse'
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/feeds/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -941,13 +941,6 @@ components:
             format: binary
       required:
         - payload
-    BriefFeedResponse:
-      allOf:
-        - $ref: '#/components/schemas/CommonResponse'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/BriefFeedDTO'
     FeedResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
