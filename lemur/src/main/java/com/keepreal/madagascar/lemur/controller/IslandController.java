@@ -14,9 +14,10 @@ import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.RepostService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import com.keepreal.madagascar.lemur.util.ResponseUtils;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -142,12 +143,13 @@ public class IslandController implements IslandApi {
      */
     @Override
     public ResponseEntity<IslandProfileResponse> apiV1IslandsIdProfileGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
         com.keepreal.madagascar.coua.IslandProfileResponse islandProfileResponse =
-                this.islandService.retrieveIslandProfileById(id);
+                this.islandService.retrieveIslandProfileById(id, userId);
 
         IslandProfileResponse response = new IslandProfileResponse();
-        response.setData(this.islandDTOFactory.valueOf(
-                islandProfileResponse.getIslandMessage(), islandProfileResponse.getUserMessage()));
+        response.setData(this.islandDTOFactory.valueOf(islandProfileResponse));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -244,6 +246,24 @@ public class IslandController implements IslandApi {
     }
 
     /**
+     * Implements the unsubscribe island by id api.
+     *
+     * @param id                     Island id.
+     * @return {@link DummyResponse}.
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1IslandsIdUnsubscribePost(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        this.islandService.unsubscribeIslandById(id, userId);
+
+        DummyResponse response = new DummyResponse();
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Implements the get subscribers by island id api.
      *
      * @param id       Island id.
@@ -259,7 +279,7 @@ public class IslandController implements IslandApi {
                 this.islandService.retrieveSubscriberByIslandId(id, page, pageSize);
 
         UsersResponse response = new UsersResponse();
-        response.setData(islandSubscribersResponse.getUserMessageList()
+        response.setData(islandSubscribersResponse.getUserList()
                 .stream()
                 .map(this.userDTOFactory::valueOf)
                 .filter(Objects::nonNull)

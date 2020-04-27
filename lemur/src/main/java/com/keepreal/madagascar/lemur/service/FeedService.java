@@ -5,6 +5,9 @@ import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.fossa.CheckNewFeedsMessage;
+import com.keepreal.madagascar.fossa.CheckNewFeedsRequest;
+import com.keepreal.madagascar.fossa.CheckNewFeedsResponse;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
@@ -188,6 +191,41 @@ public class FeedService {
         }
 
         return feedsResponse;
+    }
+
+    /**
+     * Checks if has new feeds after the given timestamp.
+     *
+     * @param islandIds Island ids.
+     * @param timestamp Timestamp in milli-seconds.
+     * @return List of {@link CheckNewFeedsMessage}.
+     */
+    public List<CheckNewFeedsMessage> checkNewFeeds(List<String> islandIds, long timestamp) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+
+        CheckNewFeedsRequest request = CheckNewFeedsRequest.newBuilder()
+                .addAllIslandIds(islandIds)
+                .setTimestamp(timestamp)
+                .build();
+
+        CheckNewFeedsResponse checkNewFeedsResponse;
+        try {
+            checkNewFeedsResponse = stub.checkNewFeeds(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(exception);
+        }
+
+        if (Objects.isNull(checkNewFeedsResponse)
+                || !checkNewFeedsResponse.hasStatus()) {
+            log.error(Objects.isNull(checkNewFeedsResponse) ? "Retrieve feed returned null." : checkNewFeedsResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != checkNewFeedsResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(checkNewFeedsResponse.getStatus());
+        }
+
+        return checkNewFeedsResponse.getCheckNewFeedsList();
     }
 
 }

@@ -994,6 +994,9 @@ components:
         timestamp:
           type: integer
           format: int64
+      required:
+        - islandIds
+        - timestamp
     CheckFeedsDTO:
       type: object
       properties:

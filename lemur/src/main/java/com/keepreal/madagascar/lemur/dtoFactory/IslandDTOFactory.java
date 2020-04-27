@@ -1,9 +1,11 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.IslandMessage;
-import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.coua.IslandProfileResponse;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
+import swagger.model.FullIslandDTO;
 import swagger.model.IslandDTO;
 import swagger.model.IslandProfileDTO;
 
@@ -70,17 +72,39 @@ public class IslandDTOFactory {
     }
 
     /**
-     * Converts {@link IslandMessage} to {@link IslandDTO}.
+     * Converts {@link IslandMessage} to {@link FullIslandDTO}.
      *
      * @param island {@link IslandMessage}.
-     * @param host   Host {@link UserMessage}.
+     * @return {@link FullIslandDTO}.
+     */
+    public FullIslandDTO fullValueOf(IslandMessage island) {
+        if (Objects.isNull(island)) {
+            return null;
+        }
+
+        FullIslandDTO fullIslandDTO = new FullIslandDTO();
+        fullIslandDTO.setId(island.getId());
+        fullIslandDTO.setName(island.getName());
+        fullIslandDTO.setDescription(island.getDescription());
+        fullIslandDTO.setHostId(island.getHostId());
+        fullIslandDTO.setPortraitImageUri(island.getPortraitImageUri());
+        fullIslandDTO.setSecret(island.getSecret());
+
+        return fullIslandDTO;
+    }
+
+    /**
+     * Converts {@link IslandProfileResponse} to {@link IslandDTO}.
+     *
+     * @param islandProfileResponse {@link IslandProfileResponse}.
      * @return {@link IslandProfileDTO}.
      */
-    public IslandProfileDTO valueOf(IslandMessage island, UserMessage host) {
+    public IslandProfileDTO valueOf(IslandProfileResponse islandProfileResponse) {
         IslandProfileDTO islandProfileDTO = new IslandProfileDTO();
-        islandProfileDTO.setIsland(this.briefValueOf(island));
-        islandProfileDTO.setHost(this.userDTOFactory.valueOf(host));
-
+        islandProfileDTO.setIsland(this.fullValueOf(islandProfileResponse.getIsland()));
+        islandProfileDTO.setHost(this.userDTOFactory.valueOf(islandProfileResponse.getHost()));
+        islandProfileDTO.setUserIndex(islandProfileResponse.getUserIndex().getValue());
+        islandProfileDTO.setSubscribed(!StringUtils.isEmpty(islandProfileDTO.getUserIndex()));
         return islandProfileDTO;
     }
 

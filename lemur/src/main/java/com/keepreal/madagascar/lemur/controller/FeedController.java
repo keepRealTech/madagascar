@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.FeedRepostMessage;
 import com.keepreal.madagascar.coua.FeedRepostsResponse;
+import com.keepreal.madagascar.fossa.CheckNewFeedsMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.CommentDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.ReactionDTOFactory;
@@ -31,6 +32,8 @@ import swagger.model.CommentsResponse;
 import swagger.model.DummyResponse;
 import swagger.model.FeedResponse;
 import swagger.model.FeedsResponse;
+import swagger.model.PostCheckFeedsRequest;
+import swagger.model.PostCheckFeedsResponse;
 import swagger.model.PostCommentRequest;
 import swagger.model.PostFeedPayload;
 import swagger.model.PostReactionRequest;
@@ -61,6 +64,19 @@ public class FeedController implements FeedApi {
     private final FeedDTOFactory feedDTOFactory;
     private final ReactionDTOFactory reactionDTOFactory;
 
+    /**
+     * Constructs the feed controller.
+     *
+     * @param imageService       {@link ImageService}.
+     * @param feedService        {@link FeedService}.
+     * @param repostService      {@link RepostService}.
+     * @param commentService     {@link CommentService}.
+     * @param reactionService    {@link ReactionService}.
+     * @param commentDTOFactory  {@link CommentDTOFactory}.
+     * @param repostDTOFactory   {@link RepostDTOFactory}.
+     * @param feedDTOFactory     {@link FeedDTOFactory}.
+     * @param reactionDTOFactory {@link ReactionDTOFactory}.
+     */
     public FeedController(ImageService imageService,
                           FeedService feedService,
                           RepostService repostService,
@@ -311,6 +327,28 @@ public class FeedController implements FeedApi {
 
         RepostResponse response = new RepostResponse();
         response.setData(this.repostDTOFactory.valueOf(feedRepostMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the check new feeds api for polling.
+     *
+     * @param postCheckFeedsRequest (required) {@link PostCheckFeedsRequest}.
+     * @return {@link PostCheckFeedsResponse}.
+     */
+    @Override
+    public ResponseEntity<PostCheckFeedsResponse> apiV1FeedsCheckPost(PostCheckFeedsRequest postCheckFeedsRequest) {
+        List<CheckNewFeedsMessage> checkNewFeedsMessages = this.feedService.checkNewFeeds(
+                postCheckFeedsRequest.getIslandIds(), postCheckFeedsRequest.getTimestamp());
+
+        PostCheckFeedsResponse response = new PostCheckFeedsResponse();
+        response.setData(checkNewFeedsMessages
+                .stream()
+                .map(this.feedDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -5,7 +5,6 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.ReportMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.ReportDTOFactory;
 import com.keepreal.madagascar.lemur.service.ReportService;
-import com.keepreal.madagascar.lemur.util.ResponseUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

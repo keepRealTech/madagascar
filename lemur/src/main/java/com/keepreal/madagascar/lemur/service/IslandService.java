@@ -19,6 +19,7 @@ import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveMultipleIslandsRequest;
 import com.keepreal.madagascar.coua.SubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.SubscribeIslandResponse;
+import com.keepreal.madagascar.coua.UnsubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateIslandByIdRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.ManagedChannel;
@@ -117,14 +118,16 @@ public class IslandService {
     /**
      * Retrieves island by id.
      *
-     * @param id Island id.
+     * @param id     Island id.
+     * @param userId User id.
      * @return {@link IslandProfileResponse}.
      */
-    public IslandProfileResponse retrieveIslandProfileById(String id) {
+    public IslandProfileResponse retrieveIslandProfileById(String id, String userId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
 
         RetrieveIslandProfileByIdRequest request = RetrieveIslandProfileByIdRequest.newBuilder()
                 .setId(id)
+                .setUserId(StringValue.of(userId))
                 .build();
 
         IslandProfileResponse islandProfileResponse;
@@ -314,6 +317,38 @@ public class IslandService {
         if (Objects.isNull(subscribeIslandResponse)
                 || !subscribeIslandResponse.hasStatus()) {
             log.error(Objects.isNull(subscribeIslandResponse) ? "Subscribe island returned null." : subscribeIslandResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != subscribeIslandResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(subscribeIslandResponse.getStatus());
+        }
+    }
+
+    /**
+     * Unsubscribes island by id.
+     *
+     * @param id     Island id.
+     * @param userId User id.
+     */
+    public void unsubscribeIslandById(String id, String userId) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+
+        UnsubscribeIslandByIdRequest request = UnsubscribeIslandByIdRequest.newBuilder()
+                .setId(id)
+                .setUserId(userId)
+                .build();
+
+        SubscribeIslandResponse subscribeIslandResponse;
+        try {
+            subscribeIslandResponse = stub.unsubscribeIslandById(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(exception);
+        }
+
+        if (Objects.isNull(subscribeIslandResponse)
+                || !subscribeIslandResponse.hasStatus()) {
+            log.error(Objects.isNull(subscribeIslandResponse) ? "Unsubscribe island returned null." : subscribeIslandResponse.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 

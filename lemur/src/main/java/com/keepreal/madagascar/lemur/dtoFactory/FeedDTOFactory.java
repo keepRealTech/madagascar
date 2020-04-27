@@ -1,9 +1,11 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.fossa.CheckNewFeedsMessage;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefFeedDTO;
+import swagger.model.CheckFeedsDTO;
 import swagger.model.FeedDTO;
 
 import java.util.Objects;
@@ -69,14 +71,34 @@ public class FeedDTOFactory {
 
         BriefFeedDTO briefFeedDTO = new BriefFeedDTO();
         briefFeedDTO.setId(feed.getId());
-//        briefFeedDTO.setUserId(feed.getUserId());
         briefFeedDTO.setIslandId(feed.getIslandId());
         briefFeedDTO.setText(feed.getText());
         briefFeedDTO.setImagesUris(feed.getImageUrisList());
         briefFeedDTO.setFromHost(feed.getFromHost());
         briefFeedDTO.setCreatedAt(feed.getCreatedAt());
 
+        briefFeedDTO.setUser(this.userDTOFactory.briefValueOf(
+                this.userService.retrieveUserById(feed.getUserId())));
+
         return briefFeedDTO;
+    }
+
+    /**
+     * Converts {@link CheckNewFeedsMessage} into {@link CheckFeedsDTO}.
+     *
+     * @param checkNewFeeds {@link CheckNewFeedsMessage}.
+     * @return {@link CheckFeedsDTO}.
+     */
+    public CheckFeedsDTO valueOf(CheckNewFeedsMessage checkNewFeeds) {
+        if (Objects.isNull(checkNewFeeds)) {
+            return null;
+        }
+
+        CheckFeedsDTO checkFeedsDTO = new CheckFeedsDTO();
+        checkFeedsDTO.setIslandId(checkFeedsDTO.getIslandId());
+        checkFeedsDTO.setHasNew(checkNewFeeds.getHasNewFeeds());
+
+        return checkFeedsDTO;
     }
 
 }

@@ -6,7 +6,6 @@ import com.keepreal.madagascar.lemur.dtoFactory.NotificationDTOFactory;
 import com.keepreal.madagascar.lemur.service.NotificationService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import com.keepreal.madagascar.lemur.util.ResponseUtils;
 import com.keepreal.madagascar.tenrecs.UnreadNotificationsCountMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
