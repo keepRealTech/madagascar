@@ -5,13 +5,16 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 
 /**
  * Represents the spring web security filter configurations.
  */
 @Configuration
+@EnableResourceServer
 @EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
-public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
 
     /**
      * Configures the http security.
@@ -26,7 +29,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .antMatchers("/api/**").permitAll()
+                .antMatchers("/api/v1/login**", "/api/v1/refreshToken").permitAll()
                 .anyRequest().authenticated();
 
         httpSecurity.headers().cacheControl();

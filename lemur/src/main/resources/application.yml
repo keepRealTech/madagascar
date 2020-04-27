@@ -20,3 +20,13 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 20MB
+
+security:
+  oauth2:
+    client:
+      client-id: lemur
+      client-secret: secret
+    resource:
+      token-info-uri: http://OAuthServer:8080/oauth/check_token
+    basic:
+      enabled: false
