@@ -153,7 +153,7 @@ public class UserController implements UserApi {
             case OTHERS:
                 return IdentityType.IDENTITY_OTHERS;
             default:
-                return IdentityType.IDENTITY_NONE;
+                return IdentityType.UNRECOGNIZED;
         }
     }
 

@@ -561,7 +561,7 @@ components:
         type: integer
         minimum: 0
         maximum: 100
-        default: 5
+        default: 10
     islandidInPath:
       in: query
       name: islandId
@@ -908,6 +908,7 @@ components:
           description: whether feed posted by the host of island
         createdAt:
           type: integer
+          format: int64
     FeedDTO:
       allOf:
         - $ref: '#/components/schemas/BriefFeedDTO'
@@ -980,6 +981,7 @@ components:
           type: string
         createdAt:
           type: integer
+          format: int64
     PostCommentRequest:
       type: object
       properties:
@@ -1082,24 +1084,25 @@ components:
           type: boolean
         createdAt:
           type: integer
+          format: int64
+    UnreadNotificationCountDTO:
+      type: object
+      properties:
+        hasUnread:
+          type: boolean
+        UnreadCommentsCount:
+          type: integer
+        UnreadReactionsCount:
+          type: integer
+        UnreadIslandNoticesCount:
+          type: integer
     NotificationsCountResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
-            pageInfo:
-              $ref: '#/components/schemas/PageInfo'
             data:
-              type: object
-              properties:
-                hasUnread:
-                  type: boolean
-                UnreadCommentsCount:
-                  type: integer
-                UnreadReactionsCount:
-                  type: integer
-                UnreadIslandNoticesCount:
-                  type: integer
+              $ref: '#/components/schemas/UnreadNotificationCountDTO'
     NotificationsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1126,6 +1129,7 @@ components:
           type: string
         createdAt:
           type: integer
+          format: int64
     PostRepostRequest:
       type: object
       properties:

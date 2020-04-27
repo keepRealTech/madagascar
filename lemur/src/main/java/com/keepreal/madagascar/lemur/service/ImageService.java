@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Represents the upload image service.
@@ -40,7 +41,9 @@ public class ImageService {
     public String uploadSingleImageAsync(MultipartFile image) {
         ImageServiceGrpc.ImageServiceFutureStub stub = ImageServiceGrpc.newFutureStub(this.managedChannel);
 
-        String uri = ImageUtils.buildImageUri();
+        String extension = Objects.requireNonNull(image.getOriginalFilename())
+                .substring(image.getOriginalFilename().lastIndexOf("."));
+        String uri = ImageUtils.buildImageUri() + extension;
 
         UploadImagesRequest request = null;
         try {

@@ -38,9 +38,9 @@ public class LoginController implements LoginApi {
     /**
      * Constructs the login controller.
      *
-     * @param loginService   Login service.
-     * @param userService    User service.
-     * @param userDTOFactory User dto factory.
+     * @param loginService   {@link LoginService}.
+     * @param userService    {@link UserService}.
+     * @param userDTOFactory {@link UserDTOFactory}.
      */
     public LoginController(LoginService loginService,
                            UserService userService,

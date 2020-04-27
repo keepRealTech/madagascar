@@ -11,7 +11,7 @@ public class ImageUtils {
      * Builds a random image uri.
      */
     public static String buildImageUri() {
-        return UUID.randomUUID().toString();
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
 }

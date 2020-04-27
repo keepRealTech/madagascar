@@ -38,6 +38,7 @@ public class UserDTOFactory {
         userDTO.setIdentityTypes(user.getIdentitiesList()
                 .stream()
                 .map(this::convertIdentityType)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
 
         return userDTO;
@@ -50,13 +51,17 @@ public class UserDTOFactory {
      * @return {@link UserDTO.GenderEnum}.
      */
     private UserDTO.GenderEnum convertGender(Gender gender) {
+        if (Objects.isNull(gender)) {
+            return null;
+        }
+
         switch (gender) {
             case MALE:
                 return UserDTO.GenderEnum.NUMBER_0;
             case FEMALE:
                 return UserDTO.GenderEnum.NUMBER_1;
             default:
-                return UserDTO.GenderEnum.NUMBER_0;
+                return null;
         }
     }
 
@@ -67,6 +72,10 @@ public class UserDTOFactory {
      * @return {@link IdentityType}.
      */
     private IdentityType convertIdentityType(com.keepreal.madagascar.common.IdentityType identityType) {
+        if (Objects.isNull(identityType)) {
+            return null;
+        }
+
         switch (identityType) {
             case IDENTITY_COMIC:
                 return IdentityType.COMIC;
