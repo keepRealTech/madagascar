@@ -11,11 +11,15 @@ message QueryFeedCondition {
     google.protobuf.BoolValue fromHost = 2;
 }
 
-message NewFeedRequest {
+message NewFeedsRequest {
     string userId = 1;
     repeated string islandId = 2;
     repeated string imageUris = 3;
     google.protobuf.StringValue text = 4;
+}
+
+message NewFeedsResponse {
+    CommonStatus status = 1;
 }
 
 message RetrieveFeedByIdRequest {
@@ -34,7 +38,7 @@ message DeleteFeedByIdRequest {
 message FeedResponse {
     CommonStatus status = 1;
     FeedMessage feed = 2;
-    BriefUserMessage briefUser = 3;
+    string userId = 3;
 }
 
 message FeedsResponse {
@@ -47,9 +51,25 @@ message DeleteFeedResponse {
     CommonStatus status = 1;
 }
 
+message CheckNewFeedsRequest {
+    repeated string islandIds = 1;
+    uint64 timestamp = 2;
+}
+
+message CheckNewFeedsMessage {
+    string islandId = 1;
+    bool hasNewFeeds = 2;
+}
+
+message CheckNewFeedsResponse {
+    CommonStatus status = 1;
+    repeated CheckNewFeedsMessage checkNewFeeds = 2;
+}
+
 service FeedService {
-    rpc CreateFeed (NewFeedRequest) returns (FeedResponse) {};
-    rpc DeleteFeedNyId (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
+    rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
+    rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
+    rpc CheckNewFeeds (CheckNewFeedsRequest) returns (CheckNewFeedsResponse) {};
 }
