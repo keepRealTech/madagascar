@@ -34,7 +34,7 @@ message DeleteFeedByIdRequest {
 message FeedResponse {
     CommonStatus status = 1;
     FeedMessage feed = 2;
-    BriefUserMessage briefUser = 3;
+    string userId = 3;
 }
 
 message FeedsResponse {

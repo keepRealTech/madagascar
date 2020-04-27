@@ -91,7 +91,8 @@ public class IslandController implements IslandApi {
 
         CheckIslandResponse response = new CheckIslandResponse();
         response.setData(checkIslandDTO);
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -128,7 +129,8 @@ public class IslandController implements IslandApi {
 
         IslandResponse response = new IslandResponse();
         response.setData(this.islandDTOFactory.valueOf(islandMessage));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -146,7 +148,8 @@ public class IslandController implements IslandApi {
         IslandProfileResponse response = new IslandProfileResponse();
         response.setData(this.islandDTOFactory.valueOf(
                 islandProfileResponse.getIslandMessage(), islandProfileResponse.getUserMessage()));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -187,7 +190,8 @@ public class IslandController implements IslandApi {
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -214,7 +218,8 @@ public class IslandController implements IslandApi {
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -233,7 +238,8 @@ public class IslandController implements IslandApi {
         this.islandService.subscribeIslandById(id, userId, subscribeIslandRequest.getSecret());
 
         DummyResponse response = new DummyResponse();
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -259,7 +265,8 @@ public class IslandController implements IslandApi {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(islandSubscribersResponse.getPageResponse()));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -285,7 +292,8 @@ public class IslandController implements IslandApi {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(islandRepostsResponse.getPageResponse()));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -306,7 +314,8 @@ public class IslandController implements IslandApi {
 
         RepostResponse response = new RepostResponse();
         response.setData(this.repostDTOFactory.valueOf(repostMessage));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -324,7 +333,8 @@ public class IslandController implements IslandApi {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(islandsResponse.getPageResponse()));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

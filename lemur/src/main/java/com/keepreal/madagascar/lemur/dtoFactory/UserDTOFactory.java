@@ -3,6 +3,8 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import org.springframework.stereotype.Component;
+import swagger.model.BriefUserDTO;
+import swagger.model.GenderType;
 import swagger.model.IdentityType;
 import swagger.model.UserDTO;
 
@@ -45,21 +47,41 @@ public class UserDTOFactory {
     }
 
     /**
-     * Converts {@link Gender} to {@link UserDTO.GenderEnum}.
+     * Converts {@link UserMessage} to {@link BriefUserDTO}.
+     *
+     * @param user {@link UserMessage}.
+     * @return {@link BriefUserDTO}.
+     */
+    public BriefUserDTO briefValueOf(UserMessage user) {
+        if (Objects.isNull(user)) {
+            return null;
+        }
+
+        BriefUserDTO briefUserDTO = new BriefUserDTO();
+        briefUserDTO.setId(user.getId());
+        briefUserDTO.setName(user.getName());
+        briefUserDTO.setPortraitImageUri(user.getPortraitImageUri());
+        briefUserDTO.setGender(this.convertGender(user.getGender()));
+
+        return briefUserDTO;
+    }
+
+    /**
+     * Converts {@link Gender} to {@link GenderType}.
      *
      * @param gender {@link Gender}.
-     * @return {@link UserDTO.GenderEnum}.
+     * @return {@link GenderType}.
      */
-    private UserDTO.GenderEnum convertGender(Gender gender) {
+    private GenderType convertGender(Gender gender) {
         if (Objects.isNull(gender)) {
             return null;
         }
 
         switch (gender) {
             case MALE:
-                return UserDTO.GenderEnum.NUMBER_0;
+                return GenderType.NUMBER_0;
             case FEMALE:
-                return UserDTO.GenderEnum.NUMBER_1;
+                return GenderType.NUMBER_1;
             default:
                 return null;
         }

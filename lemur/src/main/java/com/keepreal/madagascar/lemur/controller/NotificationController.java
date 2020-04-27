@@ -52,7 +52,8 @@ public class NotificationController implements NotificationApi {
 
         NotificationsCountResponse response = new NotificationsCountResponse();
         response.setData(this.notificationDTOFactory.valueOf(unreadNotificationsCountMessage));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -79,7 +80,8 @@ public class NotificationController implements NotificationApi {
                 .map(this.notificationDTOFactory::valueOf)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(notificationsResponse.getPageResponse()));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

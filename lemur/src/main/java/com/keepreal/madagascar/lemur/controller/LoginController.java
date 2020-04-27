@@ -69,7 +69,8 @@ public class LoginController implements LoginApi {
 
         LoginResponse response = new LoginResponse();
         response.setData(this.buildTokenInfo(loginResponse, user));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -98,7 +99,8 @@ public class LoginController implements LoginApi {
 
         UserResponse response = new UserResponse();
         response.setData(this.userDTOFactory.valueOf(user));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

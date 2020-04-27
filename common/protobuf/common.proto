@@ -88,11 +88,6 @@ enum ReportType {
     REPORT_TYPE_NONE = 0;
 }
 
-message BriefUserMessage {
-    string name = 1;
-    string portraitImageUri = 2;
-}
-
 message UserMessage {
     string id = 1;
     string unionId = 2;

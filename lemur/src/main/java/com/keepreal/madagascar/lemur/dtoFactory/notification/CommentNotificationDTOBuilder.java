@@ -69,7 +69,7 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
         notificationDTO.setHasRead(this.notificationMessage.getHasRead());
         notificationDTO.setNotificationType(NotificationType.COMMENTS);
         notificationDTO.setCreatedAt(this.notificationMessage.getCreatedAt());
-        notificationDTO.setFeed(this.feedDTOFactory.valueOf(this.notificationMessage.getFeed()));
+        notificationDTO.setFeed(this.feedDTOFactory.briefValueOf(this.notificationMessage.getFeed()));
         notificationDTO.setComment(this.commentDTOFactory.valueOf(this.notificationMessage.getComment()));
 
         return notificationDTO;

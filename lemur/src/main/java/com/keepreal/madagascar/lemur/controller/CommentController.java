@@ -36,7 +36,8 @@ public class CommentController implements CommentApi {
         this.commentService.deleteCommentById(id);
 
         DummyResponse response = new DummyResponse();
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

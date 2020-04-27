@@ -26,7 +26,7 @@ subprojects {
     ext['jersey.version'] = '2.22.2'
     ext['swagger.client.annotation.version'] = '2.0.0'
     ext['swagger.server.annotation.version'] = '1.5.22'
-    ext['swagger.codegen.version'] = '3.3.4'
+    ext['swagger.codegen.version'] = '4.2.3'
     ext['protobuf-java.version'] = '3.8.0'
     ext['grpc.springboot.version'] = '3.3.0'
     ext['boringssl.version'] = '2.0.22.Final'

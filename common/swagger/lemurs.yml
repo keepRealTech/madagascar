@@ -417,6 +417,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ReactionsResponse'
     post:
+      parameters:
+        - $ref: '#/components/parameters/isRevokeInQuery'
       tags:
         - Feed
       summary: creates a new reaction
@@ -433,26 +435,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReactionResponse'
-  /api/v1/feeds/{id}/reactions/revoke:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    post:
-      tags:
-        - Feed
-      summary: revokes a reaction
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RevokeReactionRequest'
-      responses:
-        '200':
-          description: reaction response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DummyResponse'
   /api/v1/feeds/{id}/reposts:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -602,6 +584,13 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/NotificationType'
+    isRevokeInQuery:
+      in: query
+      name: isRevoke
+      description: whether is revoking a reaction
+      required: false
+      schema:
+        type: boolean
   schemas:
     LoginType:
       type: string
@@ -611,6 +600,11 @@ components:
       type: string
       enum:
         - REACTION_LIKE
+    GenderType:
+      type: integer
+      minimum: 0
+      maximum: 1
+      enum: [0, 1]
     NotificationType:
       type: string
       enum:
@@ -666,7 +660,7 @@ components:
         pageSize:
           type: integer
           description: page size
-    UserDTO:
+    BriefUserDTO:
       type: object
       properties:
         id:
@@ -676,31 +670,30 @@ components:
         portraitImageUri:
           type: string
         gender:
-          type: integer
-          minimum: 0
-          maximum: 1
-          enum: [0, 1]
-        description:
-          type: string
-        city:
-          type: string
-        birthday:
-          type: string
-          format: date
-        identityTypes:
-          type: array
-          items:
-            $ref: '#/components/schemas/IdentityType'
+          $ref: '#/components/schemas/GenderType'
+    UserDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefUserDTO'
+        - type: object
+          properties:
+            description:
+              type: string
+            city:
+              type: string
+            birthday:
+              type: string
+              format: date
+            identityTypes:
+              type: array
+              items:
+                $ref: '#/components/schemas/IdentityType'
     PutUserPayload:
       type: object
       properties:
         name:
           type: string
         gender:
-          type: integer
-          minimum: 0
-          maximum: 1
-          enum: [0, 1]
+          $ref: '#/components/schemas/GenderType'
         description:
           type: string
         city:
@@ -902,8 +895,8 @@ components:
           type: string
         islandId:
           type: string
-        userId:
-          type: string
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
         text:
           type: string
         imagesUris:
@@ -982,10 +975,10 @@ components:
           type: string
         feedId:
           type: string
-        userId:
-          type: string
-        replyToId:
-          type: string
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        replyTo:
+          $ref: '#/components/schemas/BriefUserDTO'
         createdAt:
           type: integer
           format: int64
@@ -1023,22 +1016,13 @@ components:
           type: string
         feedId:
           type: string
-        userId:
-          type: string
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
         reactionType:
           type: array
           items:
             $ref: '#/components/schemas/ReactionType'
     PostReactionRequest:
-      type: object
-      properties:
-        reactions:
-          type: array
-          items:
-            $ref: '#/components/schemas/ReactionType'
-      required:
-        - reactionType
-    RevokeReactionRequest:
       type: object
       properties:
         reactions:

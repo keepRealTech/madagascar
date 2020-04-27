@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import swagger.api.UserApi;
+import swagger.model.GenderType;
 import swagger.model.PutUserPayload;
 import swagger.model.UserResponse;
 
@@ -59,7 +60,8 @@ public class UserController implements UserApi {
 
         UserResponse response = new UserResponse();
         response.setData(this.userDTOFactory.valueOf(userMessage));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -91,22 +93,23 @@ public class UserController implements UserApi {
 
         UserResponse response = new UserResponse();
         response.setData(this.userDTOFactory.valueOf(userMessage));
-        ResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
-     * Converts {@link swagger.model.PutUserPayload.GenderEnum} to {@link Gender}.
+     * Converts {@link GenderType} to {@link Gender}.
      *
-     * @param genderEnum {@link swagger.model.PutUserPayload.GenderEnum}.
+     * @param genderType {@link GenderType}.
      * @return {@link Gender}.
      */
-    private Gender convertGenderEnum(PutUserPayload.GenderEnum genderEnum) {
-        if (Objects.isNull(genderEnum)) {
+    private Gender convertGenderEnum(GenderType genderType) {
+        if (Objects.isNull(genderType)) {
             return null;
         }
 
-        switch (genderEnum) {
+        switch (genderType) {
             case NUMBER_0:
                 return Gender.MALE;
             case NUMBER_1:

@@ -69,7 +69,7 @@ public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
         notificationDTO.setHasRead(this.notificationMessage.getHasRead());
         notificationDTO.setNotificationType(NotificationType.REACTIONS);
         notificationDTO.setCreatedAt(this.notificationMessage.getCreatedAt());
-        notificationDTO.setFeed(this.feedDTOFactory.valueOf(this.notificationMessage.getFeed()));
+        notificationDTO.setFeed(this.feedDTOFactory.briefValueOf(this.notificationMessage.getFeed()));
         notificationDTO.setReactions(this.reactionDTOFactory.valueOf(this.notificationMessage.getReaction()));
 
         return notificationDTO;

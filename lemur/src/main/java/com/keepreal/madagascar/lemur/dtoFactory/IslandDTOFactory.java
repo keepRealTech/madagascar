@@ -78,7 +78,7 @@ public class IslandDTOFactory {
      */
     public IslandProfileDTO valueOf(IslandMessage island, UserMessage host) {
         IslandProfileDTO islandProfileDTO = new IslandProfileDTO();
-        islandProfileDTO.setIsland(this.valueOf(island));
+        islandProfileDTO.setIsland(this.briefValueOf(island));
         islandProfileDTO.setHost(this.userDTOFactory.valueOf(host));
 
         return islandProfileDTO;
