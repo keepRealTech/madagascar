@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.fossa";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message ReportMessage {
+    string id = 1;
+    string type = 2;
+    string feedId = 3;
+    string reporterId = 4;
+}
+
+message NewReportRequest {
+    ReportType type = 1;
+    string feedId = 2;
+    string reporterId = 3;
+}
+
+message ReportResponse {
+    CommonStatus status = 1;
+    ReportMessage report = 2;
+}
+
+service ReportService {
+    rpc CreateReport(NewReportRequest) returns (ReportResponse) {};
+}
