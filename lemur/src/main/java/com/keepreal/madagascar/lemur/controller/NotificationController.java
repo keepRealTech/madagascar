@@ -65,7 +65,9 @@ public class NotificationController implements NotificationApi {
      * @return {@link NotificationsResponse}.
      */
     @Override
-    public ResponseEntity<NotificationsResponse> apiV1NotificationsGet(swagger.model.NotificationType type, Integer page, Integer pageSize) {
+    public ResponseEntity<NotificationsResponse> apiV1NotificationsGet(swagger.model.NotificationType type,
+                                                                       Integer page,
+                                                                       Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         com.keepreal.madagascar.tenrecs.NotificationsResponse notificationsResponse =
