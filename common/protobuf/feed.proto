@@ -51,9 +51,25 @@ message DeleteFeedResponse {
     CommonStatus status = 1;
 }
 
+message CheckNewFeedsRequest {
+    repeated string islandIds = 1;
+    uint64 timestamp = 2;
+}
+
+message CheckNewFeedsMessage {
+    string islandId = 1;
+    bool hasNewFeeds = 2;
+}
+
+message CheckNewFeedsResponse {
+    CommonStatus status = 1;
+    repeated CheckNewFeedsMessage checkNewFeeds = 2;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
+    rpc CheckNewFeedsRequest (CheckNewFeedsRequest) returns (CheckNewFeedsResponse) {};
 }

@@ -63,23 +63,30 @@ message RetrieveIslandSubscribersByIdRequest {
 message IslandSubscribersResponse {
     CommonStatus status = 1;
     PageResponse pageResponse = 2;
-    repeated UserMessage userMessage = 3;
+    repeated UserMessage user = 3;
 }
 
 message RetrieveIslandProfileByIdRequest {
     string id = 1;
+    google.protobuf.StringValue userId = 2;
 }
 
 message IslandProfileResponse {
     CommonStatus status = 1;
-    IslandMessage islandMessage = 2;
-    UserMessage userMessage = 3;
+    IslandMessage island = 2;
+    UserMessage host = 3;
+    google.protobuf.StringValue userIndex = 4;
 }
 
 message SubscribeIslandByIdRequest {
     string id = 1;
     string secret = 2;
     string userId = 3;
+}
+
+message UnsubscribeIslandByIdRequest {
+    string id = 1;
+    string userId = 2;
 }
 
 message SubscribeIslandResponse {
@@ -95,4 +102,5 @@ service IslandService {
     rpc UpdateIslandById (UpdateIslandByIdRequest) returns (IslandResponse) {};
     rpc RetrieveIslandSubscribersById (RetrieveIslandSubscribersByIdRequest) returns (IslandSubscribersResponse) {};
     rpc SubscribeIslandById (SubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
+    rpc UnsubscribeIslandById (UnsubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
 }

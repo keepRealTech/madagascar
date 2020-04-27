@@ -240,13 +240,27 @@ paths:
     post:
       tags:
         - Island
-      summary: subscribe to a island
+      summary: subscribe to an island
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/SubscribeIslandRequest'
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/unsubscribe:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Island
+      summary: unsubscribe to an island
       responses:
         '200':
           description: common response
@@ -340,6 +354,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/feeds/check:
+    post:
+      tags:
+        - Feed
+      summary: check if has new feed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCheckFeedsRequest'
+      responses:
+        '200':
+          description: check feed response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostCheckFeedsResponse'
   /api/v1/feeds/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -751,13 +783,24 @@ components:
           properties:
             memberCount:
               type: integer
+    FullIslandDTO:
+      allOf:
+        - $ref: '#/components/schemas/IslandDTO'
+        - type: object
+          properties:
+            secret:
+              type: string
     IslandProfileDTO:
       type: object
       properties:
         island:
-          $ref: '#/components/schemas/BriefIslandDTO'
+          $ref: '#/components/schemas/FullIslandDTO'
         host:
           $ref: '#/components/schemas/UserDTO'
+        userIndex:
+          type: string
+        subscribed:
+          type: boolean
     CheckIslandDTO:
       type: object
       properties:
@@ -941,6 +984,32 @@ components:
             format: binary
       required:
         - payload
+    PostCheckFeedsRequest:
+      type: object
+      properties:
+        islandIds:
+          type: array
+          items:
+            type: string
+        timestamp:
+          type: integer
+          format: int64
+    CheckFeedsDTO:
+      type: object
+      properties:
+        islandId:
+          type: string
+        hasNew:
+          type: boolean
+    PostCheckFeedsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CheckFeedsDTO'
     FeedResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
