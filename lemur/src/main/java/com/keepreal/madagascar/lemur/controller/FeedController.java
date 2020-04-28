@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import swagger.api.FeedApi;
+import swagger.model.CheckFeedsMessage;
 import swagger.model.CommentResponse;
 import swagger.model.CommentsResponse;
 import swagger.model.DummyResponse;
@@ -341,7 +342,8 @@ public class FeedController implements FeedApi {
     @Override
     public ResponseEntity<PostCheckFeedsResponse> apiV1FeedsCheckPost(PostCheckFeedsRequest postCheckFeedsRequest) {
         List<CheckNewFeedsMessage> checkNewFeedsMessages = this.feedService.checkNewFeeds(
-                postCheckFeedsRequest.getIslandIds(), postCheckFeedsRequest.getTimestamp());
+                postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getIslandId).collect(Collectors.toList()),
+                postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getTimestamp).collect(Collectors.toList()));
 
         PostCheckFeedsResponse response = new PostCheckFeedsResponse();
         response.setData(checkNewFeedsMessages
