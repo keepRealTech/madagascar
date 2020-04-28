@@ -21,7 +21,7 @@ message NewIslandRequest {
 
 message IslandResponse {
     CommonStatus status = 1;
-    IslandMessage message = 2;
+    IslandMessage island = 2;
 }
 
 message RetrieveMultipleIslandsRequest {
@@ -32,7 +32,7 @@ message RetrieveMultipleIslandsRequest {
 message IslandsResponse {
     CommonStatus status = 1;
     PageResponse pageResponse = 2;
-    repeated IslandMessage message = 3;
+    repeated IslandMessage islands = 3;
 }
 
 message CheckNameRequest {
@@ -40,7 +40,8 @@ message CheckNameRequest {
 }
 
 message CheckNameResponse {
-    bool isExisted = 1;
+    CommonStatus status = 1;
+    bool isExisted = 2;
 }
 
 message RetrieveIslandByIdRequest {
@@ -55,31 +56,38 @@ message UpdateIslandByIdRequest {
     google.protobuf.StringValue description = 5;
 }
 
-message RetrieveIslandProfileByIdRequest {
-    string id = 1;
-}
-
-message IslandProfileResponse {
-    CommonStatus status = 1;
-    IslandMessage islandMessage = 2;
-    UserMessage userMessage = 3;
-}
-
 message RetrieveIslandSubscribersByIdRequest {
     string id = 1;
     PageRequest pageRequest = 2;
 }
 
-message RetrieveIslandSubscribersByIdResponse {
+message IslandSubscribersResponse {
     CommonStatus status = 1;
     PageResponse pageResponse = 2;
-    repeated UserMessage userMessage = 3;
+    repeated UserMessage user = 3;
+}
+
+message RetrieveIslandProfileByIdRequest {
+    string id = 1;
+    google.protobuf.StringValue userId = 2;
+}
+
+message IslandProfileResponse {
+    CommonStatus status = 1;
+    IslandMessage island = 2;
+    UserMessage host = 3;
+    google.protobuf.StringValue userIndex = 4;
 }
 
 message SubscribeIslandByIdRequest {
     string id = 1;
     string secret = 2;
     string userId = 3;
+}
+
+message UnsubscribeIslandByIdRequest {
+    string id = 1;
+    string userId = 2;
 }
 
 message SubscribeIslandResponse {
@@ -90,9 +98,10 @@ service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
     rpc RetrieveIslandById (RetrieveIslandByIdRequest) returns (IslandResponse) {};
+    rpc RetrieveIslandProfileById (RetrieveIslandProfileByIdRequest) returns (IslandProfileResponse) {};
     rpc RetrieveIslandsByCondition (RetrieveMultipleIslandsRequest) returns (IslandsResponse) {};
     rpc UpdateIslandById (UpdateIslandByIdRequest) returns (IslandResponse) {};
-    rpc RetrieveIslandProfileById (RetrieveIslandProfileByIdRequest) returns (IslandProfileResponse) {};
-    rpc RetrieveIslandSubscribersById (RetrieveIslandSubscribersByIdRequest) returns (RetrieveIslandSubscribersByIdResponse) {};
+    rpc RetrieveIslandSubscribersById (RetrieveIslandSubscribersByIdRequest) returns (IslandSubscribersResponse) {};
     rpc SubscribeIslandById (SubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
+    rpc UnsubscribeIslandById (UnsubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
 }

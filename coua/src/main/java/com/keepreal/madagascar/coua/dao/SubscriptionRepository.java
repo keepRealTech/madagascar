@@ -24,4 +24,13 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
 
     @Query(value = "SELECT user_id FROM subscription WHERE island_id = ?1", nativeQuery = true)
     Page<Long> getSubscriberIdListByIslandId(Long islandId, Pageable pageable);
+
+    @Query(value = "SELECT COUNT(*) FROM subscription WHERE island_id = ?1 AND state > 0", nativeQuery = true)
+    Integer getCountByIslandId(Long islandId);
+
+    @Query(value = "SELECT number FROM subscription WHERE island_id = ?1 AND user_id = ?2", nativeQuery = true)
+    Integer getNumberByIslandId(Long islandId, Long userId);
+
+    Subscription getSubscriptionByIslandIdAndUserId(Long islandId, Long userId);
+
 }

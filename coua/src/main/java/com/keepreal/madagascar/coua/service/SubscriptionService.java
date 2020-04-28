@@ -1,14 +1,12 @@
 package com.keepreal.madagascar.coua.service;
 
-import com.keepreal.madagascar.coua.common.IslandState;
+import com.keepreal.madagascar.coua.common.SubscriptionState;
 import com.keepreal.madagascar.coua.dao.SubscriptionRepository;
 import com.keepreal.madagascar.coua.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @program: madagascar
@@ -29,19 +27,19 @@ public class SubscriptionService {
         subscription.setIslandId(islandId);
         subscription.setUserId(hostId);
         subscription.setNumber(HOST_NUMBER);
-        subscription.setState(IslandState.HOST.getValue());
+        subscription.setState(SubscriptionState.HOST.getValue());
         subscription.setCreateTime(System.currentTimeMillis());
         subscription.setUpdateTime(System.currentTimeMillis());
         subscriptionRepository.save(subscription);
     }
 
     public Page<Long> getIslandIdListByUserCreated(Long userId, Pageable pageable) {
-        int state = IslandState.HOST.getValue();
+        int state = SubscriptionState.HOST.getValue();
         return getIslandsByUserState(userId, state, pageable);
     }
 
     public Page<Long> getIslandIdListByUserSubscribed(Long userId, Pageable pageable) {
-        int state = IslandState.ISLANDER.getValue();
+        int state = SubscriptionState.ISLANDER.getValue();
         return getIslandsByUserState(userId, state, pageable);
     }
 
@@ -49,22 +47,48 @@ public class SubscriptionService {
         return subscriptionRepository.getSubscriberIdListByIslandId(islandId, pageable);
     }
 
+    public Integer getMemberCountByIslandId(Long islandId) {
+        return subscriptionRepository.getCountByIslandId(islandId);
+    }
+
+    public Integer getUserIndexByIslandId(Long islandId, Long userId) {
+        return subscriptionRepository.getNumberByIslandId(islandId, userId);
+    }
+
     private Page<Long> getIslandsByUserState(Long userId, Integer state, Pageable pageable) {
         return subscriptionRepository.getIslandIdListByUserState(userId, state, pageable);
     }
 
     public void subscribeIsland(Long islandId, Long userId) {
-        //创建对象
-        Subscription subscription = new Subscription();
-        subscription.setIslandId(islandId);
-        subscription.setUserId(userId);
-        subscription.setState(IslandState.ISLANDER.getValue());
-        subscription.setCreateTime(System.currentTimeMillis());
-        subscription.setUpdateTime(System.currentTimeMillis());
+        Subscription subscription = subscriptionRepository.getSubscriptionByIslandIdAndUserId(islandId, userId);
+        // 如果这个用户之前加入过这个岛，那么只需要恢复他的状态即可
+        if (subscription != null) {
+            updateSubscriptionState(subscription, SubscriptionState.ISLANDER);
+        } else {
+            //创建对象
+            subscription = new Subscription();
+            subscription.setIslandId(islandId);
+            subscription.setUserId(userId);
+            subscription.setState(SubscriptionState.ISLANDER.getValue());
+            subscription.setCreateTime(System.currentTimeMillis());
+            subscription.setUpdateTime(System.currentTimeMillis());
 
-        //查询上一个number，+1作为本条记录的number todo 如果先查后写，这样会有并发问题
+            //查询上一个number，+1作为本条记录的number todo 如果先查后写，这样会有并发问题
 
-        //保存
+        }
         subscriptionRepository.save(subscription);
+    }
+
+    public void unSubscripeIsland(Long islandId, Long userId) {
+        Subscription subscription = subscriptionRepository.getSubscriptionByIslandIdAndUserId(islandId, userId);
+        if (subscription != null) {
+            updateSubscriptionState(subscription, SubscriptionState.LEAVE);
+            subscriptionRepository.save(subscription);
+        }
+    }
+
+    private void updateSubscriptionState(Subscription subscription, SubscriptionState state) {
+        subscription.setState(state.getValue());
+        subscription.setUpdateTime(System.currentTimeMillis());
     }
 }

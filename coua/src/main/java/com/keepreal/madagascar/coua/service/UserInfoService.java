@@ -116,6 +116,11 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         return getUserMessage(userInfo);
     }
 
+    public List<UserMessage> getUserMessageListByIdList(List<Long> userIdList) {
+        List<UserInfo> userInfoList = userInfoRepository.findAllById(userIdList);
+        return userInfoList.stream().map(this::getUserMessage).collect(Collectors.toList());
+    }
+
     private void saveAndResponse(UserInfo userInfo, StreamObserver<UserResponse> responseObserver) {
         UserInfo save = userInfoRepository.save(userInfo);
 

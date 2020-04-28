@@ -9,7 +9,7 @@ import lombok.Getter;
  **/
 
 @Getter
-public enum IslandState {
+public enum SubscriptionState {
 
     LEAVE(0),
     HOST(1),
@@ -17,7 +17,7 @@ public enum IslandState {
     ;
     private int value;
 
-    IslandState(int value) {
+    SubscriptionState(int value) {
         this.value = value;
     }
 
