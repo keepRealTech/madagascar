@@ -949,6 +949,10 @@ components:
         fromHost:
           type: boolean
           description: whether feed posted by the host of island
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentDTO'
         createdAt:
           type: integer
           format: int64

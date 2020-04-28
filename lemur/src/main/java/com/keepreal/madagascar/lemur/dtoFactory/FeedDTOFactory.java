@@ -10,6 +10,7 @@ import swagger.model.CheckFeedsDTO;
 import swagger.model.FeedDTO;
 
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the feed dto factory.
@@ -21,23 +22,27 @@ public class FeedDTOFactory {
     private final IslandDTOFactory islandDTOFactory;
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final CommentDTOFactory commentDTOFactory;
 
     /**
      * Constructs the feed dto factory.
      *
-     * @param islandService    {@link IslandService}.
-     * @param islandDTOFactory {@link IslandDTOFactory}.
-     * @param userService      {@link UserService}.
-     * @param userDTOFactory   {@link UserDTOFactory}.
+     * @param islandService     {@link IslandService}.
+     * @param islandDTOFactory  {@link IslandDTOFactory}.
+     * @param userService       {@link UserService}.
+     * @param userDTOFactory    {@link UserDTOFactory}.
+     * @param commentDTOFactory {@link CommentDTOFactory}.
      */
     public FeedDTOFactory(IslandService islandService,
                           IslandDTOFactory islandDTOFactory,
                           UserService userService,
-                          UserDTOFactory userDTOFactory) {
+                          UserDTOFactory userDTOFactory,
+                          CommentDTOFactory commentDTOFactory) {
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.commentDTOFactory = commentDTOFactory;
     }
 
     /**
@@ -58,6 +63,11 @@ public class FeedDTOFactory {
         feedDTO.setFromHost(feed.getFromHost());
         feedDTO.setLikesCount(feedDTO.getLikesCount());
         feedDTO.setCommentsCount(feed.getCommentsCount());
+        feedDTO.setComments(feed.getLastCommentsList()
+                .stream()
+                .map(this.commentDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
         feedDTO.setRepostCount(feed.getRepostCount());
         feedDTO.setCreatedAt(feed.getCreatedAt());
 
