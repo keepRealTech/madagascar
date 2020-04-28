@@ -22,18 +22,19 @@ message RetrieveCommentsByFeedIdRequest {
 message CommentsResponse {
     CommonStatus status = 1;
     PageResponse pageResponse = 2;
-    repeated CommentMessage commentMessage = 3;
+    repeated CommentMessage comments = 3;
 }
 
 message NewCommentRequest {
     string feedId = 1;
     string content = 2;
-    google.protobuf.StringValue replyToId = 3;
+    string userId = 3;
+    google.protobuf.StringValue replyToId = 4;
 }
 
 message CommentResponse {
     CommonStatus status = 1;
-    CommentMessage commentMessage = 2;
+    CommentMessage comment = 2;
 }
 
 service CommentService {

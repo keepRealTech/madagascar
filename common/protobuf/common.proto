@@ -16,6 +16,11 @@ message PageResponse {
     bool hasContent = 4;
 }
 
+enum LoginType {
+    LOGIN_TYPE_NONE = 0;
+    LOGIN_OAUTH_WECHAT = 1;
+}
+
 enum NotificationType {
     NOTIFICATION_NONE = 0;
     NOTIFICATION_COMMENTS = 1;
@@ -83,11 +88,6 @@ enum ReportType {
     REPORT_TYPE_NONE = 0;
 }
 
-message BriefUserMessage {
-    string name = 1;
-    string portraitImageUri = 2;
-}
-
 message UserMessage {
     string id = 1;
     string unionId = 2;
@@ -108,6 +108,8 @@ message IslandMessage {
     string description = 5;
     uint64 lastFeedAt = 6;
     uint64 createdAt = 7;
+    int32 memberCount = 8;
+    string secret = 9;
 }
 
 message RepostMessage {

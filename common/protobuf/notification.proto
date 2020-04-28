@@ -19,10 +19,9 @@ message NotificationMessage {
 }
 
 message UnreadNotificationsCountMessage {
-    bool hasUnread = 1;
-    int32 unreadCommentsCount = 2;
-    int32 unreadReactionsCount = 3;
-    int32 unreadIslandNoticesCount = 4;
+    int32 unreadCommentsCount = 1;
+    int32 unreadReactionsCount = 2;
+    int32 unreadIslandNoticesCount = 3;
 }
 
 message QueryNotificationCondition {

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.baobob";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message LoginRequest {
+  LoginType loginType = 1;
+  google.protobuf.StringValue code = 2;
+}
+
+message LoginResponse {
+  CommonStatus status = 1;
+  string token = 2;
+  string refreshToken = 3;
+  string userId = 4;
+}
+
+service LoginService {
+	rpc login(LoginRequest) returns (LoginResponse) {};
+}

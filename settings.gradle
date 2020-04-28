@@ -5,3 +5,4 @@ include 'indri'
 include 'lemur'
 include 'coua'
 
+include 'baobob'

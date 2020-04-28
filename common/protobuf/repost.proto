@@ -6,12 +6,12 @@ option java_package = "com.keepreal.madagascar.coua";
 import "common.proto";
 
 message FeedRepostMessage {
-    RepostMessage message = 1;
+    RepostMessage feedRepost = 1;
     string feedId = 2;
 }
 
 message IslandRepostMessage {
-    RepostMessage message = 1;
+    RepostMessage islandRepost = 1;
     string islandId = 2;
 }
 
@@ -55,7 +55,7 @@ message RetrieveIslandRepostsByIslandIdRequest {
     PageRequest pageRequest = 2;
 }
 
-message RetrieveRepostsByIslandIdResponse {
+message IslandRepostsResponse {
     CommonStatus status = 1;
     PageResponse pageResponse = 2;
     repeated IslandRepostMessage islandReposts = 3;
@@ -65,5 +65,5 @@ service RepostService {
     rpc CreateFeedRepost(NewFeedRepostRequest) returns (FeedRepostResponse) {};
     rpc RetrieveFeedRepostsByFeedId(RetrieveFeedRepostsByFeedIdRequest) returns (FeedRepostsResponse) {};
     rpc CreateIslandRepost(NewIslandRepostRequest) returns (IslandRepostResponse) {};
-    rpc RetrieveIslandRepostsByIslandId(RetrieveIslandRepostsByIslandIdRequest) returns (RetrieveRepostsByIslandIdResponse) {};
+    rpc RetrieveIslandRepostsByIslandId(RetrieveIslandRepostsByIslandIdRequest) returns (IslandRepostsResponse) {};
 }
