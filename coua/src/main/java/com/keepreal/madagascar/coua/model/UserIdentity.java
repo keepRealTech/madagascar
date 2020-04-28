@@ -1,7 +1,6 @@
 package com.keepreal.madagascar.coua.model;
 
 import lombok.Data;
-
 import javax.persistence.*;
 
 /**
@@ -20,6 +19,7 @@ public class UserIdentity {
     private Long id;
     private Long userId;
     private Integer identityType;
-    private Long createTime;
-    private Long updateTime;
+    private Boolean deleted;
+    private Long createdTime;
+    private Long updatedTime;
 }

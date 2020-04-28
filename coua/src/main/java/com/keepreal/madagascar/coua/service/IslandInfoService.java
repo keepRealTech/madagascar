@@ -1,10 +1,12 @@
 package com.keepreal.madagascar.coua.service;
 
 import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.*;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
 import com.keepreal.madagascar.coua.model.IslandInfo;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @program: madagascar
@@ -26,12 +29,16 @@ import java.util.Optional;
 @GRpcService
 public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
+    private final IslandInfoRepository islandInfoRepository;
+    private final SubscriptionService subscriptionService;
+    private final UserInfoService userInfoService;
+
     @Autowired
-    private IslandInfoRepository islandInfoRepository;
-    @Autowired
-    private SubscriptionService subscriptionService;
-    @Autowired
-    private UserInfoService userInfoService;
+    public IslandInfoService(IslandInfoRepository islandInfoRepository, SubscriptionService subscriptionService, UserInfoService userInfoService) {
+        this.islandInfoRepository = islandInfoRepository;
+        this.subscriptionService = subscriptionService;
+        this.userInfoService = userInfoService;
+    }
 
     /**
      * 检查island name 是否已经存在
@@ -59,11 +66,15 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         islandInfo.setId(islandId);
         islandInfo.setHostId(Long.valueOf(request.getHostId()));
         islandInfo.setIslandName(request.getName()); //todo: 是否需要再校验一遍
-        islandInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
-        islandInfo.setSecret(request.getSecret().getValue());
+        if (request.hasPortraitImageUri()) {
+            islandInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
+        }
+        if (request.hasSecret()) {
+            islandInfo.setSecret(request.getSecret().getValue());
+        }
         islandInfo.setLastFeedAt(System.currentTimeMillis());
-        islandInfo.setCreateTime(System.currentTimeMillis());
-        islandInfo.setUpdateTime(System.currentTimeMillis());
+        islandInfo.setCreatedTime(System.currentTimeMillis());
+        islandInfo.setUpdatedTime(System.currentTimeMillis());
         // 将数据插入 island 表
         IslandInfo save = islandInfoRepository.save(islandInfo);
         // 维护 subscription 表
@@ -106,7 +117,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         QueryIslandCondition requestCondition = request.getCondition();
         // 如果参数中有 name ，目前的版本是精确匹配，所以只返回一条记录
         if (requestCondition.hasName()) {
-            IslandInfo islandInfo = islandInfoRepository.findByIslandName(requestCondition.getName().getValue());
+            IslandInfo islandInfo = islandInfoRepository.findByIslandNameAndDeletedIsFalse(requestCondition.getName().getValue());
             islandMessageList.add(getIslandMessage(islandInfo));
         } else { // 如果传入的是hostId，返回hostId创建的岛的列表；否则返回subscriberId加入的岛的列表
             int page = pageRequest.getPage();
@@ -120,7 +131,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             }
 
             List<IslandInfo> islandInfoList = islandInfoRepository.findAllById(islandListPageable.getContent());
-            islandInfoList.forEach(info -> islandMessageList.add(getIslandMessage(info)));
+            islandMessageList = islandInfoList.stream().map(this::getIslandMessage).collect(Collectors.toList());
         }
 
         // 构建返回信息
@@ -149,24 +160,33 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     @Override
     public void updateIslandById(UpdateIslandByIdRequest request, StreamObserver<IslandResponse> responseObserver) {
         Optional<IslandInfo> optionalIslandInfo = islandInfoRepository.findById(Long.valueOf(request.getId()));
-        IslandInfo islandInfo = optionalIslandInfo.orElseThrow(RuntimeException::new);// todo: 假设找不到按抛异常处理
-        if (request.hasName() && !islandNameIsExisted(request.getName().getValue())) {
-            islandInfo.setIslandName(request.getName().getValue());
+        IslandResponse.Builder responseBuilder = IslandResponse.newBuilder();
+        if (optionalIslandInfo.isPresent()) {
+            IslandInfo islandInfo = optionalIslandInfo.get();
+            if (request.hasName() && !islandNameIsExisted(request.getName().getValue())) {
+                islandInfo.setIslandName(request.getName().getValue());
+            }
+            if (request.hasDescription()) {
+                islandInfo.setDescription(request.getDescription().getValue());
+            }
+            if (request.hasPortraitImageUri()) {
+                islandInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
+            }
+            if (request.hasSecret()) {
+                islandInfo.setSecret(request.getSecret().getValue());
+            }
+            islandInfo.setUpdatedTime(System.currentTimeMillis());
+            IslandInfo save = islandInfoRepository.save(islandInfo);
+            IslandMessage islandMessage = getIslandMessage(save);
+            responseBuilder.setIsland(islandMessage);
+        } else {
+            CommonStatus commonStatus = CommonStatus.newBuilder()
+                    .setRtn(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR_VALUE)
+                    .setMessage(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR.name()).build();
+            responseBuilder.setStatus(commonStatus);
         }
-        if (request.hasDescription()) {
-            islandInfo.setDescription(request.getDescription().getValue());
-        }
-        if (request.hasPortraitImageUri()) {
-            islandInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
-        }
-        if (request.hasSecret()) {
-            islandInfo.setSecret(request.getSecret().getValue());
-        }
-        islandInfo.setUpdateTime(System.currentTimeMillis());
-        IslandInfo save = islandInfoRepository.save(islandInfo);
 
-        IslandMessage islandMessage = getIslandMessage(save);
-        IslandResponse islandResponse = IslandResponse.newBuilder().setIsland(islandMessage).build();
+        IslandResponse islandResponse = responseBuilder.build();
         responseObserver.onNext(islandResponse);
         responseObserver.onCompleted();
     }
@@ -178,18 +198,36 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
      */
     @Override
     public void retrieveIslandProfileById(RetrieveIslandProfileByIdRequest request, StreamObserver<IslandProfileResponse> responseObserver) {
-        String islandId = request.getId();
-        IslandInfo islandInfo = islandInfoRepository.findById(Long.valueOf(islandId))
-                .orElseThrow(RuntimeException::new); // todo: 如果找不到默认抛异常
+        boolean islandFound = false;
+        boolean userFound = false;
+        IslandProfileResponse.Builder responseBuilder = IslandProfileResponse.newBuilder();
+        Optional<IslandInfo> islandInfoOptional = islandInfoRepository.findById(Long.valueOf(request.getId()));
+        if (islandInfoOptional.isPresent()) {
+            islandFound = true;
+            IslandInfo islandInfo = islandInfoOptional.get();
+            UserMessage userMessage = userInfoService.getUserMessageById(islandInfo.getHostId());
+            if (userMessage != null) {
+                userFound = true;
+                IslandMessage islandMessage = getIslandMessage(islandInfo);
+                Integer userIndex = subscriptionService.getUserIndexByIslandId(islandInfo.getId(), islandInfo.getHostId());
+                responseBuilder.setIsland(islandMessage)
+                        .setHost(userMessage)
+                        .setUserIndex(StringValue.newBuilder().setValue(userIndex.toString()).build());
+            }
+        }
+        if (!islandFound || !userFound) {
+            CommonStatus.Builder commonStatusBuilder = CommonStatus.newBuilder();
+            CommonStatus commonStatus = islandFound ?
+                        commonStatusBuilder
+                            .setRtn(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR_VALUE)
+                            .setMessage(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR.name()).build() :
+                        commonStatusBuilder
+                            .setRtn(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR_VALUE)
+                            .setMessage(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR.name()).build();
+            responseBuilder.setStatus(commonStatus);
+        }
 
-        IslandMessage islandMessage = getIslandMessage(islandInfo);
-        UserMessage userMessage = userInfoService.getUserMessageById(islandInfo.getHostId());
-        Integer userIndex = subscriptionService.getUserIndexByIslandId(islandInfo.getId(), islandInfo.getHostId());
-
-        IslandProfileResponse islandProfileResponse = IslandProfileResponse.newBuilder()
-                .setIsland(islandMessage)
-                .setHost(userMessage)
-                .setUserIndex(StringValue.newBuilder().setValue(userIndex.toString()).build())
+        IslandProfileResponse islandProfileResponse = responseBuilder
                 // todo: 没有subscribed字段，httpserver加上还是让客户端自己去判断
                 .build();
         responseObserver.onNext(islandProfileResponse);
@@ -269,7 +307,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     }
 
     private boolean islandNameIsExisted(String islandName) {
-        return islandInfoRepository.findByIslandName(islandName) != null;
+        return islandInfoRepository.findByIslandNameAndDeletedIsFalse(islandName) != null;
     }
 
     /**
@@ -287,7 +325,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
                 .setPortraitImageUri(islandInfo.getPortraitImageUri())
                 .setDescription(islandInfo.getDescription())
                 .setLastFeedAt(islandInfo.getLastFeedAt())
-                .setCreatedAt(islandInfo.getCreateTime())
+                .setCreatedAt(islandInfo.getCreatedTime())
                 .setSecret(islandInfo.getSecret())
                 .setMemberCount(memberCount)
                 .build();

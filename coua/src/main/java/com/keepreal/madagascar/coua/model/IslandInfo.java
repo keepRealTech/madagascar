@@ -2,6 +2,7 @@ package com.keepreal.madagascar.coua.model;
 
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -25,6 +26,8 @@ public class IslandInfo {
     private String secret;
     private Integer state;
     private Long lastFeedAt; //用户客户端判断是否有未读feed消息（客户端轮询模式下使用）
-    private Long createTime;
-    private Long updateTime;
+    @Column(name = "is_deleted")
+    private Boolean deleted;
+    private Long createdTime;
+    private Long updatedTime;
 }

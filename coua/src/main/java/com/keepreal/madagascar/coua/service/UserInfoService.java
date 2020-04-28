@@ -1,8 +1,10 @@
 package com.keepreal.madagascar.coua.service;
 
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.IdentityType;
 import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.*;
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
 import com.keepreal.madagascar.coua.model.UserInfo;
@@ -24,10 +26,14 @@ import java.util.stream.Collectors;
 @GRpcService
 public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
 
+    private final UserInfoRepository userInfoRepository;
+    private final UserIdentityService userIdentityService;
+
     @Autowired
-    private UserInfoRepository userInfoRepository;
-    @Autowired
-    private UserIdentityService userIdentityService;
+    public UserInfoService(UserInfoRepository userInfoRepository, UserIdentityService userIdentityService) {
+        this.userInfoRepository = userInfoRepository;
+        this.userIdentityService = userIdentityService;
+    }
 
     @Override
     public void createUser(NewUserRequest request, StreamObserver<UserResponse> responseObserver) {
@@ -48,8 +54,8 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         if (request.getIdentitiesCount() > 0) {
             userIdentityService.saveUserIdentities(request.getIdentitiesValueList(), userId);
         }
-        userInfo.setCreateTime(System.currentTimeMillis());
-        userInfo.setUpdateTime(System.currentTimeMillis());
+        userInfo.setCreatedTime(System.currentTimeMillis());
+        userInfo.setUpdatedTime(System.currentTimeMillis());
 
         saveAndResponse(userInfo, responseObserver);
     }
@@ -58,17 +64,23 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
     public void retrieveSingleUser(RetrieveSingleUserRequest request, StreamObserver<UserResponse> responseObserver) {
         QueryUserCondition queryUserCondition = request.getCondition();
         UserInfo userInfo = null;
+        UserResponse.Builder responseBuilder = UserResponse.newBuilder();
         if (queryUserCondition.hasId()) {
-            userInfo = userInfoRepository.findUserInfoById(Long.valueOf(queryUserCondition.getId().getValue()));
+            userInfo = userInfoRepository.findUserInfoByIdAndDeletedIsFalse(Long.valueOf(queryUserCondition.getId().getValue()));
         }
         if (queryUserCondition.hasUnionId()) {
-            userInfo = userInfoRepository.findUserInfoByUnionId(queryUserCondition.getUnionId().getValue());
+            userInfo = userInfoRepository.findUserInfoByUnionIdAndDeletedIsFalse(queryUserCondition.getUnionId().getValue());
         }
         if (userInfo == null) {
-            throw new RuntimeException();//todo 是否有其他的处理办法
+            CommonStatus commonStatus = CommonStatus.newBuilder()
+                    .setRtn(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR_VALUE)
+                    .setMessage(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR.name()).build();
+            responseBuilder.setStatus(commonStatus);
+        } else {
+            UserMessage userMessage = getUserMessage(userInfo);
+            responseBuilder.setUser(userMessage);
         }
-        UserMessage userMessage = getUserMessage(userInfo);
-        UserResponse userResponse = UserResponse.newBuilder().setUser(userMessage).build();
+        UserResponse userResponse = responseBuilder.build();
         responseObserver.onNext(userResponse);
         responseObserver.onCompleted();
     }
@@ -76,7 +88,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void updateUserById(UpdateUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
         Long userId = Long.valueOf(request.getId());
-        UserInfo userInfo = userInfoRepository.findUserInfoById(userId);
+        UserInfo userInfo = userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
         if (request.hasName()) {
             userInfo.setNickName(request.getName().getValue());
         }
@@ -105,13 +117,13 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
     }
 
     public UserInfo getUserInfoById(Long userId) {
-        return userInfoRepository.findUserInfoById(userId);
+        return userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
     }
 
     public UserMessage getUserMessageById(Long userId) {
-        UserInfo userInfo = userInfoRepository.findUserInfoById(userId);
+        UserInfo userInfo = userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
         if (userInfo == null) {
-            // todo: throw exception?
+            return null;
         }
         return getUserMessage(userInfo);
     }

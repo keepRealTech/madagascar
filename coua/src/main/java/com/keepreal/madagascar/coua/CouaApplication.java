@@ -13,6 +13,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class CouaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CouaApplication.class);
+        SpringApplication.run(CouaApplication.class, args);
     }
 }

@@ -16,6 +16,6 @@ import java.util.List;
 @Repository
 public interface UserIdentityRepository extends JpaRepository<UserIdentity, Long> {
 
-    @Query(value = "SELECT identity_type FROM user_identity WHERE user_id = ?1", nativeQuery = true)
+    @Query(value = "SELECT identity_type FROM user_identity WHERE user_id = ?1 AND is_deleted = FALSE", nativeQuery = true)
     List<Integer> getUserIdentityTypesByUserId(Long userId);
 }

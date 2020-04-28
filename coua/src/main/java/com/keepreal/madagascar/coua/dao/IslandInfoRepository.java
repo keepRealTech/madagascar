@@ -4,8 +4,6 @@ import com.keepreal.madagascar.coua.model.IslandInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
  * @program: madagascar
  * @author: zhangxidong
@@ -15,5 +13,5 @@ import java.util.List;
 @Repository
 public interface IslandInfoRepository extends JpaRepository<IslandInfo, Long> {
 
-    IslandInfo findByIslandName(String islandName);
+    IslandInfo findByIslandNameAndDeletedIsFalse(String islandName);
 }

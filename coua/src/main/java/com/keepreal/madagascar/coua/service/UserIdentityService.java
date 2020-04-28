@@ -17,16 +17,20 @@ import java.util.stream.Collectors;
 @Service
 public class UserIdentityService {
 
+    private final UserIdentityRepository userIdentityRepository;
+
     @Autowired
-    private UserIdentityRepository userIdentityRepository;
+    public UserIdentityService(UserIdentityRepository userIdentityRepository) {
+        this.userIdentityRepository = userIdentityRepository;
+    }
 
     void saveUserIdentities(List<Integer> userIdentitiesTypes, Long userId) {
         List<UserIdentity> userIdentityList = userIdentitiesTypes.stream().map(type -> {
             UserIdentity userIdentity = new UserIdentity();
             userIdentity.setUserId(userId);
             userIdentity.setIdentityType(type);
-            userIdentity.setCreateTime(System.currentTimeMillis());
-            userIdentity.setUpdateTime(System.currentTimeMillis());
+            userIdentity.setCreatedTime(System.currentTimeMillis());
+            userIdentity.setUpdatedTime(System.currentTimeMillis());
             return userIdentity;
         }).collect(Collectors.toList());
 

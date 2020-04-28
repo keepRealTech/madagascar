@@ -28,6 +28,6 @@ public class UserInfo {
     private Boolean deleted;
     private Integer state;
     private String unionId;
-    private Long createTime;
-    private Long updateTime;
+    private Long createdTime;
+    private Long updatedTime;
 }

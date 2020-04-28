@@ -26,10 +26,10 @@ public class SubscriptionService {
         Subscription subscription = new Subscription();
         subscription.setIslandId(islandId);
         subscription.setUserId(hostId);
-        subscription.setNumber(HOST_NUMBER);
+        subscription.setIslanderNumber(HOST_NUMBER);
         subscription.setState(SubscriptionState.HOST.getValue());
-        subscription.setCreateTime(System.currentTimeMillis());
-        subscription.setUpdateTime(System.currentTimeMillis());
+        subscription.setCreatedTime(System.currentTimeMillis());
+        subscription.setUpdatedTime(System.currentTimeMillis());
         subscriptionRepository.save(subscription);
     }
 
@@ -52,7 +52,7 @@ public class SubscriptionService {
     }
 
     public Integer getUserIndexByIslandId(Long islandId, Long userId) {
-        return subscriptionRepository.getNumberByIslandId(islandId, userId);
+        return subscriptionRepository.getIslanderNumberByIslandId(islandId, userId);
     }
 
     private Page<Long> getIslandsByUserState(Long userId, Integer state, Pageable pageable) {
@@ -60,7 +60,7 @@ public class SubscriptionService {
     }
 
     public void subscribeIsland(Long islandId, Long userId) {
-        Subscription subscription = subscriptionRepository.getSubscriptionByIslandIdAndUserId(islandId, userId);
+        Subscription subscription = subscriptionRepository.getSubscriptionByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
         // 如果这个用户之前加入过这个岛，那么只需要恢复他的状态即可
         if (subscription != null) {
             updateSubscriptionState(subscription, SubscriptionState.ISLANDER);
@@ -70,8 +70,8 @@ public class SubscriptionService {
             subscription.setIslandId(islandId);
             subscription.setUserId(userId);
             subscription.setState(SubscriptionState.ISLANDER.getValue());
-            subscription.setCreateTime(System.currentTimeMillis());
-            subscription.setUpdateTime(System.currentTimeMillis());
+            subscription.setCreatedTime(System.currentTimeMillis());
+            subscription.setUpdatedTime(System.currentTimeMillis());
 
             //查询上一个number，+1作为本条记录的number todo 如果先查后写，这样会有并发问题
 
@@ -80,7 +80,7 @@ public class SubscriptionService {
     }
 
     public void unSubscripeIsland(Long islandId, Long userId) {
-        Subscription subscription = subscriptionRepository.getSubscriptionByIslandIdAndUserId(islandId, userId);
+        Subscription subscription = subscriptionRepository.getSubscriptionByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
         if (subscription != null) {
             updateSubscriptionState(subscription, SubscriptionState.LEAVE);
             subscriptionRepository.save(subscription);
@@ -89,6 +89,6 @@ public class SubscriptionService {
 
     private void updateSubscriptionState(Subscription subscription, SubscriptionState state) {
         subscription.setState(state.getValue());
-        subscription.setUpdateTime(System.currentTimeMillis());
+        subscription.setUpdatedTime(System.currentTimeMillis());
     }
 }

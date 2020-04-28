@@ -2,6 +2,7 @@ package com.keepreal.madagascar.coua.model;
 
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -22,7 +23,9 @@ public class Subscription {
     private Long userId;
     private Long islandId;
     private Integer state;
-    private Integer number;
-    private Long createTime;
-    private Long updateTime;
+    private Integer islanderNumber;
+    @Column(name = "is_deleted")
+    private Boolean deleted;
+    private Long createdTime;
+    private Long updatedTime;
 }
