@@ -1093,6 +1093,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ReactionType'
+        createdAt:
+          type: integer
+          format: int64
     PostReactionRequest:
       type: object
       properties:
