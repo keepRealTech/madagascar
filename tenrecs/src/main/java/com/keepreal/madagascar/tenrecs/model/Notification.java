@@ -27,6 +27,9 @@ public class Notification {
     private Reaction reaction;
     private Notice notice;
 
+    private String eventId;
+    private Long timestamp;
+
     @Builder.Default
     private Boolean isDeleted = false;
     @CreatedDate

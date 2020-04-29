@@ -4,11 +4,15 @@ import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.tenrecs.NoticeNotificationMessage;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.SubscribeNotice;
+import com.keepreal.madagascar.tenrecs.factory.notificationBuilder.NotificationBuilder;
 import com.keepreal.madagascar.tenrecs.model.Notice;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 
 import java.util.Objects;
 
+/**
+ * Implements the {@link NotificationBuilder}.
+ */
 public class NoticeNotificationMessageBuilder implements NotificationMessageBuilder {
 
     private long lastReadTimestamp;
@@ -31,6 +35,7 @@ public class NoticeNotificationMessageBuilder implements NotificationMessageBuil
      * @param notification {@link Notification}.
      * @return this.
      */
+    @Override
     public NoticeNotificationMessageBuilder setNotification(Notification notification) {
         this.notification = notification;
         return this;
@@ -44,7 +49,7 @@ public class NoticeNotificationMessageBuilder implements NotificationMessageBuil
     @Override
     public NotificationMessage build() {
         if (Objects.isNull(this.notification)
-                || !notification.getType().equals(NotificationType.NOTIFICATION_ISLAND_NOTICE)) {
+                || !this.notification.getType().equals(NotificationType.NOTIFICATION_ISLAND_NOTICE)) {
             return null;
         }
 
@@ -75,14 +80,15 @@ public class NoticeNotificationMessageBuilder implements NotificationMessageBuil
         switch (notice.getType()) {
             case NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER:
                 if (Objects.isNull(notice.getSubscribeNotice())) {
-                    break;
+                    return noticeNotificationMessageBuilder.build();
                 }
 
-                noticeNotificationMessageBuilder.setSubscribeNotice(SubscribeNotice.newBuilder()
+                SubscribeNotice subscribeNotice = SubscribeNotice.newBuilder()
                         .setIslandId(notice.getSubscribeNotice().getIslandId())
                         .setSubscriberId(notice.getSubscribeNotice().getSubscriberId())
-                        .build());
-                break;
+                        .build();
+                noticeNotificationMessageBuilder.setSubscribeNotice(subscribeNotice);
+                return noticeNotificationMessageBuilder.build();
             default:
         }
 

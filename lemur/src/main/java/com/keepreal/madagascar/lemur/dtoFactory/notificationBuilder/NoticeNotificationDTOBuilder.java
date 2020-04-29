@@ -119,7 +119,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                 noticeDTO.setNoticeType(NoticeType.ISLAND_NOTICE_NEW_SUBSCRIBER);
 
                 if (Objects.isNull(noticeMessage.getSubscribeNotice())) {
-                    break;
+                    return noticeDTO;
                 }
 
                 noticeDTO.setIsland(
@@ -130,7 +130,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                         this.userDTOFactory.briefValueOf(
                                 this.userService.retrieveUserById(
                                         noticeMessage.getSubscribeNotice().getSubscriberId())));
-                break;
+                return noticeDTO;
             default:
         }
 

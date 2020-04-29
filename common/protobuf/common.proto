@@ -3,8 +3,6 @@ syntax = "proto3";
 option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.common";
 
-import "google/protobuf/wrappers.proto";
-
 message PageRequest {
     int32 page = 1;
     int32 pageSize = 2;
@@ -146,7 +144,7 @@ message CommentMessage {
     string content = 2;
     string feedId = 3;
     string userId = 4;
-    google.protobuf.StringValue replyToId = 5;
+    string replyToId = 5;
     uint64 createdAt = 6;
 }
 

@@ -43,17 +43,13 @@ public class NotificationEventListener implements MessageListener {
      */
     @Override
     public Action consume(Message message, ConsumeContext context) {
-        NotificationEvent event;
         try {
-            event = NotificationEvent.parseFrom(message.getBody());
+            Notification notification =
+                    this.notificationFactory.toNotification(NotificationEvent.parseFrom(message.getBody()));
+            this.notificationService.upsert(notification);
+            return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {
             log.warn("Bad formatted notification event, skipped.");
-            return Action.CommitMessage;
-        }
-
-        try {
-            Notification notification = this.notificationFactory.toNotification(event);
-            this.notificationService.upsert(notification);
             return Action.CommitMessage;
         } catch (Exception e) {
             return Action.ReconsumeLater;

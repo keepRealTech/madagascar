@@ -35,4 +35,6 @@ message NotificationEvent {
         CommentEvent commentEvent = 4;
         ReactionEvent reactionEvent = 5;
     }
+    uint64 timestamp = 6;
+    string eventId = 7;
 }

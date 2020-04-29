@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder;
 
-import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.NotificationType;
@@ -9,7 +8,6 @@ import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.model.Comment;
 import com.keepreal.madagascar.tenrecs.model.Feed;
 import com.keepreal.madagascar.tenrecs.model.Notification;
-import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -38,6 +36,7 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
      * @param notification {@link Notification}.
      * @return this.
      */
+    @Override
     public CommentNotificationMessageBuilder setNotification(Notification notification) {
         this.notification = notification;
         return this;
@@ -51,7 +50,7 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
     @Override
     public NotificationMessage build() {
         if (Objects.isNull(this.notification)
-                || !notification.getType().equals(NotificationType.NOTIFICATION_COMMENTS)) {
+                || !this.notification.getType().equals(NotificationType.NOTIFICATION_COMMENTS)) {
             return null;
         }
 
@@ -106,18 +105,14 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
             return null;
         }
 
-        CommentMessage.Builder commentBuilder = CommentMessage.newBuilder()
+        return CommentMessage.newBuilder()
                 .setId(comment.getId())
                 .setFeedId(comment.getFeedId())
                 .setContent(comment.getContent())
                 .setUserId(comment.getAuthorId())
-                .setCreatedAt(comment.getCreatedAt());
-
-        if (StringUtils.isEmpty(comment.getReplyToId())) {
-            commentBuilder.setReplyToId(StringValue.of(comment.getReplyToId()));
-        }
-
-        return commentBuilder.build();
+                .setReplyToId(comment.getReplyToId())
+                .setCreatedAt(comment.getCreatedAt())
+                .build();
     }
 
 }

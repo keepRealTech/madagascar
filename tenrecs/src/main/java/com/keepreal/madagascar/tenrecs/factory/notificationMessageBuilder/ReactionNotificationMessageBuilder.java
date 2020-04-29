@@ -36,6 +36,7 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
      * @param notification {@link Notification}.
      * @return this.
      */
+    @Override
     public ReactionNotificationMessageBuilder setNotification(Notification notification) {
         this.notification = notification;
         return this;
@@ -49,7 +50,7 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
     @Override
     public NotificationMessage build() {
         if (Objects.isNull(this.notification)
-                || !notification.getType().equals(NotificationType.NOTIFICATION_REACTIONS)) {
+                || !this.notification.getType().equals(NotificationType.NOTIFICATION_REACTIONS)) {
             return null;
         }
 
