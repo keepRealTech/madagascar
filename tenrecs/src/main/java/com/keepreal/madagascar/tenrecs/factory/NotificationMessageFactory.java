@@ -1,9 +1,9 @@
 package com.keepreal.madagascar.tenrecs.factory;
 
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
-import com.keepreal.madagascar.tenrecs.factory.notificationMessage.CommentNotificationMessageBuilder;
-import com.keepreal.madagascar.tenrecs.factory.notificationMessage.NoticeNotificationMessageBuilder;
-import com.keepreal.madagascar.tenrecs.factory.notificationMessage.ReactionNotificationMessageBuilder;
+import com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder.CommentNotificationMessageBuilder;
+import com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder.NoticeNotificationMessageBuilder;
+import com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder.ReactionNotificationMessageBuilder;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.model.UserNotificationRecord;
 import org.springframework.stereotype.Component;

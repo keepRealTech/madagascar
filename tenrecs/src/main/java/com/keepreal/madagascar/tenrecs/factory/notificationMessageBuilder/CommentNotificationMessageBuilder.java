@@ -1,20 +1,22 @@
-package com.keepreal.madagascar.tenrecs.factory.notificationMessage;
+package com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder;
 
+import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.NotificationType;
-import com.keepreal.madagascar.common.ReactionMessage;
+import com.keepreal.madagascar.tenrecs.CommentNotificationMessage;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
-import com.keepreal.madagascar.tenrecs.ReactionNotificationMessage;
+import com.keepreal.madagascar.tenrecs.model.Comment;
 import com.keepreal.madagascar.tenrecs.model.Feed;
 import com.keepreal.madagascar.tenrecs.model.Notification;
-import com.keepreal.madagascar.tenrecs.model.Reaction;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
 /**
  * Implements the {@link NotificationMessageBuilder}.
  */
-public class ReactionNotificationMessageBuilder implements NotificationMessageBuilder {
+public class CommentNotificationMessageBuilder implements NotificationMessageBuilder {
 
     private long lastReadTimestamp;
     private Notification notification;
@@ -22,21 +24,21 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
     /**
      * Sets the last read timestamp.
      *
-     * @param lastReadTimestamp Last read reaction notification timestamp.
+     * @param lastReadTimestamp Last read comment notification timestamp.
      * @return this.
      */
-    public ReactionNotificationMessageBuilder setLastReadTimestamp(long lastReadTimestamp) {
+    public CommentNotificationMessageBuilder setLastReadTimestamp(long lastReadTimestamp) {
         this.lastReadTimestamp = lastReadTimestamp;
         return this;
     }
 
     /**
-     * Sets the notificaton.
+     * Sets the notification.
      *
      * @param notification {@link Notification}.
      * @return this.
      */
-    public ReactionNotificationMessageBuilder setNotification(Notification notification) {
+    public CommentNotificationMessageBuilder setNotification(Notification notification) {
         this.notification = notification;
         return this;
     }
@@ -49,21 +51,21 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
     @Override
     public NotificationMessage build() {
         if (Objects.isNull(this.notification)
-                || !notification.getType().equals(NotificationType.NOTIFICATION_REACTIONS)) {
+                || !notification.getType().equals(NotificationType.NOTIFICATION_COMMENTS)) {
             return null;
         }
 
-        ReactionNotificationMessage reactionNotificationMessage = ReactionNotificationMessage.newBuilder()
+        CommentNotificationMessage commentNotificationMessage = CommentNotificationMessage.newBuilder()
                 .setFeed(this.toFeedMessage(this.notification.getFeed()))
-                .setReaction(this.toReactionMessage(this.notification.getReaction()))
+                .setComment(this.toCommentMessage(this.notification.getComment()))
                 .build();
 
         return NotificationMessage.newBuilder()
                 .setId(String.valueOf(this.notification.getId()))
-                .setType(NotificationType.NOTIFICATION_REACTIONS)
+                .setType(NotificationType.NOTIFICATION_COMMENTS)
                 .setUserId(this.notification.getUserId())
                 .setHasRead(this.notification.getCreatedAt().compareTo(this.lastReadTimestamp) < 0)
-                .setReactionNotification(reactionNotificationMessage)
+                .setCommentNotification(commentNotificationMessage)
                 .setCreatedAt(this.notification.getCreatedAt())
                 .build();
     }
@@ -94,24 +96,28 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
     }
 
     /**
-     * Converts {@link Reaction} into {@link ReactionMessage}.
+     * Converts {@link Comment} into {@link CommentMessage}.
      *
-     * @param reaction {@link Reaction}.
-     * @return {@link ReactionMessage}.
+     * @param comment {@link Comment}.
+     * @return {@link CommentMessage}.
      */
-    private ReactionMessage toReactionMessage(Reaction reaction) {
-        if (Objects.isNull(reaction)) {
+    private CommentMessage toCommentMessage(Comment comment) {
+        if (Objects.isNull(comment)) {
             return null;
         }
 
-        ReactionMessage.Builder reactionMessageBuilder = ReactionMessage.newBuilder()
-                .setId(reaction.getId())
-                .setFeedId(reaction.getFeedId())
-                .setUserId(reaction.getAuthorId())
-                .addAllReactionType(reaction.getTypes())
-                .setCreatedAt(reaction.getCreatedAt());
+        CommentMessage.Builder commentBuilder = CommentMessage.newBuilder()
+                .setId(comment.getId())
+                .setFeedId(comment.getFeedId())
+                .setContent(comment.getContent())
+                .setUserId(comment.getAuthorId())
+                .setCreatedAt(comment.getCreatedAt());
 
-        return reactionMessageBuilder.build();
+        if (StringUtils.isEmpty(comment.getReplyToId())) {
+            commentBuilder.setReplyToId(StringValue.of(comment.getReplyToId()));
+        }
+
+        return commentBuilder.build();
     }
 
 }

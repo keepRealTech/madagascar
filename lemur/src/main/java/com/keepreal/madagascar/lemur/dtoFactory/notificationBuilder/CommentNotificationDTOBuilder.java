@@ -1,7 +1,7 @@
-package com.keepreal.madagascar.lemur.dtoFactory.notification;
+package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
+import com.keepreal.madagascar.lemur.dtoFactory.CommentDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
-import com.keepreal.madagascar.lemur.dtoFactory.ReactionDTOFactory;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import swagger.model.NotificationDTO;
 import swagger.model.NotificationType;
@@ -9,22 +9,22 @@ import swagger.model.NotificationType;
 import java.util.Objects;
 
 /**
- * Represents the reaction notification dto builder.
+ * Represents the comment notification dto builder.
  */
-public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
+public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
 
     private NotificationMessage notificationMessage;
-    private ReactionDTOFactory reactionDTOFactory;
+    private CommentDTOFactory commentDTOFactory;
     private FeedDTOFactory feedDTOFactory;
 
     /**
-     * Sets the {@link ReactionDTOFactory}.
+     * Sets the {@link CommentDTOFactory}.
      *
-     * @param reactionDTOFactory {@link ReactionDTOFactory}.
-     * @return {@link ReactionNotificationDTOBuilder}.
+     * @param commentDTOFactory {@link CommentDTOFactory}.
+     * @return {@link CommentNotificationDTOBuilder}.
      */
-    public ReactionNotificationDTOBuilder setReactionDTOFactory(ReactionDTOFactory reactionDTOFactory) {
-        this.reactionDTOFactory = reactionDTOFactory;
+    public CommentNotificationDTOBuilder setCommentDTOFactory(CommentDTOFactory commentDTOFactory) {
+        this.commentDTOFactory = commentDTOFactory;
         return this;
     }
 
@@ -32,9 +32,9 @@ public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
      * Sets the {@link FeedDTOFactory}.
      *
      * @param feedDTOFactory {@link FeedDTOFactory}.
-     * @return {@link ReactionNotificationDTOBuilder}.
+     * @return {@link CommentNotificationDTOBuilder}.
      */
-    public ReactionNotificationDTOBuilder setFeedDTOFactory(FeedDTOFactory feedDTOFactory) {
+    public CommentNotificationDTOBuilder setFeedDTOFactory(FeedDTOFactory feedDTOFactory) {
         this.feedDTOFactory = feedDTOFactory;
         return this;
     }
@@ -43,10 +43,10 @@ public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
      * Sets the notification message.
      *
      * @param notificationMessage {@link NotificationMessage}.
-     * @return {@link ReactionNotificationDTOBuilder}.
+     * @return {@link CommentNotificationDTOBuilder}.
      */
     @Override
-    public ReactionNotificationDTOBuilder setNotificationMessage(NotificationMessage notificationMessage) {
+    public CommentNotificationDTOBuilder setNotificationMessage(NotificationMessage notificationMessage) {
         this.notificationMessage = notificationMessage;
         return this;
     }
@@ -59,22 +59,23 @@ public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
     @Override
     public NotificationDTO build() {
         if (Objects.isNull(this.notificationMessage)
+
                 || Objects.isNull(this.feedDTOFactory)
-                || Objects.isNull(this.reactionDTOFactory)) {
+                || Objects.isNull(this.commentDTOFactory)) {
             return null;
         }
 
         NotificationDTO notificationDTO = new NotificationDTO();
         notificationDTO.setId(this.notificationMessage.getId());
         notificationDTO.setHasRead(this.notificationMessage.getHasRead());
-        notificationDTO.setNotificationType(NotificationType.REACTIONS);
+        notificationDTO.setNotificationType(NotificationType.COMMENTS);
         notificationDTO.setCreatedAt(this.notificationMessage.getCreatedAt());
 
-        if (Objects.nonNull(this.notificationMessage.getReactionNotification())) {
+        if (Objects.nonNull(this.notificationMessage.getCommentNotification())) {
             notificationDTO.setFeed(
-                    this.feedDTOFactory.briefValueOf(this.notificationMessage.getReactionNotification().getFeed()));
-            notificationDTO.setReactions(
-                    this.reactionDTOFactory.valueOf(this.notificationMessage.getReactionNotification().getReaction()));
+                    this.feedDTOFactory.briefValueOf(this.notificationMessage.getCommentNotification().getFeed()));
+            notificationDTO.setComment(
+                    this.commentDTOFactory.valueOf(this.notificationMessage.getCommentNotification().getComment()));
         }
 
         return notificationDTO;

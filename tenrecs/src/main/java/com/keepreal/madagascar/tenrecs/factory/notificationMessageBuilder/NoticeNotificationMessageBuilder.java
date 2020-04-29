@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.tenrecs.factory.notificationMessage;
+package com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder;
 
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.tenrecs.NoticeNotificationMessage;

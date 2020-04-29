@@ -1,9 +1,9 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 
-import com.keepreal.madagascar.lemur.dtoFactory.notification.CommentNotificationDTOBuilder;
-import com.keepreal.madagascar.lemur.dtoFactory.notification.NoticeNotificationDTOBuilder;
-import com.keepreal.madagascar.lemur.dtoFactory.notification.ReactionNotificationDTOBuilder;
+import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.CommentNotificationDTOBuilder;
+import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.NoticeNotificationDTOBuilder;
+import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.ReactionNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
