@@ -10,6 +10,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.*;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
 import com.keepreal.madagascar.coua.model.IslandInfo;
+import com.keepreal.madagascar.coua.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,12 +95,19 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
      */
     @Override
     public void retrieveIslandById(RetrieveIslandByIdRequest request, StreamObserver<IslandResponse> responseObserver) {
+        IslandResponse.Builder responseBuilder = IslandResponse.newBuilder();
         String islandId = request.getId();
-        IslandInfo islandInfo = islandInfoRepository.findById(Long.valueOf(islandId))
-                                            .orElseThrow(RuntimeException::new);
+        Optional<IslandInfo> islandInfoOptional = islandInfoRepository.findById(Long.valueOf(islandId));
+        if (islandInfoOptional.isPresent()) {
+            IslandInfo islandInfo = islandInfoOptional.get();
+            IslandMessage islandMessage = getIslandMessage(islandInfo);
+            responseBuilder.setIsland(islandMessage);
+        } else {
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
+            responseBuilder.setStatus(commonStatus);
+        }
 
-        IslandMessage islandMessage = getIslandMessage(islandInfo);
-        IslandResponse islandResponse = IslandResponse.newBuilder().setIsland(islandMessage).build();
+        IslandResponse islandResponse = responseBuilder.build();
         responseObserver.onNext(islandResponse);
         responseObserver.onCompleted();
     }
@@ -180,9 +188,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             IslandMessage islandMessage = getIslandMessage(save);
             responseBuilder.setIsland(islandMessage);
         } else {
-            CommonStatus commonStatus = CommonStatus.newBuilder()
-                    .setRtn(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR_VALUE)
-                    .setMessage(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR.name()).build();
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
         }
 
@@ -216,14 +222,9 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             }
         }
         if (!islandFound || !userFound) {
-            CommonStatus.Builder commonStatusBuilder = CommonStatus.newBuilder();
             CommonStatus commonStatus = islandFound ?
-                        commonStatusBuilder
-                            .setRtn(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR_VALUE)
-                            .setMessage(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR.name()).build() :
-                        commonStatusBuilder
-                            .setRtn(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR_VALUE)
-                            .setMessage(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR.name()).build();
+                    CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR) :
+                    CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
         }
 
@@ -277,13 +278,21 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         String islandId = request.getId();
         String secret = request.getSecret();
         String userId = request.getUserId();
-
-        IslandInfo islandInfo = islandInfoRepository.findById(Long.valueOf(islandId)).orElseThrow(RuntimeException::new);
-        if (!secret.equals(islandInfo.getSecret())) {
-            // throw exception?
+        SubscribeIslandResponse.Builder responseBuilder = SubscribeIslandResponse.newBuilder();
+        Optional<IslandInfo> islandInfoOptional = islandInfoRepository.findById(Long.valueOf(islandId));
+        if (islandInfoOptional.isPresent()) {
+            IslandInfo islandInfo = islandInfoOptional.get();
+            if (secret.equals(islandInfo.getSecret())) {
+                //todo 这个方法里面的实现待商议
+                subscriptionService.subscribeIsland(Long.valueOf(islandId), Long.valueOf(userId));
+            } else {
+                CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_SECRET_ERROR);
+                responseBuilder.setStatus(commonStatus);
+            }
+        } else {
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
+            responseBuilder.setStatus(commonStatus);
         }
-        //todo 这个方法里面的实现待商议
-        subscriptionService.subscribeIsland(Long.valueOf(islandId), Long.valueOf(userId));
 
         SubscribeIslandResponse subscribeIslandResponse = SubscribeIslandResponse.newBuilder().build();
         responseObserver.onNext(subscribeIslandResponse);
@@ -299,7 +308,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     public void unsubscribeIslandById(UnsubscribeIslandByIdRequest request, StreamObserver<SubscribeIslandResponse> responseObserver) {
         String islandId = request.getId();
         String userId = request.getUserId();
-        subscriptionService.unSubscripeIsland(Long.valueOf(islandId), Long.valueOf(userId));
+        subscriptionService.unSubscribeIsland(Long.valueOf(islandId), Long.valueOf(userId));
 
         SubscribeIslandResponse subscribeIslandResponse = SubscribeIslandResponse.newBuilder().build();
         responseObserver.onNext(subscribeIslandResponse);

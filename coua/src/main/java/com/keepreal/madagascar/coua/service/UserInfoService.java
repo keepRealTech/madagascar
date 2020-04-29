@@ -5,9 +5,15 @@ import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.IdentityType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.coua.*;
+import com.keepreal.madagascar.coua.NewUserRequest;
+import com.keepreal.madagascar.coua.QueryUserCondition;
+import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
+import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
+import com.keepreal.madagascar.coua.UserResponse;
+import com.keepreal.madagascar.coua.UserServiceGrpc;
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
 import com.keepreal.madagascar.coua.model.UserInfo;
+import com.keepreal.madagascar.coua.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,9 +78,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
             userInfo = userInfoRepository.findUserInfoByUnionIdAndDeletedIsFalse(queryUserCondition.getUnionId().getValue());
         }
         if (userInfo == null) {
-            CommonStatus commonStatus = CommonStatus.newBuilder()
-                    .setRtn(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR_VALUE)
-                    .setMessage(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR.name()).build();
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
         } else {
             UserMessage userMessage = getUserMessage(userInfo);

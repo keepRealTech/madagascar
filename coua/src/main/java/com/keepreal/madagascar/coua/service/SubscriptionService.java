@@ -79,7 +79,7 @@ public class SubscriptionService {
         subscriptionRepository.save(subscription);
     }
 
-    public void unSubscripeIsland(Long islandId, Long userId) {
+    public void unSubscribeIsland(Long islandId, Long userId) {
         Subscription subscription = subscriptionRepository.getSubscriptionByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
         if (subscription != null) {
             updateSubscriptionState(subscription, SubscriptionState.LEAVE);
