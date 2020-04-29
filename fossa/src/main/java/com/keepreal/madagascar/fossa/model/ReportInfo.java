@@ -2,6 +2,8 @@ package com.keepreal.madagascar.fossa.model;
 
 import lombok.Data;
 
+import javax.persistence.Column;
+
 /**
  * @program: madagascar
  * @author: zhangxidong
@@ -15,6 +17,8 @@ public class ReportInfo {
     private Integer type;
     private Long feedId;
     private Long reporterId;
-    private Long createTime;
-    private Long updateTime;
+    @Column(name = "is_deleted")
+    private Boolean deleted;
+    private Long createdTime;
+    private Long updatedTime;
 }

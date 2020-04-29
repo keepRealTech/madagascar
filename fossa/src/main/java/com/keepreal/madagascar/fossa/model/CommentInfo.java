@@ -15,9 +15,10 @@ public class CommentInfo {
     @Id
     private Long id;
     private Long feedId;
+    private Long userId;
     private String content;
     private Long replyToId;
     private Boolean deleted;
-    private Long createTime;
-    private Long updateTime;
+    private Long createdTime;
+    private Long updatedTime;
 }

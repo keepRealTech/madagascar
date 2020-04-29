@@ -24,6 +24,7 @@ public class FeedInfo {
     private Integer commentsCount;
     private Integer repostCount;
     private Integer state;
-    private Long createTime;
-    private Long updateTime;
+    private boolean deleted;
+    private Long createdTime;
+    private Long updatedTime;
 }
