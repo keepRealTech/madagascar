@@ -1,15 +1,13 @@
 package com.keepreal.madagascar.tenrecs.factory.notificationMessage;
 
-import com.google.protobuf.StringValue;
-import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
+import com.keepreal.madagascar.tenrecs.ReactionNotificationMessage;
 import com.keepreal.madagascar.tenrecs.model.Feed;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.model.Reaction;
-import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -55,13 +53,17 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
             return null;
         }
 
+        ReactionNotificationMessage reactionNotificationMessage = ReactionNotificationMessage.newBuilder()
+                .setFeed(this.toFeedMessage(this.notification.getFeed()))
+                .setReaction(this.toReactionMessage(this.notification.getReaction()))
+                .build();
+
         return NotificationMessage.newBuilder()
                 .setId(String.valueOf(this.notification.getId()))
                 .setType(NotificationType.NOTIFICATION_REACTIONS)
                 .setUserId(this.notification.getUserId())
                 .setHasRead(this.notification.getCreatedAt().compareTo(this.lastReadTimestamp) < 0)
-                .setFeed(this.toFeedMessage(this.notification.getFeed()))
-                .setReaction(this.toReactionMessage(this.notification.getReaction()))
+                .setReactionNotification(reactionNotificationMessage)
                 .setCreatedAt(this.notification.getCreatedAt())
                 .build();
     }

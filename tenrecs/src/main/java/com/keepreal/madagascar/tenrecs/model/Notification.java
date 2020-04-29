@@ -25,7 +25,7 @@ public class Notification {
     private Feed feed;
     private Comment comment;
     private Reaction reaction;
-    private IslandNotice notice;
+    private Notice notice;
 
     @Builder.Default
     private Boolean isDeleted = false;

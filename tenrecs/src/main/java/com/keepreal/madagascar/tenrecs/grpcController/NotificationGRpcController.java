@@ -67,7 +67,8 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
         if (!request.hasCondition()
                 || !request.getCondition().hasUserId()
                 || !request.getCondition().hasType()) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+            responseObserver.onError(new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT));
+            return;
         }
 
         UserNotificationRecord record =

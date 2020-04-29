@@ -4,6 +4,7 @@ import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.NotificationType;
+import com.keepreal.madagascar.tenrecs.CommentNotificationMessage;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.model.Comment;
 import com.keepreal.madagascar.tenrecs.model.Feed;
@@ -32,7 +33,7 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
     }
 
     /**
-     * Sets the notificaton.
+     * Sets the notification.
      *
      * @param notification {@link Notification}.
      * @return this.
@@ -54,13 +55,17 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
             return null;
         }
 
+        CommentNotificationMessage commentNotificationMessage = CommentNotificationMessage.newBuilder()
+                .setFeed(this.toFeedMessage(this.notification.getFeed()))
+                .setComment(this.toCommentMessage(this.notification.getComment()))
+                .build();
+
         return NotificationMessage.newBuilder()
                 .setId(String.valueOf(this.notification.getId()))
                 .setType(NotificationType.NOTIFICATION_COMMENTS)
                 .setUserId(this.notification.getUserId())
                 .setHasRead(this.notification.getCreatedAt().compareTo(this.lastReadTimestamp) < 0)
-                .setFeed(this.toFeedMessage(this.notification.getFeed()))
-                .setComment(this.toCommentMessage(this.notification.getComment()))
+                .setCommentNotification(commentNotificationMessage)
                 .setCreatedAt(this.notification.getCreatedAt())
                 .build();
     }
