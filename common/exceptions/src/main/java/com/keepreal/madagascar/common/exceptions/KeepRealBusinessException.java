@@ -1,6 +1,9 @@
 package com.keepreal.madagascar.common.exceptions;
 
+import com.keepreal.madagascar.common.CommonStatus;
 import lombok.Getter;
+
+import java.util.Objects;
 
 /**
  * Represents the generic business runtime exception.
@@ -13,6 +16,7 @@ public class KeepRealBusinessException extends RuntimeException {
 
     /**
      * Constructs a {@link KeepRealBusinessException} with generic throwable.
+     *
      * @param throwable Throwable.
      */
     public KeepRealBusinessException(Throwable throwable) {
@@ -21,6 +25,7 @@ public class KeepRealBusinessException extends RuntimeException {
 
     /**
      * Constructs a {@link KeepRealBusinessException} with {@link ErrorCode}.
+     *
      * @param errorCode {@link ErrorCode}.
      */
     public KeepRealBusinessException(ErrorCode errorCode) {
@@ -30,8 +35,9 @@ public class KeepRealBusinessException extends RuntimeException {
 
     /**
      * Constructs a {@link KeepRealBusinessException} with {@link ErrorCode} and message.
+     *
      * @param errorCode {@link ErrorCode}.
-     * @param message Customized error message.
+     * @param message   Customized error message.
      */
     public KeepRealBusinessException(ErrorCode errorCode, String message) {
         this(errorCode);
@@ -39,7 +45,17 @@ public class KeepRealBusinessException extends RuntimeException {
     }
 
     /**
+     * Constructs a {@link KeepRealBusinessException} with {@link CommonStatus}.
+     *
+     * @param commonStatus {@link CommonStatus}.
+     */
+    public KeepRealBusinessException(CommonStatus commonStatus) {
+        this(ErrorCode.forNumber(commonStatus.getRtn()), commonStatus.getMessage());
+    }
+
+    /**
      * Overrides the toString method.
+     *
      * @return String.
      */
     @Override

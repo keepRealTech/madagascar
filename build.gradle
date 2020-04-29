@@ -1,7 +1,7 @@
 plugins {
     id 'io.spring.dependency-management' version '1.0.8.RELEASE' apply false
     id 'org.springframework.boot' version '2.1.4.RELEASE' apply false
-    id 'org.hidetake.swagger.generator' version '2.16.0' apply false
+    id 'org.hidetake.swagger.generator' version '2.18.2' apply false
     id 'com.google.protobuf' version '0.8.12' apply false
     id 'com.palantir.docker' version '0.22.1' apply false
 }
@@ -26,7 +26,7 @@ subprojects {
     ext['jersey.version'] = '2.22.2'
     ext['swagger.client.annotation.version'] = '2.0.0'
     ext['swagger.server.annotation.version'] = '1.5.22'
-    ext['swagger.codegen.version'] = '3.0.2'
+    ext['swagger.codegen.version'] = '4.2.3'
     ext['protobuf-java.version'] = '3.8.0'
     ext['grpc.springboot.version'] = '3.3.0'
     ext['boringssl.version'] = '2.0.22.Final'
@@ -128,7 +128,7 @@ subprojects {
             dependency "com.google.protobuf:protobuf-java:${ext['protobuf-java.version']}"
             dependency "com.salesforce.servicelibs:reactor-grpc-stub:0.10.0"
             dependency "io.github.lognet:grpc-spring-boot-starter:${ext['grpc.springboot.version']}"
-            dependency "io.swagger.codegen.v3:swagger-codegen-cli:${ext['swagger.codegen.version']}"
+            dependency "org.openapitools:openapi-generator-cli:${ext['swagger.codegen.version']}"
             dependency "io.swagger.core.v3:swagger-annotations:${ext['swagger.client.annotation.version']}"
             dependency "io.swagger:swagger-annotations:${ext['swagger.server.annotation.version']}"
             dependency "io.netty:netty-tcnative-boringssl-static:${ext['boringssl.version']}"
