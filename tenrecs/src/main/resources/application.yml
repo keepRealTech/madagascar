@@ -3,3 +3,11 @@ spring:
     mongodb:
       database: aks-poc-retailsaas
       uri:
+
+rocketmq:
+  accessKey:
+  secretKey:
+  nameSrvAddr:
+  topic:
+  groupId:
+  tag:

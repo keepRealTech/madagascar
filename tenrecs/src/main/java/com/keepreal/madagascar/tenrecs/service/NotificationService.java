@@ -50,4 +50,14 @@ public class NotificationService {
         return this.notificationRepository.findAllByUserIdAndTypeAndIsDeletedIsFalse(userId, type, PaginationUtils.valueOf(pageRequest));
     }
 
+    /**
+     * Upserts the notification.
+     *
+     * @param notification {@link Notification}.
+     * @return {@link Notification}.
+     */
+    public Notification upsert(Notification notification) {
+        return this.notificationRepository.save(notification);
+    }
+
 }

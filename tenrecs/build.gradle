@@ -16,6 +16,7 @@ sourceSets {
 dependencies {
     implementation project(":common:exceptions")
 
+    implementation 'com.aliyun.openservices:ons-client:1.8.4.Final'
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
