@@ -46,7 +46,7 @@ message RetrieveMultipleNotificationsRequest {
 
 message NotificationsResponse {
     CommonStatus status = 1;
-    repeated NotificationMessage notification = 2;
+    repeated NotificationMessage notifications = 2;
     PageResponse pageResponse = 3;
 }
 

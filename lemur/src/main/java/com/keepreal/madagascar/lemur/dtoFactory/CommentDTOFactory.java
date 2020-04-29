@@ -46,9 +46,9 @@ public class CommentDTOFactory {
         commentDTO.setContent(comment.getContent());
         commentDTO.setCreatedAt(comment.getCreatedAt());
 
-        if (!StringUtils.isEmpty(comment.getReplyToId())) {
+        if (comment.hasReplyToId()) {
             commentDTO.setReplyTo(this.userDTOFactory.briefValueOf(
-                    this.userService.retrieveUserById(comment.getReplyToId())));
+                    this.userService.retrieveUserById(comment.getReplyToId().getValue())));
         }
 
         commentDTO.setUser(this.userDTOFactory.briefValueOf(

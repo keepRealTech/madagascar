@@ -13,7 +13,7 @@ enum NotificationEventType {
 }
 
 message SubscribeEvent {
-    string groupId = 1;
+    string islandId = 1;
     string subscriberId = 2;
 }
 
