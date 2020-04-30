@@ -53,7 +53,7 @@ message DeleteFeedResponse {
 
 message CheckNewFeedsRequest {
     repeated string islandIds = 1;
-    uint64 timestamp = 2;
+    repeated uint64 timestamps = 2;
 }
 
 message CheckNewFeedsMessage {
