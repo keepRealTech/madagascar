@@ -33,6 +33,11 @@ message NotificationTypeValue {
     NotificationType value = 1;
 }
 
+enum NoticeType {
+    NOTICE_TYPE_NONE = 0;
+    NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER = 1;
+}
+
 enum ReactionType {
     REACTION_NONE = 0;
     REACTION_LIKE = 1;

@@ -11,11 +11,34 @@ message NotificationMessage {
     string userId = 2;
     int64 createdAt = 3;
     NotificationType type = 4;
-    FeedMessage feed = 5;
-    CommentMessage comment = 6;
-    ReactionMessage reaction = 7;
-    IslandNoticeMessage islandNotice = 8;
-    bool hasRead = 9;
+    bool hasRead = 5;
+    oneof notification {
+        CommentNotificationMessage commentNotification = 6;
+        ReactionNotificationMessage reactionNotification = 7;
+        NoticeNotificationMessage noticeNotification = 8;
+    }
+}
+
+message CommentNotificationMessage {
+    FeedMessage feed = 1;
+    CommentMessage comment = 2;
+}
+
+message ReactionNotificationMessage {
+    FeedMessage feed = 1;
+    ReactionMessage reaction = 8;
+}
+
+message NoticeNotificationMessage {
+    NoticeType type = 1;
+    oneof notice {
+        SubscribeNotice SubscribeNotice = 2;
+    }
+}
+
+message SubscribeNotice {
+    string IslandId = 1;
+    string subscriberId = 2;
 }
 
 message UnreadNotificationsCountMessage {
@@ -46,7 +69,7 @@ message RetrieveMultipleNotificationsRequest {
 
 message NotificationsResponse {
     CommonStatus status = 1;
-    repeated NotificationMessage notification = 2;
+    repeated NotificationMessage notifications = 2;
     PageResponse pageResponse = 3;
 }
 
