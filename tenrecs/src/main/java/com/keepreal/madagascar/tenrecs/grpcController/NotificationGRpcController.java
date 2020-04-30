@@ -98,7 +98,7 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 record.setLastReadCommentNotificationTimestamp(timestamp);
         }
 
-        this.userNotificationRecordService.upsert(record);
+        this.userNotificationRecordService.update(record);
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

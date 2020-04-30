@@ -46,7 +46,7 @@ public class NotificationEventListener implements MessageListener {
         try {
             Notification notification =
                     this.notificationFactory.toNotification(NotificationEvent.parseFrom(message.getBody()));
-            this.notificationService.upsert(notification);
+            this.notificationService.insert(notification);
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {
             log.warn("Bad formatted notification event, skipped.");

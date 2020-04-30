@@ -1,5 +1,7 @@
 package com.keepreal.madagascar.tenrecs.service;
 
+import com.keepreal.madagascar.common.snowflake.generator.DefaultSnowflakeIdGenerator;
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.tenrecs.model.UserNotificationRecord;
 import com.keepreal.madagascar.tenrecs.repository.UserNotificationRecordRepository;
 import org.springframework.stereotype.Service;
@@ -13,24 +15,39 @@ import java.util.Objects;
 public class UserNotificationRecordService {
 
     private final UserNotificationRecordRepository userNotificationRecordRepository;
+    private final LongIdGenerator idGenerator;
 
     /**
      * Constructs the user notification record service.
      *
      * @param userNotificationRecordRepository {@link UserNotificationRecordRepository}.
+     * @param idGenerator                      {@link DefaultSnowflakeIdGenerator}.
      */
-    public UserNotificationRecordService(UserNotificationRecordRepository userNotificationRecordRepository) {
+    public UserNotificationRecordService(UserNotificationRecordRepository userNotificationRecordRepository,
+                                         LongIdGenerator idGenerator) {
         this.userNotificationRecordRepository = userNotificationRecordRepository;
+        this.idGenerator = idGenerator;
     }
 
     /**
-     * Upserts a given {@link UserNotificationRecord}.
+     * Inserts a given {@link UserNotificationRecord}.
      *
      * @param userNotificationRecord {@link UserNotificationRecord}.
      * @return {@link UserNotificationRecord}.
      */
-    public UserNotificationRecord upsert(UserNotificationRecord userNotificationRecord) {
-        return this.userNotificationRecordRepository.save(userNotificationRecord);
+    public UserNotificationRecord insert(UserNotificationRecord userNotificationRecord) {
+        userNotificationRecord.setId(this.idGenerator.nextId());
+        return this.userNotificationRecordRepository.insert(userNotificationRecord);
+    }
+
+    /**
+     * Updates a given {@link UserNotificationRecord}.
+     *
+     * @param userNotificationRecord {@link UserNotificationRecord}.
+     * @return {@link UserNotificationRecord}.
+     */
+    public UserNotificationRecord update(UserNotificationRecord userNotificationRecord) {
+        return this.userNotificationRecordRepository.insert(userNotificationRecord);
     }
 
     /**
@@ -47,7 +64,7 @@ public class UserNotificationRecordService {
             return userNotificationRecord;
         }
 
-        return this.upsert(UserNotificationRecord.builder().userId(userId).build());
+        return this.insert(UserNotificationRecord.builder().userId(userId).build());
     }
 
 }

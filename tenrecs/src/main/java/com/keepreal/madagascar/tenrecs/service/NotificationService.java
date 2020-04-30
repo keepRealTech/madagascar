@@ -2,6 +2,8 @@ package com.keepreal.madagascar.tenrecs.service;
 
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.PageRequest;
+import com.keepreal.madagascar.common.snowflake.generator.DefaultSnowflakeIdGenerator;
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.repository.NotificationRepository;
 import com.keepreal.madagascar.tenrecs.util.PaginationUtils;
@@ -15,14 +17,18 @@ import org.springframework.stereotype.Service;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final LongIdGenerator idGenerator;
 
     /**
      * Constructs the notification service.
      *
      * @param notificationRepository {@link NotificationRepository}.
+     * @param idGenerator            {@link DefaultSnowflakeIdGenerator}.
      */
-    public NotificationService(NotificationRepository notificationRepository) {
+    public NotificationService(NotificationRepository notificationRepository,
+                               LongIdGenerator idGenerator) {
         this.notificationRepository = notificationRepository;
+        this.idGenerator = idGenerator;
     }
 
     /**
@@ -51,13 +57,14 @@ public class NotificationService {
     }
 
     /**
-     * Upserts the notification.
+     * Inserts the notification.
      *
      * @param notification {@link Notification}.
      * @return {@link Notification}.
      */
-    public Notification upsert(Notification notification) {
-        return this.notificationRepository.save(notification);
+    public Notification insert(Notification notification) {
+        notification.setId(this.idGenerator.nextId());
+        return this.notificationRepository.insert(notification);
     }
 
 }

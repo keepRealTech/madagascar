@@ -15,6 +15,7 @@ sourceSets {
 
 dependencies {
     implementation project(":common:exceptions")
+    implementation project(":common:id-generator-starter")
 
     implementation 'com.aliyun.openservices:ons-client:1.8.4.Final'
     implementation 'org.springframework.boot:spring-boot-starter'
