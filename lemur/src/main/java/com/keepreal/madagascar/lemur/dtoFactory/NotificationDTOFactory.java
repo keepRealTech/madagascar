@@ -1,9 +1,11 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 
-import com.keepreal.madagascar.lemur.dtoFactory.notification.CommentNotificationDTOBuilder;
-import com.keepreal.madagascar.lemur.dtoFactory.notification.IslandNoticeNotificationDTOBuilder;
-import com.keepreal.madagascar.lemur.dtoFactory.notification.ReactionNotificationDTOBuilder;
+import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.CommentNotificationDTOBuilder;
+import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.NoticeNotificationDTOBuilder;
+import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.ReactionNotificationDTOBuilder;
+import com.keepreal.madagascar.lemur.service.IslandService;
+import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.UnreadNotificationsCountMessage;
 import org.springframework.stereotype.Component;
@@ -21,13 +23,36 @@ public class NotificationDTOFactory {
     private final FeedDTOFactory feedDTOFactory;
     private final ReactionDTOFactory reactionDTOFactory;
     private final CommentDTOFactory commentDTOFactory;
+    private final UserService userService;
+    private final UserDTOFactory userDTOFactory;
+    private final IslandService islandService;
+    private final IslandDTOFactory islandDTOFactory;
 
+    /**
+     * Constructs the notification dto factory.
+     *
+     * @param feedDTOFactory     {@link FeedDTOFactory}.
+     * @param reactionDTOFactory {@link ReactionDTOFactory}.
+     * @param commentDTOFactory  {@link CommentDTOFactory}.
+     * @param userService        {@link UserService}.
+     * @param userDTOFactory     {@link UserDTOFactory}.
+     * @param islandService      {@link IslandService}.
+     * @param islandDTOFactory   {@link IslandDTOFactory}.
+     */
     public NotificationDTOFactory(FeedDTOFactory feedDTOFactory,
                                   ReactionDTOFactory reactionDTOFactory,
-                                  CommentDTOFactory commentDTOFactory) {
+                                  CommentDTOFactory commentDTOFactory,
+                                  UserService userService,
+                                  UserDTOFactory userDTOFactory,
+                                  IslandService islandService,
+                                  IslandDTOFactory islandDTOFactory) {
         this.feedDTOFactory = feedDTOFactory;
         this.reactionDTOFactory = reactionDTOFactory;
         this.commentDTOFactory = commentDTOFactory;
+        this.userService = userService;
+        this.userDTOFactory = userDTOFactory;
+        this.islandService = islandService;
+        this.islandDTOFactory = islandDTOFactory;
     }
 
     /**
@@ -65,8 +90,12 @@ public class NotificationDTOFactory {
 
         switch (notification.getType()) {
             case NOTIFICATION_ISLAND_NOTICE:
-                return new IslandNoticeNotificationDTOBuilder()
+                return new NoticeNotificationDTOBuilder()
                         .setNotificationMessage(notification)
+                        .setIslandService(this.islandService)
+                        .setIslandDTOFactory(this.islandDTOFactory)
+                        .setUserService(this.userService)
+                        .setUserDTOFactory(this.userDTOFactory)
                         .build();
             case NOTIFICATION_COMMENTS:
                 return new CommentNotificationDTOBuilder()

@@ -33,6 +33,11 @@ message NotificationTypeValue {
     NotificationType value = 1;
 }
 
+enum NoticeType {
+    NOTICE_TYPE_NONE = 0;
+    NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER = 1;
+}
+
 enum ReactionType {
     REACTION_NONE = 0;
     REACTION_LIKE = 1;
@@ -131,7 +136,7 @@ message FeedMessage {
     int32 likesCount = 8;
     int32 commentsCount = 9;
     int32 repostCount = 10;
-    //需要返回评论的前五条，评论人name和text
+    repeated CommentMessage lastComments = 11;
 }
 
 message CommentMessage {

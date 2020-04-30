@@ -661,6 +661,10 @@ components:
         - IDENTITY_FASHION
         - IDENTITY_COMIC
         - IDENTITY_OTHERS
+    NoticeType:
+      type: string
+      enum:
+        - ISLAND_NOTICE_NEW_SUBSCRIBER
     CommonResponse:
       type: object
       properties:
@@ -936,8 +940,8 @@ components:
       properties:
         id:
           type: string
-        islandId:
-          type: string
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
         user:
           $ref: '#/components/schemas/BriefUserDTO'
         text:
@@ -949,6 +953,10 @@ components:
         fromHost:
           type: boolean
           description: whether feed posted by the host of island
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentDTO'
         createdAt:
           type: integer
           format: int64
@@ -984,19 +992,21 @@ components:
             format: binary
       required:
         - payload
-    PostCheckFeedsRequest:
+    CheckFeedsMessage:
       type: object
       properties:
-        islandIds:
-          type: array
-          items:
-            type: string
+        islandId:
+          type: string
         timestamp:
           type: integer
           format: int64
-      required:
-        - islandIds
-        - timestamp
+    PostCheckFeedsRequest:
+      type: object
+      properties:
+        checkFeedsMessage:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckFeedsMessage'
     CheckFeedsDTO:
       type: object
       properties:
@@ -1087,6 +1097,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ReactionType'
+        createdAt:
+          type: integer
+          format: int64
     PostReactionRequest:
       type: object
       properties:
@@ -1114,14 +1127,40 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/ReactionDTO'
-    IslandNoticeDTO:
+    NotificationDTO:
+      oneOf:
+        - $ref: '#/components/schemas/CommentNotificationDTO'
+        - $ref: '#/components/schemas/ReactionNotificationDTO'
+        - $ref: '#/components/schemas/NoticeNotificationDTO'
+    NoticeDTO:
+      oneOf:
+        - $ref: '#/components/schemas/SubscribeNoticeDTO'
+    SubscribeNoticeDTO:
       type: object
       properties:
-        content:
+        noticeType:
+          $ref: '#/components/schemas/NoticeType'
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
+        subscriber:
+          $ref: '#/components/schemas/BriefUserDTO'
+    ReactionNotificationDTO:
+      type: object
+      properties:
+        id:
           type: string
-        islandId:
-          type: string
-    NotificationDTO:
+        notificationType:
+          $ref: '#/components/schemas/NotificationType'
+        feed:
+          $ref: '#/components/schemas/BriefFeedDTO'
+        reactions:
+          $ref: '#/components/schemas/ReactionDTO'
+        hasRead:
+          type: boolean
+        createdAt:
+          type: integer
+          format: int64
+    CommentNotificationDTO:
       type: object
       properties:
         id:
@@ -1132,10 +1171,20 @@ components:
           $ref: '#/components/schemas/BriefFeedDTO'
         comment:
           $ref: '#/components/schemas/CommentDTO'
-        reactions:
-          $ref: '#/components/schemas/ReactionDTO'
-        islandNotice:
-          $ref: '#/components/schemas/IslandNoticeDTO'
+        hasRead:
+          type: boolean
+        createdAt:
+          type: integer
+          format: int64
+    NoticeNotificationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        notificationType:
+          $ref: '#/components/schemas/NotificationType'
+        notice:
+          $ref: '#/components/schemas/NoticeDTO'
         hasRead:
           type: boolean
         createdAt:

@@ -197,15 +197,15 @@ public class FeedService {
      * Checks if has new feeds after the given timestamp.
      *
      * @param islandIds Island ids.
-     * @param timestamp Timestamp in milli-seconds.
+     * @param timestamps Timestamps in milli-seconds.
      * @return List of {@link CheckNewFeedsMessage}.
      */
-    public List<CheckNewFeedsMessage> checkNewFeeds(List<String> islandIds, long timestamp) {
+    public List<CheckNewFeedsMessage> checkNewFeeds(List<String> islandIds, List<Long> timestamps) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
 
         CheckNewFeedsRequest request = CheckNewFeedsRequest.newBuilder()
                 .addAllIslandIds(islandIds)
-                .setTimestamp(timestamp)
+                .addAllTimestamps(timestamps)
                 .build();
 
         CheckNewFeedsResponse checkNewFeedsResponse;
