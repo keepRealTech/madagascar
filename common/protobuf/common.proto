@@ -133,7 +133,7 @@ message FeedMessage {
     int32 likesCount = 8;
     int32 commentsCount = 9;
     int32 repostCount = 10;
-    //需要返回评论的前五条，评论人name和text
+    repeated CommentMessage lastComments = 11;
 }
 
 message CommentMessage {

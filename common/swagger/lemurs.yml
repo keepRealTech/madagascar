@@ -936,8 +936,8 @@ components:
       properties:
         id:
           type: string
-        islandId:
-          type: string
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
         user:
           $ref: '#/components/schemas/BriefUserDTO'
         text:
@@ -949,6 +949,10 @@ components:
         fromHost:
           type: boolean
           description: whether feed posted by the host of island
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentDTO'
         createdAt:
           type: integer
           format: int64
@@ -984,19 +988,21 @@ components:
             format: binary
       required:
         - payload
-    PostCheckFeedsRequest:
+    CheckFeedsMessage:
       type: object
       properties:
-        islandIds:
-          type: array
-          items:
-            type: string
+        islandId:
+          type: string
         timestamp:
           type: integer
           format: int64
-      required:
-        - islandIds
-        - timestamp
+    PostCheckFeedsRequest:
+      type: object
+      properties:
+        checkFeedsMessage:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckFeedsMessage'
     CheckFeedsDTO:
       type: object
       properties:
@@ -1087,6 +1093,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ReactionType'
+        createdAt:
+          type: integer
+          format: int64
     PostReactionRequest:
       type: object
       properties:

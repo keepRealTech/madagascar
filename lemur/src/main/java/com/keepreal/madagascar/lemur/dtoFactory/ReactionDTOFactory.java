@@ -44,6 +44,7 @@ public class ReactionDTOFactory {
         ReactionDTO reactionDTO = new ReactionDTO();
         reactionDTO.setId(reaction.getId());
         reactionDTO.setFeedId(reaction.getFeedId());
+        reactionDTO.setCreatedAt(reaction.getCreatedAt());
         reactionDTO.setReactionType(reaction.getReactionTypeList()
                 .stream()
                 .map(this::convertType)
