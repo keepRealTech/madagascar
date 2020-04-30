@@ -17,4 +17,8 @@ public class CommonStatusUtils {
                 .setMessage(errorCode.name())
                 .build();
     }
+
+    public static CommonStatus getSuccStatus() {
+        return buildCommonStatus(ErrorCode.REQUEST_SUCC);
+    }
 }

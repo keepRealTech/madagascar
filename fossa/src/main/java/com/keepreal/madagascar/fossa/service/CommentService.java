@@ -19,6 +19,7 @@ import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -51,7 +52,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         String feedId = request.getFeedId();
         String userId = request.getUserId();
         String content = request.getContent();
-        String replyToId = userId;//todo
+        String replyToId = userId;//todo 如果没传怎么处理，或者自己回复自己，或者没有回复对象
         if (request.hasReplyToId()) {
             replyToId = request.getReplyToId().getValue();
         }
@@ -123,6 +124,13 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
                 .build();
         responseObserver.onNext(deleteCommentByIdResponse);
         responseObserver.onCompleted();
+    }
+
+    public List<CommentMessage> getLastCommentMessage(Long feedId, int commentCount) {
+        Pageable pageable = PageRequest.of(0, commentCount);
+        List<CommentInfo> commentInfoList = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalse(feedId, pageable).getContent();
+
+        return commentInfoList.stream().map(this::getCommentMessage).collect(Collectors.toList());
     }
 
     private CommentMessage getCommentMessage(CommentInfo commentInfo) {

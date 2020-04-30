@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.coua";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message QueryIslandCondition {
+    google.protobuf.StringValue name = 1;
+    google.protobuf.StringValue hostId = 2;
+    google.protobuf.StringValue subscribedUserId = 3;
+}
+
+message NewIslandRequest {
+    string name = 1;
+    google.protobuf.StringValue portraitImageUri = 2;
+    google.protobuf.StringValue secret = 3;
+}
+
+message IslandResponse {
+    CommonStatus status = 1;
+    IslandMessage island = 2;
+}
+
+message RetrieveMultipleIslandsRequest {
+    QueryIslandCondition condition = 1;
+    PageRequest pageRequest = 2;
+}
+
+message IslandsResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated IslandMessage islands = 3;
+}
+
+message CheckNameRequest {
+    string name = 1;
+}
+
+message CheckNameResponse {
+    CommonStatus status = 1;
+    bool isExisted = 2;
+}
+
+message RetrieveIslandByIdRequest {
+    string id = 1;
+}
+
+message UpdateIslandByIdRequest {
+    string id = 1;
+    google.protobuf.StringValue name = 2;
+    google.protobuf.StringValue portraitImageUri = 3;
+    google.protobuf.StringValue secret = 4;
+    google.protobuf.StringValue description = 5;
+}
+
+message RetrieveIslandSubscribersByIdRequest {
+    string id = 1;
+    PageRequest pageRequest = 2;
+}
+
+message IslandSubscribersResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated UserMessage user = 3;
+}
+
+message RetrieveIslandProfileByIdRequest {
+    string id = 1;
+    google.protobuf.StringValue userId = 2;
+}
+
+message IslandProfileResponse {
+    CommonStatus status = 1;
+    IslandMessage island = 2;
+    UserMessage host = 3;
+    google.protobuf.StringValue userIndex = 4;
+}
+
+message SubscribeIslandByIdRequest {
+    string id = 1;
+    string secret = 2;
+    string userId = 3;
+}
+
+message UnsubscribeIslandByIdRequest {
+    string id = 1;
+    string userId = 2;
+}
+
+message SubscribeIslandResponse {
+    CommonStatus status = 1;
+}
+
+service IslandService {
+    rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
+    rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
+    rpc RetrieveIslandById (RetrieveIslandByIdRequest) returns (IslandResponse) {};
+    rpc RetrieveIslandProfileById (RetrieveIslandProfileByIdRequest) returns (IslandProfileResponse) {};
+    rpc RetrieveIslandsByCondition (RetrieveMultipleIslandsRequest) returns (IslandsResponse) {};
+    rpc UpdateIslandById (UpdateIslandByIdRequest) returns (IslandResponse) {};
+    rpc RetrieveIslandSubscribersById (RetrieveIslandSubscribersByIdRequest) returns (IslandSubscribersResponse) {};
+    rpc SubscribeIslandById (SubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
+    rpc UnsubscribeIslandById (UnsubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
+}

@@ -98,6 +98,8 @@ message UserMessage {
     Gender gender = 7;
     string birthday = 8;
     repeated IdentityType identities = 9;
+    uint64 createAt = 10;
+    uint32 age = 11;
 }
 
 message IslandMessage {
@@ -123,7 +125,7 @@ message RepostMessage {
 message FeedMessage {
     string id = 1;
     string islandId = 2;
-    string userId = 3; // 返回user的name和imageUrl
+    string userId = 3;
     string text = 4;
     repeated string imageUris = 5;
     bool fromHost = 6;
@@ -131,7 +133,7 @@ message FeedMessage {
     int32 likesCount = 8;
     int32 commentsCount = 9;
     int32 repostCount = 10;
-    //需要返回评论的前五条，评论人name和text
+    repeated CommentMessage lastComments = 11;
 }
 
 message CommentMessage {

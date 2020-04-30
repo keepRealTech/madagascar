@@ -2,6 +2,7 @@ package com.keepreal.madagascar.fossa.model;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
@@ -12,14 +13,16 @@ import java.util.List;
  **/
 
 @Data
+@Document(value = "feedInfo")
 public class FeedInfo {
 
     @Id
     private Long id;
     private Long islandId;
     private Long userId;
-    private String content;
+    private String text;
     private List<String> imageUrls;
+    private Boolean fromHost;
     private Integer likesCount;
     private Integer commentsCount;
     private Integer repostCount;
