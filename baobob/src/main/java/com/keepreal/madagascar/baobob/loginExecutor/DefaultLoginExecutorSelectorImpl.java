@@ -49,6 +49,12 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
                                 endpoints.getEndpointsConfigurer().getTokenServices(),
                                 endpoints.getEndpointsConfigurer().getClientDetailsService(),
                                 endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
+            case LOGIN_PASSWORD:
+                return new DummyPasswordLoginExecutor(this.userService,
+                        new LocalTokenGranter(
+                                endpoints.getEndpointsConfigurer().getTokenServices(),
+                                endpoints.getEndpointsConfigurer().getClientDetailsService(),
+                                endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
             case UNRECOGNIZED:
             default:
                 return new DummyLoginExecutorImpl();
