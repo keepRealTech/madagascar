@@ -3,6 +3,8 @@ package com.keepreal.madagascar.baobob.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -100,6 +102,16 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
                 .tokenEnhancer(tokenEnhancerChain)
                 .tokenStore(this.tokenStore())
                 .allowedTokenEndpointRequestMethods(HttpMethod.GET);
+    }
+
+    /**
+     * Represents the default password encoder. This is required by Spring 5 and will be used by the client secrets.
+     *
+     * @return Password encoder.
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
     }
 
 }
