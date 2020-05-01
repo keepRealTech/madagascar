@@ -2,6 +2,8 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.baobob.LoginRequest;
+import com.keepreal.madagascar.baobob.OAuthWechatLoginPayload;
+import com.keepreal.madagascar.baobob.PasswordLoginPayload;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -59,11 +61,26 @@ public class LoginController implements LoginApi {
      */
     @Override
     public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest body) {
-        LoginRequest loginRequest =
-                LoginRequest.newBuilder()
-                        .setCode(StringValue.of(""))
-                        .setLoginType(this.loginTypeOf(body.getLoginType()))
+        LoginRequest loginRequest;
+        switch (body.getLoginType()) {
+            case OAUTH_WECHAT:
+                loginRequest = LoginRequest.newBuilder()
+                    .setOauthWechatPayload(OAuthWechatLoginPayload.newBuilder()
+                            .setCode(body.getData().getCode()))
+                    .setLoginType(com.keepreal.madagascar.common.LoginType.LOGIN_OAUTH_WECHAT)
+                    .build();
+                break;
+            case PASSWORD:
+                loginRequest = LoginRequest.newBuilder()
+                        .setPasswordPayload(PasswordLoginPayload.newBuilder()
+                                .setUsername(body.getData().getUsername())
+                                .setPassword(body.getData().getPassword()))
+                        .setLoginType(com.keepreal.madagascar.common.LoginType.LOGIN_PASSWORD)
                         .build();
+                break;
+            default:
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.login(loginRequest);
 
         UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
@@ -103,21 +120,6 @@ public class LoginController implements LoginApi {
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-
-    /**
-     * Converts the {@link LoginType} into {@link com.keepreal.madagascar.common.LoginType}.
-     *
-     * @param loginType {@link LoginType}.
-     * @return {@link com.keepreal.madagascar.common.LoginType}.
-     */
-    private com.keepreal.madagascar.common.LoginType loginTypeOf(LoginType loginType) {
-        switch (loginType) {
-            case OAUTH_WECHAT:
-                return com.keepreal.madagascar.common.LoginType.LOGIN_OAUTH_WECHAT;
-            default:
-                throw new KeepRealBusinessException(ErrorCode.REQUEST_NOT_IMPLEMENTED_FUNCTION_ERROR);
-        }
     }
 
     /**

@@ -6,18 +6,30 @@ option java_package = "com.keepreal.madagascar.baobob";
 import "common.proto";
 import "google/protobuf/wrappers.proto";
 
+message OAuthWechatLoginPayload {
+    string code = 1;
+}
+
+message PasswordLoginPayload {
+    string username = 1;
+    string password = 2;
+}
+
 message LoginRequest {
-  LoginType loginType = 1;
-  google.protobuf.StringValue code = 2;
+    LoginType loginType = 1;
+    oneof payload {
+        OAuthWechatLoginPayload oauthWechatPayload = 2;
+        PasswordLoginPayload passwordPayload = 3;
+    }
 }
 
 message LoginResponse {
-  CommonStatus status = 1;
-  string token = 2;
-  string refreshToken = 3;
-  string userId = 4;
+    CommonStatus status = 1;
+    string token = 2;
+    string refreshToken = 3;
+    string userId = 4;
 }
 
 service LoginService {
-	rpc login(LoginRequest) returns (LoginResponse) {};
+    rpc login(LoginRequest) returns (LoginResponse) {};
 }

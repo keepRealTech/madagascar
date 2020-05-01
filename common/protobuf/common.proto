@@ -19,6 +19,7 @@ message PageResponse {
 enum LoginType {
     LOGIN_TYPE_NONE = 0;
     LOGIN_OAUTH_WECHAT = 1;
+    LOGIN_PASSWORD = 2;
 }
 
 enum NotificationType {

@@ -1317,6 +1317,7 @@ components:
           $ref: '#/components/schemas/LoginPayload'
       required:
         - loginType
+        - data
     PostRefreshTokenRequest:
       type: object
       properties:
