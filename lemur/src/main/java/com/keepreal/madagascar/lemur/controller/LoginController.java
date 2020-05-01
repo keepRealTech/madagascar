@@ -14,6 +14,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.LoginApi;
 import swagger.model.LoginResponse;
@@ -64,6 +65,10 @@ public class LoginController implements LoginApi {
         LoginRequest loginRequest;
         switch (body.getLoginType()) {
             case OAUTH_WECHAT:
+                if (StringUtils.isEmpty(body.getData().getCode())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
                 loginRequest = LoginRequest.newBuilder()
                     .setOauthWechatPayload(OAuthWechatLoginPayload.newBuilder()
                             .setCode(body.getData().getCode()))
@@ -71,6 +76,11 @@ public class LoginController implements LoginApi {
                     .build();
                 break;
             case PASSWORD:
+                if (StringUtils.isEmpty(body.getData().getUsername())
+                        || StringUtils.isEmpty(body.getData().getPassword())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
                 loginRequest = LoginRequest.newBuilder()
                         .setPasswordPayload(PasswordLoginPayload.newBuilder()
                                 .setUsername(body.getData().getUsername())
