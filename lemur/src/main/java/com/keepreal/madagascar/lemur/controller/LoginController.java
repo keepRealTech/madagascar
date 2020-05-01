@@ -23,6 +23,8 @@ import swagger.model.UserResponse;
 
 import javax.validation.Valid;
 
+import static swagger.model.LoginType.OAUTH_WECHAT;
+
 /**
  * Represents the login controllers.
  */
@@ -59,7 +61,7 @@ public class LoginController implements LoginApi {
     public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest body) {
         LoginRequest loginRequest =
                 LoginRequest.newBuilder()
-                        .setCode(StringValue.of(body.getData()))
+                        .setCode(StringValue.of(""))
                         .setLoginType(this.loginTypeOf(body.getLoginType()))
                         .build();
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.login(loginRequest);
@@ -111,7 +113,7 @@ public class LoginController implements LoginApi {
      */
     private com.keepreal.madagascar.common.LoginType loginTypeOf(LoginType loginType) {
         switch (loginType) {
-            case LOGIN_OAUTH_WECHAT:
+            case OAUTH_WECHAT:
                 return com.keepreal.madagascar.common.LoginType.LOGIN_OAUTH_WECHAT;
             default:
                 throw new KeepRealBusinessException(ErrorCode.REQUEST_NOT_IMPLEMENTED_FUNCTION_ERROR);

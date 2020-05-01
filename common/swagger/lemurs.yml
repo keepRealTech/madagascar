@@ -23,6 +23,8 @@ tags:
     description: Notifications controllers
   - name: Report
     description: Reports controllers
+  - name: Config
+    description: Configs controllers
 
 paths:
   /api/v1/login:
@@ -543,6 +545,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotificationsCountResponse'
+  /api/v1/configs:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/configTypeInQuery'
+      tags:
+        - Config
+      summary: retrieves the client config info
+      responses:
+        '200':
+          description: client configurations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -623,11 +639,23 @@ components:
       required: false
       schema:
         type: boolean
+    configTypeInQuery:
+      in: query
+      name: configType
+      required: true
+      schema:
+        $ref: '#/components/schemas/ConfigType'
   schemas:
     LoginType:
       type: string
       enum:
         - LOGIN_OAUTH_WECHAT
+        - LOGIN_PASSWORD
+    ConfigType:
+      type: string
+      enum:
+        - CONFIG_IOS
+        - CONFIG_ANDROID
     ReactionType:
       type: string
       enum:
@@ -1264,13 +1292,29 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/RepostDTO'
+    WechatOAuthLoginPayload:
+      type: object
+      properties:
+        code:
+          type: string
+    PasswordLoginPayload:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    LoginPayload:
+      oneOf:
+        - $ref: '#/components/schemas/WechatOAuthLoginPayload'
+        - $ref: '#/components/schemas/PasswordLoginPayload'
     PostLoginRequest:
       type: object
       properties:
         loginType:
           $ref: '#/components/schemas/LoginType'
         data:
-          type: string
+          $ref: '#/components/schemas/LoginPayload'
       required:
         - loginType
     PostRefreshTokenRequest:
@@ -1296,3 +1340,24 @@ components:
           type: string
         user:
           $ref: '#/components/schemas/UserDTO'
+    IOSConfigurationDTO:
+      type: object
+      properties:
+        audit:
+          type: boolean
+    AndroidConfigurationDTO:
+      type: object
+      properties:
+        audit:
+          type: boolean
+    ConfigurationDTO:
+      oneOf:
+        - $ref: '#/components/schemas/IOSConfigurationDTO'
+        - $ref: '#/components/schemas/AndroidConfigurationDTO'
+    ConfigurationResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ConfigurationDTO'
