@@ -22,7 +22,7 @@ public class ConfigurationController implements ConfigApi {
      * @return {@link ConfigurationResponse}.
      */
     @Override
-    public ResponseEntity<ConfigurationResponse> apiV1ConfigGet(ConfigType configType) {
+    public ResponseEntity<ConfigurationResponse> apiV1ConfigsGet(ConfigType configType) {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
         switch (configType) {
             case IOS:
