@@ -37,6 +37,11 @@ public class UserIdentityService {
         userIdentityRepository.saveAll(userIdentityList);
     }
 
+    void updateUserIdentities(List<Integer> userIdentitiesTypes, Long userId) {
+        userIdentityRepository.deleteUserIdentitiesByUserId(userId);
+        saveUserIdentities(userIdentitiesTypes, userId);
+    }
+
     public List<Integer> getAllIdentitiesByUserId(Long userId) {
         return userIdentityRepository.getUserIdentityTypesByUserId(userId);
     }

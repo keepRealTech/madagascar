@@ -84,7 +84,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
             UserMessage userMessage = getUserMessage(userInfo);
             responseBuilder.setUser(userMessage);
         }
-        UserResponse userResponse = responseBuilder.build();
+        UserResponse userResponse = responseBuilder.setStatus(CommonStatusUtils.getSuccStatus()).build();
         responseObserver.onNext(userResponse);
         responseObserver.onCompleted();
     }
@@ -115,7 +115,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
             }
         }
         if (request.getIdentitiesCount() > 0) {
-            userIdentityService.saveUserIdentities(request.getIdentitiesValueList(), userId);
+            userIdentityService.updateUserIdentities(request.getIdentitiesValueList(), userId);
         }
         saveAndResponse(userInfo, responseObserver);
     }
@@ -141,7 +141,9 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         UserInfo save = userInfoRepository.save(userInfo);
 
         UserMessage userMessage = getUserMessage(save);
-        UserResponse userResponse = UserResponse.newBuilder().setUser(userMessage).build();
+        UserResponse userResponse = UserResponse.newBuilder()
+                .setUser(userMessage)
+                .setStatus(CommonStatusUtils.getSuccStatus()).build();
         responseObserver.onNext(userResponse);
         responseObserver.onCompleted();
     }

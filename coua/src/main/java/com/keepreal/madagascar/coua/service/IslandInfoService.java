@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -50,7 +51,10 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     public void checkName(CheckNameRequest request, StreamObserver<CheckNameResponse> responseObserver) {
         String islandName = request.getName();
         boolean isExisted = islandNameIsExisted(islandName);
-        CheckNameResponse checkNameResponse = CheckNameResponse.newBuilder().setIsExisted(isExisted).build();
+        CheckNameResponse checkNameResponse = CheckNameResponse.newBuilder()
+                .setIsExisted(isExisted)
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
         responseObserver.onNext(checkNameResponse);
         responseObserver.onCompleted();
     }
@@ -83,7 +87,10 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         subscriptionService.initHost(islandId, Long.valueOf(hostId));
 
         IslandMessage islandMessage = getIslandMessage(save);
-        IslandResponse islandResponse = IslandResponse.newBuilder().setIsland(islandMessage).build();
+        IslandResponse islandResponse = IslandResponse.newBuilder()
+                .setIsland(islandMessage)
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
         responseObserver.onNext(islandResponse);
         responseObserver.onCompleted();
     }
@@ -101,7 +108,9 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         if (islandInfoOptional.isPresent()) {
             IslandInfo islandInfo = islandInfoOptional.get();
             IslandMessage islandMessage = getIslandMessage(islandInfo);
-            responseBuilder.setIsland(islandMessage);
+            responseBuilder
+                    .setIsland(islandMessage)
+                    .setStatus(CommonStatusUtils.getSuccStatus());
         } else {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
@@ -155,7 +164,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
                     .build();
             builder.setPageResponse(pageResponse);
         }
-        IslandsResponse islandsResponse = builder.build();
+        IslandsResponse islandsResponse = builder.setStatus(CommonStatusUtils.getSuccStatus()).build();
         responseObserver.onNext(islandsResponse);
         responseObserver.onCompleted();
     }
@@ -186,7 +195,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             islandInfo.setUpdatedTime(System.currentTimeMillis());
             IslandInfo save = islandInfoRepository.save(islandInfo);
             IslandMessage islandMessage = getIslandMessage(save);
-            responseBuilder.setIsland(islandMessage);
+            responseBuilder.setIsland(islandMessage).setStatus(CommonStatusUtils.getSuccStatus());
         } else {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
@@ -218,7 +227,8 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
                 Integer userIndex = subscriptionService.getUserIndexByIslandId(islandInfo.getId(), islandInfo.getHostId());
                 responseBuilder.setIsland(islandMessage)
                         .setHost(userMessage)
-                        .setUserIndex(StringValue.newBuilder().setValue(userIndex.toString()).build());
+                        .setUserIndex(StringValue.newBuilder().setValue(userIndex.toString()).build())
+                        .setStatus(CommonStatusUtils.getSuccStatus());
             }
         }
         if (!islandFound || !userFound) {
@@ -263,6 +273,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
                  IslandSubscribersResponse.newBuilder()
                         .setPageResponse(pageResponse)
                         .addAllUser(userMessageList)
+                        .setStatus(CommonStatusUtils.getSuccStatus())
                         .build();
         responseObserver.onNext(islandSubscribersResponse);
         responseObserver.onCompleted();
@@ -294,7 +305,9 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             responseBuilder.setStatus(commonStatus);
         }
 
-        SubscribeIslandResponse subscribeIslandResponse = SubscribeIslandResponse.newBuilder().build();
+        SubscribeIslandResponse subscribeIslandResponse = SubscribeIslandResponse.newBuilder()
+                        .setStatus(CommonStatusUtils.getSuccStatus())
+                        .build();
         responseObserver.onNext(subscribeIslandResponse);
         responseObserver.onCompleted();
     }
@@ -310,8 +323,55 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         String userId = request.getUserId();
         subscriptionService.unSubscribeIsland(Long.valueOf(islandId), Long.valueOf(userId));
 
-        SubscribeIslandResponse subscribeIslandResponse = SubscribeIslandResponse.newBuilder().build();
+        SubscribeIslandResponse subscribeIslandResponse = SubscribeIslandResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus()).build();
         responseObserver.onNext(subscribeIslandResponse);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * 根据islandId和对应的timestamp检查是否有新的未读feed
+     * @param request
+     * @param responseObserver
+     */
+    @Override
+    public void checkNewFeeds(CheckNewFeedsRequest request, StreamObserver<CheckNewFeedsResponse> responseObserver) {
+        List<Long> islandIdList = request.getIslandIdsList().stream().map(Long::valueOf).collect(Collectors.toList());
+        List<Long> timestampsList = request.getTimestampsList();
+        List<CheckNewFeedsMessage> messageList = new ArrayList<>();
+        if (islandIdList.size() == timestampsList.size()) {
+            Map<Long, Long> map = islandInfoRepository.findIslandIdAndLastFeedAtByIslandIdList(islandIdList);
+            for (int i = 0; i < islandIdList.size(); i++) {
+                Long islandId = islandIdList.get(i);
+                CheckNewFeedsMessage feedMessage = getFeedMessage(islandId.toString(), map.get(islandId) > timestampsList.get(i));
+                messageList.add(feedMessage);
+            }
+        } else {
+            // todo add error status
+        }
+        CheckNewFeedsResponse response = CheckNewFeedsResponse.newBuilder()
+                .addAllCheckNewFeeds(messageList)
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * 根据islandId和timestamp更新island的lastFeedAt
+     * @param request
+     * @param responseObserver
+     */
+    @Override
+    public void updateLastFeedAtById(UpdateLastFeedAtRequest request, StreamObserver<UpdateLastFeedAtResponse> responseObserver) {
+        List<Long> islandIdList = request.getIslandIdsList().stream().map(Long::valueOf).collect(Collectors.toList());
+        long timestamps = request.getTimestamps();
+        islandInfoRepository.updateLastFeedAtByIslandIdList(islandIdList, timestamps);
+
+        UpdateLastFeedAtResponse response = UpdateLastFeedAtResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 
@@ -337,6 +397,13 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
                 .setCreatedAt(islandInfo.getCreatedTime())
                 .setSecret(islandInfo.getSecret())
                 .setMemberCount(memberCount)
+                .build();
+    }
+
+    private CheckNewFeedsMessage getFeedMessage(String islandId, boolean hasNewFeeds) {
+        return CheckNewFeedsMessage.newBuilder()
+                .setIslandId(islandId)
+                .setHasNewFeeds(hasNewFeeds)
                 .build();
     }
 }
