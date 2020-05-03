@@ -146,17 +146,18 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         boolean fromHost = condition.hasFromHost();
         boolean hasIslandId = condition.hasIslandId();
         Query query = new Query();
-        if (fromHost && hasIslandId) {
+        if (fromHost && hasIslandId) { //两个条件都存在
             Criteria criteria = Criteria
                     .where("fromHost").is(condition.getFromHost().getValue())
                     .and("islandId").is(condition.getIslandId().getValue());
             query.addCriteria(criteria);
-        } else if (fromHost || hasIslandId) {
+        } else if (fromHost || hasIslandId) { //只有一个条件
             Criteria criteria = fromHost ? Criteria.where("fromHost").is(condition.getFromHost().getValue())
                     : Criteria.where("islandId").is(condition.getIslandId().getValue());
             query.addCriteria(criteria);
         }
 
+        // 没有条件
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.skip(page * pageSize).limit(pageSize), FeedInfo.class);
         List<FeedMessage> feedMessageList = feedInfoList.stream().map(this::getFeedMessage).collect(Collectors.toList());

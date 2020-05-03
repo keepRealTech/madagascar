@@ -1,12 +1,12 @@
 package com.keepreal.madagascar.fossa.service;
 
-import com.keepreal.madagascar.common.ReportType;
 import com.keepreal.madagascar.fossa.NewReportRequest;
 import com.keepreal.madagascar.fossa.ReportMessage;
 import com.keepreal.madagascar.fossa.ReportResponse;
 import com.keepreal.madagascar.fossa.ReportServiceGrpc;
 import com.keepreal.madagascar.fossa.dao.ReportRepository;
 import com.keepreal.madagascar.fossa.model.ReportInfo;
+import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +55,7 @@ public class ReportService extends ReportServiceGrpc.ReportServiceImplBase {
 
         ReportResponse reportResponse = ReportResponse.newBuilder()
                 .setReport(reportMessage)
+                .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
         responseObserver.onNext(reportResponse);
         responseObserver.onCompleted();

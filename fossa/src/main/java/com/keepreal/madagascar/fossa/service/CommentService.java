@@ -69,7 +69,9 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
 
         CommentMessage commentMessage = getCommentMessage(save);
         CommentResponse commentResponse = CommentResponse.newBuilder()
-                .setComment(commentMessage).build();
+                .setComment(commentMessage)
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
         responseObserver.onNext(commentResponse);
         responseObserver.onCompleted();
         super.createComment(request, responseObserver);
@@ -93,6 +95,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         CommentsResponse commentsResponse = CommentsResponse.newBuilder()
                 .addAllComments(commentMessageList)
                 .setPageResponse(pageResponse)
+                .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
 
         responseObserver.onNext(commentsResponse);

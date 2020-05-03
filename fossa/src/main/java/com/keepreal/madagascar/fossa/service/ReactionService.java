@@ -11,6 +11,7 @@ import com.keepreal.madagascar.fossa.RetrieveReactionsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.RevokeReactionRequest;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.ReactionInfo;
+import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
@@ -110,6 +111,7 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         ReactionsResponse reactionsResponse = ReactionsResponse.newBuilder()
                 .addAllReactions(reactionMessageList)
                 .setPageResponse(pageResponse)
+                .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
         responseObserver.onNext(reactionsResponse);
         responseObserver.onCompleted();
@@ -129,8 +131,10 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
     }
 
     private void basicResponse(StreamObserver<ReactionResponse> responseObserver, ReactionMessage reactionMessage) {
-        ReactionResponse reactionResponse = ReactionResponse
-                .newBuilder().setReaction(reactionMessage).build();
+        ReactionResponse reactionResponse = ReactionResponse.newBuilder()
+                .setReaction(reactionMessage)
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
         responseObserver.onNext(reactionResponse);
         responseObserver.onCompleted();
     }
