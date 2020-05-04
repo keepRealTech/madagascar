@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.coua.service;
 
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.common.SubscriptionState;
 import com.keepreal.madagascar.coua.dao.SubscriptionRepository;
 import com.keepreal.madagascar.coua.model.Subscription;
@@ -22,10 +23,11 @@ public class SubscriptionService {
     @Autowired
     private SubscriptionRepository subscriptionRepository;
     @Autowired
-    private IslandInfoService islandInfoService;
+    private LongIdGenerator idGenerator;
 
     public void initHost(Long islandId, Long hostId) {
         Subscription subscription = new Subscription();
+        subscription.setId(idGenerator.nextId());
         subscription.setIslandId(islandId);
         subscription.setUserId(hostId);
         subscription.setIslanderNumber(HOST_NUMBER);
@@ -67,6 +69,7 @@ public class SubscriptionService {
         } else {
             //创建对象
             subscription = new Subscription();
+            subscription.setId(idGenerator.nextId());
             subscription.setIslandId(islandId);
             subscription.setUserId(userId);
             subscription.setState(SubscriptionState.ISLANDER.getValue());

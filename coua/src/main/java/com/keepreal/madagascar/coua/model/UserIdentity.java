@@ -20,7 +20,6 @@ import javax.persistence.*;
 public class UserIdentity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long userId;
     private Integer identityType;

@@ -26,7 +26,6 @@ import javax.persistence.Table;
 public class Subscription {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Long userId;
     private Long islandId;

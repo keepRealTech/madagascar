@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.*;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
 import com.keepreal.madagascar.coua.model.IslandInfo;
@@ -35,6 +36,8 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     private final IslandInfoRepository islandInfoRepository;
     private final SubscriptionService subscriptionService;
     private final UserInfoService userInfoService;
+    @Autowired
+    private LongIdGenerator idGenerator;
 
     @Autowired
     public IslandInfoService(IslandInfoRepository islandInfoRepository, SubscriptionService subscriptionService, UserInfoService userInfoService) {
@@ -67,11 +70,11 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
      */
     @Override
     public void createIsland(NewIslandRequest request, StreamObserver<IslandResponse> responseObserver) {
-        Long islandId = 0L; //todo: 从id生成器中获取
+        Long islandId = idGenerator.nextId();
         IslandInfo islandInfo = new IslandInfo();
         islandInfo.setId(islandId);
         islandInfo.setHostId(Long.valueOf(request.getHostId()));
-        islandInfo.setIslandName(request.getName()); //todo: 是否需要再校验一遍
+        islandInfo.setIslandName(request.getName());
         if (request.hasPortraitImageUri()) {
             islandInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
         }

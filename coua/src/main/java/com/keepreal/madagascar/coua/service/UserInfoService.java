@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.IdentityType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.NewUserRequest;
 import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
@@ -34,16 +35,18 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
 
     private final UserInfoRepository userInfoRepository;
     private final UserIdentityService userIdentityService;
+    private final LongIdGenerator idGenerator;
 
     @Autowired
-    public UserInfoService(UserInfoRepository userInfoRepository, UserIdentityService userIdentityService) {
+    public UserInfoService(UserInfoRepository userInfoRepository, UserIdentityService userIdentityService, LongIdGenerator idGenerator) {
         this.userInfoRepository = userInfoRepository;
         this.userIdentityService = userIdentityService;
+        this.idGenerator = idGenerator;
     }
 
     @Override
     public void createUser(NewUserRequest request, StreamObserver<UserResponse> responseObserver) {
-        Long userId = 0L;//todo: 从id生成器中获取
+        Long userId = idGenerator.nextId();
         UserInfo userInfo = new UserInfo();
         userInfo.setId(userId);
         userInfo.setNickName(request.getName().getValue());

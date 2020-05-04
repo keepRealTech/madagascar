@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.coua.service;
 
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.dao.UserIdentityRepository;
 import com.keepreal.madagascar.coua.model.UserIdentity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 public class UserIdentityService {
 
     private final UserIdentityRepository userIdentityRepository;
+    @Autowired
+    private LongIdGenerator idGenerator;
 
     @Autowired
     public UserIdentityService(UserIdentityRepository userIdentityRepository) {
@@ -27,6 +30,7 @@ public class UserIdentityService {
     void saveUserIdentities(List<Integer> userIdentitiesTypes, Long userId) {
         List<UserIdentity> userIdentityList = userIdentitiesTypes.stream().map(type -> {
             UserIdentity userIdentity = new UserIdentity();
+            userIdentity.setId(idGenerator.nextId());
             userIdentity.setUserId(userId);
             userIdentity.setIdentityType(type);
             return userIdentity;
