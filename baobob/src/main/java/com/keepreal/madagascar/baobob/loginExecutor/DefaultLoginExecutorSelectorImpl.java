@@ -5,6 +5,7 @@ import com.keepreal.madagascar.baobob.service.UserService;
 import com.keepreal.madagascar.baobob.tokenGranter.LocalTokenGranter;
 import com.keepreal.madagascar.common.LoginType;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration;
+import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,15 +47,21 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
                 return new OauthWechatLoginExecutor(this.userService,
                         this.oauthWechatLoginConfiguration,
                         new LocalTokenGranter(
-                                endpoints.getEndpointsConfigurer().getTokenServices(),
-                                endpoints.getEndpointsConfigurer().getClientDetailsService(),
-                                endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
+                                this.endpoints.getEndpointsConfigurer().getTokenServices(),
+                                this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
+                                this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
             case LOGIN_PASSWORD:
                 return new DummyPasswordLoginExecutor(this.userService,
                         new LocalTokenGranter(
-                                endpoints.getEndpointsConfigurer().getTokenServices(),
-                                endpoints.getEndpointsConfigurer().getClientDetailsService(),
-                                endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
+                                this.endpoints.getEndpointsConfigurer().getTokenServices(),
+                                this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
+                                this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
+            case LOGIN_REFRESH_TOKEN:
+                return new RefreshLoginExecutor(
+                        new RefreshTokenGranter(
+                                this.endpoints.getEndpointsConfigurer().getTokenServices(),
+                                this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
+                                this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
             case UNRECOGNIZED:
             default:
                 return new DummyLoginExecutorImpl();

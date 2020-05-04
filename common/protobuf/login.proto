@@ -20,6 +20,7 @@ message LoginRequest {
     oneof payload {
         OAuthWechatLoginPayload oauthWechatPayload = 2;
         PasswordLoginPayload passwordPayload = 3;
+        TokenRefreshPayload tokenRefreshPayload = 4;
     }
 }
 
@@ -30,12 +31,10 @@ message LoginResponse {
     string userId = 4;
 }
 
-
-message RefreshTokenRequest {
+message TokenRefreshPayload {
     string refreshToken = 1;
 }
 
 service LoginService {
     rpc login(LoginRequest) returns (LoginResponse) {};
-    rpc refreshToken(RefreshTokenRequest) returns (LoginResponse) {};
 }

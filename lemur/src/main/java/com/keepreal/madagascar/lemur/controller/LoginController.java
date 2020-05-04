@@ -1,9 +1,10 @@
 package com.keepreal.madagascar.lemur.controller;
 
-import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.OAuthWechatLoginPayload;
 import com.keepreal.madagascar.baobob.PasswordLoginPayload;
+import com.keepreal.madagascar.baobob.TokenRefreshPayload;
+import com.keepreal.madagascar.common.LoginType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -19,14 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 import swagger.api.LoginApi;
 import swagger.model.LoginResponse;
 import swagger.model.LoginTokenInfo;
-import swagger.model.LoginType;
 import swagger.model.PostLoginRequest;
 import swagger.model.PostRefreshTokenRequest;
 import swagger.model.UserResponse;
 
 import javax.validation.Valid;
-
-import static swagger.model.LoginType.OAUTH_WECHAT;
 
 /**
  * Represents the login controllers.
@@ -70,10 +68,10 @@ public class LoginController implements LoginApi {
                 }
 
                 loginRequest = LoginRequest.newBuilder()
-                    .setOauthWechatPayload(OAuthWechatLoginPayload.newBuilder()
-                            .setCode(body.getData().getCode()))
-                    .setLoginType(com.keepreal.madagascar.common.LoginType.LOGIN_OAUTH_WECHAT)
-                    .build();
+                        .setOauthWechatPayload(OAuthWechatLoginPayload.newBuilder()
+                                .setCode(body.getData().getCode()))
+                        .setLoginType(LoginType.LOGIN_OAUTH_WECHAT)
+                        .build();
                 break;
             case PASSWORD:
                 if (StringUtils.isEmpty(body.getData().getUsername())
@@ -85,7 +83,7 @@ public class LoginController implements LoginApi {
                         .setPasswordPayload(PasswordLoginPayload.newBuilder()
                                 .setUsername(body.getData().getUsername())
                                 .setPassword(body.getData().getPassword()))
-                        .setLoginType(com.keepreal.madagascar.common.LoginType.LOGIN_PASSWORD)
+                        .setLoginType(LoginType.LOGIN_PASSWORD)
                         .build();
                 break;
             default:
@@ -110,15 +108,20 @@ public class LoginController implements LoginApi {
      */
     @Override
     public ResponseEntity<LoginResponse> apiV1RefreshTokenPost(@Valid PostRefreshTokenRequest body) {
-        com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.refresh(body.getRefreshToken());
+        LoginRequest loginRequest = LoginRequest.newBuilder()
+                .setLoginType(LoginType.LOGIN_REFRESH_TOKEN)
+                .setTokenRefreshPayload(TokenRefreshPayload.newBuilder()
+                        .setRefreshToken(body.getRefreshToken())
+                        .build())
+                .build();
 
-        UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
+        com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.login(loginRequest);
 
         LoginResponse response = new LoginResponse();
-        response.setData(this.buildTokenInfo(loginResponse, user));
+        response.setData(this.buildTokenInfo(loginResponse, null));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
