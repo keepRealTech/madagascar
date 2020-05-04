@@ -55,7 +55,7 @@ public class CommentService {
         try {
             deleteCommentByIdResponse = stub.deleteCommentById(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(deleteCommentByIdResponse)
@@ -94,7 +94,7 @@ public class CommentService {
         try {
             commentResponse = stub.createComment(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(commentResponse)
@@ -130,7 +130,7 @@ public class CommentService {
         try {
             commentsResponse = stub.retrieveCommentsByFeedId(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(commentsResponse)

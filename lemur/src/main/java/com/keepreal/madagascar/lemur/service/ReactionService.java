@@ -59,7 +59,7 @@ public class ReactionService {
         try {
             reactionResponse = stub.createReaction(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(reactionResponse)
@@ -96,7 +96,7 @@ public class ReactionService {
         try {
             reactionResponse = stub.revokeReaction(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(reactionResponse)
@@ -132,7 +132,7 @@ public class ReactionService {
         try {
             reactionsResponse = stub.retrieveReactionsByFeedId(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(reactionsResponse)

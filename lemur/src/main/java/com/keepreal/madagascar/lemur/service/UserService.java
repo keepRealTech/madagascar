@@ -61,7 +61,7 @@ public class UserService {
         try {
             userResponse = stub.retrieveSingleUser(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(userResponse)
@@ -135,7 +135,7 @@ public class UserService {
         try {
             userResponse = stub.updateUserById(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(userResponse)

@@ -66,7 +66,7 @@ public class IslandService {
         try {
             checkNameResponse = stub.checkName(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(checkNameResponse)
@@ -99,7 +99,7 @@ public class IslandService {
         try {
             islandResponse = stub.retrieveIslandById(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(islandResponse)
@@ -134,7 +134,7 @@ public class IslandService {
         try {
             islandProfileResponse = stub.retrieveIslandProfileById(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(islandProfileResponse)
@@ -186,7 +186,7 @@ public class IslandService {
         try {
             islandsResponse = stub.retrieveIslandsByCondition(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(islandsResponse)
@@ -223,7 +223,7 @@ public class IslandService {
         try {
             islandResponse = stub.createIsland(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(islandResponse)
@@ -275,7 +275,7 @@ public class IslandService {
         try {
             islandResponse = stub.updateIslandById(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(islandResponse)
@@ -311,7 +311,7 @@ public class IslandService {
         try {
             subscribeIslandResponse = stub.subscribeIslandById(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(subscribeIslandResponse)
@@ -343,7 +343,7 @@ public class IslandService {
         try {
             subscribeIslandResponse = stub.unsubscribeIslandById(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(subscribeIslandResponse)
@@ -377,7 +377,7 @@ public class IslandService {
         try {
             islandSubscribersResponse = stub.retrieveIslandSubscribersById(request);
         } catch (StatusRuntimeException exception) {
-            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(islandSubscribersResponse)
