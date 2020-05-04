@@ -18,10 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.LoginApi;
+import swagger.model.BriefTokenInfo;
 import swagger.model.LoginResponse;
 import swagger.model.LoginTokenInfo;
 import swagger.model.PostLoginRequest;
 import swagger.model.PostRefreshTokenRequest;
+import swagger.model.RefreshTokenResponse;
 import swagger.model.UserResponse;
 
 import javax.validation.Valid;
@@ -104,10 +106,10 @@ public class LoginController implements LoginApi {
      * Implements the refresh token api.
      *
      * @param body {@link PostRefreshTokenRequest}.
-     * @return {@link LoginResponse}.
+     * @return {@link RefreshTokenResponse}.
      */
     @Override
-    public ResponseEntity<LoginResponse> apiV1RefreshTokenPost(@Valid PostRefreshTokenRequest body) {
+    public ResponseEntity<RefreshTokenResponse> apiV1RefreshTokenPost(@Valid PostRefreshTokenRequest body) {
         LoginRequest loginRequest = LoginRequest.newBuilder()
                 .setLoginType(LoginType.LOGIN_REFRESH_TOKEN)
                 .setTokenRefreshPayload(TokenRefreshPayload.newBuilder()
@@ -117,8 +119,8 @@ public class LoginController implements LoginApi {
 
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.login(loginRequest);
 
-        LoginResponse response = new LoginResponse();
-        response.setData(this.buildTokenInfo(loginResponse, null));
+        RefreshTokenResponse response = new RefreshTokenResponse();
+        response.setData(this.buildBriefTokenInfo(loginResponse));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -158,4 +160,17 @@ public class LoginController implements LoginApi {
         return loginTokenInfo;
     }
 
+    /**
+     * Builds the {@link BriefTokenInfo} from a {@link com.keepreal.madagascar.baobob.LoginResponse}.
+     *
+     * @param loginResponse {@link com.keepreal.madagascar.baobob.LoginResponse}.
+     * @return {@link BriefTokenInfo}.
+     */
+    private BriefTokenInfo buildBriefTokenInfo(com.keepreal.madagascar.baobob.LoginResponse loginResponse) {
+        BriefTokenInfo briefTokenInfo = new BriefTokenInfo();
+        briefTokenInfo.setToken(loginResponse.getToken());
+        briefTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
+        return briefTokenInfo;
+    }
+    
 }

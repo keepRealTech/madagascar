@@ -64,7 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: '#/components/schemas/RefreshTokenResponse'
   /api/v1/userInfo:
     get:
       tags:
@@ -1335,15 +1335,27 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/LoginTokenInfo'
-    LoginTokenInfo:
+    RefreshTokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BriefTokenInfo'
+    BriefTokenInfo:
       type: object
       properties:
         token:
           type: string
         refreshToken:
           type: string
-        user:
-          $ref: '#/components/schemas/UserDTO'
+    LoginTokenInfo:
+      allOf:
+        - $ref: '#/components/schemas/BriefTokenInfo'
+        - type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/UserDTO'
     IOSConfigurationDTO:
       type: object
       properties:
