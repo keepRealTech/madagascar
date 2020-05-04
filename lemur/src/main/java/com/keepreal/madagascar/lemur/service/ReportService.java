@@ -54,7 +54,7 @@ public class ReportService {
         try {
             reportResponse = stub.createReport(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(reportResponse)

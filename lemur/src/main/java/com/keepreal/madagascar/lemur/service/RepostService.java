@@ -63,7 +63,7 @@ public class RepostService {
         try {
             repostResponse = stub.createIslandRepost(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(repostResponse)
@@ -99,7 +99,7 @@ public class RepostService {
         try {
             repostsResponse = stub.retrieveIslandRepostsByIslandId(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(repostsResponse)
@@ -138,7 +138,7 @@ public class RepostService {
         try {
             repostResponse = stub.createFeedRepost(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(repostResponse)
@@ -174,7 +174,7 @@ public class RepostService {
         try {
             repostsResponse = stub.retrieveFeedRepostsByFeedId(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(repostsResponse)

@@ -69,7 +69,7 @@ public class FeedService {
         try {
             newFeedsResponse = stub.createFeeds(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(newFeedsResponse)
@@ -99,7 +99,7 @@ public class FeedService {
         try {
             deleteFeedResponse = stub.deleteFeedById(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(deleteFeedResponse)
@@ -130,7 +130,7 @@ public class FeedService {
         try {
             feedResponse = stub.retrieveFeedById(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(feedResponse)
@@ -177,7 +177,7 @@ public class FeedService {
         try {
             feedsResponse = stub.retrieveMultipleFeeds(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(feedsResponse)
@@ -212,7 +212,7 @@ public class FeedService {
         try {
             checkNewFeedsResponse = stub.checkNewFeeds(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(checkNewFeedsResponse)

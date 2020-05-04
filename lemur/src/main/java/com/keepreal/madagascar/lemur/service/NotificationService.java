@@ -67,7 +67,7 @@ public class NotificationService {
         try {
             notificationsResponse = stub.retrieveMultipleNotifications(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(notificationsResponse)
@@ -100,7 +100,7 @@ public class NotificationService {
         try {
             countUnreadNotificationsResponse = stub.countUnreadNotifications(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage()););
         }
 
         if (Objects.isNull(countUnreadNotificationsResponse)
