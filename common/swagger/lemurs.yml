@@ -663,8 +663,11 @@ components:
     GenderType:
       type: integer
       minimum: 0
-      maximum: 1
-      enum: [0, 1]
+      maximum: 2
+      enum:
+        - 0
+        - 1
+        - 2
     NotificationType:
       type: string
       enum:

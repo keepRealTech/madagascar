@@ -110,11 +110,13 @@ public class UserController implements UserApi {
 
         switch (genderType) {
             case NUMBER_0:
-                return Gender.MALE;
+                return Gender.UNKNOWN;
             case NUMBER_1:
+                return Gender.MALE;
+            case NUMBER_2:
                 return Gender.FEMALE;
             default:
-                return Gender.UNKNOWN;
+                return Gender.UNRECOGNIZED;
         }
     }
 
