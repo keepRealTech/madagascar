@@ -43,6 +43,21 @@ public class UserService {
     }
 
     /**
+     * Retrieves the user by id.
+     *
+     * @param id Id.
+     * @return {@link UserMessage}.
+     */
+    public Mono<UserMessage> retrieveUserByIdMono(String id) {
+        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.managedChannel);
+
+        QueryUserCondition condition = QueryUserCondition.newBuilder().setId(StringValue.of(id)).build();
+        RetrieveSingleUserRequest request = RetrieveSingleUserRequest.newBuilder().setCondition(condition).build();
+
+        return stub.retrieveSingleUser(request).map(UserResponse::getUser);
+    }
+
+    /**
      * Creates a new user by {@link WechatUserInfo}.
      *
      * @param wechatUserInfo {@link WechatUserInfo}.

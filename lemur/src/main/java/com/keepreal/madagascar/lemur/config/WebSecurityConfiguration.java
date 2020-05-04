@@ -5,7 +5,11 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
+import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
+import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
+import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 
 /**
  * Represents the spring web security filter configurations.
@@ -28,10 +32,26 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .antMatchers("/api/v1/login**", "/api/v1/refreshToken").permitAll()
+                .antMatchers("/api/v1/login**", "/api/v1/refreshToken**", "/api/v1/config**").permitAll()
                 .anyRequest().authenticated();
 
         httpSecurity.headers().cacheControl();
+    }
+
+    /**
+     * Overrides the error handling logic.
+     *
+     * @param config {@link ResourceServerConfigurer}.
+     */
+    @Override
+    public void configure(final ResourceServerSecurityConfigurer config) {
+        OAuth2AccessDeniedHandler auth2AccessDeniedHandler = new OAuth2AccessDeniedHandler();
+        auth2AccessDeniedHandler.setExceptionTranslator(new OAuthExceptionHandler());
+        OAuth2AuthenticationEntryPoint authenticationEntryPoint = new OAuth2AuthenticationEntryPoint();
+        authenticationEntryPoint.setExceptionTranslator(new OAuthExceptionHandler());
+
+        config.accessDeniedHandler(auth2AccessDeniedHandler)
+                .authenticationEntryPoint(authenticationEntryPoint);
     }
 
 }
