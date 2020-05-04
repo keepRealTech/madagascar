@@ -15,5 +15,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CommentInfoRepository extends JpaRepository<CommentInfo, Long> {
 
-    Page<CommentInfo> getCommentInfosByFeedIdAndDeletedIsFalse(Long feedId, Pageable pageable);
+    Page<CommentInfo> getCommentInfosByFeedIdAndDeletedIsFalseAndOrderByCreatedTimeDesc(Long feedId, Pageable pageable);
 }

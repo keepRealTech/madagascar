@@ -52,18 +52,13 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         String feedId = request.getFeedId();
         String userId = request.getUserId();
         String content = request.getContent();
-        String replyToId = userId;//todo 如果没传怎么处理，或者自己回复自己，或者没有回复对象
-        if (request.hasReplyToId()) {
-            replyToId = request.getReplyToId().getValue();
-        }
+        String replyToId = request.hasReplyToId() ? request.getReplyToId().getValue() : "";
         CommentInfo commentInfo = new CommentInfo();
         commentInfo.setFeedId(Long.valueOf(feedId));
         commentInfo.setUserId(Long.valueOf(userId));
         commentInfo.setContent(content);
         commentInfo.setReplyToId(Long.valueOf(replyToId));
         commentInfo.setDeleted(false);
-        commentInfo.setCreatedTime(System.currentTimeMillis());
-        commentInfo.setUpdatedTime(System.currentTimeMillis());
 
         CommentInfo save = commentInfoRepository.save(commentInfo);
 
@@ -86,7 +81,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
     public void retrieveCommentsByFeedId(RetrieveCommentsByFeedIdRequest request, StreamObserver<CommentsResponse> responseObserver) {
         String feedId = request.getFeedId();
         Pageable pageable = PageRequestResponseUtils.getPageableByRequest(request.getPageRequest());
-        Page<CommentInfo> commentInfoPage = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalse(Long.valueOf(feedId), pageable);
+        Page<CommentInfo> commentInfoPage = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseAndOrderByCreatedTimeDesc(Long.valueOf(feedId), pageable);
         List<CommentMessage> commentMessageList = commentInfoPage.getContent()
                 .stream().map(this::getCommentMessage)
                 .collect(Collectors.toList());
@@ -131,7 +126,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
 
     public List<CommentMessage> getLastCommentMessage(Long feedId, int commentCount) {
         Pageable pageable = PageRequest.of(0, commentCount);
-        List<CommentInfo> commentInfoList = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalse(feedId, pageable).getContent();
+        List<CommentInfo> commentInfoList = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseAndOrderByCreatedTimeDesc(feedId, pageable).getContent();
 
         return commentInfoList.stream().map(this::getCommentMessage).collect(Collectors.toList());
     }

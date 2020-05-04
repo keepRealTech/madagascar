@@ -24,7 +24,16 @@ public class PageRequestResponseUtils {
                 .setPage(page.getNumber())
                 .setPageSize(page.getSize())
                 .setHasContent(page.hasContent())
-                .setHasMore(page.getTotalPages() > page.getNumber())
+                .setHasMore(!page.isLast())
+                .build();
+    }
+
+    public static PageResponse buildPageResponse(int pageIndex, int pageSize, long totalElements) {
+        return PageResponse.newBuilder()
+                .setPageSize(pageIndex)
+                .setPageSize(pageSize)
+                .setHasContent(pageIndex * pageSize <= totalElements + pageSize)
+                .setHasMore(totalElements / pageSize + 1 > pageIndex)
                 .build();
     }
 }

@@ -8,8 +8,6 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
 import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
-import com.keepreal.madagascar.fossa.CheckNewFeedsRequest;
-import com.keepreal.madagascar.fossa.CheckNewFeedsResponse;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
@@ -20,16 +18,21 @@ import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
+import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
+import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,12 +50,14 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
     private final ManagedChannel managedChannel;
     private final MongoTemplate mongoTemplate;
     private final CommentService commentService;
+    private final FeedInfoRepository feedInfoRepository;
 
     @Autowired
-    public FeedInfoService(MongoTemplate mongoTemplate, CommentService commentService, ManagedChannel managedChannel) {
+    public FeedInfoService(MongoTemplate mongoTemplate, CommentService commentService, ManagedChannel managedChannel, FeedInfoRepository feedInfoRepository) {
         this.mongoTemplate = mongoTemplate;
         this.commentService = commentService;
         this.managedChannel = managedChannel;
+        this.feedInfoRepository = feedInfoRepository;
     }
 
     /**
@@ -66,6 +71,7 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         List<String> islandIdList = request.getIslandIdList().stream().map(s -> toString()).collect(Collectors.toList());
         List<String> imageUrisList = request.getImageUrisList().stream().map(s -> toString()).collect(Collectors.toList());
         String text = request.hasText() ? request.getText().getValue() : "";
+        List<FeedInfo> feedInfoList = new ArrayList<>();
         islandIdList.forEach(id -> {
             // rpc调用coua服务，如果通过id拿不到island的信息，那么hostId就是""，fromHost=false
             String hostId = callCouaGetIslandHostId(id);
@@ -79,12 +85,11 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfo.setLikesCount(0);
             feedInfo.setDeleted(false);
             feedInfo.setFromHost(userId.equals(hostId));
-            feedInfo.setCreatedTime(System.currentTimeMillis());
-            feedInfo.setUpdatedTime(System.currentTimeMillis());
-            mongoTemplate.save(feedInfo);
             //todo: 调用coua服务，更新island的lastFeedAt字段的值
+            feedInfoList.add(feedInfo);
         });
 
+        feedInfoRepository.saveAll(feedInfoList);
         NewFeedsResponse newFeedsResponse = NewFeedsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
@@ -100,7 +105,11 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
     @Override
     public void deleteFeedById(DeleteFeedByIdRequest request, StreamObserver<DeleteFeedResponse> responseObserver) {
         String feedId = request.getId();
-        mongoTemplate.remove(new Query(Criteria.where("id").is(feedId)), FeedInfo.class);
+
+        mongoTemplate.updateFirst(
+                Query.query(Criteria.where("id").is(feedId)),
+                Update.update("deleted", true),
+                FeedInfo.class);
 
         DeleteFeedResponse deleteFeedResponse = DeleteFeedResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -119,7 +128,7 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         FeedResponse.Builder responseBuilder = FeedResponse.newBuilder();
 
         String feedId = request.getId();
-        FeedInfo feedInfo = mongoTemplate.findById(feedId, FeedInfo.class);
+        FeedInfo feedInfo = feedInfoRepository.findFeedInfoByIdAndDeletedIsFalse(Long.valueOf(feedId));
         if (feedInfo != null) {
             FeedMessage feedMessage = getFeedMessage(feedInfo);
             responseBuilder.setFeed(feedMessage)
@@ -146,6 +155,7 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         boolean fromHost = condition.hasFromHost();
         boolean hasIslandId = condition.hasIslandId();
         Query query = new Query();
+        query.addCriteria(Criteria.where("deleted").is(false));
         if (fromHost && hasIslandId) { //两个条件都存在
             Criteria criteria = Criteria
                     .where("fromHost").is(condition.getFromHost().getValue())
@@ -159,14 +169,9 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
 
         // 没有条件
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
-        List<FeedInfo> feedInfoList = mongoTemplate.find(query.skip(page * pageSize).limit(pageSize), FeedInfo.class);
+        List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
         List<FeedMessage> feedMessageList = feedInfoList.stream().map(this::getFeedMessage).collect(Collectors.toList());
-        PageResponse pageResponse = PageResponse.newBuilder()
-                .setPage(page)
-                .setPageSize(pageSize)
-                .setHasContent(feedInfoList.size() > 0)
-                .setHasMore(page * pageSize < totalCount)
-                .build();
+        PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(page, pageSize, totalCount);
         FeedsResponse feedsResponse = FeedsResponse.newBuilder()
                 .addAllFeed(feedMessageList)
                 .setPageResponse(pageResponse)
@@ -174,15 +179,6 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
                 .build();
         responseObserver.onNext(feedsResponse);
         responseObserver.onCompleted();
-    }
-
-    /**
-     * 根据岛的id和上次查看的时间，返回是否有新的feed
-     * @param request
-     * @param responseObserver
-     */
-    @Override
-    public void checkNewFeeds(CheckNewFeedsRequest request, StreamObserver<CheckNewFeedsResponse> responseObserver) {
     }
 
     private FeedMessage getFeedMessage(FeedInfo feedInfo) {

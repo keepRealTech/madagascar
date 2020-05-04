@@ -1,9 +1,16 @@
 package com.keepreal.madagascar.fossa.model;
 
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.persistence.Column;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import java.util.List;
 
 /**
@@ -14,9 +21,11 @@ import java.util.List;
 
 @Data
 @Document(value = "feedInfo")
+@EntityListeners(AuditingEntityListener.class)
 public class FeedInfo {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Long islandId;
     private Long userId;
@@ -27,7 +36,10 @@ public class FeedInfo {
     private Integer commentsCount;
     private Integer repostCount;
     private Integer state;
+    @Column(name = "is_deleted")
     private boolean deleted;
+    @CreatedDate
     private Long createdTime;
+    @LastModifiedDate
     private Long updatedTime;
 }

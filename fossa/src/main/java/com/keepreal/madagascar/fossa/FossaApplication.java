@@ -13,6 +13,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class FossaApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(FossaApplication.class);
+        SpringApplication.run(FossaApplication.class, args);
     }
 }
