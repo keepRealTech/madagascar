@@ -3,6 +3,8 @@ package com.keepreal.madagascar.fossa.model;
 import lombok.Data;
 
 import javax.persistence.Column;
+import javax.persistence.Id;
+import java.util.List;
 
 /**
  * @program: madagascar
@@ -13,10 +15,11 @@ import javax.persistence.Column;
 @Data
 public class ReactionInfo {
 
+    @Id
     private Long id;
     private Long feedId;
     private Long userId;
-    private Integer reactionType;
+    private List<Integer> reactionTypeList;
     @Column(name = "is_deleted")
     private Boolean deleted;
     private Long createdTime;

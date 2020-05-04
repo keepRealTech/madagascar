@@ -60,7 +60,7 @@ public class GrpcChannelFactory {
     @Bean(name = "fossaChannel")
     public ManagedChannel getFossaChannel() {
         return ManagedChannelBuilder
-                .forAddress(this.couaConfiguration.getHost(), this.couaConfiguration.getPort())
+                .forAddress(this.fossaConfiguration.getHost(), this.fossaConfiguration.getPort())
                 .usePlaintext()
                 .build();
     }
@@ -73,7 +73,7 @@ public class GrpcChannelFactory {
     @Bean(name = "indriChannel")
     public ManagedChannel getIndriChannel() {
         return ManagedChannelBuilder
-                .forAddress(this.couaConfiguration.getHost(), this.couaConfiguration.getPort())
+                .forAddress(this.indriConfiguration.getHost(), this.indriConfiguration.getPort())
                 .usePlaintext()
                 .build();
     }
@@ -86,7 +86,7 @@ public class GrpcChannelFactory {
     @Bean(name = "baobobChannel")
     public ManagedChannel getBaobobChannel() {
         return ManagedChannelBuilder
-                .forAddress(this.couaConfiguration.getHost(), this.couaConfiguration.getPort())
+                .forAddress(this.baobobConfiguration.getHost(), this.baobobConfiguration.getPort())
                 .usePlaintext()
                 .build();
     }

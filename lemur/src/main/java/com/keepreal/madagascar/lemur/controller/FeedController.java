@@ -17,6 +17,7 @@ import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.ReactionService;
 import com.keepreal.madagascar.lemur.service.RepostService;
+import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
@@ -119,8 +120,7 @@ public class FeedController implements FeedApi {
         this.feedService.createFeed(payload.getIslandIds(), userId, payload.getContent(), imageUris);
 
         DummyResponse response = new DummyResponse();
-        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
-        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -135,8 +135,7 @@ public class FeedController implements FeedApi {
         this.feedService.deleteFeedById(id);
 
         DummyResponse response = new DummyResponse();
-        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
-        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

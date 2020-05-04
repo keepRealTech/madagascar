@@ -78,10 +78,12 @@ public class UserDTOFactory {
         }
 
         switch (gender) {
-            case MALE:
+            case UNKNOWN:
                 return GenderType.NUMBER_0;
-            case FEMALE:
+            case MALE:
                 return GenderType.NUMBER_1;
+            case FEMALE:
+                return GenderType.NUMBER_2;
             default:
                 return null;
         }

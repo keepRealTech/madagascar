@@ -23,6 +23,8 @@ tags:
     description: Notifications controllers
   - name: Report
     description: Reports controllers
+  - name: Config
+    description: Configs controllers
 
 paths:
   /api/v1/login:
@@ -62,7 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: '#/components/schemas/RefreshTokenResponse'
   /api/v1/userInfo:
     get:
       tags:
@@ -543,6 +545,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotificationsCountResponse'
+  /api/v1/configs:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/configTypeInQuery'
+      tags:
+        - Config
+      summary: retrieves the client config info
+      responses:
+        '200':
+          description: client configurations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -623,11 +639,23 @@ components:
       required: false
       schema:
         type: boolean
+    configTypeInQuery:
+      in: query
+      name: configType
+      required: true
+      schema:
+        $ref: '#/components/schemas/ConfigType'
   schemas:
     LoginType:
       type: string
       enum:
         - LOGIN_OAUTH_WECHAT
+        - LOGIN_PASSWORD
+    ConfigType:
+      type: string
+      enum:
+        - CONFIG_IOS
+        - CONFIG_ANDROID
     ReactionType:
       type: string
       enum:
@@ -635,8 +663,11 @@ components:
     GenderType:
       type: integer
       minimum: 0
-      maximum: 1
-      enum: [0, 1]
+      maximum: 2
+      enum:
+        - 0
+        - 1
+        - 2
     NotificationType:
       type: string
       enum:
@@ -661,6 +692,10 @@ components:
         - IDENTITY_FASHION
         - IDENTITY_COMIC
         - IDENTITY_OTHERS
+    NoticeType:
+      type: string
+      enum:
+        - ISLAND_NOTICE_NEW_SUBSCRIBER
     CommonResponse:
       type: object
       properties:
@@ -1123,14 +1158,40 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/ReactionDTO'
-    IslandNoticeDTO:
+    NotificationDTO:
+      oneOf:
+        - $ref: '#/components/schemas/CommentNotificationDTO'
+        - $ref: '#/components/schemas/ReactionNotificationDTO'
+        - $ref: '#/components/schemas/NoticeNotificationDTO'
+    NoticeDTO:
+      oneOf:
+        - $ref: '#/components/schemas/SubscribeNoticeDTO'
+    SubscribeNoticeDTO:
       type: object
       properties:
-        content:
+        noticeType:
+          $ref: '#/components/schemas/NoticeType'
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
+        subscriber:
+          $ref: '#/components/schemas/BriefUserDTO'
+    ReactionNotificationDTO:
+      type: object
+      properties:
+        id:
           type: string
-        islandId:
-          type: string
-    NotificationDTO:
+        notificationType:
+          $ref: '#/components/schemas/NotificationType'
+        feed:
+          $ref: '#/components/schemas/BriefFeedDTO'
+        reactions:
+          $ref: '#/components/schemas/ReactionDTO'
+        hasRead:
+          type: boolean
+        createdAt:
+          type: integer
+          format: int64
+    CommentNotificationDTO:
       type: object
       properties:
         id:
@@ -1141,10 +1202,20 @@ components:
           $ref: '#/components/schemas/BriefFeedDTO'
         comment:
           $ref: '#/components/schemas/CommentDTO'
-        reactions:
-          $ref: '#/components/schemas/ReactionDTO'
-        islandNotice:
-          $ref: '#/components/schemas/IslandNoticeDTO'
+        hasRead:
+          type: boolean
+        createdAt:
+          type: integer
+          format: int64
+    NoticeNotificationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        notificationType:
+          $ref: '#/components/schemas/NotificationType'
+        notice:
+          $ref: '#/components/schemas/NoticeDTO'
         hasRead:
           type: boolean
         createdAt:
@@ -1224,15 +1295,32 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/RepostDTO'
+    WechatOAuthLoginPayload:
+      type: object
+      properties:
+        code:
+          type: string
+    PasswordLoginPayload:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    LoginPayload:
+      oneOf:
+        - $ref: '#/components/schemas/WechatOAuthLoginPayload'
+        - $ref: '#/components/schemas/PasswordLoginPayload'
     PostLoginRequest:
       type: object
       properties:
         loginType:
           $ref: '#/components/schemas/LoginType'
         data:
-          type: string
+          $ref: '#/components/schemas/LoginPayload'
       required:
         - loginType
+        - data
     PostRefreshTokenRequest:
       type: object
       properties:
@@ -1247,12 +1335,45 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/LoginTokenInfo'
-    LoginTokenInfo:
+    RefreshTokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BriefTokenInfo'
+    BriefTokenInfo:
       type: object
       properties:
         token:
           type: string
         refreshToken:
           type: string
-        user:
-          $ref: '#/components/schemas/UserDTO'
+    LoginTokenInfo:
+      allOf:
+        - $ref: '#/components/schemas/BriefTokenInfo'
+        - type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/UserDTO'
+    IOSConfigurationDTO:
+      type: object
+      properties:
+        audit:
+          type: boolean
+    AndroidConfigurationDTO:
+      type: object
+      properties:
+        audit:
+          type: boolean
+    ConfigurationDTO:
+      oneOf:
+        - $ref: '#/components/schemas/IOSConfigurationDTO'
+        - $ref: '#/components/schemas/AndroidConfigurationDTO'
+    ConfigurationResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ConfigurationDTO'

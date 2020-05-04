@@ -74,7 +74,7 @@ public class NotificationController implements NotificationApi {
                 this.notificationService.retrieveNotifications(userId, this.convertType(type), page, pageSize);
 
         NotificationsResponse response = new NotificationsResponse();
-        response.setData(notificationsResponse.getNotificationList()
+        response.setData(notificationsResponse.getNotificationsList()
                 .stream()
                 .map(this.notificationDTOFactory::valueOf)
                 .collect(Collectors.toList()));

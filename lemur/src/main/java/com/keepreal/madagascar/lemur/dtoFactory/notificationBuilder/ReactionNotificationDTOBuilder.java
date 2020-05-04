@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.lemur.dtoFactory.notification;
+package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.ReactionDTOFactory;
@@ -69,8 +69,13 @@ public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
         notificationDTO.setHasRead(this.notificationMessage.getHasRead());
         notificationDTO.setNotificationType(NotificationType.REACTIONS);
         notificationDTO.setCreatedAt(this.notificationMessage.getCreatedAt());
-        notificationDTO.setFeed(this.feedDTOFactory.briefValueOf(this.notificationMessage.getFeed()));
-        notificationDTO.setReactions(this.reactionDTOFactory.valueOf(this.notificationMessage.getReaction()));
+
+        if (Objects.nonNull(this.notificationMessage.getReactionNotification())) {
+            notificationDTO.setFeed(
+                    this.feedDTOFactory.briefValueOf(this.notificationMessage.getReactionNotification().getFeed()));
+            notificationDTO.setReactions(
+                    this.reactionDTOFactory.valueOf(this.notificationMessage.getReactionNotification().getReaction()));
+        }
 
         return notificationDTO;
     }

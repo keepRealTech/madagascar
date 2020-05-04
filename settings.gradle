@@ -7,3 +7,5 @@ include 'lemur'
 include 'baobob'
 include 'fossa'
 
+
+include 'tenrecs'

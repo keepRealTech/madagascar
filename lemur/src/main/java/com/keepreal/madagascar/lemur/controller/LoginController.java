@@ -1,7 +1,10 @@
 package com.keepreal.madagascar.lemur.controller;
 
-import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.baobob.LoginRequest;
+import com.keepreal.madagascar.baobob.OAuthWechatLoginPayload;
+import com.keepreal.madagascar.baobob.PasswordLoginPayload;
+import com.keepreal.madagascar.baobob.TokenRefreshPayload;
+import com.keepreal.madagascar.common.LoginType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -12,13 +15,15 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.LoginApi;
+import swagger.model.BriefTokenInfo;
 import swagger.model.LoginResponse;
 import swagger.model.LoginTokenInfo;
-import swagger.model.LoginType;
 import swagger.model.PostLoginRequest;
 import swagger.model.PostRefreshTokenRequest;
+import swagger.model.RefreshTokenResponse;
 import swagger.model.UserResponse;
 
 import javax.validation.Valid;
@@ -57,11 +62,35 @@ public class LoginController implements LoginApi {
      */
     @Override
     public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest body) {
-        LoginRequest loginRequest =
-                LoginRequest.newBuilder()
-                        .setCode(StringValue.of(body.getData()))
-                        .setLoginType(this.loginTypeOf(body.getLoginType()))
+        LoginRequest loginRequest;
+        switch (body.getLoginType()) {
+            case OAUTH_WECHAT:
+                if (StringUtils.isEmpty(body.getData().getCode())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
+                loginRequest = LoginRequest.newBuilder()
+                        .setOauthWechatPayload(OAuthWechatLoginPayload.newBuilder()
+                                .setCode(body.getData().getCode()))
+                        .setLoginType(LoginType.LOGIN_OAUTH_WECHAT)
                         .build();
+                break;
+            case PASSWORD:
+                if (StringUtils.isEmpty(body.getData().getUsername())
+                        || StringUtils.isEmpty(body.getData().getPassword())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
+                loginRequest = LoginRequest.newBuilder()
+                        .setPasswordPayload(PasswordLoginPayload.newBuilder()
+                                .setUsername(body.getData().getUsername())
+                                .setPassword(body.getData().getPassword()))
+                        .setLoginType(LoginType.LOGIN_PASSWORD)
+                        .build();
+                break;
+            default:
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.login(loginRequest);
 
         UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
@@ -77,12 +106,24 @@ public class LoginController implements LoginApi {
      * Implements the refresh token api.
      *
      * @param body {@link PostRefreshTokenRequest}.
-     * @return {@link LoginResponse}.
+     * @return {@link RefreshTokenResponse}.
      */
     @Override
-    public ResponseEntity<LoginResponse> apiV1RefreshTokenPost(@Valid PostRefreshTokenRequest body) {
-        this.loginService.refresh(body.getRefreshToken());
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<RefreshTokenResponse> apiV1RefreshTokenPost(@Valid PostRefreshTokenRequest body) {
+        LoginRequest loginRequest = LoginRequest.newBuilder()
+                .setLoginType(LoginType.LOGIN_REFRESH_TOKEN)
+                .setTokenRefreshPayload(TokenRefreshPayload.newBuilder()
+                        .setRefreshToken(body.getRefreshToken())
+                        .build())
+                .build();
+
+        com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.login(loginRequest);
+
+        RefreshTokenResponse response = new RefreshTokenResponse();
+        response.setData(this.buildBriefTokenInfo(loginResponse));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
@@ -104,21 +145,6 @@ public class LoginController implements LoginApi {
     }
 
     /**
-     * Converts the {@link LoginType} into {@link com.keepreal.madagascar.common.LoginType}.
-     *
-     * @param loginType {@link LoginType}.
-     * @return {@link com.keepreal.madagascar.common.LoginType}.
-     */
-    private com.keepreal.madagascar.common.LoginType loginTypeOf(LoginType loginType) {
-        switch (loginType) {
-            case LOGIN_OAUTH_WECHAT:
-                return com.keepreal.madagascar.common.LoginType.LOGIN_OAUTH_WECHAT;
-            default:
-                throw new KeepRealBusinessException(ErrorCode.REQUEST_NOT_IMPLEMENTED_FUNCTION_ERROR);
-        }
-    }
-
-    /**
      * Builds the {@link LoginTokenInfo} from a {@link com.keepreal.madagascar.baobob.LoginResponse}.
      *
      * @param loginResponse {@link com.keepreal.madagascar.baobob.LoginResponse}.
@@ -134,4 +160,17 @@ public class LoginController implements LoginApi {
         return loginTokenInfo;
     }
 
+    /**
+     * Builds the {@link BriefTokenInfo} from a {@link com.keepreal.madagascar.baobob.LoginResponse}.
+     *
+     * @param loginResponse {@link com.keepreal.madagascar.baobob.LoginResponse}.
+     * @return {@link BriefTokenInfo}.
+     */
+    private BriefTokenInfo buildBriefTokenInfo(com.keepreal.madagascar.baobob.LoginResponse loginResponse) {
+        BriefTokenInfo briefTokenInfo = new BriefTokenInfo();
+        briefTokenInfo.setToken(loginResponse.getToken());
+        briefTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
+        return briefTokenInfo;
+    }
+    
 }

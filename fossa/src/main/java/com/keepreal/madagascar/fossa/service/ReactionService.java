@@ -3,6 +3,7 @@ package com.keepreal.madagascar.fossa.service;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.NewReactionRequest;
 import com.keepreal.madagascar.fossa.ReactionResponse;
 import com.keepreal.madagascar.fossa.ReactionServiceGrpc;
@@ -18,8 +19,11 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,10 +37,14 @@ import java.util.stream.Collectors;
 public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase {
 
     private final ReactionRepository reactionRepository;
+    private final LongIdGenerator idGenerator;
+    private final MongoTemplate mongoTemplate;
 
     @Autowired
-    public ReactionService(ReactionRepository reactionRepository) {
+    public ReactionService(ReactionRepository reactionRepository, LongIdGenerator idGenerator, MongoTemplate mongoTemplate) {
         this.reactionRepository = reactionRepository;
+        this.idGenerator = idGenerator;
+        this.mongoTemplate = mongoTemplate;
     }
 
     /**
@@ -48,20 +56,14 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
     public void createReaction(NewReactionRequest request, StreamObserver<ReactionResponse> responseObserver) {
         String userId = request.getUserId();
         String feedId = request.getFeedId();
-        long currentTimeMillis = System.currentTimeMillis();
-        if (request.getReactionTypesCount() > 0) {
-            List<Integer> typesValueList = request.getReactionTypesValueList();
-            typesValueList.forEach(type -> {
-                ReactionInfo reactionInfo = new ReactionInfo();
-                reactionInfo.setUserId(Long.valueOf(userId));
-                reactionInfo.setFeedId(Long.valueOf(feedId));
-                reactionInfo.setReactionType(type);
-                reactionInfo.setDeleted(false);
-                reactionInfo.setCreatedTime(currentTimeMillis);
-                reactionInfo.setUpdatedTime(currentTimeMillis);
-                reactionRepository.save(reactionInfo);
-            });
-        }
+        List<Integer> reactionTypesList = request.getReactionTypesValueList();
+        ReactionInfo reactionInfo = new ReactionInfo();
+        reactionInfo.setId(idGenerator.nextId());
+        reactionInfo.setUpdatedTime(Long.valueOf(userId));
+        reactionInfo.setFeedId(Long.valueOf(feedId));
+        reactionInfo.setReactionTypeList(reactionTypesList);
+        reactionInfo.setDeleted(false);
+        reactionRepository.save(reactionInfo);
 
         ReactionMessage reactionMessage = getReactionMessage(feedId, userId, request.getReactionTypesList());
         basicResponse(responseObserver, reactionMessage);
@@ -77,10 +79,11 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         String feedId = request.getFeedId();
         String userId = request.getUserId();
         List<Integer> typesValueList = request.getReactionTypesValueList();
-        List<ReactionInfo> reactionInfoList = reactionRepository
-                .findReactionInfosByFeedIdAndUserIdAndReactionTypeIn(Long.valueOf(feedId), Long.valueOf(userId), typesValueList);
-        reactionInfoList.forEach(r -> r.setDeleted(true));
-        reactionRepository.saveAll(reactionInfoList);
+
+        Query query = Query.query(Criteria.where("feedId").is(feedId).and("userId").is(userId));
+        Update update = new Update();
+        update.pullAll("reactionTypeList", typesValueList.toArray());
+        mongoTemplate.updateFirst(query, update, ReactionInfo.class);
 
         ReactionMessage reactionMessage = getReactionMessage(feedId, userId, request.getReactionTypesList());
         basicResponse(responseObserver, reactionMessage);
@@ -98,16 +101,17 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         Pageable pageable = PageRequestResponseUtils.getPageableByRequest(request.getPageRequest());
         Page<ReactionInfo> reactionInfoListPageable = reactionRepository.findReactionInfosByFeedId(Long.valueOf(feedId), pageable);
         List<ReactionInfo> reactionInfoList = reactionInfoListPageable.getContent();
-        List<ReactionMessage> reactionMessageList = reactionInfoList.stream()
-                .map(info -> getReactionMessage(info.getFeedId().toString(), info.getUserId().toString(), ReactionType.forNumber(info.getReactionType())))
-                .collect(Collectors.toList());
+        List<ReactionMessage> reactionMessageList = reactionInfoList.stream() //这种写法是不是会让人看得很乱？
+                .map(info -> getReactionMessage(
+                                info.getFeedId().toString(),
+                                info.getUserId().toString(),
+                                info.getReactionTypeList().stream()
+                                        .map(ReactionType::forNumber)
+                                        .collect(Collectors.toList())
+                        )
+                ).collect(Collectors.toList());
 
-        PageResponse pageResponse = PageResponse.newBuilder()
-                .setPage(pageable.getPageNumber())
-                .setPageSize(pageable.getPageSize())
-                .setHasContent(reactionInfoListPageable.hasContent())
-                .setHasMore(reactionInfoListPageable.getTotalPages() > pageable.getPageNumber())
-                .build();
+        PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(reactionInfoListPageable);
         ReactionsResponse reactionsResponse = ReactionsResponse.newBuilder()
                 .addAllReactions(reactionMessageList)
                 .setPageResponse(pageResponse)
@@ -115,10 +119,6 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
                 .build();
         responseObserver.onNext(reactionsResponse);
         responseObserver.onCompleted();
-    }
-
-    private ReactionMessage getReactionMessage(String feedId, String userId, ReactionType type) {
-        return getReactionMessage(feedId, userId, Collections.singletonList(type));
     }
 
     private ReactionMessage getReactionMessage(String feedId, String userId, List<ReactionType> typeList) {

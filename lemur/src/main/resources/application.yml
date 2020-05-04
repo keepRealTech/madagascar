@@ -4,7 +4,7 @@ grpc:
     port: 12000
   baobob:
     host: 127.0.0.1
-    port: 12001
+    port: 6565
   indri:
     host: 127.0.0.1
     port: 12002
@@ -27,6 +27,10 @@ security:
       client-id: lemur
       client-secret: secret
     resource:
-      token-info-uri: http://OAuthServer:8080/oauth/check_token
+      jwt:
+        key-value: thisisatopsecret
     basic:
       enabled: false
+
+server:
+  port: 8081

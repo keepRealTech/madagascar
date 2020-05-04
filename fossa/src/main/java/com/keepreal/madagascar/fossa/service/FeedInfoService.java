@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
 import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
@@ -51,13 +52,15 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
     private final MongoTemplate mongoTemplate;
     private final CommentService commentService;
     private final FeedInfoRepository feedInfoRepository;
+    private final LongIdGenerator idGenerator;
 
     @Autowired
-    public FeedInfoService(MongoTemplate mongoTemplate, CommentService commentService, ManagedChannel managedChannel, FeedInfoRepository feedInfoRepository) {
+    public FeedInfoService(MongoTemplate mongoTemplate, CommentService commentService, ManagedChannel managedChannel, FeedInfoRepository feedInfoRepository, LongIdGenerator idGenerator) {
         this.mongoTemplate = mongoTemplate;
         this.commentService = commentService;
         this.managedChannel = managedChannel;
         this.feedInfoRepository = feedInfoRepository;
+        this.idGenerator = idGenerator;
     }
 
     /**
@@ -76,6 +79,7 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
             // rpc调用coua服务，如果通过id拿不到island的信息，那么hostId就是""，fromHost=false
             String hostId = callCouaGetIslandHostId(id);
             FeedInfo feedInfo = new FeedInfo();
+            feedInfo.setId(idGenerator.nextId());
             feedInfo.setIslandId(Long.valueOf(id));
             feedInfo.setUserId(Long.valueOf(userId));
             feedInfo.setImageUrls(imageUrisList);

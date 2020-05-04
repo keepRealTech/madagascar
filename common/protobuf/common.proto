@@ -19,6 +19,8 @@ message PageResponse {
 enum LoginType {
     LOGIN_TYPE_NONE = 0;
     LOGIN_OAUTH_WECHAT = 1;
+    LOGIN_PASSWORD = 2;
+    LOGIN_REFRESH_TOKEN = 3;
 }
 
 enum NotificationType {
@@ -31,6 +33,11 @@ enum NotificationType {
 
 message NotificationTypeValue {
     NotificationType value = 1;
+}
+
+enum NoticeType {
+    NOTICE_TYPE_NONE = 0;
+    NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER = 1;
 }
 
 enum ReactionType {

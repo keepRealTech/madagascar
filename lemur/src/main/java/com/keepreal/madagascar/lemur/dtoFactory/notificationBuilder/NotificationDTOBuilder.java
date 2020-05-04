@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.lemur.dtoFactory.notification;
+package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import swagger.model.NotificationDTO;

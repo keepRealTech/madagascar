@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.fossa.service;
 
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.NewReportRequest;
 import com.keepreal.madagascar.fossa.ReportMessage;
 import com.keepreal.madagascar.fossa.ReportResponse;
@@ -21,10 +22,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class ReportService extends ReportServiceGrpc.ReportServiceImplBase {
 
     private final ReportRepository reportRepository;
+    private final LongIdGenerator idGenerator;
 
     @Autowired
-    public ReportService(ReportRepository reportRepository) {
+    public ReportService(ReportRepository reportRepository, LongIdGenerator idGenerator) {
         this.reportRepository = reportRepository;
+        this.idGenerator = idGenerator;
     }
 
     /**
@@ -38,6 +41,7 @@ public class ReportService extends ReportServiceGrpc.ReportServiceImplBase {
         String reporterId = request.getReporterId();
         int typeValue = request.getTypeValue();
         ReportInfo reportInfo = new ReportInfo();
+        reportInfo.setId(idGenerator.nextId());
         reportInfo.setFeedId(Long.valueOf(feedId));
         reportInfo.setReporterId(Long.valueOf(reporterId));
         reportInfo.setType(typeValue);

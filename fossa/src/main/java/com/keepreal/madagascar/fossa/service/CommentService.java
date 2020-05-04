@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.CommentResponse;
 import com.keepreal.madagascar.fossa.CommentServiceGrpc;
 import com.keepreal.madagascar.fossa.CommentsResponse;
@@ -36,10 +37,12 @@ import java.util.stream.Collectors;
 public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
 
     private final CommentInfoRepository commentInfoRepository;
+    private final LongIdGenerator idGenerator;
 
     @Autowired
-    public CommentService(CommentInfoRepository commentInfoRepository) {
+    public CommentService(CommentInfoRepository commentInfoRepository, LongIdGenerator idGenerator) {
         this.commentInfoRepository = commentInfoRepository;
+        this.idGenerator = idGenerator;
     }
 
     /**
@@ -54,6 +57,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         String content = request.getContent();
         String replyToId = request.hasReplyToId() ? request.getReplyToId().getValue() : "";
         CommentInfo commentInfo = new CommentInfo();
+        commentInfo.setId(idGenerator.nextId());
         commentInfo.setFeedId(Long.valueOf(feedId));
         commentInfo.setUserId(Long.valueOf(userId));
         commentInfo.setContent(content);

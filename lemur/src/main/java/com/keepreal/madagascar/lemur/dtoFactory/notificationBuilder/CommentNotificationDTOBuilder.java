@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.lemur.dtoFactory.notification;
+package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
 import com.keepreal.madagascar.lemur.dtoFactory.CommentDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
@@ -59,6 +59,7 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
     @Override
     public NotificationDTO build() {
         if (Objects.isNull(this.notificationMessage)
+
                 || Objects.isNull(this.feedDTOFactory)
                 || Objects.isNull(this.commentDTOFactory)) {
             return null;
@@ -69,8 +70,13 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
         notificationDTO.setHasRead(this.notificationMessage.getHasRead());
         notificationDTO.setNotificationType(NotificationType.COMMENTS);
         notificationDTO.setCreatedAt(this.notificationMessage.getCreatedAt());
-        notificationDTO.setFeed(this.feedDTOFactory.briefValueOf(this.notificationMessage.getFeed()));
-        notificationDTO.setComment(this.commentDTOFactory.valueOf(this.notificationMessage.getComment()));
+
+        if (Objects.nonNull(this.notificationMessage.getCommentNotification())) {
+            notificationDTO.setFeed(
+                    this.feedDTOFactory.briefValueOf(this.notificationMessage.getCommentNotification().getFeed()));
+            notificationDTO.setComment(
+                    this.commentDTOFactory.valueOf(this.notificationMessage.getCommentNotification().getComment()));
+        }
 
         return notificationDTO;
     }
