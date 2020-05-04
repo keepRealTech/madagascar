@@ -1,8 +1,11 @@
 package com.keepreal.madagascar.baobob.config;
 
+import com.keepreal.madagascar.baobob.service.BaobobUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
@@ -23,15 +26,19 @@ import java.util.Collections;
 public class AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
 
     private final JwtTokenConfiguration jwtTokenConfiguration;
+    private final BaobobUserDetailsService userDetailsService;
 
     /**
      * Constructs the authorization server configuration.
      *
      * @param jwtTokenConfiguration Jwt token configuration.
+     * @param userDetailsService    {@link BaobobUserDetailsService}.
      */
     public AuthorizationServerConfiguration(
-            JwtTokenConfiguration jwtTokenConfiguration) {
+            JwtTokenConfiguration jwtTokenConfiguration,
+            BaobobUserDetailsService userDetailsService) {
         this.jwtTokenConfiguration = jwtTokenConfiguration;
+        this.userDetailsService = userDetailsService;
     }
 
     /**
@@ -97,9 +104,20 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         tokenEnhancerChain.setTokenEnhancers(Collections.singletonList(this.accessTokenConverter()));
 
         endpoints
+                .userDetailsService(this.userDetailsService)
                 .tokenEnhancer(tokenEnhancerChain)
                 .tokenStore(this.tokenStore())
                 .allowedTokenEndpointRequestMethods(HttpMethod.GET);
+    }
+
+    /**
+     * Represents the default password encoder. This is required by Spring 5 and will be used by the client secrets.
+     *
+     * @return Password encoder.
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
     }
 
 }

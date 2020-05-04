@@ -67,8 +67,11 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
         if (!request.hasCondition()
                 || !request.getCondition().hasUserId()
                 || !request.getCondition().hasType()) {
-            responseObserver.onError(new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT));
-            return;
+            NotificationsResponse response = NotificationsResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_INVALID_ARGUMENT))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
         }
 
         UserNotificationRecord record =
@@ -81,6 +84,7 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
 
         NotificationsResponse response = NotificationsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .addAllNotifications(notifications.get()
                         .map(notification -> this.notificationMessageFactory.toNotificationMessage(notification, record))
                         .collect(Collectors.toList()))

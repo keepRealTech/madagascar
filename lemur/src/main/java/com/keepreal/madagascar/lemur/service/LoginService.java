@@ -10,7 +10,6 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -48,7 +47,7 @@ public class LoginService {
         try {
             loginResponse = stub.login(request);
         } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(exception);
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(loginResponse)
@@ -62,16 +61,6 @@ public class LoginService {
         }
 
         return loginResponse;
-    }
-
-    /**
-     * Refreshes the token.
-     *
-     * @param refreshToken Refresh token.
-     * @return {@link LoginResponse}.
-     */
-    public LoginResponse refresh(String refreshToken) {
-        throw new NotImplementedException();
     }
 
 }

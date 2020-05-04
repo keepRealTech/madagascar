@@ -50,13 +50,14 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
      */
     @Override
     public Mono<LoginResponse> login(LoginRequest loginRequest) {
-        if (!loginRequest.hasCode()) {
+        if (!loginRequest.hasOauthWechatPayload()) {
             return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
         }
 
-        return this.loginWechat(loginRequest.getCode().getValue())
+        return this.loginWechat(loginRequest.getOauthWechatPayload().getCode())
                 .flatMap(this::retrieveOrCreateUserByUnionId)
-                .map(this.tokenGranter::grant);
+                .map(this.tokenGranter::grant)
+                .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
     }
 
     /**
