@@ -28,4 +28,12 @@ public interface IslandInfoRepository extends JpaRepository<IslandInfo, Long> {
     @Transactional
     @Query(value = "UPDATE island SET last_feed_at = ?2 WHERE id IN ?1", nativeQuery = true)
     void updateLastFeedAtByIslandIdList(List<Long> islandIdList, Long timestamp);
+
+    @Query(value = "SELECT islander_number FROM island WHERE id = ?1 FOR UPDATE", nativeQuery = true)
+    Integer getIslanderNumberByIslandId(Long islandId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE island SET islander_number = islander_number + 1 WHERE id = ?1", nativeQuery = true)
+    void updateIslanderNumberById(Long islandId);
 }

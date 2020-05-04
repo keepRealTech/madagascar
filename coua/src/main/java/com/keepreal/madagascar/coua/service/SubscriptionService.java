@@ -21,6 +21,8 @@ public class SubscriptionService {
 
     @Autowired
     private SubscriptionRepository subscriptionRepository;
+    @Autowired
+    private IslandInfoService islandInfoService;
 
     public void initHost(Long islandId, Long hostId) {
         Subscription subscription = new Subscription();
@@ -28,8 +30,6 @@ public class SubscriptionService {
         subscription.setUserId(hostId);
         subscription.setIslanderNumber(HOST_NUMBER);
         subscription.setState(SubscriptionState.HOST.getValue());
-        subscription.setCreatedTime(System.currentTimeMillis());
-        subscription.setUpdatedTime(System.currentTimeMillis());
         subscriptionRepository.save(subscription);
     }
 
@@ -59,7 +59,7 @@ public class SubscriptionService {
         return subscriptionRepository.getIslandIdListByUserState(userId, state, pageable);
     }
 
-    public void subscribeIsland(Long islandId, Long userId) {
+    public void subscribeIsland(Long islandId, Long userId, Integer islanderNumber) {
         Subscription subscription = subscriptionRepository.getSubscriptionByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
         // 如果这个用户之前加入过这个岛，那么只需要恢复他的状态即可
         if (subscription != null) {
@@ -70,11 +70,7 @@ public class SubscriptionService {
             subscription.setIslandId(islandId);
             subscription.setUserId(userId);
             subscription.setState(SubscriptionState.ISLANDER.getValue());
-            subscription.setCreatedTime(System.currentTimeMillis());
-            subscription.setUpdatedTime(System.currentTimeMillis());
-
-            //查询上一个number，+1作为本条记录的number todo 如果先查后写，这样会有并发问题
-
+            subscription.setIslanderNumber(islanderNumber);
         }
         subscriptionRepository.save(subscription);
     }

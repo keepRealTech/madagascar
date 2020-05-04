@@ -1,6 +1,9 @@
 package com.keepreal.madagascar.coua.model;
 
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -14,6 +17,7 @@ import java.sql.Date;
 @Data
 @Table(name = "user")
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class UserInfo {
 
     @Id
@@ -28,6 +32,8 @@ public class UserInfo {
     private Boolean deleted;
     private Integer state;
     private String unionId;
+    @CreatedDate
     private Long createdTime;
+    @LastModifiedDate
     private Long updatedTime;
 }

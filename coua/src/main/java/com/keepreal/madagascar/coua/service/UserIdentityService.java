@@ -29,8 +29,6 @@ public class UserIdentityService {
             UserIdentity userIdentity = new UserIdentity();
             userIdentity.setUserId(userId);
             userIdentity.setIdentityType(type);
-            userIdentity.setCreatedTime(System.currentTimeMillis());
-            userIdentity.setUpdatedTime(System.currentTimeMillis());
             return userIdentity;
         }).collect(Collectors.toList());
 

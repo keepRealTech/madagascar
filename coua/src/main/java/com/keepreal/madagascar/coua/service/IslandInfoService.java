@@ -16,6 +16,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,8 +79,6 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             islandInfo.setSecret(request.getSecret().getValue());
         }
         islandInfo.setLastFeedAt(System.currentTimeMillis());
-        islandInfo.setCreatedTime(System.currentTimeMillis());
-        islandInfo.setUpdatedTime(System.currentTimeMillis());
         // 将数据插入 island 表
         IslandInfo save = islandInfoRepository.save(islandInfo);
         // 维护 subscription 表
@@ -192,7 +191,6 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             if (request.hasSecret()) {
                 islandInfo.setSecret(request.getSecret().getValue());
             }
-            islandInfo.setUpdatedTime(System.currentTimeMillis());
             IslandInfo save = islandInfoRepository.save(islandInfo);
             IslandMessage islandMessage = getIslandMessage(save);
             responseBuilder.setIsland(islandMessage).setStatus(CommonStatusUtils.getSuccStatus());
@@ -285,6 +283,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
      * @param responseObserver
      */
     @Override
+    @Transactional
     public void subscribeIslandById(SubscribeIslandByIdRequest request, StreamObserver<SubscribeIslandResponse> responseObserver) {
         String islandId = request.getId();
         String secret = request.getSecret();
@@ -294,8 +293,9 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         if (islandInfoOptional.isPresent()) {
             IslandInfo islandInfo = islandInfoOptional.get();
             if (secret.equals(islandInfo.getSecret())) {
-                //todo 这个方法里面的实现待商议
-                subscriptionService.subscribeIsland(Long.valueOf(islandId), Long.valueOf(userId));
+                Integer islanderNumber = islandInfoRepository.getIslanderNumberByIslandId(Long.valueOf(islandId));
+                subscriptionService.subscribeIsland(Long.valueOf(islandId), Long.valueOf(userId), islanderNumber);
+                islandInfoRepository.updateIslanderNumberById(Long.valueOf(islanderNumber));
             } else {
                 CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_SECRET_ERROR);
                 responseBuilder.setStatus(commonStatus);
@@ -373,6 +373,15 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
                 .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+    }
+
+    /**
+     * 拿到最新的islanderNumber(岛成员编号)
+     * @param islandId
+     * @return
+     */
+    public Integer getLatestIslanderNumber(Long islandId) {
+        return islandInfoRepository.getIslanderNumberByIslandId(islandId);
     }
 
     private boolean islandNameIsExisted(String islandName) {

@@ -60,8 +60,6 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         if (request.getIdentitiesCount() > 0) {
             userIdentityService.saveUserIdentities(request.getIdentitiesValueList(), userId);
         }
-        userInfo.setCreatedTime(System.currentTimeMillis());
-        userInfo.setUpdatedTime(System.currentTimeMillis());
 
         saveAndResponse(userInfo, responseObserver);
     }
