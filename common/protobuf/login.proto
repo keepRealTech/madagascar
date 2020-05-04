@@ -30,6 +30,12 @@ message LoginResponse {
     string userId = 4;
 }
 
+
+message RefreshTokenRequest {
+    string refreshToken = 1;
+}
+
 service LoginService {
     rpc login(LoginRequest) returns (LoginResponse) {};
+    rpc refreshToken(RefreshTokenRequest) returns (LoginResponse) {};
 }

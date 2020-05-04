@@ -110,7 +110,14 @@ public class LoginController implements LoginApi {
      */
     @Override
     public ResponseEntity<LoginResponse> apiV1RefreshTokenPost(@Valid PostRefreshTokenRequest body) {
-        this.loginService.refresh(body.getRefreshToken());
+        com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.refresh(body.getRefreshToken());
+
+        UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
+
+        LoginResponse response = new LoginResponse();
+        response.setData(this.buildTokenInfo(loginResponse, user));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

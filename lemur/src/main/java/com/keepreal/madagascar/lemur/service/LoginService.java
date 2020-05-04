@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.service;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.baobob.LoginServiceGrpc;
+import com.keepreal.madagascar.baobob.RefreshTokenRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.ManagedChannel;
@@ -71,7 +72,32 @@ public class LoginService {
      * @return {@link LoginResponse}.
      */
     public LoginResponse refresh(String refreshToken) {
-        throw new NotImplementedException();
+        LoginServiceGrpc.LoginServiceBlockingStub stub =
+                LoginServiceGrpc.newBlockingStub(this.managedChannel)
+                        .withDeadlineAfter(10, TimeUnit.SECONDS);
+
+        RefreshTokenRequest request = RefreshTokenRequest.newBuilder()
+                .setRefreshToken(refreshToken)
+                .build();
+
+        LoginResponse loginResponse;
+        try {
+            loginResponse = stub.refreshToken(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(exception);
+        }
+
+        if (Objects.isNull(loginResponse)
+                || !loginResponse.hasStatus()) {
+            log.error(Objects.isNull(loginResponse) ? "GRpc login returned null." : loginResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != loginResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(loginResponse.getStatus());
+        }
+
+        return loginResponse;
     }
 
 }
