@@ -35,6 +35,8 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        log.error(exception.toString());
+        
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, exception.getErrorCode());
         return new ResponseEntity<>(response, HttpStatus.OK);
