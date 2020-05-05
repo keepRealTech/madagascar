@@ -1,15 +1,22 @@
 package com.keepreal.madagascar.fossa.service;
 
+import com.aliyun.openservices.ons.api.Message;
+import com.aliyun.openservices.ons.api.bean.ProducerBean;
+import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.NewReactionRequest;
+import com.keepreal.madagascar.fossa.NotificationEvent;
+import com.keepreal.madagascar.fossa.NotificationEventType;
+import com.keepreal.madagascar.fossa.ReactionEvent;
 import com.keepreal.madagascar.fossa.ReactionResponse;
 import com.keepreal.madagascar.fossa.ReactionServiceGrpc;
 import com.keepreal.madagascar.fossa.ReactionsResponse;
 import com.keepreal.madagascar.fossa.RetrieveReactionsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.RevokeReactionRequest;
+import com.keepreal.madagascar.fossa.config.MqConfig;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.ReactionInfo;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
@@ -25,6 +32,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -39,12 +47,18 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
     private final ReactionRepository reactionRepository;
     private final LongIdGenerator idGenerator;
     private final MongoTemplate mongoTemplate;
+    private final FeedInfoService feedInfoService;
+    private final MqConfig mqConfig;
+    private final ProducerBean producerBean;
 
     @Autowired
-    public ReactionService(ReactionRepository reactionRepository, LongIdGenerator idGenerator, MongoTemplate mongoTemplate) {
+    public ReactionService(ReactionRepository reactionRepository, LongIdGenerator idGenerator, MongoTemplate mongoTemplate, FeedInfoService feedInfoService, MqConfig mqConfig, ProducerBean producerBean) {
         this.reactionRepository = reactionRepository;
         this.idGenerator = idGenerator;
         this.mongoTemplate = mongoTemplate;
+        this.feedInfoService = feedInfoService;
+        this.mqConfig = mqConfig;
+        this.producerBean = producerBean;
     }
 
     /**
@@ -66,6 +80,21 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         reactionRepository.save(reactionInfo);
 
         ReactionMessage reactionMessage = getReactionMessage(feedId, userId, request.getReactionTypesList());
+
+        ReactionEvent reactionEvent = ReactionEvent.newBuilder()
+                .setReaction(reactionMessage)
+                .setFeed(feedInfoService.getFeedMessageById(Long.valueOf(feedId)))
+                .build();
+        NotificationEvent event = NotificationEvent.newBuilder()
+                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_REACTION)
+                .setUserId(userId)
+                .setReactionEvent(reactionEvent)
+                .setTimestamp(System.currentTimeMillis())
+                .setEventId(UUID.randomUUID().toString())
+                .build();
+        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
+        producerBean.send(message);
+
         basicResponse(responseObserver, reactionMessage);
     }
 

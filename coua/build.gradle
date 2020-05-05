@@ -16,14 +16,12 @@ sourceSets {
 dependencies {
     implementation project(":common:exceptions")
     implementation project(":common:id-generator-starter")
-    implementation 'com.aliyun.openservices:ons-client:1.8.4.Final'
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    implementation 'io.projectreactor:reactor-core'
+    runtimeOnly 'mysql:mysql-connector-java'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
     implementation 'org.projectlombok:lombok'
-    runtimeOnly 'mysql:mysql-connector-java'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
 }

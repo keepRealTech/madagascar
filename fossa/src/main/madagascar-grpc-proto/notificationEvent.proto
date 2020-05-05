@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.fossa";
+
+import "common.proto";
+
+enum NotificationEventType {
+    NOTIFICATION_EVENT_NONE = 0;
+    NOTIFICATION_EVENT_NEW_SUBSCRIBE = 1;
+    NOTIFICATION_EVENT_NEW_COMMENT = 2;
+    NOTIFICATION_EVENT_NEW_REACTION = 3;
+}
+
+message SubscribeEvent {
+    string islandId = 1;
+    string subscriberId = 2;
+}
+
+message CommentEvent {
+    CommentMessage comment = 1;
+    FeedMessage feed = 2;
+}
+
+message ReactionEvent {
+    ReactionMessage reaction = 1;
+    FeedMessage feed = 2;
+}
+
+message NotificationEvent {
+    NotificationEventType type = 1;
+    string userId = 2;
+    oneof event {
+        SubscribeEvent subscribeEvent = 3;
+        CommentEvent commentEvent = 4;
+        ReactionEvent reactionEvent = 5;
+    }
+    uint64 timestamp = 6;
+    string eventId = 7;
+}

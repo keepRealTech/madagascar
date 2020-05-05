@@ -4,6 +4,8 @@ include 'common:exceptions'
 include 'common:id-generator-starter'
 include 'indri'
 include 'lemur'
+include 'coua'
+
 include 'baobob'
 include 'fossa'
 

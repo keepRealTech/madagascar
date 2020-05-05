@@ -1,17 +1,23 @@
 package com.keepreal.madagascar.fossa.service;
 
+import com.aliyun.openservices.ons.api.Message;
+import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import com.keepreal.madagascar.fossa.CommentEvent;
 import com.keepreal.madagascar.fossa.CommentResponse;
 import com.keepreal.madagascar.fossa.CommentServiceGrpc;
 import com.keepreal.madagascar.fossa.CommentsResponse;
 import com.keepreal.madagascar.fossa.DeleteCommentByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteCommentByIdResponse;
 import com.keepreal.madagascar.fossa.NewCommentRequest;
+import com.keepreal.madagascar.fossa.NotificationEvent;
+import com.keepreal.madagascar.fossa.NotificationEventType;
 import com.keepreal.madagascar.fossa.RetrieveCommentsByFeedIdRequest;
+import com.keepreal.madagascar.fossa.config.MqConfig;
 import com.keepreal.madagascar.fossa.dao.CommentInfoRepository;
 import com.keepreal.madagascar.fossa.model.CommentInfo;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
@@ -25,6 +31,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -38,11 +45,17 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
 
     private final CommentInfoRepository commentInfoRepository;
     private final LongIdGenerator idGenerator;
+    private final FeedInfoService feedInfoService;
+    private final MqConfig mqConfig;
+    private final ProducerBean producerBean;
 
     @Autowired
-    public CommentService(CommentInfoRepository commentInfoRepository, LongIdGenerator idGenerator) {
+    public CommentService(CommentInfoRepository commentInfoRepository, LongIdGenerator idGenerator, FeedInfoService feedInfoService, MqConfig mqConfig, ProducerBean producerBean) {
         this.commentInfoRepository = commentInfoRepository;
         this.idGenerator = idGenerator;
+        this.feedInfoService = feedInfoService;
+        this.mqConfig = mqConfig;
+        this.producerBean = producerBean;
     }
 
     /**
@@ -65,15 +78,28 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         commentInfo.setDeleted(false);
 
         CommentInfo save = commentInfoRepository.save(commentInfo);
-
         CommentMessage commentMessage = getCommentMessage(save);
         CommentResponse commentResponse = CommentResponse.newBuilder()
                 .setComment(commentMessage)
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
+
+        CommentEvent commentEvent = CommentEvent.newBuilder()
+                .setComment(commentMessage)
+                .setFeed(feedInfoService.getFeedMessageById(Long.valueOf(feedId)))
+                .build();
+        NotificationEvent event = NotificationEvent.newBuilder()
+                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_COMMENT)
+                .setUserId(userId)
+                .setCommentEvent(commentEvent)
+                .setTimestamp(System.currentTimeMillis())
+                .setEventId(UUID.randomUUID().toString())
+                .build();
+        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
+        producerBean.send(message);
+
         responseObserver.onNext(commentResponse);
         responseObserver.onCompleted();
-        super.createComment(request, responseObserver);
     }
 
     /**

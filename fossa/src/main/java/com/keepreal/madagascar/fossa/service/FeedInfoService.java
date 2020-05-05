@@ -35,6 +35,7 @@ import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -183,6 +184,15 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
                 .build();
         responseObserver.onNext(feedsResponse);
         responseObserver.onCompleted();
+    }
+
+    public FeedMessage getFeedMessageById(Long feedId) {
+        Optional<FeedInfo> feedInfoOptional = feedInfoRepository.findById(feedId);
+        if (feedInfoOptional.isPresent()) {
+            return getFeedMessage(feedInfoOptional.get());
+        } else {
+            return FeedMessage.newBuilder().build();
+        }
     }
 
     private FeedMessage getFeedMessage(FeedInfo feedInfo) {

@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,6 +22,7 @@ public class ConfigurationController implements ConfigApi {
      * @param configType  (required) {@link ConfigType}.
      * @return {@link ConfigurationResponse}.
      */
+    @Cacheable(value = "config")
     @Override
     public ResponseEntity<ConfigurationResponse> apiV1ConfigsGet(ConfigType configType) {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
