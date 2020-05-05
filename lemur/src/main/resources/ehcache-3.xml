@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<eh:config
+        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xmlns:eh='http://www.ehcache.org/v3'
+        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.3.xsd">
+    <!--指定缓存目录-->
+    <eh:persistence directory="${java.io.tmpdir}/cache-data"/>
+
+    <eh:cache-template name="default">
+        <eh:expiry>
+            <eh:ttl unit="seconds">600</eh:ttl>
+        </eh:expiry>
+        <eh:resources>
+            <eh:heap unit="entries">2000</eh:heap>
+            <eh:offheap unit="MB">10</eh:offheap>
+        </eh:resources>
+    </eh:cache-template>
+
+    <eh:cache alias="user" uses-template="default">
+        <eh:expiry>
+            <eh:ttl unit="hours">1</eh:ttl>
+        </eh:expiry>
+    </eh:cache>
+
+    <eh:cache alias="island" uses-template="default">
+        <eh:expiry>
+            <eh:ttl unit="hours">24</eh:ttl>
+        </eh:expiry>
+    </eh:cache>
+
+    <eh:cache alias="config" uses-template="default">
+        <eh:expiry>
+            <eh:none/>
+        </eh:expiry>
+    </eh:cache>
+</eh:config>

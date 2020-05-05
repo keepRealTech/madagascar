@@ -10,7 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Represents the {@link EnableIdGenerator} annotaion.
+ * Represents the {@link EnableIdGenerator} annotation.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

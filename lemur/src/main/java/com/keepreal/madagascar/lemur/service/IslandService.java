@@ -26,6 +26,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -88,6 +90,7 @@ public class IslandService {
      * @param id Island id.
      * @return {@link IslandMessage}.
      */
+    @Cacheable(value = "island", key = "#id")
     public IslandMessage retrieveIslandById(String id) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
 
@@ -122,6 +125,7 @@ public class IslandService {
      * @param userId User id.
      * @return {@link IslandProfileResponse}.
      */
+    @Cacheable(value = "island-profile", key = "#id")
     public IslandProfileResponse retrieveIslandProfileById(String id, String userId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
 
@@ -249,6 +253,7 @@ public class IslandService {
      * @param description      Description.
      * @return {@link IslandMessage}.
      */
+    @CacheEvict(value = {"island, island-profile"}, key = "#id")
     public IslandMessage updateIslandById(String id, String name, String portraitImageUri, String secret, String description) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
 
@@ -298,6 +303,7 @@ public class IslandService {
      * @param userId User id.
      * @param secret Secret.
      */
+    @CacheEvict(value = "island-subscriber", key = "#id")
     public void subscribeIslandById(String id, String userId, String secret) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
 
@@ -331,6 +337,7 @@ public class IslandService {
      * @param id     Island id.
      * @param userId User id.
      */
+    @CacheEvict(value = "island-subscriber", key = "#id")
     public void unsubscribeIslandById(String id, String userId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
 
@@ -365,6 +372,7 @@ public class IslandService {
      * @param pageSize Page size.
      * @return {@link IslandSubscribersResponse}.
      */
+    @Cacheable(value = "island-subscriber", key = "#id")
     public IslandSubscribersResponse retrieveSubscriberByIslandId(String id, int page, int pageSize) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
 
