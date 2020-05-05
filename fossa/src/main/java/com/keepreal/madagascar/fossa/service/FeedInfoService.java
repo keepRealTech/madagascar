@@ -9,6 +9,8 @@ import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
 import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
+import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
+import com.keepreal.madagascar.coua.UpdateLastFeedAtResponse;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
@@ -90,10 +92,10 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfo.setLikesCount(0);
             feedInfo.setDeleted(false);
             feedInfo.setFromHost(userId.equals(hostId));
-            //todo: 调用coua服务，更新island的lastFeedAt字段的值
             feedInfoList.add(feedInfo);
         });
-
+        //调用coua服务更新island的lastFeedAt字段
+        callCouaUpdateIslandLastFeedAt(islandIdList);
         feedInfoRepository.saveAll(feedInfoList);
         NewFeedsResponse newFeedsResponse = NewFeedsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -218,5 +220,14 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         RetrieveIslandByIdRequest islandByIdRequest = RetrieveIslandByIdRequest.newBuilder().setId(islandId).build();
         IslandResponse islandResponse = stub.retrieveIslandById(islandByIdRequest);
         return islandResponse.hasIsland() ? islandResponse.getIsland().getHostId() : "";
+    }
+
+    private void callCouaUpdateIslandLastFeedAt(List<String> islandIdList) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        UpdateLastFeedAtRequest request = UpdateLastFeedAtRequest.newBuilder()
+                .addAllIslandIds(islandIdList)
+                .setTimestamps(System.currentTimeMillis())
+                .build();
+        stub.updateLastFeedAtById(request);
     }
 }

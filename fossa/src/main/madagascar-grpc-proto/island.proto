@@ -13,9 +13,10 @@ message QueryIslandCondition {
 }
 
 message NewIslandRequest {
-    string name = 1;
-    google.protobuf.StringValue portraitImageUri = 2;
-    google.protobuf.StringValue secret = 3;
+    string hostId = 1;
+    string name = 2;
+    google.protobuf.StringValue portraitImageUri = 3;
+    google.protobuf.StringValue secret = 4;
 }
 
 message IslandResponse {
@@ -93,6 +94,30 @@ message SubscribeIslandResponse {
     CommonStatus status = 1;
 }
 
+message CheckNewFeedsRequest {
+    repeated string islandIds = 1;
+    repeated uint64 timestamps = 2;
+}
+
+message CheckNewFeedsMessage {
+    string islandId = 1;
+    bool hasNewFeeds = 2;
+}
+
+message CheckNewFeedsResponse {
+    CommonStatus status = 1;
+    repeated CheckNewFeedsMessage checkNewFeeds = 2;
+}
+
+message UpdateLastFeedAtRequest {
+    repeated string islandIds = 1;
+    uint64 timestamps = 2;
+}
+
+message UpdateLastFeedAtResponse {
+    CommonStatus status = 1;
+}
+
 service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
@@ -103,4 +128,6 @@ service IslandService {
     rpc RetrieveIslandSubscribersById (RetrieveIslandSubscribersByIdRequest) returns (IslandSubscribersResponse) {};
     rpc SubscribeIslandById (SubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
     rpc UnsubscribeIslandById (UnsubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
+    rpc CheckNewFeeds (CheckNewFeedsRequest) returns (CheckNewFeedsResponse) {};
+    rpc updateLastFeedAtById (UpdateLastFeedAtRequest) returns (UpdateLastFeedAtResponse) {}
 }
