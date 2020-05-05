@@ -44,6 +44,11 @@ public class NotificationEventListener implements MessageListener {
     @Override
     public Action consume(Message message, ConsumeContext context) {
         try {
+            if (this.notificationService.hasConsumed(message.getKey())){
+                log.warn("Event id {} has been consumed before, skipped.", message.getKey());
+                return Action.CommitMessage;
+            }
+
             Notification notification =
                     this.notificationFactory.toNotification(NotificationEvent.parseFrom(message.getBody()));
             this.notificationService.insert(notification);
