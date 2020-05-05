@@ -20,11 +20,7 @@ public class MqConfig {
     private String secretKey;
     private String nameSrvAddr;
     private String topic;
-    private String groupId;
     private String tag;
-    private String orderTopic;
-    private String orderGroupId;
-    private String orderTag;
 
     public Properties getMqProperties() {
         Properties properties = new Properties();
