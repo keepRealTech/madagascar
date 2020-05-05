@@ -8,7 +8,28 @@ import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.coua.*;
+import com.keepreal.madagascar.coua.CheckNameRequest;
+import com.keepreal.madagascar.coua.CheckNameResponse;
+import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
+import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
+import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
+import com.keepreal.madagascar.coua.IslandProfileResponse;
+import com.keepreal.madagascar.coua.IslandResponse;
+import com.keepreal.madagascar.coua.IslandServiceGrpc;
+import com.keepreal.madagascar.coua.IslandSubscribersResponse;
+import com.keepreal.madagascar.coua.IslandsResponse;
+import com.keepreal.madagascar.coua.NewIslandRequest;
+import com.keepreal.madagascar.coua.QueryIslandCondition;
+import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
+import com.keepreal.madagascar.coua.RetrieveIslandProfileByIdRequest;
+import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
+import com.keepreal.madagascar.coua.RetrieveMultipleIslandsRequest;
+import com.keepreal.madagascar.coua.SubscribeIslandByIdRequest;
+import com.keepreal.madagascar.coua.SubscribeIslandResponse;
+import com.keepreal.madagascar.coua.UnsubscribeIslandByIdRequest;
+import com.keepreal.madagascar.coua.UpdateIslandByIdRequest;
+import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
+import com.keepreal.madagascar.coua.UpdateLastFeedAtResponse;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
 import com.keepreal.madagascar.coua.model.IslandInfo;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
@@ -48,6 +69,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 检查island name 是否已经存在
+     *
      * @param request
      * @param responseObserver
      */
@@ -65,6 +87,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 创建island
+     *
      * @param request
      * @param responseObserver
      */
@@ -99,6 +122,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 根据 island id 查询岛的信息
+     *
      * @param request
      * @param responseObserver
      */
@@ -125,7 +149,8 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 根据条件查询符合条件的岛的列表
-     * @param request 可根据 name，hostId，subscriberId 查询
+     *
+     * @param request          可根据 name，hostId，subscriberId 查询
      * @param responseObserver
      */
     @Override
@@ -173,6 +198,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 通过 id 更新 island 的信息，部分更新，先查后改
+     *
      * @param request
      * @param responseObserver
      */
@@ -209,6 +235,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 根据 id 查询 island 详情页
+     *
      * @param request
      * @param responseObserver
      */
@@ -248,6 +275,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 根据 island id 返回岛的所有订阅者信息
+     *
      * @param request
      * @param responseObserver
      */
@@ -270,8 +298,8 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
                 .setHasMore(subscriberIdListPageable.getTotalPages() > page)
                 .setHasContent(subscriberIdListPageable.hasContent())
                 .build();
-         IslandSubscribersResponse islandSubscribersResponse =
-                 IslandSubscribersResponse.newBuilder()
+        IslandSubscribersResponse islandSubscribersResponse =
+                IslandSubscribersResponse.newBuilder()
                         .setPageResponse(pageResponse)
                         .addAllUser(userMessageList)
                         .setStatus(CommonStatusUtils.getSuccStatus())
@@ -282,6 +310,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 订阅一个岛
+     *
      * @param request
      * @param responseObserver
      */
@@ -309,14 +338,15 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         }
 
         SubscribeIslandResponse subscribeIslandResponse = SubscribeIslandResponse.newBuilder()
-                        .setStatus(CommonStatusUtils.getSuccStatus())
-                        .build();
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
         responseObserver.onNext(subscribeIslandResponse);
         responseObserver.onCompleted();
     }
 
     /**
      * 取消订阅这个岛
+     *
      * @param request
      * @param responseObserver
      */
@@ -334,6 +364,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 根据islandId和对应的timestamp检查是否有新的未读feed
+     *
      * @param request
      * @param responseObserver
      */
@@ -362,6 +393,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 根据islandId和timestamp更新island的lastFeedAt
+     *
      * @param request
      * @param responseObserver
      */
@@ -380,6 +412,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 拿到最新的islanderNumber(岛成员编号)
+     *
      * @param islandId
      * @return
      */
@@ -393,6 +426,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 把 IslandInfo 对象包装为 IslandMessage 对象
+     *
      * @param islandInfo
      * @return
      */
