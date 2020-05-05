@@ -94,6 +94,7 @@ public class SubscriptionService {
         subscriptionRepository.save(subscription);
 
         //向mq发消息
+        String uuid = UUID.randomUUID().toString();
         SubscribeEvent subscribeEvent = SubscribeEvent.newBuilder()
                 .setIslandId(islandId.toString())
                 .setSubscriberId(userId.toString())
@@ -103,9 +104,10 @@ public class SubscriptionService {
                 .setUserId(userId.toString())
                 .setSubscribeEvent(subscribeEvent)
                 .setTimestamp(System.currentTimeMillis())
-                .setEventId(UUID.randomUUID().toString())
+                .setEventId(uuid)
                 .build();
         Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
+        message.setKey(uuid);
         producerBean.send(message);
     }
 
