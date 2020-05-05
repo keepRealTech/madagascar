@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 public class UserIdentityService {
 
     private final UserIdentityRepository userIdentityRepository;
-    @Autowired
-    private LongIdGenerator idGenerator;
+    private final LongIdGenerator idGenerator;
 
     @Autowired
-    public UserIdentityService(UserIdentityRepository userIdentityRepository) {
+    public UserIdentityService(UserIdentityRepository userIdentityRepository, LongIdGenerator idGenerator) {
         this.userIdentityRepository = userIdentityRepository;
+        this.idGenerator = idGenerator;
     }
 
     void saveUserIdentities(List<Integer> userIdentitiesTypes, Long userId) {

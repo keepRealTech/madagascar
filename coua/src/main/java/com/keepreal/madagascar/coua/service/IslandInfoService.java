@@ -36,14 +36,14 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     private final IslandInfoRepository islandInfoRepository;
     private final SubscriptionService subscriptionService;
     private final UserInfoService userInfoService;
-    @Autowired
-    private LongIdGenerator idGenerator;
+    private final LongIdGenerator idGenerator;
 
     @Autowired
-    public IslandInfoService(IslandInfoRepository islandInfoRepository, SubscriptionService subscriptionService, UserInfoService userInfoService) {
+    public IslandInfoService(IslandInfoRepository islandInfoRepository, SubscriptionService subscriptionService, UserInfoService userInfoService, LongIdGenerator idGenerator) {
         this.islandInfoRepository = islandInfoRepository;
         this.subscriptionService = subscriptionService;
         this.userInfoService = userInfoService;
+        this.idGenerator = idGenerator;
     }
 
     /**

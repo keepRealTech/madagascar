@@ -24,6 +24,12 @@ public interface IslandInfoRepository extends JpaRepository<IslandInfo, Long> {
     @Query(value = "SELECT island_id, last_feed_at FROM island WHERE is_deleted = FALSE AND id IN ?1", nativeQuery = true)
     Map<Long, Long> findIslandIdAndLastFeedAtByIslandIdList(List<Long> islandIdList);
 
+    /**
+     * 根据islandIdList更新lastFeedAt字段
+     * todo: 会有性能问题，以后要改掉
+     * @param islandIdList
+     * @param timestamp
+     */
     @Modifying
     @Transactional
     @Query(value = "UPDATE island SET last_feed_at = ?2 WHERE id IN ?1", nativeQuery = true)

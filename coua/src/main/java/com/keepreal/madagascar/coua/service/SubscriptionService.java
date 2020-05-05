@@ -20,10 +20,14 @@ public class SubscriptionService {
 
     public static final int HOST_NUMBER = 1;
 
+    private final SubscriptionRepository subscriptionRepository;
+    private final LongIdGenerator idGenerator;
+
     @Autowired
-    private SubscriptionRepository subscriptionRepository;
-    @Autowired
-    private LongIdGenerator idGenerator;
+    public SubscriptionService(SubscriptionRepository subscriptionRepository, LongIdGenerator idGenerator) {
+        this.subscriptionRepository = subscriptionRepository;
+        this.idGenerator = idGenerator;
+    }
 
     public void initHost(Long islandId, Long hostId) {
         Subscription subscription = new Subscription();
