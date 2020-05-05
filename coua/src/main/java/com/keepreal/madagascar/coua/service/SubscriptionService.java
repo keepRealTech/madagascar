@@ -1,13 +1,21 @@
 package com.keepreal.madagascar.coua.service;
 
+import com.aliyun.openservices.ons.api.Message;
+import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import com.keepreal.madagascar.coua.NotificationEvent;
+import com.keepreal.madagascar.coua.NotificationEventType;
+import com.keepreal.madagascar.coua.SubscribeEvent;
 import com.keepreal.madagascar.coua.common.SubscriptionState;
+import com.keepreal.madagascar.coua.config.MqConfig;
 import com.keepreal.madagascar.coua.dao.SubscriptionRepository;
 import com.keepreal.madagascar.coua.model.Subscription;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 /**
  * @program: madagascar
@@ -22,11 +30,15 @@ public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final LongIdGenerator idGenerator;
+    private final ProducerBean producerBean;
+    private final MqConfig mqConfig;
 
     @Autowired
-    public SubscriptionService(SubscriptionRepository subscriptionRepository, LongIdGenerator idGenerator) {
+    public SubscriptionService(SubscriptionRepository subscriptionRepository, LongIdGenerator idGenerator, ProducerBean producerBean, MqConfig mqConfig) {
         this.subscriptionRepository = subscriptionRepository;
         this.idGenerator = idGenerator;
+        this.producerBean = producerBean;
+        this.mqConfig = mqConfig;
     }
 
     public void initHost(Long islandId, Long hostId) {
@@ -80,6 +92,23 @@ public class SubscriptionService {
             subscription.setIslanderNumber(islanderNumber);
         }
         subscriptionRepository.save(subscription);
+
+        //向mq发消息
+        String uuid = UUID.randomUUID().toString();
+        SubscribeEvent subscribeEvent = SubscribeEvent.newBuilder()
+                .setIslandId(islandId.toString())
+                .setSubscriberId(userId.toString())
+                .build();
+        NotificationEvent event = NotificationEvent.newBuilder()
+                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_SUBSCRIBE)
+                .setUserId(userId.toString())
+                .setSubscribeEvent(subscribeEvent)
+                .setTimestamp(System.currentTimeMillis())
+                .setEventId(uuid)
+                .build();
+        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
+        message.setKey(uuid);
+        producerBean.send(message);
     }
 
     public void unSubscribeIsland(Long islandId, Long userId) {
