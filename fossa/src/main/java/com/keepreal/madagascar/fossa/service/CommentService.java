@@ -88,14 +88,16 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
                 .setComment(commentMessage)
                 .setFeed(feedInfoService.getFeedMessageById(Long.valueOf(feedId)))
                 .build();
+        String uuid = UUID.randomUUID().toString();
         NotificationEvent event = NotificationEvent.newBuilder()
                 .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_COMMENT)
                 .setUserId(userId)
                 .setCommentEvent(commentEvent)
                 .setTimestamp(System.currentTimeMillis())
-                .setEventId(UUID.randomUUID().toString())
+                .setEventId(uuid)
                 .build();
         Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
+        message.setKey(uuid);
         producerBean.send(message);
 
         responseObserver.onNext(commentResponse);

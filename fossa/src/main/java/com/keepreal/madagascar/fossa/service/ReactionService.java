@@ -85,14 +85,16 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
                 .setReaction(reactionMessage)
                 .setFeed(feedInfoService.getFeedMessageById(Long.valueOf(feedId)))
                 .build();
+        String uuid = UUID.randomUUID().toString();
         NotificationEvent event = NotificationEvent.newBuilder()
                 .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_REACTION)
                 .setUserId(userId)
                 .setReactionEvent(reactionEvent)
                 .setTimestamp(System.currentTimeMillis())
-                .setEventId(UUID.randomUUID().toString())
+                .setEventId(uuid)
                 .build();
         Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
+        message.setKey(uuid);
         producerBean.send(message);
 
         basicResponse(responseObserver, reactionMessage);
