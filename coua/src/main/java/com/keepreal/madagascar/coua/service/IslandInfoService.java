@@ -41,6 +41,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -374,7 +375,9 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         List<Long> timestampsList = request.getTimestampsList();
         List<CheckNewFeedsMessage> messageList = new ArrayList<>();
         if (islandIdList.size() == timestampsList.size()) {
-            Map<Long, Long> map = islandInfoRepository.findIslandIdAndLastFeedAtByIslandIdList(islandIdList);
+            List<Map<String, Long>> resList = islandInfoRepository.findIslandIdAndLastFeedAtByIslandIdList(islandIdList);
+            Map<Long, Long> map = new HashMap<>();
+            resList.forEach(m -> map.put(m.get("id"), m.get("lastFeedAt")));
             for (int i = 0; i < islandIdList.size(); i++) {
                 Long islandId = islandIdList.get(i);
                 CheckNewFeedsMessage feedMessage = getFeedMessage(islandId.toString(), map.get(islandId) > timestampsList.get(i));
