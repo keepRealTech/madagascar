@@ -33,7 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
-    implementation  'org.openapitools:jackson-databind-nullable:0.2.1'
+    implementation 'org.openapitools:jackson-databind-nullable'
     implementation 'io.swagger.core.v3:swagger-annotations'
     implementation 'io.swagger:swagger-annotations'
     swaggerCodegen 'org.openapitools:openapi-generator-cli'
