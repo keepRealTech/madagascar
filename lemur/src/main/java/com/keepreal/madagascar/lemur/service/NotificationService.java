@@ -52,7 +52,7 @@ public class NotificationService {
         NotificationServiceGrpc.NotificationServiceBlockingStub stub = NotificationServiceGrpc.newBlockingStub(this.managedChannel);
 
         QueryNotificationCondition.Builder conditionBuilder = QueryNotificationCondition.newBuilder()
-                .setId(StringValue.of(userId));
+                .setUserId(StringValue.of(userId));
 
         if (Objects.nonNull(type)) {
             conditionBuilder.setType(NotificationTypeValue.newBuilder().setValue(type).build());

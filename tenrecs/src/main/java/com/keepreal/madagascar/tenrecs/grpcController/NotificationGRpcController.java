@@ -3,7 +3,6 @@ package com.keepreal.madagascar.tenrecs.grpcController;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.tenrecs.CountUnreadNotificationsRequest;
 import com.keepreal.madagascar.tenrecs.CountUnreadNotificationsResponse;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
@@ -72,6 +71,7 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                     .build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
+            return;
         }
 
         UserNotificationRecord record =

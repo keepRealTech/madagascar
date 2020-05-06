@@ -47,7 +47,7 @@ public class UserNotificationRecordService {
      * @return {@link UserNotificationRecord}.
      */
     public UserNotificationRecord update(UserNotificationRecord userNotificationRecord) {
-        return this.userNotificationRecordRepository.insert(userNotificationRecord);
+        return this.userNotificationRecordRepository.save(userNotificationRecord);
     }
 
     /**
