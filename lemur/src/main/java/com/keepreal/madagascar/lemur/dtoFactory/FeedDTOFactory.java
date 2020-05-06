@@ -3,7 +3,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
-import com.keepreal.madagascar.fossa.CheckNewFeedsMessage;
+import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
@@ -57,13 +57,15 @@ public class FeedDTOFactory {
         if (Objects.isNull(feed)) {
             return null;
         }
+
         IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
         UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+
         FeedDTO feedDTO = new FeedDTO();
         feedDTO.setId(feed.getId());
         feedDTO.setText(feed.getText());
         feedDTO.setImagesUris(feed.getImageUrisList());
-        feedDTO.setFromHost(userMessage.getId().equals(islandMessage.getHostId()));
+        feedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
         feedDTO.setLikesCount(feedDTO.getLikesCount());
         feedDTO.setCommentsCount(feed.getCommentsCount());
         feedDTO.setComments(feed.getLastCommentsList()
@@ -91,17 +93,18 @@ public class FeedDTOFactory {
             return null;
         }
 
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
+        UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+
         BriefFeedDTO briefFeedDTO = new BriefFeedDTO();
         briefFeedDTO.setId(feed.getId());
         briefFeedDTO.setText(feed.getText());
         briefFeedDTO.setImagesUris(feed.getImageUrisList());
-        briefFeedDTO.setFromHost(feed.getFromHost());
+        briefFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
         briefFeedDTO.setCreatedAt(feed.getCreatedAt());
 
-        briefFeedDTO.setUser(this.userDTOFactory.briefValueOf(
-                this.userService.retrieveUserById(feed.getUserId())));
-        briefFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(
-                this.islandService.retrieveIslandById(feed.getIslandId())));
+        briefFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
+        briefFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
 
         return briefFeedDTO;
     }

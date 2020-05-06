@@ -6,6 +6,9 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckNameRequest;
 import com.keepreal.madagascar.coua.CheckNameResponse;
+import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
+import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
+import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
@@ -31,6 +34,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -399,6 +403,41 @@ public class IslandService {
         }
 
         return islandSubscribersResponse;
+    }
+
+    /**
+     * Checks if has new feeds after the given timestamp.
+     *
+     * @param islandIds Island ids.
+     * @param timestamps Timestamps in milli-seconds.
+     * @return List of {@link CheckNewFeedsMessage}.
+     */
+    public List<CheckNewFeedsMessage> checkNewFeeds(List<String> islandIds, List<Long> timestamps) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+
+        CheckNewFeedsRequest request = CheckNewFeedsRequest.newBuilder()
+                .addAllIslandIds(islandIds)
+                .addAllTimestamps(timestamps)
+                .build();
+
+        CheckNewFeedsResponse checkNewFeedsResponse;
+        try {
+            checkNewFeedsResponse = stub.checkNewFeeds(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(checkNewFeedsResponse)
+                || !checkNewFeedsResponse.hasStatus()) {
+            log.error(Objects.isNull(checkNewFeedsResponse) ? "Retrieve feed returned null." : checkNewFeedsResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != checkNewFeedsResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(checkNewFeedsResponse.getStatus());
+        }
+
+        return checkNewFeedsResponse.getCheckNewFeedsList();
     }
 
 }
