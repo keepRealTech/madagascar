@@ -1,6 +1,9 @@
 package com.keepreal.madagascar.coua.service;
 
 import com.aliyun.openservices.ons.api.Message;
+import com.aliyun.openservices.ons.api.OnExceptionContext;
+import com.aliyun.openservices.ons.api.SendCallback;
+import com.aliyun.openservices.ons.api.SendResult;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.NotificationEvent;
@@ -10,6 +13,7 @@ import com.keepreal.madagascar.coua.common.SubscriptionState;
 import com.keepreal.madagascar.coua.config.MqConfig;
 import com.keepreal.madagascar.coua.dao.SubscriptionRepository;
 import com.keepreal.madagascar.coua.model.Subscription;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +27,7 @@ import java.util.UUID;
  * @create: 2020-04-26
  **/
 
+@Slf4j
 @Service
 public class SubscriptionService {
 
@@ -108,7 +113,14 @@ public class SubscriptionService {
                 .build();
         Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
         message.setKey(uuid);
-        producerBean.send(message);
+        producerBean.sendAsync(message, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) { }
+            @Override
+            public void onException(OnExceptionContext context) {
+                log.error("this message send failure, message Id is {}", context.getMessageId());
+            }
+        });
     }
 
     public void unSubscribeIsland(Long islandId, Long userId) {
