@@ -338,7 +338,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             IslandInfo islandInfo = islandInfoOptional.get();
             if (secret.equals(islandInfo.getSecret())) {
                 Integer islanderNumber = islandInfoRepository.getIslanderNumberByIslandId(islandId);
-                subscriptionService.subscribeIsland(islandId, userId, islanderNumber);
+                subscriptionService.subscribeIsland(islandId, userId, islandInfo.getHostId(), islanderNumber);
                 islandInfoRepository.updateIslanderNumberById(islandId);
             } else {
                 CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_SECRET_ERROR);

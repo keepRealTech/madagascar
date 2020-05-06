@@ -89,7 +89,7 @@ public class SubscriptionService {
         return subscriptionRepository.getIslandIdListByUserState(userId, state, pageable);
     }
 
-    public void subscribeIsland(String islandId, String userId, Integer islanderNumber) {
+    public void subscribeIsland(String islandId, String userId, String hostId, Integer islanderNumber) {
         Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
         // 如果这个用户之前加入过这个岛，那么只需要恢复他的状态即可
         if (subscription != null) {
@@ -114,7 +114,7 @@ public class SubscriptionService {
                 .build();
         NotificationEvent event = NotificationEvent.newBuilder()
                 .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_SUBSCRIBE)
-                .setUserId(userId)
+                .setUserId(hostId) //当用户加入这个岛时，收到这个通知的是岛主
                 .setSubscribeEvent(subscribeEvent)
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
