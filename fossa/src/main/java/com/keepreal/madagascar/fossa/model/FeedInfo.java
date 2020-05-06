@@ -25,7 +25,6 @@ import java.util.List;
 public class FeedInfo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Long islandId;
     private Long userId;

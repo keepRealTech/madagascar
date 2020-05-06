@@ -1,9 +1,6 @@
 package com.keepreal.madagascar.fossa.service;
 
 import com.aliyun.openservices.ons.api.Message;
-import com.aliyun.openservices.ons.api.OnExceptionContext;
-import com.aliyun.openservices.ons.api.SendCallback;
-import com.aliyun.openservices.ons.api.SendResult;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.ReactionMessage;

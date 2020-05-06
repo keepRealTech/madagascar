@@ -26,7 +26,6 @@ import javax.persistence.Table;
 public class CommentInfo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private Long feedId;
     private Long userId;

@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.fossa.model;
 
 import lombok.Data;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -13,6 +14,7 @@ import java.util.List;
  **/
 
 @Data
+@Document(value = "reactionInfo")
 public class ReactionInfo {
 
     @Id
