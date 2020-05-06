@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class UserNotificationRecord {
 
     @Id
-    private long id;
+    private String id;
     private String userId;
     @Builder.Default
     private Long lastReadCommentNotificationTimestamp = 0L;

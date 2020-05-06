@@ -63,7 +63,7 @@ public class NotificationService {
      * @return {@link Notification}.
      */
     public Notification insert(Notification notification) {
-        notification.setId(this.idGenerator.nextId());
+        notification.setId(String.valueOf(this.idGenerator.nextId()));
         return this.notificationRepository.insert(notification);
     }
 

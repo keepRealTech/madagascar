@@ -86,7 +86,6 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
                 .setText(feed.getText())
                 .setIslandId(feed.getIslandId())
                 .addAllImageUris(feed.getImageUris())
-                .setFromHost(feed.getFromHost())
                 .setCreatedAt(feed.getCreatedAt())
                 .setCommentsCount(0)
                 .setLikesCount(0)

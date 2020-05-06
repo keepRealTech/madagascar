@@ -36,7 +36,7 @@ public class UserNotificationRecordService {
      * @return {@link UserNotificationRecord}.
      */
     public UserNotificationRecord insert(UserNotificationRecord userNotificationRecord) {
-        userNotificationRecord.setId(this.idGenerator.nextId());
+        userNotificationRecord.setId(String.valueOf(this.idGenerator.nextId()));
         return this.userNotificationRecordRepository.insert(userNotificationRecord);
     }
 
