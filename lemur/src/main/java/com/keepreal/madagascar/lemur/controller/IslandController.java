@@ -108,10 +108,10 @@ public class IslandController implements IslandApi {
      */
     @Override
     public ResponseEntity<BriefIslandsResponse> apiV1IslandsGet(String name,
-                                                                @RequestParam(defaultValue = "false") Boolean subscribed,
+                                                                Boolean subscribed,
                                                                 Integer page,
                                                                 Integer pageSize) {
-        String subscriberId = subscribed ? HttpContextUtils.getUserIdFromContext() : null;
+        String subscriberId = (Objects.nonNull(subscribed) && subscribed) ? HttpContextUtils.getUserIdFromContext() : null;
         IslandsResponse islandsResponse = this.islandService.retrieveIslands(
                 name, null, subscriberId, page, pageSize);
 
