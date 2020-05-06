@@ -1,8 +1,10 @@
 package com.keepreal.madagascar.fossa.service;
 
 import com.aliyun.openservices.ons.api.Message;
+import com.aliyun.openservices.ons.api.OnExceptionContext;
+import com.aliyun.openservices.ons.api.SendCallback;
+import com.aliyun.openservices.ons.api.SendResult;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
-import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
@@ -21,7 +23,9 @@ import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.ReactionInfo;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
+import com.keepreal.madagascar.fossa.util.ProducerUtils;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -41,6 +45,7 @@ import java.util.stream.Collectors;
  * @create: 2020-04-27
  **/
 
+@Slf4j
 @GRpcService
 public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase {
 
@@ -95,8 +100,7 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
                 .build();
         Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
         message.setKey(uuid);
-        producerBean.send(message);
-
+        ProducerUtils.sendMessageAsync(producerBean, message);
         basicResponse(responseObserver, reactionMessage);
     }
 
