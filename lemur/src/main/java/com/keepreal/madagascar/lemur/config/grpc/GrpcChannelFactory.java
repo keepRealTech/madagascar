@@ -99,7 +99,7 @@ public class GrpcChannelFactory {
     @Bean(name = "tenrecsChannel")
     public ManagedChannel getTenrecsChannel() {
         return ManagedChannelBuilder
-                .forAddress(this.couaConfiguration.getHost(), this.couaConfiguration.getPort())
+                .forAddress(this.tenrecsConfiguration.getHost(), this.tenrecsConfiguration.getPort())
                 .usePlaintext()
                 .build();
     }

@@ -100,6 +100,11 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 break;
             case NOTIFICATION_COMMENTS:
                 record.setLastReadCommentNotificationTimestamp(timestamp);
+                break;
+            default:
+                record.setLastReadReactionNotificationTimestamp(timestamp);
+                record.setLastReadIslandNoticeNotificationTimestamp(timestamp);
+                record.setLastReadCommentNotificationTimestamp(timestamp);
         }
 
         this.userNotificationRecordService.update(record);
