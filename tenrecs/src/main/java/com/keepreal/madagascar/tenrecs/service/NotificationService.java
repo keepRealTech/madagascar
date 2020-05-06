@@ -67,4 +67,14 @@ public class NotificationService {
         return this.notificationRepository.insert(notification);
     }
 
+    /**
+     * Checks if an event id has been consumed.
+     *
+     * @param eventId Event id.
+     * @return True if has consumed.
+     */
+    public boolean hasConsumed(String eventId) {
+        return this.notificationRepository.findByEventIdAndIsDeletedIsFalse(eventId).isPresent();
+    }
+
 }
