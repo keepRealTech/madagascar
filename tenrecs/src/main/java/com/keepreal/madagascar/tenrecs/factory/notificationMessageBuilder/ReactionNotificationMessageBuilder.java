@@ -60,7 +60,7 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
                 .build();
 
         return NotificationMessage.newBuilder()
-                .setId(String.valueOf(this.notification.getId()))
+                .setId(this.notification.getId())
                 .setType(NotificationType.NOTIFICATION_REACTIONS)
                 .setUserId(this.notification.getUserId())
                 .setHasRead(this.notification.getCreatedAt().compareTo(this.lastReadTimestamp) < 0)

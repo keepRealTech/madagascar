@@ -60,7 +60,7 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
                 .build();
 
         return NotificationMessage.newBuilder()
-                .setId(String.valueOf(this.notification.getId()))
+                .setId(this.notification.getId())
                 .setType(NotificationType.NOTIFICATION_COMMENTS)
                 .setUserId(this.notification.getUserId())
                 .setHasRead(this.notification.getCreatedAt().compareTo(this.lastReadTimestamp) < 0)
