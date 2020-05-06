@@ -10,7 +10,6 @@ import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
 import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
-import com.keepreal.madagascar.coua.UpdateLastFeedAtResponse;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
@@ -27,6 +26,7 @@ import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -46,6 +46,7 @@ import java.util.stream.Collectors;
  * @create: 2020-04-27
  **/
 
+@Slf4j
 @GRpcService
 public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
 
@@ -94,9 +95,9 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfo.setFromHost(userId.equals(hostId));
             feedInfoList.add(feedInfo);
         });
+        feedInfoRepository.saveAll(feedInfoList);
         //调用coua服务更新island的lastFeedAt字段
         callCouaUpdateIslandLastFeedAt(islandIdList);
-        feedInfoRepository.saveAll(feedInfoList);
         NewFeedsResponse newFeedsResponse = NewFeedsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
@@ -228,6 +229,10 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
                 .addAllIslandIds(islandIdList)
                 .setTimestamps(System.currentTimeMillis())
                 .build();
-        stub.updateLastFeedAtById(request);
+        try {
+            stub.updateLastFeedAtById(request);
+        } catch (Exception e) {
+            log.error("callCouaUpdateIslandLastFeedAt failure! exception: {}", e.getMessage());
+        }
     }
 }

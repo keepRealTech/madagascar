@@ -1,6 +1,8 @@
 package com.keepreal.madagascar.fossa.model;
 
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Column;
@@ -24,6 +26,8 @@ public class ReactionInfo {
     private List<Integer> reactionTypeList;
     @Column(name = "is_deleted")
     private Boolean deleted;
+    @CreatedDate
     private Long createdTime;
+    @LastModifiedDate
     private Long updatedTime;
 }

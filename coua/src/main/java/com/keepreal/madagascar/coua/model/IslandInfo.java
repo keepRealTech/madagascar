@@ -30,7 +30,7 @@ public class IslandInfo {
     private String description;
     private String secret;
     private Integer state;
-    private Long islanderNumber;
+    private Integer islanderNumber;
     private Long lastFeedAt; //用户客户端判断是否有未读feed消息（客户端轮询模式下使用）
     @Column(name = "is_deleted")
     private Boolean deleted;

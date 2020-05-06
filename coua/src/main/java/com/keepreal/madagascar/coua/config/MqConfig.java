@@ -3,6 +3,7 @@ package com.keepreal.madagascar.coua.config;
 import com.aliyun.openservices.ons.api.PropertyKeyConst;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 import java.util.Properties;
 
@@ -14,6 +15,7 @@ import java.util.Properties;
 
 @ConfigurationProperties(prefix = "rocketmq")
 @Data
+@Component
 public class MqConfig {
 
     private String accessKey;
