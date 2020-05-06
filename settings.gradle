@@ -7,4 +7,7 @@ include 'lemur'
 include 'coua'
 
 include 'baobob'
+include 'fossa'
+
+
 include 'tenrecs'

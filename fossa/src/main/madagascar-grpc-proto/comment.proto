@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.fossa";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message DeleteCommentByIdRequest {
+    string id = 1;
+}
+
+message DeleteCommentByIdResponse {
+    CommonStatus status = 1;
+}
+
+message RetrieveCommentsByFeedIdRequest {
+    string feedId = 1;
+    PageRequest pageRequest = 2;
+}
+
+message CommentsResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated CommentMessage comments = 3;
+}
+
+message NewCommentRequest {
+    string feedId = 1;
+    string content = 2;
+    string userId = 3;
+    google.protobuf.StringValue replyToId = 4;
+}
+
+message CommentResponse {
+    CommonStatus status = 1;
+    CommentMessage comment = 2;
+}
+
+service CommentService {
+    rpc CreateComment(NewCommentRequest) returns (CommentResponse) {};
+    rpc RetrieveCommentsByFeedId(RetrieveCommentsByFeedIdRequest) returns (CommentsResponse) {};
+    rpc DeleteCommentById(DeleteCommentByIdRequest) returns (DeleteCommentByIdResponse) {};
+}

@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.coua.config;
+package com.keepreal.madagascar.fossa.config;
 
 import com.aliyun.openservices.ons.api.PropertyKeyConst;
 import lombok.Data;
@@ -24,7 +24,7 @@ public class MqConfig {
     private String topic;
     private String tag;
 
-    public Properties getMqProperties() {
+    public Properties getMqPropertie() {
         Properties properties = new Properties();
         properties.setProperty(PropertyKeyConst.AccessKey, this.accessKey);
         properties.setProperty(PropertyKeyConst.SecretKey, this.secretKey);

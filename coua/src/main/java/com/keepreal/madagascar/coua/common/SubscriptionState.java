@@ -11,9 +11,9 @@ import lombok.Getter;
 @Getter
 public enum SubscriptionState {
 
-    LEAVE(0),
+    LEAVE(2),
     HOST(1),
-    ISLANDER(2),
+    ISLANDER(0),
     ;
     private int value;
 
