@@ -17,6 +17,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -107,7 +108,7 @@ public class IslandController implements IslandApi {
      */
     @Override
     public ResponseEntity<BriefIslandsResponse> apiV1IslandsGet(String name,
-                                                                Boolean subscribed,
+                                                                @RequestParam(defaultValue = "false") Boolean subscribed,
                                                                 Integer page,
                                                                 Integer pageSize) {
         String subscriberId = subscribed ? HttpContextUtils.getUserIdFromContext() : null;
