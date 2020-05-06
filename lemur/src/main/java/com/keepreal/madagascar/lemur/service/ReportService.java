@@ -29,7 +29,7 @@ public class ReportService {
      *
      * @param managedChannel GRpc managed channel connection to service coua.
      */
-    public ReportService(@Qualifier("couaChannel") ManagedChannel managedChannel) {
+    public ReportService(@Qualifier("fossaChannel") ManagedChannel managedChannel) {
         this.managedChannel = managedChannel;
     }
 
