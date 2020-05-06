@@ -89,6 +89,7 @@ public class IslandDTOFactory {
         fullIslandDTO.setHostId(island.getHostId());
         fullIslandDTO.setPortraitImageUri(island.getPortraitImageUri());
         fullIslandDTO.setSecret(island.getSecret());
+        fullIslandDTO.setMemberCount(island.getMemberCount());
 
         return fullIslandDTO;
     }

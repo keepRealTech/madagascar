@@ -40,7 +40,7 @@ public class NoticeNotificationBuilder implements NotificationBuilder {
         }
 
         return Notification.builder()
-                .type(NotificationType.NOTIFICATION_COMMENTS)
+                .type(NotificationType.NOTIFICATION_ISLAND_NOTICE)
                 .userId(this.event.getUserId())
                 .eventId(this.event.getEventId())
                 .timestamp(this.event.getTimestamp())

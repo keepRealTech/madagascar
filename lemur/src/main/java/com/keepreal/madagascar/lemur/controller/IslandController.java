@@ -213,7 +213,7 @@ public class IslandController implements IslandApi {
             PutIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String portraitImageUri = null;
-        if (Objects.nonNull(portraitImage)) {
+        if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
             portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
         }
 
