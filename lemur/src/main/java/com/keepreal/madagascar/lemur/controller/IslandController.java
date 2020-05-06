@@ -183,13 +183,15 @@ public class IslandController implements IslandApi {
     public ResponseEntity<BriefIslandResponse> apiV1IslandsPost(
             PostIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
         String portraitImageUri = null;
         if (Objects.nonNull(portraitImage)) {
             portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
         }
 
         IslandMessage islandMessage = this.islandService.createIsland(
-                payload.getName(), payload.getSecret(), portraitImageUri);
+                payload.getName(), portraitImageUri, payload.getSecret(), userId);
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));

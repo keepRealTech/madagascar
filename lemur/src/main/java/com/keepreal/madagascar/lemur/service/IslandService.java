@@ -216,15 +216,17 @@ public class IslandService {
      * @param name             Island name.
      * @param portraitImageUri Portrait image uri.
      * @param secret           Secret.
+     * @param userId           User id.
      * @return {@link IslandMessage}.
      */
-    public IslandMessage createIsland(String name, String portraitImageUri, String secret) {
+    public IslandMessage createIsland(String name, String portraitImageUri, String secret, String userId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
 
         NewIslandRequest request = NewIslandRequest.newBuilder()
                 .setName(name)
                 .setPortraitImageUri(StringValue.of(portraitImageUri))
                 .setSecret(StringValue.of(secret))
+                .setHostId(userId)
                 .build();
 
         IslandResponse islandResponse;
