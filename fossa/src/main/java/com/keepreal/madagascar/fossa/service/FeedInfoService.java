@@ -6,9 +6,7 @@ import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
-import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
@@ -80,8 +78,6 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         String text = request.hasText() ? request.getText().getValue() : "";
         List<FeedInfo> feedInfoList = new ArrayList<>();
         islandIdList.forEach(id -> {
-            // rpc调用coua服务，如果通过id拿不到island的信息，那么hostId就是""，fromHost=false
-            String hostId = callCouaGetIslandHostId(id);
             FeedInfo feedInfo = new FeedInfo();
             feedInfo.setId(idGenerator.nextId());
             feedInfo.setIslandId(Long.valueOf(id));
@@ -92,7 +88,6 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfo.setCommentsCount(0);
             feedInfo.setLikesCount(0);
             feedInfo.setDeleted(false);
-            feedInfo.setFromHost(userId.equals(hostId));
             feedInfoList.add(feedInfo);
         });
         feedInfoRepository.saveAll(feedInfoList);
@@ -206,7 +201,6 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
                 .setIslandId(feedInfo.getIslandId().toString())
                 .setUserId(feedInfo.getUserId().toString())
                 .setText(feedInfo.getText())
-                .setFromHost(feedInfo.getFromHost())
                 .addAllImageUris(feedInfo.getImageUrls())
                 .setCreatedAt(feedInfo.getCreatedTime())
                 .setCommentsCount(feedInfo.getCommentsCount())
@@ -214,13 +208,6 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
                 .setRepostCount(feedInfo.getRepostCount())
                 .addAllLastComments(lastCommentMessage)
                 .build();
-    }
-
-    private String callCouaGetIslandHostId(String islandId) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
-        RetrieveIslandByIdRequest islandByIdRequest = RetrieveIslandByIdRequest.newBuilder().setId(islandId).build();
-        IslandResponse islandResponse = stub.retrieveIslandById(islandByIdRequest);
-        return islandResponse.hasIsland() ? islandResponse.getIsland().getHostId() : "";
     }
 
     private void callCouaUpdateIslandLastFeedAt(List<String> islandIdList) {

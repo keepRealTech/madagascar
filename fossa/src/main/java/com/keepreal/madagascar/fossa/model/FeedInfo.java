@@ -30,7 +30,6 @@ public class FeedInfo {
     private Long userId;
     private String text;
     private List<String> imageUrls;
-    private Boolean fromHost;
     private Integer likesCount;
     private Integer commentsCount;
     private Integer repostCount;

@@ -1,6 +1,8 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.fossa.CheckNewFeedsMessage;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
@@ -55,12 +57,13 @@ public class FeedDTOFactory {
         if (Objects.isNull(feed)) {
             return null;
         }
-
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
+        UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
         FeedDTO feedDTO = new FeedDTO();
         feedDTO.setId(feed.getId());
         feedDTO.setText(feed.getText());
         feedDTO.setImagesUris(feed.getImageUrisList());
-        feedDTO.setFromHost(feed.getFromHost());
+        feedDTO.setFromHost(userMessage.getId().equals(islandMessage.getHostId()));
         feedDTO.setLikesCount(feedDTO.getLikesCount());
         feedDTO.setCommentsCount(feed.getCommentsCount());
         feedDTO.setComments(feed.getLastCommentsList()
@@ -71,10 +74,8 @@ public class FeedDTOFactory {
         feedDTO.setRepostCount(feed.getRepostCount());
         feedDTO.setCreatedAt(feed.getCreatedAt());
 
-        feedDTO.setUser(this.userDTOFactory.briefValueOf(
-                this.userService.retrieveUserById(feed.getUserId())));
-        feedDTO.setIsland(this.islandDTOFactory.briefValueOf(
-                this.islandService.retrieveIslandById(feed.getIslandId())));
+        feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
+        feedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
 
         return feedDTO;
     }
