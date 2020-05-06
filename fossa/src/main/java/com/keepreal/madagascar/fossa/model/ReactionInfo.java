@@ -20,9 +20,9 @@ import java.util.List;
 public class ReactionInfo {
 
     @Id
-    private Long id;
-    private Long feedId;
-    private Long userId;
+    private String id;
+    private String feedId;
+    private String userId;
     private List<Integer> reactionTypeList;
     @Column(name = "is_deleted")
     private Boolean deleted;

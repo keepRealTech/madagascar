@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
  **/
 
 @Repository
-public interface FeedInfoRepository extends MongoRepository<FeedInfo, Long> {
+public interface FeedInfoRepository extends MongoRepository<FeedInfo, String> {
 
-    FeedInfo findFeedInfoByIdAndDeletedIsFalse(Long id);
+    FeedInfo findFeedInfoByIdAndDeletedIsFalse(String id);
 }

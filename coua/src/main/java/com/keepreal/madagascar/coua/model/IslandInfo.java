@@ -1,6 +1,9 @@
 package com.keepreal.madagascar.coua.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -21,19 +24,29 @@ import javax.persistence.Table;
 @Table(name = "island")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class IslandInfo {
     @Id
-    private Long id;
-    private Long hostId;
+    private String id;
+    private String hostId;
     private String islandName;
-    private String portraitImageUri;
-    private String description;
-    private String secret;
-    private Integer state;
-    private Integer islanderNumber;
-    private Long lastFeedAt; //用户客户端判断是否有未读feed消息（客户端轮询模式下使用）
+    @Builder.Default
+    private String portraitImageUri = "";
+    @Builder.Default
+    private String description = "";
+    @Builder.Default
+    private String secret = "";
+    @Builder.Default
+    private Integer state = 0;
+    @Builder.Default
+    private Integer islanderNumber = 1;
+    @Builder.Default
+    private Long lastFeedAt = 0L; //用户客户端判断是否有未读feed消息（客户端轮询模式下使用）
     @Column(name = "is_deleted")
-    private Boolean deleted;
+    @Builder.Default
+    private Boolean deleted = false;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate

@@ -16,13 +16,13 @@ import java.util.List;
  **/
 
 @Repository
-public interface UserIdentityRepository extends JpaRepository<UserIdentity, Long> {
+public interface UserIdentityRepository extends JpaRepository<UserIdentity, String> {
 
     @Query(value = "SELECT identity_type FROM user_identity WHERE user_id = ?1 AND is_deleted = FALSE", nativeQuery = true)
-    List<Integer> getUserIdentityTypesByUserId(Long userId);
+    List<Integer> getUserIdentityTypesByUserId(String userId);
 
     @Modifying
     @Transactional
     @Query(value = "UPDATE user_identity SET is_deleted = TRUE WHERE user_id = ?1", nativeQuery = true)
-    void deleteUserIdentitiesByUserId(Long userId);
+    void deleteUserIdentitiesByUserId(String userId);
 }

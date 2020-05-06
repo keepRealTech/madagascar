@@ -1,6 +1,9 @@
 package com.keepreal.madagascar.fossa.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -18,15 +21,19 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "report")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ReportInfo {
 
     @Id
-    private Long id;
+    private String id;
     private Integer type;
-    private Long feedId;
-    private Long reporterId;
+    private String feedId;
+    private String reporterId;
     @Column(name = "is_deleted")
-    private Boolean deleted;
+    @Builder.Default
+    private Boolean deleted = false;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate

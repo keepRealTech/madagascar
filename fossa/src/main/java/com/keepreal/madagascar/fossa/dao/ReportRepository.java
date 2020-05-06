@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
  **/
 
 @Repository
-public interface ReportRepository extends JpaRepository<ReportInfo, Long> {
+public interface ReportRepository extends JpaRepository<ReportInfo, String> {
 }

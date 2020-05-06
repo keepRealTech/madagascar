@@ -1,6 +1,9 @@
 package com.keepreal.madagascar.coua.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -23,16 +26,20 @@ import javax.persistence.Table;
 @Table(name = "subscription")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Subscription {
 
     @Id
-    private Long id;
-    private Long userId;
-    private Long islandId;
+    private String id;
+    private String userId;
+    private String islandId;
     private Integer state;
     private Integer islanderNumber;
     @Column(name = "is_deleted")
-    private Boolean deleted;
+    @Builder.Default
+    private Boolean deleted = false;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate
