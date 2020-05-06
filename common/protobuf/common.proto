@@ -135,12 +135,11 @@ message FeedMessage {
     string userId = 3; // 返回user的name和imageUrl
     string text = 4;
     repeated string imageUris = 5;
-    bool fromHost = 6;
-    uint64 createdAt = 7;
-    int32 likesCount = 8;
-    int32 commentsCount = 9;
-    int32 repostCount = 10;
-    repeated CommentMessage lastComments = 11;
+    uint64 createdAt = 6;
+    int32 likesCount = 7;
+    int32 commentsCount = 8;
+    int32 repostCount = 9;
+    repeated CommentMessage lastComments = 10;
 }
 
 message CommentMessage {
