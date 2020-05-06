@@ -222,16 +222,18 @@ public class IslandService {
     public IslandMessage createIsland(String name, String portraitImageUri, String secret, String userId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
 
-        NewIslandRequest request = NewIslandRequest.newBuilder()
+        NewIslandRequest.Builder requestBuilder = NewIslandRequest.newBuilder()
                 .setName(name)
-                .setPortraitImageUri(StringValue.of(portraitImageUri))
                 .setSecret(StringValue.of(secret))
-                .setHostId(userId)
-                .build();
+                .setHostId(userId);
+
+        if (!StringUtils.isEmpty(portraitImageUri)) {
+            requestBuilder.setPortraitImageUri(StringValue.of(portraitImageUri));
+        }
 
         IslandResponse islandResponse;
         try {
-            islandResponse = stub.createIsland(request);
+            islandResponse = stub.createIsland(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

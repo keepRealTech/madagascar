@@ -15,10 +15,8 @@ import com.keepreal.madagascar.lemur.service.RepostService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -186,7 +184,7 @@ public class IslandController implements IslandApi {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         String portraitImageUri = null;
-        if (Objects.nonNull(portraitImage)) {
+        if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
             portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
         }
 
@@ -250,7 +248,7 @@ public class IslandController implements IslandApi {
     /**
      * Implements the unsubscribe island by id api.
      *
-     * @param id                     Island id.
+     * @param id Island id.
      * @return {@link DummyResponse}.
      */
     @Override
