@@ -72,6 +72,9 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
     public void createReaction(NewReactionRequest request, StreamObserver<ReactionResponse> responseObserver) {
         String userId = request.getUserId();
         String feedId = request.getFeedId();
+
+        FeedMessage feedMessage = this.feedInfoService.getFeedMessageById(feedId);
+
         List<Integer> reactionTypesList = request.getReactionTypesValueList();
         ReactionInfo reactionInfo = new ReactionInfo();
         reactionInfo.setId(String.valueOf(idGenerator.nextId()));

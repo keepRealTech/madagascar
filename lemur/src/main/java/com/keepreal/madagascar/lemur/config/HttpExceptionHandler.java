@@ -13,6 +13,8 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import swagger.model.DummyResponse;
 
+import javax.validation.ConstraintViolationException;
+
 /**
  * Represents a controller advice entity that handles exceptions.
  */
@@ -40,6 +42,20 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, exception.getErrorCode());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Handles the {@link ConstraintViolationException}.
+     *
+     * @param exception {@link ConstraintViolationException}.
+     * @param request   Request.
+     * @return {@link DummyResponse}.
+     */
+    @ExceptionHandler(value = {ConstraintViolationException.class})
+    protected ResponseEntity<DummyResponse> handleConstraintViolationException(ConstraintViolationException exception,
+                                                                        WebRequest request) {
+        log.error(exception.toString());
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
 }

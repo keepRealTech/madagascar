@@ -54,12 +54,12 @@ public class NoticeNotificationMessageBuilder implements NotificationMessageBuil
         }
 
         return NotificationMessage.newBuilder()
-                .setId(String.valueOf(this.notification.getId()))
+                .setId(this.notification.getId())
                 .setType(NotificationType.NOTIFICATION_ISLAND_NOTICE)
                 .setUserId(this.notification.getUserId())
                 .setHasRead(this.notification.getCreatedAt().compareTo(this.lastReadTimestamp) < 0)
                 .setNoticeNotification(this.toNoticeMessage(this.notification.getNotice()))
-                .setCreatedAt(this.notification.getCreatedAt())
+                .setTimestamp(this.notification.getTimestamp())
                 .build();
     }
 

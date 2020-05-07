@@ -6,8 +6,12 @@ import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.model.Notice;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.model.notice.SubscribeNotice;
+import com.keepreal.madagascar.tenrecs.service.NotificationService;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Implements the {@link NotificationBuilder}.
@@ -15,6 +19,7 @@ import java.util.Objects;
 public class NoticeNotificationBuilder implements NotificationBuilder {
 
     private NotificationEvent event;
+    private NotificationService notificationService;
 
     /**
      * Sets the notification event.
@@ -29,18 +34,39 @@ public class NoticeNotificationBuilder implements NotificationBuilder {
     }
 
     /**
+     * Sets the notification service.
+     *
+     * @param notificationService {@link NotificationService}.
+     * @return this.
+     */
+    public NoticeNotificationBuilder setNotificationService(NotificationService notificationService) {
+        this.notificationService = notificationService;
+        return this;
+    }
+
+    /**
      * Builds the {@link Notification}.
      *
      * @return {@link Notification}.
      */
     @Override
     public Notification build() {
-        if (Objects.isNull(this.event)) {
+        if (Objects.isNull(this.event)
+                || Objects.isNull(this.notificationService)) {
             return null;
         }
 
+        Optional<Notification> lastNotification = this.notificationService.retrieveLastSubscribeNoticeByIslandIdAndSubscriberId(
+                this.event.getSubscribeEvent().getIslandId(), this.event.getSubscribeEvent().getSubscriberId());
+        if (lastNotification.isPresent()
+                && lastNotification.get().getTimestamp() > LocalDateTime.now().minusDays(1).atZone(ZoneId.of("Asia/Shanghai")).toInstant().toEpochMilli()) {
+            Notification ln = lastNotification.get();
+            ln.setTimestamp(this.event.getTimestamp());
+            return ln;
+        }
+
         return Notification.builder()
-                .type(NotificationType.NOTIFICATION_COMMENTS)
+                .type(NotificationType.NOTIFICATION_ISLAND_NOTICE)
                 .userId(this.event.getUserId())
                 .eventId(this.event.getEventId())
                 .timestamp(this.event.getTimestamp())

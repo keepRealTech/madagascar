@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import swagger.model.CommentDTO;
 
 import java.util.Objects;
@@ -45,8 +46,10 @@ public class CommentDTOFactory {
         commentDTO.setContent(comment.getContent());
         commentDTO.setCreatedAt(comment.getCreatedAt());
 
-        commentDTO.setReplyTo(this.userDTOFactory.briefValueOf(
-                this.userService.retrieveUserById(comment.getReplyToId())));
+        if (!StringUtils.isEmpty(comment.getReplyToId())) {
+            commentDTO.setReplyTo(this.userDTOFactory.briefValueOf(
+                    this.userService.retrieveUserById(comment.getReplyToId())));
+        }
 
         commentDTO.setUser(this.userDTOFactory.briefValueOf(
                 this.userService.retrieveUserById(comment.getUserId())));

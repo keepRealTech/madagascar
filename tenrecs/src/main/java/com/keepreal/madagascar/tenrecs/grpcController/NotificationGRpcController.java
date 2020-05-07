@@ -3,7 +3,6 @@ package com.keepreal.madagascar.tenrecs.grpcController;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.tenrecs.CountUnreadNotificationsRequest;
 import com.keepreal.madagascar.tenrecs.CountUnreadNotificationsResponse;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
@@ -65,13 +64,13 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 request.hasPageRequest() ? request.getPageRequest() : PaginationUtils.defaultPageRequest();
 
         if (!request.hasCondition()
-                || !request.getCondition().hasUserId()
-                || !request.getCondition().hasType()) {
+                || !request.getCondition().hasUserId()) {
             NotificationsResponse response = NotificationsResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_INVALID_ARGUMENT))
                     .build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
+            return;
         }
 
         UserNotificationRecord record =
@@ -80,8 +79,12 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
         String userId = request.getCondition().getUserId().getValue();
         NotificationType type = request.getCondition().getType().getValue();
 
-        Page<Notification> notifications =
-                this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
+        Page<Notification> notifications;
+        if (!request.getCondition().hasType()) {
+            notifications = this.notificationService.retrieveByUserIdWithPagination(userId, pageRequest);
+        } else {
+            notifications = this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
+        }
 
         NotificationsResponse response = NotificationsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
@@ -99,6 +102,11 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 record.setLastReadIslandNoticeNotificationTimestamp(timestamp);
                 break;
             case NOTIFICATION_COMMENTS:
+                record.setLastReadCommentNotificationTimestamp(timestamp);
+                break;
+            default:
+                record.setLastReadReactionNotificationTimestamp(timestamp);
+                record.setLastReadIslandNoticeNotificationTimestamp(timestamp);
                 record.setLastReadCommentNotificationTimestamp(timestamp);
         }
 

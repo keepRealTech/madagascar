@@ -60,12 +60,12 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
                 .build();
 
         return NotificationMessage.newBuilder()
-                .setId(String.valueOf(this.notification.getId()))
+                .setId(this.notification.getId())
                 .setType(NotificationType.NOTIFICATION_COMMENTS)
                 .setUserId(this.notification.getUserId())
                 .setHasRead(this.notification.getCreatedAt().compareTo(this.lastReadTimestamp) < 0)
                 .setCommentNotification(commentNotificationMessage)
-                .setCreatedAt(this.notification.getCreatedAt())
+                .setTimestamp(this.notification.getTimestamp())
                 .build();
     }
 
@@ -86,7 +86,6 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
                 .setText(feed.getText())
                 .setIslandId(feed.getIslandId())
                 .addAllImageUris(feed.getImageUris())
-                .setFromHost(feed.getFromHost())
                 .setCreatedAt(feed.getCreatedAt())
                 .setCommentsCount(0)
                 .setLikesCount(0)

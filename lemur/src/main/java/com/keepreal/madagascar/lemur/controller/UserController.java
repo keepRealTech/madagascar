@@ -18,6 +18,9 @@ import swagger.model.GenderType;
 import swagger.model.PutUserPayload;
 import swagger.model.UserResponse;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -81,14 +84,23 @@ public class UserController implements UserApi {
             portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
         }
 
+        List<swagger.model.IdentityType> identityTypeList =
+                Objects.nonNull(payload.getIdentityTypes()) ? payload.getIdentityTypes() : new ArrayList<>();
+
+        String birthday = null;
+        if (Objects.nonNull(payload.getBirthday())) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            birthday = formatter.format(payload.getBirthday());
+        }
+
         UserMessage userMessage = this.userService.updateUser(id,
                 payload.getName(),
                 portraitImageUri,
                 this.convertGenderEnum(payload.getGender()),
                 payload.getDescription(),
                 payload.getCity(),
-                payload.getBirthday().toString(),
-                payload.getIdentityTypes().stream().map(this::convertIdentityType).collect(Collectors.toList()));
+                birthday,
+                identityTypeList.stream().map(this::convertIdentityType).collect(Collectors.toList()));
 
         UserResponse response = new UserResponse();
         response.setData(this.userDTOFactory.valueOf(userMessage));
