@@ -66,7 +66,7 @@ public class FeedDTOFactory {
         feedDTO.setText(feed.getText());
         feedDTO.setImagesUris(feed.getImageUrisList());
         feedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
-        feedDTO.setLikesCount(feedDTO.getLikesCount());
+        feedDTO.setLikesCount(feed.getLikesCount());
         feedDTO.setCommentsCount(feed.getCommentsCount());
         feedDTO.setComments(feed.getLastCommentsList()
                 .stream()

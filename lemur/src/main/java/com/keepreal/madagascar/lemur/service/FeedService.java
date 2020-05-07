@@ -5,10 +5,6 @@ import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
-import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
-import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
-import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
-import com.keepreal.madagascar.coua.IslandServiceGrpc;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
@@ -24,8 +20,6 @@ import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -91,7 +85,6 @@ public class FeedService {
      *
      * @param id Feed id.
      */
-    @CacheEvict(value = "feed", key = "#id")
     public void deleteFeedById(String id) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
 
@@ -123,7 +116,6 @@ public class FeedService {
      * @param id Feed id.
      * @return {@link FeedMessage}.
      */
-    @Cacheable(value = "feed", key = "#id")
     public FeedMessage retrieveFeedById(String id) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
 
