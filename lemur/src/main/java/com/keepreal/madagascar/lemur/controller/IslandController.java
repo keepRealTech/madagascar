@@ -2,8 +2,8 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.coua.IslandRepostMessage;
-import com.keepreal.madagascar.coua.IslandRepostsResponse;
+import com.keepreal.madagascar.fossa.IslandRepostMessage;
+import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;

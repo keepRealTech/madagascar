@@ -3,7 +3,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
-import com.keepreal.madagascar.fossa.CheckNewFeedsMessage;
+import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
