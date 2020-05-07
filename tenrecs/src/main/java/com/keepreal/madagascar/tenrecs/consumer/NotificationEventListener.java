@@ -12,6 +12,8 @@ import com.keepreal.madagascar.tenrecs.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
  * Represents the logic consuming {@link NotificationEvent}.
  */
@@ -44,14 +46,20 @@ public class NotificationEventListener implements MessageListener {
     @Override
     public Action consume(Message message, ConsumeContext context) {
         try {
-            if (this.notificationService.hasConsumed(message.getKey())){
+            if (this.notificationService.hasConsumed(message.getKey())) {
                 log.warn("Event id {} has been consumed before, skipped.", message.getKey());
                 return Action.CommitMessage;
             }
 
             Notification notification =
                     this.notificationFactory.toNotification(NotificationEvent.parseFrom(message.getBody()));
-            this.notificationService.insert(notification);
+
+            if (Objects.nonNull(notification.getId())) {
+                this.notificationService.update(notification);
+            } else {
+                this.notificationService.insert(notification);
+            }
+
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {
             log.warn("Bad formatted notification event, skipped.");

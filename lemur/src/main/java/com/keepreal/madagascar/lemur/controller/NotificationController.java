@@ -77,11 +77,12 @@ public class NotificationController implements NotificationApi {
         response.setData(notificationsResponse.getNotificationsList()
                 .stream()
                 .map(this.notificationDTOFactory::valueOf)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(notificationsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**

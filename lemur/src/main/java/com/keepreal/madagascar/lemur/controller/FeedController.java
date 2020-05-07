@@ -15,6 +15,7 @@ import com.keepreal.madagascar.lemur.dtoFactory.RepostDTOFactory;
 import com.keepreal.madagascar.lemur.service.CommentService;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.ReactionService;
 import com.keepreal.madagascar.lemur.service.RepostService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
@@ -58,6 +59,7 @@ public class FeedController implements FeedApi {
 
     private final ImageService imageService;
     private final FeedService feedService;
+    private final IslandService islandService;
     private final RepostService repostService;
     private final CommentService commentService;
     private final ReactionService reactionService;
@@ -71,6 +73,7 @@ public class FeedController implements FeedApi {
      *
      * @param imageService       {@link ImageService}.
      * @param feedService        {@link FeedService}.
+     * @param islandService      {@link IslandService}.
      * @param repostService      {@link RepostService}.
      * @param commentService     {@link CommentService}.
      * @param reactionService    {@link ReactionService}.
@@ -81,6 +84,7 @@ public class FeedController implements FeedApi {
      */
     public FeedController(ImageService imageService,
                           FeedService feedService,
+                          IslandService islandService,
                           RepostService repostService,
                           CommentService commentService,
                           ReactionService reactionService,
@@ -90,6 +94,7 @@ public class FeedController implements FeedApi {
                           ReactionDTOFactory reactionDTOFactory) {
         this.imageService = imageService;
         this.feedService = feedService;
+        this.islandService = islandService;
         this.repostService = repostService;
         this.commentService = commentService;
         this.reactionService = reactionService;
@@ -340,7 +345,7 @@ public class FeedController implements FeedApi {
      */
     @Override
     public ResponseEntity<PostCheckFeedsResponse> apiV1FeedsCheckPost(PostCheckFeedsRequest postCheckFeedsRequest) {
-        List<CheckNewFeedsMessage> checkNewFeedsMessages = this.feedService.checkNewFeeds(
+        List<CheckNewFeedsMessage> checkNewFeedsMessages = this.islandService.checkNewFeeds(
                 postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getIslandId).collect(Collectors.toList()),
                 postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getTimestamp).collect(Collectors.toList()));
 

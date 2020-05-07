@@ -17,6 +17,11 @@ public interface NotificationRepository extends MongoRepository<Notification, Lo
 
     Page<Notification> findAllByUserIdAndTypeAndIsDeletedIsFalse(String userId, NotificationType type, Pageable pageable);
 
+    Page<Notification> findAllByUserIdAndIsDeletedIsFalse(String userId, Pageable pageable);
+
     Optional<Notification> findByEventIdAndIsDeletedIsFalse(String eventId);
 
+    Optional<Notification> findTopByNotice_SubscribeNotice_IslandIdAndNotice_SubscribeNotice_SubscriberIdAndIsDeletedIsFalseOrderByTimestamp(String islandId, String subscriberId);
+
+    Optional<Notification> findTopByReaction_AuthorIdAndReaction_FeedIdAndIsDeletedIsFalseOrderByTimestamp(String authorId, String feedId);
 }

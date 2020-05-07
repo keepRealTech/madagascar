@@ -24,8 +24,6 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -98,7 +96,6 @@ public class FeedService {
      *
      * @param id Feed id.
      */
-    @CacheEvict(value = "feed", key = "#id")
     public void deleteFeedById(String id) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
 
@@ -130,7 +127,6 @@ public class FeedService {
      * @param id Feed id.
      * @return {@link FeedMessage}.
      */
-    @Cacheable(value = "feed", key = "#id")
     public FeedMessage retrieveFeedById(String id) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
 
@@ -203,41 +199,6 @@ public class FeedService {
         }
 
         return feedsResponse;
-    }
-
-    /**
-     * Checks if has new feeds after the given timestamp.
-     *
-     * @param islandIds Island ids.
-     * @param timestamps Timestamps in milli-seconds.
-     * @return List of {@link CheckNewFeedsMessage}.
-     */
-    public List<CheckNewFeedsMessage> checkNewFeeds(List<String> islandIds, List<Long> timestamps) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
-
-        CheckNewFeedsRequest request = CheckNewFeedsRequest.newBuilder()
-                .addAllIslandIds(islandIds)
-                .addAllTimestamps(timestamps)
-                .build();
-
-        CheckNewFeedsResponse checkNewFeedsResponse;
-        try {
-            checkNewFeedsResponse = stub.checkNewFeeds(request);
-        } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
-        }
-
-        if (Objects.isNull(checkNewFeedsResponse)
-                || !checkNewFeedsResponse.hasStatus()) {
-            log.error(Objects.isNull(checkNewFeedsResponse) ? "Retrieve feed returned null." : checkNewFeedsResponse.toString());
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
-        }
-
-        if (ErrorCode.REQUEST_SUCC_VALUE != checkNewFeedsResponse.getStatus().getRtn()) {
-            throw new KeepRealBusinessException(checkNewFeedsResponse.getStatus());
-        }
-
-        return checkNewFeedsResponse.getCheckNewFeedsList();
     }
 
 }

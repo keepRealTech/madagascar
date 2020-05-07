@@ -167,7 +167,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         if (requestCondition.hasName()) {
             IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(requestCondition.getName().getValue());
             // 如果没有SubscribedUserId，或者有SubscribedUserId并且这个user订阅了这个岛
-            if (!requestCondition.hasSubscribedUserId() ||
+            if (requestCondition.hasSubscribedUserId() &&
                     subscriptionService.isSubScribedIslandByIslandIdAndUserId(requestCondition.getSubscribedUserId().getValue(), islandInfo.getId())) {
                 IslandMessage islandMessage = getIslandMessage(islandInfo);
                 if (islandMessage != null) {
@@ -278,7 +278,6 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         }
 
         IslandProfileResponse islandProfileResponse = responseBuilder
-                // todo: 没有subscribed字段，httpserver加上还是让客户端自己去判断
                 .build();
         responseObserver.onNext(islandProfileResponse);
         responseObserver.onCompleted();
@@ -342,6 +341,9 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             } else {
                 CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_SECRET_ERROR);
                 responseBuilder.setStatus(commonStatus);
+                responseObserver.onNext(responseBuilder.build());
+                responseObserver.onCompleted();
+                return;
             }
         } else {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);

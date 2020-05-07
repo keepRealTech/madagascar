@@ -17,7 +17,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Notification {
 
     @Id
-    private long id;
+    private String id;
     private String userId;
 
     private NotificationType type;

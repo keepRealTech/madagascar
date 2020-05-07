@@ -129,5 +129,5 @@ service IslandService {
     rpc SubscribeIslandById (SubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
     rpc UnsubscribeIslandById (UnsubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
     rpc CheckNewFeeds (CheckNewFeedsRequest) returns (CheckNewFeedsResponse) {};
-    rpc updateLastFeedAtById (UpdateLastFeedAtRequest) returns (UpdateLastFeedAtResponse) {}
+    rpc UpdateLastFeedAtById (UpdateLastFeedAtRequest) returns (UpdateLastFeedAtResponse) {}
 }

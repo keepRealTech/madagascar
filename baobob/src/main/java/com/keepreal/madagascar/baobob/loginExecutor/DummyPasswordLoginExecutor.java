@@ -52,7 +52,7 @@ public class DummyPasswordLoginExecutor implements LoginExecutor {
     }
 
     /**
-     * Logs in with user combinations.
+     * Logs in with user combinations.¶
      *
      * @param username User name.
      * @param password Password.

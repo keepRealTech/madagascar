@@ -75,20 +75,23 @@ public class IslandDTOFactory {
      * Converts {@link IslandMessage} to {@link FullIslandDTO}.
      *
      * @param island {@link IslandMessage}.
+     * @param maskSecret True if should mask secret.
      * @return {@link FullIslandDTO}.
      */
-    public FullIslandDTO fullValueOf(IslandMessage island) {
+    public FullIslandDTO fullValueOf(IslandMessage island, boolean maskSecret) {
         if (Objects.isNull(island)) {
             return null;
         }
 
+        String secret = island.getSecret();
         FullIslandDTO fullIslandDTO = new FullIslandDTO();
         fullIslandDTO.setId(island.getId());
         fullIslandDTO.setName(island.getName());
         fullIslandDTO.setDescription(island.getDescription());
         fullIslandDTO.setHostId(island.getHostId());
         fullIslandDTO.setPortraitImageUri(island.getPortraitImageUri());
-        fullIslandDTO.setSecret(island.getSecret());
+        fullIslandDTO.setSecret(maskSecret ? "******" : secret);
+        fullIslandDTO.setMemberCount(island.getMemberCount());
 
         return fullIslandDTO;
     }
@@ -97,11 +100,19 @@ public class IslandDTOFactory {
      * Converts {@link IslandProfileResponse} to {@link IslandDTO}.
      *
      * @param islandProfileResponse {@link IslandProfileResponse}.
+     * @param userId  User id.
      * @return {@link IslandProfileDTO}.
      */
-    public IslandProfileDTO valueOf(IslandProfileResponse islandProfileResponse) {
+    public IslandProfileDTO valueOf(IslandProfileResponse islandProfileResponse, String userId) {
         IslandProfileDTO islandProfileDTO = new IslandProfileDTO();
-        islandProfileDTO.setIsland(this.fullValueOf(islandProfileResponse.getIsland()));
+
+        boolean maskSecret = true;
+        if (Objects.nonNull(islandProfileResponse.getIsland())
+                && !Objects.equals(islandProfileResponse.getIsland().getHostId(), userId)) {
+            maskSecret = false;
+        }
+
+        islandProfileDTO.setIsland(this.fullValueOf(islandProfileResponse.getIsland(), maskSecret));
         islandProfileDTO.setHost(this.userDTOFactory.valueOf(islandProfileResponse.getHost()));
         islandProfileDTO.setUserIndex(islandProfileResponse.getUserIndex().getValue());
         islandProfileDTO.setSubscribed(!StringUtils.isEmpty(islandProfileDTO.getUserIndex()));

@@ -25,7 +25,6 @@ import com.keepreal.madagascar.fossa.util.ProducerUtils;
 import com.mongodb.client.result.UpdateResult;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +51,8 @@ import java.util.stream.Collectors;
 @GRpcService
 public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase {
 
+    public static final String FEED_COUNT_TYPE = "likesCount";
+
     private final ReactionRepository reactionRepository;
     private final LongIdGenerator idGenerator;
     private final MongoTemplate mongoTemplate;
@@ -71,7 +72,6 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
 
     /**
      * 创建reaction
-     * todo 创建时检测是否已经存在
      * @param request
      * @param responseObserver
      */
@@ -93,18 +93,18 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
             reactionInfo.setReactionTypeList(reactionTypesSet);
             reactionInfo.setDeleted(false);
             if (requesthasLikeType) {
-                feedInfoService.incFeedCount(feedId, "likesCount");
+                feedInfoService.incFeedCount(feedId, FEED_COUNT_TYPE);
             }
         } else {
             Set<Integer> integerSet = reactionInfo.getReactionTypeList();
             if (!integerSet.contains(ReactionType.REACTION_LIKE_VALUE) && requesthasLikeType) {
-                feedInfoService.incFeedCount(feedId, "likesCount");
+                feedInfoService.incFeedCount(feedId, FEED_COUNT_TYPE);
             }
             integerSet.addAll(reactionTypesSet);
         }
         reactionRepository.save(reactionInfo);
 
-        ReactionMessage reactionMessage = getReactionMessage(id ,feedId, userId, request.getReactionTypesList());
+        ReactionMessage reactionMessage = getReactionMessage(reactionInfo.getId() ,feedId, userId, request.getReactionTypesList());
         FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId);
         ReactionEvent reactionEvent = ReactionEvent.newBuilder()
                 .setReaction(reactionMessage)
@@ -135,16 +135,22 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         String userId = request.getUserId();
         List<Integer> typesValueList = request.getReactionTypesValueList();
 
-        Query query = Query.query(Criteria.where("feedId").is(feedId).and("userId").is(userId));
-        Update update = new Update();
-        update.pullAll("reactionTypeList", typesValueList.toArray());
-        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, ReactionInfo.class);
-        BsonValue upsertedId = updateResult.getUpsertedId();
-        if (upsertedId != null) {
-            ReactionMessage reactionMessage = getReactionMessage(upsertedId.asString().toString(), feedId, userId, request.getReactionTypesList());
+        ReactionInfo reactionInfo = reactionRepository.findTopByFeedIdAndUserId(feedId, userId);
+        if (reactionInfo != null) {
+            reactionInfo.getReactionTypeList().removeAll(typesValueList);
+            reactionRepository.save(reactionInfo);
+            if (typesValueList.contains(ReactionType.REACTION_LIKE_VALUE)) {
+                feedInfoService.subFeedCount(reactionInfo.getFeedId(), FEED_COUNT_TYPE);
+            }
+            ReactionMessage reactionMessage = getReactionMessage(reactionInfo.getId(), feedId, userId, request.getReactionTypesList());
             basicResponse(responseObserver, reactionMessage);
+            return;
         }
-
+        ReactionResponse reactionResponse = ReactionResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(reactionResponse);
+        responseObserver.onCompleted();
     }
 
     /**

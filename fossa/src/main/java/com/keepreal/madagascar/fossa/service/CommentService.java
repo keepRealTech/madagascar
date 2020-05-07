@@ -1,9 +1,6 @@
 package com.keepreal.madagascar.fossa.service;
 
 import com.aliyun.openservices.ons.api.Message;
-import com.aliyun.openservices.ons.api.OnExceptionContext;
-import com.aliyun.openservices.ons.api.SendCallback;
-import com.aliyun.openservices.ons.api.SendResult;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
@@ -32,7 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
@@ -50,6 +46,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @GRpcService
 public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
+
+    public static final String FEED_COUNT_TYPE = "commentsCount";
 
     private final CommentInfoRepository commentInfoRepository;
     private final LongIdGenerator idGenerator;
@@ -87,7 +85,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
 
         CommentInfo save = commentInfoRepository.save(commentInfo);
 
-        feedInfoService.incFeedCount(feedId, "commentsCount");
+        feedInfoService.incFeedCount(feedId, FEED_COUNT_TYPE);
         CommentMessage commentMessage = getCommentMessage(save);
         CommentResponse commentResponse = CommentResponse.newBuilder()
                 .setComment(commentMessage)
@@ -146,9 +144,11 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
             commentInfo.setDeleted(true);
             commentInfoRepository.save(commentInfo);
             commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
+            feedInfoService.subFeedCount(commentInfo.getFeedId(), FEED_COUNT_TYPE);
         } else {
             commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_COMMENT_NOT_FOUND_ERROR);
         }
+
 
         DeleteCommentByIdResponse deleteCommentByIdResponse = DeleteCommentByIdResponse
                 .newBuilder()

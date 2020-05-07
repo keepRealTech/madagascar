@@ -15,10 +15,9 @@ import com.keepreal.madagascar.lemur.service.RepostService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -112,7 +111,7 @@ public class IslandController implements IslandApi {
                                                                 Boolean subscribed,
                                                                 Integer page,
                                                                 Integer pageSize) {
-        String subscriberId = subscribed ? HttpContextUtils.getUserIdFromContext() : null;
+        String subscriberId = (Objects.nonNull(subscribed) && subscribed) ? HttpContextUtils.getUserIdFromContext() : null;
         IslandsResponse islandsResponse = this.islandService.retrieveIslands(
                 name, null, subscriberId, page, pageSize);
 
@@ -150,7 +149,7 @@ public class IslandController implements IslandApi {
                 this.islandService.retrieveIslandProfileById(id, userId);
 
         IslandProfileResponse response = new IslandProfileResponse();
-        response.setData(this.islandDTOFactory.valueOf(islandProfileResponse));
+        response.setData(this.islandDTOFactory.valueOf(islandProfileResponse, userId));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -183,13 +182,15 @@ public class IslandController implements IslandApi {
     public ResponseEntity<BriefIslandResponse> apiV1IslandsPost(
             PostIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
         String portraitImageUri = null;
-        if (Objects.nonNull(portraitImage)) {
+        if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
             portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
         }
 
         IslandMessage islandMessage = this.islandService.createIsland(
-                payload.getName(), payload.getSecret(), portraitImageUri);
+                payload.getName(), portraitImageUri, payload.getSecret(), userId);
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -212,7 +213,7 @@ public class IslandController implements IslandApi {
             PutIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String portraitImageUri = null;
-        if (Objects.nonNull(portraitImage)) {
+        if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
             portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
         }
 
@@ -248,7 +249,7 @@ public class IslandController implements IslandApi {
     /**
      * Implements the unsubscribe island by id api.
      *
-     * @param id                     Island id.
+     * @param id Island id.
      * @return {@link DummyResponse}.
      */
     @Override

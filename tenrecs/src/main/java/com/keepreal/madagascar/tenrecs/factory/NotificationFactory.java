@@ -5,6 +5,7 @@ import com.keepreal.madagascar.tenrecs.factory.notificationBuilder.CommentNotifi
 import com.keepreal.madagascar.tenrecs.factory.notificationBuilder.NoticeNotificationBuilder;
 import com.keepreal.madagascar.tenrecs.factory.notificationBuilder.ReactionNotificationBuilder;
 import com.keepreal.madagascar.tenrecs.model.Notification;
+import com.keepreal.madagascar.tenrecs.service.NotificationService;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -14,6 +15,17 @@ import java.util.Objects;
  */
 @Component
 public class NotificationFactory {
+
+    private final NotificationService notificationService;
+
+    /**
+     * Constructs the notification factory.
+     *
+     * @param notificationService {@link NotificationService}.
+     */
+    public NotificationFactory(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     /**
      * Converts {@link NotificationEvent} into {@link Notification}.
@@ -30,9 +42,9 @@ public class NotificationFactory {
             case NOTIFICATION_EVENT_NEW_COMMENT:
                 return new CommentNotificationBuilder().setEvent(event).build();
             case NOTIFICATION_EVENT_NEW_REACTION:
-                return new ReactionNotificationBuilder().setEvent(event).build();
+                return new ReactionNotificationBuilder().setEvent(event).setNotificationService(this.notificationService).build();
             case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
-                return new NoticeNotificationBuilder().setEvent(event).build();
+                return new NoticeNotificationBuilder().setEvent(event).setNotificationService(this.notificationService).build();
             default:
                 return null;
         }

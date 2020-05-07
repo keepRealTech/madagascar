@@ -203,7 +203,13 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
 
     public void incFeedCount(String feedId, String type) {
         Update update = new Update();
-        update.inc(type);
+        update.inc(type, 1);
+        mongoTemplate.updateFirst(Query.query(Criteria.where("id").is(feedId)), update, FeedInfo.class);
+    }
+
+    public void subFeedCount(String feedId, String type) {
+        Update update = new Update();
+        update.inc(type, -1);
         mongoTemplate.updateFirst(Query.query(Criteria.where("id").is(feedId)), update, FeedInfo.class);
     }
 

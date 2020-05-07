@@ -70,7 +70,6 @@ public class CommentNotificationBuilder implements NotificationBuilder {
                 .authorId(feedMessage.getUserId())
                 .text(feedMessage.getText())
                 .imageUris(feedMessage.getImageUrisList())
-                .fromHost(feedMessage.getFromHost())
                 .createdAt(feedMessage.getCreatedAt())
                 .build();
     }
