@@ -7,6 +7,7 @@ import com.aliyun.openservices.ons.api.SendResult;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -84,27 +86,21 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         commentInfo.setDeleted(false);
 
         CommentInfo save = commentInfoRepository.save(commentInfo);
+
+        feedInfoService.incFeedCount(feedId, "commentsCount");
         CommentMessage commentMessage = getCommentMessage(save);
         CommentResponse commentResponse = CommentResponse.newBuilder()
                 .setComment(commentMessage)
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
 
-        CommentEvent commentEvent = CommentEvent.newBuilder()
-                .setComment(commentMessage)
-                .setFeed(feedInfoService.getFeedMessageById(feedId))
-                .build();
-        String uuid = UUID.randomUUID().toString();
-        NotificationEvent event = NotificationEvent.newBuilder()
-                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_COMMENT)
-                .setUserId(userId)
-                .setCommentEvent(commentEvent)
-                .setTimestamp(System.currentTimeMillis())
-                .setEventId(uuid)
-                .build();
-        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
-        message.setKey(uuid);
+        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId);
+        Message message = getMessage(commentMessage, feedMessage, feedMessage.getUserId());
         ProducerUtils.sendMessageAsync(producerBean, message);
+        if (!StringUtils.isEmpty(replyToId)) {
+            message = getMessage(commentMessage, feedMessage, replyToId);
+            ProducerUtils.sendMessageAsync(producerBean, message);
+        }
 
         responseObserver.onNext(commentResponse);
         responseObserver.onCompleted();
@@ -171,5 +167,23 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
                 .setReplyToId(commentInfo.getReplyToId())
                 .setCreatedAt(commentInfo.getCreatedTime())
                 .build();
+    }
+
+    private Message getMessage(CommentMessage commentMessage, FeedMessage feedMessage, String userId) {
+        CommentEvent commentEvent = CommentEvent.newBuilder()
+                .setComment(commentMessage)
+                .setFeed(feedMessage)
+                .build();
+        String uuid = UUID.randomUUID().toString();
+        NotificationEvent event = NotificationEvent.newBuilder()
+                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_COMMENT)
+                .setUserId(userId)
+                .setCommentEvent(commentEvent)
+                .setTimestamp(System.currentTimeMillis())
+                .setEventId(uuid)
+                .build();
+        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
+        message.setKey(uuid);
+        return message;
     }
 }

@@ -82,6 +82,9 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         if (userInfo == null) {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+            return;
         } else {
             UserMessage userMessage = getUserMessage(userInfo);
             responseBuilder.setUser(userMessage);

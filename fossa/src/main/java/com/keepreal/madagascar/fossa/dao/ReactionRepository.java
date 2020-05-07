@@ -18,4 +18,6 @@ import java.util.List;
 @Repository
 public interface ReactionRepository extends MongoRepository<ReactionInfo, String> {
     Page<ReactionInfo> findReactionInfosByFeedId(String feedId, Pageable pageable);
+
+    ReactionInfo findTopByFeedIdAndUserId(String feedId, String userId);
 }

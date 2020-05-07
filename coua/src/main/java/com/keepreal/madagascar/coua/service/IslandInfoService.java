@@ -163,13 +163,12 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         Page<String> islandListPageable = null;
         PageRequest pageRequest = request.getPageRequest();
         QueryIslandCondition requestCondition = request.getCondition();
-        // 如果参数中有 name ，目前的版本是精确匹配，所以只返回一条记录 todo
+        // 如果参数中有 name ，目前的版本是精确匹配，所以只返回一条记录
         if (requestCondition.hasName()) {
             IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(requestCondition.getName().getValue());
-            if (requestCondition.hasSubscribedUserId() &&
-                    !subscriptionService.isSubScribedIslandByIslandIdAndUserId(requestCondition.getSubscribedUserId().getValue(), islandInfo.getId())) {
-                islandInfo = null;
-            } else {
+            // 如果没有SubscribedUserId，或者有SubscribedUserId并且这个user订阅了这个岛
+            if (!requestCondition.hasSubscribedUserId() ||
+                    subscriptionService.isSubScribedIslandByIslandIdAndUserId(requestCondition.getSubscribedUserId().getValue(), islandInfo.getId())) {
                 IslandMessage islandMessage = getIslandMessage(islandInfo);
                 if (islandMessage != null) {
                     islandMessageList.add(islandMessage);
@@ -387,15 +386,13 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         List<CheckNewFeedsMessage> messageList = new ArrayList<>();
         if (islandIdList.size() == timestampsList.size()) {
             List<Map<String, Long>> resList = islandInfoRepository.findIslandIdAndLastFeedAtByIslandIdList(islandIdList);
-            Map<Long, Long> map = new HashMap<>();
-            resList.forEach(m -> map.put(m.get("id"), m.get("lastFeedAt")));
+            Map<String, Long> map = new HashMap<>();
+            resList.forEach(m -> map.put(m.get("id").toString(), m.get("lastFeedAt")));
             for (int i = 0; i < islandIdList.size(); i++) {
                 String islandId = islandIdList.get(i);
-                CheckNewFeedsMessage feedMessage = getFeedMessage(islandId, map.get(islandId) > timestampsList.get(i));
+                CheckNewFeedsMessage feedMessage = getFeedMessage(islandId, map.get(islandId), timestampsList.get(i));
                 messageList.add(feedMessage);
             }
-        } else {
-            // todo add error status
         }
         CheckNewFeedsResponse response = CheckNewFeedsResponse.newBuilder()
                 .addAllCheckNewFeeds(messageList)
@@ -463,10 +460,10 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
                 .build();
     }
 
-    private CheckNewFeedsMessage getFeedMessage(String islandId, boolean hasNewFeeds) {
+    private CheckNewFeedsMessage getFeedMessage(String islandId, Long islandLastFeedAt, Long currentTime) {
         return CheckNewFeedsMessage.newBuilder()
                 .setIslandId(islandId)
-                .setHasNewFeeds(hasNewFeeds)
+                .setHasNewFeeds(islandLastFeedAt != null && islandLastFeedAt > currentTime)
                 .build();
     }
 }

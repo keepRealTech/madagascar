@@ -9,7 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
-import java.util.List;
+import java.util.Set;
 
 /**
  * @program: madagascar
@@ -26,7 +26,7 @@ public class ReactionInfo {
     private String id;
     private String feedId;
     private String userId;
-    private List<Integer> reactionTypeList;
+    private Set<Integer> reactionTypeList;
     @Column(name = "is_deleted")
     private Boolean deleted;
     @CreatedDate

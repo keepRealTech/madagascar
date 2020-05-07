@@ -72,7 +72,8 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
 
     /**
      * 创建一个feed
-     * todo 校验 island
+     * TODO feed fromHost 字段
+     * TODO feed count
      * @param request
      * @param responseObserver
      */
@@ -197,6 +198,12 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         } else {
             return FeedMessage.newBuilder().build();
         }
+    }
+
+    public void incFeedCount(String feedId, String type) {
+        Update update = new Update();
+        update.inc(type);
+        mongoTemplate.updateFirst(Query.query(Criteria.where("id").is(feedId)), update, FeedInfo.class);
     }
 
     private FeedMessage getFeedMessage(FeedInfo feedInfo) {

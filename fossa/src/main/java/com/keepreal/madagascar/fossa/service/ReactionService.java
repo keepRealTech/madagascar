@@ -2,6 +2,7 @@ package com.keepreal.madagascar.fossa.service;
 
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
@@ -21,8 +22,11 @@ import com.keepreal.madagascar.fossa.model.ReactionInfo;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import com.keepreal.madagascar.fossa.util.ProducerUtils;
+import com.mongodb.client.result.UpdateResult;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.BsonString;
+import org.bson.BsonValue;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -32,7 +36,9 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -65,32 +71,49 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
 
     /**
      * 创建reaction
+     * todo 创建时检测是否已经存在
      * @param request
      * @param responseObserver
      */
     @Override
     public void createReaction(NewReactionRequest request, StreamObserver<ReactionResponse> responseObserver) {
+        String id = String.valueOf(idGenerator.nextId());
         String userId = request.getUserId();
         String feedId = request.getFeedId();
-        List<Integer> reactionTypesList = request.getReactionTypesValueList();
-        ReactionInfo reactionInfo = new ReactionInfo();
-        reactionInfo.setId(String.valueOf(idGenerator.nextId()));
-        reactionInfo.setUpdatedTime(Long.valueOf(userId));
-        reactionInfo.setFeedId(feedId);
-        reactionInfo.setReactionTypeList(reactionTypesList);
-        reactionInfo.setDeleted(false);
+
+        Set<Integer> reactionTypesSet = new HashSet<>(request.getReactionTypesValueList());
+        boolean requesthasLikeType = reactionTypesSet.contains(ReactionType.REACTION_LIKE_VALUE);
+        ReactionInfo reactionInfo = reactionRepository.findTopByFeedIdAndUserId(feedId, userId);
+        if (reactionInfo == null) {
+            reactionInfo = new ReactionInfo();
+            reactionInfo.setId(id);
+            reactionInfo.setUserId(request.getUserId());
+            reactionInfo.setUpdatedTime(Long.valueOf(userId));
+            reactionInfo.setFeedId(feedId);
+            reactionInfo.setReactionTypeList(reactionTypesSet);
+            reactionInfo.setDeleted(false);
+            if (requesthasLikeType) {
+                feedInfoService.incFeedCount(feedId, "likesCount");
+            }
+        } else {
+            Set<Integer> integerSet = reactionInfo.getReactionTypeList();
+            if (!integerSet.contains(ReactionType.REACTION_LIKE_VALUE) && requesthasLikeType) {
+                feedInfoService.incFeedCount(feedId, "likesCount");
+            }
+            integerSet.addAll(reactionTypesSet);
+        }
         reactionRepository.save(reactionInfo);
 
-        ReactionMessage reactionMessage = getReactionMessage(feedId, userId, request.getReactionTypesList());
-
+        ReactionMessage reactionMessage = getReactionMessage(id ,feedId, userId, request.getReactionTypesList());
+        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId);
         ReactionEvent reactionEvent = ReactionEvent.newBuilder()
                 .setReaction(reactionMessage)
-                .setFeed(feedInfoService.getFeedMessageById(feedId))
+                .setFeed(feedMessage)
                 .build();
         String uuid = UUID.randomUUID().toString();
         NotificationEvent event = NotificationEvent.newBuilder()
                 .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_REACTION)
-                .setUserId(userId)
+                .setUserId(feedMessage.getUserId())
                 .setReactionEvent(reactionEvent)
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
@@ -115,10 +138,13 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         Query query = Query.query(Criteria.where("feedId").is(feedId).and("userId").is(userId));
         Update update = new Update();
         update.pullAll("reactionTypeList", typesValueList.toArray());
-        mongoTemplate.updateFirst(query, update, ReactionInfo.class);
+        UpdateResult updateResult = mongoTemplate.updateFirst(query, update, ReactionInfo.class);
+        BsonValue upsertedId = updateResult.getUpsertedId();
+        if (upsertedId != null) {
+            ReactionMessage reactionMessage = getReactionMessage(upsertedId.asString().toString(), feedId, userId, request.getReactionTypesList());
+            basicResponse(responseObserver, reactionMessage);
+        }
 
-        ReactionMessage reactionMessage = getReactionMessage(feedId, userId, request.getReactionTypesList());
-        basicResponse(responseObserver, reactionMessage);
     }
 
     /**
@@ -135,6 +161,7 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         List<ReactionInfo> reactionInfoList = reactionInfoListPageable.getContent();
         List<ReactionMessage> reactionMessageList = reactionInfoList.stream() //这种写法是不是会让人看得很乱？
                 .map(info -> getReactionMessage(
+                                info.getId(),
                                 info.getFeedId(),
                                 info.getUserId(),
                                 info.getReactionTypeList().stream()
@@ -153,8 +180,9 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         responseObserver.onCompleted();
     }
 
-    private ReactionMessage getReactionMessage(String feedId, String userId, List<ReactionType> typeList) {
+    private ReactionMessage getReactionMessage(String id, String feedId, String userId, List<ReactionType> typeList) {
         return ReactionMessage.newBuilder()
+                .setId(id)
                 .setFeedId(feedId)
                 .setUserId(userId)
                 .addAllReactionType(typeList)
