@@ -45,8 +45,9 @@ public class FeedService {
      * Constructs the feed service.
      *
      * @param managedChannel GRpc managed channel connection to service Fossa.
+     * @param islandService {@link IslandService}
      */
-    @Autowired
+
     public FeedService(@Qualifier("fossaChannel") ManagedChannel managedChannel, IslandService islandService) {
         this.managedChannel = managedChannel;
         this.islandService = islandService;
