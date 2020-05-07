@@ -1,6 +1,6 @@
-package com.keepreal.madagascar.coua.dao;
+package com.keepreal.madagascar.fossa.dao;
 
-import com.keepreal.madagascar.coua.model.RepostInfo;
+import com.keepreal.madagascar.fossa.model.RepostInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
