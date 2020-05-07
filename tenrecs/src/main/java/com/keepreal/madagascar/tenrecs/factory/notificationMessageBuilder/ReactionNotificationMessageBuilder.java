@@ -65,7 +65,7 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
                 .setUserId(this.notification.getUserId())
                 .setHasRead(this.notification.getCreatedAt().compareTo(this.lastReadTimestamp) < 0)
                 .setReactionNotification(reactionNotificationMessage)
-                .setCreatedAt(this.notification.getCreatedAt())
+                .setTimestamp(this.notification.getTimestamp())
                 .build();
     }
 

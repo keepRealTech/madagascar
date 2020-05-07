@@ -7,13 +7,18 @@ import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.repository.NotificationRepository;
 import com.keepreal.madagascar.tenrecs.util.PaginationUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.Optional;
 
 /**
  * Represents the notification service.
  */
 @Service
+@Slf4j
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
@@ -63,8 +68,30 @@ public class NotificationService {
      * @param pageRequest {@link PageRequest}.
      * @return {@link Notification}.
      */
-    public Page<Notification> retrieveByUSerIdWithPagination(String userId, PageRequest pageRequest) {
+    public Page<Notification> retrieveByUserIdWithPagination(String userId, PageRequest pageRequest) {
         return this.notificationRepository.findAllByUserIdAndIsDeletedIsFalse(userId, PaginationUtils.valueOf(pageRequest));
+    }
+
+    /**
+     * Retrieves the latest notification by user id and feed id.
+     *
+     * @param authorId User id.
+     * @param feedId Feed id.
+     * @return {@link Notification}.
+     */
+    public Optional<Notification> retrieveLastByReactionAuthorIdAndReactionFeedId(String authorId, String feedId) {
+        return this.notificationRepository.findTopByReaction_AuthorIdAndReaction_FeedIdAndIsDeletedIsFalseOrderByTimestamp(authorId, feedId);
+    }
+
+    /**
+     * Retrieves the latest subscribe notification by island id and subscriber id.
+     *
+     * @param islandId Island id.
+     * @param subscriberId Subscriber id.
+     * @return {@link Notification}.
+     */
+    public Optional<Notification> retrieveLastSubscribeNoticeByIslandIdAndSubscriberId(String islandId, String subscriberId) {
+        return this.notificationRepository.findTopByNotice_SubscribeNotice_IslandIdAndNotice_SubscribeNotice_SubscriberIdAndIsDeletedIsFalseOrderByTimestamp(islandId, subscriberId);
     }
 
     /**
@@ -77,6 +104,16 @@ public class NotificationService {
         notification.setId(String.valueOf(this.idGenerator.nextId()));
         notification.setCreatedAt(notification.getTimestamp());
         return this.notificationRepository.insert(notification);
+    }
+
+    /**
+     * Updates the notification.
+     *
+     * @param notification {@link Notification}.
+     * @return {@link Notification}.
+     */
+    public Notification update(Notification notification) {
+        return this.notificationRepository.save(notification);
     }
 
     /**

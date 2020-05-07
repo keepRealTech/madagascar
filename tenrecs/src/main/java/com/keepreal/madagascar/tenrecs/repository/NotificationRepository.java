@@ -21,4 +21,7 @@ public interface NotificationRepository extends MongoRepository<Notification, Lo
 
     Optional<Notification> findByEventIdAndIsDeletedIsFalse(String eventId);
 
+    Optional<Notification> findTopByNotice_SubscribeNotice_IslandIdAndNotice_SubscribeNotice_SubscriberIdAndIsDeletedIsFalseOrderByTimestamp(String islandId, String subscriberId);
+
+    Optional<Notification> findTopByReaction_AuthorIdAndReaction_FeedIdAndIsDeletedIsFalseOrderByTimestamp(String authorId, String feedId);
 }

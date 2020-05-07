@@ -11,14 +11,14 @@ import org.springframework.data.domain.Sort;
  */
 public class PaginationUtils {
 
-    private static final String CREATED_AT_PROPERTY_NAME = "createdAt";
+    private static final String TIMESTAMP_PROPERTY_NAME = "timestamp";
 
     @Getter
     private final static int DEFAULT_PAGE = 0;
     @Getter
     private final static int DEFAULT_PAGE_SIZE = 10;
     @Getter
-    private final static Sort DEFAULT_SORT = Sort.by(Sort.Order.desc(PaginationUtils.CREATED_AT_PROPERTY_NAME));
+    private final static Sort DEFAULT_SORT = Sort.by(Sort.Order.desc(PaginationUtils.TIMESTAMP_PROPERTY_NAME));
 
     /**
      * Constructs a default {@link PageRequest}.

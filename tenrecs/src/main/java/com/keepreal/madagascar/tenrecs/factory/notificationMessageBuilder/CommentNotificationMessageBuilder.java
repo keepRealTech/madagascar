@@ -65,7 +65,7 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
                 .setUserId(this.notification.getUserId())
                 .setHasRead(this.notification.getCreatedAt().compareTo(this.lastReadTimestamp) < 0)
                 .setCommentNotification(commentNotificationMessage)
-                .setCreatedAt(this.notification.getCreatedAt())
+                .setTimestamp(this.notification.getTimestamp())
                 .build();
     }
 

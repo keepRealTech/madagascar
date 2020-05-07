@@ -95,7 +95,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
         notificationDTO.setId(this.notificationMessage.getId());
         notificationDTO.setHasRead(this.notificationMessage.getHasRead());
         notificationDTO.setNotificationType(NotificationType.ISLAND_NOTICE);
-        notificationDTO.setCreatedAt(this.notificationMessage.getCreatedAt());
+        notificationDTO.setCreatedAt(this.notificationMessage.getTimestamp());
         notificationDTO.setNotice(this.valueOf(this.notificationMessage.getNoticeNotification()));
 
         return notificationDTO;

@@ -9,7 +9,7 @@ import "google/protobuf/wrappers.proto";
 message NotificationMessage {
     string id = 1;
     string userId = 2;
-    int64 createdAt = 3;
+    int64 timestamp = 3;
     NotificationType type = 4;
     bool hasRead = 5;
     oneof notification {

@@ -81,7 +81,7 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
 
         Page<Notification> notifications;
         if (!request.getCondition().hasType()) {
-            notifications = this.notificationService.retrieveByUSerIdWithPagination(userId, pageRequest);
+            notifications = this.notificationService.retrieveByUserIdWithPagination(userId, pageRequest);
         } else {
             notifications = this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
         }

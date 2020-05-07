@@ -59,7 +59,7 @@ public class NoticeNotificationMessageBuilder implements NotificationMessageBuil
                 .setUserId(this.notification.getUserId())
                 .setHasRead(this.notification.getCreatedAt().compareTo(this.lastReadTimestamp) < 0)
                 .setNoticeNotification(this.toNoticeMessage(this.notification.getNotice()))
-                .setCreatedAt(this.notification.getCreatedAt())
+                .setTimestamp(this.notification.getTimestamp())
                 .build();
     }
 

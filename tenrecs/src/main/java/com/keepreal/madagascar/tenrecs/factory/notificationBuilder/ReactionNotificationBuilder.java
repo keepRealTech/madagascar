@@ -8,8 +8,13 @@ import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import com.keepreal.madagascar.tenrecs.model.Feed;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.model.Reaction;
+import com.keepreal.madagascar.tenrecs.service.NotificationService;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Implements the {@link NotificationBuilder}.
@@ -17,6 +22,7 @@ import java.util.Objects;
 public class ReactionNotificationBuilder implements NotificationBuilder {
 
     private NotificationEvent event;
+    private NotificationService notificationService;
 
     /**
      * Sets the notificaton event.
@@ -31,6 +37,17 @@ public class ReactionNotificationBuilder implements NotificationBuilder {
     }
 
     /**
+     * Sets the notification service.
+     *
+     * @param notificationService {@link NotificationService}.
+     * @return this.
+     */
+    public ReactionNotificationBuilder setNotificationService(NotificationService notificationService) {
+        this.notificationService = notificationService;
+        return this;
+    }
+
+    /**
      * Builds the {@link Notification}.
      *
      * @return {@link Notification}.
@@ -38,9 +55,20 @@ public class ReactionNotificationBuilder implements NotificationBuilder {
     @Override
     public Notification build() {
         if (Objects.isNull(this.event)
+                || Objects.isNull(this.notificationService)
                 || !this.event.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_REACTION)
                 || Objects.isNull(this.event.getReactionEvent())) {
             return null;
+        }
+
+        Optional<Notification> lastNotification = this.notificationService.retrieveLastByReactionAuthorIdAndReactionFeedId(
+                this.event.getUserId(), this.event.getReactionEvent().getReaction().getFeedId());
+        if (lastNotification.isPresent()
+                && lastNotification.get().getTimestamp() > LocalDateTime.now().minusDays(1).atZone(ZoneId.of("Asia/Shanghai")).toInstant().toEpochMilli()) {
+            Notification ln = lastNotification.get();
+            ln.setTimestamp(this.event.getTimestamp());
+            ln.getReaction().getTypes().addAll(this.event.getReactionEvent().getReaction().getReactionTypeList());
+            return ln;
         }
 
         return Notification.builder()
@@ -89,7 +117,7 @@ public class ReactionNotificationBuilder implements NotificationBuilder {
                 .id(reactionMessage.getId())
                 .authorId(reactionMessage.getUserId())
                 .feedId(reactionMessage.getFeedId())
-                .types(reactionMessage.getReactionTypeList())
+                .types(new HashSet<>(reactionMessage.getReactionTypeList()))
                 .createdAt(reactionMessage.getCreatedAt())
                 .build();
     }
