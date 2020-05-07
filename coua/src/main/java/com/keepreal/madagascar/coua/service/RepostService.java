@@ -38,10 +38,14 @@ import java.util.stream.Collectors;
 @GRpcService
 public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
 
+    private final RepostRepository repostRepository;
+    private final LongIdGenerator idGenerator;
+
     @Autowired
-    private RepostRepository repostRepository;
-    @Autowired
-    private LongIdGenerator idGenerator;
+    public RepostService(RepostRepository repostRepository, LongIdGenerator idGenerator) {
+        this.repostRepository = repostRepository;
+        this.idGenerator = idGenerator;
+    }
 
     @Override
     public void createFeedRepost(NewFeedRepostRequest request, StreamObserver<FeedRepostResponse> responseObserver) {

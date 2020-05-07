@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.fossa.service;
 
+import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
@@ -71,14 +72,14 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
 
     /**
      * 创建一个feed
+     * todo 校验 island
      * @param request
      * @param responseObserver
      */
     @Override
     public void createFeeds(NewFeedsRequest request, StreamObserver<NewFeedsResponse> responseObserver) {
         String userId = request.getUserId();
-        List<String> islandIdList = request.getIslandIdList().stream().map(s -> toString()).collect(Collectors.toList());
-        List<String> imageUrisList = request.getImageUrisList().stream().map(s -> toString()).collect(Collectors.toList());
+        ProtocolStringList islandIdList = request.getIslandIdList();
         String text = request.hasText() ? request.getText().getValue() : "";
         List<FeedInfo> feedInfoList = new ArrayList<>();
         islandIdList.forEach(id -> {
@@ -86,13 +87,14 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfo.setId(String.valueOf(idGenerator.nextId()));
             feedInfo.setIslandId(id);
             feedInfo.setUserId(userId);
-            feedInfo.setImageUrls(imageUrisList);
+            feedInfo.setImageUrls(request.getImageUrisList());
             feedInfo.setText(text);
             feedInfo.setRepostCount(0);
             feedInfo.setCommentsCount(0);
             feedInfo.setLikesCount(0);
             feedInfo.setDeleted(false);
             feedInfoList.add(feedInfo);
+            feedInfo.setCreatedTime(System.currentTimeMillis());
         });
         feedInfoRepository.saveAll(feedInfoList);
         //调用coua服务更新island的lastFeedAt字段
