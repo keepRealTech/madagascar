@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.UUID;
 
 /**
@@ -46,67 +47,74 @@ public class SubscriptionService {
         this.mqConfig = mqConfig;
     }
 
-    public void initHost(Long islandId, Long hostId) {
-        Subscription subscription = new Subscription();
-        subscription.setId(idGenerator.nextId());
-        subscription.setIslandId(islandId);
-        subscription.setUserId(hostId);
-        subscription.setIslanderNumber(HOST_NUMBER);
-        subscription.setState(SubscriptionState.HOST.getValue());
+    public void initHost(String islandId, String hostId) {
+        Subscription subscription = Subscription.builder()
+                .id(String.valueOf(idGenerator.nextId()))
+                .islandId(islandId)
+                .userId(hostId)
+                .islanderNumber(HOST_NUMBER)
+                .state(SubscriptionState.HOST.getValue())
+                .build();
         subscriptionRepository.save(subscription);
     }
 
-    public Page<Long> getIslandIdListByUserCreated(Long userId, Pageable pageable) {
+    public boolean isSubScribedIslandByIslandIdAndUserId(String islandId, String userId) {
+        Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
+        return subscription != null;
+    }
+
+    public Page<String> getIslandIdListByUserCreated(String userId, Pageable pageable) {
         int state = SubscriptionState.HOST.getValue();
         return getIslandsByUserState(userId, state, pageable);
     }
 
-    public Page<Long> getIslandIdListByUserSubscribed(Long userId, Pageable pageable) {
+    public Page<String> getIslandIdListByUserSubscribed(String userId, Pageable pageable) {
         int state = SubscriptionState.ISLANDER.getValue();
         return getIslandsByUserState(userId, state, pageable);
     }
 
-    public Page<Long> getSubscriberIdListByIslandId(Long islandId, Pageable pageable) {
+    public Page<String> getSubscriberIdListByIslandId(String islandId, Pageable pageable) {
         return subscriptionRepository.getSubscriberIdListByIslandId(islandId, pageable);
     }
 
-    public Integer getMemberCountByIslandId(Long islandId) {
+    public Integer getMemberCountByIslandId(String islandId) {
         return subscriptionRepository.getCountByIslandId(islandId);
     }
 
-    public Integer getUserIndexByIslandId(Long islandId, Long userId) {
+    public Integer getUserIndexByIslandId(String islandId, String userId) {
         return subscriptionRepository.getIslanderNumberByIslandId(islandId, userId);
     }
 
-    private Page<Long> getIslandsByUserState(Long userId, Integer state, Pageable pageable) {
+    private Page<String> getIslandsByUserState(String userId, Integer state, Pageable pageable) {
         return subscriptionRepository.getIslandIdListByUserState(userId, state, pageable);
     }
 
-    public void subscribeIsland(Long islandId, Long userId, Integer islanderNumber) {
-        Subscription subscription = subscriptionRepository.getSubscriptionByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
+    public void subscribeIsland(String islandId, String userId, String hostId, Integer islanderNumber) {
+        Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
         // 如果这个用户之前加入过这个岛，那么只需要恢复他的状态即可
         if (subscription != null) {
             updateSubscriptionState(subscription, SubscriptionState.ISLANDER);
         } else {
             //创建对象
-            subscription = new Subscription();
-            subscription.setId(idGenerator.nextId());
-            subscription.setIslandId(islandId);
-            subscription.setUserId(userId);
-            subscription.setState(SubscriptionState.ISLANDER.getValue());
-            subscription.setIslanderNumber(islanderNumber);
+            subscription = Subscription.builder()
+                    .id(String.valueOf(idGenerator.nextId()))
+                    .islandId(islandId)
+                    .userId(userId)
+                    .state(SubscriptionState.ISLANDER.getValue())
+                    .islanderNumber(islanderNumber)
+                    .build();
         }
         subscriptionRepository.save(subscription);
 
         //向mq发消息
         String uuid = UUID.randomUUID().toString();
         SubscribeEvent subscribeEvent = SubscribeEvent.newBuilder()
-                .setIslandId(islandId.toString())
-                .setSubscriberId(userId.toString())
+                .setIslandId(islandId)
+                .setSubscriberId(userId)
                 .build();
         NotificationEvent event = NotificationEvent.newBuilder()
                 .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_SUBSCRIBE)
-                .setUserId(userId.toString())
+                .setUserId(hostId) //当用户加入这个岛时，收到这个通知的是岛主
                 .setSubscribeEvent(subscribeEvent)
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
@@ -115,7 +123,9 @@ public class SubscriptionService {
         message.setKey(uuid);
         producerBean.sendAsync(message, new SendCallback() {
             @Override
-            public void onSuccess(SendResult sendResult) { }
+            public void onSuccess(SendResult sendResult) {
+            }
+
             @Override
             public void onException(OnExceptionContext context) {
                 log.error("this message send failure, message Id is {}", context.getMessageId());
@@ -123,8 +133,8 @@ public class SubscriptionService {
         });
     }
 
-    public void unSubscribeIsland(Long islandId, Long userId) {
-        Subscription subscription = subscriptionRepository.getSubscriptionByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
+    public void unSubscribeIsland(String islandId, String userId) {
+        Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
         if (subscription != null) {
             updateSubscriptionState(subscription, SubscriptionState.LEAVE);
             subscriptionRepository.save(subscription);

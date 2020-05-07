@@ -1,6 +1,9 @@
 package com.keepreal.madagascar.coua.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -22,19 +25,28 @@ import java.sql.Date;
 @Table(name = "user")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserInfo {
 
     @Id
-    private Long id;
+    private String id;
     private String nickName;
     private String portraitImageUri;
-    private Integer gender;
-    private String description;
-    private String city;
-    private Date birthday;
+    @Builder.Default
+    private Integer gender = 0;
+    @Builder.Default
+    private String description = "";
+    @Builder.Default
+    private String city = "";
+    @Builder.Default
+    private Date birthday = Date.valueOf("2000-01-01");
     @Column(name = "is_deleted")
-    private Boolean deleted;
-    private Integer state;
+    @Builder.Default
+    private Boolean deleted = false;
+    @Builder.Default
+    private Integer state = 0;
     private String unionId;
     @CreatedDate
     private Long createdTime;

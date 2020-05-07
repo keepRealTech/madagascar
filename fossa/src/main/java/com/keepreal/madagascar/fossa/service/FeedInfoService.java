@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.fossa.service;
 
+import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
@@ -18,7 +19,9 @@ import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
+import com.keepreal.madagascar.fossa.dao.CommentInfoRepository;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
+import com.keepreal.madagascar.fossa.model.CommentInfo;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
@@ -27,7 +30,9 @@ import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -52,14 +57,14 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
 
     private final ManagedChannel managedChannel;
     private final MongoTemplate mongoTemplate;
-    private final CommentService commentService;
+    private final CommentInfoRepository commentInfoRepository;
     private final FeedInfoRepository feedInfoRepository;
     private final LongIdGenerator idGenerator;
 
     @Autowired
-    public FeedInfoService(MongoTemplate mongoTemplate, CommentService commentService, ManagedChannel managedChannel, FeedInfoRepository feedInfoRepository, LongIdGenerator idGenerator) {
+    public FeedInfoService(MongoTemplate mongoTemplate, CommentInfoRepository commentInfoRepository, @Qualifier("couaChannel")ManagedChannel managedChannel, FeedInfoRepository feedInfoRepository, LongIdGenerator idGenerator) {
         this.mongoTemplate = mongoTemplate;
-        this.commentService = commentService;
+        this.commentInfoRepository = commentInfoRepository;
         this.managedChannel = managedChannel;
         this.feedInfoRepository = feedInfoRepository;
         this.idGenerator = idGenerator;
@@ -67,28 +72,29 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
 
     /**
      * 创建一个feed
+     * todo 校验 island
      * @param request
      * @param responseObserver
      */
     @Override
     public void createFeeds(NewFeedsRequest request, StreamObserver<NewFeedsResponse> responseObserver) {
         String userId = request.getUserId();
-        List<String> islandIdList = request.getIslandIdList().stream().map(s -> toString()).collect(Collectors.toList());
-        List<String> imageUrisList = request.getImageUrisList().stream().map(s -> toString()).collect(Collectors.toList());
+        ProtocolStringList islandIdList = request.getIslandIdList();
         String text = request.hasText() ? request.getText().getValue() : "";
         List<FeedInfo> feedInfoList = new ArrayList<>();
         islandIdList.forEach(id -> {
             FeedInfo feedInfo = new FeedInfo();
-            feedInfo.setId(idGenerator.nextId());
-            feedInfo.setIslandId(Long.valueOf(id));
-            feedInfo.setUserId(Long.valueOf(userId));
-            feedInfo.setImageUrls(imageUrisList);
+            feedInfo.setId(String.valueOf(idGenerator.nextId()));
+            feedInfo.setIslandId(id);
+            feedInfo.setUserId(userId);
+            feedInfo.setImageUrls(request.getImageUrisList());
             feedInfo.setText(text);
             feedInfo.setRepostCount(0);
             feedInfo.setCommentsCount(0);
             feedInfo.setLikesCount(0);
             feedInfo.setDeleted(false);
             feedInfoList.add(feedInfo);
+            feedInfo.setCreatedTime(System.currentTimeMillis());
         });
         feedInfoRepository.saveAll(feedInfoList);
         //调用coua服务更新island的lastFeedAt字段
@@ -131,11 +137,11 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         FeedResponse.Builder responseBuilder = FeedResponse.newBuilder();
 
         String feedId = request.getId();
-        FeedInfo feedInfo = feedInfoRepository.findFeedInfoByIdAndDeletedIsFalse(Long.valueOf(feedId));
+        FeedInfo feedInfo = feedInfoRepository.findFeedInfoByIdAndDeletedIsFalse(feedId);
         if (feedInfo != null) {
             FeedMessage feedMessage = getFeedMessage(feedInfo);
             responseBuilder.setFeed(feedMessage)
-                    .setUserId(feedInfo.getUserId().toString())
+                    .setUserId(feedInfo.getUserId())
                     .setStatus(CommonStatusUtils.getSuccStatus());
         } else {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR);
@@ -184,7 +190,7 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    public FeedMessage getFeedMessageById(Long feedId) {
+    public FeedMessage getFeedMessageById(String feedId) {
         Optional<FeedInfo> feedInfoOptional = feedInfoRepository.findById(feedId);
         if (feedInfoOptional.isPresent()) {
             return getFeedMessage(feedInfoOptional.get());
@@ -194,12 +200,11 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
     }
 
     private FeedMessage getFeedMessage(FeedInfo feedInfo) {
-        List<CommentMessage> lastCommentMessage = commentService
-                .getLastCommentMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
+        List<CommentMessage> lastCommentMessage = getLastCommentMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
         return FeedMessage.newBuilder()
-                .setId(feedInfo.getId().toString())
-                .setIslandId(feedInfo.getIslandId().toString())
-                .setUserId(feedInfo.getUserId().toString())
+                .setId(feedInfo.getId())
+                .setIslandId(feedInfo.getIslandId())
+                .setUserId(feedInfo.getUserId())
                 .setText(feedInfo.getText())
                 .addAllImageUris(feedInfo.getImageUrls())
                 .setCreatedAt(feedInfo.getCreatedTime())
@@ -208,6 +213,13 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
                 .setRepostCount(feedInfo.getRepostCount())
                 .addAllLastComments(lastCommentMessage)
                 .build();
+    }
+
+    private List<CommentMessage> getLastCommentMessage(String feedId, int commentCount) {
+        Pageable pageable = PageRequest.of(0, commentCount);
+        List<CommentInfo> commentInfoList = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseOrderByCreatedTimeDesc(feedId, pageable).getContent();
+
+        return commentInfoList.stream().map(CommentService::getCommentMessage).collect(Collectors.toList());
     }
 
     private void callCouaUpdateIslandLastFeedAt(List<String> islandIdList) {

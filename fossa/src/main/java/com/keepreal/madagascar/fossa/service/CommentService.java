@@ -10,15 +10,15 @@ import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.fossa.CommentEvent;
+import com.keepreal.madagascar.tenrecs.CommentEvent;
 import com.keepreal.madagascar.fossa.CommentResponse;
 import com.keepreal.madagascar.fossa.CommentServiceGrpc;
 import com.keepreal.madagascar.fossa.CommentsResponse;
 import com.keepreal.madagascar.fossa.DeleteCommentByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteCommentByIdResponse;
 import com.keepreal.madagascar.fossa.NewCommentRequest;
-import com.keepreal.madagascar.fossa.NotificationEvent;
-import com.keepreal.madagascar.fossa.NotificationEventType;
+import com.keepreal.madagascar.tenrecs.NotificationEvent;
+import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import com.keepreal.madagascar.fossa.RetrieveCommentsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.config.MqConfig;
 import com.keepreal.madagascar.fossa.dao.CommentInfoRepository;
@@ -76,11 +76,11 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         String content = request.getContent();
         String replyToId = request.hasReplyToId() ? request.getReplyToId().getValue() : "";
         CommentInfo commentInfo = new CommentInfo();
-        commentInfo.setId(idGenerator.nextId());
-        commentInfo.setFeedId(Long.valueOf(feedId));
-        commentInfo.setUserId(Long.valueOf(userId));
+        commentInfo.setId(String.valueOf(idGenerator.nextId()));
+        commentInfo.setFeedId(feedId);
+        commentInfo.setUserId(userId);
         commentInfo.setContent(content);
-        commentInfo.setReplyToId(Long.valueOf(replyToId));
+        commentInfo.setReplyToId(replyToId);
         commentInfo.setDeleted(false);
 
         CommentInfo save = commentInfoRepository.save(commentInfo);
@@ -92,7 +92,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
 
         CommentEvent commentEvent = CommentEvent.newBuilder()
                 .setComment(commentMessage)
-                .setFeed(feedInfoService.getFeedMessageById(Long.valueOf(feedId)))
+                .setFeed(feedInfoService.getFeedMessageById(feedId))
                 .build();
         String uuid = UUID.randomUUID().toString();
         NotificationEvent event = NotificationEvent.newBuilder()
@@ -119,9 +119,9 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
     public void retrieveCommentsByFeedId(RetrieveCommentsByFeedIdRequest request, StreamObserver<CommentsResponse> responseObserver) {
         String feedId = request.getFeedId();
         Pageable pageable = PageRequestResponseUtils.getPageableByRequest(request.getPageRequest());
-        Page<CommentInfo> commentInfoPage = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseAndOrderByCreatedTimeDesc(Long.valueOf(feedId), pageable);
+        Page<CommentInfo> commentInfoPage = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseOrderByCreatedTimeDesc(feedId, pageable);
         List<CommentMessage> commentMessageList = commentInfoPage.getContent()
-                .stream().map(this::getCommentMessage)
+                .stream().map(CommentService::getCommentMessage)
                 .collect(Collectors.toList());
 
         PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(commentInfoPage);
@@ -144,7 +144,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
     public void deleteCommentById(DeleteCommentByIdRequest request, StreamObserver<DeleteCommentByIdResponse> responseObserver) {
         CommonStatus commonStatus;
         String id = request.getId();
-        Optional<CommentInfo> commentInfoOptional = commentInfoRepository.findById(Long.valueOf(id));
+        Optional<CommentInfo> commentInfoOptional = commentInfoRepository.findById(id);
         if (commentInfoOptional.isPresent()) {
             CommentInfo commentInfo = commentInfoOptional.get();
             commentInfo.setDeleted(true);
@@ -162,20 +162,13 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    public List<CommentMessage> getLastCommentMessage(Long feedId, int commentCount) {
-        Pageable pageable = PageRequest.of(0, commentCount);
-        List<CommentInfo> commentInfoList = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseAndOrderByCreatedTimeDesc(feedId, pageable).getContent();
-
-        return commentInfoList.stream().map(this::getCommentMessage).collect(Collectors.toList());
-    }
-
-    private CommentMessage getCommentMessage(CommentInfo commentInfo) {
+    public static CommentMessage getCommentMessage(CommentInfo commentInfo) {
         return CommentMessage.newBuilder()
-                .setId(commentInfo.getId().toString())
-                .setFeedId(commentInfo.getFeedId().toString())
-                .setUserId(commentInfo.getUserId().toString())
+                .setId(commentInfo.getId())
+                .setFeedId(commentInfo.getFeedId())
+                .setUserId(commentInfo.getUserId())
                 .setContent(commentInfo.getContent())
-                .setReplyToId(commentInfo.getReplyToId().toString())
+                .setReplyToId(commentInfo.getReplyToId())
                 .setCreatedAt(commentInfo.getCreatedTime())
                 .build();
     }

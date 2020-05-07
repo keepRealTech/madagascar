@@ -11,32 +11,33 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
  * @program: madagascar
  * @author: zhangxidong
- * @create: 2020-04-26
+ * @create: 2020-05-06
  **/
 
-@Data
-@Table(name = "subscription")
 @Entity
-@EntityListeners(AuditingEntityListener.class)
+@Data
+@Table(name = "repost")
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @AllArgsConstructor
-public class Subscription {
+public class
+RepostInfo {
 
     @Id
     private String id;
     private String userId;
-    private String islandId;
-    private Integer state;
-    private Integer islanderNumber;
+    private String fromId;
+    private String content;
+    @Column(name = "is_successful")
+    private Boolean successful;
+    private Integer fromType;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
@@ -44,4 +45,5 @@ public class Subscription {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }

@@ -3,6 +3,7 @@ package com.keepreal.madagascar.coua;
 import com.keepreal.madagascar.common.snowflake.annotation.EnableIdGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 /**
  * @program: madagascar
@@ -12,6 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @EnableIdGenerator
+@EnableJpaAuditing
 public class CouaApplication {
 
     public static void main(String[] args) {

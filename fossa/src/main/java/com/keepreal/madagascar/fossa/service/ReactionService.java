@@ -7,9 +7,9 @@ import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.NewReactionRequest;
-import com.keepreal.madagascar.fossa.NotificationEvent;
-import com.keepreal.madagascar.fossa.NotificationEventType;
-import com.keepreal.madagascar.fossa.ReactionEvent;
+import com.keepreal.madagascar.tenrecs.NotificationEvent;
+import com.keepreal.madagascar.tenrecs.NotificationEventType;
+import com.keepreal.madagascar.tenrecs.ReactionEvent;
 import com.keepreal.madagascar.fossa.ReactionResponse;
 import com.keepreal.madagascar.fossa.ReactionServiceGrpc;
 import com.keepreal.madagascar.fossa.ReactionsResponse;
@@ -74,9 +74,9 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         String feedId = request.getFeedId();
         List<Integer> reactionTypesList = request.getReactionTypesValueList();
         ReactionInfo reactionInfo = new ReactionInfo();
-        reactionInfo.setId(idGenerator.nextId());
+        reactionInfo.setId(String.valueOf(idGenerator.nextId()));
         reactionInfo.setUpdatedTime(Long.valueOf(userId));
-        reactionInfo.setFeedId(Long.valueOf(feedId));
+        reactionInfo.setFeedId(feedId);
         reactionInfo.setReactionTypeList(reactionTypesList);
         reactionInfo.setDeleted(false);
         reactionRepository.save(reactionInfo);
@@ -85,7 +85,7 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
 
         ReactionEvent reactionEvent = ReactionEvent.newBuilder()
                 .setReaction(reactionMessage)
-                .setFeed(feedInfoService.getFeedMessageById(Long.valueOf(feedId)))
+                .setFeed(feedInfoService.getFeedMessageById(feedId))
                 .build();
         String uuid = UUID.randomUUID().toString();
         NotificationEvent event = NotificationEvent.newBuilder()
@@ -131,12 +131,12 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         String feedId = request.getFeedId();
 
         Pageable pageable = PageRequestResponseUtils.getPageableByRequest(request.getPageRequest());
-        Page<ReactionInfo> reactionInfoListPageable = reactionRepository.findReactionInfosByFeedId(Long.valueOf(feedId), pageable);
+        Page<ReactionInfo> reactionInfoListPageable = reactionRepository.findReactionInfosByFeedId(feedId, pageable);
         List<ReactionInfo> reactionInfoList = reactionInfoListPageable.getContent();
         List<ReactionMessage> reactionMessageList = reactionInfoList.stream() //这种写法是不是会让人看得很乱？
                 .map(info -> getReactionMessage(
-                                info.getFeedId().toString(),
-                                info.getUserId().toString(),
+                                info.getFeedId(),
+                                info.getUserId(),
                                 info.getReactionTypeList().stream()
                                         .map(ReactionType::forNumber)
                                         .collect(Collectors.toList())
