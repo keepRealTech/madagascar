@@ -149,7 +149,7 @@ public class IslandController implements IslandApi {
                 this.islandService.retrieveIslandProfileById(id, userId);
 
         IslandProfileResponse response = new IslandProfileResponse();
-        response.setData(this.islandDTOFactory.valueOf(islandProfileResponse));
+        response.setData(this.islandDTOFactory.valueOf(islandProfileResponse, userId));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
