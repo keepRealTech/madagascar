@@ -34,9 +34,9 @@ public class RepostService {
     /**
      * Constructs the repost service.
      *
-     * @param managedChannel GRpc managed channel connection to service Coua.
+     * @param managedChannel GRpc managed channel connection to service fossa.
      */
-    public RepostService(@Qualifier("couaChannel") ManagedChannel managedChannel) {
+    public RepostService(@Qualifier("fossaChannel") ManagedChannel managedChannel) {
         this.managedChannel = managedChannel;
     }
 
