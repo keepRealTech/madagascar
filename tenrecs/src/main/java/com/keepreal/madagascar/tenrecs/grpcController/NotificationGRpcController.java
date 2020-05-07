@@ -64,8 +64,7 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 request.hasPageRequest() ? request.getPageRequest() : PaginationUtils.defaultPageRequest();
 
         if (!request.hasCondition()
-                || !request.getCondition().hasUserId()
-                || !request.getCondition().hasType()) {
+                || !request.getCondition().hasUserId()) {
             NotificationsResponse response = NotificationsResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_INVALID_ARGUMENT))
                     .build();
@@ -80,8 +79,12 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
         String userId = request.getCondition().getUserId().getValue();
         NotificationType type = request.getCondition().getType().getValue();
 
-        Page<Notification> notifications =
-                this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
+        Page<Notification> notifications;
+        if (!request.getCondition().hasType()) {
+            notifications = this.notificationService.retrieveByUSerIdWithPagination(userId, pageRequest);
+        } else {
+            notifications = this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
+        }
 
         NotificationsResponse response = NotificationsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))

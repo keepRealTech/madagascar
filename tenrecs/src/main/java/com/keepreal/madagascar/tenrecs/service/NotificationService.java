@@ -8,7 +8,6 @@ import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.repository.NotificationRepository;
 import com.keepreal.madagascar.tenrecs.util.PaginationUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 /**
@@ -55,6 +54,17 @@ public class NotificationService {
      */
     public Page<Notification> retrieveByUserIdAndTypeWithPagination(String userId, NotificationType type, PageRequest pageRequest) {
         return this.notificationRepository.findAllByUserIdAndTypeAndIsDeletedIsFalse(userId, type, PaginationUtils.valueOf(pageRequest));
+    }
+
+    /**
+     * Retrieves notifications by user id.
+     *
+     * @param userId      User id.
+     * @param pageRequest {@link PageRequest}.
+     * @return {@link Notification}.
+     */
+    public Page<Notification> retrieveByUSerIdWithPagination(String userId, PageRequest pageRequest) {
+        return this.notificationRepository.findAllByUserIdAndIsDeletedIsFalse(userId, PaginationUtils.valueOf(pageRequest));
     }
 
     /**

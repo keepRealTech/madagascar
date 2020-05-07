@@ -36,5 +36,5 @@ message TokenRefreshPayload {
 }
 
 service LoginService {
-    rpc login(LoginRequest) returns (LoginResponse) {};
+    rpc Login(LoginRequest) returns (LoginResponse) {};
 }

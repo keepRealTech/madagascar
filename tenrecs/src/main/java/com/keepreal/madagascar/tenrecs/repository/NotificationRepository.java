@@ -17,6 +17,8 @@ public interface NotificationRepository extends MongoRepository<Notification, Lo
 
     Page<Notification> findAllByUserIdAndTypeAndIsDeletedIsFalse(String userId, NotificationType type, Pageable pageable);
 
+    Page<Notification> findAllByUserIdAndIsDeletedIsFalse(String userId, Pageable pageable);
+
     Optional<Notification> findByEventIdAndIsDeletedIsFalse(String eventId);
 
 }
