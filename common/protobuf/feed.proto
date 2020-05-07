@@ -14,8 +14,9 @@ message QueryFeedCondition {
 message NewFeedsRequest {
     string userId = 1;
     repeated string islandId = 2;
-    repeated string imageUris = 3;
-    google.protobuf.StringValue text = 4;
+    repeated string hostId = 3;
+    repeated string imageUris = 4;
+    google.protobuf.StringValue text = 5;
 }
 
 message NewFeedsResponse {
