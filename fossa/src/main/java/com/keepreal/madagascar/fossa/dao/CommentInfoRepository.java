@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
  **/
 
 @Repository
-public interface CommentInfoRepository extends JpaRepository<CommentInfo, Long> {
+public interface CommentInfoRepository extends JpaRepository<CommentInfo, String> {
 
-    Page<CommentInfo> getCommentInfosByFeedIdAndDeletedIsFalseAndOrderByCreatedTimeDesc(Long feedId, Pageable pageable);
+    Page<CommentInfo> getCommentInfosByFeedIdAndDeletedIsFalseOrderByCreatedTimeDesc(String feedId, Pageable pageable);
 }

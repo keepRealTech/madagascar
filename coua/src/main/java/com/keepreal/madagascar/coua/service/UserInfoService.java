@@ -46,15 +46,16 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
 
     @Override
     public void createUser(NewUserRequest request, StreamObserver<UserResponse> responseObserver) {
-        Long userId = idGenerator.nextId();
-        UserInfo userInfo = new UserInfo();
-        userInfo.setId(userId);
-        userInfo.setNickName(request.getName().getValue());
-        userInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
-        userInfo.setGender(request.getGender().getValueValue());
-        userInfo.setCity(request.getCity().getValue());
-        userInfo.setDescription(request.getDescription().getValue());
-        userInfo.setUnionId(request.getUnionId());
+        String userId = String.valueOf(idGenerator.nextId());
+        UserInfo userInfo = UserInfo.builder()
+                .id(userId)
+                .nickName(request.getName().getValue())
+                .portraitImageUri(request.getPortraitImageUri().getValue())
+                .gender(request.getGender().getValueValue())
+                .city(request.getCity().getValue())
+                .description(request.getDescription().getValue())
+                .unionId(request.getUnionId())
+                .build();
 
         String birthdayStr = request.getBirthday().getValue();
         if (!StringUtils.isEmpty(birthdayStr)) {
@@ -73,7 +74,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         UserInfo userInfo = null;
         UserResponse.Builder responseBuilder = UserResponse.newBuilder();
         if (queryUserCondition.hasId()) {
-            userInfo = userInfoRepository.findUserInfoByIdAndDeletedIsFalse(Long.valueOf(queryUserCondition.getId().getValue()));
+            userInfo = userInfoRepository.findUserInfoByIdAndDeletedIsFalse(queryUserCondition.getId().getValue());
         }
         if (queryUserCondition.hasUnionId()) {
             userInfo = userInfoRepository.findUserInfoByUnionIdAndDeletedIsFalse(queryUserCondition.getUnionId().getValue());
@@ -92,7 +93,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
 
     @Override
     public void updateUserById(UpdateUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
-        Long userId = Long.valueOf(request.getId());
+        String userId = request.getId();
         UserInfo userInfo = userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
         if (request.hasName()) {
             userInfo.setNickName(request.getName().getValue());
@@ -121,11 +122,11 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         saveAndResponse(userInfo, responseObserver);
     }
 
-    public UserInfo getUserInfoById(Long userId) {
+    public UserInfo getUserInfoById(String userId) {
         return userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
     }
 
-    public UserMessage getUserMessageById(Long userId) {
+    public UserMessage getUserMessageById(String userId) {
         UserInfo userInfo = userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
         if (userInfo == null) {
             return null;
@@ -133,7 +134,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         return getUserMessage(userInfo);
     }
 
-    public List<UserMessage> getUserMessageListByIdList(List<Long> userIdList) {
+    public List<UserMessage> getUserMessageListByIdList(List<String> userIdList) {
         List<UserInfo> userInfoList = userInfoRepository.findAllById(userIdList);
         return userInfoList.stream().map(this::getUserMessage).collect(Collectors.toList());
     }
@@ -153,7 +154,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         List<Integer> identities = userIdentityService.getAllIdentitiesByUserId(userInfo.getId());
         List<IdentityType> identityTypes = identities.stream().map(IdentityType::forNumber).collect(Collectors.toList());
         return UserMessage.newBuilder()
-                .setId(userInfo.getId().toString())
+                .setId(userInfo.getId())
                 .setName(userInfo.getNickName())
                 .setPortraitImageUri(userInfo.getPortraitImageUri())
                 .setGender(Gender.forNumber(userInfo.getGender()))

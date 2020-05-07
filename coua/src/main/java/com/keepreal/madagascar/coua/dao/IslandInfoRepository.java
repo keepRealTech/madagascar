@@ -17,12 +17,12 @@ import java.util.Map;
  **/
 
 @Repository
-public interface IslandInfoRepository extends JpaRepository<IslandInfo, Long> {
+public interface IslandInfoRepository extends JpaRepository<IslandInfo, String> {
 
-    IslandInfo findByIslandNameAndDeletedIsFalse(String islandName);
+    IslandInfo findTopByIslandNameAndDeletedIsFalse(String islandName);
 
     @Query(value = "SELECT id, last_feed_at AS lastFeedAt FROM island WHERE is_deleted = FALSE AND id IN ?1", nativeQuery = true)
-    List<Map<String, Long>> findIslandIdAndLastFeedAtByIslandIdList(List<Long> islandIdList);
+    List<Map<String, Long>> findIslandIdAndLastFeedAtByIslandIdList(List<String> islandIdList);
 
     /**
      * 根据islandIdList更新lastFeedAt字段
@@ -33,13 +33,15 @@ public interface IslandInfoRepository extends JpaRepository<IslandInfo, Long> {
     @Modifying
     @Transactional
     @Query(value = "UPDATE island SET last_feed_at = ?2 WHERE id IN ?1", nativeQuery = true)
-    void updateLastFeedAtByIslandIdList(List<Long> islandIdList, Long timestamp);
+    void updateLastFeedAtByIslandIdList(List<String> islandIdList, Long timestamp);
 
     @Query(value = "SELECT islander_number FROM island WHERE id = ?1 FOR UPDATE", nativeQuery = true)
-    Integer getIslanderNumberByIslandId(Long islandId);
+    Integer getIslanderNumberByIslandId(String islandId);
 
     @Modifying
     @Transactional
     @Query(value = "UPDATE island SET islander_number = islander_number + 1 WHERE id = ?1", nativeQuery = true)
-    void updateIslanderNumberById(Long islandId);
+    void updateIslanderNumberById(String islandId);
+
+    List<IslandInfo> findIslandInfosByIdInAndDeletedIsFalse(List<String> idList);
 }

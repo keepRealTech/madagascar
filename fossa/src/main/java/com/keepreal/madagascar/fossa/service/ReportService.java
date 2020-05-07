@@ -32,6 +32,7 @@ public class ReportService extends ReportServiceGrpc.ReportServiceImplBase {
 
     /**
      * 根据id举报一个feed
+     *
      * @param request
      * @param responseObserver
      */
@@ -40,18 +41,17 @@ public class ReportService extends ReportServiceGrpc.ReportServiceImplBase {
         String feedId = request.getFeedId();
         String reporterId = request.getReporterId();
         int typeValue = request.getTypeValue();
-        ReportInfo reportInfo = new ReportInfo();
-        reportInfo.setId(idGenerator.nextId());
-        reportInfo.setFeedId(Long.valueOf(feedId));
-        reportInfo.setReporterId(Long.valueOf(reporterId));
-        reportInfo.setType(typeValue);
-        reportInfo.setCreatedTime(System.currentTimeMillis());
-        reportInfo.setUpdatedTime(System.currentTimeMillis());
+        ReportInfo reportInfo = ReportInfo.builder()
+                .id(String.valueOf(idGenerator.nextId()))
+                .feedId(feedId)
+                .reporterId(reporterId)
+                .type(typeValue)
+                .build();
 
         ReportInfo save = reportRepository.save(reportInfo);
 
         ReportMessage reportMessage = ReportMessage.newBuilder()
-                .setId(save.getId().toString())
+                .setId(save.getId())
                 .setFeedId(feedId)
                 .setReporterId(reporterId)
                 .setTypeValue(typeValue)

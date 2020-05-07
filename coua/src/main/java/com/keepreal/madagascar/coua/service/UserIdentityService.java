@@ -27,24 +27,22 @@ public class UserIdentityService {
         this.idGenerator = idGenerator;
     }
 
-    void saveUserIdentities(List<Integer> userIdentitiesTypes, Long userId) {
-        List<UserIdentity> userIdentityList = userIdentitiesTypes.stream().map(type -> {
-            UserIdentity userIdentity = new UserIdentity();
-            userIdentity.setId(idGenerator.nextId());
-            userIdentity.setUserId(userId);
-            userIdentity.setIdentityType(type);
-            return userIdentity;
-        }).collect(Collectors.toList());
+    void saveUserIdentities(List<Integer> userIdentitiesTypes, String userId) {
+        List<UserIdentity> userIdentityList = userIdentitiesTypes.stream().map(type -> UserIdentity.builder()
+                .id(String.valueOf(idGenerator.nextId()))
+                .userId(userId)
+                .identityType(type)
+                .build()).collect(Collectors.toList());
 
         userIdentityRepository.saveAll(userIdentityList);
     }
 
-    void updateUserIdentities(List<Integer> userIdentitiesTypes, Long userId) {
+    void updateUserIdentities(List<Integer> userIdentitiesTypes, String userId) {
         userIdentityRepository.deleteUserIdentitiesByUserId(userId);
         saveUserIdentities(userIdentitiesTypes, userId);
     }
 
-    public List<Integer> getAllIdentitiesByUserId(Long userId) {
+    public List<Integer> getAllIdentitiesByUserId(String userId) {
         return userIdentityRepository.getUserIdentityTypesByUserId(userId);
     }
 }

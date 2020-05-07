@@ -11,9 +11,9 @@ import org.springframework.stereotype.Repository;
  **/
 
 @Repository
-public interface UserInfoRepository extends JpaRepository<UserInfo, Long> {
+public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
 
-    UserInfo findUserInfoByIdAndDeletedIsFalse(Long id);
+    UserInfo findUserInfoByIdAndDeletedIsFalse(String id);
 
     UserInfo findUserInfoByUnionIdAndDeletedIsFalse(String unionId);
 }

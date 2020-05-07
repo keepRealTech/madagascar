@@ -16,6 +16,6 @@ import java.util.List;
  **/
 
 @Repository
-public interface ReactionRepository extends MongoRepository<ReactionInfo, Long> {
-    Page<ReactionInfo> findReactionInfosByFeedId(Long feedId, Pageable pageable);
+public interface ReactionRepository extends MongoRepository<ReactionInfo, String> {
+    Page<ReactionInfo> findReactionInfosByFeedId(String feedId, Pageable pageable);
 }

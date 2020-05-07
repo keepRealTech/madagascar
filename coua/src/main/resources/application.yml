@@ -2,10 +2,14 @@ spring:
   datasource:
     password: 123456
     username: root
-    url: jdbc:mysql://localhost:3306
+    url: jdbc:mysql://localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 rocketmq:
   accessKey: "xxx"
   secretKey: "xxx"
-  nameSrvAddr: "xxx"
+  topic: notification-event
+  tag: event
+  nameSrvAddr: 192.168.0.8:9876
+grpc:
+  port: 12002

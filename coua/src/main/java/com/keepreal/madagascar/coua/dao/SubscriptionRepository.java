@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigInteger;
+
 /**
  * @program: madagascar
  * @author: zhangxidong
@@ -14,23 +16,23 @@ import org.springframework.stereotype.Repository;
  **/
 
 @Repository
-public interface SubscriptionRepository extends JpaRepository<Subscription, Long> {
+public interface SubscriptionRepository extends JpaRepository<Subscription, String> {
 
     @Query(value = "SELECT user_id FROM subscription WHERE island_id = ?1 AND state = ?2 AND is_deleted = FALSE", nativeQuery = true)
-    Long getIslandOwnerId(Long islandId, Integer state);
+    Long getIslandOwnerId(String islandId, Integer state);
 
     @Query(value = "SELECT island_id FROM subscription WHERE user_id = ?1 AND state = ?2 AND is_deleted = FALSE", nativeQuery = true)
-    Page<Long> getIslandIdListByUserState(Long userId, Integer state, Pageable pageable);
+    Page<String> getIslandIdListByUserState(String userId, Integer state, Pageable pageable);
 
     @Query(value = "SELECT user_id FROM subscription WHERE island_id = ?1 AND is_deleted = FALSE", nativeQuery = true)
-    Page<Long> getSubscriberIdListByIslandId(Long islandId, Pageable pageable);
+    Page<String> getSubscriberIdListByIslandId(String islandId, Pageable pageable);
 
     @Query(value = "SELECT COUNT(*) FROM subscription WHERE island_id = ?1 AND state > 0 AND is_deleted = FALSE", nativeQuery = true)
-    Integer getCountByIslandId(Long islandId);
+    Integer getCountByIslandId(String islandId);
 
-    @Query(value = "SELECT number FROM subscription WHERE island_id = ?1 AND user_id = ?2 AND is_deleted = FALSE", nativeQuery = true)
-    Integer getIslanderNumberByIslandId(Long islandId, Long userId);
+    @Query(value = "SELECT islander_number FROM subscription WHERE island_id = ?1 AND user_id = ?2 AND is_deleted = FALSE", nativeQuery = true)
+    Integer getIslanderNumberByIslandId(String islandId, String userId);
 
-    Subscription getSubscriptionByIslandIdAndUserIdAndDeletedIsFalse(Long islandId, Long userId);
+    Subscription findTopByIslandIdAndUserIdAndDeletedIsFalse(String islandId, String userId);
 
 }

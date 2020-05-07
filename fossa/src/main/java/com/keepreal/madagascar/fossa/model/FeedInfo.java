@@ -9,8 +9,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import java.util.List;
 
 /**
@@ -25,9 +23,9 @@ import java.util.List;
 public class FeedInfo {
 
     @Id
-    private Long id;
-    private Long islandId;
-    private Long userId;
+    private String id;
+    private String islandId;
+    private String userId;
     private String text;
     private List<String> imageUrls;
     private Integer likesCount;
