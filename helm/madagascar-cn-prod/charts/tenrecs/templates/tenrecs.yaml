@@ -1,13 +1,13 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: lemur
+  name: tenrecs
   namespace: {{ .Values.commonConfigs.namespace }}
 spec:
   replicas: {{ .Values.commonConfigs.replicas }}
   selector:
     matchLabels:
-      app: lemur
+      app: tenrecs
   template:
     metadata:
       annotations:
@@ -17,7 +17,7 @@ spec:
         config.linkerd.io/proxy-image-version: stable-2.7.1
         linkerd.io/inject: enabled
       labels:
-        app: lemur
+        app: tenrecs
     spec:
       initContainers:
         - name: sysctl
@@ -36,12 +36,28 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
-        - name: lemur
-          image: {{ .Values.images.lemur.name }}:{{ .Values.images.lemur.tag }}
-          imagePullPolicy: {{ .Values.images.lemur.imagePullPolicy }}
+        - name: tenrecs
+          image: {{ .Values.images.tenrecs.name }}:{{ .Values.images.tenrecs.tag }}
+          imagePullPolicy: {{ .Values.images.tenrecs.imagePullPolicy }}
           envFrom:
             - configMapRef:
-                name: lemur
+                name: tenrecs
+          env:
+            - name: ROCKETMQ_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-key
+            - name: ROCKETMQ_ACCESSSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-secret
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-mongo
+                  key: connection-string
           resources:
             limits:
               memory: 1024Mi
@@ -49,17 +65,17 @@ spec:
               cpu: 200m
               memory: 256Mi
           ports:
-            - containerPort: 8081
-              name: lemur-http
+            - containerPort: 12004
+              name: tenrecs-grpc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: lemur
+  name: tenrecs
 spec:
   type: ClusterIP
   ports:
-    - port: 80
-      targetPort: lemur-http
+    - port: 6565
+      targetPort: tenrecs-grpc
   selector:
-    app: lemur
+    app: tenrecs
