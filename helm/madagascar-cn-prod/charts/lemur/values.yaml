@@ -1,0 +1,37 @@
+# Default values for test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+commonConfigs:
+  namespace: keepreal-prod
+  replicas: 1
+
+images:
+  indri:
+    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
+    tag: 1.0.0
+    imagePullPolicy: Always
+
+coua:
+  host: coua
+  port: 6565
+
+baobob:
+  host: baobob
+  port: 6565
+
+indri:
+  host: indri
+  port: 6565
+
+fossa:
+  host: fossa
+  port: 6565
+
+tenrecs:
+  host: tenrecs
+  port: 6565
+
+file:
+  max_file_size: 10MB
+  max_request_size: 20MB
