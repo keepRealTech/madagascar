@@ -1,0 +1,24 @@
+# Default values for test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+commonConfigs:
+  namespace: keepreal-prod
+  replicas: 3
+
+images:
+  baobob:
+    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
+    tag: 1.0.0
+    imagePullPolicy: Always
+
+wechat:
+  host: https://api.weixin.qq.com
+
+jwt:
+  access_token_validity: 86400
+  refresh_token_validity: 604800
+
+coua:
+  host: coua
+  port: 6565
