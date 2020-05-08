@@ -8,6 +8,10 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  data:
+    mongodb:
+      database:
+      uri:
 
 rocketmq:
   accessKey: "xxx"
@@ -21,3 +25,6 @@ grpc:
     host: 127.0.0.1
     port: 12002
   port: 12003
+
+snowflake:
+  nodeId: 0

@@ -7,16 +7,12 @@ commonConfigs:
   replicas: 1
 
 images:
-  tenrecs:
-    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/tenrecs
+  coua:
+    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
     tag: 1.0.0
     imagePullPolicy: Always
-
-mongodb:
-  database: tenrecs
 
 rocketmq:
   name_server_address: http://MQ_INST_1398284016177859_BcaZSx5M.cn-beijing.mq-internal.aliyuncs.com:8080
   topic: notification-event
-  group_id: GID-tenrecs-default
   tag: event
