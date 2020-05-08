@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: indri
+  namespace: {{ .Values.commonConfigs.namespace }}
+spec:
+  replicas: {{ .Values.commonConfigs.replicas }}
+  selector:
+    matchLabels:
+      app: indri
+  template:
+    metadata:
+      annotations:
+        config.linkerd.io/init-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy-init
+        config.linkerd.io/init-image-version: v1.3.2
+        config.linkerd.io/proxy-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy
+        config.linkerd.io/proxy-image-version: stable-2.7.1
+        linkerd.io/inject: enabled
+      labels:
+        app: indri
+    spec:
+      initContainers:
+        - name: sysctl
+          command:
+            - sh
+            - -c
+            - sysctl -w net.ipv4.tcp_keepalive_time=600; sysctl -w net.ipv4.tcp_keepalive_intvl=30; sysctl -w net.ipv4.tcp_keepalive_probes=10
+          image: alpine:3.6
+          imagePullPolicy: IfNotPresent
+          resources: {}
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+      imagePullSecrets:
+        - name: {{ .Values.global.acr.acr_secret_name }}
+      containers:
+        - name: indri
+          image: {{ .Values.images.indri.name }}:{{ .Values.images.indri.tag }}
+          imagePullPolicy: {{ .Values.images.indri.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: indri
+          env:
+            - name: ALIYUNOSS_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-oss
+                  key: access-key
+            - name: ALIYUNOSS_ACCESSSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-oss
+                  key: access-secret
+          resources:
+            limits:
+              memory: 1024Mi
+            requests:
+              cpu: 200m
+              memory: 256Mi
+          ports:
+            - containerPort: 12000
+              name: indri-grpc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: indri
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6565
+      targetPort: indri-grpc
+  selector:
+    app: indri

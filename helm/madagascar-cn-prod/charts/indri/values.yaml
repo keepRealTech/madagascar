@@ -7,18 +7,11 @@ commonConfigs:
   replicas: 1
 
 images:
-  baobob:
-    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
+  indri:
+    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
     tag: 1.0.0
     imagePullPolicy: Always
 
-wechat:
-  host: https://api.weixin.qq.com
-
-jwt:
-  access_token_validity: 86400
-  refresh_token_validity: 604800
-
-coua:
-  host: coua
-  port: 6565
+aliyun_oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  bucketName: kr-thumbnail-prod-cn2-01
