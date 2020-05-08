@@ -8,6 +8,7 @@ spec:
   selector:
     matchLabels:
       app: tenrecs
+  serviceName: tenrecs
   template:
     metadata:
       annotations:
@@ -58,6 +59,8 @@ spec:
                 secretKeyRef:
                   name: aliyun-mongo
                   key: connection-string
+            - name: SNOWFLAKE_NODEID
+              value: "1"
           resources:
             limits:
               memory: 1024Mi
