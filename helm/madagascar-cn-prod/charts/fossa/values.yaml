@@ -22,3 +22,7 @@ jpa:
 
 mongodb:
   database: fossa
+
+coua:
+  host: coua
+  port: 6565
