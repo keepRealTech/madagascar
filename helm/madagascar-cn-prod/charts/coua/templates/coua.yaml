@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: coua
+  namespace: {{ .Values.commonConfigs.namespace }}
+spec:
+  replicas: {{ .Values.commonConfigs.replicas }}
+  selector:
+    matchLabels:
+      app: coua
+  serviceName: coua
+  template:
+    metadata:
+      annotations:
+        config.linkerd.io/init-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy-init
+        config.linkerd.io/init-image-version: v1.3.2
+        config.linkerd.io/proxy-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy
+        config.linkerd.io/proxy-image-version: stable-2.7.1
+        linkerd.io/inject: enabled
+      labels:
+        app: coua
+    spec:
+      initContainers:
+        - name: sysctl
+          command:
+            - sh
+            - -c
+            - sysctl -w net.ipv4.tcp_keepalive_time=600; sysctl -w net.ipv4.tcp_keepalive_intvl=30; sysctl -w net.ipv4.tcp_keepalive_probes=10
+          image: alpine:3.6
+          imagePullPolicy: IfNotPresent
+          resources: {}
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+      imagePullSecrets:
+        - name: {{ .Values.global.acr.acr_secret_name }}
+      containers:
+        - name: coua
+          image: {{ .Values.images.coua.name }}:{{ .Values.images.coua.tag }}
+          imagePullPolicy: {{ .Values.images.coua.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: coua
+          env:
+            - name: ROCKETMQ_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-key
+            - name: ROCKETMQ_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-secret
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rdb
+                  key: coua-connection-string
+          resources:
+            limits:
+              memory: 1024Mi
+            requests:
+              cpu: 200m
+              memory: 256Mi
+          ports:
+            - containerPort: 12002
+              name: coua-grpc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coua
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6565
+      targetPort: coua-grpc
+  selector:
+    app: coua

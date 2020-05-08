@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: baobob
+  namespace: {{ .Values.commonConfigs.namespace }}
+data:
+  WECHAT_OAUTH_HOST: {{ .Values.wechat.host }}
+  GRPC_COUA_HOST: {{ .Values.coua.host }}
+  GRPC_COUA_PORT: '{{ .Values.coua.port }}'
+  JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS: '{{ .Values.jwt.access_token_validity }}'
+  JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS: '{{ .Values.jwt.refresh_token_validity }}'

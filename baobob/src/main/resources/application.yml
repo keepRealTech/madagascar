@@ -5,12 +5,13 @@ wechat:
     app-secret:
 
 grpc:
+  port: 12001
   coua:
-    host: 127.0.0.1
-    port: 6000
+    host: 192.168.0.7
+    port: 12002
 
 jwt:
   token-secret: thisisatopsecret
-  access-token-validity-in-seconds: 600
+  access-token-validity-in-seconds: 86400
   refresh-token-validity-in-seconds: 6000
   client-secret: secret

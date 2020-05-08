@@ -1,0 +1,18 @@
+# Default values for test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+commonConfigs:
+  namespace: keepreal-prod
+  replicas: 1
+
+images:
+  coua:
+    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
+    tag: 1.0.0
+    imagePullPolicy: Always
+
+rocketmq:
+  name_server_address: http://MQ_INST_1398284016177859_BcaZSx5M.cn-beijing.mq-internal.aliyuncs.com:8080
+  topic: notification-event
+  tag: event

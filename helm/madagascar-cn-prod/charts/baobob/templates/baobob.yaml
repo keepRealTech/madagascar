@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baobob
+  namespace: {{ .Values.commonConfigs.namespace }}
+spec:
+  replicas: {{ .Values.commonConfigs.replicas }}
+  selector:
+    matchLabels:
+      app: baobob
+  template:
+    metadata:
+      annotations:
+        config.linkerd.io/init-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy-init
+        config.linkerd.io/init-image-version: v1.3.2
+        config.linkerd.io/proxy-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy
+        config.linkerd.io/proxy-image-version: stable-2.7.1
+        linkerd.io/inject: enabled
+      labels:
+        app: baobob
+    spec:
+      initContainers:
+        - name: sysctl
+          command:
+            - sh
+            - -c
+            - sysctl -w net.ipv4.tcp_keepalive_time=600; sysctl -w net.ipv4.tcp_keepalive_intvl=30; sysctl -w net.ipv4.tcp_keepalive_probes=10
+          image: alpine:3.6
+          imagePullPolicy: IfNotPresent
+          resources: {}
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+      imagePullSecrets:
+        - name: {{ .Values.global.acr.acr_secret_name }}
+      containers:
+        - name: baobob
+          image: {{ .Values.images.baobob.name }}:{{ .Values.images.baobob.tag }}
+          imagePullPolicy: {{ .Values.images.baobob.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: baobob
+          env:
+            - name: WECHAT_OAUTH_APPID
+              valueFrom:
+                secretKeyRef:
+                  name: wechat-app
+                  key: app-id
+            - name: WECHAT_OAUTH_APPSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: wechat-app
+                  key: app-secret
+          resources:
+            limits:
+              memory: 1024Mi
+            requests:
+              cpu: 200m
+              memory: 256Mi
+          ports:
+            - containerPort: 12001
+              name: baobob-grpc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: baobob
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6565
+      targetPort: baobob-grpc
+  selector:
+    app: baobob

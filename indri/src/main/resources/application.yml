@@ -1,5 +1,8 @@
 aliyun-oss:
-  endpoint:
+  endpoint: oss-cn-beijing.aliyuncs.com
   accessKey:
   accessSecret:
-  bucketName:
+  bucketName: kr-thumbnail-staging-cn2-01
+
+grpc:
+  port: 12000

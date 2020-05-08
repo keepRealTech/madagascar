@@ -1,17 +1,19 @@
 spring:
   datasource:
-    username: root
-    password: 123456
-    url: jdbc:mysql://localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://root:123456@localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+  data:
+    mongodb:
+      database: fossa
+      uri:
 
 rocketmq:
-  accessKey: "xxx"
-  secretKey: "xxx"
+  accessKey:
+  secretKey:
   topic: notification-event
   tag: event
   nameSrvAddr: 192.168.0.8:9876
@@ -21,3 +23,6 @@ grpc:
     host: 127.0.0.1
     port: 12002
   port: 12003
+
+snowflake:
+  nodeId: 0
