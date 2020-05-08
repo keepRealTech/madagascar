@@ -1,5 +1,5 @@
 # this is a hack way to set the snowflake node id base on the stateful set ordinal
-pod_index=${POD_NAME##*-}
+pod_index=${HOSTNAME##*-}
 export SNOWFLAKE_NODEID=$pod_index
 
 export
