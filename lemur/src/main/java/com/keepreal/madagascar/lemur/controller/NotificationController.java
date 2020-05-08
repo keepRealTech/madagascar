@@ -2,11 +2,14 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.lemur.config.SystemNotificationConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.NotificationDTOFactory;
 import com.keepreal.madagascar.lemur.service.NotificationService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
+import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.UnreadNotificationsCountMessage;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,8 +32,8 @@ public class NotificationController implements NotificationApi {
     /**
      * Constructs the notification controller.
      *
-     * @param notificationService    {@link NotificationService}.
-     * @param notificationDTOFactory {@link NotificationDTOFactory}.
+     * @param notificationService             {@link NotificationService}.
+     * @param notificationDTOFactory          {@link NotificationDTOFactory}.
      */
     public NotificationController(NotificationService notificationService,
                                   NotificationDTOFactory notificationDTOFactory) {
@@ -64,14 +67,22 @@ public class NotificationController implements NotificationApi {
      * @param pageSize Page size.
      * @return {@link NotificationsResponse}.
      */
+    @Cacheable(value = "default-system-notice-response", condition = "T(swagger.model.NotificationType).SYSTEM_NOTICE.equals(#type)")
     @Override
     public ResponseEntity<NotificationsResponse> apiV1NotificationsGet(swagger.model.NotificationType type,
                                                                        Integer page,
                                                                        Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        com.keepreal.madagascar.tenrecs.NotificationsResponse notificationsResponse =
-                this.notificationService.retrieveNotifications(userId, this.convertType(type), page, pageSize);
+        com.keepreal.madagascar.tenrecs.NotificationsResponse notificationsResponse;
+        if (swagger.model.NotificationType.SYSTEM_NOTICE.equals(type)) {
+            notificationsResponse = com.keepreal.madagascar.tenrecs.NotificationsResponse.newBuilder()
+                    .addNotifications(this.defaultSystemNotificationMessage())
+                    .build();
+        } else {
+            notificationsResponse =
+                    this.notificationService.retrieveNotifications(userId, this.convertType(type), page, pageSize);
+        }
 
         NotificationsResponse response = new NotificationsResponse();
         response.setData(notificationsResponse.getNotificationsList()
@@ -108,6 +119,17 @@ public class NotificationController implements NotificationApi {
             default:
                 return NotificationType.UNRECOGNIZED;
         }
+    }
+
+    /**
+     * Constructs a default notification message entity.
+     *
+     * @return {@link NotificationMessage}.
+     */
+    private NotificationMessage defaultSystemNotificationMessage() {
+        return NotificationMessage.newBuilder()
+                .setType(NotificationType.NOTIFICATION_SYSTEM_NOTICE)
+                .build();
     }
 
 }

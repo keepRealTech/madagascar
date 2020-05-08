@@ -35,3 +35,8 @@ tenrecs:
 file:
   max_file_size: 10MB
   max_request_size: 20MB
+
+system_notification:
+  name: default-helper
+  content: hello, handsome.
+  portrait_image_uri: keepreal-helper.jpg

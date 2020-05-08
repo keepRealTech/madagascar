@@ -15,6 +15,11 @@ grpc:
     host: 127.0.0.1
     port: 12004
 
+system-notification:
+  name: test-user
+  portrait-image-uri: 123.jpg
+  content: hello, there.
+
 spring:
   servlet:
     multipart:
