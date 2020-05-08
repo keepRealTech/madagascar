@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: coua
+  name: fossa
   namespace: {{ .Values.commonConfigs.namespace }}
 spec:
   replicas: {{ .Values.commonConfigs.replicas }}
   selector:
     matchLabels:
-      app: coua
-  serviceName: coua
+      app: fossa
+  serviceName: fossa
   template:
     metadata:
       annotations:
@@ -18,7 +18,7 @@ spec:
         config.linkerd.io/proxy-image-version: stable-2.7.1
         linkerd.io/inject: enabled
       labels:
-        app: coua
+        app: fossa
     spec:
       initContainers:
         - name: sysctl
@@ -37,12 +37,12 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
-        - name: coua
-          image: {{ .Values.images.coua.name }}:{{ .Values.images.coua.tag }}
-          imagePullPolicy: {{ .Values.images.coua.imagePullPolicy }}
+        - name: fossa
+          image: {{ .Values.images.fossa.name }}:{{ .Values.images.fossa.tag }}
+          imagePullPolicy: {{ .Values.images.fossa.imagePullPolicy }}
           envFrom:
             - configMapRef:
-                name: coua
+                name: fossa
           env:
             - name: ROCKETMQ_ACCESSKEY
               valueFrom:
@@ -54,11 +54,16 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
-            - name: SPRING_DATASOURCE_URL
+            - name: SPRING_DATA_MONGODB_URI
               valueFrom:
                 secretKeyRef:
-                  name: aliyun-rdb
-                  key: coua-connection-string
+                  name: aliyun-mongo
+                  key: connection-string
+            - name: SPRING_DATASOURCE_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: aliyun-rdb
+                    key: fossa-connection-string
           resources:
             limits:
               memory: 1024Mi
@@ -66,17 +71,17 @@ spec:
               cpu: 200m
               memory: 256Mi
           ports:
-            - containerPort: 12002
-              name: coua-grpc
+            - containerPort: 12003
+              name: fossa-grpc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: coua
+  name: fossa
 spec:
   type: ClusterIP
   ports:
     - port: 6565
-      targetPort: coua-grpc
+      targetPort: fossa-grpc
   selector:
-    app: coua
+    app: fossa

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coua
+  namespace: {{ .Values.commonConfigs.namespace }}
+data:
+  SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
+  SPRING_JPA_SHOWSQL: {{ .Values.jpa.show_sql }}
+  ROCKETMQ_NAMESRVADDR: {{ .Values.rocketmq.name_server_address }}
+  ROCKETMQ_TOPIC: {{ .Values.rocketmq.topic }}
+  ROCKETMQ_TAG: {{ .Values.rocketmq.tag }}
