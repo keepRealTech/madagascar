@@ -15,7 +15,12 @@ allprojects {
     }
 }
 
+ext['baobob.version'] = '1.0.0'
 ext['indri.version'] = '1.0.0'
+ext['coua.version'] = '1.0.0'
+ext['fossa.version'] = '1.0.0'
+ext['lemur.version'] = '1.0.0'
+ext['tenrecs.version'] = '1.0.0'
 
 subprojects {
     apply plugin: 'io.spring.dependency-management'
@@ -65,8 +70,8 @@ subprojects {
         }
 
         docker {
-            name "ytcontainers.azurecr.cn/retail-saas/${project.name.replace('_','-')}:$project.version"
-            dockerfile file("$projectDir/Dockerfile")
+            name "registry.cn-beijing.aliyuncs.com/keepreal/${project.name.replace('_','-')}:$project.version"
+            dockerfile file("$projectDir/dockerfile")
             files "$projectDir/start.sh", "$projectDir/healthcheck.sh"
             copySpec.from(tasks.unpack.outputs).into("dependency")
             buildArgs(['DEPENDENCY': "dependency"])
