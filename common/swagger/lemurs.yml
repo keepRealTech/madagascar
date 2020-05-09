@@ -1163,9 +1163,26 @@ components:
         - $ref: '#/components/schemas/CommentNotificationDTO'
         - $ref: '#/components/schemas/ReactionNotificationDTO'
         - $ref: '#/components/schemas/NoticeNotificationDTO'
+        - $ref: '#/components/schemas/SystemNotificationDTO'
     NoticeDTO:
       oneOf:
         - $ref: '#/components/schemas/SubscribeNoticeDTO'
+    SystemNotificationDTO:
+      type: object
+      properties:
+        notificationType:
+          $ref: '#/components/schemas/NotificationType'
+        systemNotice:
+          $ref: '#/components/schemas/SystemNoticeDTO'
+    SystemNoticeDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        portraitImageUri:
+          type: string
+        content:
+          type: string
     SubscribeNoticeDTO:
       type: object
       properties:

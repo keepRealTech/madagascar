@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 
+import com.keepreal.madagascar.lemur.config.SystemNotificationConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.CommentNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.NoticeNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.ReactionNotificationDTOBuilder;
@@ -10,6 +11,9 @@ import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.UnreadNotificationsCountMessage;
 import org.springframework.stereotype.Component;
 import swagger.model.NotificationDTO;
+import swagger.model.NotificationType;
+import swagger.model.SystemNoticeDTO;
+import swagger.model.SystemNotificationDTO;
 import swagger.model.UnreadNotificationCountDTO;
 
 import java.util.Objects;
@@ -27,17 +31,19 @@ public class NotificationDTOFactory {
     private final UserDTOFactory userDTOFactory;
     private final IslandService islandService;
     private final IslandDTOFactory islandDTOFactory;
+    private final SystemNotificationConfiguration systemNotificationConfiguration;
 
     /**
      * Constructs the notification dto factory.
      *
-     * @param feedDTOFactory     {@link FeedDTOFactory}.
-     * @param reactionDTOFactory {@link ReactionDTOFactory}.
-     * @param commentDTOFactory  {@link CommentDTOFactory}.
-     * @param userService        {@link UserService}.
-     * @param userDTOFactory     {@link UserDTOFactory}.
-     * @param islandService      {@link IslandService}.
-     * @param islandDTOFactory   {@link IslandDTOFactory}.
+     * @param feedDTOFactory                  {@link FeedDTOFactory}.
+     * @param reactionDTOFactory              {@link ReactionDTOFactory}.
+     * @param commentDTOFactory               {@link CommentDTOFactory}.
+     * @param userService                     {@link UserService}.
+     * @param userDTOFactory                  {@link UserDTOFactory}.
+     * @param islandService                   {@link IslandService}.
+     * @param islandDTOFactory                {@link IslandDTOFactory}.
+     * @param systemNotificationConfiguration {@link SystemNotificationConfiguration}.
      */
     public NotificationDTOFactory(FeedDTOFactory feedDTOFactory,
                                   ReactionDTOFactory reactionDTOFactory,
@@ -45,7 +51,8 @@ public class NotificationDTOFactory {
                                   UserService userService,
                                   UserDTOFactory userDTOFactory,
                                   IslandService islandService,
-                                  IslandDTOFactory islandDTOFactory) {
+                                  IslandDTOFactory islandDTOFactory,
+                                  SystemNotificationConfiguration systemNotificationConfiguration) {
         this.feedDTOFactory = feedDTOFactory;
         this.reactionDTOFactory = reactionDTOFactory;
         this.commentDTOFactory = commentDTOFactory;
@@ -53,6 +60,7 @@ public class NotificationDTOFactory {
         this.userDTOFactory = userDTOFactory;
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
+        this.systemNotificationConfiguration = systemNotificationConfiguration;
     }
 
     /**
@@ -109,6 +117,17 @@ public class NotificationDTOFactory {
                         .setFeedDTOFactory(this.feedDTOFactory)
                         .setReactionDTOFactory(this.reactionDTOFactory)
                         .build();
+            case NOTIFICATION_SYSTEM_NOTICE:
+                SystemNoticeDTO systemNotice = new SystemNoticeDTO();
+                systemNotice.setName(this.systemNotificationConfiguration.getName());
+                systemNotice.setContent(this.systemNotificationConfiguration.getContent());
+                systemNotice.setPortraitImageUri(this.systemNotificationConfiguration.getPortraitImageUri());
+
+                NotificationDTO systemNotificationDTO = new NotificationDTO();
+                systemNotificationDTO.setNotificationType(NotificationType.SYSTEM_NOTICE);
+                systemNotificationDTO.setSystemNotice(systemNotice);
+
+                return systemNotificationDTO;
             default:
                 return null;
         }
