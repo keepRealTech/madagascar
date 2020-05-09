@@ -1,13 +1,19 @@
 spring:
   data:
     mongodb:
-      database: aks-poc-retailsaas
-      uri:
+      database: tenrecs
+      uri: mongodb://root:password@127.0.0.1:27017
 
 rocketmq:
   accessKey:
   secretKey:
-  nameSrvAddr:
-  topic:
-  groupId:
-  tag:
+  nameSrvAddr: localhost:9876
+  topic: notification-event
+  groupId: GID-tenrecs-default
+  tag: event
+
+grpc:
+  port: 12004
+
+snowflake:
+  nodeId: 0

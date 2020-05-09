@@ -3,6 +3,12 @@ plugins {
     id 'org.springframework.boot'
 }
 
+version = 1.0
+
+jar {
+    enabled = true
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     compileOnly 'org.projectlombok:lombok'

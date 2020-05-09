@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lemur
+  namespace: {{ .Values.commonConfigs.namespace }}
+data:
+  GRPC_COUA_HOST: {{ .Values.coua.host }}
+  GRPC_COUA_PORT: '{{ .Values.coua.port }}'
+  GRPC_BAOBOB_HOST: {{ .Values.baobob.host }}
+  GRPC_BAOBOB_PORT: '{{ .Values.baobob.port }}'
+  GRPC_INDRI_HOST: {{ .Values.indri.host }}
+  GRPC_INDRI_PORT: '{{ .Values.indri.port }}'
+  GRPC_FOSSA_HOST: {{ .Values.fossa.host }}
+  GRPC_FOSSA_PORT: '{{ .Values.fossa.port }}'
+  GRPC_TENRECS_HOST: {{ .Values.tenrecs.host }}
+  GRPC_TENRECS_PORT: '{{ .Values.tenrecs.port }}'
+  SPRING_SERVLET_MULTIPART_MAXFILESIZE: {{ .Values.file.max_file_size }}
+  SPRING_SERVLET_MULTIPART_MAXREQUESTSIZE: {{ .Values.file.max_request_size }}
