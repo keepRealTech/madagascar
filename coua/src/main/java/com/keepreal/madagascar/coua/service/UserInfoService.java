@@ -12,10 +12,10 @@ import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
+import com.keepreal.madagascar.coua.common.UIdGenerator;
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
-import com.keepreal.madagascar.coua.util.UIdGeneratorUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +37,14 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
     private final UserInfoRepository userInfoRepository;
     private final UserIdentityService userIdentityService;
     private final LongIdGenerator idGenerator;
+    private final UIdGenerator uIdGenerator;
 
     @Autowired
-    public UserInfoService(UserInfoRepository userInfoRepository, UserIdentityService userIdentityService, LongIdGenerator idGenerator) {
+    public UserInfoService(UserInfoRepository userInfoRepository, UserIdentityService userIdentityService, LongIdGenerator idGenerator, UIdGenerator uIdGenerator) {
         this.userInfoRepository = userInfoRepository;
         this.userIdentityService = userIdentityService;
         this.idGenerator = idGenerator;
+        this.uIdGenerator = uIdGenerator;
     }
 
     @Override
@@ -51,7 +53,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
 
         UserInfo userInfo = UserInfo.builder()
                 .id(userId)
-                .uId(UIdGeneratorUtils.nextUId())
+                .uId(uIdGenerator.nextUId())
                 .nickName(request.getName().getValue())
                 .portraitImageUri(request.getPortraitImageUri().getValue())
                 .gender(request.getGender().getValueValue())
@@ -104,6 +106,12 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
     public void updateUserById(UpdateUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
         String userId = request.getId();
         UserInfo userInfo = userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
+        if (userInfo == null) {
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
+            responseObserver.onNext(UserResponse.newBuilder().setStatus(commonStatus).build());
+            responseObserver.onCompleted();
+            return;
+        }
         if (request.hasName()) {
             userInfo.setNickName(request.getName().getValue());
         }

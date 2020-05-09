@@ -6,6 +6,7 @@ import com.aliyun.openservices.ons.api.SendCallback;
 import com.aliyun.openservices.ons.api.SendResult;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import com.keepreal.madagascar.tenrecs.SubscribeEvent;
@@ -19,7 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
 import java.util.UUID;
 
 /**
@@ -38,13 +38,15 @@ public class SubscriptionService {
     private final LongIdGenerator idGenerator;
     private final ProducerBean producerBean;
     private final MqConfig mqConfig;
+    private final IslandInfoRepository islandInfoRepository;
 
     @Autowired
-    public SubscriptionService(SubscriptionRepository subscriptionRepository, LongIdGenerator idGenerator, ProducerBean producerBean, MqConfig mqConfig) {
+    public SubscriptionService(SubscriptionRepository subscriptionRepository, LongIdGenerator idGenerator, ProducerBean producerBean, MqConfig mqConfig, IslandInfoRepository islandInfoRepository) {
         this.subscriptionRepository = subscriptionRepository;
         this.idGenerator = idGenerator;
         this.producerBean = producerBean;
         this.mqConfig = mqConfig;
+        this.islandInfoRepository = islandInfoRepository;
     }
 
     public void initHost(String islandId, String hostId) {
@@ -58,7 +60,7 @@ public class SubscriptionService {
         subscriptionRepository.save(subscription);
     }
 
-    public boolean isSubScribedIslandByIslandIdAndUserId(String islandId, String userId) {
+    public boolean isSubScribedIsland(String islandId, String userId) {
         Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
         return subscription != null;
     }
@@ -101,8 +103,9 @@ public class SubscriptionService {
                     .islandId(islandId)
                     .userId(userId)
                     .state(SubscriptionState.ISLANDER.getValue())
-                    .islanderNumber(islanderNumber)
+                    .islanderNumber(islanderNumber + 1)
                     .build();
+            islandInfoRepository.updateIslanderNumberById(islandId);
         }
         subscriptionRepository.save(subscription);
 
@@ -121,16 +124,16 @@ public class SubscriptionService {
                 .build();
         Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
         message.setKey(uuid);
-        producerBean.sendAsync(message, new SendCallback() {
-            @Override
-            public void onSuccess(SendResult sendResult) {
-            }
-
-            @Override
-            public void onException(OnExceptionContext context) {
-                log.error("this message send failure, message Id is {}", context.getMessageId());
-            }
-        });
+//        producerBean.sendAsync(message, new SendCallback() {
+//            @Override
+//            public void onSuccess(SendResult sendResult) {
+//            }
+//
+//            @Override
+//            public void onException(OnExceptionContext context) {
+//                log.error("this message send failure, message Id is {}", context.getMessageId());
+//            }
+//        });
     }
 
     public void unSubscribeIsland(String islandId, String userId) {
