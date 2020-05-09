@@ -2,6 +2,14 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+commonConfigs:
+  namespace: keepreal-prod
+
 global:
   acr:
     acr_secret_name: keepreal-acr-secret
+
+deploy:
+  enable_http: true
+  ssl:
+    cert_id: 1398284016177859_171f8558958_1798620612_-1406035680
