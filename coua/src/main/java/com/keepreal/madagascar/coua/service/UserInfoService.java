@@ -12,6 +12,7 @@ import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
+import com.keepreal.madagascar.coua.common.UIdGenerator;
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
@@ -36,19 +37,23 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
     private final UserInfoRepository userInfoRepository;
     private final UserIdentityService userIdentityService;
     private final LongIdGenerator idGenerator;
+    private final UIdGenerator uIdGenerator;
 
     @Autowired
-    public UserInfoService(UserInfoRepository userInfoRepository, UserIdentityService userIdentityService, LongIdGenerator idGenerator) {
+    public UserInfoService(UserInfoRepository userInfoRepository, UserIdentityService userIdentityService, LongIdGenerator idGenerator, UIdGenerator uIdGenerator) {
         this.userInfoRepository = userInfoRepository;
         this.userIdentityService = userIdentityService;
         this.idGenerator = idGenerator;
+        this.uIdGenerator = uIdGenerator;
     }
 
     @Override
     public void createUser(NewUserRequest request, StreamObserver<UserResponse> responseObserver) {
         String userId = String.valueOf(idGenerator.nextId());
+
         UserInfo userInfo = UserInfo.builder()
                 .id(userId)
+                .uId(uIdGenerator.nextUId())
                 .nickName(request.getName().getValue())
                 .portraitImageUri(request.getPortraitImageUri().getValue())
                 .gender(request.getGender().getValueValue())
@@ -79,9 +84,15 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         if (queryUserCondition.hasUnionId()) {
             userInfo = userInfoRepository.findUserInfoByUnionIdAndDeletedIsFalse(queryUserCondition.getUnionId().getValue());
         }
+        if (queryUserCondition.hasUid()) {
+            userInfo = userInfoRepository.findUserInfoByUIdAndDeletedIsFalse(queryUserCondition.getUid().getValue());
+        }
         if (userInfo == null) {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+            return;
         } else {
             UserMessage userMessage = getUserMessage(userInfo);
             responseBuilder.setUser(userMessage);
@@ -95,6 +106,12 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
     public void updateUserById(UpdateUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
         String userId = request.getId();
         UserInfo userInfo = userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
+        if (userInfo == null) {
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
+            responseObserver.onNext(UserResponse.newBuilder().setStatus(commonStatus).build());
+            responseObserver.onCompleted();
+            return;
+        }
         if (request.hasName()) {
             userInfo.setNickName(request.getName().getValue());
         }
@@ -118,6 +135,9 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         }
         if (request.getIdentitiesCount() > 0) {
             userIdentityService.updateUserIdentities(request.getIdentitiesValueList(), userId);
+        }
+        if (request.hasUId()) {
+            userInfo.setUId(request.getUId().getValue());
         }
         saveAndResponse(userInfo, responseObserver);
     }
@@ -155,6 +175,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         List<IdentityType> identityTypes = identities.stream().map(IdentityType::forNumber).collect(Collectors.toList());
         return UserMessage.newBuilder()
                 .setId(userInfo.getId())
+                .setUId(userInfo.getUId())
                 .setName(userInfo.getNickName())
                 .setPortraitImageUri(userInfo.getPortraitImageUri())
                 .setGender(Gender.forNumber(userInfo.getGender()))

@@ -41,17 +41,19 @@ public class ReportService extends ReportServiceGrpc.ReportServiceImplBase {
         String feedId = request.getFeedId();
         String reporterId = request.getReporterId();
         int typeValue = request.getTypeValue();
-        ReportInfo reportInfo = ReportInfo.builder()
-                .id(String.valueOf(idGenerator.nextId()))
-                .feedId(feedId)
-                .reporterId(reporterId)
-                .type(typeValue)
-                .build();
-
-        ReportInfo save = reportRepository.save(reportInfo);
+        ReportInfo reportInfo = reportRepository.findTopByFeedIdAndReporterIdAndTypeAndDeletedIsFalse(feedId, reporterId, typeValue);
+        if (reportInfo == null) {
+            reportInfo = ReportInfo.builder()
+                    .id(String.valueOf(idGenerator.nextId()))
+                    .feedId(feedId)
+                    .reporterId(reporterId)
+                    .type(typeValue)
+                    .build();
+            reportRepository.save(reportInfo);
+        }
 
         ReportMessage reportMessage = ReportMessage.newBuilder()
-                .setId(save.getId())
+                .setId(reportInfo.getId())
                 .setFeedId(feedId)
                 .setReporterId(reporterId)
                 .setTypeValue(typeValue)

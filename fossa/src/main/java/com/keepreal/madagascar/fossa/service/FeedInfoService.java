@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * @program: madagascar
@@ -72,7 +73,6 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
 
     /**
      * 创建一个feed
-     * todo 校验 island
      * @param request
      * @param responseObserver
      */
@@ -80,13 +80,15 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
     public void createFeeds(NewFeedsRequest request, StreamObserver<NewFeedsResponse> responseObserver) {
         String userId = request.getUserId();
         ProtocolStringList islandIdList = request.getIslandIdList();
+        ProtocolStringList hostIdList = request.getHostIdList();
         String text = request.hasText() ? request.getText().getValue() : "";
         List<FeedInfo> feedInfoList = new ArrayList<>();
-        islandIdList.forEach(id -> {
+        IntStream.range(0, islandIdList.size()).forEach(i -> {
             FeedInfo feedInfo = new FeedInfo();
             feedInfo.setId(String.valueOf(idGenerator.nextId()));
-            feedInfo.setIslandId(id);
+            feedInfo.setIslandId(islandIdList.get(i));
             feedInfo.setUserId(userId);
+            feedInfo.setFromHost(userId.equals(hostIdList.get(i)));
             feedInfo.setImageUrls(request.getImageUrisList());
             feedInfo.setText(text);
             feedInfo.setRepostCount(0);
@@ -197,6 +199,18 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         } else {
             return FeedMessage.newBuilder().build();
         }
+    }
+
+    public void incFeedCount(String feedId, String type) {
+        Update update = new Update();
+        update.inc(type, 1);
+        mongoTemplate.updateFirst(Query.query(Criteria.where("id").is(feedId)), update, FeedInfo.class);
+    }
+
+    public void subFeedCount(String feedId, String type) {
+        Update update = new Update();
+        update.inc(type, -1);
+        mongoTemplate.updateFirst(Query.query(Criteria.where("id").is(feedId)), update, FeedInfo.class);
     }
 
     private FeedMessage getFeedMessage(FeedInfo feedInfo) {

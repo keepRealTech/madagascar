@@ -2,17 +2,17 @@ package com.keepreal.madagascar.lemur.service;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
-import com.keepreal.madagascar.coua.FeedRepostMessage;
-import com.keepreal.madagascar.coua.FeedRepostResponse;
-import com.keepreal.madagascar.coua.FeedRepostsResponse;
-import com.keepreal.madagascar.coua.IslandRepostMessage;
-import com.keepreal.madagascar.coua.IslandRepostResponse;
-import com.keepreal.madagascar.coua.IslandRepostsResponse;
-import com.keepreal.madagascar.coua.NewFeedRepostRequest;
-import com.keepreal.madagascar.coua.NewIslandRepostRequest;
-import com.keepreal.madagascar.coua.RepostServiceGrpc;
-import com.keepreal.madagascar.coua.RetrieveFeedRepostsByFeedIdRequest;
-import com.keepreal.madagascar.coua.RetrieveIslandRepostsByIslandIdRequest;
+import com.keepreal.madagascar.fossa.FeedRepostMessage;
+import com.keepreal.madagascar.fossa.FeedRepostResponse;
+import com.keepreal.madagascar.fossa.FeedRepostsResponse;
+import com.keepreal.madagascar.fossa.IslandRepostMessage;
+import com.keepreal.madagascar.fossa.IslandRepostResponse;
+import com.keepreal.madagascar.fossa.IslandRepostsResponse;
+import com.keepreal.madagascar.fossa.NewFeedRepostRequest;
+import com.keepreal.madagascar.fossa.NewIslandRepostRequest;
+import com.keepreal.madagascar.fossa.RepostServiceGrpc;
+import com.keepreal.madagascar.fossa.RetrieveFeedRepostsByFeedIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveIslandRepostsByIslandIdRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
@@ -34,9 +34,9 @@ public class RepostService {
     /**
      * Constructs the repost service.
      *
-     * @param managedChannel GRpc managed channel connection to service Coua.
+     * @param managedChannel GRpc managed channel connection to service fossa.
      */
-    public RepostService(@Qualifier("couaChannel") ManagedChannel managedChannel) {
+    public RepostService(@Qualifier("fossaChannel") ManagedChannel managedChannel) {
         this.managedChannel = managedChannel;
     }
 

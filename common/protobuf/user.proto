@@ -31,11 +31,13 @@ message UpdateUserByIdRequest {
     GenderValue gender = 6;
     google.protobuf.StringValue birthday = 7;
     repeated IdentityType identities = 8;
+    google.protobuf.Int32Value uId = 9;
 }
 
 message QueryUserCondition {
     google.protobuf.StringValue id = 1;
     google.protobuf.StringValue unionId = 2;
+    google.protobuf.Int32Value uid = 9;
 }
 
 message RetrieveSingleUserRequest {

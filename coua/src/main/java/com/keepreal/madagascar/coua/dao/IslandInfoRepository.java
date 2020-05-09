@@ -1,6 +1,9 @@
 package com.keepreal.madagascar.coua.dao;
 
+import com.keepreal.madagascar.coua.Island;
 import com.keepreal.madagascar.coua.model.IslandInfo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +23,10 @@ import java.util.Map;
 public interface IslandInfoRepository extends JpaRepository<IslandInfo, String> {
 
     IslandInfo findTopByIslandNameAndDeletedIsFalse(String islandName);
+
+    IslandInfo findTopByIdAndDeletedIsFalse(String id);
+
+    Page<IslandInfo> findAllByDeletedIsFalse(Pageable pageable);
 
     @Query(value = "SELECT id, last_feed_at AS lastFeedAt FROM island WHERE is_deleted = FALSE AND id IN ?1", nativeQuery = true)
     List<Map<String, Long>> findIslandIdAndLastFeedAtByIslandIdList(List<String> islandIdList);

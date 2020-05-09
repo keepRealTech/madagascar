@@ -12,4 +12,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ReportRepository extends JpaRepository<ReportInfo, String> {
+    ReportInfo findTopByFeedIdAndReporterIdAndTypeAndDeletedIsFalse(String feedId, String reporterId, Integer type);
 }

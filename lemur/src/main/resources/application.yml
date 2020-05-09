@@ -1,6 +1,6 @@
 grpc:
   coua:
-    host: 192.168.0.7
+    host: 127.0.0.1
     port: 12002
   baobob:
     host: 127.0.0.1
@@ -9,7 +9,7 @@ grpc:
     host: 127.0.0.1
     port: 12000
   fossa:
-    host: 192.168.0.7
+    host: 127.0.0.1
     port: 12003
   tenrecs:
     host: 127.0.0.1

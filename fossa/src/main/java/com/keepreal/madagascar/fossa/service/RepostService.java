@@ -1,24 +1,24 @@
-package com.keepreal.madagascar.coua.service;
+package com.keepreal.madagascar.fossa.service;
 
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.RepostMessage;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.coua.FeedRepostMessage;
-import com.keepreal.madagascar.coua.FeedRepostResponse;
-import com.keepreal.madagascar.coua.FeedRepostsResponse;
-import com.keepreal.madagascar.coua.IslandRepostMessage;
-import com.keepreal.madagascar.coua.IslandRepostResponse;
-import com.keepreal.madagascar.coua.IslandRepostsResponse;
-import com.keepreal.madagascar.coua.NewFeedRepostRequest;
-import com.keepreal.madagascar.coua.NewIslandRepostRequest;
-import com.keepreal.madagascar.coua.RepostServiceGrpc;
-import com.keepreal.madagascar.coua.RetrieveFeedRepostsByFeedIdRequest;
-import com.keepreal.madagascar.coua.RetrieveIslandRepostsByIslandIdRequest;
-import com.keepreal.madagascar.coua.common.RepostType;
-import com.keepreal.madagascar.coua.dao.RepostRepository;
-import com.keepreal.madagascar.coua.model.RepostInfo;
-import com.keepreal.madagascar.coua.util.CommonStatusUtils;
-import com.keepreal.madagascar.coua.util.PageResponseUtil;
+import com.keepreal.madagascar.fossa.FeedRepostMessage;
+import com.keepreal.madagascar.fossa.FeedRepostResponse;
+import com.keepreal.madagascar.fossa.FeedRepostsResponse;
+import com.keepreal.madagascar.fossa.IslandRepostMessage;
+import com.keepreal.madagascar.fossa.IslandRepostResponse;
+import com.keepreal.madagascar.fossa.IslandRepostsResponse;
+import com.keepreal.madagascar.fossa.NewFeedRepostRequest;
+import com.keepreal.madagascar.fossa.NewIslandRepostRequest;
+import com.keepreal.madagascar.fossa.RepostServiceGrpc;
+import com.keepreal.madagascar.fossa.RetrieveFeedRepostsByFeedIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveIslandRepostsByIslandIdRequest;
+import com.keepreal.madagascar.fossa.common.RepostType;
+import com.keepreal.madagascar.fossa.dao.RepostRepository;
+import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
+import com.keepreal.madagascar.fossa.model.RepostInfo;
+import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,11 +40,13 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
 
     private final RepostRepository repostRepository;
     private final LongIdGenerator idGenerator;
+    private final FeedInfoService feedInfoService;
 
     @Autowired
-    public RepostService(RepostRepository repostRepository, LongIdGenerator idGenerator) {
+    public RepostService(RepostRepository repostRepository, LongIdGenerator idGenerator, FeedInfoService feedInfoService) {
         this.repostRepository = repostRepository;
         this.idGenerator = idGenerator;
+        this.feedInfoService = feedInfoService;
     }
 
     @Override
@@ -52,6 +54,8 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
         RepostInfo repostInfo = getRepostInfo(request.getFeedId(), request.getUserId(),
                 request.getContent(), request.getIsSuccessful(), RepostType.FEED.getCode());
         RepostInfo save = repostRepository.save(repostInfo);
+
+        feedInfoService.incFeedCount(request.getFeedId(), "repostCount");
 
         FeedRepostMessage message = getFeedRepostMessage(save);
         FeedRepostResponse response = FeedRepostResponse.newBuilder()
@@ -69,7 +73,7 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
         Page<RepostInfo> repostInfoPageable = getRepostInfoPageable(request.getPageRequest(), feedId);
         List<FeedRepostMessage> repostMessageList = repostInfoPageable.getContent().stream().map(this::getFeedRepostMessage).filter(Objects::nonNull).collect(Collectors.toList());
 
-        PageResponse pageResponse = PageResponseUtil.buildResponse(repostInfoPageable);
+        PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(repostInfoPageable);
 
         FeedRepostsResponse response = FeedRepostsResponse.newBuilder()
                 .addAllFeedReposts(repostMessageList)
@@ -102,7 +106,7 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
         Page<RepostInfo> repostInfoPageable = getRepostInfoPageable(request.getPageRequest(), islandId);
         List<IslandRepostMessage> repostMessageList = repostInfoPageable.getContent().stream().map(this::getIslandRepostMessage).filter(Objects::nonNull).collect(Collectors.toList());
 
-        PageResponse pageResponse = PageResponseUtil.buildResponse(repostInfoPageable);
+        PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(repostInfoPageable);
 
         IslandRepostsResponse response = IslandRepostsResponse.newBuilder()
                 .addAllIslandReposts(repostMessageList)

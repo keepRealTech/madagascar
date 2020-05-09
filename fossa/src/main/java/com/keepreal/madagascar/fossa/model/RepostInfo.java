@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.coua.model;
+package com.keepreal.madagascar.fossa.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,8 +27,7 @@ import javax.persistence.Table;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @AllArgsConstructor
-public class
-RepostInfo {
+public class RepostInfo {
 
     @Id
     private String id;

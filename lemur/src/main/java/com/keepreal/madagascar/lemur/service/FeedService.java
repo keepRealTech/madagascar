@@ -5,6 +5,9 @@ import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
+import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
+import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
@@ -19,12 +22,14 @@ import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the feed service.
@@ -34,14 +39,18 @@ import java.util.Objects;
 public class FeedService {
 
     private final ManagedChannel managedChannel;
+    private final IslandService islandService;
 
     /**
      * Constructs the feed service.
      *
      * @param managedChannel GRpc managed channel connection to service Fossa.
+     * @param islandService {@link IslandService}
      */
-    public FeedService(@Qualifier("fossaChannel") ManagedChannel managedChannel) {
+
+    public FeedService(@Qualifier("fossaChannel") ManagedChannel managedChannel, IslandService islandService) {
         this.managedChannel = managedChannel;
+        this.islandService = islandService;
     }
 
     /**
@@ -55,8 +64,11 @@ public class FeedService {
     public void createFeed(List<String> islandIds, String userId, String text, List<String> imageUris) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
 
+        List<String> hostIdList = islandIds.stream().map(id -> islandService.retrieveIslandById(id).getHostId()).collect(Collectors.toList());
+
         NewFeedsRequest request = NewFeedsRequest.newBuilder()
                 .addAllIslandId(islandIds)
+                .addAllHostId(hostIdList)
                 .setUserId(userId)
                 .setText(StringValue.of(text))
                 .addAllImageUris(imageUris)

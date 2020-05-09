@@ -1,7 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
-import com.keepreal.madagascar.coua.FeedRepostMessage;
-import com.keepreal.madagascar.coua.IslandRepostMessage;
+import com.keepreal.madagascar.fossa.FeedRepostMessage;
+import com.keepreal.madagascar.fossa.IslandRepostMessage;
 import org.springframework.stereotype.Component;
 import swagger.model.RepostDTO;
 

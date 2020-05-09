@@ -107,6 +107,7 @@ message UserMessage {
     repeated IdentityType identities = 9;
     uint64 createdAt = 10;
     uint32 age = 11;
+    int32 uId = 12;
 }
 
 message IslandMessage {
