@@ -1,2 +1,2 @@
 export
-java -cp app:app/lib/* com.keepreal.madagascar.lemur.LemurApplication
+java -Xms2g -Xmx2g -cp app:app/lib/* com.keepreal.madagascar.lemur.LemurApplication

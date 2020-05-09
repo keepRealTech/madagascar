@@ -44,10 +44,10 @@ spec:
                 name: lemur
           resources:
             limits:
-              memory: 1024Mi
+              memory: 2.5Gi
             requests:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 1
+              memory: 2.5Gi
           ports:
             - containerPort: 8081
               name: lemur-http
