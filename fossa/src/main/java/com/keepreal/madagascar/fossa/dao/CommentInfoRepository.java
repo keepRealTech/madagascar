@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 /**
  * @program: madagascar
  * @author: zhangxidong
@@ -16,4 +18,7 @@ import org.springframework.stereotype.Repository;
 public interface CommentInfoRepository extends JpaRepository<CommentInfo, String> {
 
     Page<CommentInfo> getCommentInfosByFeedIdAndDeletedIsFalseOrderByCreatedTimeDesc(String feedId, Pageable pageable);
+
+    CommentInfo findByIdAndDeletedIsFalse(String id);
+
 }

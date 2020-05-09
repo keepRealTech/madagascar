@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -137,6 +138,13 @@ public class FeedController implements FeedApi {
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1FeedsIdDelete(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id);
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(feedMessage.getIslandId());
+        if (!userId.equals(islandMessage.getHostId()) && !userId.equals(feedMessage.getUserId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         this.feedService.deleteFeedById(id);
 
         DummyResponse response = new DummyResponse();

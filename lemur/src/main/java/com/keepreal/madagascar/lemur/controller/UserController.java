@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -79,6 +80,11 @@ public class UserController implements UserApi {
     public ResponseEntity<UserResponse> apiV1UsersIdPut(String id,
                                                         PutUserPayload payload,
                                                         @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        if (!userId.equals(id)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         String portraitImageUri = null;
         if (Objects.nonNull(portraitImage)) {
             portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
