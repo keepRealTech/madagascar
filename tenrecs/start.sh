@@ -3,4 +3,4 @@ pod_index=${HOSTNAME##*-}
 export SNOWFLAKE_NODEID=$pod_index
 
 export
-java -cp app:app/lib/* com.keepreal.madagascar.tenrecs.TenrecsApplication
+java -Xms1g -Xmx1g -cp app:app/lib/* com.keepreal.madagascar.tenrecs.TenrecsApplication

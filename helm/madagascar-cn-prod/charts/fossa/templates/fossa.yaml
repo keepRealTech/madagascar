@@ -60,16 +60,16 @@ spec:
                   name: aliyun-mongo
                   key: connection-string
             - name: SPRING_DATASOURCE_URL
-                valueFrom:
-                  secretKeyRef:
-                    name: aliyun-rdb
-                    key: fossa-connection-string
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rdb
+                  key: fossa-connection-string
           resources:
             limits:
-              memory: 1024Mi
+              memory: 2.5Gi
             requests:
-              cpu: 200m
-              memory: 256Mi
+              cpu: 1
+              memory: 2.5Gi
           ports:
             - containerPort: 12003
               name: fossa-grpc

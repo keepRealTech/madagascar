@@ -25,8 +25,21 @@ tags:
     description: Reports controllers
   - name: Config
     description: Configs controllers
+  - name: Healthcheck
+    description: SLB health check controllers
 
 paths:
+  /api/healthcheck:
+    head:
+      tags:
+        - Healthcheck
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/login:
     post:
       tags:

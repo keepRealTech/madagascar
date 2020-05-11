@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -115,6 +116,12 @@ public class FeedController implements FeedApi {
     public ResponseEntity<DummyResponse> apiV1FeedsPost(
             PostFeedPayload payload,
             @ApiParam(value = "file detail") @Valid @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+        DummyResponse response = new DummyResponse();
+        if (images.size() > 9) {
+            DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        }
+
         String userId = HttpContextUtils.getUserIdFromContext();
 
         List<String> imageUris = images
@@ -124,7 +131,6 @@ public class FeedController implements FeedApi {
 
         this.feedService.createFeed(payload.getIslandIds(), userId, payload.getContent(), imageUris);
 
-        DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -138,8 +144,13 @@ public class FeedController implements FeedApi {
     @Override
     public ResponseEntity<DummyResponse> apiV1FeedsIdDelete(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id);
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(feedMessage.getIslandId());
+        if (!userId.equals(islandMessage.getHostId()) && !userId.equals(feedMessage.getUserId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
 
-        this.feedService.deleteFeedById(id, userId);
+        this.feedService.deleteFeedById(id);
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);

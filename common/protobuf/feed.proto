@@ -34,7 +34,6 @@ message RetrieveMultipleFeedsRequest {
 
 message DeleteFeedByIdRequest {
     string id = 1;
-    string userId = 2;
 }
 
 message FeedResponse {

@@ -1,8 +1,10 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.service.CommentService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
+import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +35,12 @@ public class CommentController implements CommentApi {
      * @return {@link DummyResponse}.
      */
     public ResponseEntity<DummyResponse> apiV1CommentsIdDelete(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        CommentMessage commentMessage = this.commentService.retrieveCommentById(id);
+        if (!userId.equals(commentMessage.getUserId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         this.commentService.deleteCommentById(id);
 
         DummyResponse response = new DummyResponse();

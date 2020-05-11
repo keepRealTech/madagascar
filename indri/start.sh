@@ -1,2 +1,2 @@
 export
-java -cp app:app/lib/* com.keepreal.madagascar.indri.IndriApplication
+java -Xms1g -Xmx1g -cp app:app/lib/* com.keepreal.madagascar.indri.IndriApplication

@@ -101,12 +101,11 @@ public class FeedService {
      *
      * @param id Feed id.
      */
-    public void deleteFeedById(String id, String userId) {
+    public void deleteFeedById(String id) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
 
         DeleteFeedByIdRequest request = DeleteFeedByIdRequest.newBuilder()
                 .setId(id)
-                .setUserId(userId)
                 .build();
 
         DeleteFeedResponse deleteFeedResponse;
