@@ -28,6 +28,7 @@ public class FeedInfo {
     private String userId;
     private String text;
     private Boolean fromHost;
+    private String hostId;
     private List<String> imageUrls;
     private Integer likesCount;
     private Integer commentsCount;

@@ -137,7 +137,9 @@ public class FeedController implements FeedApi {
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1FeedsIdDelete(String id) {
-        this.feedService.deleteFeedById(id);
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        this.feedService.deleteFeedById(id, userId);
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);

@@ -62,8 +62,12 @@ public class FeedService {
      * @param imageUris Image uris.
      */
     public void createFeed(List<String> islandIds, String userId, String text, List<String> imageUris) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+        if (Objects.isNull(islandIds) || islandIds.size() == 0) {
+            log.error("param islandIds is invalid");
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
 
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
         List<String> hostIdList = islandIds.stream().map(id -> islandService.retrieveIslandById(id).getHostId()).collect(Collectors.toList());
 
         NewFeedsRequest request = NewFeedsRequest.newBuilder()
@@ -97,11 +101,12 @@ public class FeedService {
      *
      * @param id Feed id.
      */
-    public void deleteFeedById(String id) {
+    public void deleteFeedById(String id, String userId) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
 
         DeleteFeedByIdRequest request = DeleteFeedByIdRequest.newBuilder()
                 .setId(id)
+                .setUserId(userId)
                 .build();
 
         DeleteFeedResponse deleteFeedResponse;

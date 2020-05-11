@@ -89,6 +89,7 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfo.setIslandId(islandIdList.get(i));
             feedInfo.setUserId(userId);
             feedInfo.setFromHost(userId.equals(hostIdList.get(i)));
+            feedInfo.setHostId(hostIdList.get(i));
             feedInfo.setImageUrls(request.getImageUrisList());
             feedInfo.setText(text);
             feedInfo.setRepostCount(0);
@@ -116,6 +117,25 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
     @Override
     public void deleteFeedById(DeleteFeedByIdRequest request, StreamObserver<DeleteFeedResponse> responseObserver) {
         String feedId = request.getId();
+        String userId = request.getUserId();
+
+        FeedInfo feedInfo = feedInfoRepository.findFeedInfoByIdAndDeletedIsFalse(feedId);
+        if (feedInfo != null) {
+            if (!userId.equals(feedInfo.getUserId()) ||
+                    !userId.equals(feedInfo.getHostId())) {
+                responseObserver.onNext(DeleteFeedResponse.newBuilder()
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_DELETE_NOT_AUTH_ERROR))
+                        .build());
+                responseObserver.onCompleted();
+                return;
+            }
+        } else {
+            responseObserver.onNext(DeleteFeedResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
 
         mongoTemplate.updateFirst(
                 Query.query(Criteria.where("id").is(feedId)),
