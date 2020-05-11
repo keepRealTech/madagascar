@@ -115,6 +115,12 @@ public class FeedController implements FeedApi {
     public ResponseEntity<DummyResponse> apiV1FeedsPost(
             PostFeedPayload payload,
             @ApiParam(value = "file detail") @Valid @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+        DummyResponse response = new DummyResponse();
+        if (images.size() > 9) {
+            DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+            return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        }
+
         String userId = HttpContextUtils.getUserIdFromContext();
 
         List<String> imageUris = images
@@ -124,7 +130,6 @@ public class FeedController implements FeedApi {
 
         this.feedService.createFeed(payload.getIslandIds(), userId, payload.getContent(), imageUris);
 
-        DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

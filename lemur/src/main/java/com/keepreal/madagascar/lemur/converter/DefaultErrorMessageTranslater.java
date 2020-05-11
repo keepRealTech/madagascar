@@ -26,6 +26,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "图片上传失败";
             case REQUEST_UNEXPECTED_ERROR:
                 return "服务器开小差了，请稍后...";
+            case REQUEST_IMAGE_NUMBER_TOO_LARGE:
+                return "单动态图片数量过大";
             default:
                 return errorCode.getValueDescriptor().getName();
         }
