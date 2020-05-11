@@ -1,8 +1,8 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.google.protobuf.ByteString;
-import com.keepreal.madagascar.Indri.ImageServiceGrpc;
-import com.keepreal.madagascar.Indri.UploadImagesRequest;
+import com.keepreal.madagascar.indri.ImageServiceGrpc;
+import com.keepreal.madagascar.indri.UploadImagesRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.util.ImageUtils;
