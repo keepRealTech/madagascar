@@ -31,14 +31,14 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
      * @return {@link DummyResponse}.
      */
     @ExceptionHandler(value = {KeepRealBusinessException.class})
-    protected ResponseEntity<DummyResponse> handleWebBussinessException(KeepRealBusinessException exception,
-                                                                        WebRequest request) {
+    protected ResponseEntity<DummyResponse> handleWebBusinessException(KeepRealBusinessException exception,
+                                                                       WebRequest request) {
         if (ErrorCode.REQUEST_INVALID_ARGUMENT.equals(exception.getErrorCode())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         log.error(exception.toString());
-        
+
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, exception.getErrorCode());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -53,7 +53,7 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(value = {ConstraintViolationException.class})
     protected ResponseEntity<DummyResponse> handleConstraintViolationException(ConstraintViolationException exception,
-                                                                        WebRequest request) {
+                                                                               WebRequest request) {
         log.error(exception.toString());
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
