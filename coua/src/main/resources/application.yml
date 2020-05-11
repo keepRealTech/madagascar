@@ -1,11 +1,12 @@
 spring:
   datasource:
-    url: jdbc:mysql://root:123456@localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://kr_admin:hMeKPJ7Yq^%25A@rm-2zefwtyv2c6ewwrk25o.mysql.rds.aliyuncs.com:3306/coua?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
     driver-class-name: com.mysql.cj.jdbc.Driver
-
+  jpa:
+    database-platform: jpa:org.hibernate.dialect.MySQLDialect
 rocketmq:
-  accessKey:
-  secretKey:
+  accessKey: 1
+  secretKey: 2
   topic: notification-event
   tag: event
   nameSrvAddr: 192.168.0.8:9876
