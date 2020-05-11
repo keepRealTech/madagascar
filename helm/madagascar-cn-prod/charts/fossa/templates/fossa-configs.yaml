@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: fossa
-  namespace: {{ .Values.commonConfigs.namespace }}
+  namespace: {{ .Values.common_configs.namespace }}
 data:
   SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
   SPRING_JPA_SHOWSQL: '{{ .Values.jpa.show_sql }}'

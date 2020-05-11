@@ -2,9 +2,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: lemur
-  namespace: {{ .Values.commonConfigs.namespace }}
+  namespace: {{ .Values.common_configs.namespace }}
 spec:
-  replicas: {{ .Values.commonConfigs.replicas }}
+  replicas: {{ .Values.common_configs.replicas }}
   selector:
     matchLabels:
       app: lemur
@@ -38,10 +38,10 @@ spec:
                 name: lemur
           resources:
             limits:
-              memory: 2.5Gi
+              memory: {{ .Values.common_configs.memory }}
             requests:
-              cpu: 1
-              memory: 2.5Gi
+              cpu: {{ .Values.common_configs.cpu }}
+              memory: {{ .Values.common_configs.memory }}
           ports:
             - containerPort: 8081
               name: lemur-http

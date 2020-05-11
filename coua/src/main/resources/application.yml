@@ -3,7 +3,7 @@ spring:
     url: jdbc:mysql://kr_admin:hMeKPJ7Yq^%25A@rm-2zefwtyv2c6ewwrk25o.mysql.rds.aliyuncs.com:3306/coua?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: jpa:org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQLDialect
 rocketmq:
   accessKey: 1
   secretKey: 2
