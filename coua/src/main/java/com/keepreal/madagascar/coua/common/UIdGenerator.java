@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.coua.common;
 
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
+import com.keepreal.madagascar.coua.util.UIdFilterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,33 +20,32 @@ public class UIdGenerator {
 
     private final UserInfoRepository userInfoRepository;
 
-    private static final int base = 10_000_000;
-    private static final int range = 89_999_999;
-    private static Set<Integer> specialIdSet = new HashSet<>();
+    private static final String base = "00_000_000";
+    private static final int range = 99_999_999;
+    private static final int uid_length = 8;
 
     @Autowired
     public UIdGenerator(UserInfoRepository userInfoRepository) {
         this.userInfoRepository = userInfoRepository;
     }
 
-    public synchronized int nextUId() {
-        int uId = generateUId();
-        while (isSpecial(uId) || isExist(uId)) {
+    public synchronized String nextUId() {
+        String uId = generateUId();
+        while (UIdFilterUtils.isSpecial(uId) || isExist(uId)) {
             uId = generateUId();
         }
 
         return uId;
     }
 
-    private boolean isSpecial(int uId) {
-        return specialIdSet.contains(uId);
-    }
-
-    private boolean isExist(int uId) {
+    private boolean isExist(String uId) {
         return userInfoRepository.countByuId(uId) > 0;
     }
 
-    private int generateUId() {
-        return new Random().nextInt(range) + base;
+    private String generateUId() {
+        StringBuilder sb = new StringBuilder(base);
+        int randomNum = new Random().nextInt(range);
+        sb.append(randomNum);
+        return sb.substring(Math.abs(uid_length - sb.length()));
     }
 }

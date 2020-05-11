@@ -2,12 +2,12 @@ spring:
   data:
     mongodb:
       database: tenrecs
-      uri: mongodb://root:password@127.0.0.1:27017
+      uri: mongodb://127.0.0.1:27017
 
 rocketmq:
-  accessKey:
-  secretKey:
-  nameSrvAddr: localhost:9876
+  accessKey: xxx
+  secretKey: xxx
+  nameSrvAddr: 127.0.0.1:9876
   topic: notification-event
   groupId: GID-tenrecs-default
   tag: event

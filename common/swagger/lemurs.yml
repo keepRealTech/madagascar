@@ -549,6 +549,7 @@ paths:
     get:
       parameters:
         - $ref: '#/components/parameters/configTypeInQuery'
+        - $ref: '#/components/parameters/versionInQuery'
       tags:
         - Config
       summary: retrieves the client config info
@@ -645,6 +646,12 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/ConfigType'
+    versionInQuery:
+      in: query
+      name: version
+      required: true
+      schema:
+        type: integer
   schemas:
     LoginType:
       type: string
@@ -731,6 +738,8 @@ components:
       type: object
       properties:
         id:
+          type: string
+        uId:
           type: string
         name:
           type: string
@@ -1376,6 +1385,18 @@ components:
     IOSConfigurationDTO:
       type: object
       properties:
+        islandFeedLoopInterval:
+          type: integer
+        myIslandsPageSize:
+          type: integer
+        messageLoopInterval:
+          type: integer
+        guestPageSize:
+          type: integer
+        islandCheckInterval:
+          type: integer
+        configTimeout:
+          type: integer
         audit:
           type: boolean
     AndroidConfigurationDTO:

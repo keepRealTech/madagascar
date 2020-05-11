@@ -4,8 +4,8 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 rocketmq:
-  accessKey:
-  secretKey:
+  accessKey: xxx
+  secretKey: xxx
   topic: notification-event
   tag: event
   nameSrvAddr: 192.168.0.8:9876

@@ -1,7 +1,7 @@
 aliyun-oss:
   endpoint: oss-cn-beijing.aliyuncs.com
-  accessKey:
-  accessSecret:
+  accessKey: LTAI4GGpLfjEfJcRJYmvAviA
+  accessSecret: P7fZiufeNVZA0pBr5Px7IDx7pxvEZy
   bucketName: kr-thumbnail-staging-cn2-01
 
 grpc:

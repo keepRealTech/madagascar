@@ -42,9 +42,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -102,20 +104,19 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             return;
         }
         String islandId = String.valueOf(idGenerator.nextId());
-        IslandInfo islandInfo = IslandInfo.builder()
+        IslandInfo.IslandInfoBuilder infoBuilder = IslandInfo.builder()
                 .id(islandId)
                 .hostId(request.getHostId())
                 .islandName(request.getName())
-                .build();
+                .lastFeedAt(System.currentTimeMillis());
         if (request.hasPortraitImageUri()) {
-            islandInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
+            infoBuilder.portraitImageUri(request.getPortraitImageUri().getValue());
         }
         if (request.hasSecret()) {
-            islandInfo.setSecret(request.getSecret().getValue());
+            infoBuilder.secret(request.getSecret().getValue());
         }
-        islandInfo.setLastFeedAt(System.currentTimeMillis());
         // 将数据插入 island 表
-        IslandInfo save = islandInfoRepository.save(islandInfo);
+        IslandInfo save = islandInfoRepository.save(infoBuilder.build());
         // 维护 subscription 表
         String hostId = request.getHostId();
         subscriptionService.initHost(islandId, hostId);
@@ -142,8 +143,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         IslandInfo islandInfo = islandInfoRepository.findTopByIdAndDeletedIsFalse(islandId);
         if (islandInfo != null) {
             IslandMessage islandMessage = getIslandMessage(islandInfo);
-            responseBuilder
-                    .setIsland(islandMessage)
+            responseBuilder.setIsland(islandMessage)
                     .setStatus(CommonStatusUtils.getSuccStatus());
         } else {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
@@ -157,15 +157,13 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
     /**
      * 根据条件查询符合条件的岛的列表
-     * todo 如果什么都不填，拿所有
      *
      * @param request          可根据 name，hostId，subscriberId 查询
      * @param responseObserver
      */
     @Override
     public void retrieveIslandsByCondition(RetrieveMultipleIslandsRequest request, StreamObserver<IslandsResponse> responseObserver) {
-        List<IslandMessage> islandMessageList = new ArrayList<>();
-        Page<String> islandListPageable = null;
+        List<IslandInfo> islandInfoList;
         PageRequest pageRequest = request.getPageRequest();
         int page = pageRequest.getPage();
         int pageSize = pageRequest.getPageSize();
@@ -174,38 +172,24 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
 
         QueryIslandCondition requestCondition = request.getCondition();
         if (requestCondition.hasHostId()) {
-            islandListPageable = subscriptionService.getIslandIdListByUserCreated(requestCondition.getHostId().getValue(), pageable);
+            islandInfoList = getMyCreatedIsland(requestCondition.getHostId().getValue(), pageable, builder);
         } else {
             boolean hasName = requestCondition.hasName();
             boolean hasSubscribedUserId = requestCondition.hasSubscribedUserId();
             if (hasName && hasSubscribedUserId) {
-                IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(requestCondition.getName().getValue());
-                if (subscriptionService.isSubScribedIsland(islandInfo.getId(), requestCondition.getSubscribedUserId().getValue())) {
-                    islandMessageList.add(getIslandMessage(islandInfo));
-                }
+                islandInfoList = getIslandByNameAndSubscribed(requestCondition.getName().getValue(), requestCondition.getSubscribedUserId().getValue());
             } else if (hasSubscribedUserId) {
-                islandListPageable = subscriptionService.getIslandIdListByUserSubscribed(requestCondition.getSubscribedUserId().getValue(), pageable);
+                islandInfoList = getIslandBySubscribed(requestCondition.getSubscribedUserId().getValue(), pageable, builder);
             } else if (hasName) {
-                IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(requestCondition.getName().getValue());
-                islandMessageList.add(getIslandMessage(islandInfo));
+                islandInfoList = getIslandByName(requestCondition.getName().getValue());
             } else {
-                Page<IslandInfo> islandInfoList = islandInfoRepository.findAllByDeletedIsFalse(pageable);
-                islandMessageList = islandInfoList.getContent().stream().map(this::getIslandMessage).collect(Collectors.toList());
-                builder.setPageResponse(PageResponseUtil.buildResponse(islandInfoList));
-            }
-            if (islandListPageable != null) {
-                List<IslandInfo> islandInfoList = islandInfoRepository.findIslandInfosByIdInAndDeletedIsFalse(islandListPageable.getContent());
-                islandMessageList = islandInfoList.stream().map(this::getIslandMessage).collect(Collectors.toList());
+                islandInfoList = getIsland(pageable, builder);
             }
         }
 
-        // 构建返回信息
+        List<IslandMessage> islandMessageList = islandInfoList.stream().map(this::getIslandMessage).filter(Objects::nonNull).collect(Collectors.toList());
         builder.addAllIslands(islandMessageList);
-        // 如果是按 name 查询，islandListPageable为null，就不会有pageResponse
-        if (islandListPageable != null) {
-            PageResponse pageResponse = PageResponseUtil.buildResponse(islandListPageable);
-            builder.setPageResponse(pageResponse);
-        }
+
         IslandsResponse islandsResponse = builder.setStatus(CommonStatusUtils.getSuccStatus()).build();
         responseObserver.onNext(islandsResponse);
         responseObserver.onCompleted();
@@ -306,14 +290,8 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         //根据idList拿到UserInfoList并转化为UserMessageList
         List<UserMessage> userMessageList = userInfoService.getUserMessageListByIdList(subscriberIdList);
 
-        PageResponse pageResponse = PageResponse.newBuilder()
-                .setPage(page)
-                .setPageSize(pageSize)
-                .setHasMore(subscriberIdListPageable.getTotalPages() > page)
-                .setHasContent(subscriberIdListPageable.hasContent())
-                .build();
-        IslandSubscribersResponse islandSubscribersResponse =
-                IslandSubscribersResponse.newBuilder()
+        PageResponse pageResponse = PageResponseUtil.buildResponse(subscriberIdListPageable);
+        IslandSubscribersResponse islandSubscribersResponse = IslandSubscribersResponse.newBuilder()
                         .setPageResponse(pageResponse)
                         .addAllUser(userMessageList)
                         .setStatus(CommonStatusUtils.getSuccStatus())
@@ -470,5 +448,46 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
                 .setIslandId(islandId)
                 .setHasNewFeeds(islandLastFeedAt != null && islandLastFeedAt > currentTime)
                 .build();
+    }
+
+    /**
+     * 用户创建的岛
+     * @param userId
+     * @param pageable
+     * @param builder
+     * @return
+     */
+    private List<IslandInfo> getMyCreatedIsland(String userId, Pageable pageable, IslandsResponse.Builder builder) {
+        Page<String> islandIdListPageable = subscriptionService.getIslandIdListByUserCreated(userId, pageable);
+        builder.setPageResponse(PageResponseUtil.buildResponse(islandIdListPageable));
+        return islandInfoRepository.findIslandInfosByIdInAndDeletedIsFalse(islandIdListPageable.getContent());
+    }
+
+    private List<IslandInfo> getIslandByName(String islandName) {
+        IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(islandName);
+        if (islandInfo == null) {
+            return Collections.emptyList();
+        }
+        return Collections.singletonList(islandInfo);
+    }
+
+    private List<IslandInfo> getIslandByNameAndSubscribed(String islandName, String userId) {
+        IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(islandName);
+        if (islandInfo == null || !subscriptionService.isSubScribedIsland(islandInfo.getId(), userId)) {
+            return Collections.emptyList();
+        }
+        return Collections.singletonList(islandInfo);
+    }
+
+    private List<IslandInfo> getIslandBySubscribed(String userId, Pageable pageable, IslandsResponse.Builder builder) {
+        Page<String> islandIdListPageable = subscriptionService.getIslandIdListByUserSubscribed(userId, pageable);
+        builder.setPageResponse(PageResponseUtil.buildResponse(islandIdListPageable));
+        return islandInfoRepository.findIslandInfosByIdInAndDeletedIsFalse(islandIdListPageable.getContent());
+    }
+
+    private List<IslandInfo> getIsland(Pageable pageable, IslandsResponse.Builder builder) {
+        Page<IslandInfo> islandInfoListPageable = islandInfoRepository.findAllByDeletedIsFalse(pageable);
+        builder.setPageResponse(PageResponseUtil.buildResponse(islandInfoListPageable));
+        return islandInfoListPageable.getContent();
     }
 }

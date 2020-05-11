@@ -82,6 +82,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         commentInfo.setContent(content);
         commentInfo.setReplyToId(replyToId);
         commentInfo.setDeleted(false);
+        commentInfo.setCreatedTime(System.currentTimeMillis());
 
         CommentInfo save = commentInfoRepository.save(commentInfo);
 

@@ -85,7 +85,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
             userInfo = userInfoRepository.findUserInfoByUnionIdAndDeletedIsFalse(queryUserCondition.getUnionId().getValue());
         }
         if (queryUserCondition.hasUid()) {
-            userInfo = userInfoRepository.findUserInfoByUIdAndDeletedIsFalse(queryUserCondition.getUid().getValue());
+            userInfo = userInfoRepository.findUserInfoByuIdAndDeletedIsFalse(queryUserCondition.getUid().getValue());
         }
         if (userInfo == null) {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);

@@ -60,11 +60,15 @@ public class DummyPasswordLoginExecutor implements LoginExecutor {
      */
     @SuppressWarnings("unchecked")
     private Mono<UserMessage> loginWithUserCombination(String username, String password) {
-        if (!"user".equals(username) || !"pass".equals(password)) {
-            return Mono.error(new IllegalArgumentException());
+        switch (username) {
+            case "user":
+                return this.userService.retrieveUserByIdMono("0");
+            case "user1":
+                return this.userService.retrieveUserByIdMono("1");
+            case "user2":
+                return this.userService.retrieveUserByIdMono("2");
         }
-
-        return this.userService.retrieveUserByIdMono(DummyPasswordLoginExecutor.DUMMY_USER_ID);
+        return Mono.error(new IllegalArgumentException());
     }
 
 }

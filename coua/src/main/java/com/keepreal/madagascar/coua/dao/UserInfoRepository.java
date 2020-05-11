@@ -17,7 +17,7 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
 
     UserInfo findUserInfoByUnionIdAndDeletedIsFalse(String unionId);
 
-    UserInfo findUserInfoByUIdAndDeletedIsFalse(Integer uId);
+    UserInfo findUserInfoByuIdAndDeletedIsFalse(String uId);
 
-    int countByuId(Integer uId);
+    int countByuId(String uId);
 }

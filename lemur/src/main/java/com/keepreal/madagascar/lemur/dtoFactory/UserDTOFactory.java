@@ -59,6 +59,7 @@ public class UserDTOFactory {
 
         BriefUserDTO briefUserDTO = new BriefUserDTO();
         briefUserDTO.setId(user.getId());
+        briefUserDTO.setuId(user.getUId());
         briefUserDTO.setName(user.getName());
         briefUserDTO.setPortraitImageUri(user.getPortraitImageUri());
         briefUserDTO.setGender(this.convertGender(user.getGender()));
