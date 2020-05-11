@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -179,6 +180,7 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         }
 
         // 没有条件
+        query.with(Sort.by(Sort.Order.desc("createdTime")));
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
         List<FeedMessage> feedMessageList = feedInfoList.stream().map(this::getFeedMessage).collect(Collectors.toList());

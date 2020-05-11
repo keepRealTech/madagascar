@@ -767,7 +767,7 @@ components:
       properties:
         id:
           type: string
-        uId:
+        displayId:
           type: string
         name:
           type: string

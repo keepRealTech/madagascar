@@ -32,7 +32,7 @@ public class UserInfo {
 
     @Id
     private String id;
-    private String uId;
+    private String displayId;
     private String nickName;
     private String portraitImageUri;
     @Builder.Default

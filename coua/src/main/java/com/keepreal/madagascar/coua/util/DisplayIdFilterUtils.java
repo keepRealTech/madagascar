@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
  * @create: 2020-05-09
  **/
 
-public class UIdFilterUtils {
+public class DisplayIdFilterUtils {
 
     private static List<String> patternList = new ArrayList<>();
 

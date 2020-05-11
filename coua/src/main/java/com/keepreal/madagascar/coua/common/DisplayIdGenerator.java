@@ -1,13 +1,11 @@
 package com.keepreal.madagascar.coua.common;
 
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
-import com.keepreal.madagascar.coua.util.UIdFilterUtils;
+import com.keepreal.madagascar.coua.util.DisplayIdFilterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 /**
  * @program: madagascar
@@ -16,7 +14,7 @@ import java.util.Set;
  **/
 
 @Component
-public class UIdGenerator {
+public class DisplayIdGenerator {
 
     private final UserInfoRepository userInfoRepository;
 
@@ -25,13 +23,13 @@ public class UIdGenerator {
     private static final int uid_length = 8;
 
     @Autowired
-    public UIdGenerator(UserInfoRepository userInfoRepository) {
+    public DisplayIdGenerator(UserInfoRepository userInfoRepository) {
         this.userInfoRepository = userInfoRepository;
     }
 
     public synchronized String nextUId() {
         String uId = generateUId();
-        while (UIdFilterUtils.isSpecial(uId) || isExist(uId)) {
+        while (DisplayIdFilterUtils.isSpecial(uId) || isExist(uId)) {
             uId = generateUId();
         }
 
@@ -39,7 +37,7 @@ public class UIdGenerator {
     }
 
     private boolean isExist(String uId) {
-        return userInfoRepository.countByuId(uId) > 0;
+        return userInfoRepository.countByDisplayId(uId) > 0;
     }
 
     private String generateUId() {
