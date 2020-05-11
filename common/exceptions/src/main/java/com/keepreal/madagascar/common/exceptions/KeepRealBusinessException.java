@@ -50,7 +50,7 @@ public class KeepRealBusinessException extends RuntimeException {
      * @param commonStatus {@link CommonStatus}.
      */
     public KeepRealBusinessException(CommonStatus commonStatus) {
-        this(ErrorCode.forNumber(commonStatus.getRtn()), ExceptionMessageMap.get(commonStatus.getRtn()));
+        this(ErrorCode.forNumber(commonStatus.getRtn()), commonStatus.getMessage());
     }
 
     /**
