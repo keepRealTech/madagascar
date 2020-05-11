@@ -10,6 +10,6 @@ global:
     acr_secret_name: keepreal-acr-secret
 
 deploy:
-  enable_http: true
+  enable_http: false
   ssl:
     cert_id: 1398284016177859_171f8558958_1798620612_-1406035680
