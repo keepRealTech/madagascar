@@ -8,15 +8,13 @@ import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.tenrecs.CommentEvent;
 import com.keepreal.madagascar.fossa.CommentResponse;
 import com.keepreal.madagascar.fossa.CommentServiceGrpc;
 import com.keepreal.madagascar.fossa.CommentsResponse;
 import com.keepreal.madagascar.fossa.DeleteCommentByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteCommentByIdResponse;
 import com.keepreal.madagascar.fossa.NewCommentRequest;
-import com.keepreal.madagascar.tenrecs.NotificationEvent;
-import com.keepreal.madagascar.tenrecs.NotificationEventType;
+import com.keepreal.madagascar.fossa.RetrieveCommentByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveCommentsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.config.MqConfig;
 import com.keepreal.madagascar.fossa.dao.CommentInfoRepository;
@@ -24,6 +22,9 @@ import com.keepreal.madagascar.fossa.model.CommentInfo;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import com.keepreal.madagascar.fossa.util.ProducerUtils;
+import com.keepreal.madagascar.tenrecs.CommentEvent;
+import com.keepreal.madagascar.tenrecs.NotificationEvent;
+import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
@@ -64,8 +65,20 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         this.producerBean = producerBean;
     }
 
+    public static CommentMessage getCommentMessage(CommentInfo commentInfo) {
+        return CommentMessage.newBuilder()
+                .setId(commentInfo.getId())
+                .setFeedId(commentInfo.getFeedId())
+                .setUserId(commentInfo.getUserId())
+                .setContent(commentInfo.getContent())
+                .setReplyToId(commentInfo.getReplyToId())
+                .setCreatedAt(commentInfo.getCreatedTime())
+                .build();
+    }
+
     /**
      * 创建一个comment
+     *
      * @param request
      * @param responseObserver
      */
@@ -105,7 +118,31 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
     }
 
     /**
+     * Retrieves comment by id.
+     *
+     * @param request          {@link RetrieveCommentByIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void retrieveCommentById(RetrieveCommentByIdRequest request, StreamObserver<CommentResponse> responseObserver) {
+        CommentResponse.Builder responseBuilder = CommentResponse.newBuilder();
+        CommentInfo commentInfo = this.commentInfoRepository.findByIdAndDeletedIsFalse(request.getId());
+        if (commentInfo != null) {
+            CommentMessage commentMessage = getCommentMessage(commentInfo);
+            responseBuilder.setComment(commentMessage)
+                    .setStatus(CommonStatusUtils.getSuccStatus());
+        } else {
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_COMMENT_NOT_FOUND_ERROR);
+            responseBuilder.setStatus(commonStatus);
+        }
+
+        responseObserver.onNext(responseBuilder.build());
+        responseObserver.onCompleted();
+    }
+
+    /**
      * 根据feedId返回这个feed下的所有comment
+     *
      * @param request
      * @param responseObserver
      */
@@ -131,6 +168,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
 
     /**
      * 根据commentId删除一条comment
+     *
      * @param request
      * @param responseObserver
      */
@@ -156,17 +194,6 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
                 .build();
         responseObserver.onNext(deleteCommentByIdResponse);
         responseObserver.onCompleted();
-    }
-
-    public static CommentMessage getCommentMessage(CommentInfo commentInfo) {
-        return CommentMessage.newBuilder()
-                .setId(commentInfo.getId())
-                .setFeedId(commentInfo.getFeedId())
-                .setUserId(commentInfo.getUserId())
-                .setContent(commentInfo.getContent())
-                .setReplyToId(commentInfo.getReplyToId())
-                .setCreatedAt(commentInfo.getCreatedTime())
-                .build();
     }
 
     private Message getMessage(CommentMessage commentMessage, FeedMessage feedMessage, String userId) {

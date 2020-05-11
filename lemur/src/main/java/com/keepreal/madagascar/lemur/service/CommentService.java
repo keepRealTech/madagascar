@@ -10,6 +10,7 @@ import com.keepreal.madagascar.fossa.CommentsResponse;
 import com.keepreal.madagascar.fossa.DeleteCommentByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteCommentByIdResponse;
 import com.keepreal.madagascar.fossa.NewCommentRequest;
+import com.keepreal.madagascar.fossa.RetrieveCommentByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveCommentsByFeedIdRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.ManagedChannel;
@@ -37,6 +38,39 @@ public class CommentService {
      */
     public CommentService(@Qualifier("fossaChannel") ManagedChannel managedChannel) {
         this.managedChannel = managedChannel;
+    }
+
+    /**
+     * Retrieves a comment by id.
+     *
+     * @param id Comment id.
+     * @return {@link CommentMessage}.
+     */
+    public CommentMessage retrieveCommentById(String id) {
+        CommentServiceGrpc.CommentServiceBlockingStub stub = CommentServiceGrpc.newBlockingStub(this.managedChannel);
+
+        RetrieveCommentByIdRequest request = RetrieveCommentByIdRequest.newBuilder()
+                .setId(id)
+                .build();
+
+        CommentResponse commentResponse;
+        try {
+            commentResponse = stub.retrieveCommentById(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(commentResponse)
+                || !commentResponse.hasStatus()) {
+            log.error(Objects.isNull(commentResponse) ? "Retrieve feed returned null." : commentResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != commentResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(commentResponse.getStatus());
+        }
+
+        return commentResponse.getComment();
     }
 
     /**

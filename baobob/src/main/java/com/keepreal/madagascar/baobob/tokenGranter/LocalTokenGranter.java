@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.exceptions.InvalidGrantException;
 import org.springframework.security.oauth2.provider.*;
@@ -75,7 +76,7 @@ public class LocalTokenGranter extends AbstractTokenGranter {
 
         AbstractAuthenticationToken userAuth = new UsernamePasswordAuthenticationToken(userId,
                 "N/A",
-                null);
+                Collections.singletonList(new SimpleGrantedAuthority(String.format("user_%s", userId))));
         userAuth.setDetails(params);
 
         OAuth2Request storedOAuth2Request = getRequestFactory().createOAuth2Request(client, tokenRequest);
@@ -91,7 +92,7 @@ public class LocalTokenGranter extends AbstractTokenGranter {
      */
     private TokenRequest buildTokenRequest(UserMessage userMessage) {
         Map<String, String> requestParameters = new HashMap<>();
-        requestParameters.put("id", userMessage.getId());
+        requestParameters.put(LocalTokenGranter.USER_PARAM_NAME, userMessage.getId());
 
         return new TokenRequest(requestParameters,
                 "lemur",

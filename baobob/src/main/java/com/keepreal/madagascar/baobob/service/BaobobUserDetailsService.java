@@ -1,12 +1,13 @@
 package com.keepreal.madagascar.baobob.service;
 
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Represents the user details service implementation.
@@ -24,7 +25,7 @@ public class BaobobUserDetailsService implements UserDetailsService {
      */
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-        return new User(id, "", new ArrayList<>());
+        return new User(id, "", Collections.singletonList(new SimpleGrantedAuthority(String.format("user_%s", id))));
     }
 
 }

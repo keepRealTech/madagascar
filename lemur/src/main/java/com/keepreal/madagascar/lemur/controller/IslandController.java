@@ -17,7 +17,6 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -212,12 +211,18 @@ public class IslandController implements IslandApi {
             String id,
             PutIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+        if (!userId.equals(islandMessage.getHostId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         String portraitImageUri = null;
         if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
             portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
         }
 
-        IslandMessage islandMessage = this.islandService.updateIslandById(
+        islandMessage = this.islandService.updateIslandById(
                 id, payload.getName(), portraitImageUri, payload.getSecret(), payload.getDescription());
 
         BriefIslandResponse response = new BriefIslandResponse();
@@ -255,6 +260,10 @@ public class IslandController implements IslandApi {
     @Override
     public ResponseEntity<DummyResponse> apiV1IslandsIdUnsubscribePost(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+        if (!userId.equals(islandMessage.getHostId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
 
         this.islandService.unsubscribeIslandById(id, userId);
 
