@@ -65,7 +65,6 @@ public class LoginController implements LoginApi {
      */
     @Override
     @StatsEventTrigger(
-            value = "body.rtn == 0",
             category = StatsEventCategory.STATS_CAT_LOGIN,
             action = StatsEventAction.STATS_ACT_NONE,
             label = "login request"

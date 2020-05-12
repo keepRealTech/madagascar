@@ -58,13 +58,22 @@ public class StatsEventTriggerAspect {
         StatsEventTrigger annotation = method.getAnnotation(StatsEventTrigger.class);
 
         String value = "";
+        String metadata = "";
         boolean succeed = false;
 
         StatsEventMessage.Builder statsEventMessageBuilder = StatsEventMessage.newBuilder()
                 .setAction(annotation.action())
                 .setCategory(annotation.category())
-                .setLabel(annotation.label())
-                .setMetadata(annotation.metadata());
+                .setLabel(annotation.label());
+
+        if (StringUtils.hasText(annotation.metadata())) {
+            ExpressionParser parser = new SpelExpressionParser();
+            StandardEvaluationContext context = new StandardEvaluationContext(joinPoint.getArgs());
+            try {
+                metadata = String.valueOf(parser.parseExpression(annotation.metadata()).getValue(context));
+            } catch (SpelEvaluationException ignored) {
+            }
+        }
 
         try {
             Object result = joinPoint.proceed();
@@ -93,6 +102,7 @@ public class StatsEventTriggerAspect {
             throw exception;
         } finally {
             statsEventMessageBuilder
+                    .setMetadata(metadata)
                     .setValue(value)
                     .setSucceed(succeed);
             Message message = this.messageFactory.valueOf(statsEventMessageBuilder);

@@ -23,7 +23,7 @@ public @interface StatsEventTrigger {
 
     String label() default "";
 
-    String value() default "";
+    String value() default "body.rtn";
 
     String succeed() default "getStatusCode().value() == 200";
 
