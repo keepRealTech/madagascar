@@ -10,6 +10,12 @@ spec:
       app: lemur
   template:
     metadata:
+      annotations:
+        config.linkerd.io/init-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy-init
+        config.linkerd.io/init-image-version: v1.3.2
+        config.linkerd.io/proxy-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy
+        config.linkerd.io/proxy-image-version: stable-2.7.1
+        linkerd.io/inject: enabled
       labels:
         app: lemur
     spec:
