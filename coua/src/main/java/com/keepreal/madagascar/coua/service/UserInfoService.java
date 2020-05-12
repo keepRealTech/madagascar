@@ -53,7 +53,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
 
         UserInfo userInfo = UserInfo.builder()
                 .id(userId)
-                .displayId(displayIdGenerator.nextUId())
+                .displayId(displayIdGenerator.nextDisplayId())
                 .nickName(request.getName().getValue())
                 .portraitImageUri(request.getPortraitImageUri().getValue())
                 .gender(request.getGender().getValueValue())

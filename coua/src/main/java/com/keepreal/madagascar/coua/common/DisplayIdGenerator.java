@@ -27,7 +27,7 @@ public class DisplayIdGenerator {
         this.userInfoRepository = userInfoRepository;
     }
 
-    public synchronized String nextUId() {
+    public synchronized String nextDisplayId() {
         String uId = generateUId();
         while (DisplayIdFilterUtils.isSpecial(uId) || isExist(uId)) {
             uId = generateUId();
@@ -37,7 +37,7 @@ public class DisplayIdGenerator {
     }
 
     private boolean isExist(String uId) {
-        return userInfoRepository.countByDisplayId(uId) > 0;
+        return userInfoRepository.existsByDisplayId(uId);
     }
 
     private String generateUId() {

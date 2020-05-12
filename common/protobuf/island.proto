@@ -118,6 +118,11 @@ message UpdateLastFeedAtResponse {
     CommonStatus status = 1;
 }
 
+message RetrieveDefaultIslandsByUserIdRequest {
+    string userId = 1;
+    PageRequest pageRequest = 2;
+}
+
 service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
@@ -130,4 +135,5 @@ service IslandService {
     rpc UnsubscribeIslandById (UnsubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
     rpc CheckNewFeeds (CheckNewFeedsRequest) returns (CheckNewFeedsResponse) {};
     rpc UpdateLastFeedAtById (UpdateLastFeedAtRequest) returns (UpdateLastFeedAtResponse) {}
+    rpc RetrieveDefaultIslandsByUserId (RetrieveDefaultIslandsByUserIdRequest) returns (IslandsResponse) {}
 }

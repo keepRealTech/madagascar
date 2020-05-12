@@ -168,7 +168,7 @@ public class FeedService {
      * @param pageSize Page size.
      * @return {@link FeedsResponse}.
      */
-    public FeedsResponse retrieveFeeds(String islandId, Boolean fromHost, int page, int pageSize) {
+    public FeedsResponse retrieveFeeds(String islandId, Boolean fromHost, String userId, int page, int pageSize) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
 
         QueryFeedCondition.Builder conditionBuilder = QueryFeedCondition.newBuilder();
@@ -184,6 +184,7 @@ public class FeedService {
         RetrieveMultipleFeedsRequest request = RetrieveMultipleFeedsRequest.newBuilder()
                 .setCondition(conditionBuilder.build())
                 .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                .setUserId(userId)
                 .build();
 
         FeedsResponse feedsResponse;

@@ -60,6 +60,9 @@ public class DummyPasswordLoginExecutor implements LoginExecutor {
      */
     @SuppressWarnings("unchecked")
     private Mono<UserMessage> loginWithUserCombination(String username, String password) {
+        if ("testuser".equals(username) && "testpass".equals(password)) {
+            return this.userService.retrieveUserByIdMono("001");
+        }
         switch (username) {
             case "user":
                 return this.userService.retrieveUserByIdMono("0");

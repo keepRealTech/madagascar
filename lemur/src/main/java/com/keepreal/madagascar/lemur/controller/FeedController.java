@@ -188,8 +188,9 @@ public class FeedController implements FeedApi {
                                                        Boolean fromHost,
                                                        Integer page,
                                                        Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveFeeds(islandId, fromHost, page, pageSize);
+                this.feedService.retrieveFeeds(islandId, fromHost, userId, page, pageSize);
 
         FeedsResponse response = new FeedsResponse();
         response.setData(feedsResponse.getFeedList()

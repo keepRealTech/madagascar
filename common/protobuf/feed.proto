@@ -30,6 +30,7 @@ message RetrieveFeedByIdRequest {
 message RetrieveMultipleFeedsRequest {
     QueryFeedCondition condition = 1;
     PageRequest pageRequest = 2;
+    string userId = 3;
 }
 
 message DeleteFeedByIdRequest {
@@ -52,9 +53,25 @@ message DeleteFeedResponse {
     CommonStatus status = 1;
 }
 
+message RetrieveLatestFeedByUserIdRequest {
+    string userId = 1;
+}
+
+message CreateDefaultFeedRequest {
+    string userId = 1;
+    string islandId = 2;
+    string hostId = 3;
+}
+
+message CreateDefaultFeedResponse {
+    CommonStatus status = 1;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
+    rpc RetrieveLatestFeedByUserId (RetrieveLatestFeedByUserIdRequest) returns (FeedResponse) {}
+    rpc CreateDefaultFeed (CreateDefaultFeedRequest) returns (CreateDefaultFeedResponse) {}
 }

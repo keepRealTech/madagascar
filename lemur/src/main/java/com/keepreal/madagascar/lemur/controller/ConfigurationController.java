@@ -19,9 +19,11 @@ import java.util.Map;
 @RestController
 public class ConfigurationController implements ConfigApi {
 
-    private static Map<Integer, ConfigurationDTO> IOSConfigVersionMap = new HashMap<>();
-    static {
-        IOSConfigVersionMap.put(100, createConfigurationDTO(5,100,5,5,5,1000, true));
+    private Map<Integer, ConfigurationDTO> IOSConfigVersionMap = new HashMap<>();
+
+    public ConfigurationController() {
+        IOSConfigVersionMap.put(0, createIOSConfigurationDTO(5,100,5,5,5,1000, true));
+        IOSConfigVersionMap.put(100, createIOSConfigurationDTO(5,100,5,5,5,1000, true));
     }
 
     /**
@@ -36,7 +38,7 @@ public class ConfigurationController implements ConfigApi {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
         switch (configType) {
             case IOS:
-                configurationDTO = IOSConfigVersionMap.get(version);
+                configurationDTO = IOSConfigVersionMap.getOrDefault(version, IOSConfigVersionMap.get(0));
             case ANDROID:
             default:
         }
@@ -48,13 +50,25 @@ public class ConfigurationController implements ConfigApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    private static ConfigurationDTO createConfigurationDTO(Integer islandFeedLoopInterval,
-                                                           Integer myIslandsPageSize,
-                                                           Integer messageLoopInterval,
-                                                           Integer guestPageSize,
-                                                           Integer islandCheckInterval,
-                                                           Integer configTimeout,
-                                                           Boolean audit) {
+    /**
+     * Create ConfigurationDTO
+     *
+     * @param islandFeedLoopInterval
+     * @param myIslandsPageSize
+     * @param messageLoopInterval
+     * @param guestPageSize
+     * @param islandCheckInterval
+     * @param configTimeout
+     * @param audit
+     * @return {@link ConfigurationDTO}
+     */
+    private ConfigurationDTO createIOSConfigurationDTO(Integer islandFeedLoopInterval,
+                                                              Integer myIslandsPageSize,
+                                                              Integer messageLoopInterval,
+                                                              Integer guestPageSize,
+                                                              Integer islandCheckInterval,
+                                                              Integer configTimeout,
+                                                              Boolean audit) {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
         configurationDTO.setIslandFeedLoopInterval(islandFeedLoopInterval);
         configurationDTO.setMyIslandsPageSize(myIslandsPageSize);
