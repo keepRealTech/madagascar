@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * Represents the repository for notification.
  */
-public interface NotificationRepository extends MongoRepository<Notification, Long> {
+public interface NotificationRepository extends MongoRepository<Notification, String> {
 
     Long countByUserIdAndTypeIsAndCreatedAtAfter(String userId, NotificationType type, Long timestamp);
 

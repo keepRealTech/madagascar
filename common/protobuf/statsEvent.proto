@@ -21,9 +21,9 @@ enum StatsEventAction {
   STATS_ACT_DELETE = 4;
 }
 
-message StatsEvent {
-  StatsCategory category = 1;
-  StatsAction action = 2;
+message StatsEventMessage {
+  StatsEventCategory category = 1;
+  StatsEventAction action = 2;
   string label = 3;
   string value = 4;
   bool succeed = 5;
