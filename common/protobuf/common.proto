@@ -21,6 +21,7 @@ enum LoginType {
     LOGIN_OAUTH_WECHAT = 1;
     LOGIN_PASSWORD = 2;
     LOGIN_REFRESH_TOKEN = 3;
+    LOGIN_JWT_IOS = 4;
 }
 
 enum NotificationType {

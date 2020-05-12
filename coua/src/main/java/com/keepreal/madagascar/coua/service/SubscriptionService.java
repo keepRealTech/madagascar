@@ -124,16 +124,16 @@ public class SubscriptionService {
                 .build();
         Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
         message.setKey(uuid);
-//        producerBean.sendAsync(message, new SendCallback() {
-//            @Override
-//            public void onSuccess(SendResult sendResult) {
-//            }
-//
-//            @Override
-//            public void onException(OnExceptionContext context) {
-//                log.error("this message send failure, message Id is {}", context.getMessageId());
-//            }
-//        });
+        producerBean.sendAsync(message, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) {
+            }
+
+            @Override
+            public void onException(OnExceptionContext context) {
+                log.error("this message send failure, message Id is {}", context.getMessageId());
+            }
+        });
     }
 
     public void unSubscribeIsland(String islandId, String userId) {

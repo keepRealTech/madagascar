@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.baobob.service;
 
 import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.baobob.loginExecutor.model.IOSLoginInfo;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
 import com.keepreal.madagascar.common.GenderValue;
 import com.keepreal.madagascar.common.UserMessage;
@@ -71,6 +72,23 @@ public class UserService {
                 .setGender(GenderValue.newBuilder().setValue(wechatUserInfo.getGender()))
                 .setPortraitImageUri(StringValue.of(wechatUserInfo.getPortraitImageUri()))
                 .setUnionId(wechatUserInfo.getUnionId())
+                .build();
+
+        return stub.createUser(request).map(UserResponse::getUser);
+    }
+
+    /**
+     * Creates a new user by {@link IOSLoginInfo}.
+     *
+     * @param iosLoginInfo  {@link IOSLoginInfo}.
+     * @return  {@link UserMessage}.
+     */
+    public Mono<UserMessage> createUserByIOSUserInfoMono(IOSLoginInfo iosLoginInfo) {
+        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.managedChannel);
+
+        NewUserRequest request = NewUserRequest.newBuilder()
+                .setName(StringValue.of(iosLoginInfo.getFullName()))
+                .setUnionId(iosLoginInfo.getUnionId())
                 .build();
 
         return stub.createUser(request).map(UserResponse::getUser);
