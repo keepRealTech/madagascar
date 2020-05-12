@@ -25,6 +25,7 @@ message NewFeedsResponse {
 
 message RetrieveFeedByIdRequest {
     string id = 1;
+    string userId = 2;
 }
 
 message RetrieveMultipleFeedsRequest {

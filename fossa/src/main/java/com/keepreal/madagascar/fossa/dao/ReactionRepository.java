@@ -20,4 +20,6 @@ public interface ReactionRepository extends MongoRepository<ReactionInfo, String
     Page<ReactionInfo> findReactionInfosByFeedId(String feedId, Pageable pageable);
 
     ReactionInfo findTopByFeedIdAndUserId(String feedId, String userId);
+
+    boolean existsByUserIdAndFeedIdAndReactionTypeListContains(String userId, String feedId, Integer reactionType);
 }
