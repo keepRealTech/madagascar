@@ -8,3 +8,5 @@ include 'coua'
 include 'baobob'
 include 'fossa'
 include 'tenrecs'
+include 'brookesia'
+
