@@ -10,7 +10,7 @@ import com.keepreal.madagascar.common.LoginType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
-import com.keepreal.madagascar.common.stats_events.annotation.StatsEventTrigger;
+import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.LoginService;
 import com.keepreal.madagascar.lemur.service.UserService;
@@ -64,7 +64,7 @@ public class LoginController implements LoginApi {
      * @return {@link LoginResponse}.
      */
     @Override
-    @StatsEventTrigger(
+    @HttpStatsEventTrigger(
             category = StatsEventCategory.STATS_CAT_LOGIN,
             action = StatsEventAction.STATS_ACT_NONE,
             label = "login request"

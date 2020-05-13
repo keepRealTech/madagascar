@@ -3,7 +3,7 @@ package com.keepreal.madagascar.common.stats_events.interceptor;
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.brookesia.StatsEventMessage;
-import com.keepreal.madagascar.common.stats_events.annotation.StatsEventTrigger;
+import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.common.stats_events.config.StatsEventProducerConfiguration;
 import com.keepreal.madagascar.common.stats_events.messageFactory.MessageFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -56,12 +56,12 @@ public class StatsEventTriggerAspect {
      * @return The result for the method.
      * @throws Throwable {@link Throwable}.
      */
-    @Around("@annotation(com.keepreal.madagascar.common.stats_events.annotation.StatsEventTrigger)")
-    public Object statsEventTriggerAspectLogic(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Around("@annotation(com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger)")
+    public Object httpStatsEventTriggerAspectLogic(ProceedingJoinPoint joinPoint) throws Throwable {
 
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
-        StatsEventTrigger annotation = method.getAnnotation(StatsEventTrigger.class);
+        HttpStatsEventTrigger annotation = method.getAnnotation(HttpStatsEventTrigger.class);
 
         String value = "";
         String metadata = "";
