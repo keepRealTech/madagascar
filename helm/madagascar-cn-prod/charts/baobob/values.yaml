@@ -18,7 +18,7 @@ wechat:
   host: https://api.weixin.qq.com
 
 jwt:
-  access_token_validity: 86400
+  access_token_validity: 604800
   refresh_token_validity: 604800
 
 coua:
