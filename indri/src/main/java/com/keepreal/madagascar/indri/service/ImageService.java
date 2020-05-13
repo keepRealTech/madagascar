@@ -1,10 +1,10 @@
 package com.keepreal.madagascar.indri.service;
 
 import com.aliyun.oss.OSS;
-import com.keepreal.madagascar.Indri.ReactorImageServiceGrpc;
-import com.keepreal.madagascar.Indri.UploadImagesRequest;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.indri.ReactorImageServiceGrpc;
+import com.keepreal.madagascar.indri.UploadImagesRequest;
 import com.keepreal.madagascar.indri.config.AliyunOssConfiguration;
 import com.keepreal.madagascar.indri.util.CommonStatusUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +53,7 @@ public class ImageService extends ReactorImageServiceGrpc.ImageServiceImplBase {
     @Override
     public Mono<CommonStatus> uploadImages(Mono<UploadImagesRequest> request) {
         return request.flatMapMany(uploadImagesRequest ->
-                    Flux.fromIterable(IntStream.range(0, uploadImagesRequest.getImageNamesCount())
+                Flux.fromIterable(IntStream.range(0, uploadImagesRequest.getImageNamesCount())
                         .mapToObj(i -> new AbstractMap.SimpleEntry<>(
                                 uploadImagesRequest.getImageNames(i),
                                 uploadImagesRequest.getImageContent(i).toByteArray()))

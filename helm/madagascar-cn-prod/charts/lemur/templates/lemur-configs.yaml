@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: lemur
-  namespace: {{ .Values.commonConfigs.namespace }}
+  namespace: {{ .Values.common_configs.namespace }}
 data:
   GRPC_COUA_HOST: {{ .Values.coua.host }}
   GRPC_COUA_PORT: '{{ .Values.coua.port }}'
@@ -19,3 +19,6 @@ data:
   SYSTEMNOTIFICATION_NAME: {{ .Values.system_notification.name }}
   SYSTEMNOTIFICATION_CONTENT: {{ .Values.system_notification.content }}
   SYSTEMNOTIFICATION_PORTRAITIMAGEURI: {{ .Values.system_notification.portrait_image_uri }}
+  ROCKETMQ_STATSEVENT_NAMESRVADDR: {{ .Values.rocketmq.name_server_address }}
+  ROCKETMQ_STATSEVENT_TOPIC: {{ .Values.rocketmq.topic }}
+  ROCKETMQ_STATSEVENT_TAG: {{ .Values.rocketmq.tag }}

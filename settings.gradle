@@ -2,9 +2,12 @@ rootProject.name = 'madagascar'
 
 include 'common:exceptions'
 include 'common:id-generator-starter'
+include 'common:stats-event-producer-starter'
 include 'indri'
 include 'lemur'
 include 'coua'
 include 'baobob'
 include 'fossa'
 include 'tenrecs'
+include 'brookesia'
+

@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-commonConfigs:
+common_configs:
   namespace: keepreal-prod
 
 global:
@@ -12,4 +12,4 @@ global:
 deploy:
   enable_http: false
   ssl:
-    cert_id: 1398284016177859_171f8558958_1798620612_-1406035680
+    cert_id: 1398284016177859_1720332b91b_1749325862_1022387165

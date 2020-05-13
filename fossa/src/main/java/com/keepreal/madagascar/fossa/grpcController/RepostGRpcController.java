@@ -167,7 +167,7 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
      * @param content       repost content.
      * @param isSuccessful  is successful.
      * @param fromType      repost type (feed or island)
-     * @return
+     * @return  {@link RepostInfo}.
      */
     private RepostInfo getRepostInfo(String fromId, String userId, String content, Boolean isSuccessful, Integer fromType) {
         return RepostInfo.builder()

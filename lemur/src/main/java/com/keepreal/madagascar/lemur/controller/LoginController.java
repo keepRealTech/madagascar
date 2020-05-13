@@ -4,10 +4,13 @@ import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.OAuthWechatLoginPayload;
 import com.keepreal.madagascar.baobob.PasswordLoginPayload;
 import com.keepreal.madagascar.baobob.TokenRefreshPayload;
+import com.keepreal.madagascar.brookesia.StatsEventAction;
+import com.keepreal.madagascar.brookesia.StatsEventCategory;
 import com.keepreal.madagascar.common.LoginType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.LoginService;
 import com.keepreal.madagascar.lemur.service.UserService;
@@ -61,6 +64,11 @@ public class LoginController implements LoginApi {
      * @return {@link LoginResponse}.
      */
     @Override
+    @HttpStatsEventTrigger(
+            category = StatsEventCategory.STATS_CAT_LOGIN,
+            action = StatsEventAction.STATS_ACT_NONE,
+            label = "login request"
+    )
     public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest body) {
         LoginRequest loginRequest;
         switch (body.getLoginType()) {

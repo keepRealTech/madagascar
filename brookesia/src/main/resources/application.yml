@@ -1,0 +1,13 @@
+spring:
+  data:
+    mongodb:
+      database: brookesia
+      uri: mongodb://root:password@127.0.0.1:27017
+
+rocketmq:
+  accessKey: 1
+  secretKey: 2
+  nameSrvAddr: localhost:9876
+  topic: stats-event
+  groupId: GID-brookesia-default
+  tag: event

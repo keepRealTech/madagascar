@@ -2,9 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-commonConfigs:
+common_configs:
   namespace: keepreal-prod
-  replicas: 1
+  replicas: 2
+  memory: 2.5Gi
+  cpu: 500m
 
 images:
   baobob:
@@ -16,7 +18,7 @@ wechat:
   host: https://api.weixin.qq.com
 
 jwt:
-  access_token_validity: 86400
+  access_token_validity: 604800
   refresh_token_validity: 604800
 
 coua:

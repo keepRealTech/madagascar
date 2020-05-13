@@ -15,12 +15,17 @@ message PasswordLoginPayload {
     string password = 2;
 }
 
+message JWTISOLoginPayload {
+    string identifyToken = 1;
+}
+
 message LoginRequest {
     LoginType loginType = 1;
     oneof payload {
         OAuthWechatLoginPayload oauthWechatPayload = 2;
         PasswordLoginPayload passwordPayload = 3;
         TokenRefreshPayload tokenRefreshPayload = 4;
+        JWTISOLoginPayload jwtIsoLoginPayload = 5;
     }
 }
 

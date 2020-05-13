@@ -1,11 +1,14 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.brookesia.StatsEventAction;
+import com.keepreal.madagascar.brookesia.StatsEventCategory;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.FeedRepostsResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
@@ -113,6 +116,12 @@ public class FeedController implements FeedApi {
      * @return {@link DummyResponse}.
      */
     @Override
+    @HttpStatsEventTrigger(
+            category = StatsEventCategory.STATS_CAT_FEED,
+            action = StatsEventAction.STATS_ACT_CREATE,
+            label = "image number",
+            metadata = "[1].size()"
+    )
     public ResponseEntity<DummyResponse> apiV1FeedsPost(
             PostFeedPayload payload,
             @ApiParam(value = "file detail") @Valid @RequestPart(value = "images", required = false) List<MultipartFile> images) {
@@ -237,6 +246,10 @@ public class FeedController implements FeedApi {
      * @return {@link CommentResponse}.
      */
     @Override
+    @HttpStatsEventTrigger(
+            category = StatsEventCategory.STATS_CAT_COMMENT,
+            action = StatsEventAction.STATS_ACT_CREATE
+    )
     public ResponseEntity<CommentResponse> apiV1FeedsIdCommentsPost(String id, PostCommentRequest postCommentRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
 

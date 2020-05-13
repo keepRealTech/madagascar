@@ -1,0 +1,30 @@
+plugins {
+    id 'java-library'
+    id 'org.springframework.boot'
+    id 'com.google.protobuf'
+}
+
+version = 1.0
+
+jar {
+    enabled = true
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDirs 'src/main/madagascar-grpc-proto'
+        }
+    }
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
+    implementation 'com.aliyun.openservices:ons-client'
+    implementation 'com.google.protobuf:protobuf-java'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

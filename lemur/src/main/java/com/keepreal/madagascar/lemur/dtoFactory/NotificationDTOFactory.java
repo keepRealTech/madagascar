@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.SystemNotificationConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.CommentNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.NoticeNotificationDTOBuilder;
@@ -9,6 +10,7 @@ import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.UnreadNotificationsCountMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import swagger.model.NotificationDTO;
 import swagger.model.NotificationType;
@@ -21,6 +23,7 @@ import java.util.Objects;
 /**
  * Represents the notification dto factory.
  */
+@Slf4j
 @Component
 public class NotificationDTOFactory {
 
@@ -96,40 +99,45 @@ public class NotificationDTOFactory {
             return null;
         }
 
-        switch (notification.getType()) {
-            case NOTIFICATION_ISLAND_NOTICE:
-                return new NoticeNotificationDTOBuilder()
-                        .setNotificationMessage(notification)
-                        .setIslandService(this.islandService)
-                        .setIslandDTOFactory(this.islandDTOFactory)
-                        .setUserService(this.userService)
-                        .setUserDTOFactory(this.userDTOFactory)
-                        .build();
-            case NOTIFICATION_COMMENTS:
-                return new CommentNotificationDTOBuilder()
-                        .setNotificationMessage(notification)
-                        .setFeedDTOFactory(this.feedDTOFactory)
-                        .setCommentDTOFactory(this.commentDTOFactory)
-                        .build();
-            case NOTIFICATION_REACTIONS:
-                return new ReactionNotificationDTOBuilder()
-                        .setNotificationMessage(notification)
-                        .setFeedDTOFactory(this.feedDTOFactory)
-                        .setReactionDTOFactory(this.reactionDTOFactory)
-                        .build();
-            case NOTIFICATION_SYSTEM_NOTICE:
-                SystemNoticeDTO systemNotice = new SystemNoticeDTO();
-                systemNotice.setName(this.systemNotificationConfiguration.getName());
-                systemNotice.setContent(this.systemNotificationConfiguration.getContent());
-                systemNotice.setPortraitImageUri(this.systemNotificationConfiguration.getPortraitImageUri());
+        try {
+            switch (notification.getType()) {
+                case NOTIFICATION_ISLAND_NOTICE:
+                    return new NoticeNotificationDTOBuilder()
+                            .setNotificationMessage(notification)
+                            .setIslandService(this.islandService)
+                            .setIslandDTOFactory(this.islandDTOFactory)
+                            .setUserService(this.userService)
+                            .setUserDTOFactory(this.userDTOFactory)
+                            .build();
+                case NOTIFICATION_COMMENTS:
+                    return new CommentNotificationDTOBuilder()
+                            .setNotificationMessage(notification)
+                            .setFeedDTOFactory(this.feedDTOFactory)
+                            .setCommentDTOFactory(this.commentDTOFactory)
+                            .build();
+                case NOTIFICATION_REACTIONS:
+                    return new ReactionNotificationDTOBuilder()
+                            .setNotificationMessage(notification)
+                            .setFeedDTOFactory(this.feedDTOFactory)
+                            .setReactionDTOFactory(this.reactionDTOFactory)
+                            .build();
+                case NOTIFICATION_SYSTEM_NOTICE:
+                    SystemNoticeDTO systemNotice = new SystemNoticeDTO();
+                    systemNotice.setName(this.systemNotificationConfiguration.getName());
+                    systemNotice.setContent(this.systemNotificationConfiguration.getContent());
+                    systemNotice.setPortraitImageUri(this.systemNotificationConfiguration.getPortraitImageUri());
 
-                NotificationDTO systemNotificationDTO = new NotificationDTO();
-                systemNotificationDTO.setNotificationType(NotificationType.SYSTEM_NOTICE);
-                systemNotificationDTO.setSystemNotice(systemNotice);
+                    NotificationDTO systemNotificationDTO = new NotificationDTO();
+                    systemNotificationDTO.setNotificationType(NotificationType.SYSTEM_NOTICE);
+                    systemNotificationDTO.setSystemNotice(systemNotice);
 
-                return systemNotificationDTO;
-            default:
-                return null;
+                    return systemNotificationDTO;
+                default:
+                    return null;
+            }
+        } catch (KeepRealBusinessException e) {
+            log.error("build NotificationDTO exception, message is {}", e.getMessage());
+            return null;
         }
     }
 
