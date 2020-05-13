@@ -8,7 +8,7 @@ import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.common.stats_events.annotation.StatsEventTrigger;
+import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.FeedRepostsResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
@@ -116,7 +116,7 @@ public class FeedController implements FeedApi {
      * @return {@link DummyResponse}.
      */
     @Override
-    @StatsEventTrigger(
+    @HttpStatsEventTrigger(
             category = StatsEventCategory.STATS_CAT_FEED,
             action = StatsEventAction.STATS_ACT_CREATE,
             label = "image number",
@@ -246,7 +246,7 @@ public class FeedController implements FeedApi {
      * @return {@link CommentResponse}.
      */
     @Override
-    @StatsEventTrigger(
+    @HttpStatsEventTrigger(
             category = StatsEventCategory.STATS_CAT_COMMENT,
             action = StatsEventAction.STATS_ACT_CREATE
     )

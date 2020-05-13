@@ -3,7 +3,7 @@ package com.keepreal.madagascar.lemur.controller;
 import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.common.stats_events.annotation.StatsEventTrigger;
+import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +36,7 @@ public class ConfigurationController implements ConfigApi {
      * @return {@link ConfigurationResponse}.
      */
     @Cacheable(value = "config")
-    @StatsEventTrigger(
+    @HttpStatsEventTrigger(
             category = StatsEventCategory.STATS_CAT_FEED,
             action = StatsEventAction.STATS_ACT_CREATE,
             metadata = ""
