@@ -18,6 +18,7 @@ public class MessageFactory {
 
     /**
      * Constructs the {@link MessageFactory}.
+     *
      * @param statsEventProducerConfiguration {@link StatsEventProducerConfiguration}.
      */
     public MessageFactory(StatsEventProducerConfiguration statsEventProducerConfiguration) {
@@ -26,6 +27,7 @@ public class MessageFactory {
 
     /**
      * Converts the {@link StatsEventMessage} into {@link Message}.
+     *
      * @param statsEventMessageBuilder {@link StatsEventMessage.Builder}.
      * @return {@link Message}.
      */
@@ -34,12 +36,11 @@ public class MessageFactory {
         statsEventMessageBuilder
                 .setEventId(uuid)
                 .setTimestamp(Instant.now().toEpochMilli());
-        Message message = new Message(
+        return new Message(
                 this.statsEventProducerConfiguration.getTopic(),
                 this.statsEventProducerConfiguration.getTag(),
+                uuid,
                 statsEventMessageBuilder.build().toByteArray());
-        message.setKey(uuid);
-        return message;
     }
 
 }
