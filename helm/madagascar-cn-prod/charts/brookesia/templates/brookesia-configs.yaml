@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brookesia
+  namespace: {{ .Values.common_configs.namespace }}
+data:
+  SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
+  ROCKETMQ_NAMESRVADDR: {{ .Values.rocketmq.name_server_address }}
+  ROCKETMQ_TOPIC: {{ .Values.rocketmq.topic }}
+  ROCKETMQ_GROUPID: {{ .Values.rocketmq.group_id }}
+  ROCKETMQ_TAG: {{ .Values.rocketmq.tag }}
