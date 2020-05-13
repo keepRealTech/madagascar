@@ -47,6 +47,6 @@ rocketmq:
   stats-event:
     accessKey: 1
     secretKey: 2
-    topic: notification-event
+    topic: stats-event
     tag: event
-    nameSrvAddr: 192.168.0.8:9876
+    nameSrvAddr: 192.168.0.4:9876

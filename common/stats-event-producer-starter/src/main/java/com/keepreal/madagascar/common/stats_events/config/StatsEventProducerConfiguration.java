@@ -6,8 +6,13 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 
 import java.util.Properties;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Represents the stats event producer configurations.
@@ -22,6 +27,14 @@ public class StatsEventProducerConfiguration {
     private String nameSrvAddr;
     private String topic;
     private String tag;
+
+    private ExecutorService executorService = new ThreadPoolExecutor(
+            10,
+            20,
+            1L,
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(100),
+            new CustomizableThreadFactory("stats-event-producer-"));
 
     /**
      * Sets the rmq properties.

@@ -4,6 +4,7 @@ import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.brookesia.StatsEventMessage;
 import com.keepreal.madagascar.common.stats_events.annotation.StatsEventTrigger;
+import com.keepreal.madagascar.common.stats_events.config.StatsEventProducerConfiguration;
 import com.keepreal.madagascar.common.stats_events.messageFactory.MessageFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents the first version of stats event trigger aspect.
@@ -30,17 +32,21 @@ public class StatsEventTriggerAspect {
 
     private final MessageFactory messageFactory;
     private final ProducerBean producerBean;
+    private final StatsEventProducerConfiguration statsEventProducerConfiguration;
 
     /**
      * Constructs the aspect.
      *
-     * @param messageFactory {@link MessageFactory}.
-     * @param producerBean   {@link ProducerBean}.
+     * @param messageFactory                  {@link MessageFactory}.
+     * @param producerBean                    {@link ProducerBean}.
+     * @param statsEventProducerConfiguration {@link StatsEventProducerConfiguration}.
      */
     public StatsEventTriggerAspect(MessageFactory messageFactory,
-                                   @Qualifier("stats-event-producer") ProducerBean producerBean) {
+                                   @Qualifier("stats-event-producer") ProducerBean producerBean,
+                                   StatsEventProducerConfiguration statsEventProducerConfiguration) {
         this.messageFactory = messageFactory;
         this.producerBean = producerBean;
+        this.statsEventProducerConfiguration = statsEventProducerConfiguration;
     }
 
     /**
@@ -106,7 +112,14 @@ public class StatsEventTriggerAspect {
                     .setValue(value)
                     .setSucceed(succeed);
             Message message = this.messageFactory.valueOf(statsEventMessageBuilder);
-            this.producerBean.sendAsync(message, null);
+
+            CompletableFuture
+                    .supplyAsync(() -> this.producerBean.send(message),
+                            this.statsEventProducerConfiguration.getExecutorService())
+                    .exceptionally(throwable -> {
+                        log.warn(throwable.getMessage());
+                        return null;
+                    });
         }
     }
 
