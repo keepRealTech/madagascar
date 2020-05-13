@@ -13,11 +13,21 @@ import swagger.model.ConfigType;
 import swagger.model.ConfigurationDTO;
 import swagger.model.ConfigurationResponse;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Represents the configuration controller.
  */
 @RestController
 public class ConfigurationController implements ConfigApi {
+
+    private Map<Integer, ConfigurationDTO> IOSConfigVersionMap = new HashMap<>();
+
+    public ConfigurationController() {
+        IOSConfigVersionMap.put(0, this.createIOSConfigurationDTO(null,null,null,null,null,null,null));
+        IOSConfigVersionMap.put(100, this.createIOSConfigurationDTO(5,100,5,5,5,1000, true));
+    }
 
     /**
      * Implements the get configuration api.
@@ -32,11 +42,11 @@ public class ConfigurationController implements ConfigApi {
             metadata = ""
     )
     @Override
-    public ResponseEntity<ConfigurationResponse> apiV1ConfigsGet(ConfigType configType) {
+    public ResponseEntity<ConfigurationResponse> apiV1ConfigsGet(ConfigType configType, Integer version) {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
         switch (configType) {
             case IOS:
-                configurationDTO.setAudit(true);
+                configurationDTO = IOSConfigVersionMap.getOrDefault(version, IOSConfigVersionMap.get(0));
             case ANDROID:
             default:
         }
@@ -48,4 +58,33 @@ public class ConfigurationController implements ConfigApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Create ConfigurationDTO
+     *
+     * @param islandFeedLoopInterval
+     * @param myIslandsPageSize
+     * @param messageLoopInterval
+     * @param guestPageSize
+     * @param islandCheckInterval
+     * @param configTimeout
+     * @param audit
+     * @return {@link ConfigurationDTO}
+     */
+    private ConfigurationDTO createIOSConfigurationDTO(Integer islandFeedLoopInterval,
+                                                              Integer myIslandsPageSize,
+                                                              Integer messageLoopInterval,
+                                                              Integer guestPageSize,
+                                                              Integer islandCheckInterval,
+                                                              Integer configTimeout,
+                                                              Boolean audit) {
+        ConfigurationDTO configurationDTO = new ConfigurationDTO();
+        configurationDTO.setIslandFeedLoopInterval(islandFeedLoopInterval);
+        configurationDTO.setMyIslandsPageSize(myIslandsPageSize);
+        configurationDTO.setMessageLoopInterval(messageLoopInterval);
+        configurationDTO.setGuestPageSize(guestPageSize);
+        configurationDTO.setIslandCheckInterval(islandCheckInterval);
+        configurationDTO.setConfigTimeout(configTimeout);
+        configurationDTO.setAudit(audit);
+        return configurationDTO;
+    }
 }

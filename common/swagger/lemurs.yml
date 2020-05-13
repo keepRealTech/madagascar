@@ -187,6 +187,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BriefIslandsResponse'
+  /api/v1/islands/defaultIslands:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Island
+      summary: retrieves user create and join islands with pagination
+      responses:
+        '200':
+          description: islands response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandsResponse'
   /api/v1/islands/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -562,6 +577,7 @@ paths:
     get:
       parameters:
         - $ref: '#/components/parameters/configTypeInQuery'
+        - $ref: '#/components/parameters/versionInQuery'
       tags:
         - Config
       summary: retrieves the client config info
@@ -658,6 +674,12 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/ConfigType'
+    versionInQuery:
+      in: query
+      name: version
+      required: true
+      schema:
+        type: integer
   schemas:
     LoginType:
       type: string
@@ -744,6 +766,8 @@ components:
       type: object
       properties:
         id:
+          type: string
+        displayId:
           type: string
         name:
           type: string
@@ -1015,6 +1039,8 @@ components:
               type: integer
             repostCount:
               type: integer
+            isLiked:
+              type: boolean
     PostFeedPayload:
       type: object
       properties:
@@ -1389,6 +1415,18 @@ components:
     IOSConfigurationDTO:
       type: object
       properties:
+        islandFeedLoopInterval:
+          type: integer
+        myIslandsPageSize:
+          type: integer
+        messageLoopInterval:
+          type: integer
+        guestPageSize:
+          type: integer
+        islandCheckInterval:
+          type: integer
+        configTimeout:
+          type: integer
         audit:
           type: boolean
     AndroidConfigurationDTO:

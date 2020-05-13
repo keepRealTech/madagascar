@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,8 +22,7 @@ import javax.persistence.Table;
  **/
 
 @Data
-@Table(name = "comment")
-@Entity
+@Document(value = "commonInfo")
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor

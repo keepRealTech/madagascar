@@ -95,6 +95,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
         commentInfo.setContent(content);
         commentInfo.setReplyToId(replyToId);
         commentInfo.setDeleted(false);
+        commentInfo.setCreatedTime(System.currentTimeMillis());
 
         CommentInfo save = commentInfoRepository.save(commentInfo);
 
@@ -105,7 +106,7 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
 
-        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId);
+        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
         Message message = getMessage(commentMessage, feedMessage, feedMessage.getUserId());
         ProducerUtils.sendMessageAsync(producerBean, message);
         if (!StringUtils.isEmpty(replyToId)) {

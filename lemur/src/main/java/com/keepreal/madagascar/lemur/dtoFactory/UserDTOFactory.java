@@ -31,6 +31,7 @@ public class UserDTOFactory {
 
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
+        userDTO.setDisplayId(user.getDisplayId());
         userDTO.setName(user.getName());
         userDTO.setCity(user.getCity());
         userDTO.setBirthday(Date.valueOf(user.getBirthday()));
@@ -59,6 +60,7 @@ public class UserDTOFactory {
 
         BriefUserDTO briefUserDTO = new BriefUserDTO();
         briefUserDTO.setId(user.getId());
+        briefUserDTO.setDisplayId(user.getDisplayId());
         briefUserDTO.setName(user.getName());
         briefUserDTO.setPortraitImageUri(user.getPortraitImageUri());
         briefUserDTO.setGender(this.convertGender(user.getGender()));

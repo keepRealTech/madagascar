@@ -71,8 +71,7 @@ public class SubscriptionService {
     }
 
     public Page<String> getIslandIdListByUserSubscribed(String userId, Pageable pageable) {
-        int state = SubscriptionState.ISLANDER.getValue();
-        return getIslandsByUserState(userId, state, pageable);
+        return subscriptionRepository.getIslandIdListByUserSubscribed(userId, pageable);
     }
 
     public Page<String> getSubscriberIdListByIslandId(String islandId, Pageable pageable) {

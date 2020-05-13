@@ -5,13 +5,16 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
 rocketmq:
-  accessKey: 1
-  secretKey: 2
+  accessKey: xxx
+  secretKey: xxx
   topic: notification-event
   tag: event
-  nameSrvAddr: 192.168.0.8:9876
+  nameSrvAddr: 127.0.0.1:9876
 
 grpc:
+  fossa:
+    host: 127.0.0.1
+    port: 12003
   port: 12002
 
 snowflake:

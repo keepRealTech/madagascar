@@ -55,16 +55,14 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
 
     private final ReactionRepository reactionRepository;
     private final LongIdGenerator idGenerator;
-    private final MongoTemplate mongoTemplate;
     private final FeedInfoService feedInfoService;
     private final MqConfig mqConfig;
     private final ProducerBean producerBean;
 
     @Autowired
-    public ReactionService(ReactionRepository reactionRepository, LongIdGenerator idGenerator, MongoTemplate mongoTemplate, FeedInfoService feedInfoService, MqConfig mqConfig, ProducerBean producerBean) {
+    public ReactionService(ReactionRepository reactionRepository, LongIdGenerator idGenerator, FeedInfoService feedInfoService, MqConfig mqConfig, ProducerBean producerBean) {
         this.reactionRepository = reactionRepository;
         this.idGenerator = idGenerator;
-        this.mongoTemplate = mongoTemplate;
         this.feedInfoService = feedInfoService;
         this.mqConfig = mqConfig;
         this.producerBean = producerBean;
@@ -82,7 +80,7 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         String feedId = request.getFeedId();
 
         Set<Integer> reactionTypesSet = new HashSet<>(request.getReactionTypesValueList());
-        boolean requesthasLikeType = reactionTypesSet.contains(ReactionType.REACTION_LIKE_VALUE);
+        boolean requestHasLikeType = reactionTypesSet.contains(ReactionType.REACTION_LIKE_VALUE);
         ReactionInfo reactionInfo = reactionRepository.findTopByFeedIdAndUserId(feedId, userId);
         if (reactionInfo == null) {
             reactionInfo = new ReactionInfo();
@@ -92,12 +90,12 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
             reactionInfo.setFeedId(feedId);
             reactionInfo.setReactionTypeList(reactionTypesSet);
             reactionInfo.setDeleted(false);
-            if (requesthasLikeType) {
+            if (requestHasLikeType) {
                 feedInfoService.incFeedCount(feedId, FEED_COUNT_TYPE);
             }
         } else {
             Set<Integer> integerSet = reactionInfo.getReactionTypeList();
-            if (!integerSet.contains(ReactionType.REACTION_LIKE_VALUE) && requesthasLikeType) {
+            if (!integerSet.contains(ReactionType.REACTION_LIKE_VALUE) && requestHasLikeType) {
                 feedInfoService.incFeedCount(feedId, FEED_COUNT_TYPE);
             }
             integerSet.addAll(reactionTypesSet);
@@ -105,7 +103,7 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         reactionRepository.save(reactionInfo);
 
         ReactionMessage reactionMessage = getReactionMessage(reactionInfo.getId() ,feedId, userId, request.getReactionTypesList());
-        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId);
+        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
         ReactionEvent reactionEvent = ReactionEvent.newBuilder()
                 .setReaction(reactionMessage)
                 .setFeed(feedMessage)
@@ -135,6 +133,7 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         String userId = request.getUserId();
         List<Integer> typesValueList = request.getReactionTypesValueList();
 
+        //todo
         ReactionInfo reactionInfo = reactionRepository.findTopByFeedIdAndUserId(feedId, userId);
         if (reactionInfo != null) {
             reactionInfo.getReactionTypeList().removeAll(typesValueList);
@@ -165,7 +164,7 @@ public class ReactionService extends ReactionServiceGrpc.ReactionServiceImplBase
         Pageable pageable = PageRequestResponseUtils.getPageableByRequest(request.getPageRequest());
         Page<ReactionInfo> reactionInfoListPageable = reactionRepository.findReactionInfosByFeedId(feedId, pageable);
         List<ReactionInfo> reactionInfoList = reactionInfoListPageable.getContent();
-        List<ReactionMessage> reactionMessageList = reactionInfoList.stream() //这种写法是不是会让人看得很乱？
+        List<ReactionMessage> reactionMessageList = reactionInfoList.stream()
                 .map(info -> getReactionMessage(
                                 info.getId(),
                                 info.getFeedId(),

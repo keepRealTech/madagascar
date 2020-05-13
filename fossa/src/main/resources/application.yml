@@ -8,14 +8,14 @@ spring:
   data:
     mongodb:
       database: fossa
-      uri:
+      uri: mongodb://localhost:27017
 
 rocketmq:
-  accessKey:
-  secretKey:
+  accessKey: xxx
+  secretKey: xxx
   topic: notification-event
   tag: event
-  nameSrvAddr: 192.168.0.8:9876
+  nameSrvAddr: 127.0.0.1:9876
 
 grpc:
   coua:

@@ -5,10 +5,13 @@ import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
+import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
+import com.keepreal.madagascar.fossa.CreateDefaultFeedRequest;
+import com.keepreal.madagascar.fossa.CreateDefaultFeedResponse;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
@@ -18,9 +21,11 @@ import com.keepreal.madagascar.fossa.NewFeedsRequest;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveLatestFeedByUserIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.dao.CommentInfoRepository;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
+import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.CommentInfo;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
@@ -33,14 +38,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -54,21 +64,24 @@ import java.util.stream.IntStream;
 @GRpcService
 public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
 
-    public static final int DEFAULT_LAST_COMMENT_COUNT = 5;
+    private static final int DEFAULT_LAST_COMMENT_COUNT = 5;
+    private static final String DEFAULT_FEED_TEXT = "于%d年%d月%d日%d:%d，创建了属于我的岛";
 
     private final ManagedChannel managedChannel;
     private final MongoTemplate mongoTemplate;
     private final CommentInfoRepository commentInfoRepository;
     private final FeedInfoRepository feedInfoRepository;
     private final LongIdGenerator idGenerator;
+    private final ReactionRepository reactionRepository;
 
     @Autowired
-    public FeedInfoService(MongoTemplate mongoTemplate, CommentInfoRepository commentInfoRepository, @Qualifier("couaChannel")ManagedChannel managedChannel, FeedInfoRepository feedInfoRepository, LongIdGenerator idGenerator) {
+    public FeedInfoService(MongoTemplate mongoTemplate, CommentInfoRepository commentInfoRepository, @Qualifier("couaChannel") ManagedChannel managedChannel, FeedInfoRepository feedInfoRepository, LongIdGenerator idGenerator, ReactionRepository reactionRepository) {
         this.mongoTemplate = mongoTemplate;
         this.commentInfoRepository = commentInfoRepository;
         this.managedChannel = managedChannel;
         this.feedInfoRepository = feedInfoRepository;
         this.idGenerator = idGenerator;
+        this.reactionRepository = reactionRepository;
     }
 
     /**
@@ -88,15 +101,15 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfo.setId(String.valueOf(idGenerator.nextId()));
             feedInfo.setIslandId(islandIdList.get(i));
             feedInfo.setUserId(userId);
-            feedInfo.setFromHost(userId.equals(hostIdList.get(i)));
+            feedInfo.setHostId(hostIdList.get(i));
             feedInfo.setImageUrls(request.getImageUrisList());
             feedInfo.setText(text);
             feedInfo.setRepostCount(0);
             feedInfo.setCommentsCount(0);
             feedInfo.setLikesCount(0);
             feedInfo.setDeleted(false);
-            feedInfoList.add(feedInfo);
             feedInfo.setCreatedTime(System.currentTimeMillis());
+            feedInfoList.add(feedInfo);
         });
         feedInfoRepository.saveAll(feedInfoList);
         //调用coua服务更新island的lastFeedAt字段
@@ -116,7 +129,6 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
     @Override
     public void deleteFeedById(DeleteFeedByIdRequest request, StreamObserver<DeleteFeedResponse> responseObserver) {
         String feedId = request.getId();
-
         mongoTemplate.updateFirst(
                 Query.query(Criteria.where("id").is(feedId)),
                 Update.update("deleted", true),
@@ -137,11 +149,11 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
     @Override
     public void retrieveFeedById(RetrieveFeedByIdRequest request, StreamObserver<FeedResponse> responseObserver) {
         FeedResponse.Builder responseBuilder = FeedResponse.newBuilder();
-
+        String userId = request.getUserId();
         String feedId = request.getId();
         FeedInfo feedInfo = feedInfoRepository.findFeedInfoByIdAndDeletedIsFalse(feedId);
         if (feedInfo != null) {
-            FeedMessage feedMessage = getFeedMessage(feedInfo);
+            FeedMessage feedMessage = getFeedMessage(feedInfo, userId);
             responseBuilder.setFeed(feedMessage)
                     .setUserId(feedInfo.getUserId())
                     .setStatus(CommonStatusUtils.getSuccStatus());
@@ -165,23 +177,25 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         QueryFeedCondition condition = request.getCondition();
         boolean fromHost = condition.hasFromHost();
         boolean hasIslandId = condition.hasIslandId();
+        String userId = request.getUserId();
         Query query = new Query();
         query.addCriteria(Criteria.where("deleted").is(false));
         if (fromHost && hasIslandId) { //两个条件都存在
             Criteria criteria = Criteria
-                    .where("fromHost").is(condition.getFromHost().getValue())
+                    .where("hostId").is(userId)
                     .and("islandId").is(condition.getIslandId().getValue());
             query.addCriteria(criteria);
         } else if (fromHost || hasIslandId) { //只有一个条件
-            Criteria criteria = fromHost ? Criteria.where("fromHost").is(condition.getFromHost().getValue())
+            Criteria criteria = fromHost ? Criteria.where("hostId").is(userId)
                     : Criteria.where("islandId").is(condition.getIslandId().getValue());
             query.addCriteria(criteria);
         }
 
         // 没有条件
+        query.with(Sort.by(Sort.Order.desc("createdTime")));
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
-        List<FeedMessage> feedMessageList = feedInfoList.stream().map(this::getFeedMessage).collect(Collectors.toList());
+        List<FeedMessage> feedMessageList = feedInfoList.stream().map(info -> getFeedMessage(info, userId)).filter(Objects::nonNull).collect(Collectors.toList());
         PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(page, pageSize, totalCount);
         FeedsResponse feedsResponse = FeedsResponse.newBuilder()
                 .addAllFeed(feedMessageList)
@@ -192,10 +206,68 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    public FeedMessage getFeedMessageById(String feedId) {
+    /**
+     * 根据userId返回该用户最新一条Feed的信息
+     * @param request
+     * @param responseObserver
+     */
+    @Override
+    public void retrieveLatestFeedByUserId(RetrieveLatestFeedByUserIdRequest request, StreamObserver<FeedResponse> responseObserver) {
+        String userId = request.getUserId();
+        FeedInfo feedInfo = feedInfoRepository.findTopByUserIdAndDeletedIsFalseOrderByCreatedTimeDesc(userId);
+        if (feedInfo == null) {
+            responseObserver.onNext(FeedResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
+        FeedResponse feedResponse = FeedResponse.newBuilder()
+                .setUserId(userId)
+                .setFeed(getFeedMessage(feedInfo, userId))
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(feedResponse);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * 用户创建岛成功后，默认向岛内发送一条Feed
+     * @param request
+     * @param responseObserver
+     */
+    @Override
+    public void createDefaultFeed(CreateDefaultFeedRequest request, StreamObserver<CreateDefaultFeedResponse> responseObserver) {
+        LocalDateTime localDateTime = LocalDateTime.now();
+        String text = String.format(DEFAULT_FEED_TEXT, localDateTime.getYear(),
+                                                       localDateTime.getMonth().getValue(),
+                                                       localDateTime.getDayOfMonth(),
+                                                       localDateTime.getHour(),
+                                                       localDateTime.getMinute());
+        FeedInfo feedInfo = new FeedInfo();
+        feedInfo.setId(String.valueOf(idGenerator.nextId()));
+        feedInfo.setIslandId(request.getIslandId());
+        feedInfo.setUserId(request.getUserId());
+        feedInfo.setHostId(request.getHostId());
+        feedInfo.setText(text);
+        feedInfo.setRepostCount(0);
+        feedInfo.setCommentsCount(0);
+        feedInfo.setLikesCount(0);
+        feedInfo.setDeleted(false);
+        feedInfo.setCreatedTime(System.currentTimeMillis());
+        feedInfoRepository.save(feedInfo);
+
+        CreateDefaultFeedResponse response = CreateDefaultFeedResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    public FeedMessage getFeedMessageById(String feedId, String userId) {
         Optional<FeedInfo> feedInfoOptional = feedInfoRepository.findById(feedId);
         if (feedInfoOptional.isPresent()) {
-            return getFeedMessage(feedInfoOptional.get());
+            return getFeedMessage(feedInfoOptional.get(), userId);
         } else {
             return FeedMessage.newBuilder().build();
         }
@@ -213,19 +285,23 @@ public class FeedInfoService extends FeedServiceGrpc.FeedServiceImplBase {
         mongoTemplate.updateFirst(Query.query(Criteria.where("id").is(feedId)), update, FeedInfo.class);
     }
 
-    private FeedMessage getFeedMessage(FeedInfo feedInfo) {
+    private FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
+        if (feedInfo == null)
+            return null;
         List<CommentMessage> lastCommentMessage = getLastCommentMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
+        boolean isLiked = reactionRepository.existsByUserIdAndFeedIdAndReactionTypeListContains(userId, feedInfo.getId(), ReactionType.REACTION_LIKE_VALUE);
         return FeedMessage.newBuilder()
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
                 .setUserId(feedInfo.getUserId())
                 .setText(feedInfo.getText())
-                .addAllImageUris(feedInfo.getImageUrls())
+                .addAllImageUris(feedInfo.getImageUrls() == null ? Collections.emptyList() : feedInfo.getImageUrls())
                 .setCreatedAt(feedInfo.getCreatedTime())
                 .setCommentsCount(feedInfo.getCommentsCount())
                 .setLikesCount(feedInfo.getLikesCount())
                 .setRepostCount(feedInfo.getRepostCount())
                 .addAllLastComments(lastCommentMessage)
+                .setIsLiked(isLiked)
                 .build();
     }
 

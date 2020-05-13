@@ -62,8 +62,12 @@ public class FeedService {
      * @param imageUris Image uris.
      */
     public void createFeed(List<String> islandIds, String userId, String text, List<String> imageUris) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+        if (Objects.isNull(islandIds) || islandIds.size() == 0) {
+            log.error("param islandIds is invalid");
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
 
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
         List<String> hostIdList = islandIds.stream().map(id -> islandService.retrieveIslandById(id).getHostId()).collect(Collectors.toList());
 
         NewFeedsRequest request = NewFeedsRequest.newBuilder()
@@ -164,7 +168,7 @@ public class FeedService {
      * @param pageSize Page size.
      * @return {@link FeedsResponse}.
      */
-    public FeedsResponse retrieveFeeds(String islandId, Boolean fromHost, int page, int pageSize) {
+    public FeedsResponse retrieveFeeds(String islandId, Boolean fromHost, String userId, int page, int pageSize) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
 
         QueryFeedCondition.Builder conditionBuilder = QueryFeedCondition.newBuilder();
@@ -180,6 +184,7 @@ public class FeedService {
         RetrieveMultipleFeedsRequest request = RetrieveMultipleFeedsRequest.newBuilder()
                 .setCondition(conditionBuilder.build())
                 .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                .setUserId(userId)
                 .build();
 
         FeedsResponse feedsResponse;

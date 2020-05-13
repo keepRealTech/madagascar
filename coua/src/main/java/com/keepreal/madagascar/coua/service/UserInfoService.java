@@ -12,7 +12,7 @@ import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
-import com.keepreal.madagascar.coua.common.UIdGenerator;
+import com.keepreal.madagascar.coua.common.DisplayIdGenerator;
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
@@ -37,14 +37,14 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
     private final UserInfoRepository userInfoRepository;
     private final UserIdentityService userIdentityService;
     private final LongIdGenerator idGenerator;
-    private final UIdGenerator uIdGenerator;
+    private final DisplayIdGenerator displayIdGenerator;
 
     @Autowired
-    public UserInfoService(UserInfoRepository userInfoRepository, UserIdentityService userIdentityService, LongIdGenerator idGenerator, UIdGenerator uIdGenerator) {
+    public UserInfoService(UserInfoRepository userInfoRepository, UserIdentityService userIdentityService, LongIdGenerator idGenerator, DisplayIdGenerator displayIdGenerator) {
         this.userInfoRepository = userInfoRepository;
         this.userIdentityService = userIdentityService;
         this.idGenerator = idGenerator;
-        this.uIdGenerator = uIdGenerator;
+        this.displayIdGenerator = displayIdGenerator;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
 
         UserInfo userInfo = UserInfo.builder()
                 .id(userId)
-                .uId(uIdGenerator.nextUId())
+                .displayId(displayIdGenerator.nextDisplayId())
                 .nickName(request.getName().getValue())
                 .portraitImageUri(request.getPortraitImageUri().getValue())
                 .gender(request.getGender().getValueValue())
@@ -84,8 +84,8 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         if (queryUserCondition.hasUnionId()) {
             userInfo = userInfoRepository.findUserInfoByUnionIdAndDeletedIsFalse(queryUserCondition.getUnionId().getValue());
         }
-        if (queryUserCondition.hasUid()) {
-            userInfo = userInfoRepository.findUserInfoByUIdAndDeletedIsFalse(queryUserCondition.getUid().getValue());
+        if (queryUserCondition.hasDisplayId()) {
+            userInfo = userInfoRepository.findUserInfoByDisplayIdAndDeletedIsFalse(queryUserCondition.getDisplayId().getValue());
         }
         if (userInfo == null) {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
@@ -136,8 +136,8 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         if (request.getIdentitiesCount() > 0) {
             userIdentityService.updateUserIdentities(request.getIdentitiesValueList(), userId);
         }
-        if (request.hasUId()) {
-            userInfo.setUId(request.getUId().getValue());
+        if (request.hasDisplayId()) {
+            userInfo.setDisplayId(request.getDisplayId().getValue());
         }
         saveAndResponse(userInfo, responseObserver);
     }
@@ -175,7 +175,7 @@ public class UserInfoService extends UserServiceGrpc.UserServiceImplBase {
         List<IdentityType> identityTypes = identities.stream().map(IdentityType::forNumber).collect(Collectors.toList());
         return UserMessage.newBuilder()
                 .setId(userInfo.getId())
-                .setUId(userInfo.getUId())
+                .setDisplayId(userInfo.getDisplayId())
                 .setName(userInfo.getNickName())
                 .setPortraitImageUri(userInfo.getPortraitImageUri())
                 .setGender(Gender.forNumber(userInfo.getGender()))

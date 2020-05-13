@@ -24,6 +24,9 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
     @Query(value = "SELECT island_id FROM subscription WHERE user_id = ?1 AND state = ?2 AND is_deleted = FALSE", nativeQuery = true)
     Page<String> getIslandIdListByUserState(String userId, Integer state, Pageable pageable);
 
+    @Query(value = "SELECT island_id FROM subscription WHERE user_id = ?1 AND state > 0 AND is_deleted = FALSE ORDER BY created_time ASC", nativeQuery = true)
+    Page<String> getIslandIdListByUserSubscribed(String userId, Pageable pageable);
+
     @Query(value = "SELECT user_id FROM subscription WHERE island_id = ?1 AND state > 0 AND is_deleted = FALSE", nativeQuery = true)
     Page<String> getSubscriberIdListByIslandId(String islandId, Pageable pageable);
 

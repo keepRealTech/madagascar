@@ -75,6 +75,7 @@ public class FeedDTOFactory {
                 .collect(Collectors.toList()));
         feedDTO.setRepostCount(feed.getRepostCount());
         feedDTO.setCreatedAt(feed.getCreatedAt());
+        feedDTO.setIsLiked(feed.getIsLiked());
 
         feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
         feedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
