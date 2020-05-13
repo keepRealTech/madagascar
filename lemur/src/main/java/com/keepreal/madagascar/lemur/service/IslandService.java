@@ -129,7 +129,6 @@ public class IslandService {
      * @param userId User id.
      * @return {@link IslandProfileResponse}.
      */
-    @Cacheable(value = "island-profile", key = "#id")
     public IslandProfileResponse retrieveIslandProfileById(String id, String userId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
 

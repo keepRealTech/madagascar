@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.fossa.service;
+package com.keepreal.madagascar.fossa.grpcController;
 
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.RepostMessage;
@@ -14,8 +14,10 @@ import com.keepreal.madagascar.fossa.NewIslandRepostRequest;
 import com.keepreal.madagascar.fossa.RepostServiceGrpc;
 import com.keepreal.madagascar.fossa.RetrieveFeedRepostsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveIslandRepostsByIslandIdRequest;
+import com.keepreal.madagascar.fossa.common.FeedCountType;
 import com.keepreal.madagascar.fossa.common.RepostType;
 import com.keepreal.madagascar.fossa.dao.RepostRepository;
+import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.model.RepostInfo;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
@@ -30,32 +32,43 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-05-06
- **/
-
+ * Represents repost GRpc Controller
+ */
 @GRpcService
-public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
+public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBase {
 
     private final RepostRepository repostRepository;
     private final LongIdGenerator idGenerator;
     private final FeedInfoService feedInfoService;
 
-    @Autowired
-    public RepostService(RepostRepository repostRepository, LongIdGenerator idGenerator, FeedInfoService feedInfoService) {
+    /**
+     * Constructs repost grpc controller.
+     *
+     * @param repostRepository  {@link RepostRepository}.
+     * @param idGenerator       {@link LongIdGenerator}.
+     * @param feedInfoService   {@link FeedInfoService}.
+     */
+    public RepostGRpcController(RepostRepository repostRepository,
+                                LongIdGenerator idGenerator,
+                                FeedInfoService feedInfoService) {
         this.repostRepository = repostRepository;
         this.idGenerator = idGenerator;
         this.feedInfoService = feedInfoService;
     }
 
+    /**
+     * Create the feed repost.
+     *
+     * @param request           {@link NewFeedRepostRequest}.
+     * @param responseObserver  {@link FeedRepostResponse}.
+     */
     @Override
     public void createFeedRepost(NewFeedRepostRequest request, StreamObserver<FeedRepostResponse> responseObserver) {
         RepostInfo repostInfo = getRepostInfo(request.getFeedId(), request.getUserId(),
                 request.getContent(), request.getIsSuccessful(), RepostType.FEED.getCode());
         RepostInfo save = repostRepository.save(repostInfo);
 
-        feedInfoService.incFeedCount(request.getFeedId(), "repostCount");
+        feedInfoService.incFeedCount(request.getFeedId(), FeedCountType.REPOST_COUNT);
 
         FeedRepostMessage message = getFeedRepostMessage(save);
         FeedRepostResponse response = FeedRepostResponse.newBuilder()
@@ -66,6 +79,12 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Implements feed reposts by feed id method.
+     *
+     * @param request           {@link RetrieveFeedRepostsByFeedIdRequest}.
+     * @param responseObserver  {@link FeedRepostsResponse}.
+     */
     @Override
     public void retrieveFeedRepostsByFeedId(RetrieveFeedRepostsByFeedIdRequest request, StreamObserver<FeedRepostsResponse> responseObserver) {
         String feedId = request.getFeedId();
@@ -84,6 +103,12 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Create the island repost.
+     *
+     * @param request           {@link NewIslandRepostRequest}.
+     * @param responseObserver  {@link IslandRepostResponse}.
+     */
     @Override
     public void createIslandRepost(NewIslandRepostRequest request, StreamObserver<IslandRepostResponse> responseObserver) {
         RepostInfo repostInfo = getRepostInfo(request.getIslandId(), request.getUserId(),
@@ -99,6 +124,12 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Implements island reposts by island id method.
+     *
+     * @param request           {@link RetrieveIslandRepostsByIslandIdRequest}.
+     * @param responseObserver  {@link IslandRepostsResponse}.
+     */
     @Override
     public void retrieveIslandRepostsByIslandId(RetrieveIslandRepostsByIslandIdRequest request, StreamObserver<IslandRepostsResponse> responseObserver) {
         String islandId = request.getIslandId();
@@ -117,10 +148,27 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Retrieves pageable repost.
+     *
+     * @param pageRequest   {@link org.springframework.data.domain.Pageable}.
+     * @param fromId        feed id or island id.
+     * @return  {@link RepostInfo}.
+     */
     private Page<RepostInfo> getRepostInfoPageable(com.keepreal.madagascar.common.PageRequest pageRequest, String fromId) {
         return repostRepository.findRepostInfosByFromId(fromId, PageRequest.of(pageRequest.getPage(), pageRequest.getPageSize()));
     }
 
+    /**
+     * Retrieves repost
+     *
+     * @param fromId        feed id or island id.
+     * @param userId        user id.
+     * @param content       repost content.
+     * @param isSuccessful  is successful.
+     * @param fromType      repost type (feed or island)
+     * @return
+     */
     private RepostInfo getRepostInfo(String fromId, String userId, String content, Boolean isSuccessful, Integer fromType) {
         return RepostInfo.builder()
                 .id(String.valueOf(idGenerator.nextId()))
@@ -132,6 +180,12 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
                 .build();
     }
 
+    /**
+     * Retrieves repost message.
+     *
+     * @param repostInfo    {@link RepostInfo}.
+     * @return  {@link RepostMessage}.
+     */
     private RepostMessage getRepostMessage(RepostInfo repostInfo) {
         return RepostMessage.newBuilder()
                 .setContent(repostInfo.getContent())
@@ -142,6 +196,12 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
                 .build();
     }
 
+    /**
+     * Retrieves island repost message.
+     *
+     * @param repostInfo    {@link RepostInfo}.
+     * @return  {@link IslandRepostMessage}.
+     */
     private IslandRepostMessage getIslandRepostMessage(RepostInfo repostInfo) {
         if (repostInfo == null) {
             return null;
@@ -153,6 +213,12 @@ public class RepostService extends RepostServiceGrpc.RepostServiceImplBase {
                 .build();
     }
 
+    /**
+     * Retrieves feed repost message.
+     *
+     * @param repostInfo    {@link RepostInfo}.
+     * @return  {@link FeedRepostMessage}.
+     */
     private FeedRepostMessage getFeedRepostMessage(RepostInfo repostInfo) {
         if (repostInfo == null) {
             return null;
