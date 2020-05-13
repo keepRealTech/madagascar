@@ -6,6 +6,10 @@ class TestSet(TaskSet):
     token = ""
 
     def on_start(self):
+        headers = {
+            "Content-Type": "application/json"
+        }
+
         payload = {
             "loginType": "LOGIN_PASSWORD",
             "data": { 
@@ -14,11 +18,8 @@ class TestSet(TaskSet):
             }
         }
 
-        with self.client.post("api/v1/login", json.dumps(payload), catch_response = True) as response:
-            print(response.content)
+        with self.client.post("/api/v1/login", json.dumps(payload), headers = headers, catch_response = True) as response:
             self.token = json.loads(response.content)['data']['token']
-
-
 
     def getConfigs(self):
         self.client.get("/api/v1/configs?configType=IOS")
