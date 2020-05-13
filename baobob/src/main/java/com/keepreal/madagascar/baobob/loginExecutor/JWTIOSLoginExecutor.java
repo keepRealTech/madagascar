@@ -74,7 +74,7 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
     }
 
     /**
-     * create a new user from ios info
+     * Creates a new user from ios info.
      *
      * @param iosLoginInfo {@link IOSLoginInfo}
      * @return {@link UserMessage}
@@ -84,7 +84,7 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
     }
 
     /**
-     * log in ios with jwt
+     * Logs in ios with jwt.
      *
      * @param jwt from IOS client
      * @return {@link IOSLoginInfo}
@@ -104,7 +104,7 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
     }
 
     /**
-     * request apple get message
+     * Requests apple to get message.
      *
      * @return {@link PublicKey}
      */
@@ -125,7 +125,7 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
     }
 
     /**
-     * verify jwt validity
+     * Verifies jwt validity.
      *
      * @param key       {@link PublicKey}
      * @param jwt       from IOS client
@@ -147,6 +147,5 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID);
         }
     }
-
 
 }
