@@ -1,7 +1,10 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.brookesia.StatsEventAction;
+import com.keepreal.madagascar.brookesia.StatsEventCategory;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.stats_events.annotation.StatsEventTrigger;
 import com.keepreal.madagascar.fossa.IslandRepostMessage;
 import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
@@ -106,6 +109,12 @@ public class IslandController implements IslandApi {
      * @return {@link BriefIslandsResponse}.
      */
     @Override
+    @StatsEventTrigger(
+            category = StatsEventCategory.STATS_CAT_ISLAND,
+            action = StatsEventAction.STATS_ACT_RETRIEVE,
+            label = "islands hit number",
+            value = "body.data.size()"
+    )
     public ResponseEntity<BriefIslandsResponse> apiV1IslandsGet(String name,
                                                                 Boolean subscribed,
                                                                 Integer page,

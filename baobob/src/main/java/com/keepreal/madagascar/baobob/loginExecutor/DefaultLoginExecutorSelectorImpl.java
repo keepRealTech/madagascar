@@ -62,6 +62,12 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
                                 this.endpoints.getEndpointsConfigurer().getTokenServices(),
                                 this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
                                 this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
+            case LOGIN_JWT_IOS:
+                return new JWTIOSLoginExecutor(this.userService,
+                        new LocalTokenGranter(
+                                this.endpoints.getEndpointsConfigurer().getTokenServices(),
+                                this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
+                                this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
             case UNRECOGNIZED:
             default:
                 return new DummyLoginExecutorImpl();

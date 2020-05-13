@@ -42,3 +42,11 @@ security:
 
 server:
   port: 8081
+
+rocketmq:
+  stats-event:
+    accessKey: 1
+    secretKey: 2
+    topic: stats-event
+    tag: event
+    nameSrvAddr: 192.168.0.4:9876
