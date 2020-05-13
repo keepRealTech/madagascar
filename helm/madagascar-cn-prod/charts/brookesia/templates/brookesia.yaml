@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: deployment
+kind: Deployment
 metadata:
   name: brookesia
   namespace: {{ .Values.common_configs.namespace }}
@@ -8,7 +8,6 @@ spec:
   selector:
     matchLabels:
       app: brookesia
-  serviceName: brookesia
   template:
     metadata:
       labels:
