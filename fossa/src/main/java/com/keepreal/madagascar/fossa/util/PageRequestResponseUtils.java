@@ -32,8 +32,8 @@ public class PageRequestResponseUtils {
         return PageResponse.newBuilder()
                 .setPageSize(pageIndex)
                 .setPageSize(pageSize)
-                .setHasContent(pageIndex * pageSize <= totalElements + pageSize)
-                .setHasMore(totalElements / pageSize + 1 > pageIndex)
+                .setHasContent(pageIndex * (pageSize+1) <= totalElements + pageSize)
+                .setHasMore(totalElements / pageSize > pageIndex)
                 .build();
     }
 }

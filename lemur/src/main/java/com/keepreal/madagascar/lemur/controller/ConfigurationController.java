@@ -1,9 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
-import com.keepreal.madagascar.brookesia.StatsEventAction;
-import com.keepreal.madagascar.brookesia.StatsEventCategory;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,8 +22,8 @@ public class ConfigurationController implements ConfigApi {
     private Map<Integer, ConfigurationDTO> IOSConfigVersionMap = new HashMap<>();
 
     public ConfigurationController() {
-        IOSConfigVersionMap.put(0, this.createIOSConfigurationDTO(null,null,null,null,null,null,null));
-        IOSConfigVersionMap.put(100, this.createIOSConfigurationDTO(5,100,5,5,5,1000, true));
+        IOSConfigVersionMap.put(0, createIOSConfigurationDTO(5,100,5,5,5,1000, true));
+        IOSConfigVersionMap.put(100, createIOSConfigurationDTO(5,100,5,5,5,1000, true));
     }
 
     /**
@@ -36,11 +33,6 @@ public class ConfigurationController implements ConfigApi {
      * @return {@link ConfigurationResponse}.
      */
     @Cacheable(value = "config")
-    @HttpStatsEventTrigger(
-            category = StatsEventCategory.STATS_CAT_FEED,
-            action = StatsEventAction.STATS_ACT_CREATE,
-            metadata = ""
-    )
     @Override
     public ResponseEntity<ConfigurationResponse> apiV1ConfigsGet(ConfigType configType, Integer version) {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();

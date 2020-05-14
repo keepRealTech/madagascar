@@ -1,71 +1,41 @@
 package com.keepreal.madagascar.fossa.service;
 
-import com.aliyun.openservices.ons.api.Message;
-import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.CommentMessage;
-import com.keepreal.madagascar.common.CommonStatus;
-import com.keepreal.madagascar.common.FeedMessage;
-import com.keepreal.madagascar.common.PageResponse;
-import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.fossa.CommentResponse;
-import com.keepreal.madagascar.fossa.CommentServiceGrpc;
-import com.keepreal.madagascar.fossa.CommentsResponse;
-import com.keepreal.madagascar.fossa.DeleteCommentByIdRequest;
-import com.keepreal.madagascar.fossa.DeleteCommentByIdResponse;
-import com.keepreal.madagascar.fossa.NewCommentRequest;
-import com.keepreal.madagascar.fossa.RetrieveCommentByIdRequest;
-import com.keepreal.madagascar.fossa.RetrieveCommentsByFeedIdRequest;
-import com.keepreal.madagascar.fossa.config.MqConfig;
 import com.keepreal.madagascar.fossa.dao.CommentInfoRepository;
 import com.keepreal.madagascar.fossa.model.CommentInfo;
-import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
-import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
-import com.keepreal.madagascar.fossa.util.ProducerUtils;
-import com.keepreal.madagascar.tenrecs.CommentEvent;
-import com.keepreal.madagascar.tenrecs.NotificationEvent;
-import com.keepreal.madagascar.tenrecs.NotificationEventType;
-import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
-import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.util.StringUtils;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-04-27
- **/
 
 @Slf4j
-@GRpcService
-public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
-
-    public static final String FEED_COUNT_TYPE = "commentsCount";
+@Service
+public class CommentService {
 
     private final CommentInfoRepository commentInfoRepository;
     private final LongIdGenerator idGenerator;
-    private final FeedInfoService feedInfoService;
-    private final MqConfig mqConfig;
-    private final ProducerBean producerBean;
 
     @Autowired
-    public CommentService(CommentInfoRepository commentInfoRepository, LongIdGenerator idGenerator, FeedInfoService feedInfoService, MqConfig mqConfig, ProducerBean producerBean) {
+    public CommentService(CommentInfoRepository commentInfoRepository,
+                          LongIdGenerator idGenerator) {
         this.commentInfoRepository = commentInfoRepository;
         this.idGenerator = idGenerator;
-        this.feedInfoService = feedInfoService;
-        this.mqConfig = mqConfig;
-        this.producerBean = producerBean;
     }
 
-    public static CommentMessage getCommentMessage(CommentInfo commentInfo) {
+    /**
+     * Retrieves comment message.
+     *
+     * @param commentInfo   {@link CommentInfo}.
+     * @return  {@link CommentMessage}.
+     */
+    public CommentMessage getCommentMessage(CommentInfo commentInfo) {
         return CommentMessage.newBuilder()
                 .setId(commentInfo.getId())
                 .setFeedId(commentInfo.getFeedId())
@@ -77,141 +47,59 @@ public class CommentService extends CommentServiceGrpc.CommentServiceImplBase {
     }
 
     /**
-     * 创建一个comment
      *
-     * @param request
-     * @param responseObserver
+     * @param feedId
+     * @param commentCount
+     * @return
      */
-    @Override
-    public void createComment(NewCommentRequest request, StreamObserver<CommentResponse> responseObserver) {
-        String feedId = request.getFeedId();
-        String userId = request.getUserId();
-        String content = request.getContent();
-        String replyToId = request.hasReplyToId() ? request.getReplyToId().getValue() : "";
-        CommentInfo commentInfo = new CommentInfo();
+    public List<CommentMessage> getCommentsMessage(String feedId, int commentCount) {
+        Pageable pageable = PageRequest.of(0, commentCount);
+        List<CommentInfo> commentInfoList = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseOrderByCreatedTimeDesc(feedId, pageable).getContent();
+
+        return commentInfoList.stream().map(this::getCommentMessage).collect(Collectors.toList());
+    }
+
+    /**
+     * Inserts the comment.
+     *
+     * @param commentInfo   {@link CommentInfo}.
+     * @return  {@link CommentInfo}.
+     */
+    public CommentInfo insert(CommentInfo commentInfo) {
         commentInfo.setId(String.valueOf(idGenerator.nextId()));
-        commentInfo.setFeedId(feedId);
-        commentInfo.setUserId(userId);
-        commentInfo.setContent(content);
-        commentInfo.setReplyToId(replyToId);
         commentInfo.setDeleted(false);
         commentInfo.setCreatedTime(System.currentTimeMillis());
-
-        CommentInfo save = commentInfoRepository.save(commentInfo);
-
-        feedInfoService.incFeedCount(feedId, FEED_COUNT_TYPE);
-        CommentMessage commentMessage = getCommentMessage(save);
-        CommentResponse commentResponse = CommentResponse.newBuilder()
-                .setComment(commentMessage)
-                .setStatus(CommonStatusUtils.getSuccStatus())
-                .build();
-
-        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
-        Message message = getMessage(commentMessage, feedMessage, feedMessage.getUserId());
-        ProducerUtils.sendMessageAsync(producerBean, message);
-        if (!StringUtils.isEmpty(replyToId)) {
-            message = getMessage(commentMessage, feedMessage, replyToId);
-            ProducerUtils.sendMessageAsync(producerBean, message);
-        }
-
-        responseObserver.onNext(commentResponse);
-        responseObserver.onCompleted();
+        return commentInfoRepository.insert(commentInfo);
     }
 
     /**
-     * Retrieves comment by id.
+     * Updates the comment.
      *
-     * @param request          {@link RetrieveCommentByIdRequest}.
-     * @param responseObserver {@link StreamObserver}.
+     * @param commentInfo   {@link CommentInfo}.
+     * @return  {@link CommentInfo}.
      */
-    @Override
-    public void retrieveCommentById(RetrieveCommentByIdRequest request, StreamObserver<CommentResponse> responseObserver) {
-        CommentResponse.Builder responseBuilder = CommentResponse.newBuilder();
-        CommentInfo commentInfo = this.commentInfoRepository.findByIdAndDeletedIsFalse(request.getId());
-        if (commentInfo != null) {
-            CommentMessage commentMessage = getCommentMessage(commentInfo);
-            responseBuilder.setComment(commentMessage)
-                    .setStatus(CommonStatusUtils.getSuccStatus());
-        } else {
-            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_COMMENT_NOT_FOUND_ERROR);
-            responseBuilder.setStatus(commonStatus);
-        }
-
-        responseObserver.onNext(responseBuilder.build());
-        responseObserver.onCompleted();
+    public CommentInfo update(CommentInfo commentInfo) {
+        return commentInfoRepository.save(commentInfo);
     }
 
     /**
-     * 根据feedId返回这个feed下的所有comment
+     * Retrieves comment by id and deleted is false.
      *
-     * @param request
-     * @param responseObserver
+     * @param id    comment id.
+     * @return  {@link CommentInfo}.
      */
-    @Override
-    public void retrieveCommentsByFeedId(RetrieveCommentsByFeedIdRequest request, StreamObserver<CommentsResponse> responseObserver) {
-        String feedId = request.getFeedId();
-        Pageable pageable = PageRequestResponseUtils.getPageableByRequest(request.getPageRequest());
-        Page<CommentInfo> commentInfoPage = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseOrderByCreatedTimeDesc(feedId, pageable);
-        List<CommentMessage> commentMessageList = commentInfoPage.getContent()
-                .stream().map(CommentService::getCommentMessage)
-                .collect(Collectors.toList());
-
-        PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(commentInfoPage);
-        CommentsResponse commentsResponse = CommentsResponse.newBuilder()
-                .addAllComments(commentMessageList)
-                .setPageResponse(pageResponse)
-                .setStatus(CommonStatusUtils.getSuccStatus())
-                .build();
-
-        responseObserver.onNext(commentsResponse);
-        responseObserver.onCompleted();
+    public CommentInfo findByIdAndDeletedIsFalse(String id) {
+        return commentInfoRepository.findByIdAndDeletedIsFalse(id);
     }
 
     /**
-     * 根据commentId删除一条comment
+     * Retrieves pageabel comment by feed id order by create time desc.
      *
-     * @param request
-     * @param responseObserver
+     * @param feedId    feed id.
+     * @param pageable  {@link Pageable}.
+     * @return  {@link CommentInfo}.
      */
-    @Override
-    public void deleteCommentById(DeleteCommentByIdRequest request, StreamObserver<DeleteCommentByIdResponse> responseObserver) {
-        CommonStatus commonStatus;
-        String id = request.getId();
-        Optional<CommentInfo> commentInfoOptional = commentInfoRepository.findById(id);
-        if (commentInfoOptional.isPresent()) {
-            CommentInfo commentInfo = commentInfoOptional.get();
-            commentInfo.setDeleted(true);
-            commentInfoRepository.save(commentInfo);
-            commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
-            feedInfoService.subFeedCount(commentInfo.getFeedId(), FEED_COUNT_TYPE);
-        } else {
-            commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_COMMENT_NOT_FOUND_ERROR);
-        }
-
-
-        DeleteCommentByIdResponse deleteCommentByIdResponse = DeleteCommentByIdResponse
-                .newBuilder()
-                .setStatus(commonStatus)
-                .build();
-        responseObserver.onNext(deleteCommentByIdResponse);
-        responseObserver.onCompleted();
-    }
-
-    private Message getMessage(CommentMessage commentMessage, FeedMessage feedMessage, String userId) {
-        CommentEvent commentEvent = CommentEvent.newBuilder()
-                .setComment(commentMessage)
-                .setFeed(feedMessage)
-                .build();
-        String uuid = UUID.randomUUID().toString();
-        NotificationEvent event = NotificationEvent.newBuilder()
-                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_COMMENT)
-                .setUserId(userId)
-                .setCommentEvent(commentEvent)
-                .setTimestamp(System.currentTimeMillis())
-                .setEventId(uuid)
-                .build();
-        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
-        message.setKey(uuid);
-        return message;
+    public Page<CommentInfo> getCommentInfosByFeedId(String feedId, Pageable pageable) {
+        return commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseOrderByCreatedTimeDesc(feedId, pageable);
     }
 }

@@ -270,7 +270,7 @@ public class IslandController implements IslandApi {
     public ResponseEntity<DummyResponse> apiV1IslandsIdUnsubscribePost(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
-        if (!userId.equals(islandMessage.getHostId())) {
+        if (userId.equals(islandMessage.getHostId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 

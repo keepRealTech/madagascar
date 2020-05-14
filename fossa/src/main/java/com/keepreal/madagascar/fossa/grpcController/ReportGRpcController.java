@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.fossa.service;
+package com.keepreal.madagascar.fossa.grpcController;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.NewReportRequest;
@@ -10,31 +10,33 @@ import com.keepreal.madagascar.fossa.model.ReportInfo;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-04-27
- **/
-
+ * Represents the report GRpc controller.
+ */
 @GRpcService
-public class ReportService extends ReportServiceGrpc.ReportServiceImplBase {
+public class ReportGRpcController extends ReportServiceGrpc.ReportServiceImplBase {
 
     private final ReportRepository reportRepository;
     private final LongIdGenerator idGenerator;
 
-    @Autowired
-    public ReportService(ReportRepository reportRepository, LongIdGenerator idGenerator) {
+    /**
+     * Constructs report grpc controller.
+     *
+     * @param reportRepository  {@link ReportRepository}.
+     * @param idGenerator       {@link LongIdGenerator}.
+     */
+    public ReportGRpcController(ReportRepository reportRepository,
+                                LongIdGenerator idGenerator) {
         this.reportRepository = reportRepository;
         this.idGenerator = idGenerator;
     }
 
     /**
-     * 根据id举报一个feed
+     * Implements create report method.
      *
-     * @param request
-     * @param responseObserver
+     * @param request           {@link NewReportRequest}.
+     * @param responseObserver  {@link ReportResponse}.
      */
     @Override
     public void createReport(NewReportRequest request, StreamObserver<ReportResponse> responseObserver) {

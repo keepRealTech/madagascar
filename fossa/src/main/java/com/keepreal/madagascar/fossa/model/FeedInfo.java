@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.fossa.model;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
@@ -18,6 +19,7 @@ import java.util.List;
  **/
 
 @Data
+@Builder
 @Document(value = "feedInfo")
 @EntityListeners(AuditingEntityListener.class)
 public class FeedInfo {
@@ -29,12 +31,15 @@ public class FeedInfo {
     private String text;
     private String hostId;
     private List<String> imageUrls;
-    private Integer likesCount;
-    private Integer commentsCount;
-    private Integer repostCount;
+    @Builder.Default
+    private Integer likesCount = 0;
+    @Builder.Default
+    private Integer commentsCount = 0;
+    @Builder.Default
+    private Integer repostCount = 0;
     private Integer state;
-    @Column(name = "is_deleted")
-    private boolean deleted;
+    @Builder.Default
+    private boolean deleted = false;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate
