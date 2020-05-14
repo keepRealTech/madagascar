@@ -67,7 +67,8 @@ public class LoginController implements LoginApi {
     @HttpStatsEventTrigger(
             category = StatsEventCategory.STATS_CAT_LOGIN,
             action = StatsEventAction.STATS_ACT_NONE,
-            label = "login request"
+            label = "user id",
+            value = "body.data.user.id"
     )
     public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest body) {
         LoginRequest loginRequest;
