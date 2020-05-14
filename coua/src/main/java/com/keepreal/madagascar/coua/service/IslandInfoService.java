@@ -279,10 +279,10 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
             if (userMessage != null) {
                 userFound = true;
                 IslandMessage islandMessage = getIslandMessage(islandInfo);
-                Integer userIndex = subscriptionService.getUserIndexByIslandId(request.getUserId().getValue(), islandInfo.getHostId());
+                Integer userIndex = subscriptionService.getUserIndexByIslandId(request.getUserId(), islandInfo.getHostId());
                 responseBuilder.setIsland(islandMessage)
                         .setHost(userMessage)
-                        .setUserIndex(StringValue.newBuilder().setValue(userIndex == null ? "" : userIndex.toString()).build())
+                        .setUserIndex(StringValue.of(userIndex == null ? "" : userIndex.toString()))
                         .setStatus(CommonStatusUtils.getSuccStatus());
             }
         }

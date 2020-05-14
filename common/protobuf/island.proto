@@ -69,7 +69,7 @@ message IslandSubscribersResponse {
 
 message RetrieveIslandProfileByIdRequest {
     string id = 1;
-    google.protobuf.StringValue userId = 2;
+    string userId = 2;
 }
 
 message IslandProfileResponse {
