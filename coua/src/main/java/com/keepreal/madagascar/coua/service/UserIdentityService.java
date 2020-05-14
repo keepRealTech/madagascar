@@ -27,7 +27,7 @@ public class UserIdentityService {
         this.idGenerator = idGenerator;
     }
 
-    void saveUserIdentities(List<Integer> userIdentitiesTypes, String userId) {
+    public void saveUserIdentities(List<Integer> userIdentitiesTypes, String userId) {
         List<UserIdentity> userIdentityList = userIdentitiesTypes.stream().map(type -> UserIdentity.builder()
                 .id(String.valueOf(idGenerator.nextId()))
                 .userId(userId)
@@ -37,7 +37,7 @@ public class UserIdentityService {
         userIdentityRepository.saveAll(userIdentityList);
     }
 
-    void updateUserIdentities(List<Integer> userIdentitiesTypes, String userId) {
+    public void updateUserIdentities(List<Integer> userIdentitiesTypes, String userId) {
         userIdentityRepository.deleteUserIdentitiesByUserId(userId);
         saveUserIdentities(userIdentitiesTypes, userId);
     }

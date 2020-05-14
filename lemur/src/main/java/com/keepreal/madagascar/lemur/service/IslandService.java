@@ -134,7 +134,7 @@ public class IslandService {
 
         RetrieveIslandProfileByIdRequest request = RetrieveIslandProfileByIdRequest.newBuilder()
                 .setId(id)
-                .setUserId(StringValue.of(userId))
+                .setUserId(userId)
                 .build();
 
         IslandProfileResponse islandProfileResponse;

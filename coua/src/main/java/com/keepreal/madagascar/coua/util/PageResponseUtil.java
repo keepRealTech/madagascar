@@ -1,7 +1,9 @@
 package com.keepreal.madagascar.coua.util;
 
+import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.PageResponse;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * @program: madagascar
@@ -18,5 +20,9 @@ public class PageResponseUtil {
                 .setHasContent(page.hasContent())
                 .setHasMore(!page.isLast())
                 .build();
+    }
+
+    public static Pageable getPageable(PageRequest pageRequest) {
+        return org.springframework.data.domain.PageRequest.of(pageRequest.getPage(), pageRequest.getPageSize());
     }
 }

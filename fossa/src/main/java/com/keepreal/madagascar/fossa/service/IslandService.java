@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * Represents the user service.
+ * Represents the island service.
  */
 @Slf4j
 @Service
@@ -19,7 +19,7 @@ public class IslandService {
     private final ManagedChannel managedChannel;
 
     /**
-     * Constructs the user service.
+     * Constructs the island service.
      *
      * @param managedChannel Managed channel for grpc traffic.
      */
