@@ -5,6 +5,8 @@ import com.aliyun.openservices.ons.api.OnExceptionContext;
 import com.aliyun.openservices.ons.api.SendCallback;
 import com.aliyun.openservices.ons.api.SendResult;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
@@ -15,6 +17,7 @@ import com.keepreal.madagascar.coua.config.MqConfig;
 import com.keepreal.madagascar.coua.dao.SubscriptionRepository;
 import com.keepreal.madagascar.coua.model.Subscription;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -67,7 +70,7 @@ public class SubscriptionService {
                 .islanderNumber(HOST_NUMBER)
                 .state(SubscriptionState.HOST.getValue())
                 .build();
-        subscriptionRepository.save(subscription);
+        insertSubscription(subscription);
     }
 
     /**
@@ -173,7 +176,7 @@ public class SubscriptionService {
                     .build();
             islandInfoRepository.updateIslanderNumberById(islandId);
         }
-        subscriptionRepository.save(subscription);
+        insertSubscription(subscription);
 
         //向mq发消息
         String uuid = UUID.randomUUID().toString();
@@ -211,6 +214,14 @@ public class SubscriptionService {
         if (subscription != null) {
             subscription.setState(SubscriptionState.LEAVE.getValue());
             subscriptionRepository.save(subscription);
+        }
+    }
+
+    private void insertSubscription(Subscription subscription) {
+        try {
+            subscriptionRepository.save(subscription);
+        } catch (DataIntegrityViolationException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_SUBSCRIPTION_SQL_DUPLICATE_ERROR);
         }
     }
 }

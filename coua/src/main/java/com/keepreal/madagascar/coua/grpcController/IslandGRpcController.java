@@ -124,14 +124,15 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             infoBuilder.secret(request.getSecret().getValue());
         }
 
-        IslandInfo save = islandInfoService.createIsland(infoBuilder.build());
-
+        IslandInfo save;
         try {
+            save = islandInfoService.createIsland(infoBuilder.build());
             feedService.createDefaultFeed(request.getHostId(), request.getHostId(), save.getId());
         } catch (KeepRealBusinessException e) {
-            log.error("rpc call fossa error");
+            if (e.getErrorCode().equals(ErrorCode.REQUEST_UNEXPECTED_ERROR))
+                log.error("rpc call fossa error");
             responseObserver.onNext(IslandResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_CREATE_ERROR))
+                    .setStatus(CommonStatusUtils.buildCommonStatus(e.getErrorCode()))
                     .build());
             responseObserver.onCompleted();
             return;
@@ -325,7 +326,15 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         if (islandInfo != null) {
             if (secret.equals(islandInfo.getSecret())) {
                 Integer islanderNumber = islandInfoService.getLatestIslanderNumber(islandId);
-                subscriptionService.subscribeIsland(islandId, userId, islandInfo.getHostId(), islanderNumber);
+                try {
+                    subscriptionService.subscribeIsland(islandId, userId, islandInfo.getHostId(), islanderNumber);
+                } catch (KeepRealBusinessException e) {
+                    CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(e.getErrorCode());
+                    responseBuilder.setStatus(commonStatus);
+                    responseObserver.onNext(responseBuilder.build());
+                    responseObserver.onCompleted();
+                    return;
+                }
             } else {
                 CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_SECRET_ERROR);
                 responseBuilder.setStatus(commonStatus);

@@ -3,7 +3,6 @@ package com.keepreal.madagascar.fossa.service;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.ReactionType;
-import com.keepreal.madagascar.fossa.common.FeedCountType;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
@@ -122,7 +121,7 @@ public class FeedInfoService {
         if (feedInfo == null)
             return null;
         List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
-        boolean isLiked = reactionRepository.existsByUserIdAndFeedIdAndReactionTypeListContains(userId, feedInfo.getId(), ReactionType.REACTION_LIKE_VALUE);
+        boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(userId, feedInfo.getId(), ReactionType.REACTION_LIKE_VALUE);
         return FeedMessage.newBuilder()
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
@@ -131,7 +130,7 @@ public class FeedInfoService {
                 .addAllImageUris(feedInfo.getImageUrls() == null ? Collections.emptyList() : feedInfo.getImageUrls())
                 .setCreatedAt(feedInfo.getCreatedTime())
                 .setCommentsCount(feedInfo.getCommentsCount())
-                .setLikesCount(feedInfo.getLikesCount())
+                .setLikesCount(feedInfo.getLikesCount() < 0 ? 0 : feedInfo.getLikesCount())
                 .setRepostCount(feedInfo.getRepostCount())
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
