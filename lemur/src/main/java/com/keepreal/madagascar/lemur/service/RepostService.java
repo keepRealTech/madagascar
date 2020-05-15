@@ -14,7 +14,7 @@ import com.keepreal.madagascar.fossa.RepostServiceGrpc;
 import com.keepreal.madagascar.fossa.RetrieveFeedRepostsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveIslandRepostsByIslandIdRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,15 +29,15 @@ import java.util.Objects;
 @Slf4j
 public class RepostService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the repost service.
      *
-     * @param managedChannel GRpc managed channel connection to service fossa.
+     * @param channel GRpc managed channel connection to service fossa.
      */
-    public RepostService(@Qualifier("fossaChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public RepostService(@Qualifier("fossaChannel") Channel channel) {
+        this.channel = channel;
     }
 
     /**
@@ -50,7 +50,7 @@ public class RepostService {
      * @return {@link IslandRepostMessage}.
      */
     public IslandRepostMessage createRepostIslandById(String islandId, String userId, String content, boolean succeeded) {
-        RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.managedChannel);
+        RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.channel);
 
         NewIslandRepostRequest request = NewIslandRepostRequest.newBuilder()
                 .setIslandId(islandId)
@@ -88,7 +88,7 @@ public class RepostService {
      * @return {@link IslandRepostsResponse}.
      */
     public IslandRepostsResponse retrieveRepostIslandById(String islandId, int page, int pageSize) {
-        RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.managedChannel);
+        RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveIslandRepostsByIslandIdRequest request = RetrieveIslandRepostsByIslandIdRequest.newBuilder()
                 .setIslandId(islandId)
@@ -125,7 +125,7 @@ public class RepostService {
      * @return {@link FeedRepostMessage}.
      */
     public FeedRepostMessage createRepostFeedById(String feedId, String userId, String content, boolean succeeded) {
-        RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.managedChannel);
+        RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.channel);
 
         NewFeedRepostRequest request = NewFeedRepostRequest.newBuilder()
                 .setFeedId(feedId)
@@ -163,7 +163,7 @@ public class RepostService {
      * @return {@link FeedRepostsResponse}.
      */
     public FeedRepostsResponse retrieveRepostFeedById(String feedId, int page, int pageSize) {
-        RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.managedChannel);
+        RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveFeedRepostsByFeedIdRequest request = RetrieveFeedRepostsByFeedIdRequest.newBuilder()
                 .setFeedId(feedId)

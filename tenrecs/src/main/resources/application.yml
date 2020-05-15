@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: tenrecs
   data:
     mongodb:
       database: tenrecs
@@ -17,3 +19,9 @@ grpc:
 
 snowflake:
   nodeId: 0
+
+opentracing:
+  jaeger:
+    grpc-server-interceptor: false
+    const-sampler:
+      decision: false

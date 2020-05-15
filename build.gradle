@@ -34,7 +34,7 @@ subprojects {
     ext['swagger.server.annotation.version'] = '1.5.22'
     ext['swagger.codegen.version'] = '4.2.3'
     ext['protobuf-java.version'] = '3.8.0'
-    ext['grpc.springboot.version'] = '3.3.0'
+    ext['grpc.springboot.version'] = '3.5.3'
     ext['boringssl.version'] = '2.0.22.Final'
     ext['redisson.version'] = '3.11.0'
     ext['micrometer.version'] = '1.4.0'
@@ -66,6 +66,7 @@ subprojects {
     plugins.withId('com.palantir.docker') {
         task unpack(type: Copy) {
             dependsOn bootJar
+            delete("build/dependency")
             from(zipTree(tasks.bootJar.outputs.files.singleFile))
             into("build/dependency")
         }
@@ -152,6 +153,8 @@ subprojects {
             dependency "org.openapitools:jackson-databind-nullable:0.2.1"
             dependency "org.ehcache:ehcache:${ext['ehcache.version']}"
             dependency "com.aliyun.openservices:ons-client:${ext['openservices.version']}"
+            dependency "io.opentracing.contrib:opentracing-spring-jaeger-web-starter:3.1.1"
+            dependency "io.opentracing.contrib:opentracing-grpc:0.2.1"
         }
     }
 }

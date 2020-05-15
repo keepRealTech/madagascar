@@ -11,7 +11,7 @@ import com.keepreal.madagascar.fossa.ReactionsResponse;
 import com.keepreal.madagascar.fossa.RetrieveReactionsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.RevokeReactionRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -27,15 +27,15 @@ import java.util.Objects;
 @Slf4j
 public class ReactionService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the reaction service.
      *
-     * @param managedChannel GRpc managed channel connection to service Fossa.
+     * @param channel GRpc managed channel connection to service Fossa.
      */
-    public ReactionService(@Qualifier("fossaChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public ReactionService(@Qualifier("fossaChannel") Channel channel) {
+        this.channel = channel;
     }
 
     /**
@@ -47,7 +47,7 @@ public class ReactionService {
      * @return {@link ReactionMessage}.
      */
     public ReactionMessage createReaction(String feedId, String userId, List<ReactionType> types) {
-        ReactionServiceGrpc.ReactionServiceBlockingStub stub = ReactionServiceGrpc.newBlockingStub(this.managedChannel);
+        ReactionServiceGrpc.ReactionServiceBlockingStub stub = ReactionServiceGrpc.newBlockingStub(this.channel);
 
         NewReactionRequest request = NewReactionRequest.newBuilder()
                 .setFeedId(feedId)
@@ -84,7 +84,7 @@ public class ReactionService {
      * @return {@link ReactionMessage}.
      */
     public ReactionMessage revokeReaction(String feedId, String userId, List<ReactionType> types) {
-        ReactionServiceGrpc.ReactionServiceBlockingStub stub = ReactionServiceGrpc.newBlockingStub(this.managedChannel);
+        ReactionServiceGrpc.ReactionServiceBlockingStub stub = ReactionServiceGrpc.newBlockingStub(this.channel);
 
         RevokeReactionRequest request = RevokeReactionRequest.newBuilder()
                 .setFeedId(feedId)
@@ -121,7 +121,7 @@ public class ReactionService {
      * @return {@link ReactionsResponse}.
      */
     public ReactionsResponse retrieveReactionsByFeedId(String feedId, int page, int pageSize) {
-        ReactionServiceGrpc.ReactionServiceBlockingStub stub = ReactionServiceGrpc.newBlockingStub(this.managedChannel);
+        ReactionServiceGrpc.ReactionServiceBlockingStub stub = ReactionServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveReactionsByFeedIdRequest request = RetrieveReactionsByFeedIdRequest.newBuilder()
                 .setFeedId(feedId)

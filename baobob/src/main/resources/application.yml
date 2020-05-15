@@ -1,3 +1,7 @@
+spring:
+  application:
+    name: baobob
+
 wechat:
   oauth:
     host: https://api.weixin.qq.com
@@ -15,3 +19,9 @@ jwt:
   access-token-validity-in-seconds: 86400
   refresh-token-validity-in-seconds: 6000
   client-secret: secret
+
+opentracing:
+  jaeger:
+    grpc-server-interceptor: false
+    const-sampler:
+      decision: false

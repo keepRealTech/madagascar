@@ -62,6 +62,30 @@ spec:
           ports:
             - containerPort: 12001
               name: baobob-grpc
+        {{ if .Values.deploy.opentracing.enable_jaeger }}
+        - name: jaeger-agent
+          image: jaegertracing/jaeger-agent:1.17.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5775
+              name: zk-compact-trft
+              protocol: UDP
+            - containerPort: 5778
+              name: config-rest
+              protocol: TCP
+            - containerPort: 6831
+              name: jg-compact-trft
+              protocol: UDP
+            - containerPort: 6832
+              name: jg-binary-trft
+              protocol: UDP
+            - containerPort: 14271
+              name: admin-http
+              protocol: TCP
+          args:
+            - --reporter.tchannel.host-port=simplest-collector-headless.keepreal-prod.svc:14267
+            - --reporter.type=tchannel
+        {{ end }}
 ---
 apiVersion: v1
 kind: Service

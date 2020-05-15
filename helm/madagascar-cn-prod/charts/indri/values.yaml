@@ -17,3 +17,7 @@ images:
 aliyun_oss:
   endpoint: oss-cn-beijing.aliyuncs.com
   bucketName: kr-thumbnail-prod-cn2-01
+
+deploy:
+  opentracing:
+    enable_jaeger: false
