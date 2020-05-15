@@ -25,7 +25,7 @@ import java.util.Optional;
 @Service
 public class FeedInfoService {
 
-    private static final int DEFAULT_LAST_COMMENT_COUNT = 5;
+    private static final int DEFAULT_LAST_COMMENT_COUNT = 2;
 
     private final MongoTemplate mongoTemplate;
     private final CommentService commentService;

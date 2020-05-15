@@ -202,8 +202,6 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
                 .build();
-        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
-        message.setKey(uuid);
-        return message;
+        return new Message(mqConfig.getTopic(), mqConfig.getTag(), uuid, event.toByteArray());
     }
 }

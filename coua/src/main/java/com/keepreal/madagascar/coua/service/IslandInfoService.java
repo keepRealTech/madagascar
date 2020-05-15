@@ -1,40 +1,11 @@
 package com.keepreal.madagascar.coua.service;
 
-import com.google.protobuf.StringValue;
-import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.IslandMessage;
-import com.keepreal.madagascar.common.PageRequest;
-import com.keepreal.madagascar.common.PageResponse;
-import com.keepreal.madagascar.common.UserMessage;
-import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.coua.CheckNameRequest;
-import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
-import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
-import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
-import com.keepreal.madagascar.coua.IslandProfileResponse;
-import com.keepreal.madagascar.coua.IslandResponse;
-import com.keepreal.madagascar.coua.IslandServiceGrpc;
-import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
-import com.keepreal.madagascar.coua.NewIslandRequest;
-import com.keepreal.madagascar.coua.QueryIslandCondition;
-import com.keepreal.madagascar.coua.RetrieveDefaultIslandsByUserIdRequest;
-import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
-import com.keepreal.madagascar.coua.RetrieveIslandProfileByIdRequest;
-import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
-import com.keepreal.madagascar.coua.RetrieveMultipleIslandsRequest;
-import com.keepreal.madagascar.coua.SubscribeIslandByIdRequest;
-import com.keepreal.madagascar.coua.SubscribeIslandResponse;
-import com.keepreal.madagascar.coua.UnsubscribeIslandByIdRequest;
-import com.keepreal.madagascar.coua.UpdateIslandByIdRequest;
-import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
-import com.keepreal.madagascar.coua.UpdateLastFeedAtResponse;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
 import com.keepreal.madagascar.coua.model.IslandInfo;
-import com.keepreal.madagascar.coua.util.CommonStatusUtils;
 import com.keepreal.madagascar.coua.util.PageResponseUtil;
 import com.keepreal.madagascar.fossa.CreateDefaultFeedRequest;
 import com.keepreal.madagascar.fossa.FeedResponse;
@@ -42,48 +13,44 @@ import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.RetrieveLatestFeedByUserIdRequest;
 import io.grpc.Channel;
 import io.grpc.stub.StreamObserver;
+
 import lombok.extern.slf4j.Slf4j;
-import org.lognet.springboot.grpc.GRpcService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-04-26
- **/
-
+ * Represents island service.
+ */
 @Slf4j
-@GRpcService
-public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
+@Service
+public class IslandInfoService {
 
     private final IslandInfoRepository islandInfoRepository;
     private final SubscriptionService subscriptionService;
-    private final UserInfoService userInfoService;
     private final LongIdGenerator idGenerator;
     private final Channel channel;
 
-    @Autowired
+
+    /**
+     * Constructs the island service.
+     *
+     * @param islandInfoRepository  {@link IslandInfoRepository}.
+     * @param subscriptionService   {@link SubscriptionService}.
+     * @param idGenerator           {@link LongIdGenerator}.
+     */
     public IslandInfoService(IslandInfoRepository islandInfoRepository,
                              SubscriptionService subscriptionService,
                              UserInfoService userInfoService,
                              LongIdGenerator idGenerator,
                              @Qualifier("fossaChannel")Channel channel) {
+                             LongIdGenerator idGenerator) {
         this.islandInfoRepository = islandInfoRepository;
         this.subscriptionService = subscriptionService;
-        this.userInfoService = userInfoService;
         this.idGenerator = idGenerator;
         this.channel = channel;
     }
@@ -367,137 +334,32 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     }
 
     /**
-     * 取消订阅这个岛
+     * Retrieve latest island number.
      *
-     * @param request
-     * @param responseObserver
-     */
-    @Override
-    public void unsubscribeIslandById(UnsubscribeIslandByIdRequest request, StreamObserver<SubscribeIslandResponse> responseObserver) {
-        String islandId = request.getId();
-        String userId = request.getUserId();
-        subscriptionService.unSubscribeIsland(islandId, userId);
-
-        SubscribeIslandResponse subscribeIslandResponse = SubscribeIslandResponse.newBuilder()
-                .setStatus(CommonStatusUtils.getSuccStatus()).build();
-        responseObserver.onNext(subscribeIslandResponse);
-        responseObserver.onCompleted();
-    }
-
-    /**
-     * 根据islandId和对应的timestamp检查是否有新的未读feed
-     *
-     * @param request
-     * @param responseObserver
-     */
-    @Override
-    public void checkNewFeeds(CheckNewFeedsRequest request, StreamObserver<CheckNewFeedsResponse> responseObserver) {
-        List<String> islandIdList = request.getIslandIdsList();
-        List<Long> timestampsList = request.getTimestampsList();
-        List<CheckNewFeedsMessage> messageList = new ArrayList<>();
-        if (islandIdList.size() == timestampsList.size()) {
-            List<Map<String, Long>> resList = islandInfoRepository.findIslandIdAndLastFeedAtByIslandIdList(islandIdList);
-            Map<String, Long> map = new HashMap<>();
-            resList.forEach(m -> map.put(m.get("id").toString(), m.get("lastFeedAt")));
-            for (int i = 0; i < islandIdList.size(); i++) {
-                String islandId = islandIdList.get(i);
-                CheckNewFeedsMessage feedMessage = getFeedMessage(islandId, map.get(islandId), timestampsList.get(i));
-                messageList.add(feedMessage);
-            }
-        }
-        CheckNewFeedsResponse response = CheckNewFeedsResponse.newBuilder()
-                .addAllCheckNewFeeds(messageList)
-                .setStatus(CommonStatusUtils.getSuccStatus())
-                .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-    }
-
-    /**
-     * 根据islandId和timestamp更新island的lastFeedAt
-     *
-     * @param request
-     * @param responseObserver
-     */
-    @Override
-    public void updateLastFeedAtById(UpdateLastFeedAtRequest request, StreamObserver<UpdateLastFeedAtResponse> responseObserver) {
-        List<String> islandIdList = request.getIslandIdsList();
-        long timestamps = request.getTimestamps();
-        islandInfoRepository.updateLastFeedAtByIslandIdList(islandIdList, timestamps);
-
-        UpdateLastFeedAtResponse response = UpdateLastFeedAtResponse.newBuilder()
-                .setStatus(CommonStatusUtils.getSuccStatus())
-                .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
-    }
-
-    /**
-     * 根据userId获取该用户创建和加入的岛，按规则排序
-     *  - 用户创建的岛在最前面
-     *  - 如果该用户没有创建岛，最新发布动态的岛在前面
-     *  - 如果都没有，最新加入的岛在前面
-     *
-     * @param request
-     * @param responseObserver
-     */
-    @Override
-    public void retrieveDefaultIslandsByUserId(RetrieveDefaultIslandsByUserIdRequest request, StreamObserver<IslandsResponse> responseObserver) {
-        String userId = request.getUserId();
-        PageRequest pageRequest = request.getPageRequest();
-        int page = pageRequest.getPage();
-        int pageSize = pageRequest.getPageSize();
-        Pageable pageable = org.springframework.data.domain.PageRequest.of(page, pageSize);
-        IslandsResponse.Builder builder = IslandsResponse.newBuilder();
-
-        String islandId;
-
-
-        List<IslandInfo> islandInfoList = getIslandBySubscribed(userId, pageable, builder);
-        if (islandInfoList.size() > 0) {
-            IslandInfo islandInfo = islandInfoList.get(0);
-            if (!userId.equals(islandInfo.getHostId()) && (islandId = callFossaRetrieveLatestFeedByUserIdGetIslandId(userId)) != null) {
-                IslandInfo island = islandInfoRepository.findTopByIdAndDeletedIsFalse(islandId);
-                if (island != null) {
-                    islandInfoList = islandInfoList.stream().filter(info -> !islandId.equals(info.getId())).collect(Collectors.toList());
-                    islandInfoList.add(0, island);
-                    if (islandInfoList.size() > pageSize) {
-                        islandInfoList.remove(islandInfoList.size() - 1);
-                    }
-                }
-            }
-
-            builder.setStatus(CommonStatusUtils.getSuccStatus())
-                    .addAllIslands(islandInfoList.stream().map(this::getIslandMessage).filter(Objects::nonNull).collect(Collectors.toList()))
-                    .build();
-            responseObserver.onNext(builder.build());
-            responseObserver.onCompleted();
-        } else {
-            responseObserver.onNext(IslandsResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_UNEXPECTED_ERROR))
-                    .build());
-            responseObserver.onCompleted();
-        }
-    }
-
-    /**
-     * 拿到最新的islanderNumber(岛成员编号)
+     * @param islandId  islandId.
+     * @return latest number.
      */
     public Integer getLatestIslanderNumber(String islandId) {
         return islandInfoRepository.getIslanderNumberByIslandId(islandId);
     }
 
-    private boolean islandNameIsExisted(String islandName) {
+    /**
+     * if islandName is existed.
+     *
+     * @param islandName    islandName.
+     * @return  is existed.
+     */
+    public boolean islandNameIsExisted(String islandName) {
         return islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(islandName) != null;
     }
 
     /**
-     * 把 IslandInfo 对象包装为 IslandMessage 对象
+     * Retrieve islandMessage.
      *
-     * @param islandInfo
-     * @return
+     * @param islandInfo    {@link IslandInfo}.
+     * @return  {@link IslandMessage}.
      */
-    private IslandMessage getIslandMessage(IslandInfo islandInfo) {
+    public IslandMessage getIslandMessage(IslandInfo islandInfo) {
         if (islandInfo == null) {
             return null;
         }
@@ -516,7 +378,15 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
                 .build();
     }
 
-    private CheckNewFeedsMessage getFeedMessage(String islandId, Long islandLastFeedAt, Long currentTime) {
+    /**
+     * build the feed message.
+     *
+     * @param islandId          islandId.
+     * @param islandLastFeedAt  islandLastFeedAt.
+     * @param currentTime       currentTime.
+     * @return  {@link CheckNewFeedsMessage}.
+     */
+    public CheckNewFeedsMessage buildFeedMessage(String islandId, Long islandLastFeedAt, Long currentTime) {
         return CheckNewFeedsMessage.newBuilder()
                 .setIslandId(islandId)
                 .setHasNewFeeds(islandLastFeedAt != null && islandLastFeedAt > currentTime)
@@ -524,18 +394,26 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     }
 
     /**
-     * 根据userId查询用户创建的岛信息 {@link IslandInfo}
+     * Retrieve islandList by user create.
+     *
+     * @param userId    userId.
+     * @param pageable  {@link Pageable}.
+     * @param builder   {@link com.keepreal.madagascar.coua.IslandsResponse.Builder}.
+     * @return  {@link IslandInfo}.
      */
-    private List<IslandInfo> getMyCreatedIsland(String userId, Pageable pageable, IslandsResponse.Builder builder) {
+    public List<IslandInfo> getMyCreatedIsland(String userId, Pageable pageable, IslandsResponse.Builder builder) {
         Page<String> islandIdListPageable = subscriptionService.getIslandIdListByUserCreated(userId, pageable);
         builder.setPageResponse(PageResponseUtil.buildResponse(islandIdListPageable));
         return islandInfoRepository.findIslandInfosByIdInAndDeletedIsFalse(islandIdListPageable.getContent());
     }
 
     /**
-     * 根据islandName查询岛信息 {@link IslandInfo}
+     * Retrieve islandList by islandName.
+     *
+     * @param islandName    islandName.
+     * @return  {@link IslandInfo}.
      */
-    private List<IslandInfo> getIslandByName(String islandName) {
+    public List<IslandInfo> getIslandByName(String islandName) {
         IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(islandName);
         if (islandInfo == null) {
             return Collections.emptyList();
@@ -544,9 +422,13 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     }
 
     /**
-     * 根据islandName和userId查询岛名匹配并且该用户订阅的岛信息 {@link IslandInfo}
+     * Retrieve islandList by islandName and user subscribed.
+     *
+     * @param islandName    islandName.
+     * @param userId        userId.
+     * @return  {@link IslandInfo}.
      */
-    private List<IslandInfo> getIslandByNameAndSubscribed(String islandName, String userId) {
+    public List<IslandInfo> getIslandByNameAndSubscribed(String islandName, String userId) {
         IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(islandName);
         if (islandInfo == null || !subscriptionService.isSubScribedIsland(islandInfo.getId(), userId)) {
             return Collections.emptyList();
@@ -555,18 +437,27 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     }
 
     /**
-     * 根据userId查询该用户创建和加入的岛信息 {@link IslandInfo}
+     * Retrieve islandList by user subscribed.
+     *
+     * @param userId    userId.
+     * @param pageable  {@link Pageable}.
+     * @param builder   {@link com.keepreal.madagascar.coua.IslandsResponse.Builder}.
+     * @return  {@link IslandInfo}.
      */
-    private List<IslandInfo> getIslandBySubscribed(String userId, Pageable pageable, IslandsResponse.Builder builder) {
+    public List<IslandInfo> getIslandBySubscribed(String userId, Pageable pageable, IslandsResponse.Builder builder) {
         Page<String> islandIdListPageable = subscriptionService.getIslandIdListByUserSubscribed(userId, pageable);
         builder.setPageResponse(PageResponseUtil.buildResponse(islandIdListPageable));
         return islandInfoRepository.findIslandInfosByIdInAndDeletedIsFalse(islandIdListPageable.getContent());
     }
 
     /**
-     * 查询所有创建的岛信息 {@link IslandInfo}
+     * Retrieve all island.
+     *
+     * @param pageable  {@link Pageable}.
+     * @param builder   {@link com.keepreal.madagascar.coua.IslandsResponse.Builder}.
+     * @return  {@link IslandInfo}.
      */
-    private List<IslandInfo> getIsland(Pageable pageable, IslandsResponse.Builder builder) {
+    public List<IslandInfo> getIsland(Pageable pageable, IslandsResponse.Builder builder) {
         Page<IslandInfo> islandInfoListPageable = islandInfoRepository.findAllByDeletedIsFalse(pageable);
         builder.setPageResponse(PageResponseUtil.buildResponse(islandInfoListPageable));
         return islandInfoListPageable.getContent();
@@ -590,18 +481,57 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
         FeedResponse response;
 
-        try {
-            response = stub.retrieveLatestFeedByUserId(RetrieveLatestFeedByUserIdRequest.newBuilder().setUserId(userId).build());
-        } catch (Exception e) {
-            log.error("call fossa error");
-            return null;
-        }
+    /**
+     * Create island.
+     *
+     * @param islandInfo    {@link IslandInfo}.
+     * @return  {@link IslandInfo}.
+     */
+    public IslandInfo createIsland(IslandInfo islandInfo) {
+        islandInfo.setId(String.valueOf(idGenerator.nextId()));
+        IslandInfo save = islandInfoRepository.save(islandInfo);
+        // 维护 subscription 表
+        subscriptionService.initHost(save.getId(), save.getHostId());
+        return save;
+    }
 
-        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
-            log.error("call fossa feed not found error");
-            return null;
-        }
+    /**
+     * Retrieve island by id and not delete.
+     *
+     * @param islandId  islandId.
+     * @return  {@link IslandInfo}.
+     */
+    public IslandInfo findTopByIdAndDeletedIsFalse(String islandId) {
+        return islandInfoRepository.findTopByIdAndDeletedIsFalse(islandId);
+    }
 
-        return response.getFeed().getIslandId();
+    /**
+     * Update island.
+     *
+     * @param islandInfo    {@link IslandInfo}.
+     * @return  {@link IslandInfo}.
+     */
+    public IslandInfo updateIsland(IslandInfo islandInfo) {
+        return islandInfoRepository.save(islandInfo);
+    }
+
+    /**
+     * Retrieve map by islandList. (key-islandId, value-lastFeedAt)
+     *
+     * @param islandIdList  islandIdList.
+     * @return  (key-islandId, value-lastFeedAt).
+     */
+    public List<Map<String, Long>> findIslandIdAndLastFeedAtByIslandIdList(List<String> islandIdList) {
+        return islandInfoRepository.findIslandIdAndLastFeedAtByIslandIdList(islandIdList);
+    }
+
+    /**
+     * Update lastFeedAt by islandIdList.
+     *
+     * @param islandIdList  islandIdList.
+     * @param timestamps    timestamps.
+     */
+    public void updateLastFeedAtByIslandIdList(List<String> islandIdList, long timestamps) {
+        islandInfoRepository.updateLastFeedAtByIslandIdList(islandIdList, timestamps);
     }
 }
