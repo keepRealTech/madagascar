@@ -22,5 +22,6 @@ jwt:
 
 opentracing:
   jaeger:
+    grpc-server-interceptor: false
     const-sampler:
       decision: false

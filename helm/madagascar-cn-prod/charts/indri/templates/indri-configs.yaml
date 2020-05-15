@@ -7,3 +7,4 @@ data:
   ALIYUNOSS_ENDPOINT: {{ .Values.aliyun_oss.endpoint }}
   ALIYUNOSS_BUCKETNAME: {{ .Values.aliyun_oss.bucketName }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
+  OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'

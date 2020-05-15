@@ -66,6 +66,7 @@ subprojects {
     plugins.withId('com.palantir.docker') {
         task unpack(type: Copy) {
             dependsOn bootJar
+            delete("build/dependency")
             from(zipTree(tasks.bootJar.outputs.files.singleFile))
             into("build/dependency")
         }

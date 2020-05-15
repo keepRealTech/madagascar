@@ -11,7 +11,8 @@ aliyun-oss:
 grpc:
   port: 12000
 
-deploy:
-  opentrace:
-    grpc-server:
-      enabled: false
+opentracing:
+  jaeger:
+    grpc-server-interceptor: false
+    const-sampler:
+      decision: false

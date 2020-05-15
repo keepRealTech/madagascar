@@ -57,7 +57,7 @@ public class GrpcChannelFactory {
      * @return {@link TracingServerInterceptor}.
      */
     @Bean
-    @ConditionalOnProperty(value = "deploy.opentrace.grpc-server.enabled", havingValue = "true")
+    @ConditionalOnProperty(value = "opentracing.jaeger.grpc-server-interceptor", havingValue = "true")
     @GRpcGlobalInterceptor
     public ServerInterceptor globalServerInterceptor() {
         return TracingServerInterceptor
