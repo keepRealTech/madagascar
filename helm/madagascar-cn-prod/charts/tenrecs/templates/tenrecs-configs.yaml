@@ -9,3 +9,4 @@ data:
   ROCKETMQ_TOPIC: {{ .Values.rocketmq.topic }}
   ROCKETMQ_GROUPID: {{ .Values.rocketmq.group_id }}
   ROCKETMQ_TAG: {{ .Values.rocketmq.tag }}
+  OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'

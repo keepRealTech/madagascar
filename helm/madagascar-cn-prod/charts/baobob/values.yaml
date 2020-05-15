@@ -24,3 +24,7 @@ jwt:
 coua:
   host: coua
   port: 6565
+
+deploy:
+  opentracing:
+    enable_jaeger: false
