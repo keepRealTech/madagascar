@@ -21,6 +21,8 @@ system-notification:
   content: hello, there.
 
 spring:
+  application:
+    name: lemur
   servlet:
     multipart:
       max-file-size: 10MB

@@ -7,6 +7,8 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
+import io.opentracing.Tracer;
+import io.opentracing.contrib.grpc.TracingClientInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -22,14 +24,18 @@ import java.util.concurrent.TimeUnit;
 public class LoginService {
 
     private final ManagedChannel managedChannel;
+    private final Tracer tracer;
 
     /**
      * Constructs the login service.
      *
      * @param managedChannel GRpc managed channel connection to service Baobob.
+     * @param tracer         {@link Tracer}.
      */
-    public LoginService(@Qualifier("baobobChannel") ManagedChannel managedChannel) {
+    public LoginService(@Qualifier("baobobChannel") ManagedChannel managedChannel,
+                        Tracer tracer) {
         this.managedChannel = managedChannel;
+        this.tracer = tracer;
     }
 
     /**
@@ -39,8 +45,13 @@ public class LoginService {
      * @return {@link LoginResponse}.
      */
     public LoginResponse login(LoginRequest request) {
+        TracingClientInterceptor tracingInterceptor = TracingClientInterceptor
+                .newBuilder()
+                .withTracer(this.tracer)
+                .build();
+
         LoginServiceGrpc.LoginServiceBlockingStub stub =
-                LoginServiceGrpc.newBlockingStub(this.managedChannel)
+                LoginServiceGrpc.newBlockingStub(tracingInterceptor.intercept(this.managedChannel))
                         .withDeadlineAfter(10, TimeUnit.SECONDS);
 
         LoginResponse loginResponse;
