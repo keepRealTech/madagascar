@@ -19,5 +19,5 @@ public interface ReactionRepository extends MongoRepository<ReactionInfo, String
 
     ReactionInfo findTopByFeedIdAndUserId(String feedId, String userId);
 
-    boolean existsByFeedIdAndUserIdAndReactionTypeListContains(String userId, String feedId, Integer reactionType);
+    boolean existsByFeedIdAndUserIdAndReactionTypeListContains(String feedId, String userId, Integer reactionType);
 }
