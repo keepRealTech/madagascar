@@ -2,9 +2,14 @@ package com.keepreal.madagascar.baobob.config.grpc;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import org.springframework.beans.factory.annotation.Autowired;
+import io.grpc.ServerInterceptor;
+import io.opentracing.Tracer;
+import io.opentracing.contrib.grpc.TracingServerInterceptor;
+import org.lognet.springboot.grpc.GRpcGlobalInterceptor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 
 /**
@@ -14,14 +19,18 @@ import org.springframework.context.annotation.Configuration;
 public class GrpcChannelFactory {
 
     private final GrpcConfiguration couaConfiguration;
+    private final Tracer tracer;
 
     /**
      * Constructs the grpc channels factory.
      *
      * @param couaConfiguration Coua grpc configuration.
+     * @param tracer            {@link Tracer}.
      */
-    public GrpcChannelFactory(@Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration) {
+    public GrpcChannelFactory(@Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration,
+                              Tracer tracer) {
         this.couaConfiguration = couaConfiguration;
+        this.tracer = tracer;
     }
 
     /**
@@ -34,6 +43,25 @@ public class GrpcChannelFactory {
         return ManagedChannelBuilder
                 .forAddress(this.couaConfiguration.getHost(), this.couaConfiguration.getPort())
                 .usePlaintext()
+                .build();
+    }
+
+    /**
+     * Represents the grpc tracing server interceptor.
+     *s
+     * @return {@link TracingServerInterceptor}.
+     */
+    @Bean
+    @ConditionalOnProperty(value = "deploy.opentrace.grpc-server.enabled", havingValue = "true")
+    @GRpcGlobalInterceptor
+    public ServerInterceptor globalServerInterceptor() {
+        return TracingServerInterceptor
+                .newBuilder()
+                .withTracer(this.tracer)
+                .withStreaming()
+                .withVerbosity()
+                .withTracedAttributes(TracingServerInterceptor.ServerRequestAttribute.HEADERS,
+                        TracingServerInterceptor.ServerRequestAttribute.METHOD_TYPE)
                 .build();
     }
 

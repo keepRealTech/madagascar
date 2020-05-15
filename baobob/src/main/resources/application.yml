@@ -15,3 +15,8 @@ jwt:
   access-token-validity-in-seconds: 86400
   refresh-token-validity-in-seconds: 6000
   client-secret: secret
+
+deploy:
+  opentrace:
+    grpc-server:
+      enabled: false
