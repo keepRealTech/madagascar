@@ -190,7 +190,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             if (userMessage != null) {
                 userFound = true;
                 IslandMessage islandMessage = islandInfoService.getIslandMessage(islandInfo);
-                Integer userIndex = subscriptionService.getUserIndexByIslandId(request.getUserId(), islandInfo.getHostId());
+                Integer userIndex = subscriptionService.getUserIndexByIslandId(islandInfo.getId(), request.getUserId());
                 responseBuilder.setIsland(islandMessage)
                         .setHost(userMessage)
                         .setUserIndex(StringValue.of(userIndex == null ? "" : userIndex.toString()))
