@@ -32,9 +32,9 @@ public class FeedService {
     /**
      * Create default feed.
      *
-     * @param userId    userId
-     * @param hostId    hostId
-     * @param islandId  islandId
+     * @param userId   userId
+     * @param hostId   hostId
+     * @param islandId islandId
      */
     public void createDefaultFeed(String userId, String hostId, String islandId) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
@@ -53,8 +53,8 @@ public class FeedService {
     /**
      * Retrieve latest feed by userId and get islandId.
      *
-     * @param userId    userId
-     * @return  islandId
+     * @param userId userId
+     * @return islandId
      */
     public String retrieveLatestFeedByUserIdGetIslandId(String userId) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
