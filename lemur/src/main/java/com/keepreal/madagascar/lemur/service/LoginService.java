@@ -5,10 +5,9 @@ import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.baobob.LoginServiceGrpc;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import io.opentracing.Tracer;
-import io.opentracing.contrib.grpc.TracingClientInterceptor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -23,19 +22,16 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class LoginService {
 
-    private final ManagedChannel managedChannel;
-    private final Tracer tracer;
+    private final Channel channel;
 
     /**
      * Constructs the login service.
      *
-     * @param managedChannel GRpc managed channel connection to service Baobob.
-     * @param tracer         {@link Tracer}.
+     * @param channel GRpc managed channel connection to service Baobob.
      */
-    public LoginService(@Qualifier("baobobChannel") ManagedChannel managedChannel,
+    public LoginService(@Qualifier("baobobChannel") Channel channel,
                         Tracer tracer) {
-        this.managedChannel = managedChannel;
-        this.tracer = tracer;
+        this.channel = channel;
     }
 
     /**
@@ -45,13 +41,8 @@ public class LoginService {
      * @return {@link LoginResponse}.
      */
     public LoginResponse login(LoginRequest request) {
-        TracingClientInterceptor tracingInterceptor = TracingClientInterceptor
-                .newBuilder()
-                .withTracer(this.tracer)
-                .build();
-
         LoginServiceGrpc.LoginServiceBlockingStub stub =
-                LoginServiceGrpc.newBlockingStub(tracingInterceptor.intercept(this.managedChannel))
+                LoginServiceGrpc.newBlockingStub(this.channel)
                         .withDeadlineAfter(10, TimeUnit.SECONDS);
 
         LoginResponse loginResponse;

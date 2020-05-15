@@ -25,7 +25,7 @@ import com.keepreal.madagascar.coua.SubscribeIslandResponse;
 import com.keepreal.madagascar.coua.UnsubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateIslandByIdRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,15 +44,15 @@ import java.util.Objects;
 @Slf4j
 public class IslandService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the island service.
      *
-     * @param managedChannel GRpc managed channel connection to service Coua.
+     * @param channel GRpc managed channel connection to service Coua.
      */
-    public IslandService(@Qualifier("couaChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public IslandService(@Qualifier("couaChannel") Channel channel) {
+        this.channel = channel;
     }
 
     /**
@@ -62,7 +62,7 @@ public class IslandService {
      * @return True if occupied.
      */
     public boolean checkName(String name) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         CheckNameRequest request = CheckNameRequest.newBuilder()
                 .setName(name)
@@ -96,7 +96,7 @@ public class IslandService {
      */
     @Cacheable(value = "island", key = "#id")
     public IslandMessage retrieveIslandById(String id) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveIslandByIdRequest request = RetrieveIslandByIdRequest.newBuilder()
                 .setId(id)
@@ -130,7 +130,7 @@ public class IslandService {
      * @return {@link IslandProfileResponse}.
      */
     public IslandProfileResponse retrieveIslandProfileById(String id, String userId) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveIslandProfileByIdRequest request = RetrieveIslandProfileByIdRequest.newBuilder()
                 .setId(id)
@@ -168,7 +168,7 @@ public class IslandService {
      * @return {@link IslandsResponse}.
      */
     public IslandsResponse retrieveIslands(String name, String hostId, String subscriberId, int page, int pageSize) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         QueryIslandCondition.Builder conditionBuilder = QueryIslandCondition.newBuilder();
 
@@ -219,7 +219,7 @@ public class IslandService {
      * @return {@link IslandMessage}.
      */
     public IslandMessage createIsland(String name, String portraitImageUri, String secret, String userId) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         NewIslandRequest.Builder requestBuilder = NewIslandRequest.newBuilder()
                 .setName(name)
@@ -262,7 +262,7 @@ public class IslandService {
      */
     @CacheEvict(value = {"island, island-profile"}, key = "#id")
     public IslandMessage updateIslandById(String id, String name, String portraitImageUri, String secret, String description) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         UpdateIslandByIdRequest.Builder requestBuilder = UpdateIslandByIdRequest.newBuilder()
                 .setId(id);
@@ -312,7 +312,7 @@ public class IslandService {
      */
     @CacheEvict(value = "island-subscriber", key = "#id")
     public void subscribeIslandById(String id, String userId, String secret) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         SubscribeIslandByIdRequest request = SubscribeIslandByIdRequest.newBuilder()
                 .setId(id)
@@ -346,7 +346,7 @@ public class IslandService {
      */
     @CacheEvict(value = "island-subscriber", key = "#id")
     public void unsubscribeIslandById(String id, String userId) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         UnsubscribeIslandByIdRequest request = UnsubscribeIslandByIdRequest.newBuilder()
                 .setId(id)
@@ -381,7 +381,7 @@ public class IslandService {
      */
     @Cacheable(value = "island-subscriber", key = "#id")
     public IslandSubscribersResponse retrieveSubscriberByIslandId(String id, int page, int pageSize) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveIslandSubscribersByIdRequest request = RetrieveIslandSubscribersByIdRequest.newBuilder()
                 .setId(id)
@@ -411,12 +411,12 @@ public class IslandService {
     /**
      * Checks if has new feeds after the given timestamp.
      *
-     * @param islandIds Island ids.
+     * @param islandIds  Island ids.
      * @param timestamps Timestamps in milli-seconds.
      * @return List of {@link CheckNewFeedsMessage}.
      */
     public List<CheckNewFeedsMessage> checkNewFeeds(List<String> islandIds, List<Long> timestamps) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         CheckNewFeedsRequest request = CheckNewFeedsRequest.newBuilder()
                 .addAllIslandIds(islandIds)

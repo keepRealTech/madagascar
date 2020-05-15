@@ -13,7 +13,7 @@ import com.keepreal.madagascar.tenrecs.NotificationsResponse;
 import com.keepreal.madagascar.tenrecs.QueryNotificationCondition;
 import com.keepreal.madagascar.tenrecs.RetrieveMultipleNotificationsRequest;
 import com.keepreal.madagascar.tenrecs.UnreadNotificationsCountMessage;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,15 +28,15 @@ import java.util.Objects;
 @Slf4j
 public class NotificationService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the notification service.
      *
-     * @param managedChannel GRpc managed channel connection to service Tenrecs.
+     * @param channel GRpc managed channel connection to service Tenrecs.
      */
-    public NotificationService(@Qualifier("tenrecsChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public NotificationService(@Qualifier("tenrecsChannel") Channel channel) {
+        this.channel = channel;
     }
 
     /**
@@ -49,7 +49,7 @@ public class NotificationService {
      * @return {@link NotificationsResponse}.
      */
     public NotificationsResponse retrieveNotifications(String userId, NotificationType type, int page, int pageSize) {
-        NotificationServiceGrpc.NotificationServiceBlockingStub stub = NotificationServiceGrpc.newBlockingStub(this.managedChannel);
+        NotificationServiceGrpc.NotificationServiceBlockingStub stub = NotificationServiceGrpc.newBlockingStub(this.channel);
 
         QueryNotificationCondition.Builder conditionBuilder = QueryNotificationCondition.newBuilder()
                 .setUserId(StringValue.of(userId));
@@ -90,7 +90,7 @@ public class NotificationService {
      * @return {@link UnreadNotificationsCountMessage}.
      */
     public UnreadNotificationsCountMessage countUnreadNotifications(String userId) {
-        NotificationServiceGrpc.NotificationServiceBlockingStub stub = NotificationServiceGrpc.newBlockingStub(this.managedChannel);
+        NotificationServiceGrpc.NotificationServiceBlockingStub stub = NotificationServiceGrpc.newBlockingStub(this.channel);
 
         CountUnreadNotificationsRequest request = CountUnreadNotificationsRequest.newBuilder()
                 .setUserId(userId)

@@ -5,9 +5,6 @@ import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
-import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
-import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
-import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
@@ -19,10 +16,9 @@ import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -38,18 +34,19 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FeedService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
     private final IslandService islandService;
 
     /**
      * Constructs the feed service.
      *
-     * @param managedChannel GRpc managed channel connection to service Fossa.
+     * @param channel       GRpc managed channel connection to service Fossa.
      * @param islandService {@link IslandService}
      */
 
-    public FeedService(@Qualifier("fossaChannel") ManagedChannel managedChannel, IslandService islandService) {
-        this.managedChannel = managedChannel;
+    public FeedService(@Qualifier("fossaChannel") Channel channel,
+                       IslandService islandService) {
+        this.channel = channel;
         this.islandService = islandService;
     }
 
@@ -67,7 +64,7 @@ public class FeedService {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
         }
 
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
         List<String> hostIdList = islandIds.stream().map(id -> islandService.retrieveIslandById(id).getHostId()).collect(Collectors.toList());
 
         NewFeedsRequest request = NewFeedsRequest.newBuilder()
@@ -102,7 +99,7 @@ public class FeedService {
      * @param id Feed id.
      */
     public void deleteFeedById(String id) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
 
         DeleteFeedByIdRequest request = DeleteFeedByIdRequest.newBuilder()
                 .setId(id)
@@ -133,7 +130,7 @@ public class FeedService {
      * @return {@link FeedMessage}.
      */
     public FeedMessage retrieveFeedById(String id) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveFeedByIdRequest request = RetrieveFeedByIdRequest.newBuilder()
                 .setId(id)
@@ -169,7 +166,7 @@ public class FeedService {
      * @return {@link FeedsResponse}.
      */
     public FeedsResponse retrieveFeeds(String islandId, Boolean fromHost, String userId, int page, int pageSize) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
 
         QueryFeedCondition.Builder conditionBuilder = QueryFeedCondition.newBuilder();
 
