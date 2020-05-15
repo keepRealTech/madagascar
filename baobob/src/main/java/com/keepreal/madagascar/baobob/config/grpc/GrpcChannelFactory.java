@@ -42,7 +42,7 @@ public class GrpcChannelFactory {
     public Channel getCouaChannel() {
         return TracingClientInterceptor
                 .newBuilder()
-                .withTracer(tracer)
+                .withTracer(this.tracer)
                 .build()
                 .intercept(ManagedChannelBuilder
                         .forAddress(this.couaConfiguration.getHost(), this.couaConfiguration.getPort())

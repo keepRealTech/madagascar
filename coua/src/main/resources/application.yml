@@ -1,4 +1,5 @@
 spring:
+  name: coua
   datasource:
     url: jdbc:mysql://kr_admin:hMeKPJ7Yq^%25A@rm-2zefwtyv2c6ewwrk25o.mysql.rds.aliyuncs.com:3306/coua?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
@@ -19,3 +20,8 @@ grpc:
 
 snowflake:
   nodeId: 0
+
+deploy:
+  opentrace:
+    grpc-server:
+      enabled: false

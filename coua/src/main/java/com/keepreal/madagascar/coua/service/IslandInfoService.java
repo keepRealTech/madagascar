@@ -40,7 +40,7 @@ import com.keepreal.madagascar.fossa.CreateDefaultFeedRequest;
 import com.keepreal.madagascar.fossa.FeedResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.RetrieveLatestFeedByUserIdRequest;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
@@ -73,19 +73,19 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     private final SubscriptionService subscriptionService;
     private final UserInfoService userInfoService;
     private final LongIdGenerator idGenerator;
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     @Autowired
     public IslandInfoService(IslandInfoRepository islandInfoRepository,
                              SubscriptionService subscriptionService,
                              UserInfoService userInfoService,
                              LongIdGenerator idGenerator,
-                             @Qualifier("fossaChannel")ManagedChannel managedChannel) {
+                             @Qualifier("fossaChannel")Channel channel) {
         this.islandInfoRepository = islandInfoRepository;
         this.subscriptionService = subscriptionService;
         this.userInfoService = userInfoService;
         this.idGenerator = idGenerator;
-        this.managedChannel = managedChannel;
+        this.channel = channel;
     }
 
     /**
@@ -573,7 +573,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     }
 
     private void callFossaCreateDefaultFeed(String userId, String hostId, String islandId) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
         CreateDefaultFeedRequest request = CreateDefaultFeedRequest.newBuilder()
                 .setUserId(userId)
                 .setHostId(hostId)
@@ -587,7 +587,7 @@ public class IslandInfoService extends IslandServiceGrpc.IslandServiceImplBase {
     }
 
     private String callFossaRetrieveLatestFeedByUserIdGetIslandId(String userId) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
         FeedResponse response;
 
         try {

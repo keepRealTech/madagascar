@@ -21,6 +21,8 @@ dependencies {
     implementation 'com.aliyun.openservices:ons-client'
     runtimeOnly 'mysql:mysql-connector-java'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
+    implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'
+    implementation 'io.opentracing.contrib:opentracing-grpc'
     implementation 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
