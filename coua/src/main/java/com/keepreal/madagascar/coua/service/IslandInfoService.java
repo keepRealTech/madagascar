@@ -1,6 +1,8 @@
 package com.keepreal.madagascar.coua.service;
 
 import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.IslandsResponse;
@@ -180,7 +182,7 @@ public class IslandInfoService {
      */
     public IslandInfo createIsland(IslandInfo islandInfo) {
         islandInfo.setId(String.valueOf(idGenerator.nextId()));
-        IslandInfo save = islandInfoRepository.save(islandInfo);
+        IslandInfo save = this.updateIsland(islandInfo);
         // 维护 subscription 表
         subscriptionService.initHost(save.getId(), save.getHostId());
         return save;
@@ -203,7 +205,11 @@ public class IslandInfoService {
      * @return {@link IslandInfo}.
      */
     public IslandInfo updateIsland(IslandInfo islandInfo) {
-        return islandInfoRepository.save(islandInfo);
+        try {
+            return islandInfoRepository.save(islandInfo);
+        } catch (Exception e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_SQL_DUPLICATE_ERROR);
+        }
     }
 
     /**

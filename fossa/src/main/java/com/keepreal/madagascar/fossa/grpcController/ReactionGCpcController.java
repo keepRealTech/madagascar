@@ -139,9 +139,10 @@ public class ReactionGCpcController extends ReactionServiceGrpc.ReactionServiceI
 
         ReactionInfo reactionInfo = reactionRepository.findTopByFeedIdAndUserId(feedId, userId);
         if (reactionInfo != null) {
+            Set<Integer> oldReactionSet = new HashSet<>(reactionInfo.getReactionTypeList());
             reactionInfo.getReactionTypeList().removeAll(typesValueList);
             reactionRepository.save(reactionInfo);
-            if (typesValueList.contains(ReactionType.REACTION_LIKE_VALUE)) {
+            if (typesValueList.contains(ReactionType.REACTION_LIKE_VALUE) && oldReactionSet.contains(ReactionType.REACTION_LIKE_VALUE)) {
                 feedInfoService.subFeedCount(reactionInfo.getFeedId(), FeedCountType.LIKES_COUNT);
             }
             ReactionMessage reactionMessage = getReactionMessage(reactionInfo.getId(), feedId, userId, request.getReactionTypesList());

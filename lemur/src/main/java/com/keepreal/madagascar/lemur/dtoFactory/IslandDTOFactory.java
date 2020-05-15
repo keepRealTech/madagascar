@@ -108,7 +108,7 @@ public class IslandDTOFactory {
 
         boolean maskSecret = true;
         if (Objects.nonNull(islandProfileResponse.getIsland())
-                && !Objects.equals(islandProfileResponse.getIsland().getHostId(), userId)) {
+                && Objects.equals(islandProfileResponse.getIsland().getHostId(), userId)) {
             maskSecret = false;
         }
 
