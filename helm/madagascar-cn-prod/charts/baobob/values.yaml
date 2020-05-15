@@ -28,4 +28,3 @@ coua:
 deploy:
   opentracing:
     enable_jaeger: false
-    grpc_server: disabled
