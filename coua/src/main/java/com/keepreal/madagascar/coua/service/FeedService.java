@@ -6,7 +6,7 @@ import com.keepreal.madagascar.fossa.CreateDefaultFeedRequest;
 import com.keepreal.madagascar.fossa.FeedResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.RetrieveLatestFeedByUserIdRequest;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -18,15 +18,15 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class FeedService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the feed service.
      *
-     * @param managedChannel GRpc managed channel connection to service Fossa.
+     * @param channel GRpc managed channel connection to service Fossa.
      */
-    public FeedService(@Qualifier("fossaChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public FeedService(@Qualifier("fossaChannel") Channel channel) {
+        this.channel = channel;
     }
 
     /**
@@ -37,7 +37,7 @@ public class FeedService {
      * @param islandId  islandId
      */
     public void createDefaultFeed(String userId, String hostId, String islandId) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
         CreateDefaultFeedRequest request = CreateDefaultFeedRequest.newBuilder()
                 .setUserId(userId)
                 .setHostId(hostId)
@@ -57,7 +57,7 @@ public class FeedService {
      * @return  islandId
      */
     public String retrieveLatestFeedByUserIdGetIslandId(String userId) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.managedChannel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
         FeedResponse response;
 
         try {
