@@ -152,6 +152,8 @@ subprojects {
             dependency "org.openapitools:jackson-databind-nullable:0.2.1"
             dependency "org.ehcache:ehcache:${ext['ehcache.version']}"
             dependency "com.aliyun.openservices:ons-client:${ext['openservices.version']}"
+            dependency "io.opentracing.contrib:opentracing-spring-jaeger-web-starter:3.1.1"
+            dependency "io.opentracing.contrib:opentracing-grpc:0.2.0"
         }
     }
 }
