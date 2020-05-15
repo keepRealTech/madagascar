@@ -2,7 +2,7 @@ package com.keepreal.madagascar.fossa.service;
 
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -16,15 +16,15 @@ import java.util.List;
 @Service
 public class IslandService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the user service.
      *
-     * @param managedChannel Managed channel for grpc traffic.
+     * @param channel Managed channel for grpc traffic.
      */
-    public IslandService(@Qualifier("couaChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public IslandService(@Qualifier("couaChannel") Channel channel) {
+        this.channel = channel;
     }
 
     /**
@@ -33,7 +33,7 @@ public class IslandService {
      * @param islandIdList  the islandIdList to be updated
      */
     public void callCouaUpdateIslandLastFeedAt(List<String> islandIdList) {
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.managedChannel);
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
         UpdateLastFeedAtRequest request = UpdateLastFeedAtRequest.newBuilder()
                 .addAllIslandIds(islandIdList)
                 .setTimestamps(System.currentTimeMillis())

@@ -1,7 +1,6 @@
 package com.keepreal.madagascar.coua.config.grpc;
 
 import io.grpc.Channel;
-import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.ServerInterceptor;
 import io.opentracing.Tracer;
