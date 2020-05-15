@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: tenrecs
   data:
     mongodb:
       database: tenrecs
@@ -17,3 +19,8 @@ grpc:
 
 snowflake:
   nodeId: 0
+
+deploy:
+  opentrace:
+    grpc-server:
+      enabled: false
