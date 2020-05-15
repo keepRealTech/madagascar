@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.coua.dao;
 
-import com.keepreal.madagascar.coua.Island;
 import com.keepreal.madagascar.coua.model.IslandInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
