@@ -22,6 +22,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
     implementation 'io.projectreactor:reactor-core'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
+    implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'
+    implementation 'io.opentracing.contrib:opentracing-grpc'
     implementation 'org.projectlombok:lombok'
     runtimeOnly 'mysql:mysql-connector-java'
     annotationProcessor 'org.projectlombok:lombok'

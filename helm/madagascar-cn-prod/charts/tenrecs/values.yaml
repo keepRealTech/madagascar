@@ -22,3 +22,7 @@ rocketmq:
   topic: notification-event
   group_id: GID-tenrecs-default
   tag: event
+
+deploy:
+  opentracing:
+    enable_jaeger: false

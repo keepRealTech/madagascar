@@ -1,7 +1,9 @@
 package com.keepreal.madagascar.lemur.config.grpc;
 
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
+import io.opentracing.Tracer;
+import io.opentracing.contrib.grpc.TracingClientInterceptor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +19,7 @@ public class GrpcChannelFactory {
     private final GrpcConfiguration baobobConfiguration;
     private final GrpcConfiguration indriConfiguration;
     private final GrpcConfiguration tenrecsConfiguration;
+    private final TracingClientInterceptor interceptor;
 
     /**
      * Constructs the grpc channels factory.
@@ -26,17 +29,23 @@ public class GrpcChannelFactory {
      * @param baobobConfiguration  Baobob grpc configuration.
      * @param indriConfiguration   Indri grpc configuration.
      * @param tenrecsConfiguration Tencres grpc configuration.
+     * @param tracer               {@link Tracer}.
      */
     public GrpcChannelFactory(@Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration,
                               @Qualifier("fossaConfiguration") GrpcConfiguration fossaConfiguration,
                               @Qualifier("baobobConfiguration") GrpcConfiguration baobobConfiguration,
                               @Qualifier("indriConfiguration") GrpcConfiguration indriConfiguration,
-                              @Qualifier("tenrecsConfiguration") GrpcConfiguration tenrecsConfiguration) {
+                              @Qualifier("tenrecsConfiguration") GrpcConfiguration tenrecsConfiguration,
+                              Tracer tracer) {
         this.couaConfiguration = couaConfiguration;
         this.fossaConfiguration = fossaConfiguration;
         this.baobobConfiguration = baobobConfiguration;
         this.indriConfiguration = indriConfiguration;
         this.tenrecsConfiguration = tenrecsConfiguration;
+        this.interceptor = TracingClientInterceptor
+                .newBuilder()
+                .withTracer(tracer)
+                .build();
     }
 
     /**
@@ -45,11 +54,11 @@ public class GrpcChannelFactory {
      * @return Coua grpc channel.
      */
     @Bean(name = "couaChannel")
-    public ManagedChannel getCouaChannel() {
-        return ManagedChannelBuilder
+    public Channel getCouaChannel() {
+        return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.couaConfiguration.getHost(), this.couaConfiguration.getPort())
                 .usePlaintext()
-                .build();
+                .build());
     }
 
     /**
@@ -58,11 +67,11 @@ public class GrpcChannelFactory {
      * @return Fossa grpc channel.
      */
     @Bean(name = "fossaChannel")
-    public ManagedChannel getFossaChannel() {
-        return ManagedChannelBuilder
+    public Channel getFossaChannel() {
+        return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.fossaConfiguration.getHost(), this.fossaConfiguration.getPort())
                 .usePlaintext()
-                .build();
+                .build());
     }
 
     /**
@@ -71,11 +80,11 @@ public class GrpcChannelFactory {
      * @return Indri grpc channel.
      */
     @Bean(name = "indriChannel")
-    public ManagedChannel getIndriChannel() {
-        return ManagedChannelBuilder
+    public Channel getIndriChannel() {
+        return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.indriConfiguration.getHost(), this.indriConfiguration.getPort())
                 .usePlaintext()
-                .build();
+                .build());
     }
 
     /**
@@ -84,11 +93,11 @@ public class GrpcChannelFactory {
      * @return Baobob grpc channel.
      */
     @Bean(name = "baobobChannel")
-    public ManagedChannel getBaobobChannel() {
-        return ManagedChannelBuilder
+    public Channel getBaobobChannel() {
+        return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.baobobConfiguration.getHost(), this.baobobConfiguration.getPort())
                 .usePlaintext()
-                .build();
+                .build());
     }
 
     /**
@@ -97,11 +106,11 @@ public class GrpcChannelFactory {
      * @return Tenrecs grpc channel.
      */
     @Bean(name = "tenrecsChannel")
-    public ManagedChannel getTenrecsChannel() {
-        return ManagedChannelBuilder
+    public Channel getTenrecsChannel() {
+        return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.tenrecsConfiguration.getHost(), this.tenrecsConfiguration.getPort())
                 .usePlaintext()
-                .build();
+                .build());
     }
 
 }

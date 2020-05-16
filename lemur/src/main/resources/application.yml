@@ -21,6 +21,8 @@ system-notification:
   content: hello, there.
 
 spring:
+  application:
+    name: lemur
   servlet:
     multipart:
       max-file-size: 10MB
@@ -50,3 +52,8 @@ rocketmq:
     topic: stats-event
     tag: event
     nameSrvAddr: 192.168.0.4:9876
+
+opentracing:
+  jaeger:
+    const-sampler:
+      decision: false

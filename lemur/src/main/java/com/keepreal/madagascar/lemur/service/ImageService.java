@@ -1,12 +1,12 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.google.protobuf.ByteString;
-import com.keepreal.madagascar.indri.ImageServiceGrpc;
-import com.keepreal.madagascar.indri.UploadImagesRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.indri.ImageServiceGrpc;
+import com.keepreal.madagascar.indri.UploadImagesRequest;
 import com.keepreal.madagascar.lemur.util.ImageUtils;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -21,15 +21,15 @@ import java.util.Objects;
 @Service
 public class ImageService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the image service.
      *
-     * @param managedChannel GRpc managed channel connection to service Indri.
+     * @param channel GRpc managed channel connection to service Indri.
      */
-    public ImageService(@Qualifier("indriChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public ImageService(@Qualifier("indriChannel") Channel channel) {
+        this.channel = channel;
     }
 
     /**
@@ -39,7 +39,7 @@ public class ImageService {
      * @return The image uri.
      */
     public String uploadSingleImageAsync(MultipartFile image) {
-        ImageServiceGrpc.ImageServiceFutureStub stub = ImageServiceGrpc.newFutureStub(this.managedChannel);
+        ImageServiceGrpc.ImageServiceFutureStub stub = ImageServiceGrpc.newFutureStub(this.channel);
 
         String extension = Objects.requireNonNull(image.getOriginalFilename())
                 .substring(image.getOriginalFilename().lastIndexOf("."));

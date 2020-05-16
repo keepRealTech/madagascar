@@ -32,9 +32,9 @@ public class IslandInfoService {
     /**
      * Constructs the island service.
      *
-     * @param islandInfoRepository  {@link IslandInfoRepository}.
-     * @param subscriptionService   {@link SubscriptionService}.
-     * @param idGenerator           {@link LongIdGenerator}.
+     * @param islandInfoRepository {@link IslandInfoRepository}.
+     * @param subscriptionService  {@link SubscriptionService}.
+     * @param idGenerator          {@link LongIdGenerator}.
      */
     public IslandInfoService(IslandInfoRepository islandInfoRepository,
                              SubscriptionService subscriptionService,
@@ -47,7 +47,7 @@ public class IslandInfoService {
     /**
      * Retrieve latest island number.
      *
-     * @param islandId  islandId.
+     * @param islandId islandId.
      * @return latest number.
      */
     public Integer getLatestIslanderNumber(String islandId) {
@@ -57,8 +57,8 @@ public class IslandInfoService {
     /**
      * if islandName is existed.
      *
-     * @param islandName    islandName.
-     * @return  is existed.
+     * @param islandName islandName.
+     * @return is existed.
      */
     public boolean islandNameIsExisted(String islandName) {
         return islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(islandName) != null;
@@ -67,8 +67,8 @@ public class IslandInfoService {
     /**
      * Retrieve islandMessage.
      *
-     * @param islandInfo    {@link IslandInfo}.
-     * @return  {@link IslandMessage}.
+     * @param islandInfo {@link IslandInfo}.
+     * @return {@link IslandMessage}.
      */
     public IslandMessage getIslandMessage(IslandInfo islandInfo) {
         if (islandInfo == null) {
@@ -92,10 +92,10 @@ public class IslandInfoService {
     /**
      * build the feed message.
      *
-     * @param islandId          islandId.
-     * @param islandLastFeedAt  islandLastFeedAt.
-     * @param currentTime       currentTime.
-     * @return  {@link CheckNewFeedsMessage}.
+     * @param islandId         islandId.
+     * @param islandLastFeedAt islandLastFeedAt.
+     * @param currentTime      currentTime.
+     * @return {@link CheckNewFeedsMessage}.
      */
     public CheckNewFeedsMessage buildFeedMessage(String islandId, Long islandLastFeedAt, Long currentTime) {
         return CheckNewFeedsMessage.newBuilder()
@@ -107,10 +107,10 @@ public class IslandInfoService {
     /**
      * Retrieve islandList by user create.
      *
-     * @param userId    userId.
-     * @param pageable  {@link Pageable}.
-     * @param builder   {@link com.keepreal.madagascar.coua.IslandsResponse.Builder}.
-     * @return  {@link IslandInfo}.
+     * @param userId   userId.
+     * @param pageable {@link Pageable}.
+     * @param builder  {@link com.keepreal.madagascar.coua.IslandsResponse.Builder}.
+     * @return {@link IslandInfo}.
      */
     public List<IslandInfo> getMyCreatedIsland(String userId, Pageable pageable, IslandsResponse.Builder builder) {
         Page<String> islandIdListPageable = subscriptionService.getIslandIdListByUserCreated(userId, pageable);
@@ -121,8 +121,8 @@ public class IslandInfoService {
     /**
      * Retrieve islandList by islandName.
      *
-     * @param islandName    islandName.
-     * @return  {@link IslandInfo}.
+     * @param islandName islandName.
+     * @return {@link IslandInfo}.
      */
     public List<IslandInfo> getIslandByName(String islandName) {
         IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(islandName);
@@ -135,9 +135,9 @@ public class IslandInfoService {
     /**
      * Retrieve islandList by islandName and user subscribed.
      *
-     * @param islandName    islandName.
-     * @param userId        userId.
-     * @return  {@link IslandInfo}.
+     * @param islandName islandName.
+     * @param userId     userId.
+     * @return {@link IslandInfo}.
      */
     public List<IslandInfo> getIslandByNameAndSubscribed(String islandName, String userId) {
         IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(islandName);
@@ -150,10 +150,10 @@ public class IslandInfoService {
     /**
      * Retrieve islandList by user subscribed.
      *
-     * @param userId    userId.
-     * @param pageable  {@link Pageable}.
-     * @param builder   {@link com.keepreal.madagascar.coua.IslandsResponse.Builder}.
-     * @return  {@link IslandInfo}.
+     * @param userId   userId.
+     * @param pageable {@link Pageable}.
+     * @param builder  {@link com.keepreal.madagascar.coua.IslandsResponse.Builder}.
+     * @return {@link IslandInfo}.
      */
     public List<IslandInfo> getIslandBySubscribed(String userId, Pageable pageable, IslandsResponse.Builder builder) {
         Page<String> islandIdListPageable = subscriptionService.getIslandIdListByUserSubscribed(userId, pageable);
@@ -164,9 +164,9 @@ public class IslandInfoService {
     /**
      * Retrieve all island.
      *
-     * @param pageable  {@link Pageable}.
-     * @param builder   {@link com.keepreal.madagascar.coua.IslandsResponse.Builder}.
-     * @return  {@link IslandInfo}.
+     * @param pageable {@link Pageable}.
+     * @param builder  {@link com.keepreal.madagascar.coua.IslandsResponse.Builder}.
+     * @return {@link IslandInfo}.
      */
     public List<IslandInfo> getIsland(Pageable pageable, IslandsResponse.Builder builder) {
         Page<IslandInfo> islandInfoListPageable = islandInfoRepository.findAllByDeletedIsFalse(pageable);
@@ -177,8 +177,8 @@ public class IslandInfoService {
     /**
      * Create island.
      *
-     * @param islandInfo    {@link IslandInfo}.
-     * @return  {@link IslandInfo}.
+     * @param islandInfo {@link IslandInfo}.
+     * @return {@link IslandInfo}.
      */
     public IslandInfo createIsland(IslandInfo islandInfo) {
         islandInfo.setId(String.valueOf(idGenerator.nextId()));
@@ -191,8 +191,8 @@ public class IslandInfoService {
     /**
      * Retrieve island by id and not delete.
      *
-     * @param islandId  islandId.
-     * @return  {@link IslandInfo}.
+     * @param islandId islandId.
+     * @return {@link IslandInfo}.
      */
     public IslandInfo findTopByIdAndDeletedIsFalse(String islandId) {
         return islandInfoRepository.findTopByIdAndDeletedIsFalse(islandId);
@@ -201,8 +201,8 @@ public class IslandInfoService {
     /**
      * Update island.
      *
-     * @param islandInfo    {@link IslandInfo}.
-     * @return  {@link IslandInfo}.
+     * @param islandInfo {@link IslandInfo}.
+     * @return {@link IslandInfo}.
      */
     public IslandInfo updateIsland(IslandInfo islandInfo) {
         try {
@@ -215,8 +215,8 @@ public class IslandInfoService {
     /**
      * Retrieve map by islandList. (key-islandId, value-lastFeedAt)
      *
-     * @param islandIdList  islandIdList.
-     * @return  (key-islandId, value-lastFeedAt).
+     * @param islandIdList islandIdList.
+     * @return (key - islandId, value - lastFeedAt).
      */
     public List<Map<String, Long>> findIslandIdAndLastFeedAtByIslandIdList(List<String> islandIdList) {
         return islandInfoRepository.findIslandIdAndLastFeedAtByIslandIdList(islandIdList);
@@ -225,10 +225,11 @@ public class IslandInfoService {
     /**
      * Update lastFeedAt by islandIdList.
      *
-     * @param islandIdList  islandIdList.
-     * @param timestamps    timestamps.
+     * @param islandIdList islandIdList.
+     * @param timestamps   timestamps.
      */
     public void updateLastFeedAtByIslandIdList(List<String> islandIdList, long timestamps) {
         islandInfoRepository.updateLastFeedAtByIslandIdList(islandIdList, timestamps);
     }
+
 }

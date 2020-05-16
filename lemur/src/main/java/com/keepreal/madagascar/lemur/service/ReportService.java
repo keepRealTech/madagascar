@@ -7,7 +7,7 @@ import com.keepreal.madagascar.fossa.NewReportRequest;
 import com.keepreal.madagascar.fossa.ReportMessage;
 import com.keepreal.madagascar.fossa.ReportResponse;
 import com.keepreal.madagascar.fossa.ReportServiceGrpc;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,15 +22,15 @@ import java.util.Objects;
 @Slf4j
 public class ReportService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the report service.
      *
-     * @param managedChannel GRpc managed channel connection to service coua.
+     * @param channel GRpc managed channel connection to service coua.
      */
-    public ReportService(@Qualifier("fossaChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public ReportService(@Qualifier("fossaChannel") Channel channel) {
+        this.channel = channel;
     }
 
     /**
@@ -42,7 +42,7 @@ public class ReportService {
      * @return {@link ReportMessage}.
      */
     public ReportMessage createReport(String feedId, String userId, ReportType type) {
-        ReportServiceGrpc.ReportServiceBlockingStub stub = ReportServiceGrpc.newBlockingStub(this.managedChannel);
+        ReportServiceGrpc.ReportServiceBlockingStub stub = ReportServiceGrpc.newBlockingStub(this.channel);
 
         NewReportRequest request = NewReportRequest.newBuilder()
                 .setFeedId(feedId)

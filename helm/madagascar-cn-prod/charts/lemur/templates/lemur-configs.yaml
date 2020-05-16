@@ -22,3 +22,4 @@ data:
   ROCKETMQ_STATSEVENT_NAMESRVADDR: {{ .Values.rocketmq.name_server_address }}
   ROCKETMQ_STATSEVENT_TOPIC: {{ .Values.rocketmq.topic }}
   ROCKETMQ_STATSEVENT_TAG: {{ .Values.rocketmq.tag }}
+  OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'

@@ -13,7 +13,7 @@ import com.keepreal.madagascar.fossa.NewCommentRequest;
 import com.keepreal.madagascar.fossa.RetrieveCommentByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveCommentsByFeedIdRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,15 +29,15 @@ import java.util.Objects;
 @Slf4j
 public class CommentService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the comment service.
      *
-     * @param managedChannel GRpc managed channel connection to service Fossa.
+     * @param channel GRpc managed channel connection to service Fossa.
      */
-    public CommentService(@Qualifier("fossaChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public CommentService(@Qualifier("fossaChannel") Channel channel) {
+        this.channel = channel;
     }
 
     /**
@@ -47,7 +47,7 @@ public class CommentService {
      * @return {@link CommentMessage}.
      */
     public CommentMessage retrieveCommentById(String id) {
-        CommentServiceGrpc.CommentServiceBlockingStub stub = CommentServiceGrpc.newBlockingStub(this.managedChannel);
+        CommentServiceGrpc.CommentServiceBlockingStub stub = CommentServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveCommentByIdRequest request = RetrieveCommentByIdRequest.newBuilder()
                 .setId(id)
@@ -79,7 +79,7 @@ public class CommentService {
      * @param id Comment id.
      */
     public void deleteCommentById(String id) {
-        CommentServiceGrpc.CommentServiceBlockingStub stub = CommentServiceGrpc.newBlockingStub(this.managedChannel);
+        CommentServiceGrpc.CommentServiceBlockingStub stub = CommentServiceGrpc.newBlockingStub(this.channel);
 
         DeleteCommentByIdRequest request = DeleteCommentByIdRequest.newBuilder()
                 .setId(id)
@@ -113,7 +113,7 @@ public class CommentService {
      * @return {@link CommentMessage}.
      */
     public CommentMessage createComment(String feedId, String userId, String content, String replyToId) {
-        CommentServiceGrpc.CommentServiceBlockingStub stub = CommentServiceGrpc.newBlockingStub(this.managedChannel);
+        CommentServiceGrpc.CommentServiceBlockingStub stub = CommentServiceGrpc.newBlockingStub(this.channel);
 
         NewCommentRequest.Builder requestBuilder = NewCommentRequest.newBuilder()
                 .setFeedId(feedId)
@@ -153,7 +153,7 @@ public class CommentService {
      * @return {@link CommentsResponse}.
      */
     public CommentsResponse retrieveCommentsByFeedId(String feedId, int page, int pageSize) {
-        CommentServiceGrpc.CommentServiceBlockingStub stub = CommentServiceGrpc.newBlockingStub(this.managedChannel);
+        CommentServiceGrpc.CommentServiceBlockingStub stub = CommentServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveCommentsByFeedIdRequest request = RetrieveCommentsByFeedIdRequest.newBuilder()
                 .setFeedId(feedId)

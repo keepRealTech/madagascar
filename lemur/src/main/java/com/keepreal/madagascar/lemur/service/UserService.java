@@ -12,7 +12,7 @@ import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,15 +31,15 @@ import java.util.Objects;
 @Slf4j
 public class UserService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the user service.
      *
-     * @param managedChannel GRpc managed channel connection to service Coua.
+     * @param channel GRpc managed channel connection to service Coua.
      */
-    public UserService(@Qualifier("couaChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public UserService(@Qualifier("couaChannel") Channel channel) {
+        this.channel = channel;
     }
 
     /**
@@ -50,7 +50,7 @@ public class UserService {
      */
     @Cacheable(value = "user", key = "#id")
     public UserMessage retrieveUserById(String id) {
-        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.managedChannel);
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
         QueryUserCondition condition = QueryUserCondition.newBuilder()
                 .setId(StringValue.of(id))
@@ -102,7 +102,7 @@ public class UserService {
                                   String city,
                                   String birthday,
                                   List<IdentityType> identityTypes) {
-        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.managedChannel);
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
         UpdateUserByIdRequest.Builder requestBuilder = UpdateUserByIdRequest.newBuilder()
                 .setId(id);

@@ -5,8 +5,9 @@ import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.baobob.LoginServiceGrpc;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
-import io.grpc.ManagedChannel;
+import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
+import io.opentracing.Tracer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -21,15 +22,16 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class LoginService {
 
-    private final ManagedChannel managedChannel;
+    private final Channel channel;
 
     /**
      * Constructs the login service.
      *
-     * @param managedChannel GRpc managed channel connection to service Baobob.
+     * @param channel GRpc managed channel connection to service Baobob.
      */
-    public LoginService(@Qualifier("baobobChannel") ManagedChannel managedChannel) {
-        this.managedChannel = managedChannel;
+    public LoginService(@Qualifier("baobobChannel") Channel channel,
+                        Tracer tracer) {
+        this.channel = channel;
     }
 
     /**
@@ -40,7 +42,7 @@ public class LoginService {
      */
     public LoginResponse login(LoginRequest request) {
         LoginServiceGrpc.LoginServiceBlockingStub stub =
-                LoginServiceGrpc.newBlockingStub(this.managedChannel)
+                LoginServiceGrpc.newBlockingStub(this.channel)
                         .withDeadlineAfter(10, TimeUnit.SECONDS);
 
         LoginResponse loginResponse;

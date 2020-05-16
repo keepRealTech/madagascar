@@ -9,3 +9,5 @@ data:
   GRPC_COUA_PORT: '{{ .Values.coua.port }}'
   JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS: '{{ .Values.jwt.access_token_validity }}'
   JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS: '{{ .Values.jwt.refresh_token_validity }}'
+  OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
+  OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
