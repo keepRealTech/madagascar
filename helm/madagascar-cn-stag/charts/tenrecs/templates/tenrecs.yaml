@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tenrecs
+  namespace: {{ .Values.common_configs.namespace }}
+spec:
+  replicas: {{ .Values.common_configs.replicas }}
+  selector:
+    matchLabels:
+      app: tenrecs
+  serviceName: tenrecs
+  template:
+    metadata:
+      annotations:
+        config.linkerd.io/init-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy-init
+        config.linkerd.io/init-image-version: v1.3.2
+        config.linkerd.io/proxy-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy
+        config.linkerd.io/proxy-image-version: stable-2.7.1
+        linkerd.io/inject: enabled
+      labels:
+        app: tenrecs
+    spec:
+      initContainers:
+        - name: sysctl
+          command:
+            - sh
+            - -c
+            - sysctl -w net.ipv4.tcp_keepalive_time=600; sysctl -w net.ipv4.tcp_keepalive_intvl=30; sysctl -w net.ipv4.tcp_keepalive_probes=10
+          image: alpine:3.6
+          imagePullPolicy: IfNotPresent
+          resources: {}
+          securityContext:
+            privileged: true
+            capabilities:
+              add:
+                - NET_ADMIN
+      imagePullSecrets:
+        - name: {{ .Values.global.acr.acr_secret_name }}
+      containers:
+        - name: tenrecs
+          image: {{ .Values.images.tenrecs.name }}:{{ .Values.images.tenrecs.tag }}
+          imagePullPolicy: {{ .Values.images.tenrecs.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: tenrecs
+          env:
+            - name: ROCKETMQ_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-key
+            - name: ROCKETMQ_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-secret
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-mongo
+                  key: connection-string
+          resources:
+            limits:
+              memory: {{ .Values.common_configs.memory }}
+            requests:
+              cpu: {{ .Values.common_configs.cpu }}
+              memory: {{ .Values.common_configs.memory }}
+          ports:
+            - containerPort: 12004
+              name: tenrecs-grpc
+        {{ if .Values.deploy.opentracing.enable_jaeger }}
+        - name: jaeger-agent
+          image: jaegertracing/jaeger-agent:1.17.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5775
+              name: zk-compact-trft
+              protocol: UDP
+            - containerPort: 5778
+              name: config-rest
+              protocol: TCP
+            - containerPort: 6831
+              name: jg-compact-trft
+              protocol: UDP
+            - containerPort: 6832
+              name: jg-binary-trft
+              protocol: UDP
+            - containerPort: 14271
+              name: admin-http
+              protocol: TCP
+          args:
+            - --reporter.tchannel.host-port=simplest-collector-headless.keepreal-prod.svc:14267
+            - --reporter.type=tchannel
+        {{ end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tenrecs
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6565
+      targetPort: tenrecs-grpc
+  selector:
+    app: tenrecs

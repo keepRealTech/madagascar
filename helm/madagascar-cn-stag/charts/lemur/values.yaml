@@ -1,0 +1,53 @@
+# Default values for test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+common_configs:
+  namespace: keepreal-prod
+  replicas: 2
+  memory: 2.5Gi
+  cpu: 500m
+
+images:
+  lemur:
+    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
+    tag: 1.0.0
+    imagePullPolicy: Always
+
+coua:
+  host: coua
+  port: 6565
+
+baobob:
+  host: baobob
+  port: 6565
+
+indri:
+  host: indri
+  port: 6565
+
+fossa:
+  host: fossa
+  port: 6565
+
+tenrecs:
+  host: tenrecs
+  port: 6565
+
+file:
+  max_file_size: 10MB
+  max_request_size: 20MB
+
+system_notification:
+  name: default-helper
+  content: hello, handsome.
+  portrait_image_uri: keepreal-helper.jpg
+
+rocketmq:
+  name_server_address: http://MQ_INST_1398284016177859_BcaZSx5M.cn-beijing.mq-internal.aliyuncs.com:8080
+  topic: stats-event
+  tag: event
+
+deploy:
+  opentracing:
+    enable_jaeger: true
