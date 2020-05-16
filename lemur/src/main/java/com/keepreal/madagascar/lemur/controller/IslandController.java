@@ -115,7 +115,7 @@ public class IslandController implements IslandApi {
             label = "islands hit number",
             value = "body.data.size()"
     )
-    public ResponseEntity<BriefIslandsResponse> apiV1IslandsGet(String name,
+    public ResponseEntity<swagger.model.IslandsResponse> apiV1IslandsGet(String name,
                                                                 Boolean subscribed,
                                                                 Integer page,
                                                                 Integer pageSize) {
@@ -123,7 +123,16 @@ public class IslandController implements IslandApi {
         IslandsResponse islandsResponse = this.islandService.retrieveIslands(
                 name, null, subscriberId, page, pageSize);
 
-        return this.BuildBriefIslandsResponse(islandsResponse);
+        swagger.model.IslandsResponse response = new swagger.model.IslandsResponse();
+        response.setData(islandsResponse.getIslandsList()
+                .stream()
+                .map(this.islandDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setPageInfo(PaginationUtils.getPageInfo(islandsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**

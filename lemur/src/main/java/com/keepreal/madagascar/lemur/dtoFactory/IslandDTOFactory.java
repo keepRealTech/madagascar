@@ -116,6 +116,7 @@ public class IslandDTOFactory {
         islandProfileDTO.setHost(this.userDTOFactory.valueOf(islandProfileResponse.getHost()));
         islandProfileDTO.setUserIndex(islandProfileResponse.getUserIndex().getValue());
         islandProfileDTO.setSubscribed(!StringUtils.isEmpty(islandProfileDTO.getUserIndex()));
+        islandProfileDTO.setCurrentTime(System.currentTimeMillis());
         return islandProfileDTO;
     }
 
