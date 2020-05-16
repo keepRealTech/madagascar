@@ -873,9 +873,6 @@ components:
           type: string
         subscribed:
           type: boolean
-        currentTime:
-          type: integer
-          format: int64
     CheckIslandDTO:
       type: object
       properties:
@@ -1119,6 +1116,9 @@ components:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
+            currentTime:
+              type: integer
+              format: int64
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
