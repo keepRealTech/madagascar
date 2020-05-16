@@ -157,7 +157,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BriefIslandsResponse'
+                $ref: '#/components/schemas/IslandsResponse'
   /api/v1/islands/checkName:
     get:
       parameters:
@@ -969,6 +969,17 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/BriefIslandDTO'
+    IslandsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/IslandDTO'
     ReportDTO:
       type: object
       properties:
@@ -1105,6 +1116,9 @@ components:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
+            currentTime:
+              type: integer
+              format: int64
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
