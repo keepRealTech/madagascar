@@ -1,7 +1,10 @@
 package com.keepreal.madagascar.coua.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -13,6 +16,7 @@ import java.util.regex.Pattern;
 public class DisplayIdFilterUtils {
 
     private static List<String> patternList = new ArrayList<>();
+    private static Set<String> specialSet = new HashSet<>();
 
     static {
         // 重复号码，镜子号码
@@ -34,11 +38,16 @@ public class DisplayIdFilterUtils {
         patternList.add("^\\d*(\\d)\\1{2,}\\d*$");
         // 4位以上 位递增或者递减（7890也是递增）
         patternList.add("(?:(?:0(?=1)|1(?=2)|2(?=3)|3(?=4)|4(?=5)|5(?=6)|6(?=7)|7(?=8)|8(?=9)|9(?=0)){2,}|(?:0(?=9)|9(?=8)|8(?=7)|7(?=6)|6(?=5)|5(?=4)|4(?=3)|3(?=2)|2(?=1)|1(?=0)){2,})\\d");
+
+        specialSet.addAll(Arrays.asList("20200526", "19920424", "20200309",
+                                        "85785785", "52480091", "20130919",
+                                        "51751751", "85785757", "13145210",
+                                        "48481748"));
     }
 
     public static boolean isSpecial(String input) {
         for (String pa : patternList) {
-            if (Pattern.matches(pa, input))
+            if (Pattern.matches(pa, input) && specialSet.contains(input))
                 return true;
         }
         return false;
