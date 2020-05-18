@@ -16,6 +16,7 @@ import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.coua.NewIslandRequest;
 import com.keepreal.madagascar.coua.QueryIslandCondition;
+import com.keepreal.madagascar.coua.RetrieveDefaultIslandsByUserIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandProfileByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
@@ -441,6 +442,34 @@ public class IslandService {
         }
 
         return checkNewFeedsResponse.getCheckNewFeedsList();
+    }
+
+    public IslandsResponse retrieveDefaultIsland(String userId, int page, int pageSize) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveDefaultIslandsByUserIdRequest request = RetrieveDefaultIslandsByUserIdRequest.newBuilder()
+                .setUserId(userId)
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                .build();
+
+        IslandsResponse islandsResponse;
+        try {
+            islandsResponse = stub.retrieveDefaultIslandsByUserId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(islandsResponse)
+                || !islandsResponse.hasStatus()) {
+            log.error(Objects.isNull(islandsResponse) ? "Retrieve feed returned null." : islandsResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != islandsResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(islandsResponse.getStatus());
+        }
+
+        return islandsResponse;
     }
 
 }

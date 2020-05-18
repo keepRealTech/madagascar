@@ -202,6 +202,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BriefIslandsResponse'
+  /api/v1/islands/officialIslands:
+    get:
+      tags:
+        - Island
+      summary: retrieves official islands id
+      responses:
+        '200':
+          description: islands response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OfficialIslandsResponse'
   /api/v1/islands/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -958,6 +970,15 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/IslandDTO'
+    OfficialIslandsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: string
     BriefIslandsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
