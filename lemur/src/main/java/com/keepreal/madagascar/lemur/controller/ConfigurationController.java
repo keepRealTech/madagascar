@@ -23,7 +23,7 @@ public class ConfigurationController implements ConfigApi {
 
     public ConfigurationController() {
         IOSConfigVersionMap.put(0, createIOSConfigurationDTO(null,null,null,null,null,null, null));
-        IOSConfigVersionMap.put(100, createIOSConfigurationDTO(5,100,5,5,5,1000, true));
+        IOSConfigVersionMap.put(100, createIOSConfigurationDTO(10,100,10,5,10,1000, true));
     }
 
     /**

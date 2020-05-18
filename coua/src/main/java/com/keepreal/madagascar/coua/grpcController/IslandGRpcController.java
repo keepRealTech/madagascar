@@ -115,8 +115,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         }
         IslandInfo.IslandInfoBuilder infoBuilder = IslandInfo.builder()
                 .hostId(request.getHostId())
-                .islandName(request.getName())
-                .lastFeedAt(System.currentTimeMillis());
+                .islandName(request.getName());
         if (request.hasPortraitImageUri()) {
             infoBuilder.portraitImageUri(request.getPortraitImageUri().getValue());
         }

@@ -22,7 +22,7 @@ import javax.persistence.Table;
  **/
 
 @Data
-@Document(value = "commonInfo")
+@Document(value = "commentInfo")
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
