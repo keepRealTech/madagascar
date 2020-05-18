@@ -63,7 +63,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                 userInfo.setBirthday(Date.valueOf(birthdayStr));
             }
         }
-        saveAndResponse(responseObserver, userInfo);
+        basicResponse(responseObserver, userInfoService.createUser(userInfo));
     }
 
     /**
@@ -145,19 +145,18 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
             userInfo.setDisplayId(request.getDisplayId().getValue());
         }
 
-        saveAndResponse(responseObserver, userInfo);
+        basicResponse(responseObserver, userInfoService.updateUser(userInfo));
     }
 
     /**
-     * save user and response.
+     * basic response.
      *
      * @param responseObserver {@link UserResponse}.
      * @param userInfo         {@link UserInfo}.
      */
-    private void saveAndResponse(StreamObserver<UserResponse> responseObserver, UserInfo userInfo) {
-        UserInfo save = userInfoService.createUser(userInfo);
+    private void basicResponse(StreamObserver<UserResponse> responseObserver, UserInfo userInfo) {
         UserResponse userResponse = UserResponse.newBuilder()
-                .setUser(userInfoService.getUserMessage(save))
+                .setUser(userInfoService.getUserMessage(userInfo))
                 .setStatus(CommonStatusUtils.getSuccStatus()).build();
         responseObserver.onNext(userResponse);
         responseObserver.onCompleted();

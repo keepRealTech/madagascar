@@ -50,6 +50,10 @@ public class UserInfoService{
         return userInfoRepository.save(userInfo);
     }
 
+    public UserInfo updateUser(UserInfo userInfo) {
+        return userInfoRepository.save(userInfo);
+    }
+
     /**
      * Retrieve userMessage by userId.
      *

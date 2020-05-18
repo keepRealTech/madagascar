@@ -122,7 +122,7 @@ public class FeedDTOFactory {
         }
 
         CheckFeedsDTO checkFeedsDTO = new CheckFeedsDTO();
-        checkFeedsDTO.setIslandId(checkFeedsDTO.getIslandId());
+        checkFeedsDTO.setIslandId(checkNewFeeds.getIslandId());
         checkFeedsDTO.setHasNew(checkNewFeeds.getHasNewFeeds());
 
         return checkFeedsDTO;
