@@ -28,6 +28,7 @@ import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -129,6 +130,11 @@ public class FeedController implements FeedApi {
         if (images.size() > 9) {
             DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
             return new ResponseEntity<>(HttpStatus.ACCEPTED);
+        }
+
+        if (images.size() == 0 && StringUtils.isEmpty(payload.getContent())) {
+            DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_INVALID_ARGUMENT);
+            return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
         }
 
         String userId = HttpContextUtils.getUserIdFromContext();
