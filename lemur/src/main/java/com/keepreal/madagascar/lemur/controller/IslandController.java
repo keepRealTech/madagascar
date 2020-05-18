@@ -31,6 +31,7 @@ import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
 import swagger.model.IslandProfileResponse;
 import swagger.model.IslandResponse;
+import swagger.model.OfficialIslandsResponse;
 import swagger.model.PostIslandPayload;
 import swagger.model.PostRepostRequest;
 import swagger.model.PutIslandPayload;
@@ -39,6 +40,11 @@ import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
 import swagger.model.UsersResponse;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -47,6 +53,8 @@ import java.util.stream.Collectors;
  */
 @RestController
 public class IslandController implements IslandApi {
+
+    private final List<String> officialIslandIdList;
 
     private final ImageService imageService;
     private final IslandService islandService;
@@ -77,6 +85,7 @@ public class IslandController implements IslandApi {
         this.islandDTOFactory = islandDTOFactory;
         this.userDTOFactory = userDTOFactory;
         this.repostDTOFactory = repostDTOFactory;
+        this.officialIslandIdList = Arrays.asList("1");
     }
 
     /**
@@ -186,6 +195,34 @@ public class IslandController implements IslandApi {
                 null, hostId, null, page, pageSize);
 
         return this.BuildBriefIslandsResponse(islandsResponse);
+    }
+
+    /**
+     * Implements the get my hosted and subscribed islands api.
+     *
+     * @param page page number (optional, default to 0)
+     * @param pageSize size of a page (optional, default to 10)
+     * @return  {@link BriefIslandsResponse}.
+     */
+    @Override
+    public ResponseEntity<BriefIslandsResponse> apiV1IslandsDefaultIslandsGet(Integer page, Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        IslandsResponse islandsResponse = islandService.retrieveDefaultIsland(userId, page, pageSize);
+        return this.BuildBriefIslandsResponse(islandsResponse);
+    }
+
+    /**
+     * Implements the official island id api.
+     *
+     * @return {@link OfficialIslandsResponse}.
+     */
+    @Override
+    public ResponseEntity<OfficialIslandsResponse> apiV1IslandsOfficialIslandsGet() {
+        OfficialIslandsResponse response = new OfficialIslandsResponse();
+        response.setData(officialIslandIdList);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
