@@ -40,11 +40,19 @@ public class NotificationFactory {
 
         switch (event.getType()) {
             case NOTIFICATION_EVENT_NEW_COMMENT:
-                return new CommentNotificationBuilder().setEvent(event).build();
+                return new CommentNotificationBuilder()
+                        .setEvent(event)
+                        .build();
             case NOTIFICATION_EVENT_NEW_REACTION:
-                return new ReactionNotificationBuilder().setEvent(event).setNotificationService(this.notificationService).build();
+                return new ReactionNotificationBuilder()
+                        .setEvent(event)
+                        .setNotificationService(this.notificationService)
+                        .build();
             case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
-                return new NoticeNotificationBuilder().setEvent(event).setNotificationService(this.notificationService).build();
+                return new NoticeNotificationBuilder()
+                        .setEvent(event)
+                        .setNotificationService(this.notificationService)
+                        .build();
             default:
                 return null;
         }

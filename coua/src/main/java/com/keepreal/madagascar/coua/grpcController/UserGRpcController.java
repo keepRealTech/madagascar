@@ -86,6 +86,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         if (queryUserCondition.hasDisplayId()) {
             userInfo = userInfoService.findUserInfoByDisplayIdAndDeletedIsFalse(queryUserCondition.getDisplayId().getValue());
         }
+        if (queryUserCondition.hasUsername()) {
+            userInfo = userInfoService.findUserInfoByUserNameAndDeletedIsFalse(queryUserCondition.getUsername().getValue());
+        }
         if (userInfo == null) {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);

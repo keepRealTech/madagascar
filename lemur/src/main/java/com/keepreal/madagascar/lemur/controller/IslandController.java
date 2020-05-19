@@ -5,10 +5,10 @@ import com.keepreal.madagascar.brookesia.StatsEventCategory;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
-import com.keepreal.madagascar.fossa.IslandRepostMessage;
-import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
+import com.keepreal.madagascar.fossa.IslandRepostMessage;
+import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.RepostDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
@@ -40,9 +40,6 @@ import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
 import swagger.model.UsersResponse;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -125,9 +122,9 @@ public class IslandController implements IslandApi {
             value = "body.data.size()"
     )
     public ResponseEntity<swagger.model.IslandsResponse> apiV1IslandsGet(String name,
-                                                                Boolean subscribed,
-                                                                Integer page,
-                                                                Integer pageSize) {
+                                                                         Boolean subscribed,
+                                                                         Integer page,
+                                                                         Integer pageSize) {
         String subscriberId = (Objects.nonNull(subscribed) && subscribed) ? HttpContextUtils.getUserIdFromContext() : null;
         IslandsResponse islandsResponse = this.islandService.retrieveIslands(
                 name, null, subscriberId, page, pageSize);
@@ -200,14 +197,14 @@ public class IslandController implements IslandApi {
     /**
      * Implements the get my hosted and subscribed islands api.
      *
-     * @param page page number (optional, default to 0)
+     * @param page     page number (optional, default to 0)
      * @param pageSize size of a page (optional, default to 10)
-     * @return  {@link BriefIslandsResponse}.
+     * @return {@link BriefIslandsResponse}.
      */
     @Override
     public ResponseEntity<BriefIslandsResponse> apiV1IslandsDefaultIslandsGet(Integer page, Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        IslandsResponse islandsResponse = islandService.retrieveDefaultIsland(userId, page, pageSize);
+        IslandsResponse islandsResponse = islandService.retrieveDefaultIslands(userId, page, pageSize);
         return this.BuildBriefIslandsResponse(islandsResponse);
     }
 

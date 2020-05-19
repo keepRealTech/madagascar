@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import java.sql.Date;
 
 /**
@@ -36,6 +37,10 @@ public class UserInfo {
     private String nickName;
     private String portraitImageUri;
     @Builder.Default
+    private String username = "";
+    @Builder.Default
+    private String password = "";
+    @Builder.Default
     private Integer gender = 0;
     @Builder.Default
     private String description = "";
@@ -53,4 +58,5 @@ public class UserInfo {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }
