@@ -1,0 +1,23 @@
+# Default values for test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+common_configs:
+  namespace: keepreal-prod
+  replicas: 2
+  memory: 2.5Gi
+  cpu: 500m
+
+images:
+  indri:
+    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
+    tag: 1.0.0
+    imagePullPolicy: Always
+
+aliyun_oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  bucketName: kr-thumbnail-prod-cn2-01
+
+deploy:
+  opentracing:
+    enable_jaeger: true
