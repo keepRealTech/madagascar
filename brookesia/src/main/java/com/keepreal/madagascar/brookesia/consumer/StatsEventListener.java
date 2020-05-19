@@ -46,7 +46,7 @@ public class StatsEventListener implements MessageListener {
     public Action consume(Message message, ConsumeContext context) {
         try {
             StatsEvent statsEvent =
-                    this.statsEventFactory.toStatsEvent(StatsEventMessage.parseFrom(message.getBody()));
+                    this.statsEventFactory.valueOf(StatsEventMessage.parseFrom(message.getBody()));
 
             this.statsEventService.insert(statsEvent);
 
