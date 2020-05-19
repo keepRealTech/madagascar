@@ -99,6 +99,7 @@ public class UserInfoService{
                 .setBirthday(userInfo.getBirthday().toString())
                 .setUnionId(userInfo.getUnionId())
                 .addAllIdentities(identityTypes)
+                .setCreatedAt(userInfo.getCreatedTime())
                 .build();
     }
 
