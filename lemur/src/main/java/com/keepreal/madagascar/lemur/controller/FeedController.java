@@ -52,7 +52,6 @@ import swagger.model.RepostResponse;
 import swagger.model.RepostsResponse;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -125,8 +124,12 @@ public class FeedController implements FeedApi {
             metadata = "[1].size()"
     )
     public ResponseEntity<DummyResponse> apiV1FeedsPost(
-            @Valid @NotNull PostFeedPayload payload,
+            PostFeedPayload payload,
             @ApiParam(value = "file detail") @Valid @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+        if (Objects.isNull(payload)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         DummyResponse response = new DummyResponse();
         if (images.size() > 9) {
             DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);

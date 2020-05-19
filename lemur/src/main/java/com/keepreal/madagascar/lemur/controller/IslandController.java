@@ -41,8 +41,6 @@ import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
 import swagger.model.UsersResponse;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -234,9 +232,13 @@ public class IslandController implements IslandApi {
      */
     @Override
     public ResponseEntity<BriefIslandResponse> apiV1IslandsPost(
-            @Valid @NotNull PostIslandPayload payload,
+            PostIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (Objects.isNull(payload)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         if (StringUtils.isEmpty(payload.getName())
                 || StringUtils.isEmpty(payload.getSecret())) {
@@ -269,9 +271,14 @@ public class IslandController implements IslandApi {
     @Override
     public ResponseEntity<BriefIslandResponse> apiV1IslandsIdPut(
             String id,
-            @Valid @NotNull PutIslandPayload payload,
+            PutIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (Objects.isNull(payload)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
         if (!userId.equals(islandMessage.getHostId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
