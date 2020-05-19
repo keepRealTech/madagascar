@@ -83,7 +83,7 @@ public class IslandController implements IslandApi {
         this.islandDTOFactory = islandDTOFactory;
         this.userDTOFactory = userDTOFactory;
         this.repostDTOFactory = repostDTOFactory;
-        this.officialIslandIdList = Arrays.asList("1");
+        this.officialIslandIdList = Arrays.asList("6668436831391973376");
     }
 
     /**

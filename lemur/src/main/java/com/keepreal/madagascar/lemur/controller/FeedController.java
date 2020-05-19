@@ -163,7 +163,7 @@ public class FeedController implements FeedApi {
     @Override
     public ResponseEntity<DummyResponse> apiV1FeedsIdDelete(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        FeedMessage feedMessage = this.feedService.retrieveFeedById(id);
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
         IslandMessage islandMessage = this.islandService.retrieveIslandById(feedMessage.getIslandId());
         if (!userId.equals(islandMessage.getHostId()) && !userId.equals(feedMessage.getUserId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -184,7 +184,8 @@ public class FeedController implements FeedApi {
      */
     @Override
     public ResponseEntity<FeedResponse> apiV1FeedsIdGet(String id) {
-        FeedMessage feedMessage = this.feedService.retrieveFeedById(id);
+        String userId = HttpContextUtils.getUserIdFromContext();
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
 
         FeedResponse response = new FeedResponse();
         response.setData(this.feedDTOFactory.valueOf(feedMessage));

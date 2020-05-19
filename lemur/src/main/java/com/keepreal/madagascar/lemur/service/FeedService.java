@@ -129,11 +129,12 @@ public class FeedService {
      * @param id Feed id.
      * @return {@link FeedMessage}.
      */
-    public FeedMessage retrieveFeedById(String id) {
+    public FeedMessage retrieveFeedById(String id, String userId) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveFeedByIdRequest request = RetrieveFeedByIdRequest.newBuilder()
                 .setId(id)
+                .setUserId(userId)
                 .build();
 
         FeedResponse feedResponse;
