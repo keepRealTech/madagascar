@@ -70,6 +70,32 @@ public class DummyPasswordLoginExecutor implements LoginExecutor {
                 return this.userService.retrieveUserByIdMono("1");
             case "user2":
                 return this.userService.retrieveUserByIdMono("2");
+            case "xiaoan":
+                return this.userService.retrieveUserByIdMono("3");
+            case "luyu":
+                return this.userService.retrieveUserByIdMono("4");
+            case "mingqiang":
+                return this.userService.retrieveUserByIdMono("5");
+            case "zzw":
+                return this.userService.retrieveUserByIdMono("6");
+            case "xingguo":
+                return this.userService.retrieveUserByIdMono("7");
+            case "liteng":
+                return this.userService.retrieveUserByIdMono("8");
+            case "xidong":
+                return this.userService.retrieveUserByIdMono("9");
+            case "baize":
+                return this.userService.retrieveUserByIdMono("10");
+            case "xiaoyu":
+                return this.userService.retrieveUserByIdMono("11");
+            case "jiumei":
+                return this.userService.retrieveUserByIdMono("12");
+            case "maomao":
+                return this.userService.retrieveUserByIdMono("13");
+            case "yangyang":
+                return this.userService.retrieveUserByIdMono("14");
+            case "yakun":
+                return this.userService.retrieveUserByIdMono("15");
         }
         return Mono.error(new IllegalArgumentException());
     }
