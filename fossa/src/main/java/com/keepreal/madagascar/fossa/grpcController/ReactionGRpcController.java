@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @GRpcService
-public class ReactionGCpcController extends ReactionServiceGrpc.ReactionServiceImplBase {
+public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceImplBase {
 
     private final ReactionRepository reactionRepository;
     private final LongIdGenerator idGenerator;
@@ -58,7 +58,7 @@ public class ReactionGCpcController extends ReactionServiceGrpc.ReactionServiceI
      * @param mqConfig              {@link MqConfig}.
      * @param producerBean          {@link ProducerBean}.
      */
-    public ReactionGCpcController(ReactionRepository reactionRepository,
+    public ReactionGRpcController(ReactionRepository reactionRepository,
                                   LongIdGenerator idGenerator,
                                   FeedInfoService feedInfoService,
                                   MqConfig mqConfig,
