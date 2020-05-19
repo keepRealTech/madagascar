@@ -20,6 +20,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +41,8 @@ import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
 import swagger.model.UsersResponse;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -231,9 +234,14 @@ public class IslandController implements IslandApi {
      */
     @Override
     public ResponseEntity<BriefIslandResponse> apiV1IslandsPost(
-            PostIslandPayload payload,
+            @Valid @NotNull PostIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (StringUtils.isEmpty(payload.getName())
+                || StringUtils.isEmpty(payload.getSecret())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
 
         String portraitImageUri = null;
         if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
@@ -261,7 +269,7 @@ public class IslandController implements IslandApi {
     @Override
     public ResponseEntity<BriefIslandResponse> apiV1IslandsIdPut(
             String id,
-            PutIslandPayload payload,
+            @Valid @NotNull PutIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);

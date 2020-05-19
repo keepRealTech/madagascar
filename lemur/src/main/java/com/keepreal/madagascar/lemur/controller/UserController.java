@@ -19,6 +19,8 @@ import swagger.model.GenderType;
 import swagger.model.PutUserPayload;
 import swagger.model.UserResponse;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +80,7 @@ public class UserController implements UserApi {
      */
     @Override
     public ResponseEntity<UserResponse> apiV1UsersIdPut(String id,
-                                                        PutUserPayload payload,
+                                                        @Valid @NotNull PutUserPayload payload,
                                                         @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
         if (!userId.equals(id)) {
