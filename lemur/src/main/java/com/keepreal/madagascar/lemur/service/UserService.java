@@ -16,8 +16,6 @@ import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -48,7 +46,6 @@ public class UserService {
      * @param id User id.
      * @return {@link UserMessage}.
      */
-    @Cacheable(value = "user", key = "#id")
     public UserMessage retrieveUserById(String id) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
@@ -93,7 +90,6 @@ public class UserService {
      * @param identityTypes    Identity types.
      * @return {@link UserResponse}.
      */
-    @CacheEvict(value = "user", key = "#id")
     public UserMessage updateUser(String id,
                                   String name,
                                   String portraitImageUri,
