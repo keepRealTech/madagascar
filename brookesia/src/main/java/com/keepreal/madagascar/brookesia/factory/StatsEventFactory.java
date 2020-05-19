@@ -18,7 +18,7 @@ public class StatsEventFactory {
      * @param event {@link StatsEventMessage}.
      * @return {@link StatsEvent}.
      */
-    public StatsEvent toStatsEvent(StatsEventMessage event) {
+    public StatsEvent valueOf(StatsEventMessage event) {
         if (Objects.isNull(event)) {
             return null;
         }
