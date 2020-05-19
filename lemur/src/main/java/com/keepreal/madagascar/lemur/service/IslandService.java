@@ -261,7 +261,7 @@ public class IslandService {
      * @param description      Description.
      * @return {@link IslandMessage}.
      */
-    @CacheEvict(value = {"island, island-profile"}, key = "#id")
+    @CacheEvict(value = {"island", "island-profile"}, key = "#id")
     public IslandMessage updateIslandById(String id, String name, String portraitImageUri, String secret, String description) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
