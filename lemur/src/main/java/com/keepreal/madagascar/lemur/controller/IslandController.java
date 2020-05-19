@@ -247,7 +247,7 @@ public class IslandController implements IslandApi {
 
         String portraitImageUri = null;
         if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
-            portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
+            portraitImageUri = this.imageService.uploadSingleImage(portraitImage);
         }
 
         IslandMessage islandMessage = this.islandService.createIsland(
@@ -286,7 +286,7 @@ public class IslandController implements IslandApi {
 
         String portraitImageUri = null;
         if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
-            portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
+            portraitImageUri = this.imageService.uploadSingleImage(portraitImage);
         }
 
         islandMessage = this.islandService.updateIslandById(
