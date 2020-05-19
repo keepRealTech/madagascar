@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the upload image service.
@@ -41,7 +43,7 @@ public class ImageService {
      * @param image Image.
      * @return The image uri.
      */
-    public String uploadSingleImageAsync(MultipartFile image) {
+    public String uploadSingleImage(MultipartFile image) {
         ImageServiceGrpc.ImageServiceBlockingStub stub = ImageServiceGrpc.newBlockingStub(this.channel);
 
         String extension = Objects.requireNonNull(image.getOriginalFilename())
@@ -65,6 +67,50 @@ public class ImageService {
         }
 
         return uri;
+    }
+
+    /**
+     * Uploads multiple images.
+     * @param images Images.
+     * @return Image uris.
+     */
+    public List<String> uploadMultipleImages(List<MultipartFile> images) {
+        ImageServiceGrpc.ImageServiceBlockingStub stub = ImageServiceGrpc.newBlockingStub(this.channel);
+
+        List<String> uris = images.stream()
+                .map(image -> {
+                    String extension = Objects.requireNonNull(image.getOriginalFilename())
+                            .substring(image.getOriginalFilename().lastIndexOf("."));
+                    return ImageUtils.buildImageUri() + extension;
+                }).collect(Collectors.toList());
+
+        CommonStatus response;
+        try {
+            List<ByteString> contents = images.stream()
+                    .map(image -> {
+                        try {
+                            return ByteString.copyFrom(image.getBytes());
+                        } catch (IOException e) {
+                            return ByteString.EMPTY;
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            UploadImagesRequest request = UploadImagesRequest.newBuilder()
+                    .addAllImageNames(uris)
+                    .addAllImageContent(contents)
+                    .build();
+            response = stub.uploadImages(request);
+        } catch (StatusRuntimeException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_IMAGE_UPLOAD_ERROR);
+        }
+
+        if (Objects.isNull(response) || ErrorCode.REQUEST_SUCC_VALUE != response.getRtn()) {
+            log.error("Upload image returned null.");
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        return uris;
     }
 
 }

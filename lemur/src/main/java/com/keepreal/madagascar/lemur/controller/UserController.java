@@ -91,7 +91,7 @@ public class UserController implements UserApi {
 
         String portraitImageUri = null;
         if (Objects.nonNull(portraitImage)) {
-            portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
+            portraitImageUri = this.imageService.uploadSingleImage(portraitImage);
         }
 
         List<swagger.model.IdentityType> identityTypeList =
