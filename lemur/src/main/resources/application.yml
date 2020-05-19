@@ -44,6 +44,9 @@ security:
 
 server:
   port: 8081
+  tomcat:
+    max-threads: 200
+  connection-timeout: 15s
 
 rocketmq:
   stats-event:

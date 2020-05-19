@@ -315,11 +315,11 @@ public class FeedController implements FeedApi {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         ReactionMessage reactionMessage;
-        if (!isRevoke) {
-            reactionMessage = this.reactionService.createReaction(
+        if (isRevoke) {
+            reactionMessage = this.reactionService.revokeReaction(
                     id, userId, postReactionRequest.getReactions().stream().map(this::convertType).collect(Collectors.toList()));
         } else {
-            reactionMessage = this.reactionService.revokeReaction(
+            reactionMessage = this.reactionService.createReaction(
                     id, userId, postReactionRequest.getReactions().stream().map(this::convertType).collect(Collectors.toList()));
         }
 
