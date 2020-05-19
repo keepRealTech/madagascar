@@ -62,7 +62,7 @@ public class ReactionNotificationBuilder implements NotificationBuilder {
         }
 
         Optional<Notification> lastNotification = this.notificationService.retrieveLastByReactionAuthorIdAndReactionFeedId(
-                this.event.getUserId(), this.event.getReactionEvent().getReaction().getFeedId());
+                this.event.getReactionEvent().getReaction().getUserId(), this.event.getReactionEvent().getReaction().getFeedId());
         if (lastNotification.isPresent()
                 && lastNotification.get().getTimestamp() > LocalDateTime.now().minusDays(1).atZone(ZoneId.of("Asia/Shanghai")).toInstant().toEpochMilli()) {
             Notification ln = lastNotification.get();
