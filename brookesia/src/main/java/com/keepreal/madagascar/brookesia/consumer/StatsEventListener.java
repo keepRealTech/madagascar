@@ -47,7 +47,7 @@ public class StatsEventListener implements MessageListener {
     @Override
     public Action consume(Message message, ConsumeContext context) {
         try {
-            if (Objects.isNull(message.getBody())) {
+            if (Objects.isNull(message) || Objects.isNull(message.getBody())) {
                 return Action.CommitMessage;
             }
 
