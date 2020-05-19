@@ -126,6 +126,10 @@ public class FeedController implements FeedApi {
     public ResponseEntity<DummyResponse> apiV1FeedsPost(
             PostFeedPayload payload,
             @ApiParam(value = "file detail") @Valid @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+        if (Objects.isNull(payload)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         DummyResponse response = new DummyResponse();
         if (images.size() > 9) {
             DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);

@@ -5,10 +5,10 @@ import com.keepreal.madagascar.brookesia.StatsEventCategory;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
-import com.keepreal.madagascar.fossa.IslandRepostMessage;
-import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
+import com.keepreal.madagascar.fossa.IslandRepostMessage;
+import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.RepostDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
@@ -20,6 +20,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,9 +41,6 @@ import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
 import swagger.model.UsersResponse;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -125,9 +123,9 @@ public class IslandController implements IslandApi {
             value = "body.data.size()"
     )
     public ResponseEntity<swagger.model.IslandsResponse> apiV1IslandsGet(String name,
-                                                                Boolean subscribed,
-                                                                Integer page,
-                                                                Integer pageSize) {
+                                                                         Boolean subscribed,
+                                                                         Integer page,
+                                                                         Integer pageSize) {
         String subscriberId = (Objects.nonNull(subscribed) && subscribed) ? HttpContextUtils.getUserIdFromContext() : null;
         IslandsResponse islandsResponse = this.islandService.retrieveIslands(
                 name, null, subscriberId, page, pageSize);
@@ -200,14 +198,14 @@ public class IslandController implements IslandApi {
     /**
      * Implements the get my hosted and subscribed islands api.
      *
-     * @param page page number (optional, default to 0)
+     * @param page     page number (optional, default to 0)
      * @param pageSize size of a page (optional, default to 10)
-     * @return  {@link BriefIslandsResponse}.
+     * @return {@link BriefIslandsResponse}.
      */
     @Override
     public ResponseEntity<BriefIslandsResponse> apiV1IslandsDefaultIslandsGet(Integer page, Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        IslandsResponse islandsResponse = islandService.retrieveDefaultIsland(userId, page, pageSize);
+        IslandsResponse islandsResponse = islandService.retrieveDefaultIslands(userId, page, pageSize);
         return this.BuildBriefIslandsResponse(islandsResponse);
     }
 
@@ -238,6 +236,15 @@ public class IslandController implements IslandApi {
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
+        if (Objects.isNull(payload)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (StringUtils.isEmpty(payload.getName())
+                || StringUtils.isEmpty(payload.getSecret())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         String portraitImageUri = null;
         if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
             portraitImageUri = this.imageService.uploadSingleImageAsync(portraitImage);
@@ -267,6 +274,11 @@ public class IslandController implements IslandApi {
             PutIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (Objects.isNull(payload)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
         if (!userId.equals(islandMessage.getHostId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);

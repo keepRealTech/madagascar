@@ -81,6 +81,10 @@ public class UserController implements UserApi {
                                                         PutUserPayload payload,
                                                         @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
+        if (Objects.isNull(payload)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         if (!userId.equals(id)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }

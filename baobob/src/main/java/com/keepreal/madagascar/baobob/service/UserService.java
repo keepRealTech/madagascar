@@ -45,6 +45,21 @@ public class UserService {
     }
 
     /**
+     * Retrieves the user by username.
+     *
+     * @param username Username.
+     * @return {@link UserMessage}.
+     */
+    public Mono<UserMessage> retrieveUserByUsernameMono(String username) {
+        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
+
+        QueryUserCondition condition = QueryUserCondition.newBuilder().setUsername(StringValue.of(username)).build();
+        RetrieveSingleUserRequest request = RetrieveSingleUserRequest.newBuilder().setCondition(condition).build();
+
+        return stub.retrieveSingleUser(request).map(UserResponse::getUser);
+    }
+
+    /**
      * Retrieves the user by id.
      *
      * @param id Id.

@@ -22,3 +22,7 @@ rocketmq:
 deploy:
   opentracing:
     enable_jaeger: false
+
+fossa:
+  host: fossa
+  port: 6565
