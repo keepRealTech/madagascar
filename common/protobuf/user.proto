@@ -37,7 +37,8 @@ message UpdateUserByIdRequest {
 message QueryUserCondition {
     google.protobuf.StringValue id = 1;
     google.protobuf.StringValue unionId = 2;
-    google.protobuf.StringValue displayId = 9;
+    google.protobuf.StringValue displayId = 3;
+    google.protobuf.StringValue username = 4;
 }
 
 message RetrieveSingleUserRequest {

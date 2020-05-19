@@ -117,6 +117,8 @@ message UserMessage {
     uint64 createdAt = 10;
     uint32 age = 11;
     string displayId = 12;
+    string username = 13;
+    string password = 14;
 }
 
 message IslandMessage {
