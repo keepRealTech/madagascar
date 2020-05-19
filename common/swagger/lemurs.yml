@@ -698,6 +698,7 @@ components:
       enum:
         - LOGIN_OAUTH_WECHAT
         - LOGIN_PASSWORD
+        - LOGIN_JWT_IOS
     ConfigType:
       type: string
       enum:
@@ -796,6 +797,11 @@ components:
               type: string
             city:
               type: string
+            age:
+              type: integer
+            createdAt:
+              type: integer
+              format: int64
             birthday:
               type: string
               format: date

@@ -121,7 +121,7 @@ public class FeedInfoService {
         if (feedInfo == null)
             return null;
         List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
-        boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(userId, feedInfo.getId(), ReactionType.REACTION_LIKE_VALUE);
+        boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
         return FeedMessage.newBuilder()
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())

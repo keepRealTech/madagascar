@@ -9,6 +9,7 @@ import swagger.model.IdentityType;
 import swagger.model.UserDTO;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,8 @@ public class UserDTOFactory {
         userDTO.setDescription(user.getDescription());
         userDTO.setPortraitImageUri(user.getPortraitImageUri());
         userDTO.setGender(this.convertGender(user.getGender()));
+        userDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
+        userDTO.setCreatedAt(user.getCreatedAt());
         userDTO.setIdentityTypes(user.getIdentitiesList()
                 .stream()
                 .map(this::convertIdentityType)

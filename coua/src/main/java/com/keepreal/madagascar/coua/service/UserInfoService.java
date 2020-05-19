@@ -102,6 +102,7 @@ public class UserInfoService{
                 .addAllIdentities(identityTypes)
                 .setUsername(StringUtils.isEmpty(userInfo.getUsername()) ? "" : userInfo.getUsername())
                 .setPassword(StringUtils.isEmpty(userInfo.getPassword()) ? "" : userInfo.getPassword())
+                .setCreatedAt(userInfo.getCreatedTime())
                 .build();
     }
 
