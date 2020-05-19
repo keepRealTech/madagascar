@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 /**
  * Represents a login executor working with user combination.
  */
-public class DummyPasswordLoginExecutor implements LoginExecutor {
+public class PasswordLoginExecutor implements LoginExecutor {
 
     private static final String DUMMY_USER_ID = "0";
 
@@ -30,8 +30,8 @@ public class DummyPasswordLoginExecutor implements LoginExecutor {
      * @param userService  User service.
      * @param tokenGranter Token granter.
      */
-    public DummyPasswordLoginExecutor(UserService userService,
-                                      LocalTokenGranter tokenGranter) {
+    public PasswordLoginExecutor(UserService userService,
+                                 LocalTokenGranter tokenGranter) {
         this.tokenGranter = tokenGranter;
         this.userService = userService;
         this.grpcResponseUtils = new GrpcResponseUtils();

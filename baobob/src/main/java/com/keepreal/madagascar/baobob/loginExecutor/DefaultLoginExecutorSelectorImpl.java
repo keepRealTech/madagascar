@@ -51,7 +51,7 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
                                 this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
                                 this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
             case LOGIN_PASSWORD:
-                return new DummyPasswordLoginExecutor(this.userService,
+                return new PasswordLoginExecutor(this.userService,
                         new LocalTokenGranter(
                                 this.endpoints.getEndpointsConfigurer().getTokenServices(),
                                 this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
