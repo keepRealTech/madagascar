@@ -60,3 +60,7 @@ opentracing:
   jaeger:
     const-sampler:
       decision: false
+
+general:
+  officialIslandIdList:
+    - "6668436831391973376"
