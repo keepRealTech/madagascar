@@ -9,6 +9,7 @@ import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.fossa.IslandRepostMessage;
 import com.keepreal.madagascar.fossa.IslandRepostsResponse;
+import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.RepostDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
@@ -41,8 +42,6 @@ import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
 import swagger.model.UsersResponse;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -52,38 +51,39 @@ import java.util.stream.Collectors;
 @RestController
 public class IslandController implements IslandApi {
 
-    private final List<String> officialIslandIdList;
-
     private final ImageService imageService;
     private final IslandService islandService;
     private final RepostService repostService;
     private final IslandDTOFactory islandDTOFactory;
     private final UserDTOFactory userDTOFactory;
     private final RepostDTOFactory repostDTOFactory;
+    private final GeneralConfiguration generalConfiguration;
 
     /**
      * Constructs the island controller.
      *
-     * @param imageService     {@link ImageService}.
-     * @param islandService    {@link IslandService}.
-     * @param repostService    {@link RepostService}.
-     * @param islandDTOFactory {@link IslandDTOFactory}.
-     * @param userDTOFactory   {@link UserDTOFactory}.
-     * @param repostDTOFactory {@link RepostDTOFactory}.
+     * @param imageService          {@link ImageService}.
+     * @param islandService         {@link IslandService}.
+     * @param repostService         {@link RepostService}.
+     * @param islandDTOFactory      {@link IslandDTOFactory}.
+     * @param userDTOFactory        {@link UserDTOFactory}.
+     * @param repostDTOFactory      {@link RepostDTOFactory}.
+     * @param generalConfiguration  {@link GeneralConfiguration}.
      */
     public IslandController(ImageService imageService,
                             IslandService islandService,
                             RepostService repostService,
                             IslandDTOFactory islandDTOFactory,
                             UserDTOFactory userDTOFactory,
-                            RepostDTOFactory repostDTOFactory) {
+                            RepostDTOFactory repostDTOFactory,
+                            GeneralConfiguration generalConfiguration) {
         this.imageService = imageService;
         this.islandService = islandService;
         this.repostService = repostService;
         this.islandDTOFactory = islandDTOFactory;
         this.userDTOFactory = userDTOFactory;
         this.repostDTOFactory = repostDTOFactory;
-        this.officialIslandIdList = Arrays.asList("6668436831391973376");
+        this.generalConfiguration = generalConfiguration;
     }
 
     /**
@@ -217,7 +217,7 @@ public class IslandController implements IslandApi {
     @Override
     public ResponseEntity<OfficialIslandsResponse> apiV1IslandsOfficialIslandsGet() {
         OfficialIslandsResponse response = new OfficialIslandsResponse();
-        response.setData(officialIslandIdList);
+        response.setData(generalConfiguration.getOfficialIslandIdList());
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
