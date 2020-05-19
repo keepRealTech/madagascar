@@ -10,3 +10,5 @@ data:
   ROCKETMQ_TAG: {{ .Values.rocketmq.tag }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
+  GRPC_FOSSA_HOST: {{ .Values.fossa.host }}
+  GRPC_FOSSA_PORT: '{{ .Values.fossa.port }}'

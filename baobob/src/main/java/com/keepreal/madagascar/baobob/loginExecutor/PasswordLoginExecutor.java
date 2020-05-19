@@ -7,18 +7,22 @@ import com.keepreal.madagascar.baobob.tokenGranter.LocalTokenGranter;
 import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 /**
  * Represents a login executor working with user combination.
  */
-public class DummyPasswordLoginExecutor implements LoginExecutor {
+public class PasswordLoginExecutor implements LoginExecutor {
 
     private static final String DUMMY_USER_ID = "0";
 
     private final LocalTokenGranter tokenGranter;
     private final UserService userService;
     private final GrpcResponseUtils grpcResponseUtils;
+    private final BCryptPasswordEncoder encoder;
 
     /**
      * Constructs the executor.
@@ -26,11 +30,12 @@ public class DummyPasswordLoginExecutor implements LoginExecutor {
      * @param userService  User service.
      * @param tokenGranter Token granter.
      */
-    public DummyPasswordLoginExecutor(UserService userService,
-                                      LocalTokenGranter tokenGranter) {
+    public PasswordLoginExecutor(UserService userService,
+                                 LocalTokenGranter tokenGranter) {
         this.tokenGranter = tokenGranter;
         this.userService = userService;
         this.grpcResponseUtils = new GrpcResponseUtils();
+        this.encoder = new BCryptPasswordEncoder();
     }
 
     /**
@@ -60,44 +65,9 @@ public class DummyPasswordLoginExecutor implements LoginExecutor {
      */
     @SuppressWarnings("unchecked")
     private Mono<UserMessage> loginWithUserCombination(String username, String password) {
-        if ("testuser".equals(username) && "testpass".equals(password)) {
-            return this.userService.retrieveUserByIdMono("001");
-        }
-        switch (username) {
-            case "user":
-                return this.userService.retrieveUserByIdMono("0");
-            case "user1":
-                return this.userService.retrieveUserByIdMono("1");
-            case "user2":
-                return this.userService.retrieveUserByIdMono("2");
-            case "xiaoan":
-                return this.userService.retrieveUserByIdMono("3");
-            case "luyu":
-                return this.userService.retrieveUserByIdMono("4");
-            case "mingqiang":
-                return this.userService.retrieveUserByIdMono("5");
-            case "zzw":
-                return this.userService.retrieveUserByIdMono("6");
-            case "xingguo":
-                return this.userService.retrieveUserByIdMono("7");
-            case "liteng":
-                return this.userService.retrieveUserByIdMono("8");
-            case "xidong":
-                return this.userService.retrieveUserByIdMono("9");
-            case "baize":
-                return this.userService.retrieveUserByIdMono("10");
-            case "xiaoyu":
-                return this.userService.retrieveUserByIdMono("11");
-            case "jiumei":
-                return this.userService.retrieveUserByIdMono("12");
-            case "maomao":
-                return this.userService.retrieveUserByIdMono("13");
-            case "yangyang":
-                return this.userService.retrieveUserByIdMono("14");
-            case "yakun":
-                return this.userService.retrieveUserByIdMono("15");
-        }
-        return Mono.error(new IllegalArgumentException());
+        return this.userService.retrieveUserByUsernameMono(username)
+                .filter(userMessage -> this.encoder.matches(password, userMessage.getPassword()))
+                .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)));
     }
 
 }

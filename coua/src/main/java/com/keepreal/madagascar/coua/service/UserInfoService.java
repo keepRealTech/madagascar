@@ -8,6 +8,7 @@ import com.keepreal.madagascar.coua.common.DisplayIdGenerator;
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -99,6 +100,8 @@ public class UserInfoService{
                 .setBirthday(userInfo.getBirthday().toString())
                 .setUnionId(userInfo.getUnionId())
                 .addAllIdentities(identityTypes)
+                .setUsername(StringUtils.isEmpty(userInfo.getUsername()) ? "" : userInfo.getUsername())
+                .setPassword(StringUtils.isEmpty(userInfo.getPassword()) ? "" : userInfo.getPassword())
                 .setCreatedAt(userInfo.getCreatedTime())
                 .build();
     }
@@ -132,4 +135,15 @@ public class UserInfoService{
     public UserInfo findUserInfoByDisplayIdAndDeletedIsFalse(String displayId) {
         return userInfoRepository.findUserInfoByDisplayIdAndDeletedIsFalse(displayId);
     }
+
+    /**
+     * Retrieve {@link UserInfo} by username.
+     *
+     * @param username Username.
+     * @return {@link UserInfo}.
+     */
+    public UserInfo findUserInfoByUserNameAndDeletedIsFalse(String username) {
+        return userInfoRepository.findTopByUsernameAndDeletedIsFalse(username);
+    }
+
 }

@@ -444,7 +444,15 @@ public class IslandService {
         return checkNewFeedsResponse.getCheckNewFeedsList();
     }
 
-    public IslandsResponse retrieveDefaultIsland(String userId, int page, int pageSize) {
+    /**
+     * Retrieves the default islands for posting new feeds.
+     *
+     * @param userId User id.
+     * @param page Page index.
+     * @param pageSize Page size.
+     * @return {@link IslandsResponse}.
+     */
+    public IslandsResponse retrieveDefaultIslands(String userId, int page, int pageSize) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveDefaultIslandsByUserIdRequest request = RetrieveDefaultIslandsByUserIdRequest.newBuilder()
