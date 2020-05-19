@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
  * Represents the stats event listener.
  */
@@ -45,6 +47,10 @@ public class StatsEventListener implements MessageListener {
     @Override
     public Action consume(Message message, ConsumeContext context) {
         try {
+            if (Objects.isNull(message.getBody())) {
+                return Action.CommitMessage;
+            }
+
             StatsEvent statsEvent =
                     this.statsEventFactory.valueOf(StatsEventMessage.parseFrom(message.getBody()));
 
