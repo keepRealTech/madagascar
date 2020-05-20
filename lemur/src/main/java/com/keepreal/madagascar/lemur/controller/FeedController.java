@@ -143,7 +143,10 @@ public class FeedController implements FeedApi {
 
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        List<String> imageUris = this.imageService.uploadMultipleImages(images);
+        List<String> imageUris = images
+                .stream()
+                .map(this.imageService::uploadSingleImage)
+                .collect(Collectors.toList());
 
         this.feedService.createFeed(payload.getIslandIds(), userId, payload.getContent(), imageUris);
 
