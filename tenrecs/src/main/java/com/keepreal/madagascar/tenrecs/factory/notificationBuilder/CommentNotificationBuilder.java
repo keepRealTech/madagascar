@@ -43,6 +43,13 @@ public class CommentNotificationBuilder implements NotificationBuilder {
             return null;
         }
 
+        if (Objects.equals(this.event.getCommentEvent().getComment().getReplyToId(),
+                this.event.getCommentEvent().getComment().getUserId())
+            || Objects.equals(this.event.getCommentEvent().getFeed().getUserId(),
+                this.event.getCommentEvent().getComment().getUserId())) {
+            return null;
+        }
+
         return Notification.builder()
                 .type(NotificationType.NOTIFICATION_COMMENTS)
                 .userId(this.event.getUserId())
