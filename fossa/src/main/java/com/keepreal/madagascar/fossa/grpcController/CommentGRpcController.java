@@ -95,7 +95,7 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
         FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
         Message message = createMqMessage(commentMessage, feedMessage, feedMessage.getUserId());
         ProducerUtils.sendMessageAsync(producerBean, message);
-        if (!StringUtils.isEmpty(replyToId)) {
+        if (!StringUtils.isEmpty(replyToId) && !replyToId.equals(feedMessage.getUserId())) {
             message = createMqMessage(commentMessage, feedMessage, replyToId);
             ProducerUtils.sendMessageAsync(producerBean, message);
         }
