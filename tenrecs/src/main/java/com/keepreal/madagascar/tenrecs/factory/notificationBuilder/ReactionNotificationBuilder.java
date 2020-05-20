@@ -61,6 +61,11 @@ public class ReactionNotificationBuilder implements NotificationBuilder {
             return null;
         }
 
+        if (Objects.equals(this.event.getReactionEvent().getFeed().getUserId(),
+                this.event.getReactionEvent().getReaction().getUserId())) {
+            return null;
+        }
+
         Optional<Notification> lastNotification = this.notificationService.retrieveLastByReactionAuthorIdAndReactionFeedId(
                 this.event.getReactionEvent().getReaction().getUserId(), this.event.getReactionEvent().getReaction().getFeedId());
         if (lastNotification.isPresent()

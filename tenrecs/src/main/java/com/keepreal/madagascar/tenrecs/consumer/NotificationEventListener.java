@@ -54,6 +54,10 @@ public class NotificationEventListener implements MessageListener {
             Notification notification =
                     this.notificationFactory.toNotification(NotificationEvent.parseFrom(message.getBody()));
 
+            if (Objects.isNull(notification)) {
+                return Action.CommitMessage;
+            }
+
             if (Objects.nonNull(notification.getId())) {
                 this.notificationService.update(notification);
             } else {
