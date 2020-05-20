@@ -173,7 +173,7 @@ public class IslandService {
 
         QueryIslandCondition.Builder conditionBuilder = QueryIslandCondition.newBuilder();
 
-        if (!StringUtils.isEmpty(name)) {
+        if (Objects.nonNull(name)) {
             conditionBuilder.setName(StringValue.of(name));
         }
 
