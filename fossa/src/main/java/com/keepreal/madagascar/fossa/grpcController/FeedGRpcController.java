@@ -33,6 +33,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -45,7 +46,7 @@ import java.util.stream.IntStream;
 @GRpcService
 public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
-    private static final String DEFAULT_FEED_TEXT = "于%d年%d月%d日%d:%s，创建了属于我的岛";
+    private static final String DEFAULT_FEED_TEXT = "于yyyy年MM月dd日HH:mm，创建了属于我的岛。";
     private final LongIdGenerator idGenerator;
     private final IslandService islandService;
     private final FeedInfoService feedInfoService;
@@ -230,12 +231,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      */
     @Override
     public void createDefaultFeed(CreateDefaultFeedRequest request, StreamObserver<CreateDefaultFeedResponse> responseObserver) {
-        LocalDateTime localDateTime = LocalDateTime.now();
-        String text = String.format(DEFAULT_FEED_TEXT, localDateTime.getYear(),
-                localDateTime.getMonth().getValue(),
-                localDateTime.getDayOfMonth(),
-                localDateTime.getHour(),
-                localDateTime.getMinute() < 10 ? "0"+localDateTime.getMinute():localDateTime.getMinute());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_FEED_TEXT);
+        String text = LocalDateTime.now().format(formatter);
 
         FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
         builder.id(String.valueOf(idGenerator.nextId()));
