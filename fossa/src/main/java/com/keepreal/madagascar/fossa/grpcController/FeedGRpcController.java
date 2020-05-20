@@ -45,7 +45,7 @@ import java.util.stream.IntStream;
 @GRpcService
 public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
-    private static final String DEFAULT_FEED_TEXT = "于%d年%d月%d日%d:%d，创建了属于我的岛";
+    private static final String DEFAULT_FEED_TEXT = "于%d年%d月%d日%d:%s，创建了属于我的岛";
     private final LongIdGenerator idGenerator;
     private final IslandService islandService;
     private final FeedInfoService feedInfoService;
@@ -167,13 +167,13 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         Query query = new Query();
         query.addCriteria(Criteria.where("deleted").is(false));
-        if (fromHost && hasIslandId) { //两个条件都存在
+        if (fromHost && hasIslandId) {
             Criteria criteria = Criteria
-                    .where("hostId").is(userId)
+                    .where("$where").is("this.userId == this.hostId")
                     .and("islandId").is(condition.getIslandId().getValue());
             query.addCriteria(criteria);
-        } else if (fromHost || hasIslandId) { //只有一个条件
-            Criteria criteria = fromHost ? Criteria.where("hostId").is(userId)
+        } else if (fromHost || hasIslandId) {
+            Criteria criteria = fromHost ? Criteria.where("$where").is("this.userId == this.hostId")
                     : Criteria.where("islandId").is(condition.getIslandId().getValue());
             query.addCriteria(criteria);
         }
@@ -235,7 +235,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 localDateTime.getMonth().getValue(),
                 localDateTime.getDayOfMonth(),
                 localDateTime.getHour(),
-                localDateTime.getMinute());
+                localDateTime.getMinute() < 10 ? "0"+localDateTime.getMinute():localDateTime.getMinute());
 
         FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
         builder.id(String.valueOf(idGenerator.nextId()));
