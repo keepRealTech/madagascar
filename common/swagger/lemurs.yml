@@ -213,7 +213,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OfficialIslandsResponse'
+                $ref: '#/components/schemas/IslandProfilesResponse'
   /api/v1/islands/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -976,7 +976,7 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/IslandDTO'
-    OfficialIslandsResponse:
+    IslandProfilesResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -984,7 +984,7 @@ components:
             data:
               type: array
               items:
-                type: string
+                $ref: '#/components/schemas/IslandProfileDTO'
     BriefIslandsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

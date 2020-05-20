@@ -32,8 +32,8 @@ import swagger.model.CheckIslandDTO;
 import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
 import swagger.model.IslandProfileResponse;
+import swagger.model.IslandProfilesResponse;
 import swagger.model.IslandResponse;
-import swagger.model.OfficialIslandsResponse;
 import swagger.model.PostIslandPayload;
 import swagger.model.PostRepostRequest;
 import swagger.model.PutIslandPayload;
@@ -212,12 +212,19 @@ public class IslandController implements IslandApi {
     /**
      * Implements the official island id api.
      *
-     * @return {@link OfficialIslandsResponse}.
+     * @return {@link IslandProfilesResponse}.
      */
     @Override
-    public ResponseEntity<OfficialIslandsResponse> apiV1IslandsOfficialIslandsGet() {
-        OfficialIslandsResponse response = new OfficialIslandsResponse();
-        response.setData(generalConfiguration.getOfficialIslandIdList());
+    public ResponseEntity<IslandProfilesResponse> apiV1IslandsOfficialIslandsGet() {
+        IslandProfilesResponse response = new IslandProfilesResponse();
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+
+
+        response.setData(generalConfiguration.getOfficialIslandIdList().stream()
+                .map(id -> islandService.retrieveIslandProfileById(id, userId))
+                .map(resp -> islandDTOFactory.valueOf(resp, userId))
+                .collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
