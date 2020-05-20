@@ -65,6 +65,7 @@ public class ImageService extends ReactorImageServiceGrpc.ImageServiceImplBase {
                         new ByteArrayInputStream(simpleEntry.getValue()))))
                 .last()
                 .map(putObjectResult -> this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .onErrorReturn(NoSuchElementException.class, this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .onErrorReturn(this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_IMAGE_UPLOAD_ERROR))
                 .doOnError(error -> log.error(error.toString()));
     }
