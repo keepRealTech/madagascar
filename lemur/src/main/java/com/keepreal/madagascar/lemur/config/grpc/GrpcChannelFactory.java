@@ -84,6 +84,7 @@ public class GrpcChannelFactory {
         return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.indriConfiguration.getHost(), this.indriConfiguration.getPort())
                 .usePlaintext()
+                .maxInboundMessageSize(6291456)
                 .build());
     }
 
