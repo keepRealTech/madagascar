@@ -45,9 +45,7 @@ public class DefaultSnowflakeIdGenerator implements LongIdGenerator{
 
         this.lastTimestamp = currentTimestamp;
 
-        return new DefaultSnowflakeId(
-                this.configuration.getNodeId(), this.lastTimestamp, this.sequence)
-                .toLong();
+        return new DefaultSnowflakeId(this.configuration.getNodeId(), this.lastTimestamp, this.sequence).toLong();
     }
 
     /**
