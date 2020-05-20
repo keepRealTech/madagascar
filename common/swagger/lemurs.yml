@@ -190,6 +190,7 @@ paths:
   /api/v1/islands/defaultIslands:
     get:
       parameters:
+        - $ref: '#/components/parameters/islandIdInQueryOptional'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -662,6 +663,13 @@ components:
         maximum: 100
         default: 10
     islandidInPath:
+      in: query
+      name: islandId
+      description: island id
+      required: false
+      schema:
+        type: string
+    islandIdInQueryOptional:
       in: query
       name: islandId
       description: island id

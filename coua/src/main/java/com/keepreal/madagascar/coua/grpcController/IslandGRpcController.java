@@ -436,15 +436,19 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
 
         List<IslandInfo> islandInfoList = islandInfoService.getIslandBySubscribed(userId, pageable, builder);
         if (islandInfoList.size() > 0) {
-            String islandId;
-            IslandInfo islandInfo = islandInfoList.get(0);
-            if (!userId.equals(islandInfo.getHostId()) && (islandId = feedService.retrieveLatestFeedByUserIdGetIslandId(userId)) != null) {
+            if (request.hasIslandId()) {
+                String islandId = request.getIslandId().getValue();
                 IslandInfo island = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
-                if (island != null) {
-                    islandInfoList = islandInfoList.stream().filter(info -> !islandId.equals(info.getId())).collect(Collectors.toList());
-                    islandInfoList.add(0, island);
-                    if (islandInfoList.size() > pageable.getPageSize()) {
-                        islandInfoList.remove(islandInfoList.size() - 1);
+                islandInfoList = islandInfoList.stream().filter(info -> !islandId.equals(info.getId())).collect(Collectors.toList());
+                islandInfoList.add(0, island);
+            } else {
+                String islandId;
+                IslandInfo islandInfo = islandInfoList.get(0);
+                if (!userId.equals(islandInfo.getHostId()) && (islandId = feedService.retrieveLatestFeedByUserIdGetIslandId(userId)) != null) {
+                    IslandInfo island = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
+                    if (island != null) {
+                        islandInfoList = islandInfoList.stream().filter(info -> !islandId.equals(info.getId())).collect(Collectors.toList());
+                        islandInfoList.add(0, island);
                     }
                 }
             }

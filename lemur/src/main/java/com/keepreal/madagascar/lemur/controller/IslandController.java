@@ -203,9 +203,9 @@ public class IslandController implements IslandApi {
      * @return {@link BriefIslandsResponse}.
      */
     @Override
-    public ResponseEntity<BriefIslandsResponse> apiV1IslandsDefaultIslandsGet(Integer page, Integer pageSize) {
+    public ResponseEntity<BriefIslandsResponse> apiV1IslandsDefaultIslandsGet(String islandId, Integer page, Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        IslandsResponse islandsResponse = islandService.retrieveDefaultIslands(userId, page, pageSize);
+        IslandsResponse islandsResponse = islandService.retrieveDefaultIslands(userId, islandId, page, pageSize);
         return this.BuildBriefIslandsResponse(islandsResponse);
     }
 

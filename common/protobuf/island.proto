@@ -120,7 +120,8 @@ message UpdateLastFeedAtResponse {
 
 message RetrieveDefaultIslandsByUserIdRequest {
     string userId = 1;
-    PageRequest pageRequest = 2;
+    google.protobuf.StringValue islandId = 2;
+    PageRequest pageRequest = 3;
 }
 
 service IslandService {

@@ -451,17 +451,19 @@ public class IslandService {
      * @param pageSize Page size.
      * @return {@link IslandsResponse}.
      */
-    public IslandsResponse retrieveDefaultIslands(String userId, int page, int pageSize) {
+    public IslandsResponse retrieveDefaultIslands(String userId, String islandId, int page, int pageSize) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
-        RetrieveDefaultIslandsByUserIdRequest request = RetrieveDefaultIslandsByUserIdRequest.newBuilder()
-                .setUserId(userId)
-                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
-                .build();
+        RetrieveDefaultIslandsByUserIdRequest.Builder builder = RetrieveDefaultIslandsByUserIdRequest.newBuilder();
+        builder.setUserId(userId)
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize));
+        if (!StringUtils.isEmpty(islandId)) {
+            builder.setIslandId(StringValue.of(islandId));
+        }
 
         IslandsResponse islandsResponse;
         try {
-            islandsResponse = stub.retrieveDefaultIslandsByUserId(request);
+            islandsResponse = stub.retrieveDefaultIslandsByUserId(builder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
