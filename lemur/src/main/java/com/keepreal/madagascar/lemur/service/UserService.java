@@ -29,6 +29,9 @@ import java.util.Objects;
 @Slf4j
 public class UserService {
 
+    private static final int NAME_LENGTH_THRESHOLD = 32;
+    private static final int DESCRIPTION_LENGTH_THRESHOLD = 60;
+
     private final Channel channel;
 
     /**
@@ -104,6 +107,7 @@ public class UserService {
                 .setId(id);
 
         if (!StringUtils.isEmpty(name)) {
+            checkLength(name, NAME_LENGTH_THRESHOLD);
             requestBuilder.setName(StringValue.of(name));
         }
 
@@ -112,6 +116,7 @@ public class UserService {
         }
 
         if (!StringUtils.isEmpty(description)) {
+            checkLength(description, DESCRIPTION_LENGTH_THRESHOLD);
             requestBuilder.setDescription(StringValue.of(description));
         }
 
@@ -151,4 +156,8 @@ public class UserService {
         return userResponse.getUser();
     }
 
+    private void checkLength(String str, int threshold) {
+        if (str.length() > threshold)
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+    }
 }

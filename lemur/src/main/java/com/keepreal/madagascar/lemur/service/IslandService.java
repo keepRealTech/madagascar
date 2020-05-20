@@ -43,6 +43,9 @@ import java.util.Objects;
 @Slf4j
 public class IslandService {
 
+    private static final int NAME_LENGTH_THRESHOLD = 32;
+    private static final int DESCRIPTION_LENGTH_THRESHOLD = 500;
+
     private final Channel channel;
 
     /**
@@ -265,6 +268,7 @@ public class IslandService {
                 .setId(id);
 
         if (!StringUtils.isEmpty(name)) {
+            checkLength(name, NAME_LENGTH_THRESHOLD);
             requestBuilder.setName(StringValue.of(name));
         }
 
@@ -273,10 +277,12 @@ public class IslandService {
         }
 
         if (!StringUtils.isEmpty(secret)) {
+            checkLength(name, NAME_LENGTH_THRESHOLD);
             requestBuilder.setSecret(StringValue.of(secret));
         }
 
         if (!StringUtils.isEmpty(description)) {
+            checkLength(name, DESCRIPTION_LENGTH_THRESHOLD);
             requestBuilder.setDescription(StringValue.of(description));
         }
 
@@ -473,4 +479,8 @@ public class IslandService {
         return islandsResponse;
     }
 
+    private void checkLength(String str, int threshold) {
+        if (str.length() > threshold)
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+    }
 }

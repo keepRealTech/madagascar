@@ -33,7 +33,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
     @Query(value = "SELECT COUNT(*) FROM subscription WHERE island_id = ?1 AND state > 0 AND is_deleted = FALSE", nativeQuery = true)
     Integer getCountByIslandId(String islandId);
 
-    @Query(value = "SELECT islander_number FROM subscription WHERE island_id = ?1 AND user_id = ?2 AND is_deleted = FALSE", nativeQuery = true)
+    @Query(value = "SELECT islander_number FROM subscription WHERE island_id = ?1 AND user_id = ?2 AND is_deleted = FALSE AND state > 0", nativeQuery = true)
     Integer getIslanderNumberByIslandId(String islandId, String userId);
 
     Subscription findTopByIslandIdAndUserIdAndDeletedIsFalse(String islandId, String userId);

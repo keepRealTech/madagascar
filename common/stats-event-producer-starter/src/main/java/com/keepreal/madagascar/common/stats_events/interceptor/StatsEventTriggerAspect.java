@@ -104,7 +104,7 @@ public class StatsEventTriggerAspect {
 
             return result;
         } catch (Exception exception) {
-            value = exception.getMessage();
+            value = exception.getMessage() == null ? "" : exception.getMessage();
             throw exception;
         } finally {
             statsEventMessageBuilder
