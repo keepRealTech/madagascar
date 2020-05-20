@@ -2,7 +2,6 @@ package com.keepreal.madagascar.lemur.config.grpc;
 
 import io.grpc.Channel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.netty.NettyChannelBuilder;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.grpc.TracingClientInterceptor;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,7 +55,7 @@ public class GrpcChannelFactory {
      */
     @Bean(name = "couaChannel")
     public Channel getCouaChannel() {
-        return this.interceptor.intercept(NettyChannelBuilder
+        return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.couaConfiguration.getHost(), this.couaConfiguration.getPort())
                 .usePlaintext()
                 .build());
