@@ -5,6 +5,9 @@ import com.keepreal.madagascar.common.snowflake.model.DefaultSnowflakeId;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * Represents unit tests for {@link DefaultSnowflakeId}.
+ */
 public class DefaultSnowflakeIdUnitTests {
 
     /**
