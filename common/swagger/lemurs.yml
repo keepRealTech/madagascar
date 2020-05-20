@@ -600,6 +600,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConfigurationResponse'
+  /api/v1/updateInfo/ios:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
+      tags:
+        - Config
+      summary: retrieves the update info for ios
+      responses:
+        '200':
+          description: client update info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IOSUpdateInfoResponse'
+  /api/v1/updateInfo/android:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
+      tags:
+        - Config
+      summary: retrieves the update info for ios
+      responses:
+        '200':
+          description: client update info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AndroidUpdateInfoResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1486,3 +1514,32 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ConfigurationDTO'
+    UpdateInfoDTO:
+      type: object
+      properties:
+        shouldForce:
+          type: boolean
+        isLatest:
+          type: boolean
+        address:
+          type: string
+        message:
+          type: string
+        currentVersion:
+          type: integer
+        nextVersion:
+          type: integer
+    IOSUpdateInfoResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UpdateInfoDTO'
+    AndroidUpdateInfoResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UpdateInfoDTO'
