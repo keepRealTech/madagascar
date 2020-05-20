@@ -7,10 +7,8 @@ import com.keepreal.madagascar.brookesia.StatsEventMessage;
 import com.keepreal.madagascar.brookesia.consumer.StatsEventListener;
 import com.keepreal.madagascar.brookesia.factory.StatsEventFactory;
 import com.keepreal.madagascar.brookesia.model.StatsEvent;
-import com.keepreal.madagascar.brookesia.repository.StatsEventRepository;
 import com.keepreal.madagascar.brookesia.service.StatsEventService;
 import com.mongodb.MongoClientException;
-import com.mongodb.MongoException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
 
