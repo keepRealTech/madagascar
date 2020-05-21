@@ -5,12 +5,16 @@ import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.baobob.config.OauthWechatLoginConfiguration;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatLoginInfo;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
+import com.keepreal.madagascar.baobob.service.ImageService;
 import com.keepreal.madagascar.baobob.service.UserService;
 import com.keepreal.madagascar.baobob.tokenGranter.LocalTokenGranter;
 import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -19,10 +23,12 @@ import java.util.HashMap;
 /**
  * Represents a login executor working with wechat oauth.
  */
+@Slf4j
 public class OauthWechatLoginExecutor implements LoginExecutor {
 
     private final LocalTokenGranter tokenGranter;
     private final UserService userService;
+    private final ImageService imageService;
     private final OauthWechatLoginConfiguration oauthWechatLoginConfiguration;
     private final GrpcResponseUtils grpcResponseUtils;
 
@@ -32,13 +38,16 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
      * @param userservice                   {@link UserService}.
      * @param oauthWechatLoginConfiguration {@link OauthWechatLoginConfiguration}.
      * @param tokenGranter                  Token granter.
+     * @param imageService                  {@link ImageService}.
      */
     OauthWechatLoginExecutor(UserService userservice,
                              OauthWechatLoginConfiguration oauthWechatLoginConfiguration,
-                             LocalTokenGranter tokenGranter) {
+                             LocalTokenGranter tokenGranter,
+                             ImageService imageService) {
         this.userService = userservice;
         this.oauthWechatLoginConfiguration = oauthWechatLoginConfiguration;
         this.tokenGranter = tokenGranter;
+        this.imageService = imageService;
         this.grpcResponseUtils = new GrpcResponseUtils();
     }
 
@@ -57,6 +66,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
         return this.loginWechat(loginRequest.getOauthWechatPayload().getCode())
                 .flatMap(this::retrieveOrCreateUserByUnionId)
                 .map(this.tokenGranter::grant)
+                .doOnError(error -> log.error(error.toString()))
                 .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
     }
 
@@ -79,6 +89,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
      */
     private Mono<UserMessage> createNewUserFromWechat(WechatLoginInfo wechatLoginInfo) {
         return this.retrieveUserInfoFromWechat(wechatLoginInfo)
+                .flatMap(this::migrateImage)
                 .flatMap(this.userService::createUserByWechatUserInfoMono);
     }
 
@@ -153,6 +164,29 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
             default:
                 return Gender.UNKNOWN;
         }
+    }
+
+    /**
+     * Migrates the image from wechat to oss.
+     *
+     * @param wechatUserInfo {@link WechatUserInfo}.
+     * @return {@link WechatUserInfo}.
+     */
+    private Mono<WechatUserInfo> migrateImage(WechatUserInfo wechatUserInfo) {
+        if (StringUtils.isEmpty(wechatUserInfo.getPortraitImageUri())) {
+            return Mono.just(wechatUserInfo);
+        }
+
+        return WebClient.create(wechatUserInfo.getPortraitImageUri())
+                .get()
+                .accept(MediaType.IMAGE_JPEG)
+                .retrieve()
+                .bodyToMono(byte[].class)
+                .flatMap(this.imageService::uploadSingleImage)
+                .map(uri -> {
+                    wechatUserInfo.setPortraitImageUri(uri);
+                    return wechatUserInfo;
+                });
     }
 
 }
