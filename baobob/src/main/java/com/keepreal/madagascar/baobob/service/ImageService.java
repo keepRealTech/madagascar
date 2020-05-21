@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.baobob.service;
 
 import com.google.protobuf.ByteString;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.indri.ReactorImageServiceGrpc;
 import com.keepreal.madagascar.indri.UploadImagesRequest;
 import io.grpc.Channel;
@@ -46,9 +47,15 @@ public class ImageService {
                 .build();
 
         return stub.uploadImages(request)
-                .thenReturn(uri)
+                .map(commonStatus -> {
+                    if (ErrorCode.REQUEST_SUCC_VALUE != commonStatus.getRtn()) {
+                        log.error("Upload image failed with {}", commonStatus.toString());
+                        return "";
+                    }
+                    return uri;
+                })
                 .onErrorReturn("")
-                .doOnError(err -> log.error(err.toString()));
+                .doOnError(err -> log.error("Upload image failed with {}", err.toString()));
     }
 
     /**
