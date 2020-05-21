@@ -59,7 +59,6 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
     @Override
     public NotificationDTO build() {
         if (Objects.isNull(this.notificationMessage)
-
                 || Objects.isNull(this.feedDTOFactory)
                 || Objects.isNull(this.commentDTOFactory)) {
             return null;
