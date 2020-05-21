@@ -2,7 +2,10 @@ package com.keepreal.madagascar.coua.dao;
 
 import com.keepreal.madagascar.coua.model.UserInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * @program: madagascar
@@ -23,4 +26,12 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
 
     UserInfo findTopByUsernameAndDeletedIsFalse(String username);
 
+    @Query(value =
+            "SELECT id, display_id, nick_name, portrait_image_uri, gender, " +
+                    "description, city, birthday, state, union_id, is_deleted, " +
+                    "created_time, updated_time, username, password " +
+            "FROM user " +
+            "WHERE id IN ?1 ORDER BY FIELD (id, ?1) ",
+            nativeQuery = true)
+    List<UserInfo> findUserInfoInfosByIdInAndDeletedIsFalse(List<String> idList);
 }

@@ -148,7 +148,7 @@ public class IslandInfoService {
     }
 
     /**
-     * Retrieve islandList by user subscribed.
+     * Retrieve islandList by user created and subscribed.
      *
      * @param userId   userId.
      * @param pageable {@link Pageable}.

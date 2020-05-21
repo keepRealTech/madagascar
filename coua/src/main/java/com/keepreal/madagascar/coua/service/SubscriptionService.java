@@ -86,7 +86,7 @@ public class SubscriptionService {
     }
 
     /**
-     * Retrieve pageable islandIdList by user create.
+     * Retrieve pageable islandIdList by user created.
      *
      * @param userId    userId.
      * @param pageable  {@link Pageable}.
