@@ -21,4 +21,15 @@ public class GrpcConfigurationFactory {
         return new GrpcConfiguration();
     }
 
+    /**
+     * Represents configurations for indri.
+     *
+     * @return Grpc configuration.
+     */
+    @Bean(name = "indriConfiguration")
+    @ConfigurationProperties(prefix = "grpc.indri", ignoreUnknownFields = false)
+    public GrpcConfiguration indriConfiguration() {
+        return new GrpcConfiguration();
+    }
+
 }

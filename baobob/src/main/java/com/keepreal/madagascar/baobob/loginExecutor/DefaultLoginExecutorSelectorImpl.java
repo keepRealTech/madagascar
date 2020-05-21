@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.baobob.loginExecutor;
 
 import com.keepreal.madagascar.baobob.config.OauthWechatLoginConfiguration;
+import com.keepreal.madagascar.baobob.service.ImageService;
 import com.keepreal.madagascar.baobob.service.UserService;
 import com.keepreal.madagascar.baobob.tokenGranter.LocalTokenGranter;
 import com.keepreal.madagascar.common.LoginType;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
 
     private final UserService userService;
+    private final ImageService imageService;
     private final OauthWechatLoginConfiguration oauthWechatLoginConfiguration;
     private final AuthorizationServerEndpointsConfiguration endpoints;
 
@@ -23,13 +25,16 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
      * Note that the endpoint will not be initialized in bean injection process.
      *
      * @param userService                   {@link UserService}.
+     * @param imageService                  {@link ImageService}.
      * @param oauthWechatLoginConfiguration {@link OauthWechatLoginConfiguration}.
      * @param endpoints                     {@link AuthorizationServerEndpointsConfiguration}.
      */
     public DefaultLoginExecutorSelectorImpl(UserService userService,
+                                            ImageService imageService,
                                             OauthWechatLoginConfiguration oauthWechatLoginConfiguration,
                                             AuthorizationServerEndpointsConfiguration endpoints) {
         this.userService = userService;
+        this.imageService = imageService;
         this.oauthWechatLoginConfiguration = oauthWechatLoginConfiguration;
         this.endpoints = endpoints;
     }
@@ -49,7 +54,8 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
                         new LocalTokenGranter(
                                 this.endpoints.getEndpointsConfigurer().getTokenServices(),
                                 this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
-                                this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
+                                this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()),
+                        this.imageService);
             case LOGIN_PASSWORD:
                 return new PasswordLoginExecutor(this.userService,
                         new LocalTokenGranter(

@@ -10,7 +10,7 @@ public class DefaultSnowflakeIdGenerator implements LongIdGenerator{
 
     private volatile long lastTimestamp = -1L;
     private volatile int sequence = 0;
-    private IdGeneratorConfiguration configuration;
+    private final IdGeneratorConfiguration configuration;
 
     /**
      * Constructs the default generator.
@@ -45,9 +45,7 @@ public class DefaultSnowflakeIdGenerator implements LongIdGenerator{
 
         this.lastTimestamp = currentTimestamp;
 
-        return new DefaultSnowflakeId(
-                this.configuration.getNodeId(), this.lastTimestamp, this.sequence)
-                .toLong();
+        return new DefaultSnowflakeId(this.configuration.getNodeId(), this.lastTimestamp, this.sequence).toLong();
     }
 
     /**
@@ -55,7 +53,7 @@ public class DefaultSnowflakeIdGenerator implements LongIdGenerator{
      *
      * @return Timestamp in milli.
      */
-    protected long currentTimestamp() {
+    public long currentTimestamp() {
         return System.currentTimeMillis();
     }
 

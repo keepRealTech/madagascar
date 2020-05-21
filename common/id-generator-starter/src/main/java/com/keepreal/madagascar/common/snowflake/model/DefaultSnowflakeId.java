@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.common.snowflake.model;
 
 import com.keepreal.madagascar.common.snowflake.config.IdGeneratorConfiguration;
+import lombok.SneakyThrows;
 
 /**
  * Represents a default snowflake id implementation.
@@ -18,7 +19,13 @@ public class DefaultSnowflakeId implements LongId {
      * @param timestamp Timestamp.
      * @param sequenceId Sequence id.
      */
+    @SneakyThrows(IllegalArgumentException.class)
     public DefaultSnowflakeId(int nodeId, long timestamp, int sequenceId) {
+        if (nodeId > IdGeneratorConfiguration.MAX_NODE_ID
+                || sequenceId > IdGeneratorConfiguration.MAX_SEQUENCE) {
+            throw new IllegalArgumentException("snowflake out of range.");
+        }
+
         this.nodeId = nodeId;
         this.timestamp = timestamp;
         this.sequenceId = sequenceId;
