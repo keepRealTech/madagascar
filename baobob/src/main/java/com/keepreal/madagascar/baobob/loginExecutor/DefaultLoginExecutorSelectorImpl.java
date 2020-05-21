@@ -30,7 +30,8 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
      * @param endpoints                     {@link AuthorizationServerEndpointsConfiguration}.
      */
     public DefaultLoginExecutorSelectorImpl(UserService userService,
-                                            ImageService imageService, OauthWechatLoginConfiguration oauthWechatLoginConfiguration,
+                                            ImageService imageService,
+                                            OauthWechatLoginConfiguration oauthWechatLoginConfiguration,
                                             AuthorizationServerEndpointsConfiguration endpoints) {
         this.userService = userService;
         this.imageService = imageService;
