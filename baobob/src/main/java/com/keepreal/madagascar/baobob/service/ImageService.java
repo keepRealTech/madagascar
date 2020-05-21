@@ -1,10 +1,8 @@
 package com.keepreal.madagascar.baobob.service;
 
-import com.google.protobuf.ByteString;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.indri.MigrateImageRequest;
 import com.keepreal.madagascar.indri.ReactorImageServiceGrpc;
-import com.keepreal.madagascar.indri.UploadImagesRequest;
 import io.grpc.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
