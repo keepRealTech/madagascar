@@ -173,7 +173,7 @@ public class IslandService {
 
         QueryIslandCondition.Builder conditionBuilder = QueryIslandCondition.newBuilder();
 
-        if (!StringUtils.isEmpty(name)) {
+        if (Objects.nonNull(name)) {
             conditionBuilder.setName(StringValue.of(name));
         }
 
@@ -268,7 +268,7 @@ public class IslandService {
                 .setId(id);
 
         if (!StringUtils.isEmpty(name)) {
-            checkLength(name, NAME_LENGTH_THRESHOLD);
+            this.checkLength(name, NAME_LENGTH_THRESHOLD);
             requestBuilder.setName(StringValue.of(name));
         }
 
@@ -277,12 +277,12 @@ public class IslandService {
         }
 
         if (!StringUtils.isEmpty(secret)) {
-            checkLength(name, NAME_LENGTH_THRESHOLD);
+            this.checkLength(secret, NAME_LENGTH_THRESHOLD);
             requestBuilder.setSecret(StringValue.of(secret));
         }
 
         if (!StringUtils.isEmpty(description)) {
-            checkLength(name, DESCRIPTION_LENGTH_THRESHOLD);
+            this.checkLength(description, DESCRIPTION_LENGTH_THRESHOLD);
             requestBuilder.setDescription(StringValue.of(description));
         }
 
