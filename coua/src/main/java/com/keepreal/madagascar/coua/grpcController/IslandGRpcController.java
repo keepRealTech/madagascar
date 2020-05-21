@@ -420,10 +420,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     }
 
     /**
-     * 根据userId获取该用户创建和加入的岛，按规则排序
-     *  - 用户创建的岛在最前面
-     *  - 如果该用户没有创建岛，最新发布动态的岛在前面
-     *  - 如果都没有，最新加入的岛在前面
+     * Implements the default islands method.
      *
      * @param request           {@link RetrieveDefaultIslandsByUserIdRequest}.
      * @param responseObserver  {@link IslandsResponse}.
@@ -435,33 +432,23 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         IslandsResponse.Builder builder = IslandsResponse.newBuilder();
 
         List<IslandInfo> islandInfoList = islandInfoService.getIslandBySubscribed(userId, pageable, builder);
-        if (islandInfoList.size() > 0) {
-            if (request.hasIslandId()) {
-                String islandId = request.getIslandId().getValue();
-                IslandInfo island = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
-                islandInfoList = islandInfoList.stream().filter(info -> !islandId.equals(info.getId())).collect(Collectors.toList());
-                islandInfoList.add(0, island);
-            } else {
-                String islandId;
-                IslandInfo islandInfo = islandInfoList.get(0);
-                if (!userId.equals(islandInfo.getHostId()) && (islandId = feedService.retrieveLatestFeedByUserIdGetIslandId(userId)) != null) {
-                    IslandInfo island = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
-                    if (island != null) {
-                        islandInfoList = islandInfoList.stream().filter(info -> !islandId.equals(info.getId())).collect(Collectors.toList());
-                        islandInfoList.add(0, island);
-                    }
-                }
+
+        if (request.hasIslandId()) {
+            String islandId = request.getIslandId().getValue();
+            IslandInfo island = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
+            if (island == null || !islandInfoList.contains(island)) {
+                responseObserver.onNext(IslandsResponse.newBuilder()
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR))
+                        .build());
+                responseObserver.onCompleted();
+                return;
             }
-            builder.setStatus(CommonStatusUtils.getSuccStatus())
-                    .addAllIslands(islandInfoList.stream().map(islandInfoService::getIslandMessage).filter(Objects::nonNull).collect(Collectors.toList()))
-                    .build();
-            responseObserver.onNext(builder.build());
-            responseObserver.onCompleted();
-        } else {
-            responseObserver.onNext(IslandsResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_UNEXPECTED_ERROR))
-                    .build());
-            responseObserver.onCompleted();
+            islandInfoList.remove(island);
+            islandInfoList.add(0, island);
         }
+        builder.addAllIslands(islandInfoList.stream().map(islandInfoService::getIslandMessage).filter(Objects::nonNull).collect(Collectors.toList()));
+        builder.setStatus(CommonStatusUtils.getSuccStatus());
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
     }
 }

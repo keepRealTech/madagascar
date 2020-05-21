@@ -76,7 +76,7 @@ public class UserInfoService{
      * @return  {@link UserMessage}.
      */
     public List<UserMessage> getUserMessageListByIdList(List<String> userIdList) {
-        List<UserInfo> userInfoList = userInfoRepository.findAllById(userIdList);
+        List<UserInfo> userInfoList = userInfoRepository.findUserInfoInfosByIdInAndDeletedIsFalse(userIdList);
         return userInfoList.stream().map(this::getUserMessage).collect(Collectors.toList());
     }
 
