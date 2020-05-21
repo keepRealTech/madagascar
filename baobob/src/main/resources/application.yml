@@ -13,6 +13,9 @@ grpc:
   coua:
     host: 127.0.0.1
     port: 12002
+  indri:
+    host: 127.0.0.1
+    port: 12000
 
 jwt:
   token-secret: thisisatopsecret

@@ -7,7 +7,7 @@ import com.keepreal.madagascar.common.GenderValue;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.coua.*;
 import io.grpc.Channel;
-import io.grpc.ManagedChannel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
  * Represents the user service.
  */
 @Service
+@Slf4j
 public class UserService {
 
     private final Channel channel;

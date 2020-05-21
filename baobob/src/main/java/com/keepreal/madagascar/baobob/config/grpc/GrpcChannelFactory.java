@@ -19,18 +19,27 @@ import org.springframework.context.annotation.Configuration;
 public class GrpcChannelFactory {
 
     private final GrpcConfiguration couaConfiguration;
+    private final GrpcConfiguration indriConfiguration;
     private final Tracer tracer;
+    private final TracingClientInterceptor interceptor;
 
     /**
      * Constructs the grpc channels factory.
      *
-     * @param couaConfiguration Coua grpc configuration.
+     * @param couaConfiguration  Coua grpc configuration.
+     * @param indriConfiguration Indri grpc configuration.
      * @param tracer            {@link Tracer}.
      */
     public GrpcChannelFactory(@Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration,
+                              @Qualifier("indriConfiguration") GrpcConfiguration indriConfiguration,
                               Tracer tracer) {
         this.couaConfiguration = couaConfiguration;
+        this.indriConfiguration = indriConfiguration;
         this.tracer = tracer;
+        this.interceptor = TracingClientInterceptor
+                .newBuilder()
+                .withTracer(tracer)
+                .build();
     }
 
     /**
@@ -40,12 +49,23 @@ public class GrpcChannelFactory {
      */
     @Bean(name = "couaChannel")
     public Channel getCouaChannel() {
-        return TracingClientInterceptor
-                .newBuilder()
-                .withTracer(this.tracer)
-                .build()
+        return this.interceptor
                 .intercept(ManagedChannelBuilder
                         .forAddress(this.couaConfiguration.getHost(), this.couaConfiguration.getPort())
+                        .usePlaintext()
+                        .build());
+    }
+
+    /**
+     * Represents the coua grpc channel.
+     *
+     * @return Indri grpc channel.
+     */
+    @Bean(name = "indriChannel")
+    public Channel getIndriChannel() {
+        return this.interceptor
+                .intercept(ManagedChannelBuilder
+                        .forAddress(this.indriConfiguration.getHost(), this.indriConfiguration.getPort())
                         .usePlaintext()
                         .build());
     }
