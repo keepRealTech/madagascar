@@ -2,6 +2,7 @@ package com.keepreal.madagascar.baobob.service;
 
 import com.google.protobuf.ByteString;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.indri.MigrateImageRequest;
 import com.keepreal.madagascar.indri.ReactorImageServiceGrpc;
 import com.keepreal.madagascar.indri.UploadImagesRequest;
 import io.grpc.Channel;
@@ -31,31 +32,31 @@ public class ImageService {
     }
 
     /**
-     * Uploads a single image async, returns the uri instantly no matter it succeeds or not.
+     * Migrates a single image, returns the uri.
      *
-     * @param image Image content.
+     * @param sourceUrl Image source url.
      * @return The image uri.
      */
-    public Mono<String> uploadSingleImage(byte[] image) {
+    public Mono<String> migrateSingleImage(String sourceUrl) {
         ReactorImageServiceGrpc.ReactorImageServiceStub stub = ReactorImageServiceGrpc.newReactorStub(this.channel);
 
-        String uri = this.buildImageUri();
+        String destinationUri = this.buildImageUri();
 
-        UploadImagesRequest request = UploadImagesRequest.newBuilder()
-                .addImageNames(uri)
-                .addImageContent(ByteString.copyFrom(image))
+        MigrateImageRequest request = MigrateImageRequest.newBuilder()
+                .setSourceUrl(sourceUrl)
+                .setDestinationUri(destinationUri)
                 .build();
 
-        return stub.uploadImages(request)
+        return stub.migrateImage(request)
                 .map(commonStatus -> {
                     if (ErrorCode.REQUEST_SUCC_VALUE != commonStatus.getRtn()) {
-                        log.error("Upload image failed with {}", commonStatus.toString());
+                        log.error("Migrate image failed with {}", commonStatus.toString());
                         return "";
                     }
-                    return uri;
+                    return destinationUri;
                 })
                 .onErrorReturn("")
-                .doOnError(err -> log.error("Upload image failed with {}", err.toString()));
+                .doOnError(err -> log.error("Migrate image failed with {}", err.toString()));
     }
 
     /**
