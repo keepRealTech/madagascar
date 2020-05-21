@@ -152,8 +152,8 @@ public class FeedInfoService {
      * @param feedId    feed id.
      * @return  {@link FeedInfo}.
      */
-    public FeedInfo findFeedInfoByIdAndDeletedIsFalse(String feedId) {
-        return feedInfoRepository.findFeedInfoByIdAndDeletedIsFalse(feedId);
+    public FeedInfo findFeedInfoById(String feedId) {
+        return feedInfoRepository.findFeedInfoById(feedId);
     }
 
     /**

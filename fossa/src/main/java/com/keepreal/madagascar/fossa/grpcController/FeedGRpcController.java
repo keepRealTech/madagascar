@@ -137,15 +137,18 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         String userId = request.getUserId();
         String feedId = request.getId();
 
-        FeedInfo feedInfo = feedInfoService.findFeedInfoByIdAndDeletedIsFalse(feedId);
-        if (feedInfo != null) {
+        FeedInfo feedInfo = feedInfoService.findFeedInfoById(feedId);
+        if (feedInfo == null) {
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR);
+            responseBuilder.setStatus(commonStatus);
+        } else if (feedInfo.isDeleted()){
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_IS_DELETED_ERROR);
+            responseBuilder.setStatus(commonStatus);
+        } else {
             FeedMessage feedMessage = feedInfoService.getFeedMessage(feedInfo, userId);
             responseBuilder.setFeed(feedMessage)
                     .setUserId(feedInfo.getUserId())
                     .setStatus(CommonStatusUtils.getSuccStatus());
-        } else {
-            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR);
-            responseBuilder.setStatus(commonStatus);
         }
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
