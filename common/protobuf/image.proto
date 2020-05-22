@@ -10,6 +10,12 @@ message UploadImagesRequest {
     repeated string imageNames = 2;
 }
 
+message MigrateImageRequest {
+    string sourceUrl = 1;
+    string destinationUri = 2;
+}
+
 service ImageService {
-	rpc uploadImages(UploadImagesRequest) returns (CommonStatus) {};
+	  rpc UploadImages(UploadImagesRequest) returns (CommonStatus) {};
+	  rpc MigrateImage(MigrateImageRequest) returns (CommonStatus) {};
 }

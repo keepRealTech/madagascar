@@ -177,12 +177,8 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
             return Mono.just(wechatUserInfo);
         }
 
-        return WebClient.create(wechatUserInfo.getPortraitImageUri())
-                .get()
-                .accept(MediaType.IMAGE_JPEG)
-                .retrieve()
-                .bodyToMono(byte[].class)
-                .flatMap(this.imageService::uploadSingleImage)
+        return Mono.just(wechatUserInfo.getPortraitImageUri())
+                .flatMap(this.imageService::migrateSingleImage)
                 .map(uri -> {
                     wechatUserInfo.setPortraitImageUri(uri);
                     return wechatUserInfo;
