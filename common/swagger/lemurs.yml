@@ -246,6 +246,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BriefIslandResponse'
+  /api/v1/feeds/{id}/poster:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Feed
+      security: []
+      summary: retrieves the poster for the given island
+
   /api/v1/islands/{id}/profile:
     parameters:
       - $ref: '#/components/parameters/idInPath'
