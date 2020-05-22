@@ -15,5 +15,7 @@ public interface FeedInfoRepository extends MongoRepository<FeedInfo, String> {
 
     FeedInfo findFeedInfoByIdAndDeletedIsFalse(String id);
 
+    FeedInfo findFeedInfoById(String id);
+
     FeedInfo findTopByUserIdAndDeletedIsFalseOrderByCreatedTimeDesc(String userId);
 }

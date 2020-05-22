@@ -137,7 +137,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         String userId = request.getUserId();
         String feedId = request.getId();
 
-        FeedInfo feedInfo = feedInfoService.findFeedInfoByIdAndDeletedIsFalse(feedId);
+        FeedInfo feedInfo = feedInfoService.findFeedInfoById(feedId, request.getIncludeDeleted());
+
         if (feedInfo != null) {
             FeedMessage feedMessage = feedInfoService.getFeedMessage(feedInfo, userId);
             responseBuilder.setFeed(feedMessage)
