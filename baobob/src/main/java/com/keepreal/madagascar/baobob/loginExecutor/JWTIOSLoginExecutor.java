@@ -1,8 +1,8 @@
 package com.keepreal.madagascar.baobob.loginExecutor;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.auth0.jwk.InvalidPublicKeyException;
-import com.auth0.jwk.Jwk;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.baobob.loginExecutor.model.IOSLoginInfo;
@@ -21,8 +21,14 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.util.Objects;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents a login executor working with IOS jwt.
@@ -32,6 +38,7 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
     private final GrpcResponseUtils grpcResponseUtils;
     private final UserService userService;
     private final LocalTokenGranter tokenGranter;
+    private final Map<String, PublicKey> publicKeyMap = new HashMap<>();
 
     /**
      * Constructs this executor
@@ -91,14 +98,19 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
      */
     private Mono<IOSLoginInfo> loginIOS(String jwt) {
         if (jwt.split("\\.").length > 1) {
+            String header = new String(Base64.decodeBase64(jwt.split("\\.")[0]));
             String claim = new String(Base64.decodeBase64(jwt.split("\\.")[1]));
+            String kid = JSONObject.parseObject(header).get("kid").toString();
             String aud = JSONObject.parseObject(claim).get("aud").toString();
             String sub = JSONObject.parseObject(claim).get("sub").toString();
-            PublicKey publicKey = generatorPublicKey();
+            PublicKey publicKey = generatorPublicKey(kid);
             if (!verify(publicKey, jwt, aud, sub)) {
                 throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID);
             }
-            return Mono.just(new IOSLoginInfo());
+            IOSLoginInfo iosLoginInfo = new IOSLoginInfo();
+            iosLoginInfo.setFullName("岛民1号");
+            iosLoginInfo.setUnionId(sub);
+            return Mono.just(iosLoginInfo);
         }
         throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
     }
@@ -108,20 +120,30 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
      *
      * @return {@link PublicKey}
      */
-    private PublicKey generatorPublicKey() {
-        Mono<Jwk> keys = WebClient.create("https://appleid.apple.com/auth/keys")
-                .get()
-                .retrieve()
-                .bodyToMono(JSONObject.class)
-                .map(j -> j.getString("keys"))
-                .map(JSONObject::parseArray)
-                .map(array -> JSONObject.parseObject(array.getString(0)))
-                .map(Jwk::fromValues);
-        try {
-            return Objects.requireNonNull(keys.block()).getPublicKey();
-        } catch (InvalidPublicKeyException e) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+    private PublicKey generatorPublicKey(String kid) {
+        if (publicKeyMap.get(kid) == null) {
+            Mono<JSONArray> jsonArrayMono = WebClient.create("https://appleid.apple.com/auth/keys")
+                    .get()
+                    .retrieve()
+                    .bodyToMono(JSONObject.class)
+                    .map(j -> JSON.toJSONString(j.get("keys")))
+                    .map(JSONObject::parseArray);
+            JSONArray jsonArray = jsonArrayMono.block();
+            jsonArray.forEach(object -> {
+                JSONObject jsonObject = JSONObject.parseObject(object.toString());
+                BigInteger bigIntModulus = new BigInteger(1,Base64.decodeBase64(jsonObject.getString("n")));
+                BigInteger bigIntPrivateExponent = new BigInteger(1,Base64.decodeBase64(jsonObject.getString("e")));
+                RSAPublicKeySpec keySpec = new RSAPublicKeySpec(bigIntModulus, bigIntPrivateExponent);
+                KeyFactory keyFactory = null;
+                try {
+                    keyFactory = KeyFactory.getInstance("RSA");
+                    publicKeyMap.put(jsonObject.getString("kid"), keyFactory.generatePublic(keySpec));
+                } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+                    e.printStackTrace();
+                }
+            });
         }
+        return publicKeyMap.get(kid);
     }
 
     /**
