@@ -945,7 +945,7 @@ components:
           $ref: '#/components/schemas/FullIslandDTO'
         host:
           $ref: '#/components/schemas/UserDTO'
-        comments:
+        feeds:
           type: array
           items:
             $ref: '#/components/schemas/PosterFeedDTO'
@@ -1138,6 +1138,8 @@ components:
           type: string
         text:
           type: string
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
         imagesUris:
           type: array
           items:
