@@ -43,7 +43,8 @@ public class FeedDTOFactory {
                           IslandDTOFactory islandDTOFactory,
                           UserService userService,
                           UserDTOFactory userDTOFactory,
-                          CommentDTOFactory commentDTOFactory, EhcacheService ehcacheService) {
+                          CommentDTOFactory commentDTOFactory,
+                          EhcacheService ehcacheService) {
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
         this.userService = userService;
