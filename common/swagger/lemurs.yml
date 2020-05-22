@@ -1102,6 +1102,13 @@ components:
         createdAt:
           type: integer
           format: int64
+    SnapshotFeedDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefFeedDTO'
+        - type: object
+          properties:
+            isDeleted:
+              type: boolean
     FeedDTO:
       allOf:
         - $ref: '#/components/schemas/BriefFeedDTO'
@@ -1316,7 +1323,7 @@ components:
         notificationType:
           $ref: '#/components/schemas/NotificationType'
         feed:
-          $ref: '#/components/schemas/BriefFeedDTO'
+          $ref: '#/components/schemas/SnapshotFeedDTO'
         reactions:
           $ref: '#/components/schemas/ReactionDTO'
         hasRead:
@@ -1332,7 +1339,7 @@ components:
         notificationType:
           $ref: '#/components/schemas/NotificationType'
         feed:
-          $ref: '#/components/schemas/BriefFeedDTO'
+          $ref: '#/components/schemas/SnapshotFeedDTO'
         comment:
           $ref: '#/components/schemas/CommentDTO'
         hasRead:

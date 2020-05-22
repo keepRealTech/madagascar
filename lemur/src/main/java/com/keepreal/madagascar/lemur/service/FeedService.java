@@ -135,6 +135,7 @@ public class FeedService {
         RetrieveFeedByIdRequest request = RetrieveFeedByIdRequest.newBuilder()
                 .setId(id)
                 .setUserId(userId)
+                .setIncludeDeleted(false)
                 .build();
 
         FeedResponse feedResponse;
@@ -155,6 +156,40 @@ public class FeedService {
         }
 
         return feedResponse.getFeed();
+    }
+
+    /**
+     * Retrieves a feed by id.
+     *
+     * @param id Feed id.
+     * @return True if deleted.
+     */
+    public boolean checkDeleted(String id) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveFeedByIdRequest request = RetrieveFeedByIdRequest.newBuilder()
+                .setId(id)
+                .setIncludeDeleted(true)
+                .build();
+
+        FeedResponse feedResponse;
+        try {
+            feedResponse = stub.retrieveFeedById(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(feedResponse)
+                || !feedResponse.hasStatus()) {
+            log.error(Objects.isNull(feedResponse) ? "Retrieve feed returned null." : feedResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != feedResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(feedResponse.getStatus());
+        }
+
+        return feedResponse.getFeed().getIsDeleted();
     }
 
     /**

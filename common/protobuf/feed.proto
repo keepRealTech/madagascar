@@ -26,6 +26,7 @@ message NewFeedsResponse {
 message RetrieveFeedByIdRequest {
     string id = 1;
     string userId = 2;
+    bool includeDeleted = 3;
 }
 
 message RetrieveMultipleFeedsRequest {

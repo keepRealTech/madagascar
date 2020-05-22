@@ -73,7 +73,7 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
 
         if (Objects.nonNull(this.notificationMessage.getCommentNotification())) {
             notificationDTO.setFeed(
-                    this.feedDTOFactory.briefValueOf(this.notificationMessage.getCommentNotification().getFeed()));
+                    this.feedDTOFactory.snapshotValueOf(this.notificationMessage.getCommentNotification().getFeed()));
             notificationDTO.setComment(
                     this.commentDTOFactory.valueOf(this.notificationMessage.getCommentNotification().getComment()));
         }

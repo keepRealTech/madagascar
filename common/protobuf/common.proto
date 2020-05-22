@@ -153,6 +153,7 @@ message FeedMessage {
     int32 repostCount = 9;
     repeated CommentMessage lastComments = 10;
     bool isLiked = 11;
+    bool isDeleted = 12;
 }
 
 message CommentMessage {

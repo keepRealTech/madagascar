@@ -134,6 +134,7 @@ public class FeedInfoService {
                 .setRepostCount(feedInfo.getRepostCount())
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
+                .setIsDeleted(feedInfo.isDeleted())
                 .build();
     }
 
@@ -150,9 +151,14 @@ public class FeedInfoService {
      * Retrieves feed by id.
      *
      * @param feedId    feed id.
+     * @param includeDeleted Whether includes the deleted.
      * @return  {@link FeedInfo}.
      */
-    public FeedInfo findFeedInfoByIdAndDeletedIsFalse(String feedId) {
+    public FeedInfo findFeedInfoById(String feedId, boolean includeDeleted) {
+        if (includeDeleted) {
+            return feedInfoRepository.findFeedInfoById(feedId);
+        }
+
         return feedInfoRepository.findFeedInfoByIdAndDeletedIsFalse(feedId);
     }
 

@@ -4,12 +4,14 @@ import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
+import com.keepreal.madagascar.lemur.service.EhcacheService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefFeedDTO;
 import swagger.model.CheckFeedsDTO;
 import swagger.model.FeedDTO;
+import swagger.model.SnapshotFeedDTO;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -25,6 +27,7 @@ public class FeedDTOFactory {
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final CommentDTOFactory commentDTOFactory;
+    private final EhcacheService ehcacheService;
 
     /**
      * Constructs the feed dto factory.
@@ -34,17 +37,19 @@ public class FeedDTOFactory {
      * @param userService       {@link UserService}.
      * @param userDTOFactory    {@link UserDTOFactory}.
      * @param commentDTOFactory {@link CommentDTOFactory}.
+     * @param ehcacheService    {@link EhcacheService}.
      */
     public FeedDTOFactory(IslandService islandService,
                           IslandDTOFactory islandDTOFactory,
                           UserService userService,
                           UserDTOFactory userDTOFactory,
-                          CommentDTOFactory commentDTOFactory) {
+                          CommentDTOFactory commentDTOFactory, EhcacheService ehcacheService) {
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.commentDTOFactory = commentDTOFactory;
+        this.ehcacheService = ehcacheService;
     }
 
     /**
@@ -108,6 +113,34 @@ public class FeedDTOFactory {
         briefFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
 
         return briefFeedDTO;
+    }
+
+    /**
+     * Converts the {@link FeedMessage} into {@link SnapshotFeedDTO}.
+     *
+     * @param feed {@link FeedMessage}.
+     * @return {@link SnapshotFeedDTO}.
+     */
+    public SnapshotFeedDTO snapshotValueOf(FeedMessage feed) {
+        if (Objects.isNull(feed)) {
+            return null;
+        }
+
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
+        UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+
+        SnapshotFeedDTO snapshotFeedDTO = new SnapshotFeedDTO();
+        snapshotFeedDTO.setId(feed.getId());
+        snapshotFeedDTO.setText(feed.getText());
+        snapshotFeedDTO.setImagesUris(feed.getImageUrisList());
+        snapshotFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
+        snapshotFeedDTO.setCreatedAt(feed.getCreatedAt());
+        snapshotFeedDTO.setIsDeleted(this.ehcacheService.checkFeedDeleted(feed.getId()));
+
+        snapshotFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
+        snapshotFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
+
+        return snapshotFeedDTO;
     }
 
     /**

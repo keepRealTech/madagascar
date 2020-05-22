@@ -72,7 +72,7 @@ public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
 
         if (Objects.nonNull(this.notificationMessage.getReactionNotification())) {
             notificationDTO.setFeed(
-                    this.feedDTOFactory.briefValueOf(this.notificationMessage.getReactionNotification().getFeed()));
+                    this.feedDTOFactory.snapshotValueOf(this.notificationMessage.getReactionNotification().getFeed()));
             notificationDTO.setReactions(
                     this.reactionDTOFactory.valueOf(this.notificationMessage.getReactionNotification().getReaction()));
         }
