@@ -1264,7 +1264,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/BriefFeedDTO'
+                $ref: '#/components/schemas/FeedDTO'
     CommentDTO:
       type: object
       properties:
