@@ -10,7 +10,7 @@ import java.util.List;
  * Represents the general configurations.
  */
 @Configuration
-@ConfigurationProperties(prefix = "general")
+@ConfigurationProperties(prefix = "general", ignoreUnknownFields = false)
 @Data
 public class GeneralConfiguration {
     private List<String> officialIslandIdList;

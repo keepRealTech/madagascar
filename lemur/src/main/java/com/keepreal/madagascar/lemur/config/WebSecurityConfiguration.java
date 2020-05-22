@@ -32,7 +32,7 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .antMatchers("/api/v1/login**", "/api/v1/refreshToken**", "/api/v1/configs**").permitAll()
+                .antMatchers("/api/v1/login**", "/api/v1/refreshToken**", "/api/v1/configs**", "/api/v1/setupInfo/**").permitAll()
                 .anyRequest().authenticated();
 
         httpSecurity.headers().cacheControl();

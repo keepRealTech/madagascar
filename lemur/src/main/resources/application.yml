@@ -64,3 +64,9 @@ opentracing:
 general:
   officialIslandIdList:
     - "6668436831391973376"
+
+client:
+  android:
+    setup:
+      version: 1
+      address: www.baidu.com
