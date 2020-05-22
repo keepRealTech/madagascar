@@ -112,7 +112,7 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
                 .filter(publicKey -> this.verify(publicKey, jwt, aud, sub))
                 .map(publicKey -> {
                     IOSLoginInfo iosLoginInfo = new IOSLoginInfo();
-                    iosLoginInfo.setFullName("岛民1号");
+                    iosLoginInfo.setFullName(sub.split("\\.")[0]);
                     iosLoginInfo.setUnionId(sub);
                     return iosLoginInfo;
                 })
