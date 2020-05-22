@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FeedInfoRepository extends MongoRepository<FeedInfo, String> {
 
-    FeedInfo findFeedInfoById(String id);
+    FeedInfo findFeedInfoByIdAndDeletedIsFalse(String id);
 
     FeedInfo findFeedInfoById(String id);
 
