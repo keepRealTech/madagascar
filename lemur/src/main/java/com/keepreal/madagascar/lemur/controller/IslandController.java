@@ -10,12 +10,15 @@ import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.fossa.IslandRepostMessage;
 import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
+import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.RepostDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
+import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.RepostService;
+import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -31,17 +34,21 @@ import swagger.model.BriefIslandsResponse;
 import swagger.model.CheckIslandDTO;
 import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
+import swagger.model.IslandPosterResponse;
 import swagger.model.IslandProfileResponse;
 import swagger.model.IslandProfilesResponse;
 import swagger.model.IslandResponse;
 import swagger.model.PostIslandPayload;
 import swagger.model.PostRepostRequest;
+import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
 import swagger.model.RepostResponse;
 import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
 import swagger.model.UsersResponse;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -55,18 +62,23 @@ public class IslandController implements IslandApi {
     private final IslandService islandService;
     private final RepostService repostService;
     private final IslandDTOFactory islandDTOFactory;
+    private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final FeedService feedService;
+    private final FeedDTOFactory feedDTOFactory;
     private final RepostDTOFactory repostDTOFactory;
     private final GeneralConfiguration generalConfiguration;
 
     /**
      * Constructs the island controller.
-     *
      * @param imageService          {@link ImageService}.
      * @param islandService         {@link IslandService}.
      * @param repostService         {@link RepostService}.
      * @param islandDTOFactory      {@link IslandDTOFactory}.
+     * @param userService           {@link UserService}.
      * @param userDTOFactory        {@link UserDTOFactory}.
+     * @param feedService
+     * @param feedDTOFactory
      * @param repostDTOFactory      {@link RepostDTOFactory}.
      * @param generalConfiguration  {@link GeneralConfiguration}.
      */
@@ -74,14 +86,17 @@ public class IslandController implements IslandApi {
                             IslandService islandService,
                             RepostService repostService,
                             IslandDTOFactory islandDTOFactory,
-                            UserDTOFactory userDTOFactory,
-                            RepostDTOFactory repostDTOFactory,
+                            UserService userService, UserDTOFactory userDTOFactory,
+                            FeedService feedService, FeedDTOFactory feedDTOFactory, RepostDTOFactory repostDTOFactory,
                             GeneralConfiguration generalConfiguration) {
         this.imageService = imageService;
         this.islandService = islandService;
         this.repostService = repostService;
         this.islandDTOFactory = islandDTOFactory;
+        this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.feedService = feedService;
+        this.feedDTOFactory = feedDTOFactory;
         this.repostDTOFactory = repostDTOFactory;
         this.generalConfiguration = generalConfiguration;
     }
@@ -156,6 +171,12 @@ public class IslandController implements IslandApi {
         response.setData(this.islandDTOFactory.valueOf(islandMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<IslandPosterResponse> apiV1IslandsIdPosterGet(String id, @NotNull @Valid String refererId) {
+        IslandPosterResponse response = buildIslandPosterResponse(id, refererId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -441,4 +462,20 @@ public class IslandController implements IslandApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    private IslandPosterResponse buildIslandPosterResponse(String islandId, String userId) {
+        PosterIslandDTO posterIslandDTO = new PosterIslandDTO();
+        posterIslandDTO.setHost(userDTOFactory.valueOf(userService.retrieveUserById(userId)));
+        posterIslandDTO.setIsland(islandDTOFactory.fullValueOf(islandService.retrieveIslandById(islandId), true));
+        posterIslandDTO.setFeeds(feedService.retrieveFeeds(islandId, null, userId, 0, 5)
+                .getFeedList()
+                .stream()
+                .map(feedDTOFactory::posterValueOf)
+                .collect(Collectors.toList())
+        );
+        IslandPosterResponse response = new IslandPosterResponse();
+        response.setData(posterIslandDTO);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return response;
+    }
 }
