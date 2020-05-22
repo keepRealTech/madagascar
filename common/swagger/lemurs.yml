@@ -246,15 +246,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BriefIslandResponse'
-  /api/v1/feeds/{id}/poster:
+  /api/v1/islands/{id}/poster:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
+      parameters:
+        - $ref: '#/components/parameters/refererIdInQuery'
       tags:
-        - Feed
+        - Island
       security: []
       summary: retrieves the poster for the given island
-
+      responses:
+        '200':
+          description: island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandPosterResponse'
   /api/v1/islands/{id}/profile:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -750,6 +758,12 @@ components:
       required: true
       schema:
         type: integer
+    refererIdInQuery:
+      in: query
+      name: refererId
+      required: true
+      schema:
+        type: string
   schemas:
     LoginType:
       type: string
@@ -924,6 +938,17 @@ components:
           type: string
         description:
           type: string
+    PosterIslandDTO:
+      type: object
+      properties:
+        island:
+          $ref: '#/components/schemas/FullIslandDTO'
+        host:
+          $ref: '#/components/schemas/UserDTO'
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/PosterFeedDTO'
     IslandDTO:
       allOf:
         - $ref: '#/components/schemas/BriefIslandDTO'
@@ -1020,6 +1045,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BriefIslandDTO'
+    IslandPosterResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PosterIslandDTO'
     IslandProfileResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1099,6 +1131,20 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ReportDTO'
+    PosterFeedDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        imagesUris:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: integer
+          format: int64
     BriefFeedDTO:
       type: object
       properties:
@@ -1216,7 +1262,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/FeedDTO'
+                $ref: '#/components/schemas/BriefFeedDTO'
     CommentDTO:
       type: object
       properties:
