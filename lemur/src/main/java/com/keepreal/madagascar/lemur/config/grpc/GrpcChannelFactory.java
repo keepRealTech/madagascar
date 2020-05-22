@@ -85,6 +85,7 @@ public class GrpcChannelFactory {
                 .forAddress(this.indriConfiguration.getHost(), this.indriConfiguration.getPort())
                 .usePlaintext()
                 .maxInboundMessageSize(6291456)
+                .maxInboundMetadataSize(6291456)
                 .build());
     }
 
