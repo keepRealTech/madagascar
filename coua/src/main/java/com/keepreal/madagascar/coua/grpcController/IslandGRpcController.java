@@ -31,6 +31,7 @@ import com.keepreal.madagascar.coua.UpdateIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtResponse;
 import com.keepreal.madagascar.coua.model.IslandInfo;
+import com.keepreal.madagascar.coua.model.Subscription;
 import com.keepreal.madagascar.coua.service.FeedService;
 import com.keepreal.madagascar.coua.service.IslandInfoService;
 import com.keepreal.madagascar.coua.service.SubscriptionService;
@@ -189,10 +190,12 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             if (userMessage != null) {
                 userFound = true;
                 IslandMessage islandMessage = islandInfoService.getIslandMessage(islandInfo);
-                Integer userIndex = subscriptionService.getUserIndexByIslandId(islandInfo.getId(), request.getUserId());
+                Subscription subscription = subscriptionService.getSubscriptionByIslandIdAndUserId(islandInfo.getId(), request.getUserId());
+
                 responseBuilder.setIsland(islandMessage)
                         .setHost(userMessage)
-                        .setUserIndex(StringValue.of(userIndex == null ? "" : userIndex.toString()))
+                        .setUserIndex(StringValue.of(subscription == null ? "" : subscription.getIslanderNumber().toString()))
+                        .setSubscribedAt(subscription == null ? 0L : subscription.getCreatedTime())
                         .setStatus(CommonStatusUtils.getSuccStatus());
             }
         }

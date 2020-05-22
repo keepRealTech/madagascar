@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.baobob.JWTISOLoginPayload;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.OAuthWechatLoginPayload;
 import com.keepreal.madagascar.baobob.PasswordLoginPayload;
@@ -95,6 +96,17 @@ public class LoginController implements LoginApi {
                                 .setUsername(body.getData().getUsername())
                                 .setPassword(body.getData().getPassword()))
                         .setLoginType(LoginType.LOGIN_PASSWORD)
+                        .build();
+                break;
+            case JWT_IOS:
+                if (StringUtils.isEmpty(body.getData().getCode())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
+                loginRequest = LoginRequest.newBuilder()
+                        .setJwtIsoLoginPayload(JWTISOLoginPayload.newBuilder()
+                                .setIdentifyToken(body.getData().getCode()).build())
+                        .setLoginType(LoginType.LOGIN_JWT_IOS)
                         .build();
                 break;
             default:

@@ -136,8 +136,8 @@ public class SubscriptionService {
      * @param userId    userId.
      * @return  user index.
      */
-    public Integer getUserIndexByIslandId(String islandId, String userId) {
-        return subscriptionRepository.getIslanderNumberByIslandId(islandId, userId);
+    public Subscription getSubscriptionByIslandIdAndUserId(String islandId, String userId) {
+        return subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
     }
 
     /**

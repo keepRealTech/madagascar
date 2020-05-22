@@ -927,6 +927,9 @@ components:
           type: string
         subscribed:
           type: boolean
+        subscribedAt:
+          type: integer
+          format: int64
     CheckIslandDTO:
       type: object
       properties:

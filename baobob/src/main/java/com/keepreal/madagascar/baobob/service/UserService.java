@@ -5,6 +5,7 @@ import com.keepreal.madagascar.baobob.loginExecutor.model.IOSLoginInfo;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
 import com.keepreal.madagascar.common.GenderValue;
 import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.*;
 import io.grpc.Channel;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,9 @@ public class UserService {
         QueryUserCondition condition = QueryUserCondition.newBuilder().setUnionId(StringValue.of(unionId)).build();
         RetrieveSingleUserRequest request = RetrieveSingleUserRequest.newBuilder().setCondition(condition).build();
 
-        return stub.retrieveSingleUser(request).map(UserResponse::getUser);
+        return stub.retrieveSingleUser(request)
+                .filter(userResponse -> ErrorCode.REQUEST_SUCC_VALUE == (userResponse.getStatus().getRtn()))
+                .map(UserResponse::getUser);
     }
 
     /**
