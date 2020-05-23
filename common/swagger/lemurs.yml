@@ -860,6 +860,8 @@ components:
           type: string
         gender:
           $ref: '#/components/schemas/GenderType'
+        age:
+          type: integer
     UserDTO:
       allOf:
         - $ref: '#/components/schemas/BriefUserDTO'
@@ -869,8 +871,6 @@ components:
               type: string
             city:
               type: string
-            age:
-              type: integer
             createdAt:
               type: integer
               format: int64
@@ -944,7 +944,9 @@ components:
         island:
           $ref: '#/components/schemas/FullIslandDTO'
         host:
-          $ref: '#/components/schemas/UserDTO'
+          $ref: '#/components/schemas/BriefUserDTO'
+        referer:
+          $ref: '#/components/schemas/BriefUserDTO'
         feeds:
           type: array
           items:

@@ -90,8 +90,11 @@ public class IslandController implements IslandApi {
                             IslandService islandService,
                             RepostService repostService,
                             IslandDTOFactory islandDTOFactory,
-                            UserService userService, UserDTOFactory userDTOFactory,
-                            FeedService feedService, FeedDTOFactory feedDTOFactory, RepostDTOFactory repostDTOFactory,
+                            UserService userService,
+                            UserDTOFactory userDTOFactory,
+                            FeedService feedService,
+                            FeedDTOFactory feedDTOFactory,
+                            RepostDTOFactory repostDTOFactory,
                             GeneralConfiguration generalConfiguration) {
         this.imageService = imageService;
         this.islandService = islandService;
@@ -187,7 +190,16 @@ public class IslandController implements IslandApi {
      */
     @Override
     public ResponseEntity<IslandPosterResponse> apiV1IslandsIdPosterGet(String id, @NotNull @Valid String refererId) {
-        IslandPosterResponse response = buildIslandPosterResponse(id, refererId);
+        PosterIslandDTO posterIslandDTO = new PosterIslandDTO();
+        posterIslandDTO.setReferer(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(refererId)));
+        posterIslandDTO.setIsland(this.islandDTOFactory.fullValueOf(this.islandService.retrieveIslandById(id), true));
+        posterIslandDTO.setReferer(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(posterIslandDTO.getIsland().getHostId())));
+        posterIslandDTO.setFeeds(this.getPosterFeedDTO(id, refererId));
+
+        IslandPosterResponse response = new IslandPosterResponse();
+        response.setData(posterIslandDTO);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -474,25 +486,6 @@ public class IslandController implements IslandApi {
     }
 
     /**
-     * Builds the {@link IslandPosterResponse} from islandId and userId.
-     *
-     * @param islandId  island id.
-     * @param userId    user id.
-     * @return  {@link IslandPosterResponse}.
-     */
-    private IslandPosterResponse buildIslandPosterResponse(String islandId, String userId) {
-        PosterIslandDTO posterIslandDTO = new PosterIslandDTO();
-        posterIslandDTO.setHost(userDTOFactory.valueOf(userService.retrieveUserById(userId)));
-        posterIslandDTO.setIsland(islandDTOFactory.fullValueOf(islandService.retrieveIslandById(islandId), true));
-        posterIslandDTO.setFeeds(getPosterFeedDTO(islandId, userId));
-        IslandPosterResponse response = new IslandPosterResponse();
-        response.setData(posterIslandDTO);
-        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
-        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
-        return response;
-    }
-
-    /**
      * Cache the {@link PosterFeedDTO} by islandId.
      *
      * @param islandId  island id.
@@ -500,11 +493,12 @@ public class IslandController implements IslandApi {
      * @return  {@link PosterFeedDTO}.
      */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
-    public List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
+    private List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
         return feedService.retrieveFeeds(islandId, null, userId, 0, 5)
                 .getFeedList()
                 .stream()
                 .map(feedDTOFactory::posterValueOf)
                 .collect(Collectors.toList());
     }
+
 }
