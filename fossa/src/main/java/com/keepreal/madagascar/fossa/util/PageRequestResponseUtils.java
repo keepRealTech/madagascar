@@ -30,7 +30,7 @@ public class PageRequestResponseUtils {
 
     public static PageResponse buildPageResponse(int pageIndex, int pageSize, long totalElements) {
         return PageResponse.newBuilder()
-                .setPageSize(pageIndex)
+                .setPage(pageIndex)
                 .setPageSize(pageSize)
                 .setHasContent(pageIndex * (pageSize+1) <= totalElements + pageSize)
                 .setHasMore(totalElements / pageSize > pageIndex)
