@@ -13,7 +13,7 @@ import java.util.Optional;
  */
 public interface NotificationRepository extends MongoRepository<Notification, String> {
 
-    Long countByUserIdAndTypeIsAndCreatedAtAfter(String userId, NotificationType type, Long timestamp);
+    Long countByUserIdAndTypeIsAndCreatedAtAfterAndIsDeletedIsFalse(String userId, NotificationType type, Long timestamp);
 
     Page<Notification> findAllByUserIdAndTypeAndIsDeletedIsFalse(String userId, NotificationType type, Pageable pageable);
 
