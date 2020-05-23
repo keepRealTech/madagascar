@@ -178,6 +178,13 @@ public class IslandController implements IslandApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the get island poster by id api.
+     *
+     * @param id Island id
+     * @param refererId  user id.
+     * @return  {@link IslandPosterResponse}.
+     */
     @Override
     public ResponseEntity<IslandPosterResponse> apiV1IslandsIdPosterGet(String id, @NotNull @Valid String refererId) {
         IslandPosterResponse response = buildIslandPosterResponse(id, refererId);
@@ -466,6 +473,13 @@ public class IslandController implements IslandApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Builds the {@link IslandPosterResponse} from islandId and userId.
+     *
+     * @param islandId  island id.
+     * @param userId    user id.
+     * @return  {@link IslandPosterResponse}.
+     */
     private IslandPosterResponse buildIslandPosterResponse(String islandId, String userId) {
         PosterIslandDTO posterIslandDTO = new PosterIslandDTO();
         posterIslandDTO.setHost(userDTOFactory.valueOf(userService.retrieveUserById(userId)));
@@ -478,6 +492,13 @@ public class IslandController implements IslandApi {
         return response;
     }
 
+    /**
+     * Cache the {@link PosterFeedDTO} by islandId.
+     *
+     * @param islandId  island id.
+     * @param userId    user id.
+     * @return  {@link PosterFeedDTO}.
+     */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
     public List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
         return feedService.retrieveFeeds(islandId, null, userId, 0, 5)

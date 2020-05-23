@@ -163,6 +163,12 @@ public class FeedDTOFactory {
         return checkFeedsDTO;
     }
 
+    /**
+     * Converts {@link FeedMessage} into {@link PosterFeedDTO}.
+     *
+     * @param feed  {@link FeedMessage}.
+     * @return  {@link PosterFeedDTO}.
+     */
     public PosterFeedDTO posterValueOf(FeedMessage feed) {
         if (Objects.isNull(feed)) {
             return null;
