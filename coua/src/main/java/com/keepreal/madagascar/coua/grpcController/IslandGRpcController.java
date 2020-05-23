@@ -193,10 +193,15 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                 IslandMessage islandMessage = islandInfoService.getIslandMessage(islandInfo);
                 Subscription subscription = subscriptionService.getSubscriptionByIslandIdAndUserId(islandInfo.getId(), request.getUserId());
 
+                if (subscription == null || subscription.getState() < 0) {
+                    responseBuilder.setUserIndex(StringValue.of(""))
+                            .setSubscribedAt(0L);
+                } else {
+                    responseBuilder.setUserIndex(StringValue.of(subscription.getIslanderNumber().toString()))
+                            .setSubscribedAt(subscription.getCreatedTime());
+                }
                 responseBuilder.setIsland(islandMessage)
                         .setHost(userMessage)
-                        .setUserIndex(StringValue.of(subscription == null ? "" : subscription.getIslanderNumber().toString()))
-                        .setSubscribedAt(subscription == null ? 0L : subscription.getCreatedTime())
                         .setStatus(CommonStatusUtils.getSuccStatus());
             }
         }
