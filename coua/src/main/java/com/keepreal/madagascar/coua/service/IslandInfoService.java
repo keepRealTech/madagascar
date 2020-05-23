@@ -115,6 +115,9 @@ public class IslandInfoService {
     public List<IslandInfo> getMyCreatedIsland(String userId, Pageable pageable, IslandsResponse.Builder builder) {
         Page<String> islandIdListPageable = subscriptionService.getIslandIdListByUserCreated(userId, pageable);
         builder.setPageResponse(PageResponseUtil.buildResponse(islandIdListPageable));
+        if (!islandIdListPageable.hasContent()) {
+            return Collections.emptyList();
+        }
         return islandInfoRepository.findIslandInfosByIdInAndDeletedIsFalse(islandIdListPageable.getContent());
     }
 
@@ -158,6 +161,9 @@ public class IslandInfoService {
     public List<IslandInfo> getIslandBySubscribed(String userId, Pageable pageable, IslandsResponse.Builder builder) {
         Page<String> islandIdListPageable = subscriptionService.getIslandIdListByUserSubscribed(userId, pageable);
         builder.setPageResponse(PageResponseUtil.buildResponse(islandIdListPageable));
+        if (!islandIdListPageable.hasContent()) {
+            return Collections.emptyList();
+        }
         return islandInfoRepository.findIslandInfosByIdInAndDeletedIsFalse(islandIdListPageable.getContent());
     }
 

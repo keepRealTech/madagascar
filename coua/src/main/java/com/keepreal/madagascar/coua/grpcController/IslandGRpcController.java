@@ -46,6 +46,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -298,6 +299,14 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         //拿到分页之后的订阅者id
         Page<String> subscriberIdListPageable = subscriptionService.getSubscriberIdListByIslandId(islandId, pageable);
         List<String> subscriberIdList = subscriberIdListPageable.getContent();
+        if (subscriberIdList.size() == 0) {
+            responseObserver.onNext(IslandSubscribersResponse.newBuilder()
+                    .addAllUser(Collections.emptyList())
+                    .setStatus(CommonStatusUtils.getSuccStatus())
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
         //根据idList拿到UserInfoList并转化为UserMessageList
         List<UserMessage> userMessageList = userInfoService.getUserMessageListByIdList(subscriberIdList);
 
