@@ -13,5 +13,6 @@ import java.util.List;
 @ConfigurationProperties(prefix = "general")
 @Data
 public class GeneralConfiguration {
+    private String singleOfficialIslandId;
     private List<String> officialIslandIdList;
 }

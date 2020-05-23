@@ -62,5 +62,6 @@ opentracing:
       decision: false
 
 general:
+  singleOfficialIslandId: "6668436831391973376"
   officialIslandIdList:
     - "6668436831391973376"

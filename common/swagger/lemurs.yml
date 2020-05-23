@@ -215,6 +215,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandProfilesResponse'
+  /api/v1/islands/subscribeOfficialIsland:
+    post:
+      tags:
+        - Island
+      summary: subscribe official island
+      responses:
+        '200':
+          description: island profile response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandProfileResponse'
   /api/v1/islands/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'

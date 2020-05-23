@@ -219,12 +219,29 @@ public class IslandController implements IslandApi {
         IslandProfilesResponse response = new IslandProfilesResponse();
         String userId = HttpContextUtils.getUserIdFromContext();
 
-
-
         response.setData(generalConfiguration.getOfficialIslandIdList().stream()
                 .map(id -> islandService.retrieveIslandProfileById(id, userId))
                 .map(resp -> islandDTOFactory.valueOf(resp, userId))
                 .collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the subscribe official island api.
+     *
+     * @return  {@link IslandProfileResponse}.
+     */
+    @Override
+    public ResponseEntity<IslandProfileResponse> apiV1IslandsSubscribeOfficialIslandPost() {
+        IslandProfileResponse response = new IslandProfileResponse();
+        String userId = HttpContextUtils.getUserIdFromContext();
+        String islandId = generalConfiguration.getSingleOfficialIslandId();
+        islandService.subscribeIslandById(islandId, userId, "");
+        com.keepreal.madagascar.coua.IslandProfileResponse islandProfileResponse =
+                this.islandService.retrieveIslandProfileById(islandId, userId);
+        response.setData(islandDTOFactory.valueOf(islandProfileResponse, userId));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
