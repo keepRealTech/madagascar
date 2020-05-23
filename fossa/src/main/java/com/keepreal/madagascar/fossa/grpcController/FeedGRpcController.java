@@ -90,6 +90,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.islandId(islandIdList.get(i));
             builder.userId(userId);
             builder.hostId(hostIdList.get(i));
+            builder.fromHost(userId.equals(hostIdList.get(i)));
             builder.imageUrls(request.getImageUrisList());
             builder.text(text);
             builder.createdTime(System.currentTimeMillis());
@@ -171,11 +172,11 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         query.addCriteria(Criteria.where("deleted").is(false));
         if (fromHost && hasIslandId) {
             Criteria criteria = Criteria
-                    .where("$where").is("this.userId == this.hostId")
+                    .where("fromHost").is(true)
                     .and("islandId").is(condition.getIslandId().getValue());
             query.addCriteria(criteria);
         } else if (fromHost || hasIslandId) {
-            Criteria criteria = fromHost ? Criteria.where("$where").is("this.userId == this.hostId")
+            Criteria criteria = fromHost ? Criteria.where("fromHost").is(true)
                     : Criteria.where("islandId").is(condition.getIslandId().getValue());
             query.addCriteria(criteria);
         }

@@ -30,6 +30,7 @@ public class FeedInfo {
     private String userId;
     private String text;
     private String hostId;
+    private Boolean fromHost;
     private List<String> imageUrls;
     @Builder.Default
     private Integer likesCount = 0;
