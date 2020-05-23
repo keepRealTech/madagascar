@@ -193,7 +193,7 @@ public class IslandController implements IslandApi {
         PosterIslandDTO posterIslandDTO = new PosterIslandDTO();
         posterIslandDTO.setReferer(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(refererId)));
         posterIslandDTO.setIsland(this.islandDTOFactory.fullValueOf(this.islandService.retrieveIslandById(id), true));
-        posterIslandDTO.setReferer(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(posterIslandDTO.getIsland().getHostId())));
+        posterIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(posterIslandDTO.getIsland().getHostId())));
         posterIslandDTO.setFeeds(this.getPosterFeedDTO(id, refererId));
 
         IslandPosterResponse response = new IslandPosterResponse();
