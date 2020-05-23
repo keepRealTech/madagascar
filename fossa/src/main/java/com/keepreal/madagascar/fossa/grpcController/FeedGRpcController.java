@@ -172,8 +172,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         query.addCriteria(Criteria.where("deleted").is(false));
         if (fromHost && hasIslandId) {
             Criteria criteria = Criteria
-                    .where("fromHost").is(true)
-                    .and("islandId").is(condition.getIslandId().getValue());
+                    .where("islandId").is(condition.getIslandId().getValue())
+                    .and("fromHost").is(true);
             query.addCriteria(criteria);
         } else if (fromHost || hasIslandId) {
             Criteria criteria = fromHost ? Criteria.where("fromHost").is(true)
