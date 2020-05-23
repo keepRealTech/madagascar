@@ -8,7 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ConfigApi;
-import swagger.model.*;
+import swagger.model.AndroidSetupInfoResponse;
+import swagger.model.AndroidUpdateInfoResponse;
+import swagger.model.ConfigType;
+import swagger.model.ConfigurationDTO;
+import swagger.model.ConfigurationResponse;
+import swagger.model.IOSUpdateInfoResponse;
+import swagger.model.SetupInfoDTO;
+import swagger.model.UpdateInfoDTO;
 
 import java.util.HashMap;
 import java.util.Map;

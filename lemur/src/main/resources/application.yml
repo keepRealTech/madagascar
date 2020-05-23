@@ -69,4 +69,4 @@ client:
   android:
     setup:
       version: 1
-      address: www.baidu.com
+      address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
