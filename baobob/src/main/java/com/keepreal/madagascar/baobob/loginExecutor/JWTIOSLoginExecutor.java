@@ -1,7 +1,6 @@
 package com.keepreal.madagascar.baobob.loginExecutor;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.LoginResponse;
@@ -28,8 +27,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents a login executor working with IOS jwt.
@@ -39,7 +36,6 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
     private final GrpcResponseUtils grpcResponseUtils;
     private final UserService userService;
     private final LocalTokenGranter tokenGranter;
-    private final Map<String, PublicKey> publicKeyMap = new ConcurrentHashMap<>();
 
     /**
      * Constructs this executor
@@ -125,10 +121,6 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
      * @return {@link PublicKey}
      */
     private Mono<PublicKey> generatorPublicKey(String kid) {
-        if (this.publicKeyMap.containsKey(kid)) {
-            return Mono.just(this.publicKeyMap.get(kid));
-        }
-
         return WebClient.create("https://appleid.apple.com/auth/keys")
                 .get()
                 .retrieve()
@@ -136,20 +128,22 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
                 .map(j -> JSON.toJSONString(j.get("keys")))
                 .map(JSONObject::parseArray)
                 .flatMapMany(Flux::fromIterable)
-                .doOnNext(object -> {
-                    JSONObject jsonObject = JSONObject.parseObject(object.toString());
+                .map(Object::toString)
+                .map(JSONObject::parseObject)
+                .filter(jsonObject -> jsonObject.getString("kid").equals(kid))
+                .single()
+                .handle((jsonObject, sink) -> {
                     BigInteger bigIntModulus = new BigInteger(1, Base64.decodeBase64(jsonObject.getString("n")));
                     BigInteger bigIntPrivateExponent = new BigInteger(1, Base64.decodeBase64(jsonObject.getString("e")));
                     RSAPublicKeySpec keySpec = new RSAPublicKeySpec(bigIntModulus, bigIntPrivateExponent);
                     try {
                         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-                        this.publicKeyMap.put(jsonObject.getString("kid"), keyFactory.generatePublic(keySpec));
-                    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-                        e.printStackTrace();
+                        sink.next(keyFactory.generatePublic(keySpec));
+                    } catch (NoSuchAlgorithmException | InvalidKeySpecException exception) {
+                        sink.error(exception);
                     }
                 })
-                .last()
-                .map(object -> this.publicKeyMap.get(kid));
+                .map(object -> (PublicKey) object);
     }
 
     /**
