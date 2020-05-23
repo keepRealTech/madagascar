@@ -10,15 +10,19 @@ import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.fossa.IslandRepostMessage;
 import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
+import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.RepostDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
+import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.RepostService;
+import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -31,17 +35,23 @@ import swagger.model.BriefIslandsResponse;
 import swagger.model.CheckIslandDTO;
 import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
+import swagger.model.IslandPosterResponse;
 import swagger.model.IslandProfileResponse;
 import swagger.model.IslandProfilesResponse;
 import swagger.model.IslandResponse;
 import swagger.model.PostIslandPayload;
 import swagger.model.PostRepostRequest;
+import swagger.model.PosterFeedDTO;
+import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
 import swagger.model.RepostResponse;
 import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
 import swagger.model.UsersResponse;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -55,7 +65,10 @@ public class IslandController implements IslandApi {
     private final IslandService islandService;
     private final RepostService repostService;
     private final IslandDTOFactory islandDTOFactory;
+    private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final FeedService feedService;
+    private final FeedDTOFactory feedDTOFactory;
     private final RepostDTOFactory repostDTOFactory;
     private final GeneralConfiguration generalConfiguration;
 
@@ -66,7 +79,10 @@ public class IslandController implements IslandApi {
      * @param islandService         {@link IslandService}.
      * @param repostService         {@link RepostService}.
      * @param islandDTOFactory      {@link IslandDTOFactory}.
+     * @param userService           {@link UserService}.
      * @param userDTOFactory        {@link UserDTOFactory}.
+     * @param feedService           {@link FeedService}.
+     * @param feedDTOFactory        {@link FeedDTOFactory}.
      * @param repostDTOFactory      {@link RepostDTOFactory}.
      * @param generalConfiguration  {@link GeneralConfiguration}.
      */
@@ -74,14 +90,20 @@ public class IslandController implements IslandApi {
                             IslandService islandService,
                             RepostService repostService,
                             IslandDTOFactory islandDTOFactory,
+                            UserService userService,
                             UserDTOFactory userDTOFactory,
+                            FeedService feedService,
+                            FeedDTOFactory feedDTOFactory,
                             RepostDTOFactory repostDTOFactory,
                             GeneralConfiguration generalConfiguration) {
         this.imageService = imageService;
         this.islandService = islandService;
         this.repostService = repostService;
         this.islandDTOFactory = islandDTOFactory;
+        this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.feedService = feedService;
+        this.feedDTOFactory = feedDTOFactory;
         this.repostDTOFactory = repostDTOFactory;
         this.generalConfiguration = generalConfiguration;
     }
@@ -154,6 +176,28 @@ public class IslandController implements IslandApi {
 
         IslandResponse response = new IslandResponse();
         response.setData(this.islandDTOFactory.valueOf(islandMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the get island poster by id api.
+     *
+     * @param id Island id
+     * @param refererId  user id.
+     * @return  {@link IslandPosterResponse}.
+     */
+    @Override
+    public ResponseEntity<IslandPosterResponse> apiV1IslandsIdPosterGet(String id, @NotNull @Valid String refererId) {
+        PosterIslandDTO posterIslandDTO = new PosterIslandDTO();
+        posterIslandDTO.setReferer(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(refererId)));
+        posterIslandDTO.setIsland(this.islandDTOFactory.fullValueOf(this.islandService.retrieveIslandById(id), true));
+        posterIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(posterIslandDTO.getIsland().getHostId())));
+        posterIslandDTO.setFeeds(this.getPosterFeedDTO(id, refererId));
+
+        IslandPosterResponse response = new IslandPosterResponse();
+        response.setData(posterIslandDTO);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -439,6 +483,22 @@ public class IslandController implements IslandApi {
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Cache the {@link PosterFeedDTO} by islandId.
+     *
+     * @param islandId  island id.
+     * @param userId    user id.
+     * @return  {@link PosterFeedDTO}.
+     */
+    @Cacheable(value = "posterFeedDTO", key = "islandId")
+    private List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
+        return feedService.retrieveFeeds(islandId, null, userId, 0, 5)
+                .getFeedList()
+                .stream()
+                .map(feedDTOFactory::posterValueOf)
+                .collect(Collectors.toList());
     }
 
 }

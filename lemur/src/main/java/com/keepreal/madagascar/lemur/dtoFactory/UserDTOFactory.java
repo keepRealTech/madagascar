@@ -67,6 +67,7 @@ public class UserDTOFactory {
         briefUserDTO.setName(user.getName());
         briefUserDTO.setPortraitImageUri(user.getPortraitImageUri());
         briefUserDTO.setGender(this.convertGender(user.getGender()));
+        briefUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
 
         return briefUserDTO;
     }

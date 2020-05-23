@@ -2,16 +2,19 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.lemur.config.AndroidClientConfiguration;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ConfigApi;
+import swagger.model.AndroidSetupInfoResponse;
 import swagger.model.AndroidUpdateInfoResponse;
 import swagger.model.ConfigType;
 import swagger.model.ConfigurationDTO;
 import swagger.model.ConfigurationResponse;
 import swagger.model.IOSUpdateInfoResponse;
+import swagger.model.SetupInfoDTO;
 import swagger.model.UpdateInfoDTO;
 
 import java.util.HashMap;
@@ -27,18 +30,23 @@ public class ConfigurationController implements ConfigApi {
     private Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
     private Map<Integer, UpdateInfoDTO> iOSUpdateInfoMap = new HashMap<>();
     private Map<Integer, UpdateInfoDTO> androidUpdateInfoMap = new HashMap<>();
+    private final SetupInfoDTO setupInfoDTO;
 
-    public ConfigurationController() {
+    public ConfigurationController(AndroidClientConfiguration androidClientConfiguration) {
+        this.setupInfoDTO = new SetupInfoDTO();
+        this.setupInfoDTO.setVerion(androidClientConfiguration.getSetup().getVersion());
+        this.setupInfoDTO.setAddress(androidClientConfiguration.getSetup().getAddress());
+
         this.iOSConfigVersionMap.put(
                 100, this.createIOSConfigurationDTO(10,100,10,5,10,1000, true));
+
         UpdateInfoDTO updateInfoDTO = new UpdateInfoDTO();
-        updateInfoDTO.address("example.com");
+        updateInfoDTO.address("https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk");
         updateInfoDTO.currentVersion(1);
-        updateInfoDTO.nextVersion(1);
-        updateInfoDTO.isLatest(true);
+        updateInfoDTO.nextVersion(2);
+        updateInfoDTO.isLatest(false);
         updateInfoDTO.message("first version");
         updateInfoDTO.shouldForce(false);
-
         this.iOSUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
         this.androidUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
     }
@@ -106,6 +114,21 @@ public class ConfigurationController implements ConfigApi {
 
         IOSUpdateInfoResponse response = new IOSUpdateInfoResponse();
         response.setData(iosUpdateInfoDTO);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the android setup info get api.
+     *
+     * @return {@link AndroidSetupInfoResponse}.
+     */
+    @Cacheable(value = "setupInfo-android")
+    @Override
+    public ResponseEntity<AndroidSetupInfoResponse> apiV1SetupInfoAndroidGet() {
+        AndroidSetupInfoResponse response = new AndroidSetupInfoResponse();
+        response.setData(this.setupInfoDTO);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

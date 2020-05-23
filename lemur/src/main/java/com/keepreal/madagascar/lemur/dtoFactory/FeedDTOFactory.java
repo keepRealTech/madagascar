@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import swagger.model.BriefFeedDTO;
 import swagger.model.CheckFeedsDTO;
 import swagger.model.FeedDTO;
+import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
 import java.util.Objects;
@@ -160,6 +161,25 @@ public class FeedDTOFactory {
         checkFeedsDTO.setHasNew(checkNewFeeds.getHasNewFeeds());
 
         return checkFeedsDTO;
+    }
+
+    /**
+     * Converts {@link FeedMessage} into {@link PosterFeedDTO}.
+     *
+     * @param feed  {@link FeedMessage}.
+     * @return  {@link PosterFeedDTO}.
+     */
+    public PosterFeedDTO posterValueOf(FeedMessage feed) {
+        if (Objects.isNull(feed)) {
+            return null;
+        }
+        PosterFeedDTO posterFeedDTO = new PosterFeedDTO();
+        posterFeedDTO.setId(feed.getId());
+        posterFeedDTO.setUser(userDTOFactory.briefValueOf(userService.retrieveUserById(feed.getUserId())));
+        posterFeedDTO.setText(feed.getText());
+        posterFeedDTO.setImagesUris(feed.getImageUrisList());
+        posterFeedDTO.setCreatedAt(feed.getCreatedAt());
+        return posterFeedDTO;
     }
 
 }

@@ -246,6 +246,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BriefIslandResponse'
+  /api/v1/islands/{id}/poster:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/refererIdInQuery'
+      tags:
+        - Island
+      security: []
+      summary: retrieves the poster for the given island
+      responses:
+        '200':
+          description: island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandPosterResponse'
   /api/v1/islands/{id}/profile:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -629,6 +646,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AndroidUpdateInfoResponse'
+  /api/v1/setupInfo/android:
+    get:
+      tags:
+        - Config
+      security: []
+      summary: get the android setup info
+      responses:
+        '200':
+          description: client setup info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AndroidSetupInfoResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -728,6 +758,12 @@ components:
       required: true
       schema:
         type: integer
+    refererIdInQuery:
+      in: query
+      name: refererId
+      required: true
+      schema:
+        type: string
   schemas:
     LoginType:
       type: string
@@ -824,6 +860,8 @@ components:
           type: string
         gender:
           $ref: '#/components/schemas/GenderType'
+        age:
+          type: integer
     UserDTO:
       allOf:
         - $ref: '#/components/schemas/BriefUserDTO'
@@ -833,8 +871,6 @@ components:
               type: string
             city:
               type: string
-            age:
-              type: integer
             createdAt:
               type: integer
               format: int64
@@ -902,6 +938,19 @@ components:
           type: string
         description:
           type: string
+    PosterIslandDTO:
+      type: object
+      properties:
+        island:
+          $ref: '#/components/schemas/FullIslandDTO'
+        host:
+          $ref: '#/components/schemas/BriefUserDTO'
+        referer:
+          $ref: '#/components/schemas/BriefUserDTO'
+        feeds:
+          type: array
+          items:
+            $ref: '#/components/schemas/PosterFeedDTO'
     IslandDTO:
       allOf:
         - $ref: '#/components/schemas/BriefIslandDTO'
@@ -1001,6 +1050,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BriefIslandDTO'
+    IslandPosterResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PosterIslandDTO'
     IslandProfileResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1080,6 +1136,22 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ReportDTO'
+    PosterFeedDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        imagesUris:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: integer
+          format: int64
     BriefFeedDTO:
       type: object
       properties:
@@ -1561,3 +1633,17 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UpdateInfoDTO'
+    SetupInfoDTO:
+      type: object
+      properties:
+        verion:
+          type: integer
+        address:
+          type: string
+    AndroidSetupInfoResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SetupInfoDTO'
