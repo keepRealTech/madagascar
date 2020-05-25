@@ -399,7 +399,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         List<String> islandIdList = request.getIslandIdsList();
         List<Long> timestampsList = request.getTimestampsList();
         List<CheckNewFeedsMessage> messageList = new ArrayList<>();
-        if (islandIdList.size() == timestampsList.size()) {
+        if (islandIdList != null && timestampsList != null && islandIdList.size() > 0) {
             List<Map<String, Long>> resList = islandInfoService.findIslandIdAndLastFeedAtByIslandIdList(islandIdList);
             Map<String, Long> map = new HashMap<>();
             resList.forEach(m -> map.put(m.get("id").toString(), m.get("lastFeedAt")));
