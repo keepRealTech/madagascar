@@ -10,6 +10,7 @@ import com.keepreal.madagascar.tenrecs.factory.NotificationFactory;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.service.NotificationService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -64,6 +65,9 @@ public class NotificationEventListener implements MessageListener {
                 this.notificationService.insert(notification);
             }
 
+            return Action.CommitMessage;
+        } catch (DuplicateKeyException exception) {
+            log.warn("Duplicated consumption, skipped.");
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {
             log.warn("Bad formatted notification event, skipped.");

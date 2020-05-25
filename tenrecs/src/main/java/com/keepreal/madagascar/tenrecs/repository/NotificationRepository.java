@@ -13,13 +13,13 @@ import java.util.Optional;
  */
 public interface NotificationRepository extends MongoRepository<Notification, String> {
 
-    Long countByUserIdAndTypeIsAndCreatedAtAfterAndIsDeletedIsFalse(String userId, NotificationType type, Long timestamp);
+    Long countByUserIdAndTypeIsAndTimestampAfterAndIsDeletedIsFalse(String userId, NotificationType type, Long timestamp);
 
     Page<Notification> findAllByUserIdAndTypeAndIsDeletedIsFalse(String userId, NotificationType type, Pageable pageable);
 
     Page<Notification> findAllByUserIdAndIsDeletedIsFalse(String userId, Pageable pageable);
 
-    Optional<Notification> findByEventIdAndIsDeletedIsFalse(String eventId);
+    boolean existsByEventIdAndIsDeletedIsFalse(String eventId);
 
     Optional<Notification> findTopByNotice_SubscribeNotice_IslandIdAndNotice_SubscribeNotice_SubscriberIdAndIsDeletedIsFalseOrderByTimestamp(String islandId, String subscriberId);
 

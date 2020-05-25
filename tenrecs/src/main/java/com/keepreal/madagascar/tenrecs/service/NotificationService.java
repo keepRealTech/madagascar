@@ -45,7 +45,7 @@ public class NotificationService {
      */
     public int countByUserIdAndTypeAndCreatedAtAfter(String userId, NotificationType type, long timestamp) {
         return Math.toIntExact(
-                this.notificationRepository.countByUserIdAndTypeIsAndCreatedAtAfterAndIsDeletedIsFalse(userId, type, timestamp));
+                this.notificationRepository.countByUserIdAndTypeIsAndTimestampAfterAndIsDeletedIsFalse(userId, type, timestamp));
     }
 
     /**
@@ -122,7 +122,7 @@ public class NotificationService {
      * @return True if has consumed.
      */
     public boolean hasConsumed(String eventId) {
-        return this.notificationRepository.findByEventIdAndIsDeletedIsFalse(eventId).isPresent();
+        return this.notificationRepository.existsByEventIdAndIsDeletedIsFalse(eventId);
     }
 
 }
