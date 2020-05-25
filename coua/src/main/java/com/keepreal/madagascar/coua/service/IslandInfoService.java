@@ -214,6 +214,7 @@ public class IslandInfoService {
         try {
             return islandInfoRepository.save(islandInfo);
         } catch (Exception e) {
+            log.error("[updateIsland] island sql duplicate error! island id is [{}], island name is [{}]", islandInfo.getId(), islandInfo.getIslandName());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_SQL_DUPLICATE_ERROR);
         }
     }

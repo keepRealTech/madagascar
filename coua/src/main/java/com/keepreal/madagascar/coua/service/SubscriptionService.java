@@ -221,6 +221,8 @@ public class SubscriptionService {
         try {
             subscriptionRepository.save(subscription);
         } catch (DataIntegrityViolationException e) {
+            log.error("[insertSubscription] subscription sql duplicate error! subscription id is [{}], island id and user id is [{}, {}]",
+                    subscription.getId(), subscription.getIslandId(), subscription.getUserId());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_SUBSCRIPTION_SQL_DUPLICATE_ERROR);
         }
     }

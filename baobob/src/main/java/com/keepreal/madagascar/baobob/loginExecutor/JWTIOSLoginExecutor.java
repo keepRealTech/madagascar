@@ -16,6 +16,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -31,6 +32,7 @@ import java.security.spec.RSAPublicKeySpec;
 /**
  * Represents a login executor working with IOS jwt.
  */
+@Slf4j
 public class JWTIOSLoginExecutor implements LoginExecutor {
 
     private final GrpcResponseUtils grpcResponseUtils;
@@ -164,8 +166,10 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
             Jws<Claims> claim = jwtParser.parseClaimsJws(jwt);
             return claim != null && claim.getBody().containsKey("auth_time");
         } catch (ExpiredJwtException e) {
+            log.error("[verify] ios token expired error! jwt is [{}]", jwt);
             throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_TOKEN_EXPIRED);
         } catch (Exception e) {
+            log.error("[verify] ios token invalid error! jwt is [{}]", jwt);
             throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID);
         }
     }
