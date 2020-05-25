@@ -51,6 +51,8 @@ public class UserInfo {
     @Builder.Default
     private Boolean deleted = false;
     @Builder.Default
+    private Integer lockedUntil = 0;
+    @Builder.Default
     private Integer state = 0;
     private String unionId;
     @CreatedDate

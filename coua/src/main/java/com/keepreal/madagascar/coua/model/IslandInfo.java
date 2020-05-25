@@ -49,6 +49,8 @@ public class IslandInfo {
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
+    @Builder.Default
+    private Integer lockedUntil = 0;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate
