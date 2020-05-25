@@ -67,4 +67,5 @@ public class StatsEventListener implements MessageListener {
             return Action.ReconsumeLater;
         }
     }
+
 }

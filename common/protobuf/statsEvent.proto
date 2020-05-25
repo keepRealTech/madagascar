@@ -3,8 +3,6 @@ syntax = "proto3";
 option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.brookesia";
 
-import "common.proto";
-
 enum StatsEventCategory {
   STATS_CAT_NONE = 0;
   STATS_CAT_LOGIN = 1;

@@ -22,6 +22,7 @@ ext['fossa.version'] = '1.0.0'
 ext['lemur.version'] = '1.0.5'
 ext['tenrecs.version'] = '1.0.0'
 ext['brookesia.version'] = '1.0.0'
+ext['mantella.version'] = '1.0.0'
 
 subprojects {
     apply plugin: 'io.spring.dependency-management'
