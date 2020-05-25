@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,6 +11,12 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Represents the spring web security filter configurations.
@@ -37,10 +44,25 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                         "/api/v1/refreshToken**",
                         "/api/v1/configs**",
                         "/api/v1/setupInfo/**",
-                        "/api/v1/islands/{\\d+}/poster").permitAll()
+                        "/api/v1/islands/{\\d+}/poster**").permitAll()
                 .anyRequest().authenticated();
 
         httpSecurity.headers().cacheControl();
+    }
+
+    /**
+     * Configures the default cors behavior.
+     * @return {@link CorsConfigurationSource}.
+     */
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Collections.singletonList("*"));
+        configuration.setAllowedMethods(Collections.singletonList("GET"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/v1/setupInfo/android**", configuration);
+        source.registerCorsConfiguration("/api/v1/islands/{\\d+}/poster**", configuration);
+        return source;
     }
 
     /**
