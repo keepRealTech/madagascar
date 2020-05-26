@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.baobob.loginExecutor;
 
+import com.google.gson.Gson;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.baobob.config.OauthWechatLoginConfiguration;
@@ -12,8 +13,8 @@ import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -31,6 +32,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
     private final ImageService imageService;
     private final OauthWechatLoginConfiguration oauthWechatLoginConfiguration;
     private final GrpcResponseUtils grpcResponseUtils;
+    private final Gson gson;
 
     /**
      * Constructs the executor.
@@ -49,6 +51,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
         this.tokenGranter = tokenGranter;
         this.imageService = imageService;
         this.grpcResponseUtils = new GrpcResponseUtils();
+        this.gson = new Gson();
     }
 
     /**
@@ -110,13 +113,15 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
         return WebClient.create(accessTokenUrl)
                 .get()
                 .retrieve()
-                .bodyToMono(HashMap.class)
-                .map(hashMap ->
-                        WechatLoginInfo.builder()
+                .bodyToMono(String.class)
+                .map(response -> this.gson.fromJson(response, HashMap.class))
+                .filter(map -> map.get("errcode") == null)
+                .map(hashMap ->  WechatLoginInfo.builder()
                                 .accessToken(String.valueOf(hashMap.get("access_token")))
                                 .openId(String.valueOf(hashMap.get("openid")))
                                 .unionId(String.valueOf(hashMap.get("unionid")))
-                                .build());
+                                .build())
+                .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)));
     }
 
     /**
@@ -135,7 +140,8 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
         return WebClient.create(userInfoUrl)
                 .get()
                 .retrieve()
-                .bodyToMono(HashMap.class)
+                .bodyToMono(String.class)
+                .map(response -> this.gson.fromJson(response, HashMap.class))
                 .map(hashMap ->
                         WechatUserInfo.builder()
                                 .name(String.valueOf(hashMap.getOrDefault("nickname", "")))
@@ -155,7 +161,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
      * @return {@link Gender}.
      */
     private Gender convertGender(Object wechatSex) {
-        int sex = Integer.parseInt(String.valueOf(wechatSex));
+        int sex = Double.valueOf(String.valueOf(wechatSex)).intValue();
         switch (sex) {
             case 1:
                 return Gender.MALE;
