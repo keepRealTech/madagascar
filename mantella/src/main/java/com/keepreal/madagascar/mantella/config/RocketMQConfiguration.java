@@ -1,9 +1,10 @@
 package com.keepreal.madagascar.mantella.config;
 
-import com.aliyun.openservices.ons.api.MessageListener;
 import com.aliyun.openservices.ons.api.PropertyKeyConst;
 import com.aliyun.openservices.ons.api.bean.ConsumerBean;
+import com.aliyun.openservices.ons.api.bean.OrderConsumerBean;
 import com.aliyun.openservices.ons.api.bean.Subscription;
+import com.aliyun.openservices.ons.api.order.MessageOrderListener;
 import com.keepreal.madagascar.mantella.consumer.FeedEventListener;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -36,8 +37,8 @@ public class RocketMQConfiguration {
      * @return {@link ConsumerBean}.
      */
     @Bean(initMethod = "start", destroyMethod = "shutdown")
-    public ConsumerBean buildConsumer() {
-        ConsumerBean consumerBean = new ConsumerBean();
+    public OrderConsumerBean buildConsumer() {
+        OrderConsumerBean orderConsumerBean = new OrderConsumerBean();
 
         Properties properties = new Properties();
         properties.setProperty(PropertyKeyConst.AccessKey, this.accessKey);
@@ -45,16 +46,16 @@ public class RocketMQConfiguration {
         properties.setProperty(PropertyKeyConst.NAMESRV_ADDR, this.nameSrvAddr);
         properties.setProperty(PropertyKeyConst.GROUP_ID, this.getGroupId());
         properties.setProperty(PropertyKeyConst.ConsumeThreadNums, "20");
-        consumerBean.setProperties(properties);
+        orderConsumerBean.setProperties(properties);
 
-        Map<Subscription, MessageListener> subscriptionTable = new HashMap<>();
+        Map<Subscription, MessageOrderListener> subscriptionTable = new HashMap<>();
         Subscription subscription = new Subscription();
         subscription.setTopic(this.getTopic());
         subscription.setExpression(this.getTag());
         subscriptionTable.put(subscription, this.feedEventListener);
-        consumerBean.setSubscriptionTable(subscriptionTable);
+        orderConsumerBean.setSubscriptionTable(subscriptionTable);
 
-        return consumerBean;
+        return orderConsumerBean;
     }
 
 }

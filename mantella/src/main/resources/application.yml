@@ -1,0 +1,13 @@
+spring:
+  data:
+    mongodb:
+      database: mantella
+      uri: mongodb://root:password@127.0.0.1:27017
+
+rocketmq:
+  accessKey: 1
+  secretKey: 2
+  nameSrvAddr: localhost:9876
+  topic: feed-event
+  groupId: GID-mantella-default
+  tag: event
