@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
+import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
@@ -17,15 +18,21 @@ import java.util.Objects;
 @Service
 public class IslandDTOFactory {
 
+    private static final int DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT = 99_999_999;
+
     private final UserDTOFactory userDTOFactory;
+    private final GeneralConfiguration generalConfiguration;
 
     /**
      * Constructs the island dto factory.
      *
      * @param userDTOFactory {@link UserDTOFactory}.
+     * @param generalConfiguration  {@link GeneralConfiguration}.
      */
-    public IslandDTOFactory(UserDTOFactory userDTOFactory) {
+    public IslandDTOFactory(UserDTOFactory userDTOFactory,
+                            GeneralConfiguration generalConfiguration) {
         this.userDTOFactory = userDTOFactory;
+        this.generalConfiguration = generalConfiguration;
     }
 
     /**
@@ -42,7 +49,10 @@ public class IslandDTOFactory {
         IslandDTO islandDTO = new IslandDTO();
         islandDTO.setId(island.getId());
         islandDTO.setName(island.getName());
-        islandDTO.setMemberCount(island.getMemberCount());
+        int memberCount = island.getMemberCount();
+        if (island.getId().equals(generalConfiguration.getSingleOfficialIslandId()))
+            memberCount = DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT;
+        islandDTO.setMemberCount(memberCount);
         islandDTO.setDescription(island.getDescription());
         islandDTO.setHostId(island.getHostId());
         islandDTO.setPortraitImageUri(island.getPortraitImageUri());
@@ -91,7 +101,10 @@ public class IslandDTOFactory {
         fullIslandDTO.setHostId(island.getHostId());
         fullIslandDTO.setPortraitImageUri(island.getPortraitImageUri());
         fullIslandDTO.setSecret(maskSecret ? "******" : secret);
-        fullIslandDTO.setMemberCount(island.getMemberCount());
+        int memberCount = island.getMemberCount();
+        if (island.getId().equals(generalConfiguration.getSingleOfficialIslandId()))
+            memberCount = DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT;
+        fullIslandDTO.setMemberCount(memberCount);
 
         return fullIslandDTO;
     }

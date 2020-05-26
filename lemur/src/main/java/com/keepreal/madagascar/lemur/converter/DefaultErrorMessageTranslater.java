@@ -28,6 +28,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "服务器开小差了，请稍后...";
             case REQUEST_IMAGE_NUMBER_TOO_LARGE:
                 return "单动态图片数量过大";
+            case REQUEST_ISLAND_NOT_FOUND_ERROR:
+                return "你已不在岛内，请先登岛";
             default:
                 return errorCode.getValueDescriptor().getName();
         }
