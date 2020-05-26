@@ -20,6 +20,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+    implementation 'io.projectreactor:reactor-core'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
     implementation 'com.salesforce.servicelibs:reactor-grpc-stub'
     implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'

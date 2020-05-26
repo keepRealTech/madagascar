@@ -4,6 +4,7 @@ import com.aliyun.openservices.ons.api.MessageListener;
 import com.aliyun.openservices.ons.api.PropertyKeyConst;
 import com.aliyun.openservices.ons.api.bean.ConsumerBean;
 import com.aliyun.openservices.ons.api.bean.Subscription;
+import com.keepreal.madagascar.mantella.consumer.FeedEventListener;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,7 @@ import java.util.Properties;
 @Data
 public class RocketMQConfiguration {
 
-    private final MessageListener messageListener;
+    private final FeedEventListener feedEventListener;
     private String accessKey;
     private String secretKey;
     private String nameSrvAddr;
@@ -50,7 +51,7 @@ public class RocketMQConfiguration {
         Subscription subscription = new Subscription();
         subscription.setTopic(this.getTopic());
         subscription.setExpression(this.getTag());
-        subscriptionTable.put(subscription, this.messageListener);
+        subscriptionTable.put(subscription, this.feedEventListener);
         consumerBean.setSubscriptionTable(subscriptionTable);
 
         return consumerBean;
