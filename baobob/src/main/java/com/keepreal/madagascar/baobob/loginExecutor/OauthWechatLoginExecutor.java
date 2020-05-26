@@ -32,6 +32,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
     private final ImageService imageService;
     private final OauthWechatLoginConfiguration oauthWechatLoginConfiguration;
     private final GrpcResponseUtils grpcResponseUtils;
+    private final Gson gson;
 
     /**
      * Constructs the executor.
@@ -50,6 +51,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
         this.tokenGranter = tokenGranter;
         this.imageService = imageService;
         this.grpcResponseUtils = new GrpcResponseUtils();
+        this.gson = new Gson();
     }
 
     /**
@@ -112,7 +114,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
                 .get()
                 .retrieve()
                 .bodyToMono(String.class)
-                .map(response -> new Gson().fromJson(response, HashMap.class))
+                .map(response -> this.gson.fromJson(response, HashMap.class))
                 .filter(map -> map.get("errcode") == null)
                 .map(hashMap ->  WechatLoginInfo.builder()
                                 .accessToken(String.valueOf(hashMap.get("access_token")))
@@ -139,7 +141,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
                 .get()
                 .retrieve()
                 .bodyToMono(String.class)
-                .map(response -> new Gson().fromJson(response, HashMap.class))
+                .map(response -> this.gson.fromJson(response, HashMap.class))
                 .map(hashMap ->
                         WechatUserInfo.builder()
                                 .name(String.valueOf(hashMap.getOrDefault("nickname", "")))
