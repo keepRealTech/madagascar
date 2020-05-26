@@ -10,9 +10,12 @@ import reactor.core.publisher.Mono;
 public class TimelineService {
 
     private final TimelineRepository timelineRepository;
+    private final TimelineService timelineService;
 
-    public TimelineService(TimelineRepository timelineRepository) {
+    public TimelineService(TimelineRepository timelineRepository,
+                           TimelineService timelineService) {
         this.timelineRepository = timelineRepository;
+        this.timelineService = timelineService;
     }
 
     public Mono<Void> distribute(FeedEventMessage feedEventMessage) {
