@@ -27,6 +27,7 @@ import com.keepreal.madagascar.tenrecs.CommentEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 /**
  * Represents comment GRpc controller
  */
+@Slf4j
 @GRpcService
 public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImplBase {
 
@@ -119,6 +121,7 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
             responseBuilder.setComment(commentMessage)
                     .setStatus(CommonStatusUtils.getSuccStatus());
         } else {
+            log.error("[retrieveCommentById] comment not found error! comment id is [{}]", request.getId());
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_COMMENT_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
         }
@@ -170,6 +173,7 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
             feedInfoService.subFeedCount(commentInfo.getFeedId(), FeedCountType.COMMENTS_COUNT);
             commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         } else {
+            log.error("[deleteCommentById] comment not found error! comment id is [{}]", request.getId());
             commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_COMMENT_NOT_FOUND_ERROR);
         }
 

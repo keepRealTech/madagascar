@@ -110,6 +110,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     @Override
     public void createIsland(NewIslandRequest request, StreamObserver<IslandResponse> responseObserver) {
         if (islandInfoService.islandNameIsExisted(request.getName())) {
+            log.error("[createIsland] island name existed error! island name is [{}]", request.getName());
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NAME_EXISTED_ERROR);
             responseObserver.onNext(IslandResponse.newBuilder().setStatus(commonStatus).build());
             responseObserver.onCompleted();
@@ -125,13 +126,11 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             infoBuilder.secret(request.getSecret().getValue());
         }
 
-        IslandInfo save;
+        IslandInfo save = islandInfoService.createIsland(infoBuilder.build());
         try {
-            save = islandInfoService.createIsland(infoBuilder.build());
             feedService.createDefaultFeed(request.getHostId(), request.getHostId(), save.getId());
         } catch (KeepRealBusinessException e) {
-            if (e.getErrorCode().equals(ErrorCode.REQUEST_UNEXPECTED_ERROR))
-                log.error("rpc call fossa error");
+            log.error("[createIsland] {}! host id is [{}], island id is [{}]", e.getErrorCode().toString(), save.getId());
             responseObserver.onNext(IslandResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(e.getErrorCode()))
                     .build());
@@ -164,6 +163,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             responseBuilder.setIsland(islandMessage)
                     .setStatus(CommonStatusUtils.getSuccStatus());
         } else {
+            log.error("[retrieveIslandById] island not found error! island id is [{}]", islandId);
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
         }
@@ -282,6 +282,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             IslandMessage islandMessage = islandInfoService.getIslandMessage(save);
             responseBuilder.setIsland(islandMessage).setStatus(CommonStatusUtils.getSuccStatus());
         } else {
+            log.error("[updateIslandById] island not found error! island id is [{}]", request.getId());
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
         }
@@ -352,6 +353,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                     return;
                 }
             } else {
+                log.error("[subscribeIslandById] island secret error! island id is [{}], secret is [{}]", islandId, secret);
                 CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_SECRET_ERROR);
                 responseBuilder.setStatus(commonStatus);
                 responseObserver.onNext(responseBuilder.build());
@@ -359,6 +361,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                 return;
             }
         } else {
+            log.error("[subscribeIslandById] island not found error! island id is [{}]", islandId);
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
         }
@@ -454,6 +457,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             String islandId = request.getIslandId().getValue();
             IslandInfo island = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
             if (island == null || !islandInfoList.contains(island)) {
+                log.error("[retrieveDefaultIslandsByUserId] island not found error! island id is [{}]", islandId);
                 responseObserver.onNext(IslandsResponse.newBuilder()
                         .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR))
                         .build());

@@ -25,6 +25,7 @@ import com.keepreal.madagascar.fossa.service.IslandService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -43,6 +44,7 @@ import java.util.stream.IntStream;
 /**
  * Represents the feed GRpc controller.
  */
+@Slf4j
 @GRpcService
 public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
@@ -146,6 +148,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                     .setUserId(feedInfo.getUserId())
                     .setStatus(CommonStatusUtils.getSuccStatus());
         } else {
+            log.error("[retrieveFeedById] feed not found error! feed id is [{}]", feedId);
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
         }
@@ -209,6 +212,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         FeedInfo feedInfo = feedInfoService.findTopByUserIdAndDeletedIsFalseOrderByCreatedTimeDesc(userId);
         if (feedInfo == null) {
+            log.error("[retrieveLatestFeedByUserId] feed not found error! user id is [{}]", userId);
             responseObserver.onNext(FeedResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR))
                     .build());

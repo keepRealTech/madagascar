@@ -14,6 +14,7 @@ import com.keepreal.madagascar.coua.service.UserIdentityService;
 import com.keepreal.madagascar.coua.service.UserInfoService;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.util.StringUtils;
 
@@ -22,6 +23,7 @@ import java.sql.Date;
 /**
  * Represents user GRpc controller.
  */
+@Slf4j
 @GRpcService
 public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
 
@@ -76,20 +78,26 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     public void retrieveSingleUser(RetrieveSingleUserRequest request, StreamObserver<UserResponse> responseObserver) {
         QueryUserCondition queryUserCondition = request.getCondition();
         UserInfo userInfo = null;
+        String condition = "";
         UserResponse.Builder responseBuilder = UserResponse.newBuilder();
         if (queryUserCondition.hasId()) {
-            userInfo = userInfoService.findUserInfoByIdAndDeletedIsFalse(queryUserCondition.getId().getValue());
+            condition = queryUserCondition.getId().getValue();
+            userInfo = userInfoService.findUserInfoByIdAndDeletedIsFalse(condition);
         }
         if (queryUserCondition.hasUnionId()) {
-            userInfo = userInfoService.findUserInfoByUnionIdAndDeletedIsFalse(queryUserCondition.getUnionId().getValue());
+            condition = queryUserCondition.getUnionId().getValue();
+            userInfo = userInfoService.findUserInfoByUnionIdAndDeletedIsFalse(condition);
         }
         if (queryUserCondition.hasDisplayId()) {
-            userInfo = userInfoService.findUserInfoByDisplayIdAndDeletedIsFalse(queryUserCondition.getDisplayId().getValue());
+            condition = queryUserCondition.getDisplayId().getValue();
+            userInfo = userInfoService.findUserInfoByDisplayIdAndDeletedIsFalse(condition);
         }
         if (queryUserCondition.hasUsername()) {
-            userInfo = userInfoService.findUserInfoByUserNameAndDeletedIsFalse(queryUserCondition.getUsername().getValue());
+            condition = queryUserCondition.getUsername().getValue();
+            userInfo = userInfoService.findUserInfoByUserNameAndDeletedIsFalse(condition);
         }
         if (userInfo == null) {
+            log.error("[retrieveSingleUser] user not found error! condition is [{}]", condition);
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
             responseObserver.onNext(responseBuilder.build());
@@ -115,6 +123,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         String userId = request.getId();
         UserInfo userInfo = userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
         if (userInfo == null) {
+            log.error("[updateUserById] user not found error! condition is [{}]", userId);
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
             responseObserver.onNext(UserResponse.newBuilder().setStatus(commonStatus).build());
             responseObserver.onCompleted();
