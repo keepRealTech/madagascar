@@ -25,6 +25,10 @@ coua:
   host: coua
   port: 6565
 
+indri:
+  host: indri
+  port: 6565
+
 deploy:
   opentracing:
     enable_jaeger: true
