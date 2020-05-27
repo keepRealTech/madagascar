@@ -1,6 +1,9 @@
 package com.keepreal.madagascar.mantella.service;
 
+import com.keepreal.madagascar.mantella.FeedCreateEvent;
+import com.keepreal.madagascar.mantella.FeedEvent;
 import com.keepreal.madagascar.mantella.FeedEventMessage;
+import com.keepreal.madagascar.mantella.factory.TimelineFactory;
 import com.keepreal.madagascar.mantella.model.Timeline;
 import com.keepreal.madagascar.mantella.repository.TimelineRepository;
 import org.springframework.stereotype.Service;
@@ -11,14 +14,26 @@ public class TimelineService {
 
     private final TimelineRepository timelineRepository;
     private final TimelineService timelineService;
+    private final TimelineFactory timelineFactory;
 
     public TimelineService(TimelineRepository timelineRepository,
-                           TimelineService timelineService) {
+                           TimelineService timelineService,
+                           TimelineFactory timelineFactory) {
         this.timelineRepository = timelineRepository;
         this.timelineService = timelineService;
+        this.timelineFactory = timelineFactory;
     }
 
-    public Mono<Void> distribute(FeedEventMessage feedEventMessage) {
+    /**
+     * Distributes the feed event into timelines.
+     *
+     * @param feedCreateEvent {@link FeedCreateEvent}.
+     * @return {@link Void}.
+     */
+    public Mono<Void> distribute(FeedCreateEvent feedCreateEvent) {
+        Timeline timeline = this.timelineFactory.valueOf(feedCreateEvent);
+
+
         return Mono.empty();
     }
 
