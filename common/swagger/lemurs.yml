@@ -1214,6 +1214,8 @@ components:
           properties:
             isDeleted:
               type: boolean
+            isSubscribed:
+              type: boolean
     FeedDTO:
       allOf:
         - $ref: '#/components/schemas/BriefFeedDTO'

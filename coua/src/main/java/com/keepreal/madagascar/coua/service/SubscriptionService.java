@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -215,6 +216,10 @@ public class SubscriptionService {
             subscription.setState(SubscriptionState.LEAVE.getValue());
             subscriptionRepository.save(subscription);
         }
+    }
+
+    public List<String> getSubscribeIslandIdByUserId(String userId, List<String> islandIdList) {
+        return subscriptionRepository.getIslandIdListByUserSubscribedIn(userId, islandIdList);
     }
 
     private void insertSubscription(Subscription subscription) {

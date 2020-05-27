@@ -7,6 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @program: madagascar
  * @author: zhangxidong
@@ -35,5 +37,8 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
     Integer getIslanderNumberByIslandId(String islandId, String userId);
 
     Subscription findTopByIslandIdAndUserIdAndDeletedIsFalse(String islandId, String userId);
+
+    @Query(value = "SELECT island_id FROM subscription WHERE user_id = ?1 AND island_id IN ?2 AND state > 0 AND is_deleted = FALSE", nativeQuery = true)
+    List<String> getIslandIdListByUserSubscribedIn(String userId, List<String> islandIdList);
 
 }

@@ -21,6 +21,8 @@ import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandProfileByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveMultipleIslandsRequest;
+import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateRequest;
+import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateResponse;
 import com.keepreal.madagascar.coua.SubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.SubscribeIslandResponse;
 import com.keepreal.madagascar.coua.UnsubscribeIslandByIdRequest;
@@ -34,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -44,7 +47,7 @@ import java.util.Objects;
 public class IslandService {
 
     private static final int NAME_LENGTH_THRESHOLD = 32;
-    private static final int DESCRIPTION_LENGTH_THRESHOLD = 500;
+    private static final int DESCRIPTION_LENGTH_THRESHOLD = 1_000;
 
     private final Channel channel;
 
@@ -470,7 +473,7 @@ public class IslandService {
 
         if (Objects.isNull(islandsResponse)
                 || !islandsResponse.hasStatus()) {
-            log.error(Objects.isNull(islandsResponse) ? "Retrieve feed returned null." : islandsResponse.toString());
+            log.error(Objects.isNull(islandsResponse) ? "Retrieve default islands null." : islandsResponse.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
@@ -479,6 +482,34 @@ public class IslandService {
         }
 
         return islandsResponse;
+    }
+
+    public Map<String, Boolean> retrieveIslandSubscribeStateByUserId(String userId, List<String> islandIdList) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveUserSubscriptionStateRequest request = RetrieveUserSubscriptionStateRequest.newBuilder()
+                .setUserId(userId)
+                .addAllIslandIds(islandIdList)
+                .build();
+
+        RetrieveUserSubscriptionStateResponse response;
+        try {
+            response = stub.retrieveUserSubscriptionState(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve island subscribe state returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getStateMapMap();
     }
 
     private void checkLength(String str, int threshold) {

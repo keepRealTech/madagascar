@@ -125,6 +125,16 @@ message RetrieveDefaultIslandsByUserIdRequest {
     PageRequest pageRequest = 3;
 }
 
+message RetrieveUserSubscriptionStateRequest {
+    string userId = 1;
+    repeated string islandIds = 2;
+}
+
+message RetrieveUserSubscriptionStateResponse {
+    CommonStatus status = 1;
+    map<string, bool> stateMap = 2;
+}
+
 service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
@@ -138,4 +148,5 @@ service IslandService {
     rpc CheckNewFeeds (CheckNewFeedsRequest) returns (CheckNewFeedsResponse) {};
     rpc UpdateLastFeedAtById (UpdateLastFeedAtRequest) returns (UpdateLastFeedAtResponse) {}
     rpc RetrieveDefaultIslandsByUserId (RetrieveDefaultIslandsByUserIdRequest) returns (IslandsResponse) {}
+    rpc RetrieveUserSubscriptionState (RetrieveUserSubscriptionStateRequest) returns (RetrieveUserSubscriptionStateResponse) {}
 }
