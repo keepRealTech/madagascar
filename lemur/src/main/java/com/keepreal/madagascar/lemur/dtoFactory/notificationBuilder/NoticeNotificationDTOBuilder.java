@@ -92,18 +92,14 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
             return null;
         }
 
-        try {
-            NotificationDTO notificationDTO = new NotificationDTO();
-            notificationDTO.setId(this.notificationMessage.getId());
-            notificationDTO.setHasRead(this.notificationMessage.getHasRead());
-            notificationDTO.setNotificationType(NotificationType.ISLAND_NOTICE);
-            notificationDTO.setCreatedAt(this.notificationMessage.getTimestamp());
-            notificationDTO.setNotice(this.valueOf(this.notificationMessage.getNoticeNotification()));
+        NotificationDTO notificationDTO = new NotificationDTO();
+        notificationDTO.setId(this.notificationMessage.getId());
+        notificationDTO.setHasRead(this.notificationMessage.getHasRead());
+        notificationDTO.setNotificationType(NotificationType.ISLAND_NOTICE);
+        notificationDTO.setCreatedAt(this.notificationMessage.getTimestamp());
+        notificationDTO.setNotice(this.valueOf(this.notificationMessage.getNoticeNotification()));
 
-            return notificationDTO;
-        } catch (KeepRealBusinessException exception) {
-            return null;
-        }
+        return notificationDTO;
     }
 
     /**

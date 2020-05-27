@@ -65,24 +65,20 @@ public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
             return null;
         }
 
-        try {
-            NotificationDTO notificationDTO = new NotificationDTO();
-            notificationDTO.setId(this.notificationMessage.getId());
-            notificationDTO.setHasRead(this.notificationMessage.getHasRead());
-            notificationDTO.setNotificationType(NotificationType.REACTIONS);
-            notificationDTO.setCreatedAt(this.notificationMessage.getTimestamp());
+        NotificationDTO notificationDTO = new NotificationDTO();
+        notificationDTO.setId(this.notificationMessage.getId());
+        notificationDTO.setHasRead(this.notificationMessage.getHasRead());
+        notificationDTO.setNotificationType(NotificationType.REACTIONS);
+        notificationDTO.setCreatedAt(this.notificationMessage.getTimestamp());
 
-            if (Objects.nonNull(this.notificationMessage.getReactionNotification())) {
-                notificationDTO.setFeed(
-                        this.feedDTOFactory.snapshotValueOf(this.notificationMessage.getReactionNotification().getFeed()));
-                notificationDTO.setReactions(
-                        this.reactionDTOFactory.valueOf(this.notificationMessage.getReactionNotification().getReaction()));
-            }
-
-            return notificationDTO;
-        } catch (KeepRealBusinessException exception) {
-            return null;
+        if (Objects.nonNull(this.notificationMessage.getReactionNotification())) {
+            notificationDTO.setFeed(
+                    this.feedDTOFactory.snapshotValueOf(this.notificationMessage.getReactionNotification().getFeed()));
+            notificationDTO.setReactions(
+                    this.reactionDTOFactory.valueOf(this.notificationMessage.getReactionNotification().getReaction()));
         }
+
+        return notificationDTO;
     }
 
 }

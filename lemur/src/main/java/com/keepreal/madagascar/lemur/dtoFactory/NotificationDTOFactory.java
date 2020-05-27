@@ -136,7 +136,7 @@ public class NotificationDTOFactory {
                     return null;
             }
         } catch (KeepRealBusinessException e) {
-            log.error("build NotificationDTO exception, message is {}", e.getMessage());
+            log.error("Build NotificationDTO {} exception, message is {}", notification.getId(), e.getMessage());
             return null;
         }
     }

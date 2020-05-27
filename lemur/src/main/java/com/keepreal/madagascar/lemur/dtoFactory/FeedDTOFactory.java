@@ -8,6 +8,7 @@ import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.lemur.service.EhcacheService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefFeedDTO;
 import swagger.model.CheckFeedsDTO;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
  * Represents the feed dto factory.
  */
 @Component
+@Slf4j
 public class FeedDTOFactory {
 
     private final IslandService islandService;
@@ -91,6 +93,7 @@ public class FeedDTOFactory {
 
             return feedDTO;
         } catch (KeepRealBusinessException exception) {
+            log.error("Failed to serialize feed {}.", feed.getId());
             return null;
         }
     }
@@ -122,6 +125,7 @@ public class FeedDTOFactory {
 
             return briefFeedDTO;
         } catch (KeepRealBusinessException exception) {
+            log.error("Failed to serialize feed {}.", feed.getId());
             return null;
         }
     }
