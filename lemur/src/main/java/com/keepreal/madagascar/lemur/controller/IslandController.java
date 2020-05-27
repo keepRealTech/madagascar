@@ -22,18 +22,13 @@ import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.swagger.annotations.ApiParam;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import swagger.api.ApiUtil;
 import swagger.api.IslandApi;
 import swagger.model.BriefIslandResponse;
 import swagger.model.BriefIslandsResponse;
@@ -56,8 +51,6 @@ import swagger.model.SubscribeIslandRequest;
 import swagger.model.UsersResponse;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
@@ -83,16 +76,16 @@ public class IslandController implements IslandApi {
     /**
      * Constructs the island controller.
      *
-     * @param imageService          {@link ImageService}.
-     * @param islandService         {@link IslandService}.
-     * @param repostService         {@link RepostService}.
-     * @param islandDTOFactory      {@link IslandDTOFactory}.
-     * @param userService           {@link UserService}.
-     * @param userDTOFactory        {@link UserDTOFactory}.
-     * @param feedService           {@link FeedService}.
-     * @param feedDTOFactory        {@link FeedDTOFactory}.
-     * @param repostDTOFactory      {@link RepostDTOFactory}.
-     * @param generalConfiguration  {@link GeneralConfiguration}.
+     * @param imageService         {@link ImageService}.
+     * @param islandService        {@link IslandService}.
+     * @param repostService        {@link RepostService}.
+     * @param islandDTOFactory     {@link IslandDTOFactory}.
+     * @param userService          {@link UserService}.
+     * @param userDTOFactory       {@link UserDTOFactory}.
+     * @param feedService          {@link FeedService}.
+     * @param feedDTOFactory       {@link FeedDTOFactory}.
+     * @param repostDTOFactory     {@link RepostDTOFactory}.
+     * @param generalConfiguration {@link GeneralConfiguration}.
      */
     public IslandController(ImageService imageService,
                             IslandService islandService,
@@ -192,9 +185,9 @@ public class IslandController implements IslandApi {
     /**
      * Implements the get island poster by id api.
      *
-     * @param id Island id
-     * @param refererId  user id.
-     * @return  {@link IslandPosterResponse}.
+     * @param id        Island id
+     * @param refererId user id.
+     * @return {@link IslandPosterResponse}.
      */
     @Override
     public ResponseEntity<IslandPosterResponse> apiV1IslandsIdPosterGet(String id, @NotNull @Valid String refererId) {
@@ -283,7 +276,7 @@ public class IslandController implements IslandApi {
     /**
      * Implements the subscribe official island api.
      *
-     * @return  {@link IslandProfileResponse}.
+     * @return {@link IslandProfileResponse}.
      */
     @Override
     public ResponseEntity<IslandProfileResponse> apiV1IslandsSubscribeOfficialIslandPost() {
@@ -493,9 +486,10 @@ public class IslandController implements IslandApi {
 
     /**
      * Implements the get feeds api.
-     * @param id id (required) Island id.
-     * @param fromHost  (optional) Whether from host.
-     * @param page page number (optional, default to 0).
+     *
+     * @param id       id (required) Island id.
+     * @param fromHost (optional) Whether from host.
+     * @param page     page number (optional, default to 0).
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link FeedsResponse}.
      */
@@ -543,9 +537,9 @@ public class IslandController implements IslandApi {
     /**
      * Cache the {@link PosterFeedDTO} by islandId.
      *
-     * @param islandId  island id.
-     * @param userId    user id.
-     * @return  {@link PosterFeedDTO}.
+     * @param islandId island id.
+     * @param userId   user id.
+     * @return {@link PosterFeedDTO}.
      */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
     private List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
