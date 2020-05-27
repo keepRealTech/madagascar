@@ -3,10 +3,12 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.lemur.service.EhcacheService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefFeedDTO;
 import swagger.model.CheckFeedsDTO;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
  * Represents the feed dto factory.
  */
 @Component
+@Slf4j
 public class FeedDTOFactory {
 
     private final IslandService islandService;
@@ -65,29 +68,34 @@ public class FeedDTOFactory {
             return null;
         }
 
-        IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
-        UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+        try {
+            IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
+            UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
 
-        FeedDTO feedDTO = new FeedDTO();
-        feedDTO.setId(feed.getId());
-        feedDTO.setText(feed.getText());
-        feedDTO.setImagesUris(feed.getImageUrisList());
-        feedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
-        feedDTO.setLikesCount(feed.getLikesCount());
-        feedDTO.setCommentsCount(feed.getCommentsCount());
-        feedDTO.setComments(feed.getLastCommentsList()
-                .stream()
-                .map(this.commentDTOFactory::valueOf)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList()));
-        feedDTO.setRepostCount(feed.getRepostCount());
-        feedDTO.setCreatedAt(feed.getCreatedAt());
-        feedDTO.setIsLiked(feed.getIsLiked());
+            FeedDTO feedDTO = new FeedDTO();
+            feedDTO.setId(feed.getId());
+            feedDTO.setText(feed.getText());
+            feedDTO.setImagesUris(feed.getImageUrisList());
+            feedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
+            feedDTO.setLikesCount(feed.getLikesCount());
+            feedDTO.setCommentsCount(feed.getCommentsCount());
+            feedDTO.setComments(feed.getLastCommentsList()
+                    .stream()
+                    .map(this.commentDTOFactory::valueOf)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
+            feedDTO.setRepostCount(feed.getRepostCount());
+            feedDTO.setCreatedAt(feed.getCreatedAt());
+            feedDTO.setIsLiked(feed.getIsLiked());
 
-        feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
-        feedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
+            feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
+            feedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
 
-        return feedDTO;
+            return feedDTO;
+        } catch (KeepRealBusinessException exception) {
+            log.error("Failed to serialize feed {}.", feed.getId());
+            return null;
+        }
     }
 
     /**
@@ -101,20 +109,25 @@ public class FeedDTOFactory {
             return null;
         }
 
-        IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
-        UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+        try {
+            IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
+            UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
 
-        BriefFeedDTO briefFeedDTO = new BriefFeedDTO();
-        briefFeedDTO.setId(feed.getId());
-        briefFeedDTO.setText(feed.getText());
-        briefFeedDTO.setImagesUris(feed.getImageUrisList());
-        briefFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
-        briefFeedDTO.setCreatedAt(feed.getCreatedAt());
+            BriefFeedDTO briefFeedDTO = new BriefFeedDTO();
+            briefFeedDTO.setId(feed.getId());
+            briefFeedDTO.setText(feed.getText());
+            briefFeedDTO.setImagesUris(feed.getImageUrisList());
+            briefFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
+            briefFeedDTO.setCreatedAt(feed.getCreatedAt());
 
-        briefFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
-        briefFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
+            briefFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
+            briefFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
 
-        return briefFeedDTO;
+            return briefFeedDTO;
+        } catch (KeepRealBusinessException exception) {
+            log.error("Failed to serialize feed {}.", feed.getId());
+            return null;
+        }
     }
 
     /**
@@ -175,7 +188,7 @@ public class FeedDTOFactory {
         }
         PosterFeedDTO posterFeedDTO = new PosterFeedDTO();
         posterFeedDTO.setId(feed.getId());
-        posterFeedDTO.setUser(userDTOFactory.briefValueOf(userService.retrieveUserById(feed.getUserId())));
+        posterFeedDTO.setUser(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(feed.getUserId())));
         posterFeedDTO.setText(feed.getText());
         posterFeedDTO.setImagesUris(feed.getImageUrisList());
         posterFeedDTO.setCreatedAt(feed.getCreatedAt());
