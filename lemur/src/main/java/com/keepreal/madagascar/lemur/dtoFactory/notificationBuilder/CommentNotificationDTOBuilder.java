@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.dtoFactory.CommentDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
@@ -64,20 +65,24 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
             return null;
         }
 
-        NotificationDTO notificationDTO = new NotificationDTO();
-        notificationDTO.setId(this.notificationMessage.getId());
-        notificationDTO.setHasRead(this.notificationMessage.getHasRead());
-        notificationDTO.setNotificationType(NotificationType.COMMENTS);
-        notificationDTO.setCreatedAt(this.notificationMessage.getTimestamp());
+        try {
+            NotificationDTO notificationDTO = new NotificationDTO();
+            notificationDTO.setId(this.notificationMessage.getId());
+            notificationDTO.setHasRead(this.notificationMessage.getHasRead());
+            notificationDTO.setNotificationType(NotificationType.COMMENTS);
+            notificationDTO.setCreatedAt(this.notificationMessage.getTimestamp());
 
-        if (Objects.nonNull(this.notificationMessage.getCommentNotification())) {
-            notificationDTO.setFeed(
-                    this.feedDTOFactory.snapshotValueOf(this.notificationMessage.getCommentNotification().getFeed()));
-            notificationDTO.setComment(
-                    this.commentDTOFactory.valueOf(this.notificationMessage.getCommentNotification().getComment()));
+            if (Objects.nonNull(this.notificationMessage.getCommentNotification())) {
+                notificationDTO.setFeed(
+                        this.feedDTOFactory.snapshotValueOf(this.notificationMessage.getCommentNotification().getFeed()));
+                notificationDTO.setComment(
+                        this.commentDTOFactory.valueOf(this.notificationMessage.getCommentNotification().getComment()));
+            }
+
+            return notificationDTO;
+        } catch (KeepRealBusinessException exception) {
+            return null;
         }
-
-        return notificationDTO;
     }
 
 }

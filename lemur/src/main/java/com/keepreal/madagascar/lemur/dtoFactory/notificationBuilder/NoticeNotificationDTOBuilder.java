@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.IslandService;
@@ -91,14 +92,18 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
             return null;
         }
 
-        NotificationDTO notificationDTO = new NotificationDTO();
-        notificationDTO.setId(this.notificationMessage.getId());
-        notificationDTO.setHasRead(this.notificationMessage.getHasRead());
-        notificationDTO.setNotificationType(NotificationType.ISLAND_NOTICE);
-        notificationDTO.setCreatedAt(this.notificationMessage.getTimestamp());
-        notificationDTO.setNotice(this.valueOf(this.notificationMessage.getNoticeNotification()));
+        try {
+            NotificationDTO notificationDTO = new NotificationDTO();
+            notificationDTO.setId(this.notificationMessage.getId());
+            notificationDTO.setHasRead(this.notificationMessage.getHasRead());
+            notificationDTO.setNotificationType(NotificationType.ISLAND_NOTICE);
+            notificationDTO.setCreatedAt(this.notificationMessage.getTimestamp());
+            notificationDTO.setNotice(this.valueOf(this.notificationMessage.getNoticeNotification()));
 
-        return notificationDTO;
+            return notificationDTO;
+        } catch (KeepRealBusinessException exception) {
+            return null;
+        }
     }
 
     /**
