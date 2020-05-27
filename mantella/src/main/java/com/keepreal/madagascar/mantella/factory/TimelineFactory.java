@@ -16,9 +16,10 @@ public class TimelineFactory {
      * Converts {@link FeedCreateEvent} into {@link Timeline}.
      *
      * @param feedCreateEvent {@link FeedCreateEvent}.
+     * @param userId          User id.
      * @return {@link Timeline}.
      */
-    public Timeline valueOf(FeedCreateEvent feedCreateEvent) {
+    public Timeline valueOf(FeedCreateEvent feedCreateEvent, String userId) {
          if (Objects.isNull(feedCreateEvent)) {
              return null;
          }
@@ -28,6 +29,7 @@ public class TimelineFactory {
                  .islandId(feedCreateEvent.getIslandId())
                  .fromHost(feedCreateEvent.getFromHost())
                  .feedCreatedAt(feedCreateEvent.getCreatedAt())
+                 .userId(userId)
                  .build();
     }
 

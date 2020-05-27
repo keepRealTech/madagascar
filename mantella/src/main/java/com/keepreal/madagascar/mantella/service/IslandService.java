@@ -19,6 +19,11 @@ public class IslandService {
 
     private final Channel couaChannel;
 
+    /**
+     * Constructs the island service.
+     *
+     * @param couaChannel GRpc connection with service coua.
+     */
     public IslandService(@Qualifier("couaChannel") Channel couaChannel) {
         this.couaChannel = couaChannel;
     }

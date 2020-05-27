@@ -45,18 +45,18 @@ public class FeedEventListener implements MessageOrderListener {
                 return OrderAction.Success;
             }
 
-            Boolean hasConsumed = this.timelineService.hasConsumed(message.getKey()).block();
-
-            if (Boolean.TRUE.equals(hasConsumed)) {
-                return OrderAction.Success;
-            } else if (Objects.isNull(hasConsumed)) {
-                return OrderAction.Suspend;
-            }
-
             FeedEventMessage feedEventMessage = FeedEventMessage.parseFrom(message.getBody());
 
             switch (feedEventMessage.getType()) {
                 case FEED_EVENT_CREATE:
+                    Boolean hasConsumed = this.timelineService.hasConsumed(message.getKey()).block();
+
+                    if (Boolean.TRUE.equals(hasConsumed)) {
+                        return OrderAction.Success;
+                    } else if (Objects.isNull(hasConsumed)) {
+                        return OrderAction.Suspend;
+                    }
+
                     if (Objects.isNull(feedEventMessage.getFeedCreateEvent())) {
                         throw new InvalidProtocolBufferException("No feed event in message.");
                     }
@@ -69,7 +69,7 @@ public class FeedEventListener implements MessageOrderListener {
                         throw new InvalidProtocolBufferException("No feed event in message.");
                     }
 
-                    this.timelineService.delete(feedEventMessage.getFeedDeleteEvent().getFeedId()).block();
+                    this.timelineService.deleteByFeedId(feedEventMessage.getFeedDeleteEvent().getFeedId()).block();
                     return OrderAction.Success;
                 default:
                     log.warn("No such feed event type {}, skipped.", feedEventMessage.getType());
