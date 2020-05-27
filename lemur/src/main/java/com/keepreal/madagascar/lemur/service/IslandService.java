@@ -47,7 +47,7 @@ import java.util.Objects;
 public class IslandService {
 
     private static final int NAME_LENGTH_THRESHOLD = 32;
-    private static final int DESCRIPTION_LENGTH_THRESHOLD = 500;
+    private static final int DESCRIPTION_LENGTH_THRESHOLD = 1_000;
 
     private final Channel channel;
 
@@ -473,7 +473,7 @@ public class IslandService {
 
         if (Objects.isNull(islandsResponse)
                 || !islandsResponse.hasStatus()) {
-            log.error(Objects.isNull(islandsResponse) ? "Retrieve feed returned null." : islandsResponse.toString());
+            log.error(Objects.isNull(islandsResponse) ? "Retrieve default islands null." : islandsResponse.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
@@ -501,7 +501,7 @@ public class IslandService {
 
         if (Objects.isNull(response)
                 || !response.hasStatus()) {
-            log.error(Objects.isNull(response) ? "Retrieve feed returned null." : response.toString());
+            log.error(Objects.isNull(response) ? "Retrieve island subscribe state returned null." : response.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
