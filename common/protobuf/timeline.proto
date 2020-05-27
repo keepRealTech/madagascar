@@ -13,15 +13,16 @@ message TimelineMessage {
 message RetrieveMultipleTimelinesRequest {
     string userId = 1;
     PageRequest pageRequest = 2;
+    uint64 createdAfter = 3;
 }
 
 message TimelinesResponse {
-  CommonStatus status = 1;
-  PageResponse pageResponse = 2;
-  repeated TimelineMessage timelines = 3;
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated TimelineMessage timelines = 3;
 }
 
 service FeedService {
-  rpc RetrieveMultipleTimelines (RetrieveMultipleTimelinesRequest) returns (TimelinesResponse) {};
+    rpc RetrieveMultipleTimelines (RetrieveMultipleTimelinesRequest) returns (TimelinesResponse) {};
 }
 
