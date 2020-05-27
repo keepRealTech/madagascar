@@ -271,6 +271,7 @@ public class IslandService {
                 .setId(id);
 
         if (!StringUtils.isEmpty(name)) {
+            name = name.trim();
             this.checkLength(name, NAME_LENGTH_THRESHOLD);
             requestBuilder.setName(StringValue.of(name));
         }

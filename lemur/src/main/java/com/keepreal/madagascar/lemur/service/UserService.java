@@ -107,6 +107,7 @@ public class UserService {
                 .setId(id);
 
         if (!StringUtils.isEmpty(name)) {
+            name = name.trim();
             checkLength(name, NAME_LENGTH_THRESHOLD);
             requestBuilder.setName(StringValue.of(name));
         }
