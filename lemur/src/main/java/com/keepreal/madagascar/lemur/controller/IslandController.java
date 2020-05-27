@@ -35,6 +35,7 @@ import swagger.model.BriefIslandsResponse;
 import swagger.model.CheckIslandDTO;
 import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
+import swagger.model.FeedsResponse;
 import swagger.model.IslandPosterResponse;
 import swagger.model.IslandProfileResponse;
 import swagger.model.IslandProfilesResponse;
@@ -75,16 +76,16 @@ public class IslandController implements IslandApi {
     /**
      * Constructs the island controller.
      *
-     * @param imageService          {@link ImageService}.
-     * @param islandService         {@link IslandService}.
-     * @param repostService         {@link RepostService}.
-     * @param islandDTOFactory      {@link IslandDTOFactory}.
-     * @param userService           {@link UserService}.
-     * @param userDTOFactory        {@link UserDTOFactory}.
-     * @param feedService           {@link FeedService}.
-     * @param feedDTOFactory        {@link FeedDTOFactory}.
-     * @param repostDTOFactory      {@link RepostDTOFactory}.
-     * @param generalConfiguration  {@link GeneralConfiguration}.
+     * @param imageService         {@link ImageService}.
+     * @param islandService        {@link IslandService}.
+     * @param repostService        {@link RepostService}.
+     * @param islandDTOFactory     {@link IslandDTOFactory}.
+     * @param userService          {@link UserService}.
+     * @param userDTOFactory       {@link UserDTOFactory}.
+     * @param feedService          {@link FeedService}.
+     * @param feedDTOFactory       {@link FeedDTOFactory}.
+     * @param repostDTOFactory     {@link RepostDTOFactory}.
+     * @param generalConfiguration {@link GeneralConfiguration}.
      */
     public IslandController(ImageService imageService,
                             IslandService islandService,
@@ -184,9 +185,9 @@ public class IslandController implements IslandApi {
     /**
      * Implements the get island poster by id api.
      *
-     * @param id Island id
-     * @param refererId  user id.
-     * @return  {@link IslandPosterResponse}.
+     * @param id        Island id
+     * @param refererId user id.
+     * @return {@link IslandPosterResponse}.
      */
     @Override
     public ResponseEntity<IslandPosterResponse> apiV1IslandsIdPosterGet(String id, @NotNull @Valid String refererId) {
@@ -275,7 +276,7 @@ public class IslandController implements IslandApi {
     /**
      * Implements the subscribe official island api.
      *
-     * @return  {@link IslandProfileResponse}.
+     * @return {@link IslandProfileResponse}.
      */
     @Override
     public ResponseEntity<IslandProfileResponse> apiV1IslandsSubscribeOfficialIslandPost() {
@@ -484,6 +485,37 @@ public class IslandController implements IslandApi {
     }
 
     /**
+     * Implements the get feeds api.
+     *
+     * @param id       id (required) Island id.
+     * @param fromHost (optional) Whether from host.
+     * @param page     page number (optional, default to 0).
+     * @param pageSize size of a page (optional, default to 10).
+     * @return {@link FeedsResponse}.
+     */
+    @Override
+    public ResponseEntity<FeedsResponse> apiV1IslandsIdFeedsGet(String id,
+                                                                Boolean fromHost,
+                                                                Integer page,
+                                                                Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
+                this.feedService.retrieveFeeds(id, fromHost, userId, page, pageSize);
+
+        FeedsResponse response = new FeedsResponse();
+        response.setData(feedsResponse.getFeedList()
+                .stream()
+                .map(this.feedDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setCurrentTime(System.currentTimeMillis());
+        response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Builds the {@link BriefIslandsResponse} from {@link IslandsResponse}.
      *
      * @param islandsResponse {@link IslandsResponse}.
@@ -505,9 +537,9 @@ public class IslandController implements IslandApi {
     /**
      * Cache the {@link PosterFeedDTO} by islandId.
      *
-     * @param islandId  island id.
-     * @param userId    user id.
-     * @return  {@link PosterFeedDTO}.
+     * @param islandId island id.
+     * @param userId   user id.
+     * @return {@link PosterFeedDTO}.
      */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
     private List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {

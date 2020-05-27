@@ -265,30 +265,39 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     public void updateIslandById(UpdateIslandByIdRequest request, StreamObserver<IslandResponse> responseObserver) {
         IslandInfo islandInfo = islandInfoService.findTopByIdAndDeletedIsFalse(request.getId());
         IslandResponse.Builder responseBuilder = IslandResponse.newBuilder();
-        if (islandInfo != null) {
-            if (request.hasName() && !islandInfoService.islandNameIsExisted(request.getName().getValue())) {
-                islandInfo.setIslandName(request.getName().getValue());
-            }
-            if (request.hasDescription()) {
-                islandInfo.setDescription(request.getDescription().getValue());
-            }
-            if (request.hasPortraitImageUri()) {
-                islandInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
-            }
-            if (request.hasSecret()) {
-                islandInfo.setSecret(request.getSecret().getValue());
-            }
-            IslandInfo save = islandInfoService.updateIsland(islandInfo);
-            IslandMessage islandMessage = islandInfoService.getIslandMessage(save);
-            responseBuilder.setIsland(islandMessage).setStatus(CommonStatusUtils.getSuccStatus());
-        } else {
+        if (Objects.isNull(islandInfo)) {
             log.error("[updateIslandById] island not found error! island id is [{}]", request.getId());
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+            return;
         }
 
-        IslandResponse islandResponse = responseBuilder.build();
-        responseObserver.onNext(islandResponse);
+        if (request.hasName()) {
+            if (islandInfoService.islandNameIsExisted(request.getName().getValue())) {
+                CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NAME_EXISTED_ERROR);
+                responseBuilder.setStatus(commonStatus);
+                responseObserver.onNext(responseBuilder.build());
+                responseObserver.onCompleted();
+                return;
+            }
+            islandInfo.setIslandName(request.getName().getValue());
+        }
+        if (request.hasDescription()) {
+            islandInfo.setDescription(request.getDescription().getValue());
+        }
+        if (request.hasPortraitImageUri()) {
+            islandInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
+        }
+        if (request.hasSecret()) {
+            islandInfo.setSecret(request.getSecret().getValue());
+        }
+
+        IslandInfo save = islandInfoService.updateIsland(islandInfo);
+        IslandMessage islandMessage = islandInfoService.getIslandMessage(save);
+        responseBuilder.setIsland(islandMessage).setStatus(CommonStatusUtils.getSuccStatus());
+        responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
 
