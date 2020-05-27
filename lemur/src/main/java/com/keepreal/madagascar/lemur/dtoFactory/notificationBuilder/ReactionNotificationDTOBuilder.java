@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
-import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.ReactionDTOFactory;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
