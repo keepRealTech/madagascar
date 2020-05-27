@@ -271,7 +271,7 @@ public class IslandService {
                 .setId(id);
 
         if (!StringUtils.isEmpty(name)) {
-            this.checkLength(name, NAME_LENGTH_THRESHOLD);
+            name = this.checkLength(name, NAME_LENGTH_THRESHOLD);
             requestBuilder.setName(StringValue.of(name));
         }
 
@@ -280,12 +280,12 @@ public class IslandService {
         }
 
         if (!StringUtils.isEmpty(secret)) {
-            this.checkLength(secret, NAME_LENGTH_THRESHOLD);
+            secret = this.checkLength(secret, NAME_LENGTH_THRESHOLD);
             requestBuilder.setSecret(StringValue.of(secret));
         }
 
         if (!StringUtils.isEmpty(description)) {
-            this.checkLength(description, DESCRIPTION_LENGTH_THRESHOLD);
+            description = this.checkLength(description, DESCRIPTION_LENGTH_THRESHOLD);
             requestBuilder.setDescription(StringValue.of(description));
         }
 
@@ -512,8 +512,10 @@ public class IslandService {
         return response.getStateMapMap();
     }
 
-    private void checkLength(String str, int threshold) {
-        if (str.length() > threshold)
+    private String checkLength(String str, int threshold) {
+        String trimmed = str.trim();
+        if (trimmed.length() > threshold)
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        return trimmed;
     }
 }
