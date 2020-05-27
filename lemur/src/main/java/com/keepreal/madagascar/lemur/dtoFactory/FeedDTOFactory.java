@@ -14,6 +14,9 @@ import swagger.model.FeedDTO;
 import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -130,6 +133,7 @@ public class FeedDTOFactory {
 
         IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
         UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+        Map<String, Boolean> stateMap = islandService.retrieveIslandSubscribeStateByUserId(feed.getUserId(), Collections.singletonList(feed.getIslandId()));
 
         SnapshotFeedDTO snapshotFeedDTO = new SnapshotFeedDTO();
         snapshotFeedDTO.setId(feed.getId());
@@ -141,6 +145,8 @@ public class FeedDTOFactory {
 
         snapshotFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
         snapshotFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
+        Boolean isSubscribed = stateMap.get(feed.getIslandId());
+        snapshotFeedDTO.setIsSubscribed(isSubscribed == null ?  false : isSubscribed);
 
         return snapshotFeedDTO;
     }

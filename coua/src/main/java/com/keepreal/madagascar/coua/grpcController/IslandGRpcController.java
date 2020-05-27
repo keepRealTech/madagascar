@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.coua.grpcController;
 
+import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.IslandMessage;
@@ -24,6 +25,8 @@ import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandProfileByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveMultipleIslandsRequest;
+import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateRequest;
+import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateResponse;
 import com.keepreal.madagascar.coua.SubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.SubscribeIslandResponse;
 import com.keepreal.madagascar.coua.UnsubscribeIslandByIdRequest;
@@ -470,6 +473,22 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         builder.addAllIslands(islandInfoList.stream().map(islandInfoService::getIslandMessage).filter(Objects::nonNull).collect(Collectors.toList()));
         builder.setStatus(CommonStatusUtils.getSuccStatus());
         responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveUserSubscriptionState(RetrieveUserSubscriptionStateRequest request, StreamObserver<RetrieveUserSubscriptionStateResponse> responseObserver) {
+        String userId = request.getUserId();
+        ProtocolStringList islandIdsList = request.getIslandIdsList();
+        Map<String, Boolean> stateMap = new HashMap<>();
+        islandIdsList.forEach(id -> stateMap.put(id, false));
+        List<String> islandIdList = subscriptionService.getSubscribeIslandIdByUserId(userId, islandIdsList);
+        islandIdList.forEach(id -> stateMap.put(id, true));
+        RetrieveUserSubscriptionStateResponse response = RetrieveUserSubscriptionStateResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .putAllStateMap(stateMap)
+                .build();
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 }

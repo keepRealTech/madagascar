@@ -245,6 +245,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         builder.islandId(request.getIslandId());
         builder.userId(request.getUserId());
         builder.hostId(request.getHostId());
+        builder.fromHost(request.getUserId().equals(request.getHostId()));
         builder.text(text);
         builder.createdTime(System.currentTimeMillis());
         feedInfoService.insert(builder.build());
