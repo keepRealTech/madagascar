@@ -28,6 +28,7 @@ import java.util.Objects;
 public class ConfigurationController implements ConfigApi {
 
     private Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
+    private Map<String, Boolean> androidChannelMap = new HashMap<>();
     private Map<Integer, UpdateInfoDTO> iOSUpdateInfoMap = new HashMap<>();
     private Map<Integer, UpdateInfoDTO> androidUpdateInfoMap = new HashMap<>();
     private final SetupInfoDTO setupInfoDTO;
@@ -36,6 +37,16 @@ public class ConfigurationController implements ConfigApi {
         this.setupInfoDTO = new SetupInfoDTO();
         this.setupInfoDTO.setVerion(androidClientConfiguration.getSetup().getVersion());
         this.setupInfoDTO.setAddress(androidClientConfiguration.getSetup().getAddress());
+        this.androidChannelMap.put("a360", true);
+        this.androidChannelMap.put("oppo", true);
+        this.androidChannelMap.put("vivo", true);
+        this.androidChannelMap.put("xiaomi", true);
+        this.androidChannelMap.put("huawei", true);
+        this.androidChannelMap.put("baidu", true);
+        this.androidChannelMap.put("wandoujia", true);
+        this.androidChannelMap.put("yingyongbao", true);
+        this.androidChannelMap.put("lianxiang", true);
+        this.androidChannelMap.put("kr", true);
 
         this.iOSConfigVersionMap.put(
                 100, this.createIOSConfigurationDTO(10,100,10,5,10,1000, true));
@@ -44,7 +55,7 @@ public class ConfigurationController implements ConfigApi {
         updateInfoDTO.address("https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk");
         updateInfoDTO.currentVersion(1);
         updateInfoDTO.nextVersion(2);
-        updateInfoDTO.isLatest(false);
+        updateInfoDTO.isLatest(true);
         updateInfoDTO.message("first version");
         updateInfoDTO.shouldForce(false);
         this.iOSUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
@@ -59,12 +70,15 @@ public class ConfigurationController implements ConfigApi {
      */
     @Cacheable(value = "config")
     @Override
-    public ResponseEntity<ConfigurationResponse> apiV1ConfigsGet(ConfigType configType, Integer version) {
+    public ResponseEntity<ConfigurationResponse> apiV1ConfigsGet(ConfigType configType, Integer version, String channel) {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
         switch (configType) {
             case IOS:
                 configurationDTO = this.iOSConfigVersionMap.get(version);
+                break;
             case ANDROID:
+                configurationDTO = this.createAndroidConfigurationDTO(channel);
+                break;
             default:
         }
 
@@ -161,6 +175,12 @@ public class ConfigurationController implements ConfigApi {
         configurationDTO.setIslandCheckInterval(islandCheckInterval);
         configurationDTO.setConfigTimeout(configTimeout);
         configurationDTO.setAudit(audit);
+        return configurationDTO;
+    }
+
+    private ConfigurationDTO createAndroidConfigurationDTO(String channel) {
+        ConfigurationDTO configurationDTO = new ConfigurationDTO();
+        configurationDTO.setIsAccountLogin(androidChannelMap.get(channel) == null ? false : androidChannelMap.get(channel));
         return configurationDTO;
     }
 }
