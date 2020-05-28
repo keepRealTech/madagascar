@@ -53,6 +53,8 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
+            - name: CLIENT_ANDROID_SETUP_ADDRESS
+              value: {{ .Values.client.android.setup.address }}
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}

@@ -56,7 +56,7 @@ client:
   android:
     setup:
       version: 1
-      address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
+      address: http://images.keepreal.cn/tiaodao_v100_kr.apk
     androidChannelMap:
       a360: true
       oppo: false
