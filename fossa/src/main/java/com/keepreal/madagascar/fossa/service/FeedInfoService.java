@@ -180,4 +180,15 @@ public class FeedInfoService {
     public void insert(FeedInfo feedInfo) {
         feedInfoRepository.insert(feedInfo);
     }
+
+    /**
+     * Retrieves a list of feeds by ids.
+     *
+     * @param ids Feed ids.
+     * @return List of {@link FeedInfo}.
+     */
+    public List<FeedInfo> findByIds(Iterable<String> ids) {
+        return this.feedInfoRepository.findAllByIdsAndDeletedIsFalse(ids);
+    }
+
 }

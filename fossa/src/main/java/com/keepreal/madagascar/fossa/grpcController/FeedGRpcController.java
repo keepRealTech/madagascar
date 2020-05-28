@@ -42,8 +42,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-
 /**
  * Represents the feed GRpc controller.
  */
@@ -268,6 +266,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      */
     @Override
     public void retrieveFeedsByIds(RetrieveFeedsByIdsRequest request, StreamObserver<FeedsResponse> responseObserver) {
+        this.feedInfoService.findByIds()
     }
 
 }

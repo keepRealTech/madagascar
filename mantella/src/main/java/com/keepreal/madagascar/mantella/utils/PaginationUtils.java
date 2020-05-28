@@ -31,4 +31,18 @@ public class PaginationUtils {
                 PaginationUtils.DEFAULT_SORT);
     }
 
+    /**
+     * Constructs a {@link com.keepreal.madagascar.common.PageRequest}.
+     *
+     * @param page     Page index.
+     * @param pageSize Page size.
+     * @return {@link com.keepreal.madagascar.common.PageRequest}.
+     */
+    public static com.keepreal.madagascar.common.PageRequest buildPageRequest(int page, int pageSize) {
+        return com.keepreal.madagascar.common.PageRequest.newBuilder()
+                .setPage(page)
+                .setPageSize(pageSize)
+                .build();
+    }
+
 }
