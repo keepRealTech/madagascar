@@ -17,6 +17,7 @@ import com.keepreal.madagascar.fossa.NewFeedsRequest;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveLatestFeedByUserIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
@@ -40,6 +41,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static io.grpc.stub.ClientCalls.asyncUnaryCall;
 
 /**
  * Represents the feed GRpc controller.
@@ -256,4 +259,15 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    /**
+     * Implements the feeds retrieve by ids method.
+     *
+     * @param request           {@link RetrieveFeedsByIdsRequest}.
+     * @param responseObserver  {@link RetrieveFeedsByIdsRequest} Callback.
+     */
+    @Override
+    public void retrieveFeedsByIds(RetrieveFeedsByIdsRequest request, StreamObserver<FeedsResponse> responseObserver) {
+    }
+
 }
