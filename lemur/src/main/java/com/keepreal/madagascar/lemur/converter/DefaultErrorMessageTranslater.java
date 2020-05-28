@@ -34,6 +34,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "你已不在岛内，请先登岛";
             case REQUEST_GRPC_LOGIN_FROZEN:
                 return "登陆失败，你的账号被暂时锁定";
+            case REQUEST_FEED_NOT_FOUND_ERROR:
+                return "该动态已被删除";
             default:
                 return errorCode.getValueDescriptor().getName();
         }
