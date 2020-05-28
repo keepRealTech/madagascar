@@ -413,9 +413,7 @@ paths:
   /api/v1/feeds:
     get:
       parameters:
-        - $ref: '#/components/parameters/islandidInPath'
-        - $ref: '#/components/parameters/fromHostInQuery'
-        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/timestampAfter'
         - $ref: '#/components/parameters/pageSize'
       tags:
         - Feed
@@ -704,6 +702,15 @@ components:
       required: true
       schema:
         type: string
+    timestampAfter:
+      in: query
+      name: minTimestamp
+      description: timestamp after
+      required: false
+      schema:
+        type: integer
+        format: int64
+        default: 0
     page:
       in: query
       name: page

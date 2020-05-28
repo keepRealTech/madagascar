@@ -21,6 +21,7 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -201,14 +202,59 @@ public class FeedService {
      * @param pageSize Page size.
      * @return {@link FeedsResponse}.
      */
-    public FeedsResponse retrieveFeeds(String islandId, Boolean fromHost, String userId, int page, int pageSize) {
+    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, int page, int pageSize) {
+        Assert.hasText(islandId, "Island id is null.");
+
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
 
         QueryFeedCondition.Builder conditionBuilder = QueryFeedCondition.newBuilder();
+        conditionBuilder.setIslandId(StringValue.of(islandId));
 
-        if (!StringUtils.isEmpty(islandId)) {
-            conditionBuilder.setIslandId(StringValue.of(islandId));
+        if (Objects.nonNull(fromHost)) {
+            conditionBuilder.setFromHost(BoolValue.of(fromHost));
         }
+
+        RetrieveMultipleFeedsRequest request = RetrieveMultipleFeedsRequest.newBuilder()
+                .setCondition(conditionBuilder.build())
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                .setUserId(userId)
+                .build();
+
+        FeedsResponse feedsResponse;
+        try {
+            feedsResponse = stub.retrieveMultipleFeeds(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(feedsResponse)
+                || !feedsResponse.hasStatus()) {
+            log.error(Objects.isNull(feedsResponse) ? "Retrieve feeds returned null." : feedsResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != feedsResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(feedsResponse.getStatus());
+        }
+
+        return feedsResponse;
+    }
+
+    /**
+     * Retrieves feeds.
+     *
+     * @param userId   User id.
+     * @param timestampAfter Timestamp filter.
+     * @param pageSize Page size.
+     * @return {@link FeedsResponse}.
+     */
+    public FeedsResponse retrieveUserFeeds(String userId, long timestampAfter , int pageSize) {
+        Assert.hasText(userId, "User id is null.");
+
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
+
+        QueryFeedCondition.Builder conditionBuilder = QueryFeedCondition.newBuilder();
+        conditionBuilder.setIslandId(StringValue.of(islandId));
 
         if (Objects.nonNull(fromHost)) {
             conditionBuilder.setFromHost(BoolValue.of(fromHost));

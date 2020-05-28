@@ -500,7 +500,7 @@ public class IslandController implements IslandApi {
                                                                 Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveFeeds(id, fromHost, userId, page, pageSize);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, page, pageSize);
 
         FeedsResponse response = new FeedsResponse();
         response.setData(feedsResponse.getFeedList()
@@ -543,7 +543,7 @@ public class IslandController implements IslandApi {
      */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
     private List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
-        return feedService.retrieveFeeds(islandId, null, userId, 0, 5)
+        return feedService.retrieveIslandFeeds(islandId, null, userId, 0, 5)
                 .getFeedList()
                 .stream()
                 .map(feedDTOFactory::posterValueOf)

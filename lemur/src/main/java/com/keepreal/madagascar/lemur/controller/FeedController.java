@@ -201,20 +201,16 @@ public class FeedController implements FeedApi {
     /**
      * Implements the get feeds api.
      *
-     * @param islandId island id (optional) Island id.
-     * @param fromHost (optional) Whether from host.
-     * @param page     page number (optional, default to 0).
-     * @param pageSize size of a page (optional, default to 10).
+     * @param minTimestamp (optional, default to 0) minimal feed created timestamp.
+     * @param pageSize     (optional, default to 10) size of a page .
      * @return {@link FeedsResponse}.
      */
     @Override
-    public ResponseEntity<FeedsResponse> apiV1FeedsGet(String islandId,
-                                                       Boolean fromHost,
-                                                       Integer page,
+    public ResponseEntity<FeedsResponse> apiV1FeedsGet(Long minTimestamp,
                                                        Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveFeeds(islandId, fromHost, userId, page, pageSize);
+                this.feedService.retrieveUserFeeds(userId, minTimestamp, pageSize);
 
         FeedsResponse response = new FeedsResponse();
         response.setData(feedsResponse.getFeedList()
