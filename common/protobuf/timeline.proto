@@ -22,7 +22,7 @@ message TimelinesResponse {
     repeated TimelineMessage timelines = 3;
 }
 
-service FeedService {
+service TimelineService {
     rpc RetrieveMultipleTimelines (RetrieveMultipleTimelinesRequest) returns (TimelinesResponse) {};
 }
 

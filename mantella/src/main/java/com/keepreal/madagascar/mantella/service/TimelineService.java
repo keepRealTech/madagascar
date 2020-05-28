@@ -5,6 +5,7 @@ import com.keepreal.madagascar.mantella.model.Timeline;
 import com.keepreal.madagascar.mantella.repository.TimelineRepository;
 import com.keepreal.madagascar.mantella.service.distributor.FeedDistributor;
 import com.keepreal.madagascar.mantella.storage.TimelineStorage;
+import com.keepreal.madagascar.mantella.utils.PaginationUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -74,6 +75,20 @@ public class TimelineService {
      */
     public Mono<Boolean> hasConsumed(String feedId) {
         return this.timelineRepository.existsByFeedId(feedId);
+    }
+
+    /**
+     * Retrieves the timelines by user id with pagination.
+     *
+     * @param userId         User id.
+     * @param startTimestamp Timestamp.
+     * @param pageSize       The chunk size.
+     * @return A flux of {@link Timeline}.
+     */
+    public Flux<Timeline> retrieveByUserIdAndCreatedTimestampAfter(String userId, long startTimestamp, int pageSize) {
+        return this.timelineRepository
+                .findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsTrue(
+                        userId, startTimestamp, PaginationUtils.defaultTimelinePageRequest(pageSize));
     }
 
 }
