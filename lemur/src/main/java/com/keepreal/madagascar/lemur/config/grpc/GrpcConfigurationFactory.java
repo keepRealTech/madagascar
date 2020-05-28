@@ -65,4 +65,15 @@ public class GrpcConfigurationFactory {
         return new GrpcConfiguration();
     }
 
+    /**
+     * Represents configurations for mantella.
+     *
+     * @return Grpc configuration.
+     */
+    @Bean(name = "mantellaConfiguration")
+    @ConfigurationProperties(prefix = "grpc.mantella", ignoreUnknownFields = false)
+    public GrpcConfiguration mantellaConfiguration() {
+        return new GrpcConfiguration();
+    }
+
 }

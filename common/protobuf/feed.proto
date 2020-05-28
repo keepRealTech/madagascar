@@ -29,6 +29,11 @@ message RetrieveFeedByIdRequest {
     bool includeDeleted = 3;
 }
 
+message RetrieveFeedsByIdsRequest {
+    repeated string ids = 1;
+    string userId = 2;
+}
+
 message RetrieveMultipleFeedsRequest {
     QueryFeedCondition condition = 1;
     PageRequest pageRequest = 2;
@@ -73,6 +78,7 @@ service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
+    rpc RetrieveFeedsByIds (RetrieveFeedsByIdsRequest) returns (FeedsResponse) {};
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
     rpc RetrieveLatestFeedByUserId (RetrieveLatestFeedByUserIdRequest) returns (FeedResponse) {}
     rpc CreateDefaultFeed (CreateDefaultFeedRequest) returns (CreateDefaultFeedResponse) {}

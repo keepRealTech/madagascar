@@ -18,8 +18,7 @@ message RetrieveMultipleTimelinesRequest {
 
 message TimelinesResponse {
     CommonStatus status = 1;
-    PageResponse pageResponse = 2;
-    repeated TimelineMessage timelines = 3;
+    repeated TimelineMessage timelines = 2;
 }
 
 service TimelineService {
