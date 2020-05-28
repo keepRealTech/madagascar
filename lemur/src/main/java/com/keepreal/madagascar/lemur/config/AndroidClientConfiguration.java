@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import swagger.model.UpdateInfoDTO;
 
 import java.util.Map;
 
@@ -16,6 +17,7 @@ public class AndroidClientConfiguration {
 
     private SetupInfo setup;
     private Map<String, Boolean> androidChannelMap;
+    private UpdateInfoDTO updateInfoDTO;
 
     @Data
     public static class SetupInfo {

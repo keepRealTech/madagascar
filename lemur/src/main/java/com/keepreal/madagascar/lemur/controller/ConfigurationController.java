@@ -44,15 +44,10 @@ public class ConfigurationController implements ConfigApi {
         this.iOSConfigVersionMap.put(
                 100, this.createIOSConfigurationDTO(10,100,10,5,10,1000, true));
 
-        UpdateInfoDTO updateInfoDTO = new UpdateInfoDTO();
-        updateInfoDTO.address(generalConfiguration.getAddress());
+        UpdateInfoDTO updateInfoDTO = androidClientConfiguration.getUpdateInfoDTO();
         Integer currentVersion = generalConfiguration.getCurrentVersion();
         Integer nextVersion = generalConfiguration.getNextVersion();
-        updateInfoDTO.currentVersion(currentVersion);
-        updateInfoDTO.nextVersion(nextVersion);
         updateInfoDTO.isLatest(currentVersion.equals(nextVersion));
-        updateInfoDTO.message(generalConfiguration.getMessage());
-        updateInfoDTO.shouldForce(generalConfiguration.getShouldForce());
         this.iOSUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
         this.androidUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
     }

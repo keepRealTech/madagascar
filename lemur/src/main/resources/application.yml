@@ -65,11 +65,6 @@ general:
   singleOfficialIslandId: "6668436831391973376"
   officialIslandIdList:
     - "6668436831391973376"
-  currentVersion: 1
-  nextVersion: 1
-  address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
-  message: first version
-  shouldForce: false
 
 client:
   android:
@@ -87,3 +82,9 @@ client:
       yingyongbao: true
       lianxiang: true
       kr: true
+    updateInfoDTO:
+      currentVersion: 1
+      nextVersion: 1
+      address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
+      message: first version
+      shouldForce: false
