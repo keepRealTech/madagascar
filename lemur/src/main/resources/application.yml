@@ -82,7 +82,7 @@ client:
       yingyongbao: true
       lianxiang: true
       kr: true
-    updateInfoDTO:
+    updateInfo:
       currentVersion: 1
       nextVersion: 1
       address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk

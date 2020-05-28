@@ -17,7 +17,7 @@ public class AndroidClientConfiguration {
 
     private SetupInfo setup;
     private Map<String, Boolean> androidChannelMap;
-    private UpdateInfoDTO updateInfoDTO;
+    private UpdateInfoDTO updateInfo;
 
     @Data
     public static class SetupInfo {

@@ -15,9 +15,4 @@ import java.util.List;
 public class GeneralConfiguration {
     private String singleOfficialIslandId;
     private List<String> officialIslandIdList;
-    private Integer currentVersion;
-    private Integer nextVersion;
-    private String address;
-    private String message;
-    private Boolean shouldForce;
 }

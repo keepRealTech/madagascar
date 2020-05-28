@@ -3,7 +3,6 @@ package com.keepreal.madagascar.lemur.controller;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.AndroidClientConfiguration;
-import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +27,11 @@ import java.util.Objects;
 @RestController
 public class ConfigurationController implements ConfigApi {
 
-    private Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
-    private Map<String, Boolean> androidChannelMap;
-    private Map<Integer, UpdateInfoDTO> iOSUpdateInfoMap = new HashMap<>();
-    private Map<Integer, UpdateInfoDTO> androidUpdateInfoMap = new HashMap<>();
     private final SetupInfoDTO setupInfoDTO;
+    private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
+    private final Map<String, Boolean> androidChannelMap;
+    private final Map<Integer, UpdateInfoDTO> iOSUpdateInfoMap = new HashMap<>();
+    private final Map<Integer, UpdateInfoDTO> androidUpdateInfoMap = new HashMap<>();
 
     public ConfigurationController(AndroidClientConfiguration androidClientConfiguration) {
         this.setupInfoDTO = new SetupInfoDTO();
@@ -41,20 +40,20 @@ public class ConfigurationController implements ConfigApi {
         this.androidChannelMap = androidClientConfiguration.getAndroidChannelMap();
 
         this.iOSConfigVersionMap.put(
-                100, this.createIOSConfigurationDTO(10,100,10,5,10,1000, true));
+                100, this.createIOSConfigurationDTO(10, 100, 10, 5, 10, 1000, true));
 
-        UpdateInfoDTO updateInfoDTO = androidClientConfiguration.getUpdateInfoDTO();
-        Integer currentVersion = updateInfoDTO.getCurrentVersion();
-        Integer nextVersion = updateInfoDTO.getNextVersion();
-        updateInfoDTO.isLatest(currentVersion.equals(nextVersion));
-        this.iOSUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
-        this.androidUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
+        UpdateInfoDTO androidUpdateInfoDTO = androidClientConfiguration.getUpdateInfo();
+        Integer currentVersion = androidUpdateInfoDTO.getCurrentVersion();
+        Integer nextVersion = androidUpdateInfoDTO.getNextVersion();
+        androidUpdateInfoDTO.isLatest(currentVersion.equals(nextVersion));
+        this.iOSUpdateInfoMap.put(androidUpdateInfoDTO.getCurrentVersion(), androidUpdateInfoDTO);
+        this.androidUpdateInfoMap.put(androidUpdateInfoDTO.getCurrentVersion(), androidUpdateInfoDTO);
     }
 
     /**
      * Implements the get configuration api.
      *
-     * @param configType  (required) {@link ConfigType}.
+     * @param configType (required) {@link ConfigType}.
      * @return {@link ConfigurationResponse}.
      */
     @Cacheable(value = "config")
@@ -85,7 +84,7 @@ public class ConfigurationController implements ConfigApi {
     /**
      * Implements the android update info get api.
      *
-     * @param version  (required).
+     * @param version (required).
      * @return {@link AndroidUpdateInfoResponse}.
      */
     @Override
@@ -105,7 +104,7 @@ public class ConfigurationController implements ConfigApi {
     /**
      * Implements the ios update info get api.
      *
-     * @param version  (required).
+     * @param version (required).
      * @return {@link IOSUpdateInfoResponse}.
      */
     @Override
@@ -150,12 +149,12 @@ public class ConfigurationController implements ConfigApi {
      * @return {@link ConfigurationDTO}
      */
     private ConfigurationDTO createIOSConfigurationDTO(Integer islandFeedLoopInterval,
-                                                              Integer myIslandsPageSize,
-                                                              Integer messageLoopInterval,
-                                                              Integer guestPageSize,
-                                                              Integer islandCheckInterval,
-                                                              Integer configTimeout,
-                                                              Boolean audit) {
+                                                       Integer myIslandsPageSize,
+                                                       Integer messageLoopInterval,
+                                                       Integer guestPageSize,
+                                                       Integer islandCheckInterval,
+                                                       Integer configTimeout,
+                                                       Boolean audit) {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
         configurationDTO.setIslandFeedLoopInterval(islandFeedLoopInterval);
         configurationDTO.setMyIslandsPageSize(myIslandsPageSize);
@@ -172,4 +171,5 @@ public class ConfigurationController implements ConfigApi {
         configurationDTO.setIsAccountLogin(androidChannelMap.get(channel) == null ? false : androidChannelMap.get(channel));
         return configurationDTO;
     }
+
 }
