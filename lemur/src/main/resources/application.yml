@@ -36,9 +36,7 @@ security:
     client:
       client-id: lemur
       client-secret: secret
-    resource:
-      jwt:
-        key-value: thisisatopsecret
+      token-info-uri: http://baobob:12001/oauth/check_token
     basic:
       enabled: false
 
