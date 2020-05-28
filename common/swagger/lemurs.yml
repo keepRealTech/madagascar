@@ -638,6 +638,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/configTypeInQuery'
         - $ref: '#/components/parameters/versionInQuery'
+        - $ref: '#/components/parameters/channelInQuery'
       tags:
         - Config
       summary: retrieves the client config info
@@ -788,6 +789,12 @@ components:
       required: true
       schema:
         type: integer
+    channelInQuery:
+      in: query
+      name: channel
+      required: false
+      schema:
+        type: string
     refererIdInQuery:
       in: query
       name: refererId
@@ -1624,6 +1631,8 @@ components:
       type: object
       properties:
         audit:
+          type: boolean
+        isAccountLogin:
           type: boolean
     ConfigurationDTO:
       oneOf:
