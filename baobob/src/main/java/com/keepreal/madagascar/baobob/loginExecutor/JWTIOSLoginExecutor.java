@@ -65,6 +65,9 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
         return this.loginIOS(loginRequest.getJwtIsoLoginPayload().getIdentifyToken())
                 .flatMap(this::retrieveOrCreateUserByUnionId)
                 .map(this.tokenGranter::grant)
+                .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
+                                && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_GRPC_LOGIN_FROZEN,
+                        this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN))
                 .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
     }
 
@@ -76,13 +79,12 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
      */
     private Mono<UserMessage> retrieveOrCreateUserByUnionId(IOSLoginInfo iosLoginInfo) {
         return this.userService.retrieveUserByUnionIdMono(iosLoginInfo.getUnionId())
-                .handle((userMessage, sink) -> {
+                .map(userMessage -> {
                     if (userMessage.getLocked()) {
-                        sink.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN));
+                        throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
                     }
-                    sink.next(userMessage);
+                    return userMessage;
                 })
-                .map(object -> (UserMessage) object)
                 .switchIfEmpty(this.createNewUserFromIOS(iosLoginInfo));
     }
 

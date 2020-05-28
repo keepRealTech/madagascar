@@ -70,6 +70,9 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
                 .flatMap(this::retrieveOrCreateUserByUnionId)
                 .map(this.tokenGranter::grant)
                 .doOnError(error -> log.error(error.toString()))
+                .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
+                                && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_GRPC_LOGIN_FROZEN,
+                        this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN))
                 .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
     }
 
@@ -81,13 +84,12 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
      */
     private Mono<UserMessage> retrieveOrCreateUserByUnionId(WechatLoginInfo wechatLoginInfo) {
         return this.userService.retrieveUserByUnionIdMono(wechatLoginInfo.getUnionId())
-                .handle((userMessage, sink) -> {
+                .map(userMessage -> {
                     if (userMessage.getLocked()) {
-                        sink.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN));
+                        throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
                     }
-                    sink.next(userMessage);
+                    return userMessage;
                 })
-                .map(object -> (UserMessage) object)
                 .switchIfEmpty(this.createNewUserFromWechat(wechatLoginInfo));
     }
 
