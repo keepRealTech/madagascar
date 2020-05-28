@@ -15,16 +15,10 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Base64;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.math.BigInteger;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.RSAPublicKeySpec;
 import java.util.HashMap;
 
 /**
@@ -129,11 +123,11 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
                 .bodyToMono(String.class)
                 .map(response -> this.gson.fromJson(response, HashMap.class))
                 .filter(map -> map.get("errcode") == null)
-                .map(hashMap ->  WechatLoginInfo.builder()
-                                .accessToken(String.valueOf(hashMap.get("access_token")))
-                                .openId(String.valueOf(hashMap.get("openid")))
-                                .unionId(String.valueOf(hashMap.get("unionid")))
-                                .build())
+                .map(hashMap -> WechatLoginInfo.builder()
+                        .accessToken(String.valueOf(hashMap.get("access_token")))
+                        .openId(String.valueOf(hashMap.get("openid")))
+                        .unionId(String.valueOf(hashMap.get("unionid")))
+                        .build())
                 .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)));
     }
 
