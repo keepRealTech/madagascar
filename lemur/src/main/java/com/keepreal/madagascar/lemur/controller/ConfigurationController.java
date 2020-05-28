@@ -34,8 +34,7 @@ public class ConfigurationController implements ConfigApi {
     private Map<Integer, UpdateInfoDTO> androidUpdateInfoMap = new HashMap<>();
     private final SetupInfoDTO setupInfoDTO;
 
-    public ConfigurationController(AndroidClientConfiguration androidClientConfiguration,
-                                   GeneralConfiguration generalConfiguration) {
+    public ConfigurationController(AndroidClientConfiguration androidClientConfiguration) {
         this.setupInfoDTO = new SetupInfoDTO();
         this.setupInfoDTO.setVerion(androidClientConfiguration.getSetup().getVersion());
         this.setupInfoDTO.setAddress(androidClientConfiguration.getSetup().getAddress());
@@ -45,8 +44,8 @@ public class ConfigurationController implements ConfigApi {
                 100, this.createIOSConfigurationDTO(10,100,10,5,10,1000, true));
 
         UpdateInfoDTO updateInfoDTO = androidClientConfiguration.getUpdateInfoDTO();
-        Integer currentVersion = generalConfiguration.getCurrentVersion();
-        Integer nextVersion = generalConfiguration.getNextVersion();
+        Integer currentVersion = updateInfoDTO.getCurrentVersion();
+        Integer nextVersion = updateInfoDTO.getNextVersion();
         updateInfoDTO.isLatest(currentVersion.equals(nextVersion));
         this.iOSUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
         this.androidUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
