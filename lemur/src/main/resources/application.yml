@@ -79,7 +79,7 @@ client:
     androidChannelMap:
       a360: true
       oppo: true
-      vivo: true
+      vivo: false
       xiaomi: true
       huawei: true
       baidu: true
