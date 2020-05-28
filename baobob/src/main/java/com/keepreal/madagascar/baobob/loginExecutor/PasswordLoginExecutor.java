@@ -8,13 +8,14 @@ import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 /**
  * Represents a login executor working with user combination.
  */
+@Slf4j
 public class PasswordLoginExecutor implements LoginExecutor {
 
     private static final String DUMMY_USER_ID = "0";
@@ -53,6 +54,9 @@ public class PasswordLoginExecutor implements LoginExecutor {
         return this.loginWithUserCombination(
                 loginRequest.getPasswordPayload().getUsername(), loginRequest.getPasswordPayload().getPassword())
                 .map(this.tokenGranter::grant)
+                .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
+                                && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_GRPC_LOGIN_FROZEN,
+                        this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN))
                 .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
     }
 
@@ -66,6 +70,12 @@ public class PasswordLoginExecutor implements LoginExecutor {
     @SuppressWarnings("unchecked")
     private Mono<UserMessage> loginWithUserCombination(String username, String password) {
         return this.userService.retrieveUserByUsernameMono(username)
+                .map(userMessage -> {
+                    if (userMessage.getLocked()) {
+                        throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
+                    }
+                    return userMessage;
+                })
                 .filter(userMessage -> this.encoder.matches(password, userMessage.getPassword()))
                 .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)));
     }

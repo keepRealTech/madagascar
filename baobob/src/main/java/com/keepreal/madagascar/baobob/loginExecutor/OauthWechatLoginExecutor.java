@@ -70,6 +70,9 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
                 .flatMap(this::retrieveOrCreateUserByUnionId)
                 .map(this.tokenGranter::grant)
                 .doOnError(error -> log.error(error.toString()))
+                .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
+                                && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_GRPC_LOGIN_FROZEN,
+                        this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN))
                 .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
     }
 
@@ -81,6 +84,12 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
      */
     private Mono<UserMessage> retrieveOrCreateUserByUnionId(WechatLoginInfo wechatLoginInfo) {
         return this.userService.retrieveUserByUnionIdMono(wechatLoginInfo.getUnionId())
+                .map(userMessage -> {
+                    if (userMessage.getLocked()) {
+                        throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
+                    }
+                    return userMessage;
+                })
                 .switchIfEmpty(this.createNewUserFromWechat(wechatLoginInfo));
     }
 
@@ -116,11 +125,11 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
                 .bodyToMono(String.class)
                 .map(response -> this.gson.fromJson(response, HashMap.class))
                 .filter(map -> map.get("errcode") == null)
-                .map(hashMap ->  WechatLoginInfo.builder()
-                                .accessToken(String.valueOf(hashMap.get("access_token")))
-                                .openId(String.valueOf(hashMap.get("openid")))
-                                .unionId(String.valueOf(hashMap.get("unionid")))
-                                .build())
+                .map(hashMap -> WechatLoginInfo.builder()
+                        .accessToken(String.valueOf(hashMap.get("access_token")))
+                        .openId(String.valueOf(hashMap.get("openid")))
+                        .unionId(String.valueOf(hashMap.get("unionid")))
+                        .build())
                 .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)));
     }
 

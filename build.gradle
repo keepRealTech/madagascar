@@ -15,11 +15,11 @@ allprojects {
     }
 }
 
-ext['baobob.version'] = '1.0.0'
+ext['baobob.version'] = '1.0.1'
 ext['indri.version'] = '1.0.0'
-ext['coua.version'] = '1.0.0'
+ext['coua.version'] = '1.0.1'
 ext['fossa.version'] = '1.0.0'
-ext['lemur.version'] = '1.0.0'
+ext['lemur.version'] = '1.0.1'
 ext['tenrecs.version'] = '1.0.0'
 ext['brookesia.version'] = '1.0.0'
 
