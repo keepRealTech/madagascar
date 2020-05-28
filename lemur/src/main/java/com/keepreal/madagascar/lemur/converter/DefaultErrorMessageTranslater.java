@@ -2,6 +2,8 @@ package com.keepreal.madagascar.lemur.converter;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 
+import static com.keepreal.madagascar.common.exceptions.ErrorCode.REQUEST_GRPC_LOGIN_FROZEN;
+
 /**
  * Represents a default implementation for error message translator.
  */
@@ -30,6 +32,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "单动态图片数量过大";
             case REQUEST_ISLAND_NOT_FOUND_ERROR:
                 return "你已不在岛内，请先登岛";
+            case REQUEST_GRPC_LOGIN_FROZEN:
+                return "登陆失败，您的账号被暂时锁定";
             default:
                 return errorCode.getValueDescriptor().getName();
         }

@@ -66,6 +66,13 @@ public class PasswordLoginExecutor implements LoginExecutor {
     @SuppressWarnings("unchecked")
     private Mono<UserMessage> loginWithUserCombination(String username, String password) {
         return this.userService.retrieveUserByUsernameMono(username)
+                .handle((userMessage, sink) -> {
+                    if (userMessage.getLocked()) {
+                        sink.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN));
+                    }
+                    sink.next(userMessage);
+                })
+                .map(object -> (UserMessage) object)
                 .filter(userMessage -> this.encoder.matches(password, userMessage.getPassword()))
                 .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)));
     }

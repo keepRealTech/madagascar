@@ -76,6 +76,13 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
      */
     private Mono<UserMessage> retrieveOrCreateUserByUnionId(IOSLoginInfo iosLoginInfo) {
         return this.userService.retrieveUserByUnionIdMono(iosLoginInfo.getUnionId())
+                .handle((userMessage, sink) -> {
+                    if (userMessage.getLocked()) {
+                        sink.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN));
+                    }
+                    sink.next(userMessage);
+                })
+                .map(object -> (UserMessage) object)
                 .switchIfEmpty(this.createNewUserFromIOS(iosLoginInfo));
     }
 

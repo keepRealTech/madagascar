@@ -10,6 +10,7 @@ import com.keepreal.madagascar.coua.model.UserInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -103,6 +104,7 @@ public class UserInfoService{
                 .setUsername(StringUtils.isEmpty(userInfo.getUsername()) ? "" : userInfo.getUsername())
                 .setPassword(StringUtils.isEmpty(userInfo.getPassword()) ? "" : userInfo.getPassword())
                 .setCreatedAt(userInfo.getCreatedTime())
+                .setLocked(Instant.now().toEpochMilli() <= userInfo.getLockedUntil())
                 .build();
     }
 
