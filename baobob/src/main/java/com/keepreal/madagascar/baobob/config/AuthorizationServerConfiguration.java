@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.baobob.config;
 
 import com.keepreal.madagascar.baobob.service.BaobobUserDetailsService;
+import com.keepreal.madagascar.baobob.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,7 +15,6 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Aut
 import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
-import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import java.util.Collections;
 
@@ -27,18 +27,22 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
     private final JwtTokenConfiguration jwtTokenConfiguration;
     private final BaobobUserDetailsService userDetailsService;
+    private final UserService userService;
 
     /**
      * Constructs the authorization server configuration.
      *
      * @param jwtTokenConfiguration Jwt token configuration.
      * @param userDetailsService    {@link BaobobUserDetailsService}.
+     * @param userService           {@link UserService}.
      */
     public AuthorizationServerConfiguration(
             JwtTokenConfiguration jwtTokenConfiguration,
-            BaobobUserDetailsService userDetailsService) {
+            BaobobUserDetailsService userDetailsService,
+            UserService userService) {
         this.jwtTokenConfiguration = jwtTokenConfiguration;
         this.userDetailsService = userDetailsService;
+        this.userService = userService;
     }
 
     /**
@@ -78,7 +82,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
      */
     @Bean
     public TokenStore tokenStore() {
-        return new JwtTokenStore(this.accessTokenConverter());
+        return new MadagascarJwtTokenStore(this.accessTokenConverter(), this.userService);
     }
 
     /**

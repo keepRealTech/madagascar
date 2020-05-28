@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.oauth2.provider.error.DefaultWebResponseExceptionTranslator;
 import org.springframework.security.oauth2.provider.error.WebResponseExceptionTranslator;
 import swagger.model.DummyResponse;
@@ -22,7 +23,7 @@ public class OAuthExceptionHandler implements WebResponseExceptionTranslator<Dum
      */
     @Override
     public ResponseEntity<DummyResponse> translate(Exception e) throws Exception {
-        if (!e.getMessage().contains("token expired")) {
+        if (!(e instanceof InsufficientAuthenticationException)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 

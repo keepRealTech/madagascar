@@ -11,7 +11,7 @@ common_configs:
 images:
   lemur:
     name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-    tag: 1.0.2
+    tag: 1.0.3
     imagePullPolicy: Always
 
 coua:
@@ -74,3 +74,8 @@ client:
       address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
       message: first version
       shouldForce: false
+
+security:
+  oauth2:
+    resource:
+      token_info_uri: http://baobob:8080/oauth/check_token
