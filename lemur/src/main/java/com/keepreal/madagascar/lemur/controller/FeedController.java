@@ -50,6 +50,7 @@ import swagger.model.ReactionResponse;
 import swagger.model.ReactionsResponse;
 import swagger.model.RepostResponse;
 import swagger.model.RepostsResponse;
+import swagger.model.TimelinesResponse;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -203,23 +204,21 @@ public class FeedController implements FeedApi {
      *
      * @param minTimestamp (optional, default to 0) minimal feed created timestamp.
      * @param pageSize     (optional, default to 10) size of a page .
-     * @return {@link FeedsResponse}.
+     * @return {@link TimelinesResponse}.
      */
     @Override
-    public ResponseEntity<FeedsResponse> apiV1FeedsGet(Long minTimestamp,
-                                                       Integer pageSize) {
+    public ResponseEntity<TimelinesResponse> apiV1FeedsGet(Long minTimestamp,
+                                                           Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
                 this.feedService.retrieveUserFeeds(userId, minTimestamp, pageSize);
 
-        FeedsResponse response = new FeedsResponse();
+        TimelinesResponse response = new TimelinesResponse();
         response.setData(feedsResponse.getFeedList()
                 .stream()
                 .map(this.feedDTOFactory::valueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
-        response.setCurrentTime(System.currentTimeMillis());
-        response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
