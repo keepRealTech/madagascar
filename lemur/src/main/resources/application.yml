@@ -65,9 +65,25 @@ general:
   singleOfficialIslandId: "6668436831391973376"
   officialIslandIdList:
     - "6668436831391973376"
+  currentVersion: 1
+  nextVersion: 1
+  address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
+  message: first version
+  shouldForce: false
 
 client:
   android:
     setup:
       version: 1
       address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
+    androidChannelMap:
+      a360: true
+      oppo: true
+      vivo: true
+      xiaomi: true
+      huawei: true
+      baidu: true
+      wandoujia: true
+      yingyongbao: true
+      lianxiang: true
+      kr: true

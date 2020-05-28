@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.controller;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.AndroidClientConfiguration;
+import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,36 +29,30 @@ import java.util.Objects;
 public class ConfigurationController implements ConfigApi {
 
     private Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
-    private Map<String, Boolean> androidChannelMap = new HashMap<>();
+    private Map<String, Boolean> androidChannelMap;
     private Map<Integer, UpdateInfoDTO> iOSUpdateInfoMap = new HashMap<>();
     private Map<Integer, UpdateInfoDTO> androidUpdateInfoMap = new HashMap<>();
     private final SetupInfoDTO setupInfoDTO;
 
-    public ConfigurationController(AndroidClientConfiguration androidClientConfiguration) {
+    public ConfigurationController(AndroidClientConfiguration androidClientConfiguration,
+                                   GeneralConfiguration generalConfiguration) {
         this.setupInfoDTO = new SetupInfoDTO();
         this.setupInfoDTO.setVerion(androidClientConfiguration.getSetup().getVersion());
         this.setupInfoDTO.setAddress(androidClientConfiguration.getSetup().getAddress());
-        this.androidChannelMap.put("a360", true);
-        this.androidChannelMap.put("oppo", true);
-        this.androidChannelMap.put("vivo", true);
-        this.androidChannelMap.put("xiaomi", true);
-        this.androidChannelMap.put("huawei", true);
-        this.androidChannelMap.put("baidu", true);
-        this.androidChannelMap.put("wandoujia", true);
-        this.androidChannelMap.put("yingyongbao", true);
-        this.androidChannelMap.put("lianxiang", true);
-        this.androidChannelMap.put("kr", true);
+        this.androidChannelMap = androidClientConfiguration.getAndroidChannelMap();
 
         this.iOSConfigVersionMap.put(
                 100, this.createIOSConfigurationDTO(10,100,10,5,10,1000, true));
 
         UpdateInfoDTO updateInfoDTO = new UpdateInfoDTO();
-        updateInfoDTO.address("https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk");
-        updateInfoDTO.currentVersion(1);
-        updateInfoDTO.nextVersion(2);
-        updateInfoDTO.isLatest(true);
-        updateInfoDTO.message("first version");
-        updateInfoDTO.shouldForce(false);
+        updateInfoDTO.address(generalConfiguration.getAddress());
+        Integer currentVersion = generalConfiguration.getCurrentVersion();
+        Integer nextVersion = generalConfiguration.getNextVersion();
+        updateInfoDTO.currentVersion(currentVersion);
+        updateInfoDTO.nextVersion(nextVersion);
+        updateInfoDTO.isLatest(currentVersion.equals(nextVersion));
+        updateInfoDTO.message(generalConfiguration.getMessage());
+        updateInfoDTO.shouldForce(generalConfiguration.getShouldForce());
         this.iOSUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
         this.androidUpdateInfoMap.put(updateInfoDTO.getCurrentVersion(), updateInfoDTO);
     }
