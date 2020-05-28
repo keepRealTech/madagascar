@@ -59,7 +59,7 @@ client:
       address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
     androidChannelMap:
       a360: true
-      oppo: true
+      oppo: false
       vivo: false
       xiaomi: true
       huawei: true
