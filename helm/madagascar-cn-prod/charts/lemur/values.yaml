@@ -78,4 +78,4 @@ client:
 security:
   oauth2:
     resource:
-      token-info-uri: http://baobob:8080/oauth/check_token
+      token_info_uri: http://baobob:8080/oauth/check_token
