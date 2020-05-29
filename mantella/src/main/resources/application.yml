@@ -11,3 +11,6 @@ rocketmq:
   topic: feed-event
   groupId: GID-mantella-default
   tag: event
+
+snowflake:
+  nodeId: 0
