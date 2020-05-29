@@ -16,6 +16,7 @@ import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
@@ -86,11 +87,18 @@ public class NotificationEventProducerService {
      * @param message {@link Message}.
      */
     private void sendAsync(Message message) {
+        if (Objects.isNull(message)) {
+            return;
+        }
+
         CompletableFuture
                 .supplyAsync(() -> this.producerBean.send(message),
                         this.executorService)
-                .exceptionally(throwable -> {
-                    log.warn(throwable.getMessage());
+                .handle((re, thr) -> {
+                    if (Objects.nonNull(re)) {
+                        return re;
+                    }
+                    log.warn("Sending message to topic {} error.", message.getTopic());
                     return null;
                 });
     }

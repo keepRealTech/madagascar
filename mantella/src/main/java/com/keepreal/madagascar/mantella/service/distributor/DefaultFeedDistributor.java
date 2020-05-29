@@ -37,9 +37,9 @@ public class DefaultFeedDistributor implements FeedDistributor {
      * @return A list of {@link Timeline}.
      */
     @Override
-    public Flux<Timeline> distribute(FeedCreateEvent feedCreateEvent) {
+    public Flux<Timeline> distribute(FeedCreateEvent feedCreateEvent, String eventId) {
         return this.islandService.retrieveSubscriberIdsByIslandId(feedCreateEvent.getIslandId())
-                .map(userId -> this.timelineFactory.valueOf(feedCreateEvent, userId));
+                .map(userId -> this.timelineFactory.valueOf(feedCreateEvent, userId, eventId));
     }
 
 }

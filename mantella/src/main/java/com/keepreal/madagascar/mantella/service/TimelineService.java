@@ -39,10 +39,11 @@ public class TimelineService {
      * Distributes the feed event into timelines.
      *
      * @param feedCreateEvent {@link FeedCreateEvent}.
+     * @param eventId         Event id.
      * @return {@link Void}.
      */
-    public Mono<Void> distribute(FeedCreateEvent feedCreateEvent) {
-        return this.feedDistributor.distribute(feedCreateEvent)
+    public Mono<Void> distribute(FeedCreateEvent feedCreateEvent, String eventId) {
+        return this.feedDistributor.distribute(feedCreateEvent, eventId)
                 .compose(this::insertAll)
                 .then();
     }
@@ -70,11 +71,11 @@ public class TimelineService {
     /**
      * Checks if the feed event has consumed.
      *
-     * @param feedId Feed id.
+     * @param eventId Event id.
      * @return True if has been consumed.
      */
-    public Mono<Boolean> hasConsumed(String feedId) {
-        return this.timelineRepository.existsByFeedId(feedId);
+    public Mono<Boolean> hasConsumed(String eventId) {
+        return this.timelineRepository.existsByEventId(eventId);
     }
 
     /**

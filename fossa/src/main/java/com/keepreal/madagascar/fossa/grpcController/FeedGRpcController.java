@@ -21,6 +21,7 @@ import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveLatestFeedByUserIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
+import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.IslandService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
@@ -54,30 +55,34 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     private final IslandService islandService;
     private final FeedInfoService feedInfoService;
     private final MongoTemplate mongoTemplate;
+    private final FeedEventProducerService feedEventProducerService;
 
     /**
      * Constructs the feed grpc controller
      *
-     * @param idGenerator       {@link LongIdGenerator}
-     * @param islandService     {@link IslandService}
-     * @param feedInfoService   {@link FeedInfoService}
-     * @param mongoTemplate     {@link MongoTemplate}
+     * @param idGenerator              {@link LongIdGenerator}
+     * @param islandService            {@link IslandService}
+     * @param feedInfoService          {@link FeedInfoService}
+     * @param mongoTemplate            {@link MongoTemplate}
+     * @param feedEventProducerService {@link FeedEventProducerService}.
      */
     public FeedGRpcController(LongIdGenerator idGenerator,
                               IslandService islandService,
                               FeedInfoService feedInfoService,
-                              MongoTemplate mongoTemplate) {
+                              MongoTemplate mongoTemplate,
+                              FeedEventProducerService feedEventProducerService) {
         this.idGenerator = idGenerator;
         this.islandService = islandService;
         this.feedInfoService = feedInfoService;
         this.mongoTemplate = mongoTemplate;
+        this.feedEventProducerService = feedEventProducerService;
     }
 
     /**
      * implements the create feeds method
      *
-     * @param request           {@link NewFeedsRequest}.
-     * @param responseObserver  {@link NewFeedsResponse} Callback.
+     * @param request          {@link NewFeedsRequest}.
+     * @param responseObserver {@link NewFeedsResponse} Callback.
      */
     @Override
     public void createFeeds(NewFeedsRequest request, StreamObserver<NewFeedsResponse> responseObserver) {
@@ -100,8 +105,10 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfoList.add(builder.build());
         });
 
-        feedInfoService.saveAll(feedInfoList);
+        List<FeedInfo> feedInfos = feedInfoService.saveAll(feedInfoList);
         islandService.callCouaUpdateIslandLastFeedAt(islandIdList);
+
+        feedInfos.forEach(this.feedEventProducerService::produceNewFeedEventAsync);
 
         NewFeedsResponse newFeedsResponse = NewFeedsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -113,14 +120,16 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * implements the delete feed by id method
      *
-     * @param request           {@link DeleteFeedByIdRequest}.
-     * @param responseObserver  {@link DeleteFeedResponse} Callback.
+     * @param request          {@link DeleteFeedByIdRequest}.
+     * @param responseObserver {@link DeleteFeedResponse} Callback.
      */
     @Override
     public void deleteFeedById(DeleteFeedByIdRequest request, StreamObserver<DeleteFeedResponse> responseObserver) {
         String feedId = request.getId();
 
         feedInfoService.deleteFeedById(feedId);
+
+        this.feedEventProducerService.produceDeleteFeedEventAsync(feedId);
 
         DeleteFeedResponse deleteFeedResponse = DeleteFeedResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -132,8 +141,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * implements the get feed by id method
      *
-     * @param request           {@link RetrieveFeedByIdRequest}.
-     * @param responseObserver  {@link FeedResponse} Callback.
+     * @param request          {@link RetrieveFeedByIdRequest}.
+     * @param responseObserver {@link FeedResponse} Callback.
      */
     @Override
     public void retrieveFeedById(RetrieveFeedByIdRequest request, StreamObserver<FeedResponse> responseObserver) {
@@ -160,8 +169,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * implements the get feeds by condition method
      *
-     * @param request           {@link RetrieveMultipleFeedsRequest}.
-     * @param responseObserver  {@link FeedsResponse} Callback.
+     * @param request          {@link RetrieveMultipleFeedsRequest}.
+     * @param responseObserver {@link FeedsResponse} Callback.
      */
     @Override
     public void retrieveMultipleFeeds(RetrieveMultipleFeedsRequest request, StreamObserver<FeedsResponse> responseObserver) {
@@ -204,8 +213,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * implements the get latest feed by userId method
      *
-     * @param request           {@link RetrieveLatestFeedByUserIdRequest}.
-     * @param responseObserver  {@link FeedResponse} Callback.
+     * @param request          {@link RetrieveLatestFeedByUserIdRequest}.
+     * @param responseObserver {@link FeedResponse} Callback.
      */
     @Override
     public void retrieveLatestFeedByUserId(RetrieveLatestFeedByUserIdRequest request, StreamObserver<FeedResponse> responseObserver) {
@@ -233,8 +242,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * implements the create default feed method
      *
-     * @param request           {@link CreateDefaultFeedRequest}.
-     * @param responseObserver  {@link CreateDefaultFeedResponse} Callback.
+     * @param request          {@link CreateDefaultFeedRequest}.
+     * @param responseObserver {@link CreateDefaultFeedResponse} Callback.
      */
     @Override
     public void createDefaultFeed(CreateDefaultFeedRequest request, StreamObserver<CreateDefaultFeedResponse> responseObserver) {
@@ -261,8 +270,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * Implements the feeds retrieve by ids method.
      *
-     * @param request           {@link RetrieveFeedsByIdsRequest}.
-     * @param responseObserver  {@link RetrieveFeedsByIdsRequest} Callback.
+     * @param request          {@link RetrieveFeedsByIdsRequest}.
+     * @param responseObserver {@link RetrieveFeedsByIdsRequest} Callback.
      */
     @Override
     public void retrieveFeedsByIds(RetrieveFeedsByIdsRequest request, StreamObserver<FeedsResponse> responseObserver) {

@@ -21,11 +21,11 @@ public class Timeline {
     private String feedId;
     private String islandId;
     private Long feedCreatedAt;
-    private Boolean fromHost;
     @Builder.Default
     private Boolean isFrozen = false;
     private String userId;
 
+    private String eventId;
     @Builder.Default
     private Boolean isDeleted = false;
     @CreatedDate

@@ -61,7 +61,7 @@ public class FeedEventListener implements MessageOrderListener {
                         throw new InvalidProtocolBufferException("No feed event in message.");
                     }
 
-                    this.timelineService.distribute(feedEventMessage.getFeedCreateEvent()).block();
+                    this.timelineService.distribute(feedEventMessage.getFeedCreateEvent(), feedEventMessage.getEventId()).block();
 
                     return OrderAction.Success;
                 case FEED_EVENT_DELETE:
