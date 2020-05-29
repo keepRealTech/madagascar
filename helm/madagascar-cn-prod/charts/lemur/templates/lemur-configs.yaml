@@ -41,3 +41,4 @@ data:
   CLIENT_ANDROID_UPDATEINFO_ADDRESS: {{ .Values.client.android.updateInfo.address }}
   CLIENT_ANDROID_UPDATEINFO_MESSAGE: {{ .Values.client.android.updateInfo.message }}
   CLIENT_ANDROID_UPDATEINFO_SHOULDFORCE: '{{ .Values.client.android.updateInfo.shouldForce }}'
+  SECURITY_OAUTH2_RESOURCE_TOKENINFOURI: {{ .Values.security.oauth2.resource.token_info_uri }}
