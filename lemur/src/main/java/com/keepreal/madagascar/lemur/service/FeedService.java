@@ -14,14 +14,19 @@ import com.keepreal.madagascar.fossa.NewFeedsRequest;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
+import com.keepreal.madagascar.mantella.RetrieveMultipleTimelinesRequest;
+import com.keepreal.madagascar.mantella.TimelineMessage;
+import com.keepreal.madagascar.mantella.TimelineServiceGrpc;
+import com.keepreal.madagascar.mantella.TimelinesResponse;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.util.Assert;
 
 import java.util.List;
 import java.util.Objects;
@@ -34,19 +39,23 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FeedService {
 
-    private final Channel channel;
+    private final Channel fossaChannel;
+    private final Channel mantellaChannel;
     private final IslandService islandService;
 
     /**
      * Constructs the feed service.
      *
-     * @param channel       GRpc managed channel connection to service Fossa.
-     * @param islandService {@link IslandService}
+     * @param fossaChannel    GRpc managed channel connection to service Fossa.
+     * @param mantellaChannel
+     * @param islandService   {@link IslandService}
      */
 
-    public FeedService(@Qualifier("fossaChannel") Channel channel,
+    public FeedService(@Qualifier("fossaChannel") Channel fossaChannel,
+                       @Qualifier("mantellaChannel") Channel mantellaChannel,
                        IslandService islandService) {
-        this.channel = channel;
+        this.fossaChannel = fossaChannel;
+        this.mantellaChannel = mantellaChannel;
         this.islandService = islandService;
     }
 
@@ -64,7 +73,7 @@ public class FeedService {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
         }
 
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
         List<String> hostIdList = islandIds.stream().map(id -> islandService.retrieveIslandById(id).getHostId()).collect(Collectors.toList());
 
         NewFeedsRequest request = NewFeedsRequest.newBuilder()
@@ -99,7 +108,7 @@ public class FeedService {
      * @param id Feed id.
      */
     public void deleteFeedById(String id) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
 
         DeleteFeedByIdRequest request = DeleteFeedByIdRequest.newBuilder()
                 .setId(id)
@@ -130,7 +139,7 @@ public class FeedService {
      * @return {@link FeedMessage}.
      */
     public FeedMessage retrieveFeedById(String id, String userId) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
 
         RetrieveFeedByIdRequest request = RetrieveFeedByIdRequest.newBuilder()
                 .setId(id)
@@ -165,7 +174,7 @@ public class FeedService {
      * @return True if deleted.
      */
     public boolean checkDeleted(String id) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
 
         RetrieveFeedByIdRequest request = RetrieveFeedByIdRequest.newBuilder()
                 .setId(id)
@@ -201,14 +210,13 @@ public class FeedService {
      * @param pageSize Page size.
      * @return {@link FeedsResponse}.
      */
-    public FeedsResponse retrieveFeeds(String islandId, Boolean fromHost, String userId, int page, int pageSize) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
+    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, int page, int pageSize) {
+        Assert.hasText(islandId, "Island id is null.");
+
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
 
         QueryFeedCondition.Builder conditionBuilder = QueryFeedCondition.newBuilder();
-
-        if (!StringUtils.isEmpty(islandId)) {
-            conditionBuilder.setIslandId(StringValue.of(islandId));
-        }
+        conditionBuilder.setIslandId(StringValue.of(islandId));
 
         if (Objects.nonNull(fromHost)) {
             conditionBuilder.setFromHost(BoolValue.of(fromHost));
@@ -230,6 +238,98 @@ public class FeedService {
         if (Objects.isNull(feedsResponse)
                 || !feedsResponse.hasStatus()) {
             log.error(Objects.isNull(feedsResponse) ? "Retrieve feeds returned null." : feedsResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != feedsResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(feedsResponse.getStatus());
+        }
+
+        return feedsResponse;
+    }
+
+    /**
+     * Retrieves feeds.
+     *
+     * @param userId         User id.
+     * @param timestampAfter Timestamp filter.
+     * @param pageSize       Page size.
+     * @return {@link FeedsResponse}.
+     */
+    public FeedsResponse retrieveUserFeeds(String userId, long timestampAfter, int pageSize) {
+        Assert.hasText(userId, "User id is null.");
+
+        TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(userId, timestampAfter, pageSize);
+
+        return this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
+                .stream()
+                .map(TimelineMessage::getFeedId)
+                .collect(Collectors.toList()));
+    }
+
+    /**
+     * Retrieves timelines by user id.
+     *
+     * @param userId         User id.
+     * @param timestampAfter Timestamp after.
+     * @param pageSize       Page size.
+     * @return {@link TimelinesResponse}.
+     */
+    private TimelinesResponse retrieveTimelinesByUserId(String userId, long timestampAfter, int pageSize) {
+        TimelineServiceGrpc.TimelineServiceBlockingStub mantellaStub = TimelineServiceGrpc.newBlockingStub(this.mantellaChannel);
+
+        RetrieveMultipleTimelinesRequest timelinesRequest = RetrieveMultipleTimelinesRequest.newBuilder()
+                .setCreatedAfter(timestampAfter)
+                .setUserId(userId)
+                .setPageRequest(PaginationUtils.buildPageRequest(0, pageSize))
+                .build();
+
+        TimelinesResponse timelinesResponse;
+        try {
+            timelinesResponse = mantellaStub.retrieveMultipleTimelines(timelinesRequest);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(timelinesResponse)
+                || !timelinesResponse.hasStatus()) {
+            log.error(Objects.isNull(timelinesResponse) ? "Retrieve timelines returned null." : timelinesResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != timelinesResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(timelinesResponse.getStatus());
+        }
+
+        return timelinesResponse;
+    }
+
+    /**
+     * Retrieves feeds by ids.
+     *
+     * @param feedIds Feed ids.
+     * @return {@link FeedsResponse}.
+     */
+    private FeedsResponse retrieveFeedsByIds(List<String> feedIds) {
+        if (feedIds.isEmpty()) {
+            return FeedsResponse.newBuilder().build();
+        }
+
+        FeedServiceGrpc.FeedServiceBlockingStub fossaStub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        RetrieveFeedsByIdsRequest byIdsRequest = RetrieveFeedsByIdsRequest.newBuilder()
+                .addAllIds(feedIds)
+                .build();
+
+        FeedsResponse feedsResponse;
+        try {
+            feedsResponse = fossaStub.retrieveFeedsByIds(byIdsRequest);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(feedsResponse)
+                || !feedsResponse.hasStatus()) {
+            log.error(Objects.isNull(feedsResponse) ? "Retrieve timelines returned null." : feedsResponse.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 

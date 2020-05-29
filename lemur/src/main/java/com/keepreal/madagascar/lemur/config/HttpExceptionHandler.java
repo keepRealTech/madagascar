@@ -58,4 +58,18 @@ public class HttpExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Handles the {@link IllegalArgumentException}.
+     *
+     * @param exception {@link IllegalArgumentException}.
+     * @param request   Request.
+     * @return {@link DummyResponse}.
+     */
+    @ExceptionHandler(value = {IllegalArgumentException.class})
+    protected ResponseEntity<DummyResponse> handleIllegalArgumentException(IllegalArgumentException exception,
+                                                                               WebRequest request) {
+        log.error(exception.toString());
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+
 }

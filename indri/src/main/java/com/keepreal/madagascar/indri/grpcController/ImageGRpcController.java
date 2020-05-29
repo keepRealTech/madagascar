@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.indri.service;
+package com.keepreal.madagascar.indri.grpcController;
 
 import com.aliyun.oss.OSS;
 import com.keepreal.madagascar.common.CommonStatus;
@@ -17,14 +17,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.util.AbstractMap;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -35,7 +27,7 @@ import java.util.stream.IntStream;
  */
 @GRpcService
 @Slf4j
-public class ImageService extends ReactorImageServiceGrpc.ImageServiceImplBase {
+public class ImageGRpcController extends ReactorImageServiceGrpc.ImageServiceImplBase {
 
     private final OSS ossClient;
     private final String bucketName;
@@ -48,9 +40,9 @@ public class ImageService extends ReactorImageServiceGrpc.ImageServiceImplBase {
      * @param aliyunOssConfiguration Aliyun oss configuration.
      * @param commonStatusUtils      Common status utils.
      */
-    public ImageService(OSS ossClient,
-                        AliyunOssConfiguration aliyunOssConfiguration,
-                        CommonStatusUtils commonStatusUtils) {
+    public ImageGRpcController(OSS ossClient,
+                               AliyunOssConfiguration aliyunOssConfiguration,
+                               CommonStatusUtils commonStatusUtils) {
         this.ossClient = ossClient;
         this.bucketName = aliyunOssConfiguration.getBucketName();
         this.commonStatusUtils = commonStatusUtils;
