@@ -204,7 +204,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BriefIslandsResponse'
+                $ref: '#/components/schemas/IslandsResponse'
   /api/v1/islands/officialIslands:
     get:
       tags:
@@ -444,6 +444,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1.1/feeds:
+    post:
+      tags:
+        - Feed
+      summary: creates a new feed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostFeedRequestV1.1'
+      responses:
+        '200':
+          description: brief feed response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponse'
   /api/v1/feeds/check:
     post:
       tags:
@@ -906,6 +924,11 @@ components:
       type: string
       enum:
         - ISLAND_NOTICE_NEW_SUBSCRIBER
+    MultiMediaType:
+      type: string
+      enum:
+        - MULTIMEDIA_TYPE_VLOG
+        - MULTIMEDIA_TYPE_MUSIC
     CommonResponse:
       type: object
       properties:
@@ -1226,6 +1249,15 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ReportDTO'
+    MultiMediaDTO:
+      type: object
+      properties:
+        uris:
+          type: array
+          items:
+            type: string
+        type:
+          $ref: '#/components/schemas/MultiMediaType'
     PosterFeedDTO:
       type: object
       properties:
@@ -1257,6 +1289,8 @@ components:
           type: array
           items:
             type: string
+        multimedia:
+          $ref: '#/components/schemas/MultiMediaDTO'
         fromHost:
           type: boolean
           description: whether feed posted by the host of island
@@ -1308,6 +1342,21 @@ components:
           items:
             type: string
             format: binary
+      required:
+        - payload
+    PostFeedRequestV1.1:
+      type: object
+      properties:
+        islandId:
+          type: string
+        content:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        multimedia:
+          $ref: "#/components/schemas/MultiMediaDTO"
       required:
         - payload
     CheckFeedsMessage:
