@@ -266,7 +266,18 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      */
     @Override
     public void retrieveFeedsByIds(RetrieveFeedsByIdsRequest request, StreamObserver<FeedsResponse> responseObserver) {
-        this.feedInfoService.findByIds()
+        List<FeedInfo> feedInfoList = this.feedInfoService.findByIds(request.getIdsList());
+        List<FeedMessage> feedMessageList = feedInfoList.stream()
+                .map(info -> this.feedInfoService.getFeedMessage(info, request.getUserId()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        FeedsResponse feedsResponse = FeedsResponse.newBuilder()
+                .addAllFeed(feedMessageList)
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(feedsResponse);
+        responseObserver.onCompleted();
     }
 
 }
