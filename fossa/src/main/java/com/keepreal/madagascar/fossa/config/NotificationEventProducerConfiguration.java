@@ -16,7 +16,7 @@ import java.util.Properties;
 @Configuration
 @ConfigurationProperties(prefix = "rocketmq")
 @Data
-public class MqConfig {
+public class NotificationEventProducerConfiguration {
 
     private String accessKey;
     private String secretKey;
