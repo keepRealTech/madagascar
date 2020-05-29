@@ -9,6 +9,6 @@ import reactor.core.publisher.Flux;
  */
 public interface FeedDistributor {
 
-    Flux<Timeline> distribute(FeedCreateEvent feedCreateEvent);
+    Flux<Timeline> distribute(FeedCreateEvent feedCreateEvent, String eventId);
 
 }

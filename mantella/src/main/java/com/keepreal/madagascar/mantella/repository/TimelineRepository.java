@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono;
  */
 public interface TimelineRepository extends ReactiveMongoRepository<Timeline, String> {
 
-    Mono<Boolean> existsByFeedId(String feedId);
+    Mono<Boolean> existsByEventId(String eventId);
 
     Flux<Timeline> findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsTrue(String userId, long startTimestamp, Pageable pageable);
 

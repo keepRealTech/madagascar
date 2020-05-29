@@ -143,8 +143,8 @@ public class FeedInfoService {
      *
      * @param feedInfoList  {@link FeedInfo}.
      */
-    public void saveAll(List<FeedInfo> feedInfoList) {
-        feedInfoRepository.saveAll(feedInfoList);
+    public List<FeedInfo> saveAll(List<FeedInfo> feedInfoList) {
+        return feedInfoRepository.saveAll(feedInfoList);
     }
 
     /**
