@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.mantella.service;
 
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.mantella.FeedCreateEvent;
 import com.keepreal.madagascar.mantella.model.Timeline;
 import com.keepreal.madagascar.mantella.repository.TimelineRepository;
@@ -9,6 +10,7 @@ import com.keepreal.madagascar.mantella.utils.PaginationUtils;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Represents the timeline service.
@@ -19,6 +21,7 @@ public class TimelineService {
     private final TimelineRepository timelineRepository;
     private final TimelineStorage timelineStorage;
     private final FeedDistributor feedDistributor;
+    private final LongIdGenerator idGenerator;
 
     /**
      * Constructs the timeline service.
@@ -26,13 +29,16 @@ public class TimelineService {
      * @param timelineRepository {@link TimelineRepository}.
      * @param timelineStorage    {@link TimelineStorage}.
      * @param feedDistributor    {@link FeedDistributor}.
+     * @param idGenerator        {@link LongIdGenerator}.
      */
     public TimelineService(TimelineRepository timelineRepository,
                            TimelineStorage timelineStorage,
-                           FeedDistributor feedDistributor) {
+                           FeedDistributor feedDistributor,
+                           LongIdGenerator idGenerator) {
         this.timelineRepository = timelineRepository;
         this.timelineStorage = timelineStorage;
         this.feedDistributor = feedDistributor;
+        this.idGenerator = idGenerator;
     }
 
     /**
@@ -55,7 +61,15 @@ public class TimelineService {
      * @return {@link Mono}.
      */
     public Flux<Timeline> insertAll(Flux<Timeline> timelines) {
-        return this.timelineRepository.insert(timelines);
+
+        return timelines
+                .publishOn(Schedulers.elastic())
+                .flatMap(timeline -> {
+                    timeline.setId(String.valueOf(this.idGenerator.nextId()));
+                    timeline.setCreatedAt(timeline.getFeedCreatedAt());
+                    return Mono.just(timeline);
+                })
+                .compose(this.timelineRepository::insert);
     }
 
     /**
