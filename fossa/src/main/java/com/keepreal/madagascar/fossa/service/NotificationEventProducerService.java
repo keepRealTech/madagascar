@@ -50,7 +50,7 @@ public class NotificationEventProducerService {
                 1L,
                 TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(500000),
-                new CustomizableThreadFactory("stats-event-producer-"));
+                new CustomizableThreadFactory("notification-event-producer-"));
     }
 
     /**
