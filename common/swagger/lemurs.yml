@@ -278,6 +278,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FeedsResponse'
+  /api/v1/islands/{id}/feeds/top:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Island
+      summary: make a feed to top
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopFeedRequest'
+      responses:
+        '200':
+          description: feed response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponse'
+
   /api/v1/islands/{id}/poster:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -454,7 +475,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostFeedRequestV1.1'
+              $ref: '#/components/schemas/PostFeedRequestV2'
       responses:
         '200':
           description: brief feed response
@@ -1298,6 +1319,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CommentDTO'
+        toppedAt:
+          type: integer
+          format: int64
         createdAt:
           type: integer
           format: int64
@@ -1344,7 +1368,7 @@ components:
             format: binary
       required:
         - payload
-    PostFeedRequestV1.1:
+    PostFeedRequestV2:
       type: object
       properties:
         islandId:
@@ -1822,3 +1846,8 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SetupInfoDTO'
+    TopFeedRequest:
+      type: object
+      properties:
+        feedId:
+          type: string
