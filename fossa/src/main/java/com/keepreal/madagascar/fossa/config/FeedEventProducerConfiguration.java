@@ -1,7 +1,7 @@
 package com.keepreal.madagascar.fossa.config;
 
 import com.aliyun.openservices.ons.api.PropertyKeyConst;
-import com.aliyun.openservices.ons.api.bean.ProducerBean;
+import com.aliyun.openservices.ons.api.bean.OrderProducerBean;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -10,15 +10,12 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Properties;
 
 /**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-05-05
- **/
-
+ * Represents the feed event producer configurations.
+ */
 @Configuration
-@ConfigurationProperties(prefix = "rocketmq.notification")
+@ConfigurationProperties(prefix = "rocketmq.feed")
 @Data
-public class NotificationEventProducerConfiguration {
+public class FeedEventProducerConfiguration {
 
     private String accessKey;
     private String secretKey;
@@ -34,11 +31,16 @@ public class NotificationEventProducerConfiguration {
         return properties;
     }
 
-    @Bean(name = "notification-event-producer", initMethod = "start", destroyMethod = "shutdown")
-    public ProducerBean buildProducer() {
-        ProducerBean producer = new ProducerBean();
-        producer.setProperties(this.getMqProperties());
-        return producer;
+    /**
+     * Builds the order producer for feed events.
+     *
+     * @return {@link OrderProducerBean}.
+     */
+    @Bean(name = "feed-event-producer", initMethod = "start", destroyMethod = "shutdown")
+    public OrderProducerBean buildProducer() {
+        OrderProducerBean orderProducer = new OrderProducerBean();
+        orderProducer.setProperties(this.getMqProperties());
+        return orderProducer;
     }
 
 }

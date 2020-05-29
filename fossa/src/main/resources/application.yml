@@ -13,11 +13,18 @@ spring:
       uri: mongodb://localhost:27017
 
 rocketmq:
-  accessKey: xxx
-  secretKey: xxx
-  topic: notification-event
-  tag: event
-  nameSrvAddr: 127.0.0.1:9876
+  notification:
+    accessKey: xxx
+    secretKey: xxx
+    topic: notification-event
+    tag: event
+    nameSrvAddr: 127.0.0.1:9876
+  feed:
+    accessKey: xxx
+    secretKey: xxx
+    topic: notification-event
+    tag: event
+    nameSrvAddr: 127.0.0.1:9876
 
 grpc:
   coua:
