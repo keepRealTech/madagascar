@@ -66,7 +66,7 @@ client:
       baidu: true
       wandoujia: true
       yingyongbao: true
-      lianxiang: true
+      lianxiang: false
       kr: true
     updateInfo:
       currentVersion: 1
