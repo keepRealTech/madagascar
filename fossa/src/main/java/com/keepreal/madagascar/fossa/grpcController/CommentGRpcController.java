@@ -185,27 +185,4 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
         responseObserver.onCompleted();
     }
 
-    /**
-     * create mq message
-     *
-     * @param commentMessage {@link CommentMessage}.
-     * @param feedMessage    {@link FeedMessage}.
-     * @param userId         receiver id.
-     * @return  {@link Message}.
-     */
-    private Message createMqMessage(CommentMessage commentMessage, FeedMessage feedMessage, String userId) {
-        CommentEvent commentEvent = CommentEvent.newBuilder()
-                .setComment(commentMessage)
-                .setFeed(feedMessage)
-                .build();
-        String uuid = UUID.randomUUID().toString();
-        NotificationEvent event = NotificationEvent.newBuilder()
-                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_COMMENT)
-                .setUserId(userId)
-                .setCommentEvent(commentEvent)
-                .setTimestamp(System.currentTimeMillis())
-                .setEventId(uuid)
-                .build();
-        return new Message(mqConfig.getTopic(), mqConfig.getTag(), uuid, event.toByteArray());
-    }
 }
