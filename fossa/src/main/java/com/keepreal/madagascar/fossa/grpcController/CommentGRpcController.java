@@ -1,7 +1,5 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
-import com.aliyun.openservices.ons.api.Message;
-import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
@@ -16,25 +14,20 @@ import com.keepreal.madagascar.fossa.NewCommentRequest;
 import com.keepreal.madagascar.fossa.RetrieveCommentByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveCommentsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.common.FeedCountType;
-import com.keepreal.madagascar.fossa.config.MqConfig;
+import com.keepreal.madagascar.fossa.config.NotificationEventProducerConfiguration;
 import com.keepreal.madagascar.fossa.model.CommentInfo;
 import com.keepreal.madagascar.fossa.service.CommentService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
+import com.keepreal.madagascar.fossa.service.NotificationEventProducerService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
-import com.keepreal.madagascar.fossa.util.ProducerUtils;
-import com.keepreal.madagascar.tenrecs.CommentEvent;
-import com.keepreal.madagascar.tenrecs.NotificationEvent;
-import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -46,32 +39,28 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
 
     private final FeedInfoService feedInfoService;
     private final CommentService commentService;
-    private final MqConfig mqConfig;
-    private final ProducerBean producerBean;
+    private final NotificationEventProducerService notificationEventProducerService;
 
     /**
      * Constructs comment grpc controller
      *
-     * @param feedInfoService   {@link FeedInfoService}.
-     * @param commentService    {@link CommentService}.
-     * @param mqConfig          {@link MqConfig}.
-     * @param producerBean      {@link ProducerBean}.
+     * @param feedInfoService                  {@link FeedInfoService}.
+     * @param commentService                   {@link CommentService}.
+     * @param notificationEventProducerService {@link NotificationEventProducerConfiguration}.
      */
     public CommentGRpcController(FeedInfoService feedInfoService,
                                  CommentService commentService,
-                                 MqConfig mqConfig,
-                                 ProducerBean producerBean) {
+                                 NotificationEventProducerService notificationEventProducerService) {
         this.feedInfoService = feedInfoService;
         this.commentService = commentService;
-        this.mqConfig = mqConfig;
-        this.producerBean = producerBean;
+        this.notificationEventProducerService = notificationEventProducerService;
     }
 
     /**
      * implements the create comment method
      *
-     * @param request           {@link NewCommentRequest}.
-     * @param responseObserver  {@link CommentResponse} Callback.
+     * @param request          {@link NewCommentRequest}.
+     * @param responseObserver {@link CommentResponse} Callback.
      */
     @Override
     public void createComment(NewCommentRequest request, StreamObserver<CommentResponse> responseObserver) {
@@ -95,12 +84,9 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
                 .build();
 
         FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
-        Message message = createMqMessage(commentMessage, feedMessage, feedMessage.getUserId());
-        ProducerUtils.sendMessageAsync(producerBean, message);
-        if (!StringUtils.isEmpty(replyToId) && !replyToId.equals(feedMessage.getUserId())) {
-            message = createMqMessage(commentMessage, feedMessage, replyToId);
-            ProducerUtils.sendMessageAsync(producerBean, message);
-        }
+
+        this.notificationEventProducerService.produceNewCommentsNotificationEventAsync(
+                commentMessage, feedMessage, replyToId);
 
         responseObserver.onNext(commentResponse);
         responseObserver.onCompleted();
@@ -133,8 +119,8 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
     /**
      * Retrieves comments by feedId.
      *
-     * @param request           {@link RetrieveCommentsByFeedIdRequest}.
-     * @param responseObserver  {@link CommentsResponse}.
+     * @param request          {@link RetrieveCommentsByFeedIdRequest}.
+     * @param responseObserver {@link CommentsResponse}.
      */
     @Override
     public void retrieveCommentsByFeedId(RetrieveCommentsByFeedIdRequest request, StreamObserver<CommentsResponse> responseObserver) {
@@ -159,8 +145,8 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
     /**
      * Delete comment by id
      *
-     * @param request           {@link DeleteCommentByIdRequest}.
-     * @param responseObserver  {@link DeleteCommentByIdResponse}.
+     * @param request          {@link DeleteCommentByIdRequest}.
+     * @param responseObserver {@link DeleteCommentByIdResponse}.
      */
     @Override
     public void deleteCommentById(DeleteCommentByIdRequest request, StreamObserver<DeleteCommentByIdResponse> responseObserver) {
