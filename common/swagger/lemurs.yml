@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.0.0"
+  version: "1.1.0"
   title: Keep Real API
 
 security:
@@ -105,7 +105,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/FullUserResponse'
     put:
       tags:
         - User
@@ -278,6 +278,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FeedsResponse'
+  /api/v1.1/islands/{id}/feeds:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/fromHostInQuery'
+        - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Island
+      summary: retrieves a list of feeds with pagination
+      responses:
+        '200':
+          description: feeds response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinesResponse'
   /api/v1/islands/{id}/feeds/top:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1015,6 +1033,15 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/IdentityType'
+    FullUserDTO:
+      allOf:
+        - $ref: '#/components/schemas/UserDTO'
+        - type: object
+          properties:
+            createdIslands:
+              type: array
+              items:
+                $ref: '#/components/schemas/BriefIslandDTO'
     PutUserPayload:
       type: object
       properties:
@@ -1048,6 +1075,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UserDTO'
+    FullUserResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FullUserDTO'
     UsersResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1245,6 +1279,8 @@ components:
           type: string
         feedId:
           type: string
+        islandId:
+          type: string
         reporterId:
           type: string
     PostReportRequest:
@@ -1256,12 +1292,14 @@ components:
         feedId:
           type: string
           description: feed id to report
+        islandId:
+          type: string
+          description: island id to report
         reporterId:
           type: string
           description: user id
       required:
         - reportType
-        - feedId
         - reporterId
     ReportResponse:
       allOf:
@@ -1270,15 +1308,18 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ReportDTO'
-    MultiMediaDTO:
+    VLogDTO:
       type: object
       properties:
-        uris:
-          type: array
-          items:
-            type: string
+        uri:
+          type: string
+        length:
+          type: integer
         type:
           $ref: '#/components/schemas/MultiMediaType'
+    MultiMediaDTO:
+      oneOf:
+        - $ref: '#/components/schemas/VLogDTO'
     PosterFeedDTO:
       type: object
       properties:
@@ -1380,7 +1421,7 @@ components:
           items:
             type: string
         multimedia:
-          $ref: "#/components/schemas/MultiMediaDTO"
+          $ref: '#/components/schemas/MultiMediaDTO'
       required:
         - payload
     CheckFeedsMessage:
