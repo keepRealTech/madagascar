@@ -82,7 +82,7 @@ public class SubscriptionService {
                 .islanderNumber(SubscriptionService.SUPER_ADMIN_NUMBER)
                 .state(SubscriptionState.SUPER_ADMIN.getValue())
                 .build();
-        insertSubscription(subscription);
+        insertSubscription(adminSubscription);
     }
 
     /**
