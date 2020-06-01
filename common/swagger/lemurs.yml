@@ -1279,6 +1279,8 @@ components:
           type: string
         feedId:
           type: string
+        islandId:
+          type: string
         reporterId:
           type: string
     PostReportRequest:
@@ -1290,12 +1292,14 @@ components:
         feedId:
           type: string
           description: feed id to report
+        islandId:
+          type: string
+          description: island id to report
         reporterId:
           type: string
           description: user id
       required:
         - reportType
-        - feedId
         - reporterId
     ReportResponse:
       allOf:
