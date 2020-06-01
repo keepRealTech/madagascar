@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import swagger.api.UserApi;
+import swagger.model.FullUserResponse;
 import swagger.model.GenderType;
 import swagger.model.PutUserPayload;
 import swagger.model.UserResponse;
@@ -58,11 +59,11 @@ public class UserController implements UserApi {
      * @return {@link UserResponse}.
      */
     @Override
-    public ResponseEntity<UserResponse> apiV1UsersIdGet(String id) {
+    public ResponseEntity<FullUserResponse> apiV1UsersIdGet(String id) {
         UserMessage userMessage = this.userService.retrieveUserById(id);
 
-        UserResponse response = new UserResponse();
-        response.setData(this.userDTOFactory.valueOf(userMessage));
+        FullUserResponse response = new FullUserResponse();
+        response.setData(this.userDTOFactory.fullValueOf(userMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

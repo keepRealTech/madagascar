@@ -1,6 +1,8 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.service.UploadService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.UploadApi;
@@ -48,7 +50,9 @@ public class UploadController implements UploadApi {
 
         UploadUrlListResponse response = new UploadUrlListResponse();
         response.data(uploadUrlDTOList);
-        return null;
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
