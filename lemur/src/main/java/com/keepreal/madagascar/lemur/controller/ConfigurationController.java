@@ -4,6 +4,8 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.AndroidClientConfiguration;
 import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
+import com.keepreal.madagascar.lemur.releaseManager.ReleaseManager;
+import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,7 @@ import java.util.Objects;
 @RestController
 public class ConfigurationController implements ConfigApi {
 
+    private final ReleaseManager releaseManager;
     private final SetupInfoDTO androidSetupInfoDTO;
     private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
     private final Map<Integer, Map<String, Boolean>> androidConfigVersionMap = new HashMap<>();
@@ -37,11 +40,14 @@ public class ConfigurationController implements ConfigApi {
     /**
      * Constructs the configurations controller.
      *
+     * @param releaseManager             {@link ReleaseManager}.
      * @param iosClientConfiguration     IOS client configuration.
      * @param androidClientConfiguration Android client configuration.
      */
-    public ConfigurationController(IOSClientConfiguration iosClientConfiguration,
+    public ConfigurationController(ReleaseManager releaseManager,
+                                   IOSClientConfiguration iosClientConfiguration,
                                    AndroidClientConfiguration androidClientConfiguration) {
+        this.releaseManager = releaseManager;
         this.androidSetupInfoDTO = androidClientConfiguration.getSetupInfo();
         this.androidConfigVersionMap.putAll(androidClientConfiguration.getVersionInfoMap());
         this.iOSConfigVersionMap.putAll(iosClientConfiguration.getVersionInfoMap());
@@ -93,7 +99,10 @@ public class ConfigurationController implements ConfigApi {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
         }
 
-        androidUpdateInfoDTO.setIsLatest(androidUpdateInfoDTO.getCurrentVersion().equals(androidUpdateInfoDTO.getNextVersion()));
+        String userId = HttpContextUtils.getUserIdFromContext();
+        androidUpdateInfoDTO.setIsLatest(
+                this.releaseManager.shouldUpdate(
+                        userId, androidUpdateInfoDTO.getCurrentVersion(), androidUpdateInfoDTO.getNextVersion()));
 
         AndroidUpdateInfoResponse response = new AndroidUpdateInfoResponse();
         response.setData(androidUpdateInfoDTO);
