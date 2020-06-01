@@ -34,7 +34,7 @@ public class SubscriptionService {
 
     private static final int HOST_NUMBER = 1;
     private static final int SUPER_ADMIN_NUMBER = 2;
-    private static final String SUPER_ADMIN_USER_ID = "4";
+    private static final String SUPER_ADMIN_USER_ID = "99999999";
 
     private final SubscriptionRepository subscriptionRepository;
     private final LongIdGenerator idGenerator;
