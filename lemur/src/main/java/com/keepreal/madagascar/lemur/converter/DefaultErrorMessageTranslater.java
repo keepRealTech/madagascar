@@ -34,6 +34,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "登陆失败，你的账号被暂时锁定";
             case REQUEST_FEED_NOT_FOUND_ERROR:
                 return "该动态已被删除";
+            case REQUEST_COMMENT_NOT_FOUND_ERROR:
+                return "该评论已被删除";
             case REQUEST_GRPC_TOKEN_EXPIRED:
                 return "哎呀，重新登录试试";
             default:
