@@ -90,3 +90,9 @@ client:
       address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
       message: first version
       shouldForce: false
+
+aliyun-oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  accessKey: 123
+  accessSecret: 123
+  bucketName: kr-thumbnail-staging-cn2-01
