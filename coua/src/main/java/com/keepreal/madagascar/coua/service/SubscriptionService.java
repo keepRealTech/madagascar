@@ -33,6 +33,8 @@ import java.util.UUID;
 public class SubscriptionService {
 
     private static final int HOST_NUMBER = 1;
+    private static final int SUPER_ADMIN_NUMBER = 2;
+    private static final String SUPER_ADMIN_USER_ID = "4";
 
     private final SubscriptionRepository subscriptionRepository;
     private final LongIdGenerator idGenerator;
@@ -70,6 +72,15 @@ public class SubscriptionService {
                 .userId(hostId)
                 .islanderNumber(HOST_NUMBER)
                 .state(SubscriptionState.HOST.getValue())
+                .build();
+        insertSubscription(subscription);
+
+        Subscription adminSubscription = Subscription.builder()
+                .id(String.valueOf(idGenerator.nextId()))
+                .islandId(islandId)
+                .userId(SubscriptionService.SUPER_ADMIN_USER_ID)
+                .islanderNumber(SubscriptionService.SUPER_ADMIN_NUMBER)
+                .state(SubscriptionState.SUPER_ADMIN.getValue())
                 .build();
         insertSubscription(subscription);
     }
