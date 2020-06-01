@@ -90,7 +90,7 @@ client:
     updateInfoMap:
       1:
         currentVersion: 1
-        nextVersion: 1
+        nextVersion: 2
         address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
         message: first version
         shouldForce: false

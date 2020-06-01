@@ -33,6 +33,7 @@ public class GeneralConfiguration {
         switch (this.androidUpgradeStrategy) {
             case("Stochastic"):
                 return new StochasticReleaseManager(androidUpgradeRatio);
+            case("Default"):
             default:
                 return new DefaultReleaseManager();
         }
