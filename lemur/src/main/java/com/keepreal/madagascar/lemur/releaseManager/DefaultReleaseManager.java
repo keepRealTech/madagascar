@@ -20,7 +20,7 @@ public class DefaultReleaseManager implements ReleaseManager {
         Assert.notNull(currentVersion, "Current version should not be null.");
         Assert.notNull(nextVersion, "Next version should not be null.");
 
-        return currentVersion.equals(nextVersion);
+        return !currentVersion.equals(nextVersion);
     }
 
 }
