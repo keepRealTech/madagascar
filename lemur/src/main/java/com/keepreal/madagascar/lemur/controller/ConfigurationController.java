@@ -101,7 +101,7 @@ public class ConfigurationController implements ConfigApi {
 
         String userId = HttpContextUtils.getUserIdFromContext();
         androidUpdateInfoDTO.setIsLatest(
-                this.releaseManager.shouldUpdate(
+                !this.releaseManager.shouldUpdate(
                         userId, androidUpdateInfoDTO.getCurrentVersion(), androidUpdateInfoDTO.getNextVersion()));
 
         AndroidUpdateInfoResponse response = new AndroidUpdateInfoResponse();

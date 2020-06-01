@@ -67,6 +67,8 @@ general:
   singleOfficialIslandId: "6668436831391973376"
   officialIslandIdList:
     - "6668436831391973376"
+  android-upgrade-strategy: Stochastic
+  android-upgrade-ratio: 100
 
 client:
   android:
