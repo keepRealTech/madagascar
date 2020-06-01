@@ -245,13 +245,23 @@ public class IslandController implements IslandApi {
      *
      * @param page     page number (optional, default to 0)
      * @param pageSize size of a page (optional, default to 10)
-     * @return {@link BriefIslandsResponse}.
+     * @return {@link swagger.model.IslandsResponse}.
      */
     @Override
-    public ResponseEntity<BriefIslandsResponse> apiV1IslandsDefaultIslandsGet(String islandId, Integer page, Integer pageSize) {
+    public ResponseEntity<swagger.model.IslandsResponse> apiV1IslandsDefaultIslandsGet(String islandId, Integer page, Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         IslandsResponse islandsResponse = islandService.retrieveDefaultIslands(userId, islandId, page, pageSize);
-        return this.BuildBriefIslandsResponse(islandsResponse);
+
+        swagger.model.IslandsResponse response = new swagger.model.IslandsResponse();
+        response.setData(islandsResponse.getIslandsList()
+                .stream()
+                .map(this.islandDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setPageInfo(PaginationUtils.getPageInfo(islandsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
