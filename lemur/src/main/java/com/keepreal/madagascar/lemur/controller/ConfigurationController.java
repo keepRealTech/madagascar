@@ -93,6 +93,8 @@ public class ConfigurationController implements ConfigApi {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
         }
 
+        androidUpdateInfoDTO.setIsLatest(androidUpdateInfoDTO.getCurrentVersion().equals(androidUpdateInfoDTO.getNextVersion()));
+
         AndroidUpdateInfoResponse response = new AndroidUpdateInfoResponse();
         response.setData(androidUpdateInfoDTO);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());

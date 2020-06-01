@@ -43,6 +43,7 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                         "/api/v1/refreshToken**",
                         "/api/v1/configs**",
                         "/api/v1/setupInfo/**",
+                        "/api/v1/updateInfo/**",
                         "/api/v1/islands/{\\d+}/poster**").permitAll()
                 .anyRequest().authenticated();
 
