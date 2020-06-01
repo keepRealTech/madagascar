@@ -11,7 +11,7 @@ common_configs:
 images:
   lemur:
     name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-    tag: 1.0.3
+    tag: 1.0.4
     imagePullPolicy: Always
 
 coua:
@@ -56,17 +56,17 @@ client:
   android:
     setup:
       version: 1
-      address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
+      address: https://images.keepreal.cn/tiaodao_v100_kr.apk
     androidChannelMap:
-      a360: true
+      a360: false
       oppo: false
       vivo: false
-      xiaomi: true
-      huawei: true
-      baidu: true
+      xiaomi: false
+      huawei: false
+      baidu: false
       wandoujia: true
       yingyongbao: true
-      lianxiang: true
+      lianxiang: false
       kr: true
     updateInfo:
       currentVersion: 1

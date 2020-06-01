@@ -14,6 +14,7 @@ public enum SubscriptionState {
     LEAVE(-1),
     HOST(1),
     ISLANDER(2),
+    SUPER_ADMIN(99),
     ;
     private int value;
 
