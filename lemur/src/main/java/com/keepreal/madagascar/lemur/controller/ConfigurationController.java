@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.controller;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.AndroidClientConfiguration;
+import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,27 +28,25 @@ import java.util.Objects;
 @RestController
 public class ConfigurationController implements ConfigApi {
 
-    private final SetupInfoDTO setupInfoDTO;
+    private final SetupInfoDTO androidSetupInfoDTO;
     private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
-    private final Map<String, Boolean> androidChannelMap;
+    private final Map<Integer, Map<String, Boolean>> androidConfigVersionMap = new HashMap<>();
     private final Map<Integer, UpdateInfoDTO> iOSUpdateInfoMap = new HashMap<>();
     private final Map<Integer, UpdateInfoDTO> androidUpdateInfoMap = new HashMap<>();
 
-    public ConfigurationController(AndroidClientConfiguration androidClientConfiguration) {
-        this.setupInfoDTO = new SetupInfoDTO();
-        this.setupInfoDTO.setVerion(androidClientConfiguration.getSetup().getVersion());
-        this.setupInfoDTO.setAddress(androidClientConfiguration.getSetup().getAddress());
-        this.androidChannelMap = androidClientConfiguration.getAndroidChannelMap();
-
-        this.iOSConfigVersionMap.put(
-                100, this.createIOSConfigurationDTO(10, 100, 10, 5, 10, 1000, false));
-
-        UpdateInfoDTO androidUpdateInfoDTO = androidClientConfiguration.getUpdateInfo();
-        Integer currentVersion = androidUpdateInfoDTO.getCurrentVersion();
-        Integer nextVersion = androidUpdateInfoDTO.getNextVersion();
-        androidUpdateInfoDTO.isLatest(currentVersion.equals(nextVersion));
-        this.iOSUpdateInfoMap.put(androidUpdateInfoDTO.getCurrentVersion(), androidUpdateInfoDTO);
-        this.androidUpdateInfoMap.put(androidUpdateInfoDTO.getCurrentVersion(), androidUpdateInfoDTO);
+    /**
+     * Constructs the configurations controller.
+     *
+     * @param iosClientConfiguration     IOS client configuration.
+     * @param androidClientConfiguration Android client configuration.
+     */
+    public ConfigurationController(IOSClientConfiguration iosClientConfiguration,
+                                   AndroidClientConfiguration androidClientConfiguration) {
+        this.androidSetupInfoDTO = androidClientConfiguration.getSetupInfo();
+        this.androidConfigVersionMap.putAll(androidClientConfiguration.getVersionInfoMap());
+        this.iOSConfigVersionMap.putAll(iosClientConfiguration.getVersionInfoMap());
+        this.androidUpdateInfoMap.putAll(androidClientConfiguration.getUpdateInfoMap());
+        this.iOSUpdateInfoMap.putAll(iosClientConfiguration.getUpdateInfoMap());
     }
 
     /**
@@ -65,7 +64,7 @@ public class ConfigurationController implements ConfigApi {
                 configurationDTO = this.iOSConfigVersionMap.get(version);
                 break;
             case ANDROID:
-                configurationDTO = this.createAndroidConfigurationDTO(channel);
+                configurationDTO = this.createAndroidConfigurationDTO(version, channel);
                 break;
             default:
         }
@@ -130,45 +129,31 @@ public class ConfigurationController implements ConfigApi {
     @Override
     public ResponseEntity<AndroidSetupInfoResponse> apiV1SetupInfoAndroidGet() {
         AndroidSetupInfoResponse response = new AndroidSetupInfoResponse();
-        response.setData(this.setupInfoDTO);
+        response.setData(this.androidSetupInfoDTO);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
-     * Create ConfigurationDTO
+     * Constructs the android configuration DTOs.
      *
-     * @param islandFeedLoopInterval
-     * @param myIslandsPageSize
-     * @param messageLoopInterval
-     * @param guestPageSize
-     * @param islandCheckInterval
-     * @param configTimeout
-     * @param audit
-     * @return {@link ConfigurationDTO}
+     * @param version Query version.
+     * @param channel Channel name.
+     * @return {@link ConfigurationDTO}.
      */
-    private ConfigurationDTO createIOSConfigurationDTO(Integer islandFeedLoopInterval,
-                                                       Integer myIslandsPageSize,
-                                                       Integer messageLoopInterval,
-                                                       Integer guestPageSize,
-                                                       Integer islandCheckInterval,
-                                                       Integer configTimeout,
-                                                       Boolean audit) {
+    private ConfigurationDTO createAndroidConfigurationDTO(Integer version, String channel) {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
-        configurationDTO.setIslandFeedLoopInterval(islandFeedLoopInterval);
-        configurationDTO.setMyIslandsPageSize(myIslandsPageSize);
-        configurationDTO.setMessageLoopInterval(messageLoopInterval);
-        configurationDTO.setGuestPageSize(guestPageSize);
-        configurationDTO.setIslandCheckInterval(islandCheckInterval);
-        configurationDTO.setConfigTimeout(configTimeout);
-        configurationDTO.setAudit(audit);
-        return configurationDTO;
-    }
+        configurationDTO.setIsAccountLogin(false);
+        Map<String, Boolean> channelMap = this.androidConfigVersionMap.get(version);
 
-    private ConfigurationDTO createAndroidConfigurationDTO(String channel) {
-        ConfigurationDTO configurationDTO = new ConfigurationDTO();
-        configurationDTO.setIsAccountLogin(androidChannelMap.get(channel) == null ? false : androidChannelMap.get(channel));
+        if (Objects.isNull(channelMap)
+                || Objects.isNull(channelMap.get(channel))
+                || !channelMap.get(channel)) {
+            return configurationDTO;
+        }
+
+        configurationDTO.setIsAccountLogin(true);
         return configurationDTO;
     }
 
