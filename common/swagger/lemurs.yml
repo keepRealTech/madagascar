@@ -105,7 +105,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/FullUserResponse'
     put:
       tags:
         - User
@@ -1033,6 +1033,15 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/IdentityType'
+    FullUserDTO:
+      allOf:
+        - $ref: '#/components/schemas/UserDTO'
+        - type: object
+          properties:
+            createdIslands:
+              type: array
+              items:
+                $ref: '#/components/schemas/BriefIslandDTO'
     PutUserPayload:
       type: object
       properties:
@@ -1066,6 +1075,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UserDTO'
+    FullUserResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FullUserDTO'
     UsersResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
