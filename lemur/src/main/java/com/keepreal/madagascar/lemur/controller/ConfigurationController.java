@@ -40,7 +40,7 @@ public class ConfigurationController implements ConfigApi {
         this.androidChannelMap = androidClientConfiguration.getAndroidChannelMap();
 
         this.iOSConfigVersionMap.put(
-                100, this.createIOSConfigurationDTO(10, 100, 10, 5, 10, 1000, true));
+                100, this.createIOSConfigurationDTO(10, 100, 10, 5, 10, 1000, false));
 
         UpdateInfoDTO androidUpdateInfoDTO = androidClientConfiguration.getUpdateInfo();
         Integer currentVersion = androidUpdateInfoDTO.getCurrentVersion();
