@@ -62,6 +62,8 @@ import java.util.stream.Collectors;
 @RestController
 public class FeedController implements FeedApi {
 
+    private static final String SUPER_ADMIN_USER_ID = "4";
+
     private final ImageService imageService;
     private final FeedService feedService;
     private final IslandService islandService;
@@ -165,7 +167,9 @@ public class FeedController implements FeedApi {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
         IslandMessage islandMessage = this.islandService.retrieveIslandById(feedMessage.getIslandId());
-        if (!userId.equals(islandMessage.getHostId()) && !userId.equals(feedMessage.getUserId())) {
+        if (!userId.equals(FeedController.SUPER_ADMIN_USER_ID)
+                && !userId.equals(islandMessage.getHostId())
+                && !userId.equals(feedMessage.getUserId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
