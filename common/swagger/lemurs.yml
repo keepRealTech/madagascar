@@ -17,6 +17,8 @@ tags:
     description: Feed stream controllers
   - name: Comment
     description: Comments controllers
+  - name: Upload
+    description: Upload file controllers
   - name: Reaction
     description: Reactions controllers such as likes
   - name: Notification
@@ -603,6 +605,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/upload/getVideoUrl:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/fileNameInQuery'
+      tags:
+        - Upload
+      summary: retrieves upload video url
+      responses:
+        '200':
+          description: retrieve upload url
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlResponse'
+  /api/v1/upload/getImageUrls:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/fileNameArrayInQuery'
+      tags:
+        - Upload
+      summary: retrieves upload image url
+      responses:
+        '200':
+          description: retrieve image url
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlListResponse'
   /api/v1/notifications:
     get:
       parameters:
@@ -771,6 +801,22 @@ components:
       required: false
       schema:
         type: boolean
+    fileNameInQuery:
+      in: query
+      name: fileName
+      description: fileName
+      required: true
+      schema:
+        type: string
+    fileNameArrayInQuery:
+      in: query
+      name: fileNameList
+      description: fileNameList
+      required: true
+      schema:
+        type: array
+        items:
+          type: string
     notificationTypeInQuery:
       in: query
       name: type
@@ -1502,6 +1548,29 @@ components:
           type: integer
         UnreadIslandNoticesCount:
           type: integer
+    UploadUrlDTO:
+      type: object
+      properties:
+        objectName:
+          type: string
+        url:
+          type: string
+    UploadUrlResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UploadUrlDTO'
+    UploadUrlListResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UploadUrlDTO'
     NotificationsCountResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
