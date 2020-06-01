@@ -62,7 +62,7 @@ import java.util.stream.Collectors;
 @RestController
 public class FeedController implements FeedApi {
 
-    private static final String SUPER_ADMIN_USER_ID = "4";
+    private static final String SUPER_ADMIN_USER_ID = "99999999";
 
     private final ImageService imageService;
     private final FeedService feedService;
