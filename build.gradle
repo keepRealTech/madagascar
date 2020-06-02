@@ -62,7 +62,7 @@ subprojects {
         }
     }
 
-    // Defines 1 tasks
+    // Defines docker tasks
     plugins.withId('com.palantir.docker') {
         task unpack(type: Copy) {
             dependsOn bootJar
