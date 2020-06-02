@@ -1,7 +1,9 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.service.UploadService;
+import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,6 +42,11 @@ public class UploadController implements UploadApi {
      */
     @Override
     public ResponseEntity<UploadUrlListResponse> apiV1UploadMediaUrlsPost(MediaUrlsRequest mediaUrlsRequest) {
+
+        if (mediaUrlsRequest.getFileNames().size() > 9 || mediaUrlsRequest.getFileNames().size() == 0) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+        }
+
         List<UploadUrlDTO> uploadUrlDTOList = mediaUrlsRequest.getFileNames().stream().map(fileName -> {
             UploadUrlDTO dto = new UploadUrlDTO();
             String objectName = generatorObjectName(fileName);

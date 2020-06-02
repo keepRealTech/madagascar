@@ -96,3 +96,4 @@ aliyun-oss:
   accessKey: 123
   accessSecret: 123
   bucketName: kr-thumbnail-staging-cn2-01
+  expireTime: 30

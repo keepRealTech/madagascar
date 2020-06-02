@@ -16,6 +16,7 @@ public class OssClientConfiguration {
     private String accessKey;
     private String accessSecret;
     private String bucketName;
+    private Integer expireTime;
 
     @Bean
     public OSS ossClient() {

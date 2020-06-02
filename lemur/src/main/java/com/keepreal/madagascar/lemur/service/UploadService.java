@@ -18,6 +18,7 @@ public class UploadService {
 
     private final OSS ossClient;
     private final String bucketName;
+    private final Integer expireTime;
 
     /**
      * Constructs the upload service.
@@ -29,6 +30,7 @@ public class UploadService {
                          OssClientConfiguration configuration) {
         this.ossClient = ossClient;
         this.bucketName = configuration.getBucketName();
+        this.expireTime = configuration.getExpireTime();
     }
 
     /**
@@ -39,7 +41,7 @@ public class UploadService {
      */
     public String retrieveUploadUrl(String objectName) {
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, objectName, HttpMethod.PUT);
-        LocalDateTime localDateTime = LocalDateTime.now().plusSeconds(30L);
+        LocalDateTime localDateTime = LocalDateTime.now().plusSeconds(expireTime);
         Date date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
         // 设置过期时间。
         request.setExpiration(date);
