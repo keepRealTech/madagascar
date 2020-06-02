@@ -5,4 +5,4 @@ metadata:
   namespace: {{ .Values.common_configs.namespace }}
 data:
   good-dictionary.txt: |-
-  {{ .Files.Get "good-dictionary.txt"}}
+    {{ .Files.Get "good-dictionary.txt" | b64enc }}
