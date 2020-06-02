@@ -53,8 +53,6 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
-            - name: RESTART
-              value: 'false'
           volumeMounts:
             - name: lemur-dictionary
               mountPath: "/app/good-dictionary.txt"
