@@ -66,3 +66,8 @@ security:
   oauth2:
     resource:
       token_info_uri: http://baobob:8080/oauth/check_token
+
+aliyun_oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  bucketName: kr-thumbnail-staging-cn2-01
+  expireTimeInSeconds: 30

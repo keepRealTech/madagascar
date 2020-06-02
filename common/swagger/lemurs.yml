@@ -662,24 +662,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
-  /api/v1/upload/getVideoUrl:
-    get:
-      parameters:
-        - $ref: '#/components/parameters/fileNameInQuery'
-      tags:
-        - Upload
-      summary: retrieves upload video url
-      responses:
-        '200':
-          description: retrieve upload url
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UploadUrlResponse'
-  /api/v1/upload/getImageUrls:
-    get:
-      parameters:
-        - $ref: '#/components/parameters/fileNameArrayInQuery'
+  /api/v1/upload/mediaUrls:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/mediaUrlsRequest'
       tags:
         - Upload
       summary: retrieves upload image url
@@ -865,15 +855,6 @@ components:
       required: true
       schema:
         type: string
-    fileNameArrayInQuery:
-      in: query
-      name: fileNameList
-      description: fileNameList
-      required: true
-      schema:
-        type: array
-        items:
-          type: string
     notificationTypeInQuery:
       in: query
       name: type
@@ -1204,6 +1185,15 @@ components:
           description: island secret
       required:
         - secret
+    mediaUrlsRequest:
+      type: object
+      properties:
+        fileNames:
+          type: array
+          items:
+            type: string
+      required:
+        - fileNames
     CheckIslandResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1669,13 +1659,6 @@ components:
           type: string
         url:
           type: string
-    UploadUrlResponse:
-      allOf:
-        - $ref: '#/components/schemas/CommonResponse'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/UploadUrlDTO'
     UploadUrlListResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

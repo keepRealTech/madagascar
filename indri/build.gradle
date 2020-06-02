@@ -22,7 +22,7 @@ dependencies {
     implementation 'io.projectreactor:reactor-core'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
     implementation 'com.salesforce.servicelibs:reactor-grpc-stub'
-    implementation 'com.aliyun.oss:aliyun-sdk-oss:3.9.0'
+    implementation 'com.aliyun.oss:aliyun-sdk-oss'
     implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'
     implementation 'io.opentracing.contrib:opentracing-grpc'
     implementation 'org.projectlombok:lombok'

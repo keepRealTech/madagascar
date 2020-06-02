@@ -109,3 +109,10 @@ client:
       100:
         currentVersion: 100
         nextVersion: 100
+
+aliyun-oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  accessKey: 123
+  accessSecret: 123
+  bucketName: kr-thumbnail-staging-cn2-01
+  expireTimeInSeconds: 30
