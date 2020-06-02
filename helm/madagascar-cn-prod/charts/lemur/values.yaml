@@ -67,7 +67,7 @@ client:
       wandoujia: true
       yingyongbao: true
       lianxiang: false
-      kr: true
+      kr: false
     updateInfo:
       currentVersion: 1
       nextVersion: 1
