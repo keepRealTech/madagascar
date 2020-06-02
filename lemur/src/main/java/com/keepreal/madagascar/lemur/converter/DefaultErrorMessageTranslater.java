@@ -20,6 +20,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "登录失败，请重试";
             case REQUEST_ISLAND_NAME_EXISTED_ERROR:
                 return "名称已被占用，请换一个";
+            case REQUEST_NAME_INVALID:
+                return "名称不符合规范，请换一个";
             case REQUEST_ISLAND_SECRET_ERROR:
                 return "暗号不对，终止交易，请重试";
             case REQUEST_GRPC_IMAGE_UPLOAD_ERROR:

@@ -64,6 +64,7 @@ general:
   singleOfficialIslandId: "6668436831391973376"
   officialIslandIdList:
     - "6668436831391973376"
+  sensitive-words-file-path: /app/good-dictionary.txt
 
 client:
   android:
