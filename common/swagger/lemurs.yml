@@ -1876,7 +1876,7 @@ components:
     SetupInfoDTO:
       type: object
       properties:
-        verion:
+        version:
           type: integer
         address:
           type: string
