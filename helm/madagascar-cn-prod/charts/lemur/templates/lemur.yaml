@@ -57,6 +57,10 @@ spec:
             - name: lemur-dictionary
               mountPath: "/app/good-dictionary.txt"
               subPath: "good-dictionary.txt"
+          volumes:
+            - name: lemur-dictionary
+              configMap:
+                name: lemur-dictionary
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}
