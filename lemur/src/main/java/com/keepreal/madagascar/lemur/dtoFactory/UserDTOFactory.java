@@ -129,30 +129,6 @@ public class UserDTOFactory {
         return briefUserDTO;
     }
 
-    public FullUserDTO fullValueOf(UserMessage user) {
-        if (Objects.isNull(user)) {
-            return null;
-        }
-        FullUserDTO fullUserDTO = new FullUserDTO();
-        fullUserDTO.setId(user.getId());
-        fullUserDTO.setDisplayId(user.getDisplayId());
-        fullUserDTO.setName(user.getName());
-        fullUserDTO.setCity(user.getCity());
-        fullUserDTO.setBirthday(Date.valueOf(user.getBirthday()));
-        fullUserDTO.setDescription(user.getDescription());
-        fullUserDTO.setPortraitImageUri(user.getPortraitImageUri());
-        fullUserDTO.setGender(this.convertGender(user.getGender()));
-        fullUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
-        fullUserDTO.setCreatedAt(user.getCreatedAt());
-        fullUserDTO.setIdentityTypes(user.getIdentitiesList()
-                .stream()
-                .map(this::convertIdentityType)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList()));
-        //todo: set createdIslands
-        return fullUserDTO;
-    }
-
     /**
      * Converts {@link Gender} to {@link GenderType}.
      *
