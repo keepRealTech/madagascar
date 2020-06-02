@@ -4,6 +4,7 @@ import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
@@ -19,6 +20,7 @@ import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.RepostService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import com.keepreal.madagascar.lemur.textFilter.TextContentFilter;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -72,6 +74,7 @@ public class IslandController implements IslandApi {
     private final FeedDTOFactory feedDTOFactory;
     private final RepostDTOFactory repostDTOFactory;
     private final GeneralConfiguration generalConfiguration;
+    private final TextContentFilter textContentFilter;
 
     /**
      * Constructs the island controller.
@@ -86,6 +89,7 @@ public class IslandController implements IslandApi {
      * @param feedDTOFactory       {@link FeedDTOFactory}.
      * @param repostDTOFactory     {@link RepostDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
+     * @param textContentFilter    {@link TextContentFilter}.
      */
     public IslandController(ImageService imageService,
                             IslandService islandService,
@@ -96,7 +100,8 @@ public class IslandController implements IslandApi {
                             FeedService feedService,
                             FeedDTOFactory feedDTOFactory,
                             RepostDTOFactory repostDTOFactory,
-                            GeneralConfiguration generalConfiguration) {
+                            GeneralConfiguration generalConfiguration,
+                            TextContentFilter textContentFilter) {
         this.imageService = imageService;
         this.islandService = islandService;
         this.repostService = repostService;
@@ -107,6 +112,7 @@ public class IslandController implements IslandApi {
         this.feedDTOFactory = feedDTOFactory;
         this.repostDTOFactory = repostDTOFactory;
         this.generalConfiguration = generalConfiguration;
+        this.textContentFilter = textContentFilter;
     }
 
     /**
@@ -117,7 +123,10 @@ public class IslandController implements IslandApi {
      */
     @Override
     public ResponseEntity<CheckIslandResponse> apiV1IslandsCheckNameGet(String name) {
-        boolean ifExists = this.islandService.checkName(name);
+        boolean ifExists = this.textContentFilter.isDisallowed(name);
+        if (!ifExists) {
+            ifExists = this.islandService.checkName(name);
+        }
 
         CheckIslandDTO checkIslandDTO = new CheckIslandDTO();
         checkIslandDTO.setIsExisted(ifExists);
@@ -314,6 +323,10 @@ public class IslandController implements IslandApi {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        if (this.textContentFilter.isDisallowed(payload.getName())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_NAME_EXISTED_ERROR);
+        }
+
         String portraitImageUri = null;
         if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
             portraitImageUri = this.imageService.uploadSingleImage(portraitImage);
@@ -346,6 +359,10 @@ public class IslandController implements IslandApi {
 
         if (Objects.isNull(payload)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.textContentFilter.isDisallowed(payload.getName())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_NAME_EXISTED_ERROR);
         }
 
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
