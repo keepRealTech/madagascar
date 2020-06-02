@@ -3,7 +3,7 @@ package com.keepreal.madagascar.lemur.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import swagger.model.SetupInfoDTO;
+import swagger.model.ConfigurationDTO;
 import swagger.model.UpdateInfoDTO;
 
 import java.util.Map;
@@ -12,12 +12,11 @@ import java.util.Map;
  * Represents the android client configuration.
  */
 @Configuration
-@ConfigurationProperties(prefix = "client.android", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "client.ios", ignoreUnknownFields = false)
 @Data
-public class AndroidClientConfiguration {
+public class IOSClientConfiguration {
 
-    private SetupInfoDTO setupInfo;
-    private Map<Integer, Map<String, Boolean>> versionInfoMap;
+    private Map<Integer, ConfigurationDTO> versionInfoMap;
     private Map<Integer, UpdateInfoDTO> updateInfoMap;
 
 }

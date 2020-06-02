@@ -8,9 +8,11 @@ import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
+import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,7 +58,7 @@ public class UserController implements UserApi {
      * Implements the get user by id api.
      *
      * @param id User id.
-     * @return {@link UserResponse}.
+     * @return {@link FullUserResponse}.
      */
     @Override
     public ResponseEntity<FullUserResponse> apiV1UsersIdGet(String id) {

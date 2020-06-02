@@ -67,29 +67,47 @@ general:
   singleOfficialIslandId: "6668436831391973376"
   officialIslandIdList:
     - "6668436831391973376"
+  android-upgrade-strategy: Stochastic
+  android-upgrade-ratio: 100
 
 client:
   android:
-    setup:
+    setupInfo:
       version: 1
       address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
-    androidChannelMap:
-      a360: true
-      oppo: true
-      vivo: false
-      xiaomi: true
-      huawei: true
-      baidu: true
-      wandoujia: true
-      yingyongbao: true
-      lianxiang: true
-      kr: true
-    updateInfo:
-      currentVersion: 1
-      nextVersion: 1
-      address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
-      message: first version
-      shouldForce: false
+    versionInfoMap:
+      1:
+        a360: false
+        oppo: false
+        vivo: false
+        xiaomi: false
+        huawei: false
+        baidu: false
+        wandoujia: false
+        yingyongbao: false
+        lianxiang: false
+        kr: false
+    updateInfoMap:
+      1:
+        currentVersion: 1
+        nextVersion: 1
+        address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
+        message: first version
+        shouldForce: false
+  ios:
+    versionInfoMap:
+      100:
+        island-feed-loop-interval: 10
+        myIslands-page-size: 100
+        message-loop-interval: 10
+        guest-page-size: 5
+        island-check-interval: 10
+        config-timeout: 1000
+        audit: false
+    updateInfoMap:
+      100:
+        currentVersion: 100
+        nextVersion: 100
 
 aliyun-oss:
   endpoint: oss-cn-beijing.aliyuncs.com

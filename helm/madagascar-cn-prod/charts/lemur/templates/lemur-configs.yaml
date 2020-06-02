@@ -24,21 +24,32 @@ data:
   ROCKETMQ_STATSEVENT_TOPIC: {{ .Values.rocketmq.topic }}
   ROCKETMQ_STATSEVENT_TAG: {{ .Values.rocketmq.tag }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
-  CLIENT_ANDROID_SETUP_VERSION: '{{ .Values.client.android.setup.version }}'
-  CLIENT_ANDROID_SETUP_ADDRESS: {{ .Values.client.android.setup.address }}
-  CLIENT_ANDROID_ANDROIDCHANNELMAP_A360: '{{ .Values.client.android.androidChannelMap.a360 }}'
-  CLIENT_ANDROID_ANDROIDCHANNELMAP_OPPO: '{{ .Values.client.android.androidChannelMap.oppo }}'
-  CLIENT_ANDROID_ANDROIDCHANNELMAP_VIVO: '{{ .Values.client.android.androidChannelMap.vivo }}'
-  CLIENT_ANDROID_ANDROIDCHANNELMAP_XIAOMI: '{{ .Values.client.android.androidChannelMap.xiaomi }}'
-  CLIENT_ANDROID_ANDROIDCHANNELMAP_HUAWEI: '{{ .Values.client.android.androidChannelMap.huawei }}'
-  CLIENT_ANDROID_ANDROIDCHANNELMAP_BAIDU: '{{ .Values.client.android.androidChannelMap.baidu }}'
-  CLIENT_ANDROID_ANDROIDCHANNELMAP_WANDOUJIA: '{{ .Values.client.android.androidChannelMap.wandoujia }}'
-  CLIENT_ANDROID_ANDROIDCHANNELMAP_YINGYONGBAO: '{{ .Values.client.android.androidChannelMap.yingyongbao }}'
-  CLIENT_ANDROID_ANDROIDCHANNELMAP_LIANXIANG: '{{ .Values.client.android.androidChannelMap.lianxiang }}'
-  CLIENT_ANDROID_ANDROIDCHANNELMAP_KR: '{{ .Values.client.android.androidChannelMap.kr }}'
-  CLIENT_ANDROID_UPDATEINFO_CURRENTVERSION: '{{ .Values.client.android.updateInfo.currentVersion }}'
-  CLIENT_ANDROID_UPDATEINFO_NEXTVERSION: '{{ .Values.client.android.updateInfo.nextVersion }}'
-  CLIENT_ANDROID_UPDATEINFO_ADDRESS: {{ .Values.client.android.updateInfo.address }}
-  CLIENT_ANDROID_UPDATEINFO_MESSAGE: {{ .Values.client.android.updateInfo.message }}
-  CLIENT_ANDROID_UPDATEINFO_SHOULDFORCE: '{{ .Values.client.android.updateInfo.shouldForce }}'
+  CLIENT_ANDROID_SETUPINFO_VERSION: '{{ .Values.client.android.setup_info.version }}'
+  CLIENT_ANDROID_SETUPINFO_ADDRESS: {{ .Values.client.android.setup_info.address }}
   SECURITY_OAUTH2_RESOURCE_TOKENINFOURI: {{ .Values.security.oauth2.resource.token_info_uri }}
+  GENERAL_ANDROIDUPGRADESTRATEGY: '{{ .Values.release.strategy }}'
+  GENERAL_ANDROIDUPGRADERATIO: '{{ .Values.release.ratio }}'
+  CLIENT_ANDROID_VERSIONINFOMAP_1_A360: 'false'
+  CLIENT_ANDROID_VERSIONINFOMAP_1_OPPO: 'false'
+  CLIENT_ANDROID_VERSIONINFOMAP_1_VIVO: 'false'
+  CLIENT_ANDROID_VERSIONINFOMAP_1_XIAOMI: 'false'
+  CLIENT_ANDROID_VERSIONINFOMAP_1_HUAWEI: 'false'
+  CLIENT_ANDROID_VERSIONINFOMAP_1_BAIDU: 'false'
+  CLIENT_ANDROID_VERSIONINFOMAP_1_WANDOUJIA: 'false'
+  CLIENT_ANDROID_VERSIONINFOMAP_1_YINGYONGBAO: 'false'
+  CLIENT_ANDROID_VERSIONINFOMAP_1_LIANXIANG: 'false'
+  CLIENT_ANDROID_VERSIONINFOMAP_1_KR: 'false'
+  CLIENT_ANDROID_UPDATEINFOMAP_1_CURRENTVERSION: '1'
+  CLIENT_ANDROID_UPDATEINFOMAP_1_NEXTVERSION: '1'
+  CLIENT_ANDROID_UPDATEINFOMAP_1_ADDRESS: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
+  CLIENT_ANDROID_UPDATEINFOMAP_1_MESSAGE: first version
+  CLIENT_ANDROID_UPDATEINFOMAP_1_SHOULDFORCE: 'false'
+  CLIENT_IOS_VERSIONINFOMAP_100_ISLANDFEEDLOOPINTERVAL: '10'
+  CLIENT_IOS_VERSIONINFOMAP_100_MYISLANDS-PAGE-SIZE: '100'
+  CLIENT_IOS_VERSIONINFOMAP_100_MESSAGE-LOOP-INTERVAL: '10'
+  CLIENT_IOS_VERSIONINFOMAP_100_GUEST-PAGE-SIZE: '5'
+  CLIENT_IOS_VERSIONINFOMAP_100_ISLAND-CHECK-INTERVAL: '10'
+  CLIENT_IOS_VERSIONINFOMAP_100_CONFIG-TIMEOUT: '1000'
+  CLIENT_IOS_VERSIONINFOMAP_100_AUDIT: 'false'
+  CLIENT_IOS_UPDATEINFOMAP_100_CURRENTVERSION: '100'
+  CLIENT_IOS_UPDATEINFOMAP_100_NEXTVERSION: '100'

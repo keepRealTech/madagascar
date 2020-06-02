@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefUserDTO;
 import swagger.model.FullUserDTO;
@@ -19,6 +20,21 @@ import java.util.stream.Collectors;
  */
 @Component
 public class UserDTOFactory {
+
+    private final IslandService islandService;
+    private final IslandDTOFactory islandDTOFactory;
+
+    /**
+     * Constructs the user dto factory.
+     *
+     * @param islandService    {@link IslandService}.
+     * @param islandDTOFactory {@link IslandDTOFactory}.
+     */
+    public UserDTOFactory(IslandService islandService,
+                          IslandDTOFactory islandDTOFactory) {
+        this.islandService = islandService;
+        this.islandDTOFactory = islandDTOFactory;
+    }
 
     /**
      * Converts {@link UserMessage} to {@link UserDTO}.
@@ -49,6 +65,46 @@ public class UserDTOFactory {
                 .collect(Collectors.toList()));
 
         return userDTO;
+    }
+
+    /**
+     * Converts {@link UserMessage} to {@link FullUserDTO}.
+     *
+     * @param user {@link UserMessage}.
+     * @return {@link FullUserDTO}.
+     */
+    public FullUserDTO fullValueOf(UserMessage user) {
+        if (Objects.isNull(user)) {
+            return null;
+        }
+
+        FullUserDTO fullUserDTO = new FullUserDTO();
+        fullUserDTO.setId(user.getId());
+        fullUserDTO.setDisplayId(user.getDisplayId());
+        fullUserDTO.setName(user.getName());
+        fullUserDTO.setCity(user.getCity());
+        fullUserDTO.setBirthday(Date.valueOf(user.getBirthday()));
+        fullUserDTO.setDescription(user.getDescription());
+        fullUserDTO.setPortraitImageUri(user.getPortraitImageUri());
+        fullUserDTO.setGender(this.convertGender(user.getGender()));
+        fullUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
+        fullUserDTO.setCreatedAt(user.getCreatedAt());
+
+        fullUserDTO.setIdentityTypes(
+                user.getIdentitiesList()
+                        .stream()
+                        .map(this::convertIdentityType)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
+
+        fullUserDTO.setCreatedIslands(
+                this.islandService.retrieveIslands(null, fullUserDTO.getId(), null, 0, Integer.MAX_VALUE)
+                        .getIslandsList()
+                        .stream()
+                        .map(this.islandDTOFactory::briefValueOf)
+                        .collect(Collectors.toList()));
+
+        return fullUserDTO;
     }
 
     /**

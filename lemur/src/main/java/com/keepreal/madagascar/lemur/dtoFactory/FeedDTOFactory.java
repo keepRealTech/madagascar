@@ -146,7 +146,8 @@ public class FeedDTOFactory {
 
         IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
         UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
-        Map<String, Boolean> stateMap = islandService.retrieveIslandSubscribeStateByUserId(feed.getUserId(), Collections.singletonList(feed.getIslandId()));
+        Map<String, Boolean> stateMap = this.islandService.retrieveIslandSubscribeStateByUserId(
+                feed.getUserId(), Collections.singletonList(feed.getIslandId()));
 
         SnapshotFeedDTO snapshotFeedDTO = new SnapshotFeedDTO();
         snapshotFeedDTO.setId(feed.getId());
