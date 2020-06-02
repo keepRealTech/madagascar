@@ -77,20 +77,20 @@ client:
       address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
     versionInfoMap:
       1:
-        a360: true
-        oppo: true
+        a360: false
+        oppo: false
         vivo: false
-        xiaomi: true
-        huawei: true
-        baidu: true
-        wandoujia: true
-        yingyongbao: true
-        lianxiang: true
-        kr: true
+        xiaomi: false
+        huawei: false
+        baidu: false
+        wandoujia: false
+        yingyongbao: false
+        lianxiang: false
+        kr: false
     updateInfoMap:
       1:
         currentVersion: 1
-        nextVersion: 2
+        nextVersion: 1
         address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
         message: first version
         shouldForce: false
@@ -105,6 +105,6 @@ client:
         config-timeout: 1000
         audit: false
     updateInfoMap:
-      1:
-        currentVersion: 1
-        nextVersion: 1
+      100:
+        currentVersion: 100
+        nextVersion: 100
