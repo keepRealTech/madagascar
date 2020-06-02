@@ -18,6 +18,7 @@ import java.util.List;
 public class GeneralConfiguration {
     private String singleOfficialIslandId;
     private List<String> officialIslandIdList;
+    private String sensitiveWordsFilePath;
 
     /**
      * Initializes the text filter.
@@ -26,7 +27,7 @@ public class GeneralConfiguration {
      */
     @Bean
     public TextContentFilter getTextFilter() {
-        return new DefaultContentFilter();
+        return new DefaultContentFilter(this.sensitiveWordsFilePath);
     }
 
 }
