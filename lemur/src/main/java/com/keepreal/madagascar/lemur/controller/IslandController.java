@@ -324,7 +324,7 @@ public class IslandController implements IslandApi {
         }
 
         if (this.textContentFilter.isDisallowed(payload.getName())) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_NAME_EXISTED_ERROR);
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
         }
 
         String portraitImageUri = null;
@@ -362,7 +362,7 @@ public class IslandController implements IslandApi {
         }
 
         if (this.textContentFilter.isDisallowed(payload.getName())) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_NAME_EXISTED_ERROR);
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
         }
 
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
