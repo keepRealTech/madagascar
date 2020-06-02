@@ -53,8 +53,10 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
-            - name: CLIENT_ANDROID_SETUP_ADDRESS
-              value: {{ .Values.client.android.setup.address }}
+          volumeMounts:
+            - name: lemur-dictionary
+              mountPath: "/app/good-dictionary.txt"
+              subPath: "good-dictionary.txt"
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}
@@ -88,6 +90,10 @@ spec:
             - --reporter.tchannel.host-port=simplest-collector-headless.keepreal-prod.svc:14267
             - --reporter.type=tchannel
         {{ end }}
+      volumes:
+        - name: lemur-dictionary
+          configMap:
+            name: lemur-dictionary
 ---
 apiVersion: v1
 kind: Service

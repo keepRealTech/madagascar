@@ -4,9 +4,11 @@ import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.IdentityType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import com.keepreal.madagascar.lemur.textFilter.TextContentFilter;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
@@ -38,20 +40,24 @@ public class UserController implements UserApi {
     private final ImageService imageService;
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final TextContentFilter textContentFilter;
 
     /**
      * Constructs the user controller.
      *
-     * @param imageService   {@link ImageService}.
-     * @param userService    {@link UserService}.
-     * @param userDTOFactory {@link UserDTOFactory}.
+     * @param imageService      {@link ImageService}.
+     * @param userService       {@link UserService}.
+     * @param userDTOFactory    {@link UserDTOFactory}.
+     * @param textContentFilter {@link TextContentFilter}.
      */
     public UserController(ImageService imageService,
                           UserService userService,
-                          UserDTOFactory userDTOFactory) {
+                          UserDTOFactory userDTOFactory,
+                          TextContentFilter textContentFilter) {
         this.imageService = imageService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.textContentFilter = textContentFilter;
     }
 
     /**
@@ -86,6 +92,10 @@ public class UserController implements UserApi {
         String userId = HttpContextUtils.getUserIdFromContext();
         if (Objects.isNull(payload)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.textContentFilter.isDisallowed(payload.getName())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
         }
 
         if (!userId.equals(id)) {
