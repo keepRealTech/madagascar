@@ -57,10 +57,6 @@ spec:
             - name: lemur-dictionary
               mountPath: "/app/good-dictionary.txt"
               subPath: "good-dictionary.txt"
-          volumes:
-            - name: lemur-dictionary
-              configMap:
-                name: lemur-dictionary
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}
@@ -94,6 +90,10 @@ spec:
             - --reporter.tchannel.host-port=simplest-collector-headless.keepreal-prod.svc:14267
             - --reporter.type=tchannel
         {{ end }}
+      volumes:
+        - name: lemur-dictionary
+          configMap:
+            name: lemur-dictionary
 ---
 apiVersion: v1
 kind: Service
