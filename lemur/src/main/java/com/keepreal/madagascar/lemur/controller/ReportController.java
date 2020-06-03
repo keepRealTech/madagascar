@@ -43,7 +43,8 @@ public class ReportController implements ReportApi {
      */
     @Override
     public ResponseEntity<ReportResponse> apiV1ReportsPost(@Valid PostReportRequest postReportRequest) {
-        if (StringUtils.isEmpty(postReportRequest.getFeedId()) && StringUtils.isEmpty(postReportRequest.getIslandId())) {
+        if ((StringUtils.isEmpty(postReportRequest.getFeedId()) && StringUtils.isEmpty(postReportRequest.getIslandId()))
+                || (!StringUtils.isEmpty(postReportRequest.getFeedId()) && !StringUtils.isEmpty(postReportRequest.getIslandId()))) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
