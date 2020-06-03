@@ -1272,6 +1272,8 @@ components:
           type: string
         islandId:
           type: string
+        userId:
+          type: string
         reporterId:
           type: string
     PostReportRequest:
@@ -1286,6 +1288,9 @@ components:
         islandId:
           type: string
           description: island id to report
+        userId:
+          type: string
+          description: user id to report
         reporterId:
           type: string
           description: user id
