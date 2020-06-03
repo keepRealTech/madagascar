@@ -45,8 +45,19 @@ message RetrieveSingleUserRequest {
     QueryUserCondition condition = 1;
 }
 
+message DeviceTokenRequest {
+    string userId = 1;
+    string deviceToken = 2;
+    bool isBind = 3;
+}
+
+message DeviceTokenResponse {
+    CommonStatus status = 1;
+}
+
 service UserService {
     rpc CreateUser(NewUserRequest) returns (UserResponse) {};
     rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
     rpc UpdateUserById(UpdateUserByIdRequest) returns (UserResponse) {};
+    rpc SetDeviceToken(DeviceTokenRequest) returns (DeviceTokenResponse) {};
 }

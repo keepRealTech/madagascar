@@ -7,6 +7,8 @@ import com.keepreal.madagascar.common.IdentityType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.DeviceTokenRequest;
+import com.keepreal.madagascar.coua.DeviceTokenResponse;
 import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
@@ -154,6 +156,33 @@ public class UserService {
         }
 
         return userResponse.getUser();
+    }
+
+    public void setDeviceToken(String userId, String deviceToken, boolean isBind) {
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
+
+        DeviceTokenRequest request = DeviceTokenRequest.newBuilder()
+                .setUserId(userId)
+                .setDeviceToken(deviceToken)
+                .setIsBind(isBind)
+                .build();
+
+        DeviceTokenResponse deviceTokenResponse;
+        try {
+            deviceTokenResponse = stub.setDeviceToken(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(deviceTokenResponse)
+                || !deviceTokenResponse.hasStatus()) {
+            log.error(Objects.isNull(deviceTokenResponse) ? "set device token returned null." : deviceTokenResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != deviceTokenResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(deviceTokenResponse.getStatus());
+        }
     }
 
     private String checkLength(String str, int threshold) {

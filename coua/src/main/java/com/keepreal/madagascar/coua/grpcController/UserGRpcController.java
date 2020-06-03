@@ -3,6 +3,8 @@ package com.keepreal.madagascar.coua.grpcController;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.coua.DeviceTokenRequest;
+import com.keepreal.madagascar.coua.DeviceTokenResponse;
 import com.keepreal.madagascar.coua.NewUserRequest;
 import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
@@ -10,6 +12,7 @@ import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
 import com.keepreal.madagascar.coua.model.UserInfo;
+import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
 import com.keepreal.madagascar.coua.service.UserIdentityService;
 import com.keepreal.madagascar.coua.service.UserInfoService;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
@@ -28,17 +31,21 @@ import java.sql.Date;
 public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
 
     private final UserInfoService userInfoService;
+    private final UserDeviceInfoService userDeviceInfoService;
     private final UserIdentityService userIdentityService;
 
     /**
      * Constructs user grpc controller.
      *
      * @param userInfoService       {@link UserInfoService}.
+     * @param userDeviceInfoService {@link UserDeviceInfoService}.
      * @param userIdentityService   {@link UserIdentityService}.
      */
     public UserGRpcController(UserInfoService userInfoService,
+                              UserDeviceInfoService userDeviceInfoService,
                               UserIdentityService userIdentityService) {
         this.userInfoService = userInfoService;
+        this.userDeviceInfoService = userDeviceInfoService;
         this.userIdentityService = userIdentityService;
     }
 
@@ -158,6 +165,26 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         }
 
         basicResponse(responseObserver, userInfoService.updateUser(userInfo));
+    }
+
+    /**
+     * Implements set device token method.
+     *
+     * @param request           {@link DeviceTokenRequest}.
+     * @param responseObserver  {@link DeviceTokenResponse}.
+     */
+    @Override
+    public void setDeviceToken(DeviceTokenRequest request, StreamObserver<DeviceTokenResponse> responseObserver) {
+        if (request.getIsBind()) {
+            userDeviceInfoService.bindDeviceToken(request.getUserId(), request.getDeviceToken());
+        } else {
+            userDeviceInfoService.unbindDeviceToken(request.getUserId(), request.getDeviceToken());
+        }
+
+        responseObserver.onNext(DeviceTokenResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build());
+        responseObserver.onCompleted();
     }
 
     /**
