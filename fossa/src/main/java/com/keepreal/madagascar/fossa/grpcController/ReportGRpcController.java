@@ -1,7 +1,9 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
+import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.NewReportRequest;
+import com.keepreal.madagascar.fossa.Report;
 import com.keepreal.madagascar.fossa.ReportMessage;
 import com.keepreal.madagascar.fossa.ReportResponse;
 import com.keepreal.madagascar.fossa.ReportServiceGrpc;
@@ -10,6 +12,7 @@ import com.keepreal.madagascar.fossa.model.ReportInfo;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents the report GRpc controller.
@@ -40,32 +43,34 @@ public class ReportGRpcController extends ReportServiceGrpc.ReportServiceImplBas
      */
     @Override
     public void createReport(NewReportRequest request, StreamObserver<ReportResponse> responseObserver) {
-        String feedId = request.getFeedId();
-        String reporterId = request.getReporterId();
-        int typeValue = request.getTypeValue();
-        ReportInfo reportInfo = reportRepository.findTopByFeedIdAndReporterIdAndTypeAndDeletedIsFalse(feedId, reporterId, typeValue);
-        if (reportInfo == null) {
-            reportInfo = ReportInfo.builder()
-                    .id(String.valueOf(idGenerator.nextId()))
-                    .feedId(feedId)
-                    .reporterId(reporterId)
-                    .type(typeValue)
-                    .build();
-            reportRepository.save(reportInfo);
+        ReportInfo.ReportInfoBuilder reportInfoBuilder = ReportInfo.builder()
+                .id(String.valueOf(idGenerator.nextId()))
+                .type(request.getTypeValue());
+
+        if (request.hasFeedId()) {
+            reportInfoBuilder.feedId(request.getFeedId().getValue());
+        } else {
+            reportInfoBuilder.islandId(request.getIslandId().getValue());
         }
 
-        ReportMessage reportMessage = ReportMessage.newBuilder()
+        ReportInfo reportInfo = reportRepository.save(reportInfoBuilder.build());
+
+        ReportMessage.Builder reportMessageBuilder = ReportMessage.newBuilder()
                 .setId(reportInfo.getId())
-                .setFeedId(feedId)
-                .setReporterId(reporterId)
-                .setTypeValue(typeValue)
-                .build();
+                .setTypeValue(request.getTypeValue());
+
+        if (!StringUtils.isEmpty(reportInfo.getFeedId())) {
+            reportMessageBuilder.setFeedId(StringValue.of(reportInfo.getFeedId()));
+        } else {
+            reportMessageBuilder.setIslandId(StringValue.of(reportInfo.getIslandId()));
+        }
 
         ReportResponse reportResponse = ReportResponse.newBuilder()
-                .setReport(reportMessage)
+                .setReport(reportMessageBuilder.build())
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
         responseObserver.onNext(reportResponse);
         responseObserver.onCompleted();
     }
+
 }

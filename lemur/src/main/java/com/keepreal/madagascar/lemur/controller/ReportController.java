@@ -7,6 +7,7 @@ import com.keepreal.madagascar.lemur.dtoFactory.ReportDTOFactory;
 import com.keepreal.madagascar.lemur.service.ReportService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ReportApi;
 import swagger.model.PostReportRequest;
@@ -42,8 +43,14 @@ public class ReportController implements ReportApi {
      */
     @Override
     public ResponseEntity<ReportResponse> apiV1ReportsPost(@Valid PostReportRequest postReportRequest) {
+        if (StringUtils.isEmpty(postReportRequest.getFeedId()) && StringUtils.isEmpty(postReportRequest.getIslandId())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         ReportMessage reportMessage = this.reportService.createReport(postReportRequest.getFeedId(),
-                postReportRequest.getReporterId(), this.convertReportType(postReportRequest.getReportType()));
+                postReportRequest.getIslandId(),
+                postReportRequest.getReporterId(),
+                this.convertReportType(postReportRequest.getReportType()));
 
         ReportResponse response = new ReportResponse();
         response.setData(this.reportDTOFactory.valueOf(reportMessage));

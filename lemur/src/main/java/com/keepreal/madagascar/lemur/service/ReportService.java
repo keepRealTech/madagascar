@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.ReportType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -12,6 +13,7 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -37,22 +39,27 @@ public class ReportService {
      * Creates a new report.
      *
      * @param feedId Feed id.
+     * @param islandId Island id.
      * @param userId User id.
      * @param type   {@link ReportType}.
      * @return {@link ReportMessage}.
      */
-    public ReportMessage createReport(String feedId, String userId, ReportType type) {
+    public ReportMessage createReport(String feedId, String islandId, String userId, ReportType type) {
         ReportServiceGrpc.ReportServiceBlockingStub stub = ReportServiceGrpc.newBlockingStub(this.channel);
 
-        NewReportRequest request = NewReportRequest.newBuilder()
-                .setFeedId(feedId)
+        NewReportRequest.Builder requestBuilder = NewReportRequest.newBuilder()
                 .setReporterId(userId)
-                .setType(type)
-                .build();
+                .setType(type);
+
+        if (!StringUtils.isEmpty(feedId)) {
+            requestBuilder.setFeedId(StringValue.of(feedId));
+        } else {
+            requestBuilder.setFeedId(StringValue.of(islandId));
+        }
 
         ReportResponse reportResponse;
         try {
-            reportResponse = stub.createReport(request);
+            reportResponse = stub.createReport(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
