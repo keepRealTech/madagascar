@@ -22,7 +22,7 @@ rocketmq:
   feed:
     accessKey: xxx
     secretKey: xxx
-    topic: notification-event
+    topic: feed-event
     tag: event
     nameSrvAddr: 127.0.0.1:9876
 

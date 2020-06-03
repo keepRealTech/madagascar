@@ -3,7 +3,7 @@ package com.keepreal.madagascar.fossa.service;
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.OrderProducerBean;
 import com.keepreal.madagascar.common.FeedMessage;
-import com.keepreal.madagascar.fossa.config.NotificationEventProducerConfiguration;
+import com.keepreal.madagascar.fossa.config.FeedEventProducerConfiguration;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.mantella.FeedCreateEvent;
 import com.keepreal.madagascar.mantella.FeedDeleteEvent;
@@ -30,19 +30,19 @@ import java.util.concurrent.TimeUnit;
 public class FeedEventProducerService {
 
     private final OrderProducerBean orderProducerBean;
-    private final NotificationEventProducerConfiguration notificationEventProducerConfiguration;
+    private final FeedEventProducerConfiguration feedEventProducerConfiguration;
     private final ExecutorService executorService;
 
     /**
      * Constructs the feed event producer service.
      *
      * @param orderProducerBean                      {@link OrderProducerBean}.
-     * @param notificationEventProducerConfiguration {@link NotificationEventProducerConfiguration}.
+     * @param feedEventProducerConfiguration {@link FeedEventProducerConfiguration}.
      */
     public FeedEventProducerService(OrderProducerBean orderProducerBean,
-                                    NotificationEventProducerConfiguration notificationEventProducerConfiguration) {
+                                    FeedEventProducerConfiguration feedEventProducerConfiguration) {
         this.orderProducerBean = orderProducerBean;
-        this.notificationEventProducerConfiguration = notificationEventProducerConfiguration;
+        this.feedEventProducerConfiguration = feedEventProducerConfiguration;
         this.executorService = new ThreadPoolExecutor(
                 10,
                 20,
@@ -113,13 +113,13 @@ public class FeedEventProducerService {
                 .build();
         String uuid = UUID.randomUUID().toString();
         FeedEventMessage event = FeedEventMessage.newBuilder()
-                .setType(FeedEventType.FEED_EVENT_DELETE)
+                .setType(FeedEventType.FEED_EVENT_CREATE)
                 .setFeedCreateEvent(feedCreateEvent)
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
                 .build();
-        return new Message(this.notificationEventProducerConfiguration.getTopic(),
-                this.notificationEventProducerConfiguration.getTag(), uuid, event.toByteArray());
+        return new Message(this.feedEventProducerConfiguration.getTopic(),
+                this.feedEventProducerConfiguration.getTag(), uuid, event.toByteArray());
     }
 
     /**
@@ -143,8 +143,8 @@ public class FeedEventProducerService {
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
                 .build();
-        return new Message(this.notificationEventProducerConfiguration.getTopic(),
-                this.notificationEventProducerConfiguration.getTag(), uuid, event.toByteArray());
+        return new Message(this.feedEventProducerConfiguration.getTopic(),
+                this.feedEventProducerConfiguration.getTag(), uuid, event.toByteArray());
     }
 
 }
