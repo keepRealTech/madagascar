@@ -29,7 +29,8 @@ tags:
     description: Configs controllers
   - name: Healthcheck
     description: SLB health check controllers
-
+  - name: Membership
+    description: Membership controllers
 paths:
   /api/healthcheck:
     head:
@@ -765,6 +766,71 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AndroidSetupInfoResponse'
+  /api/v1/islands/{id}/memberships:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Membership
+      summary: Create a new membership for given island
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostMembershipRequest'
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipResponse'
+    get:
+      tags:
+        - Membership
+      summary: Get memberships for island
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipsResponse'
+  /api/v1/memberships/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Membership
+      summary: Update a membership
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutMembershipRequest'
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipResponse'
+  /api/v1/memberships/{id}/deactivate:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Membership
+      summary: deletes a membership by id
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -950,6 +1016,13 @@ components:
         - MULTIMEDIA_TYPE_PIC
         - MULTIMEDIA_TYPE_VLOG
         - MULTIMEDIA_TYPE_MUSIC
+    MembershipLevel:
+      type: string
+      enum:
+        - MEMBERSHIP_LEVEL_VIP0
+        - MEMBERSHIP_LEVEL_VIP1
+        - MEMBERSHIP_LEVEL_VIP2
+        - MEMBERSHIP_LEVEL_VIP3
     CommonResponse:
       type: object
       properties:
@@ -1402,6 +1475,8 @@ components:
             type: string
         content:
           type: string
+        membershipLevel:
+          $ref: '#/components/schemas/MembershipLevel'
     PostFeedRequest:
       type: object
       properties:
@@ -1425,6 +1500,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MultiMediaDTO'
+        membershipLevel:
+          $ref: '#/components/schemas/MembershipLevel'
       required:
         - islandId
     CheckFeedsMessage:
@@ -1890,3 +1967,51 @@ components:
           type: string
         isRevoke:
           type: boolean
+    MembershipDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        hostId:
+          type: string
+        islandId:
+          type: string
+        description:
+          type: string
+        chargePerMonth:
+          type: integer
+        level:
+          $ref: '#/components/schemas/MembershipLevel'
+    PostMembershipRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        chargePerMonth:
+          type: integer
+        level:
+          $ref: '#/components/schemas/MembershipLevel'
+    PutMembershipRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        chargePerMonth:
+          type: integer
+          description: can only increase
+    MembershipResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/MembershipDTO'
+    MembershipsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/MembershipDTO'
