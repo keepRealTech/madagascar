@@ -669,7 +669,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/mediaUrlsRequest'
+              $ref: '#/components/schemas/MediaUrlsRequest'
       tags:
         - Upload
       summary: retrieves upload image url
@@ -947,6 +947,7 @@ components:
     MultiMediaType:
       type: string
       enum:
+        - MULTIMEDIA_TYPE_PIC
         - MULTIMEDIA_TYPE_VLOG
         - MULTIMEDIA_TYPE_MUSIC
     CommonResponse:
@@ -1185,7 +1186,7 @@ components:
           description: island secret
       required:
         - secret
-    mediaUrlsRequest:
+    MediaUrlsRequest:
       type: object
       properties:
         fileNames:
@@ -1307,9 +1308,21 @@ components:
           type: integer
         type:
           $ref: '#/components/schemas/MultiMediaType'
+    PictureDTO:
+      type: object
+      properties:
+        uri:
+          type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        type:
+          $ref: '#/components/schemas/MultiMediaType'
     MultiMediaDTO:
       oneOf:
         - $ref: '#/components/schemas/VLogDTO'
+        - $ref: '#/components/schemas/PictureDTO'
     PosterFeedDTO:
       type: object
       properties:
@@ -1342,7 +1355,9 @@ components:
           items:
             type: string
         multimedia:
-          $ref: '#/components/schemas/MultiMediaDTO'
+          type: array
+          items:
+            $ref: '#/components/schemas/MultiMediaDTO'
         fromHost:
           type: boolean
           description: whether feed posted by the host of island
@@ -1406,14 +1421,12 @@ components:
           type: string
         content:
           type: string
-        images:
+        multimedia:
           type: array
           items:
-            type: string
-        multimedia:
-          $ref: '#/components/schemas/MultiMediaDTO'
+            $ref: '#/components/schemas/MultiMediaDTO'
       required:
-        - payload
+        - islandId
     CheckFeedsMessage:
       type: object
       properties:
