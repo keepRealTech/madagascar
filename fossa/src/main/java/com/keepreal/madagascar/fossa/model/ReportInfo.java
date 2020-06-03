@@ -33,6 +33,7 @@ public class ReportInfo {
     private String id;
     private Integer type;
     private String feedId;
+    private String islandId;
     private String reporterId;
     @Column(name = "is_deleted")
     @Builder.Default
