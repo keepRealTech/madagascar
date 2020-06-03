@@ -14,6 +14,8 @@ import swagger.model.PostReportRequest;
 import swagger.model.ReportResponse;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Represents the report controller.
@@ -43,13 +45,17 @@ public class ReportController implements ReportApi {
      */
     @Override
     public ResponseEntity<ReportResponse> apiV1ReportsPost(@Valid PostReportRequest postReportRequest) {
-        if ((StringUtils.isEmpty(postReportRequest.getFeedId()) && StringUtils.isEmpty(postReportRequest.getIslandId()))
-                || (!StringUtils.isEmpty(postReportRequest.getFeedId()) && !StringUtils.isEmpty(postReportRequest.getIslandId()))) {
+        List<String> params = new ArrayList<>();
+        params.add(postReportRequest.getFeedId());
+        params.add(postReportRequest.getIslandId());
+        params.add(postReportRequest.getReporterId());
+        if (2 != params.stream().filter(StringUtils::isEmpty).count()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         ReportMessage reportMessage = this.reportService.createReport(postReportRequest.getFeedId(),
                 postReportRequest.getIslandId(),
+                postReportRequest.getUserId(),
                 postReportRequest.getReporterId(),
                 this.convertReportType(postReportRequest.getReportType()));
 

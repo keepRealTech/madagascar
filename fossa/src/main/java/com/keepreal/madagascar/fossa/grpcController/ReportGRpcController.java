@@ -49,8 +49,10 @@ public class ReportGRpcController extends ReportServiceGrpc.ReportServiceImplBas
 
         if (request.hasFeedId()) {
             reportInfoBuilder.feedId(request.getFeedId().getValue());
-        } else {
+        } else if (request.hasIslandId()) {
             reportInfoBuilder.islandId(request.getIslandId().getValue());
+        } else {
+            reportInfoBuilder.userId(request.getUserId().getValue());
         }
 
         ReportInfo reportInfo = reportRepository.save(reportInfoBuilder.build());
@@ -61,8 +63,10 @@ public class ReportGRpcController extends ReportServiceGrpc.ReportServiceImplBas
 
         if (!StringUtils.isEmpty(reportInfo.getFeedId())) {
             reportMessageBuilder.setFeedId(StringValue.of(reportInfo.getFeedId()));
-        } else {
+        } else if (!StringUtils.isEmpty(reportInfo.getIslandId())) {
             reportMessageBuilder.setIslandId(StringValue.of(reportInfo.getIslandId()));
+        } else {
+            reportMessageBuilder.setUserId(StringValue.of(reportInfo.getUserId()));
         }
 
         ReportResponse reportResponse = ReportResponse.newBuilder()
