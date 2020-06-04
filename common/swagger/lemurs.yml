@@ -29,6 +29,12 @@ tags:
     description: Configs controllers
   - name: Healthcheck
     description: SLB health check controllers
+  - name: WechatOrder
+    description: Wechat pay order controllers
+  - name: Subscription
+    description: Subscriptions controller
+  - name: Balance
+    description: Balance controller
 
 paths:
   /api/healthcheck:
@@ -765,6 +771,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AndroidSetupInfoResponse'
+  /api/v1/wechatOrders/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - WechatOrder
+      summary: get the wechat order
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/wechatOrder:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Subscription
+      summary: purchase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeMemberRequest'
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/balances/myWallet:
+    get:
+      tags:
+        - Balance
+      summary: get user's wallet
+      responses:
+        '200':
+          description: wallet info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -940,6 +992,16 @@ components:
         - IDENTITY_FASHION
         - IDENTITY_COMIC
         - IDENTITY_OTHERS
+    WechatOrderState:
+      type: string
+      enum:
+        - STATE_NOTPAY
+        - STATE_USERPAYING
+        - STATE_SUCCESS
+        - STATE_CLOSED
+        - STATE_REFUND
+        - STATE_PAYERROR
+        - STATE_REVOKED
     NoticeType:
       type: string
       enum:
@@ -1895,3 +1957,55 @@ components:
           type: string
         isRevoke:
           type: boolean
+    WechatOrderDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        prepayId:
+          type: string
+        signature:
+          type: string
+        payerId:
+          type: string
+        payeeId:
+          type: string
+        feeInCents:
+          type: integer
+        createdAt:
+          type: integer
+          format: int64
+        state:
+          $ref: '#/components/schemas/WechatOrderState'
+    WechatOrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/WechatOrderDTO'
+    SubscribeMemberRequest:
+      type: object
+      properties:
+        membershipId:
+          type: string
+    BalanceDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        balanceInCents:
+          type: integer
+          format: int64
+        balanceInShells:
+          type: integer
+          format: int64
+    BalanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BalanceDTO'
