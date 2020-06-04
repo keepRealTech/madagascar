@@ -7,11 +7,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-06-03
- **/
-
+ * Represents the island service.
+ */
 @Service
 public class IslandService {
 
@@ -27,7 +24,7 @@ public class IslandService {
     }
 
     public List<String> getDeviceTokenList(String islandId) {
-
+        // TODO get android & ios device token
         return null;
     }
 }

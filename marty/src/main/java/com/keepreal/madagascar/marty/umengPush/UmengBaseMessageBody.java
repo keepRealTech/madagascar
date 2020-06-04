@@ -1,8 +1,10 @@
 package com.keepreal.madagascar.marty.umengPush;
 
-
 import com.aliyun.openservices.shade.com.alibaba.fastjson.JSONObject;
 
+/**
+ * Umeng base message body.
+ */
 public abstract class UmengBaseMessageBody {
 
     private JSONObject jsonObject = new JSONObject();

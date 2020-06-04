@@ -10,6 +10,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represent the umeng push client.
+ */
 @Component
 public class UmengPushClient {
 
@@ -18,19 +21,36 @@ public class UmengPushClient {
     private static final String HTTP_METHOD = "POST";
     private final RestTemplate restTemplate;
 
+    /**
+     * Constructs the umeng push client.
+     *
+     * @param umengConfiguration    {@link UmengConfiguration}.
+     * @param restTemplate          {@link RestTemplate}.
+     */
     public UmengPushClient(UmengConfiguration umengConfiguration,
                            RestTemplate restTemplate) {
-        this.appMasterSecret = umengConfiguration.getAppMasterSecret();
+        this.appMasterSecret = umengConfiguration.getAndroidAppMasterSecret();
         this.url = umengConfiguration.getUrl();
         this.restTemplate = restTemplate;
     }
 
+    /**
+     * push by umeng.
+     *
+     * @param pushMessage   push message.
+     */
     public void push(String pushMessage) {
         Map<String, String> urlVariables = new HashMap<>();
         urlVariables.put("sign", generatorSign(pushMessage));
         JSONObject responseJsonObject = restTemplate.postForObject(url, pushMessage, JSONObject.class, urlVariables);
     }
 
+    /**
+     * generator sign by umeng regulation.
+     *
+     * @param pushMessage   push message.
+     * @return  generated sign.
+     */
     private String generatorSign(String pushMessage) {
         return DigestUtils.md5Hex((HTTP_METHOD + url + pushMessage + appMasterSecret).getBytes(StandardCharsets.UTF_8));
     }

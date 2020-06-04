@@ -6,7 +6,9 @@ import com.keepreal.madagascar.marty.umengPush.android.AndroidListCast;
 import com.keepreal.madagascar.marty.config.UmengConfiguration;
 import org.springframework.stereotype.Service;
 
-
+/**
+ * Represents the umeng push service.
+ */
 @Service
 public class UmengPushService {
 
@@ -47,7 +49,7 @@ public class UmengPushService {
         String deviceTokenListString = islandService.getDeviceTokenList(islandId).toString();
         String tokens = deviceTokenListString.substring(1, deviceTokenListString.length() - 1);
         // build android
-        AndroidListCast androidListCast = new AndroidListCast(umengConfiguration.getAppKey());
+        AndroidListCast androidListCast = new AndroidListCast(umengConfiguration.getAndroidAppKey());
         androidListCast.setDeviceToken(tokens);
         androidListCast.setDisplayType("message");
         androidListCast.setCustom(jsonObject);

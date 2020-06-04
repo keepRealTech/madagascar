@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+/**
+ * Represents the notification event listener.
+ */
 @Component
 @Slf4j
 public class NotificationEventListener implements MessageListener {
@@ -24,6 +27,13 @@ public class NotificationEventListener implements MessageListener {
         this.umengPushService = umengPushService;
     }
 
+    /**
+     * Implements the message consume method.
+     *
+     * @param message   {@link Message}.
+     * @param context   {@link ConsumeContext}.
+     * @return  {@link Action}.
+     */
     @Override
     public Action consume(Message message, ConsumeContext context) {
         try {

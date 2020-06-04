@@ -21,3 +21,8 @@ rocketmq:
     topic: feed-event
     groupId: GID-brookesia-default
     tag: event
+
+umeng:
+  androidAppKey: xxx
+  androidAppMasterSecret: xxx
+  url: xxx

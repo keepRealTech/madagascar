@@ -15,6 +15,9 @@ import java.util.Objects;
 
 import static com.keepreal.madagascar.mantella.FeedEventType.FEED_EVENT_CREATE;
 
+/**
+ * Represents the feed event listener.
+ */
 @Component
 @Slf4j
 public class FeedEventListener implements MessageListener {
@@ -25,6 +28,13 @@ public class FeedEventListener implements MessageListener {
         this.umengPushService = umengPushService;
     }
 
+    /**
+     * Implements the message consume method.
+     *
+     * @param message   {@link Message}.
+     * @param context   {@link ConsumeContext}.
+     * @return  {@link Action}.
+     */
     @Override
     public Action consume(Message message, ConsumeContext context) {
         try {

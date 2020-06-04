@@ -4,11 +4,8 @@ import com.aliyun.openservices.shade.com.alibaba.fastjson.JSONObject;
 import com.keepreal.madagascar.marty.umengPush.UmengBaseMessageBody;
 
 /**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-06-03
- **/
-
+ * Build android list cast message body
+ */
 public class AndroidListCast extends UmengBaseMessageBody {
 
     private JSONObject payloadJsonObject = new JSONObject();
