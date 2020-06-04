@@ -65,7 +65,7 @@ public class UserDeviceInfoService {
      * @param userIdList    user id list.
      * @return  device token list.
      */
-    public List<String> getDeviceTokenListByUserIdList(List<String> userIdList) {
+    public List<UserDeviceInfo> getDeviceTokenListByUserIdList(List<String> userIdList) {
         return userDeviceInfoRepository.findDeviceTokenListByUserIdList(userIdList);
     }
 }
