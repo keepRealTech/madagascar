@@ -18,7 +18,8 @@ public enum WechatOrderState {
     REVOKED(7),
     REFUNDED(8),
     ;
-    private int value;
+
+    private final int value;
 
     WechatOrderState(int value) {
         this.value = value;

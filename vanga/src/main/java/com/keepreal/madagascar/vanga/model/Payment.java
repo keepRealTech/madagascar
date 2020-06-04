@@ -16,7 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Represents the user balance.
+ * Represents the balance appending log.
  */
 @Builder
 @Data
@@ -25,18 +25,17 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-@Table(name = "balance")
-public class Balance {
+@Table(name = "balance_log")
+public class Payment {
 
     @Id
     private String id;
+    private String payerId;
     private String userId;
-    @Builder.Default
-    private Long balanceInCents = 0L;
-    @Builder.Default
-    private Long balanceEligibleInCents = 0L;
-    @Builder.Default
-    private Long balanceInShells = 0L;
+    private Long balanceChangeInCents = 0L;
+    private Long balanceChangeInShells = 0L;
+    private Integer type;
+
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

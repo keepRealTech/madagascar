@@ -14,7 +14,6 @@ import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 
 /**
  * Represents the wechat order entity.
@@ -28,6 +27,7 @@ import javax.persistence.Version;
 @EqualsAndHashCode
 @Table(name = "wechat_order")
 public class WechatOrder {
+
     @Id
     private String id;
     private String payerId;
@@ -52,9 +52,8 @@ public class WechatOrder {
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
-    @Version
-    private Integer version;
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }
