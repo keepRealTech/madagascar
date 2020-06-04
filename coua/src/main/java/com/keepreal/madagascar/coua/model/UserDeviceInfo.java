@@ -27,6 +27,7 @@ public class UserDeviceInfo {
     private String id;
     private String userId;
     private String deviceToken;
+    private Integer deviceType;
     @Column(name = "is_binded")
     @Builder.Default
     private Boolean binded = false;

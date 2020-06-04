@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface UserDeviceInfoRepository extends JpaRepository<UserDeviceInfo, String> {
 
-    UserDeviceInfo findByUserIdAndDeviceTokenAndDeletedIsFalse(String userId, String deviceToken);
+    UserDeviceInfo findByUserIdAndDeviceTokenAndDeviceTypeAndDeletedIsFalse(String userId, String deviceToken, Integer deviceType);
 
     @Query(value = "SELECT device_token FROM uesr_device WHERE user_id IN ?1 AND is_binded = FALSE AND is_deleted = FALSE", nativeQuery = true)
     List<String> findDeviceTokenListByUserIdList(List<String> userIdList);

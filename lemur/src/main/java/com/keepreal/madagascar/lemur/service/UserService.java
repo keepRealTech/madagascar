@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.common.DeviceType;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.GenderValue;
 import com.keepreal.madagascar.common.IdentityType;
@@ -158,18 +159,19 @@ public class UserService {
         return userResponse.getUser();
     }
 
-    public void setDeviceToken(String userId, String deviceToken, boolean isBind) {
+    public void updateDeviceToken(String userId, String deviceToken, boolean isBind, Integer deviceType) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
         DeviceTokenRequest request = DeviceTokenRequest.newBuilder()
                 .setUserId(userId)
                 .setDeviceToken(deviceToken)
                 .setIsBind(isBind)
+                .setDeviceType(DeviceType.forNumber(deviceType))
                 .build();
 
         DeviceTokenResponse deviceTokenResponse;
         try {
-            deviceTokenResponse = stub.setDeviceToken(request);
+            deviceTokenResponse = stub.updateDeviceToken(request);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

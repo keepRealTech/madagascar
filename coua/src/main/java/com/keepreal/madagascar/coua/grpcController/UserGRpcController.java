@@ -168,17 +168,17 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     }
 
     /**
-     * Implements set device token method.
+     * Implements update device token method.
      *
      * @param request           {@link DeviceTokenRequest}.
      * @param responseObserver  {@link DeviceTokenResponse}.
      */
     @Override
-    public void setDeviceToken(DeviceTokenRequest request, StreamObserver<DeviceTokenResponse> responseObserver) {
+    public void updateDeviceToken(DeviceTokenRequest request, StreamObserver<DeviceTokenResponse> responseObserver) {
         if (request.getIsBind()) {
-            userDeviceInfoService.bindDeviceToken(request.getUserId(), request.getDeviceToken());
+            userDeviceInfoService.bindDeviceToken(request.getUserId(), request.getDeviceToken(), request.getDeviceTypeValue());
         } else {
-            userDeviceInfoService.unbindDeviceToken(request.getUserId(), request.getDeviceToken());
+            userDeviceInfoService.unbindDeviceToken(request.getUserId(), request.getDeviceToken(), request.getDeviceTypeValue());
         }
 
         responseObserver.onNext(DeviceTokenResponse.newBuilder()

@@ -15,11 +15,12 @@ public class UserDeviceInfoService {
 
     private final UserDeviceInfoRepository userDeviceInfoRepository;
     private final LongIdGenerator idGenerator;
+
     /**
      * Constructs the user device info service.
      *
      * @param userDeviceInfoRepository  {@link UserDeviceInfoRepository}.
-     * @param idGenerator
+     * @param idGenerator               {@link LongIdGenerator}.
      */
     public UserDeviceInfoService(UserDeviceInfoRepository userDeviceInfoRepository,
                                  LongIdGenerator idGenerator) {
@@ -33,12 +34,14 @@ public class UserDeviceInfoService {
      * @param userId        user id.
      * @param deviceToken   device token.
      */
-    public void bindDeviceToken(String userId, String deviceToken) {
+    public void bindDeviceToken(String userId, String deviceToken, Integer deviceType) {
         UserDeviceInfo userDeviceInfo = new UserDeviceInfo();
         userDeviceInfo.setId(String.valueOf(idGenerator.nextId()));
         userDeviceInfo.setUserId(userId);
         userDeviceInfo.setBinded(true);
         userDeviceInfo.setDeviceToken(deviceToken);
+        userDeviceInfo.setDeviceType(deviceType);
+        userDeviceInfo.setUpdatedTime(System.currentTimeMillis());
         userDeviceInfoRepository.save(userDeviceInfo);
     }
 
@@ -48,8 +51,8 @@ public class UserDeviceInfoService {
      * @param userId        user id.
      * @param deviceToken   device token.
      */
-    public void unbindDeviceToken(String userId, String deviceToken) {
-        UserDeviceInfo userDeviceInfo = userDeviceInfoRepository.findByUserIdAndDeviceTokenAndDeletedIsFalse(userId, deviceToken);
+    public void unbindDeviceToken(String userId, String deviceToken, Integer deviceType) {
+        UserDeviceInfo userDeviceInfo = userDeviceInfoRepository.findByUserIdAndDeviceTokenAndDeviceTypeAndDeletedIsFalse(userId, deviceToken, deviceType);
         if (userDeviceInfo != null) {
             userDeviceInfo.setBinded(false);
             userDeviceInfoRepository.save(userDeviceInfo);

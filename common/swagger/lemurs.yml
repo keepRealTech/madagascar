@@ -80,11 +80,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RefreshTokenResponse'
-  /api/v1/setDeviceToken:
+  /api/v1/deviceTokens:
     post:
       tags:
         - Login
-      summary: set device token
+      summary: update device token
       requestBody:
         required: true
         content:
@@ -1789,9 +1789,12 @@ components:
           type: boolean
         deviceToken:
           type: string
+        deviceType:
+          type: integer
       required:
         - isBind
         - deviceToken
+        - deviceType
     LoginResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

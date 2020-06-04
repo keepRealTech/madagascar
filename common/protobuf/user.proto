@@ -49,6 +49,7 @@ message DeviceTokenRequest {
     string userId = 1;
     string deviceToken = 2;
     bool isBind = 3;
+    DeviceType deviceType = 4;
 }
 
 message DeviceTokenResponse {
@@ -59,5 +60,5 @@ service UserService {
     rpc CreateUser(NewUserRequest) returns (UserResponse) {};
     rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
     rpc UpdateUserById(UpdateUserByIdRequest) returns (UserResponse) {};
-    rpc SetDeviceToken(DeviceTokenRequest) returns (DeviceTokenResponse) {};
+    rpc UpdateDeviceToken(DeviceTokenRequest) returns (DeviceTokenResponse) {};
 }
