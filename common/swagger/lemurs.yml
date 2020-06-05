@@ -29,13 +29,14 @@ tags:
     description: Configs controllers
   - name: Healthcheck
     description: SLB health check controllers
-  - name: WechatOrder
-    description: Wechat pay order controllers
+  - name: Order
+    description: Orders controllers
   - name: Subscription
     description: Subscriptions controller
   - name: Billing
-    description: Billing controller
-
+    description: Billings controller
+  - name: Sku
+    description: SKU controller
 paths:
   /api/healthcheck:
     head:
@@ -771,12 +772,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AndroidSetupInfoResponse'
-  /api/v1/wechatOrders/{id}:
+  /api/v1/orders/wechat/{id}/check:
     parameters:
       - $ref: '#/components/parameters/idInPath'
-    get:
+    post:
       tags:
-        - WechatOrder
+        - Order
       summary: get the wechat order
       responses:
         '200':
@@ -785,13 +786,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
-  /api/v1/islands/{id}/memberSubscription/wechatOrder:
+  /api/v1/orders/ios:
+    post:
+      tags:
+        - Order
+      summary: create a new ios shell order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostIOSOrderRequest'
+      responses:
+        '200':
+          description: ios scallop order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IOSOrderResponse'
+  /api/v1/orders/ios/{id}/check:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Order
+      summary: checks an ios order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckIOSOrderRequest'
+      responses:
+        '200':
+          description: ios scallop order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IOSOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/wechatPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
       tags:
         - Subscription
-      summary: purchase
+      summary: purchase with wechat pay
       requestBody:
         required: true
         content:
@@ -805,6 +844,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/shellPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Subscription
+      summary: purchase with shell
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeMemberRequest'
+      responses:
+        '200':
+          description: dummy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/balances/myWallet:
     get:
       tags:
@@ -846,7 +905,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BillingInfoResponse'
-
+  /api/v1/memberships/skus:
+    get:
+      tags:
+        - Sku
+      summary: get all active skus
+      responses:
+        '200':
+          description: skus info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SkusResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1022,7 +1092,7 @@ components:
         - IDENTITY_FASHION
         - IDENTITY_COMIC
         - IDENTITY_OTHERS
-    WechatOrderState:
+    OrderState:
       type: string
       enum:
         - STATE_NOTPAY
@@ -1987,18 +2057,27 @@ components:
           type: string
         isRevoke:
           type: boolean
+    PostIOSOrderRequest:
+      type: object
+      properties:
+        skuId:
+          type: string
     WechatOrderDTO:
       type: object
       properties:
         id:
           type: string
+        nounceStr:
+          type: string
+        appId:
+          type: string
+        partnerId:
+          type: string
         prepayId:
           type: string
         signature:
           type: string
-        payerId:
-          type: string
-        payeeId:
+        userId:
           type: string
         feeInCents:
           type: integer
@@ -2006,7 +2085,23 @@ components:
           type: integer
           format: int64
         state:
-          $ref: '#/components/schemas/WechatOrderState'
+          $ref: '#/components/schemas/OrderState'
+    IOSOrderDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        tradeNumber:
+          type: string
+        userId:
+          type: string
+        skuId:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+        state:
+          $ref: '#/components/schemas/OrderState'
     WechatOrderResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -2014,6 +2109,18 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/WechatOrderDTO'
+    IOSOrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IOSOrderDTO'
+    CheckIOSOrderRequest:
+      type: object
+      properties:
+        receiptId:
+          type: string
     SubscribeMemberRequest:
       type: object
       properties:
@@ -2081,3 +2188,24 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BillingInfoDTO'
+    SkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        shells:
+          type: integer
+          format: int64
+        priceInCents:
+          type: integer
+    SkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SkuDTO'
