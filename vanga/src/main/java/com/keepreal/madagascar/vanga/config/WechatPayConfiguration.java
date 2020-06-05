@@ -29,9 +29,9 @@ import java.nio.file.StandardOpenOption;
 @Slf4j
 public class WechatPayConfiguration extends WXPayConfig {
 
-    private String appId = "wx301608aae2f8f0ea";
-    private String merchantId = "1594907001";
-    private String merchantKey = "fbf367eff80d415b889cedf1a2f04890";
+    private String appId = "";
+    private String merchantId = "";
+    private String merchantKey = "";
     private String certPath = "/Users/sli/development/madagascar/vanga/src/main/resources/apiclient_cert.pem";
     private String hostIp = "127.0.0.1";
 
