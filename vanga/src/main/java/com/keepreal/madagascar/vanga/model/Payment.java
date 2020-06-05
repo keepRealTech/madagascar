@@ -33,6 +33,7 @@ public class Payment {
     private String payerId;
     private String userId;
     private Long balanceChangeInCents = 0L;
+    @Builder.Default
     private Long balanceChangeInShells = 0L;
     private String orderId;
     private Integer type;

@@ -6,6 +6,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import javax.persistence.Column;
 import javax.persistence.Id;
 
+@Builder
 public class IosOrder {
 
     @Id

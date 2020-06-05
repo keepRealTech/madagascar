@@ -37,7 +37,11 @@ public class WechatOrder {
     private String prepayId;
     private String feeInCents;
     @Transient
+    private String nonceStr;
+    @Transient
     private String signature;
+    @Builder.Default
+    private String transactionId = "";
     @Builder.Default
     private String refundNumber = "";
     @Builder.Default

@@ -98,6 +98,21 @@ public class WXPay {
     }
 
     /**
+     * 向 Map 中添加 appid、mch_id、nonce_str、sign_type、sign <br>
+     * 该函数适用于商户适用于统一下单等接口，不适用于红包、代金券接口
+     *
+     * @param reqData
+     * @return
+     * @throws Exception
+     */
+    public Map<String, String> fillPayRequestData(Map<String, String> reqData) throws Exception {
+        reqData.put("appid", config.getAppID());
+        reqData.put("partnerid", config.getMchID());
+        reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), this.signType));
+        return reqData;
+    }
+
+    /**
      * 判断xml数据的sign是否有效，必须包含sign字段，否则返回false。
      *
      * @param reqData 向wxpay post的请求数据
