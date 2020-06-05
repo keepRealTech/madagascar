@@ -33,8 +33,8 @@ tags:
     description: Wechat pay order controllers
   - name: Subscription
     description: Subscriptions controller
-  - name: Balance
-    description: Balance controller
+  - name: Billing
+    description: Billing controller
 
 paths:
   /api/healthcheck:
@@ -808,7 +808,7 @@ paths:
   /api/v1/balances/myWallet:
     get:
       tags:
-        - Balance
+        - Billing
       summary: get user's wallet
       responses:
         '200':
@@ -817,6 +817,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/billingInfo:
+    get:
+      tags:
+        - Billing
+      summary: get current user's billing info
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingInfoResponse'
+    put:
+      tags:
+        - Billing
+      summary: post current user's billing info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutBillingInfoRequest'
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingInfoResponse'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1999,6 +2029,9 @@ components:
         balanceInCents:
           type: integer
           format: int64
+        balanceEligibleInCents:
+          type: integer
+          format: int64
         balanceInShells:
           type: integer
           format: int64
@@ -2009,3 +2042,42 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BalanceDTO'
+    BillingInfoDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        mobile:
+          type: string
+        identityNumber:
+          type: string
+        account:
+          type: string
+        accountSite:
+          type: string
+        verified:
+          type: boolean
+    PutBillingInfoRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        mobile:
+          type: string
+        identityNumber:
+          type: string
+        account:
+          type: string
+        accountSite:
+          type: string
+    BillingInfoResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BillingInfoDTO'

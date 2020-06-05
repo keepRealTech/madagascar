@@ -30,12 +30,11 @@ public class WechatOrder {
 
     @Id
     private String id;
-    private String payerId;
+    private String userId;
     private String payeeId;
     private String description;
     private String tradeNumber;
     private String prepayId;
-    private String attachment;
     private String feeInCents;
     @Transient
     private String signature;

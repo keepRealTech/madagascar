@@ -34,6 +34,7 @@ public class Payment {
     private String userId;
     private Long balanceChangeInCents = 0L;
     private Long balanceChangeInShells = 0L;
+    private String orderId;
     private Integer type;
 
     @Column(name = "is_deleted")
