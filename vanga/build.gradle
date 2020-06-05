@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'com.google.protobuf'
+    id 'com.palantir.docker'
+}
+
+dependencies {
+    implementation project(":common:exceptions")
+    implementation project(":common:id-generator-starter")
+
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.3'
+    runtimeOnly 'mysql:mysql-connector-java'
+    implementation 'io.github.lognet:grpc-spring-boot-starter'
+    implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'
+    implementation 'io.opentracing.contrib:opentracing-grpc'
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
