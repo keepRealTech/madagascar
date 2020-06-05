@@ -135,6 +135,18 @@ message RetrieveUserSubscriptionStateResponse {
     map<string, bool> stateMap = 2;
 }
 
+message RetrieveDeviceTokensRequest {
+    string islandId = 1;
+    PageRequest pageRequest = 2;
+}
+
+message RetrieveDeviceTokensResponse {
+    CommonStatus status = 1;
+    repeated string androidTokens = 2;
+    repeated string iosTokens = 3;
+    PageResponse pageResponse = 4;
+}
+
 service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
@@ -149,4 +161,5 @@ service IslandService {
     rpc UpdateLastFeedAtById (UpdateLastFeedAtRequest) returns (UpdateLastFeedAtResponse) {}
     rpc RetrieveDefaultIslandsByUserId (RetrieveDefaultIslandsByUserIdRequest) returns (IslandsResponse) {}
     rpc RetrieveUserSubscriptionState (RetrieveUserSubscriptionStateRequest) returns (RetrieveUserSubscriptionStateResponse) {}
+    rpc RetrieveDeviceTokensById (RetrieveDeviceTokensRequest) returns (RetrieveDeviceTokensResponse) {}
 }

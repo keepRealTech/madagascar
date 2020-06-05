@@ -80,6 +80,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RefreshTokenResponse'
+  /api/v1/deviceTokens:
+    post:
+      tags:
+        - Login
+      summary: update device token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceTokenRequest'
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/userInfo:
     get:
       tags:
@@ -1782,6 +1800,19 @@ components:
           type: string
       required:
         - refreshToken
+    DeviceTokenRequest:
+      type: object
+      properties:
+        isBind:
+          type: boolean
+        deviceToken:
+          type: string
+        deviceType:
+          type: integer
+      required:
+        - isBind
+        - deviceToken
+        - deviceType
     LoginResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
