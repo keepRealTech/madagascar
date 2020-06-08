@@ -14,4 +14,6 @@ public interface MembershipSkuRepository extends JpaRepository<MembershipSku, St
 
     List<MembershipSku> findAllByMembershipIdAndActiveIsTrueAndDeletedIsFalse(String membershipId);
 
+    Boolean existsByMembershipIdAndDeletedIsFalse(String membershipId);
+
 }

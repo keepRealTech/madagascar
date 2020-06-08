@@ -2,6 +2,7 @@ package com.keepreal.madagascar.vanga.grpcController;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.vanga.BillingInfoResponse;
+import com.keepreal.madagascar.vanga.CreateMembershipSkusRequest;
 import com.keepreal.madagascar.vanga.MembershipSkusResponse;
 import com.keepreal.madagascar.vanga.RetrieveMembershipSkusByMembershipIdRequest;
 import com.keepreal.madagascar.vanga.RetrieveShellSkusRequest;
@@ -18,6 +19,8 @@ import org.lognet.springboot.grpc.GRpcService;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the sku grpc controller.
@@ -67,6 +70,26 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
     public void retrieveActiveMembershipSkusByMembershipId(RetrieveMembershipSkusByMembershipIdRequest request,
                                                            StreamObserver<MembershipSkusResponse> responseObserver) {
         List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipIdAndActiveIsTrue(request.getMembershipId());
+
+        MembershipSkusResponse response = MembershipSkusResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .addAllMembershipSkus(membershipSkus.stream()
+                        .map(this.skuMessageFactory::valueOf)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the creation of membership skus for a given membership.
+     */
+    public void createMembershipSkusByMembershipId(CreateMembershipSkusRequest request,
+                                                   StreamObserver<MembershipSkusResponse> responseObserver) {
+        List<MembershipSku> membershipSkus = this.skuService
+                .createDefaultMembershipSkusByMembershipIdAndCostPerMonth(request.getMembershipId(), request.getPriceInCentsPerMonth());
 
         MembershipSkusResponse response = MembershipSkusResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))

@@ -40,7 +40,13 @@ message MembershipSkusResponse {
   repeated MembershipSkuMessage membershipSkus = 2;
 }
 
+message CreateMembershipSkusRequest {
+  string membershipId = 1;
+  uint64 priceInCentsPerMonth = 2;
+}
+
 service SkuService {
   rpc RetrieveActiveShellSkus (RetrieveShellSkusRequest) returns (ShellSkusResponse) {};
   rpc RetrieveActiveMembershipSkusByMembershipId (RetrieveMembershipSkusByMembershipIdRequest) returns (MembershipSkusResponse) {};
+  rpc CreateMembershipSkusByMembershipId (CreateMembershipSkusRequest) returns (MembershipSkusResponse) {};
 }
