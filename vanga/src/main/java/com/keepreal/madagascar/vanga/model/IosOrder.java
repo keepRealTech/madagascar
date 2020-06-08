@@ -12,6 +12,7 @@ public class IosOrder {
     @Id
     private String id;
     private String userId;
+    private String shellSkuId;
 
     @Column(name = "is_deleted")
     @Builder.Default

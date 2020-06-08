@@ -31,15 +31,16 @@ public class WechatOrder {
     @Id
     private String id;
     private String userId;
-    private String payeeId;
     private String description;
     private String tradeNumber;
-    private String prepayId;
     private String feeInCents;
+    private String memberShipSkuId;
     @Transient
     private String nonceStr;
     @Transient
     private String signature;
+    @Transient
+    private String prepayId;
     @Builder.Default
     private String transactionId = "";
     @Builder.Default

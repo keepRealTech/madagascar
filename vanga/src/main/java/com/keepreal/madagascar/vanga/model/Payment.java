@@ -31,13 +31,17 @@ public class Payment {
     @Id
     private String id;
     private String payerId;
-    private String userId;
-    private Long balanceChangeInCents = 0L;
+    private String payeeId;
     @Builder.Default
-    private Long balanceChangeInShells = 0L;
+    private Long changeInCents = 0L;
+    @Builder.Default
+    private Long changeInShells = 0L;
     private String orderId;
     private Integer type;
-
+    @Builder.Default
+    private Integer state = 1;
+    @Builder.Default
+    private Long validAfter = 0L;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
