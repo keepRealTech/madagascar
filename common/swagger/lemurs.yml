@@ -2113,6 +2113,7 @@ components:
           type: string
         feeInCents:
           type: integer
+          format: int64
         createdAt:
           type: integer
           format: int64
@@ -2233,6 +2234,9 @@ components:
           format: int64
         priceInCents:
           type: integer
+          format: int64
+        isDefault:
+          type: boolean
     ShellSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -2247,11 +2251,13 @@ components:
       properties:
         id:
           type: string
+        description:
+          type: string
         membershipId:
           type: string
         isDefault:
           type: boolean
-        timeInMonth:
+        timeInMonths:
           type: integer
         priceInCents:
           type: integer

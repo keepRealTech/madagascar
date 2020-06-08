@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.vanga";
+
+import "common.proto";
+
+message ShellSkuMessage {
+  string id = 1;
+  string description = 2;
+  uint64 shells = 3;
+  uint64 priceInCents = 4;
+  bool isDefault = 5;
+}
+
+message RetrieveShellSkusRequest {
+}
+
+message ShellSkusResponse {
+  CommonStatus status = 1;
+  repeated ShellSkuMessage shellSkus = 2;
+}
+
+message MembershipSkuMessage {
+  string id = 1;
+  string description = 2;
+  string membershipId = 3;
+  uint64 priceInCents = 4;
+  uint64 priceInShells = 5;
+  int32 timeInMonths = 6;
+  bool isDefault = 7;
+}
+
+message RetrieveMembershipSkusByMembershipIdRequest {
+  string membershipId = 1;
+}
+
+message MembershipSkusResponse {
+  CommonStatus status = 1;
+  repeated MembershipSkuMessage membershipSkus = 2;
+}
+
+service SkuService {
+  rpc RetrieveActiveShellSkus (RetrieveShellSkusRequest) returns (ShellSkusResponse) {};
+  rpc RetrieveActiveMembershipSkusByMembershipId (RetrieveMembershipSkusByMembershipIdRequest) returns (MembershipSkusResponse) {};
+}

@@ -17,6 +17,7 @@ public class HealthcheckController implements HealthcheckApi {
      * 
      * @return {@link HttpStatus}.
      */
+    @Override
     public ResponseEntity<DummyResponse> apiHealthcheckHead() {
         return new ResponseEntity<>(HttpStatus.OK);
     }

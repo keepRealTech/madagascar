@@ -51,6 +51,7 @@ public class BillingController implements BillingApi {
      *
      * @return {@link BalanceResponse}.
      */
+    @Override
     public ResponseEntity<BalanceResponse> apiV1BalancesMyWalletGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
         BalanceMessage balanceMessage = this.balanceService.retrieveBalanceByUserId(userId);
@@ -67,6 +68,7 @@ public class BillingController implements BillingApi {
      *
      * @return {@link BillingInfoResponse}.
      */
+    @Override
     public ResponseEntity<BillingInfoResponse> apiV1BillingInfoGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
         BillingInfoMessage billingInfoMessage = this.billingInfoService.retrieveBillingInfoByUserId(userId);
@@ -83,6 +85,7 @@ public class BillingController implements BillingApi {
      *
      * @return {@link BillingInfoResponse}.
      */
+    @Override
     public ResponseEntity<BillingInfoResponse> apiV1BillingInfoPut(PutBillingInfoRequest putBillingInfoRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
