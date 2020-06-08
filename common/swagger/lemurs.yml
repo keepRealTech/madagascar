@@ -31,8 +31,8 @@ tags:
     description: SLB health check controllers
   - name: Order
     description: Orders controllers
-  - name: Subscription
-    description: Subscriptions controller
+  - name: Payment
+    description: Payments controller
   - name: Billing
     description: Billings controller
   - name: Sku
@@ -847,7 +847,7 @@ paths:
       - $ref: '#/components/parameters/idInPath'
     post:
       tags:
-        - Subscription
+        - Payment
       summary: purchase with wechat pay
       requestBody:
         required: true
@@ -867,7 +867,7 @@ paths:
       - $ref: '#/components/parameters/idInPath'
     post:
       tags:
-        - Subscription
+        - Payment
       summary: purchase with shell
       requestBody:
         required: true
@@ -923,7 +923,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BillingInfoResponse'
-  /api/v1/memberships/skus:
+  /api/v1/balances/skus:
     get:
       tags:
         - Sku
@@ -934,7 +934,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SkusResponse'
+                $ref: '#/components/schemas/ShellSkusResponse'
+  /api/v1/membership/{id}/skus:
+    parameters:
+      - $ref: "#/components/parameters/idInPath"
+    get:
+      tags:
+        - Sku
+      summary: get all active membership skus
+      responses:
+        '200':
+          description: skus info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipSkusResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1962,19 +1976,6 @@ components:
           type: string
       required:
         - refreshToken
-    DeviceTokenRequest:
-      type: object
-      properties:
-        isBind:
-          type: boolean
-        deviceToken:
-          type: string
-        deviceType:
-          type: integer
-      required:
-        - isBind
-        - deviceToken
-        - deviceType
     LoginResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -2091,7 +2092,7 @@ components:
     PostIOSOrderRequest:
       type: object
       properties:
-        skuId:
+        shellSkuId:
           type: string
     WechatOrderDTO:
       type: object
@@ -2155,7 +2156,7 @@ components:
     SubscribeMemberRequest:
       type: object
       properties:
-        membershipId:
+        membershipSkuId:
           type: string
     BalanceDTO:
       type: object
@@ -2195,8 +2196,6 @@ components:
           type: string
         account:
           type: string
-        accountSite:
-          type: string
         verified:
           type: boolean
     PutBillingInfoRequest:
@@ -2208,10 +2207,13 @@ components:
           type: string
         identityNumber:
           type: string
-        account:
+        accountNumber:
           type: string
-        accountSite:
-          type: string
+      required:
+        - name
+        - mobile
+        - identityNumber
+        - accountNumber
     BillingInfoResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -2219,7 +2221,7 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BillingInfoDTO'
-    SkuDTO:
+    ShellSkuDTO:
       type: object
       properties:
         id:
@@ -2231,7 +2233,7 @@ components:
           format: int64
         priceInCents:
           type: integer
-    SkusResponse:
+    ShellSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -2239,4 +2241,43 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/SkuDTO'
+                $ref: '#/components/schemas/ShellSkuDTO'
+    MembershipSkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        membershipId:
+          type: string
+        isDefault:
+          type: boolean
+        timeInMonth:
+          type: integer
+        priceInCents:
+          type: integer
+          format: int64
+        priceInShells:
+          type: integer
+          format: int64
+    MembershipSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/MembershipSkuDTO'
+    DeviceTokenRequest:
+      type: object
+      properties:
+        isBind:
+          type: boolean
+        deviceToken:
+          type: string
+        deviceType:
+          type: integer
+      required:
+        - isBind
+        - deviceToken
+        - deviceType

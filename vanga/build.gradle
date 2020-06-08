@@ -5,6 +5,14 @@ plugins {
     id 'com.palantir.docker'
 }
 
+sourceSets {
+    main {
+        proto {
+            srcDirs 'src/main/madagascar-grpc-proto'
+        }
+    }
+}
+
 dependencies {
     implementation project(":common:exceptions")
     implementation project(":common:id-generator-starter")

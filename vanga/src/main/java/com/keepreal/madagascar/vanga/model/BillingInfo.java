@@ -16,7 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Represents the user balance.
+ * Represents the user billing info.
  */
 @Builder
 @Data
@@ -25,20 +25,22 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode
-@Table(name = "balance")
-public class Balance {
+@Table(name = "billingInfo")
+public class BillingInfo {
 
     @Id
     private String id;
     private String userId;
     @Builder.Default
-    private Long balanceInCents = 0L;
+    private String name = "";
     @Builder.Default
-    private Long balanceEligibleInCents = 0L;
+    private String mobile = "";
     @Builder.Default
-    private Long balanceInShells = 0L;
+    private String idNumber = "";
     @Builder.Default
-    private Boolean frozen = false;
+    private String accountNumber = "";
+    @Builder.Default
+    private Boolean verified = false;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

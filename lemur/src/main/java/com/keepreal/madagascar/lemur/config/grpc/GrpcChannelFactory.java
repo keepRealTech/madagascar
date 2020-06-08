@@ -20,6 +20,7 @@ public class GrpcChannelFactory {
     private final GrpcConfiguration indriConfiguration;
     private final GrpcConfiguration tenrecsConfiguration;
     private final GrpcConfiguration mantellaConfiguration;
+    private final GrpcConfiguration vangaConfiguration;
     private final TracingClientInterceptor interceptor;
 
     /**
@@ -31,7 +32,8 @@ public class GrpcChannelFactory {
      * @param indriConfiguration    Indri grpc configuration.
      * @param tenrecsConfiguration  Tencres grpc configuration.
      * @param mantellaConfiguration Mantella grpc configuration.
-     * @param tracer               {@link Tracer}.
+     * @param vangaConfiguration    Vanga grpc configuration.
+     * @param tracer                {@link Tracer}.
      */
     public GrpcChannelFactory(@Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration,
                               @Qualifier("fossaConfiguration") GrpcConfiguration fossaConfiguration,
@@ -39,6 +41,7 @@ public class GrpcChannelFactory {
                               @Qualifier("indriConfiguration") GrpcConfiguration indriConfiguration,
                               @Qualifier("tenrecsConfiguration") GrpcConfiguration tenrecsConfiguration,
                               @Qualifier("mantellaConfiguration") GrpcConfiguration mantellaConfiguration,
+                              @Qualifier("vangaConfiguration")GrpcConfiguration vangaConfiguration,
                               Tracer tracer) {
         this.couaConfiguration = couaConfiguration;
         this.fossaConfiguration = fossaConfiguration;
@@ -46,6 +49,7 @@ public class GrpcChannelFactory {
         this.indriConfiguration = indriConfiguration;
         this.tenrecsConfiguration = tenrecsConfiguration;
         this.mantellaConfiguration = mantellaConfiguration;
+        this.vangaConfiguration = vangaConfiguration;
         this.interceptor = TracingClientInterceptor
                 .newBuilder()
                 .withTracer(tracer)
@@ -120,7 +124,7 @@ public class GrpcChannelFactory {
     }
 
     /**
-     * Represents the tenrecs grpc channel.
+     * Represents the mantella grpc channel.
      *
      * @return Tenrecs grpc channel.
      */
@@ -128,6 +132,19 @@ public class GrpcChannelFactory {
     public Channel getMantellaChannel() {
         return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.mantellaConfiguration.getHost(), this.mantellaConfiguration.getPort())
+                .usePlaintext()
+                .build());
+    }
+
+    /**
+     * Represents the vanga grpc channel.
+     *
+     * @return Tenrecs grpc channel.
+     */
+    @Bean(name = "vangaChannel")
+    public Channel getVangaChannel() {
+        return this.interceptor.intercept(ManagedChannelBuilder
+                .forAddress(this.vangaConfiguration.getHost(), this.vangaConfiguration.getPort())
                 .usePlaintext()
                 .build());
     }
