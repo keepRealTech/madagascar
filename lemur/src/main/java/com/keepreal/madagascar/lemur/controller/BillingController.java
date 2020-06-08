@@ -116,7 +116,15 @@ public class BillingController implements BillingApi {
      */
     @Override
     public ResponseEntity<BalanceResponse> apiV1BalancesWithDrawPost(PostWithDrawRequest postWithDrawRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
 
+        BalanceMessage balanceMessage = this.paymentService.submitWithdrawRequest(userId, postWithDrawRequest.getAmountInCents());
+
+        BalanceResponse response = new BalanceResponse();
+        response.setData(this.balanceDTOFactory.valueOf(balanceMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }
