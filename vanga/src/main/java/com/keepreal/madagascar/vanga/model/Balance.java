@@ -37,6 +37,8 @@ public class Balance {
     private Long balanceEligibleInCents = 0L;
     @Builder.Default
     private Long balanceInShells = 0L;
+    @Builder.Default
+    private Boolean frozen = false;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
