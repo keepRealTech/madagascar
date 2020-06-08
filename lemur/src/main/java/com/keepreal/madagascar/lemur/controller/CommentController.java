@@ -34,6 +34,7 @@ public class CommentController implements CommentApi {
      * @param id Comment id.
      * @return {@link DummyResponse}.
      */
+    @Override
     public ResponseEntity<DummyResponse> apiV1CommentsIdDelete(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
         CommentMessage commentMessage = this.commentService.retrieveCommentById(id);
