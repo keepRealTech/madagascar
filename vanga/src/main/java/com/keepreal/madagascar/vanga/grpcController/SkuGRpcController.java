@@ -8,6 +8,7 @@ import com.keepreal.madagascar.vanga.RetrieveShellSkusRequest;
 import com.keepreal.madagascar.vanga.ShellSkusResponse;
 import com.keepreal.madagascar.vanga.SkuServiceGrpc;
 import com.keepreal.madagascar.vanga.factory.SkuMessageFactory;
+import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.service.SkuService;
 import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
@@ -60,11 +61,23 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
     }
 
     /**
-     *
+     * Implements retrieving all active membership skus for a given membership id.
      */
     @Override
     public void retrieveActiveMembershipSkusByMembershipId(RetrieveMembershipSkusByMembershipIdRequest request,
                                                            StreamObserver<MembershipSkusResponse> responseObserver) {
+        List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipIdAndActiveIsTrue(request.getMembershipId());
+
+        MembershipSkusResponse response = MembershipSkusResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .addAllMembershipSkus(membershipSkus.stream()
+                        .map(this.skuMessageFactory::valueOf)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
 }
