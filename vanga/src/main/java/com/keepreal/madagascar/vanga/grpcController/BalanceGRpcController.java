@@ -34,10 +34,10 @@ public class BalanceGRpcController extends BalanceServiceGrpc.BalanceServiceImpl
     /**
      * Retrieves balance by user id.
      */
+    @Override
     public void retrieveBalanceByUserId(RetrieveBalanceByUserIdRequest request,
                                         StreamObserver<BalanceResponse> responseObserver) {
-        String userId = request.getUserId();
-        Balance balance = this.balanceService.retrieveOrCreateIfNotExistsByUserId(userId);
+        Balance balance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(request.getUserId());
 
         BalanceResponse response = BalanceResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))

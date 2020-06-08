@@ -90,7 +90,7 @@ public class BillingInfoService {
 
         BillingInfoResponse billingInfoResponse;
         try {
-            billingInfoResponse = stub.updateBillingInfoById(request);
+            billingInfoResponse = stub.updateBillingInfoByUserId(request);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

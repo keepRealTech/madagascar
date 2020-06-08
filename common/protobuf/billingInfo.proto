@@ -34,5 +34,5 @@ message UpdateBillingInfoByUserIdRequest {
 
 service BillingInfoService {
   rpc RetrieveBillingInfoByUserId (RetrieveBillingInfoByUserIdRequest) returns (BillingInfoResponse) {};
-  rpc UpdateBillingInfoById (UpdateBillingInfoByUserIdRequest) returns (BillingInfoResponse) {};
+  rpc UpdateBillingInfoByUserId (UpdateBillingInfoByUserIdRequest) returns (BillingInfoResponse) {};
 }

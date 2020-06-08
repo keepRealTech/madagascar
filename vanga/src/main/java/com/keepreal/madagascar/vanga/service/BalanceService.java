@@ -35,13 +35,13 @@ public class BalanceService {
      * @return {@link Balance}.
      */
     @Transactional
-    public Balance retrieveOrCreateIfNotExistsByUserId(String userId) {
+    public Balance retrieveOrCreateBalanceIfNotExistsByUserId(String userId) {
         Balance balance = this.balanceRepository.findTopByUserIdAndDeletedIsFalse(userId);
         if (Objects.nonNull(balance)) {
             return balance;
         }
 
-        return this.insert(userId);
+        return this.createNewBalance(userId);
     }
 
     /**
@@ -50,7 +50,7 @@ public class BalanceService {
      * @param userId User id.
      * @return {@link Balance}.
      */
-    private Balance insert(String userId) {
+    private Balance createNewBalance(String userId) {
         Balance balance = Balance.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .userId(userId)
