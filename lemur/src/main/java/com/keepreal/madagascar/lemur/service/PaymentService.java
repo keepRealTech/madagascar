@@ -1,11 +1,15 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
+import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
+import com.keepreal.madagascar.vanga.WechatOrderMessage;
+import com.keepreal.madagascar.vanga.WechatOrderResponse;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +69,68 @@ public class PaymentService {
         }
 
         return balanceResponse.getBalance();
+    }
+
+    /**
+     * Subscribe membership for a given user with its shell balance.
+     *
+     * @param userId          User id.
+     * @param membershipSkuId Membership sku id.
+     */
+    public void subscribeMembershipWithShell(String userId, String membershipSkuId) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        SubscribeMembershipRequest request = SubscribeMembershipRequest.newBuilder()
+                .setUserId(userId)
+                .setMembershipSkuId(membershipSkuId)
+                .build();
+
+        CommonStatus response;
+        try {
+            response = stub.subscribeMembershipWithShell(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        } else if (ErrorCode.REQUEST_SUCC_VALUE != response.getRtn()) {
+            throw new KeepRealBusinessException(response);
+        }
+    }
+
+    /**
+     * Submit a membership subscription request for a given user with wechat pay.
+     *
+     * @param userId          User id.
+     * @param membershipSkuId Membership sku id.
+     */
+    public WechatOrderMessage submitSubscribeMembershipWithWechatPay(String userId, String membershipSkuId) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        SubscribeMembershipRequest request = SubscribeMembershipRequest.newBuilder()
+                .setUserId(userId)
+                .setMembershipSkuId(membershipSkuId)
+                .build();
+
+        WechatOrderResponse response;
+        try {
+            response = stub.submitSubscribeMembershipWithWechatPay(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create wechat order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getWechatOrder();
     }
 
 }

@@ -10,8 +10,9 @@ public enum PaymentType {
 
     UNKNOWN(0),
     WECHATPAY(1),
-    SHELLPAY(2),
-    WITHDRAW(3),
+    SHELLBUY(2),
+    SHELLPAY(3),
+    WITHDRAW(4),
     ;
     private final int value;
 

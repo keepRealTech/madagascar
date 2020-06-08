@@ -42,8 +42,8 @@ public class WechatPayService {
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryPlaceOrder(String feeInCents, String description, String attachment) {
-//        String tradeNum = UUID.randomUUID().toString().replace("-", "");
-        String tradeNum = "testcase0";
+        String tradeNum = UUID.randomUUID().toString().replace("-", "");
+
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
                 .description(description)
@@ -79,7 +79,6 @@ public class WechatPayService {
                 wechatOrder.setSignature(request.get("sign"));
                 wechatOrder.setNonceStr(request.get("noncestr"));
                 wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
-
             }
             return wechatOrder;
         } catch (Exception e) {

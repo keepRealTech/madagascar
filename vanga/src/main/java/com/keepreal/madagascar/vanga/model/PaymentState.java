@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public enum PaymentState {
 
-    DUMMY(0),
+    UNKNOWN(0),
     OPEN(1),
     CLOSED(2),
     ;
