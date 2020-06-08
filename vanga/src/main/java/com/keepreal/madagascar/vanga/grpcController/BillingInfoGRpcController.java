@@ -12,6 +12,8 @@ import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 
+import java.util.Objects;
+
 /**
  * Represents the billing info grpc controller.
  */
@@ -40,10 +42,17 @@ public class BillingInfoGRpcController extends BillingInfoServiceGrpc.BillingInf
                                             StreamObserver<BillingInfoResponse> responseObserver) {
         BillingInfo billingInfo = this.billingInfoService.retrieveOrCreateBillingInfoIfNotExistsByUserId(request.getUserId());
 
-        BillingInfoResponse response = BillingInfoResponse.newBuilder()
-                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                .setBillingInfo(this.billingInfoMessageFactory.valueOf(billingInfo))
-                .build();
+        BillingInfoResponse response;
+        if (Objects.nonNull(billingInfo)) {
+            response = BillingInfoResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setBillingInfo(this.billingInfoMessageFactory.valueOf(billingInfo))
+                    .build();
+        } else {
+            response = BillingInfoResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_BILLING_INFO_NOT_FOUND))
+                    .build();
+        }
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -58,10 +67,17 @@ public class BillingInfoGRpcController extends BillingInfoServiceGrpc.BillingInf
         BillingInfo billingInfo = this.billingInfoService.updateBillingInfoByUserId(request.getUserId(),
                 request.getName(), request.getMobile(), request.getAccountNumber(), request.getIdNumber());
 
-        BillingInfoResponse response = BillingInfoResponse.newBuilder()
-                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                .setBillingInfo(this.billingInfoMessageFactory.valueOf(billingInfo))
-                .build();
+        BillingInfoResponse response;
+        if (Objects.nonNull(billingInfo)) {
+            response = BillingInfoResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setBillingInfo(this.billingInfoMessageFactory.valueOf(billingInfo))
+                    .build();
+        } else {
+            response = BillingInfoResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_BILLING_INFO_NOT_FOUND))
+                    .build();
+        }
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

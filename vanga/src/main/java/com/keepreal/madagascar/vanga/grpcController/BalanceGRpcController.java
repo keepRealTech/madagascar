@@ -11,6 +11,8 @@ import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 
+import java.util.Objects;
+
 /**
  * Represents the balance grpc controller.
  */
@@ -39,10 +41,17 @@ public class BalanceGRpcController extends BalanceServiceGrpc.BalanceServiceImpl
                                         StreamObserver<BalanceResponse> responseObserver) {
         Balance balance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(request.getUserId());
 
-        BalanceResponse response = BalanceResponse.newBuilder()
-                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                .setBalance(this.balanceMessageFactory.valueOf(balance))
-                .build();
+        BalanceResponse response;
+        if (Objects.nonNull(balance)) {
+            response = BalanceResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setBalance(this.balanceMessageFactory.valueOf(balance))
+                    .build();
+        } else {
+            response = BalanceResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_BALANCE_NOT_FOUND))
+                    .build();
+        }
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
