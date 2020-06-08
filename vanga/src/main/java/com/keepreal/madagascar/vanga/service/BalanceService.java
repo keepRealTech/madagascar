@@ -63,7 +63,7 @@ public class BalanceService {
      * @return {@link Balance}.
      */
     @Transactional
-    private Balance createNewBalance(String userId) {
+    public Balance createNewBalance(String userId) {
         Balance balance = Balance.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .userId(userId)

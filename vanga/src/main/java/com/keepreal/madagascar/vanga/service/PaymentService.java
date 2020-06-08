@@ -22,6 +22,12 @@ public class PaymentService {
     private final BalanceService balanceService;
     private final PaymentRepository paymentRepository;
 
+    /**
+     * Constructs the payment service.
+     *
+     * @param balanceService    {@link BalanceService}.
+     * @param paymentRepository {@link PaymentRepository}.
+     */
     public PaymentService(BalanceService balanceService, PaymentRepository paymentRepository) {
         this.balanceService = balanceService;
         this.paymentRepository = paymentRepository;

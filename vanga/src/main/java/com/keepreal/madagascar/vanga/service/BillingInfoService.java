@@ -87,7 +87,7 @@ public class BillingInfoService {
      * @return {@link BillingInfo}.
      */
     @Transactional
-    private BillingInfo createNewBillingInfo(String userId) {
+    public BillingInfo createNewBillingInfo(String userId) {
         BillingInfo billingInfo = BillingInfo.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .userId(userId)

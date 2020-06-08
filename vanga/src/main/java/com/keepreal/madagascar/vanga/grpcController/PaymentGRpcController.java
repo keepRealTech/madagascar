@@ -12,7 +12,6 @@ import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 
-
 /**
  * Represents the payment grpc controller.
  */
@@ -22,6 +21,12 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final PaymentService paymentService;
     private final BalanceMessageFactory balanceMessageFactory;
 
+    /**
+     * Constructs the payment grpc controller.
+     *
+     * @param paymentService        {@link PaymentService}.
+     * @param balanceMessageFactory {@link BalanceMessageFactory}.
+     */
     public PaymentGRpcController(PaymentService paymentService,
                                  BalanceMessageFactory balanceMessageFactory) {
         this.paymentService = paymentService;
