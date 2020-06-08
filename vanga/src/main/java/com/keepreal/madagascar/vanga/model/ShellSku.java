@@ -34,9 +34,12 @@ public class ShellSku {
     private Long shells = 0L;
     @Builder.Default
     private Long priceInCents = 0L;
+    @Column(name = "is_default")
+    @Builder.Default
+    private Boolean defaultSku = false;
     @Column(name = "is_active")
     @Builder.Default
-    private boolean active = true;
+    private Boolean active = true;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
