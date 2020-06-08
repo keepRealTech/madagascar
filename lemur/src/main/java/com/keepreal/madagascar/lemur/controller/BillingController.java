@@ -10,15 +10,12 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BillingInfoMessage;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
-import swagger.api.ApiUtil;
 import swagger.api.BillingApi;
 import swagger.model.BalanceResponse;
 import swagger.model.BillingInfoResponse;
-import swagger.model.PostWithDrawRequest;
+import swagger.model.PostWithdrawRequest;
 import swagger.model.PutBillingInfoRequest;
 
 /**
@@ -111,14 +108,14 @@ public class BillingController implements BillingApi {
     /**
      * Implements the create withdraw request api.
      *
-     * @param postWithDrawRequest  (required) {@link PostWithDrawRequest}.
+     * @param postWithdrawRequest (required) {@link PostWithdrawRequest}.
      * @return {@link BalanceResponse}.
      */
     @Override
-    public ResponseEntity<BalanceResponse> apiV1BalancesWithDrawPost(PostWithDrawRequest postWithDrawRequest) {
+    public ResponseEntity<BalanceResponse> apiV1BalancesWithdrawPost(PostWithdrawRequest postWithdrawRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        BalanceMessage balanceMessage = this.paymentService.submitWithdrawRequest(userId, postWithDrawRequest.getAmountInCents());
+        BalanceMessage balanceMessage = this.paymentService.submitWithdrawRequest(userId, postWithdrawRequest.getAmountInCents());
 
         BalanceResponse response = new BalanceResponse();
         response.setData(this.balanceDTOFactory.valueOf(balanceMessage));

@@ -36,7 +36,10 @@ public class BillingInfoGRpcController extends BillingInfoServiceGrpc.BillingInf
 
     /**
      * Retrieves billing info by user id.
-     */
+     *
+     * @param request          {@link RetrieveBillingInfoByUserIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     **/
     @Override
     public void retrieveBillingInfoByUserId(RetrieveBillingInfoByUserIdRequest request,
                                             StreamObserver<BillingInfoResponse> responseObserver) {
@@ -50,7 +53,7 @@ public class BillingInfoGRpcController extends BillingInfoServiceGrpc.BillingInf
                     .build();
         } else {
             response = BillingInfoResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_BILLING_INFO_NOT_FOUND))
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_BILLING_INFO_NOT_FOUND_ERROR))
                     .build();
         }
 
@@ -60,12 +63,18 @@ public class BillingInfoGRpcController extends BillingInfoServiceGrpc.BillingInf
 
     /**
      * Updates the billing info for given user id.
+     *
+     * @param request          {@link UpdateBillingInfoByUserIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
      */
     @Override
     public void updateBillingInfoByUserId(UpdateBillingInfoByUserIdRequest request,
                                           StreamObserver<BillingInfoResponse> responseObserver) {
         BillingInfo billingInfo = this.billingInfoService.updateBillingInfoByUserId(request.getUserId(),
-                request.getName(), request.getMobile(), request.getAccountNumber(), request.getIdNumber());
+                request.hasName() ? request.getName().getValue() : null,
+                request.hasMobile() ? request.getMobile().getValue() : null,
+                request.hasAccountNumber() ? request.getAccountNumber().getValue() : null,
+                request.hasIdNumber() ? request.getIdNumber().getValue() : null);
 
         BillingInfoResponse response;
         if (Objects.nonNull(billingInfo)) {
@@ -75,7 +84,7 @@ public class BillingInfoGRpcController extends BillingInfoServiceGrpc.BillingInf
                     .build();
         } else {
             response = BillingInfoResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_BILLING_INFO_NOT_FOUND))
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_BILLING_INFO_NOT_FOUND_ERROR))
                     .build();
         }
 

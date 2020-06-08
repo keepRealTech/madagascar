@@ -41,7 +41,7 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
             case REQUEST_GRPC_TOKEN_EXPIRED:
                 return "哎呀，重新登录试试";
             case REQUEST_USER_BALANCE_WITHDRAW_DAY_LIMIT_ERROR:
-                return "今日提现已达上限制";
+                return "单日提现上限为两万人民币，请重新输入";
             default:
                 return errorCode.getValueDescriptor().getName();
         }

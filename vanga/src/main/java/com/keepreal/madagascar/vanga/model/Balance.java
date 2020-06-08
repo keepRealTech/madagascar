@@ -38,6 +38,8 @@ public class Balance {
     @Builder.Default
     private Long balanceInShells = 0L;
     @Builder.Default
+    private Long withdrawDayLimitInCents = 2000000L;
+    @Builder.Default
     private Boolean frozen = false;
     @Column(name = "is_deleted")
     @Builder.Default

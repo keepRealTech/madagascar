@@ -72,10 +72,10 @@ public class BillingInfoService {
             billingInfo.setIdNumber(idNumber);
         }
 
-        if (!StringUtils.isEmpty(name) && !StringUtils.isEmpty(mobile)
-                && !StringUtils.isEmpty(accountNumber) && !StringUtils.isEmpty(idNumber)) {
-            billingInfo.setVerified(true);
-        }
+        billingInfo.setVerified(!StringUtils.isEmpty(name)
+                && !StringUtils.isEmpty(mobile)
+                && !StringUtils.isEmpty(accountNumber)
+                && !StringUtils.isEmpty(idNumber));
 
         return this.billingInfoRepository.save(billingInfo);
     }
@@ -86,6 +86,7 @@ public class BillingInfoService {
      * @param userId User id.
      * @return {@link BillingInfo}.
      */
+    @Transactional
     private BillingInfo createNewBillingInfo(String userId) {
         BillingInfo billingInfo = BillingInfo.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
