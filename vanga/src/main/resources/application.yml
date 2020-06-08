@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: vanga
+  datasource:
+    url: jdbc:mysql://root:pass@localhost:3306/coua
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect

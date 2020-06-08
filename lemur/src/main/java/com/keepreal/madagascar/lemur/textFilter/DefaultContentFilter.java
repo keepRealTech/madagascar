@@ -12,7 +12,6 @@ import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Represents the default text content filter implementation.

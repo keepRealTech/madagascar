@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.vanga";
+
+import "common.proto";
+
+message BalanceMessage {
+  string id = 1;
+  string userId = 2;
+  uint64 balanceInCents = 3;
+  uint64 balanceEligibleInCents = 4;
+  uint64 balanceInShells = 5;
+}
+
+message RetrieveBalanceByUserIdRequest {
+  string userId = 1;
+}
+
+message BalanceResponse {
+  CommonStatus status = 1;
+  BalanceMessage balance = 2;
+}
+
+service BalanceService {
+  rpc RetrieveBalanceByUserId (RetrieveBalanceByUserIdRequest) returns (BalanceResponse) {};
+}
