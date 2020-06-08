@@ -894,6 +894,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/balances/withDraw:
+    post:
+      tags:
+        - Billing
+      summary: submit a withdraw request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWithDrawRequest'
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
   /api/v1/billingInfo:
     get:
       tags:
@@ -2274,6 +2292,13 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/MembershipSkuDTO'
+    PostWithDrawRequest:
+      type: object
+      properties:
+        amountInCents:
+          type: integer
+          format: int64
+          maximum: 2000000
     DeviceTokenRequest:
       type: object
       properties:

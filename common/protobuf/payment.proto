@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.vanga";
+
+import "common.proto";
+import "balance.proto";
+
+message CreateWithdrawRequest {
+  string userId = 1;
+  uint64 withdrawAmountInCents = 2;
+}
+
+service PaymentService {
+  rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
+}
