@@ -39,6 +39,7 @@ public class Balance {
     private Long balanceInShells = 0L;
     @Builder.Default
     private Long withdrawDayLimitInCents = 2000000L;
+    private Integer withdrawPercent = 88;
     @Builder.Default
     private Boolean frozen = false;
     @Column(name = "is_deleted")

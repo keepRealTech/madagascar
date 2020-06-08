@@ -2298,7 +2298,7 @@ components:
         amountInCents:
           type: integer
           format: int64
-          minimum: 1
+          minimum: 100
     DeviceTokenRequest:
       type: object
       properties:
