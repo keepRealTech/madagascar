@@ -47,13 +47,12 @@ public class WechatPayCallbackController {
      * @param request {@link HttpServletRequest}.
      * @param response {@link HttpServletResponse}.
      */
-    @RequestMapping(value = "/api/v1/orders/wechat/callback",
-            produces = {"text/plain;charset=utf-8"},
-            consumes = {"text/plain;charset=utf-8"},
-            method = RequestMethod.POST)
+    @RequestMapping(value = "/api/v1/orders/wechat/callback", method = RequestMethod.POST)
     public void apiV1OrdersWechatCallback(HttpServletRequest request, HttpServletResponse response) {
         try {
             String requestXml = IOUtils.toString(request.getInputStream(), Charset.forName(request.getCharacterEncoding()));
+
+            log.info(requestXml);
 
             this.orderService.wechatOrderCallback(requestXml);
 
