@@ -4,6 +4,7 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.vanga";
 
 import "common.proto";
+import "google/protobuf/wrappers.proto";
 
 message BillingInfoMessage {
   string id = 1;
@@ -26,10 +27,10 @@ message BillingInfoResponse {
 
 message UpdateBillingInfoByUserIdRequest {
   string userId = 1;
-  string name = 2;
-  string mobile = 3;
-  string idNumber = 4;
-  string accountNumber = 5;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue mobile = 3;
+  google.protobuf.StringValue idNumber = 4;
+  google.protobuf.StringValue accountNumber = 5;
 }
 
 service BillingInfoService {

@@ -1,7 +1,6 @@
 package com.keepreal.madagascar.vanga.grpcController;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.vanga.BillingInfoResponse;
 import com.keepreal.madagascar.vanga.CreateMembershipSkusRequest;
 import com.keepreal.madagascar.vanga.MembershipSkusResponse;
 import com.keepreal.madagascar.vanga.RetrieveMembershipSkusByMembershipIdRequest;
@@ -19,8 +18,6 @@ import org.lognet.springboot.grpc.GRpcService;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the sku grpc controller.
@@ -45,6 +42,9 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
 
     /**
      * Implements retrieving all active shell skus.
+     *
+     * @param request          {@link RetrieveShellSkusRequest}.
+     * @param responseObserver {@link StreamObserver}.
      */
     @Override
     public void retrieveActiveShellSkus(RetrieveShellSkusRequest request,
@@ -52,12 +52,12 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
         List<ShellSku> shellSkus = this.skuService.retrieveShellSkusByActiveIsTrue();
 
         ShellSkusResponse response = ShellSkusResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                    .addAllShellSkus(shellSkus.stream()
-                            .map(this.skuMessageFactory::valueOf)
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList()))
-                    .build();
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .addAllShellSkus(shellSkus.stream()
+                        .map(this.skuMessageFactory::valueOf)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -65,6 +65,9 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
 
     /**
      * Implements retrieving all active membership skus for a given membership id.
+     *
+     * @param request          {@link RetrieveMembershipSkusByMembershipIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
      */
     @Override
     public void retrieveActiveMembershipSkusByMembershipId(RetrieveMembershipSkusByMembershipIdRequest request,
@@ -85,6 +88,9 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
 
     /**
      * Implements the creation of membership skus for a given membership.
+     *
+     * @param request          {@link CreateMembershipSkusRequest}.
+     * @param responseObserver {@link StreamObserver}.
      */
     public void createMembershipSkusByMembershipId(CreateMembershipSkusRequest request,
                                                    StreamObserver<MembershipSkusResponse> responseObserver) {

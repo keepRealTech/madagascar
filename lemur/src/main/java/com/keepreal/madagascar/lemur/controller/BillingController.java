@@ -5,16 +5,17 @@ import com.keepreal.madagascar.lemur.dtoFactory.BalanceDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.BillingInfoDTOFactory;
 import com.keepreal.madagascar.lemur.service.BalanceService;
 import com.keepreal.madagascar.lemur.service.BillingInfoService;
+import com.keepreal.madagascar.lemur.service.PaymentService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BillingInfoMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.BillingApi;
 import swagger.model.BalanceResponse;
 import swagger.model.BillingInfoResponse;
+import swagger.model.PostWithdrawRequest;
 import swagger.model.PutBillingInfoRequest;
 
 /**
@@ -27,6 +28,7 @@ public class BillingController implements BillingApi {
     private final BillingInfoDTOFactory billingInfoDTOFactory;
     private final BalanceService balanceService;
     private final BalanceDTOFactory balanceDTOFactory;
+    private final PaymentService paymentService;
 
     /**
      * Constructs the billing controller.
@@ -35,15 +37,18 @@ public class BillingController implements BillingApi {
      * @param billingInfoDTOFactory {@link BillingInfoDTOFactory}.
      * @param balanceService        {@link BalanceService}.
      * @param balanceDTOFactory     {@link BalanceDTOFactory}.
+     * @param paymentService        {@link PaymentService}.
      */
     public BillingController(BillingInfoService billingInfoService,
                              BillingInfoDTOFactory billingInfoDTOFactory,
                              BalanceService balanceService,
-                             BalanceDTOFactory balanceDTOFactory) {
+                             BalanceDTOFactory balanceDTOFactory,
+                             PaymentService paymentService) {
         this.billingInfoService = billingInfoService;
         this.billingInfoDTOFactory = billingInfoDTOFactory;
         this.balanceService = balanceService;
         this.balanceDTOFactory = balanceDTOFactory;
+        this.paymentService = paymentService;
     }
 
     /**
@@ -89,19 +94,31 @@ public class BillingController implements BillingApi {
     public ResponseEntity<BillingInfoResponse> apiV1BillingInfoPut(PutBillingInfoRequest putBillingInfoRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        if (StringUtils.isEmpty(putBillingInfoRequest.getName())
-                || StringUtils.isEmpty(putBillingInfoRequest.getAccountNumber())
-                || StringUtils.isEmpty(putBillingInfoRequest.getIdentityNumber())
-                || StringUtils.isEmpty(putBillingInfoRequest.getMobile())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
         BillingInfoMessage billingInfoMessage = this.billingInfoService.updateBillingInfoByUserId(
                 userId, putBillingInfoRequest.getName(), putBillingInfoRequest.getAccountNumber(),
                 putBillingInfoRequest.getIdentityNumber(), putBillingInfoRequest.getMobile());
 
         BillingInfoResponse response = new BillingInfoResponse();
         response.setData(this.billingInfoDTOFactory.valueOf(billingInfoMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the create withdraw request api.
+     *
+     * @param postWithdrawRequest (required) {@link PostWithdrawRequest}.
+     * @return {@link BalanceResponse}.
+     */
+    @Override
+    public ResponseEntity<BalanceResponse> apiV1BalancesWithdrawPost(PostWithdrawRequest postWithdrawRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        BalanceMessage balanceMessage = this.paymentService.submitWithdrawRequest(userId, postWithdrawRequest.getAmountInCents());
+
+        BalanceResponse response = new BalanceResponse();
+        response.setData(this.balanceDTOFactory.valueOf(balanceMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

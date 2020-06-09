@@ -30,12 +30,12 @@ public class Payment {
 
     @Id
     private String id;
-    private String payerId;
+    private String userId;
     private String payeeId;
     @Builder.Default
-    private Long changeInCents = 0L;
+    private Long amountInCents = 0L;
     @Builder.Default
-    private Long changeInShells = 0L;
+    private Long amountInShells = 0L;
     private String orderId;
     private Integer type;
     @Builder.Default

@@ -40,6 +40,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "该评论已被删除";
             case REQUEST_GRPC_TOKEN_EXPIRED:
                 return "哎呀，重新登录试试";
+            case REQUEST_USER_BALANCE_WITHDRAW_DAY_LIMIT_ERROR:
+                return "单日提现上限为两万人民币，请重新输入";
             default:
                 return errorCode.getValueDescriptor().getName();
         }
