@@ -29,7 +29,14 @@ tags:
     description: Configs controllers
   - name: Healthcheck
     description: SLB health check controllers
-
+  - name: Order
+    description: Orders controllers
+  - name: Payment
+    description: Payments controller
+  - name: Billing
+    description: Billings controller
+  - name: Sku
+    description: SKU controller
 paths:
   /api/healthcheck:
     head:
@@ -80,6 +87,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RefreshTokenResponse'
+  /api/v1/deviceTokens:
+    post:
+      tags:
+        - Login
+      summary: update device token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceTokenRequest'
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/userInfo:
     get:
       tags:
@@ -765,6 +790,165 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AndroidSetupInfoResponse'
+  /api/v1/orders/wechat/{id}/check:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Order
+      summary: get the wechat order
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/orders/ios:
+    post:
+      tags:
+        - Order
+      summary: create a new ios shell order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostIOSOrderRequest'
+      responses:
+        '200':
+          description: ios scallop order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IOSOrderResponse'
+  /api/v1/orders/ios/{id}/check:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Order
+      summary: checks an ios order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CheckIOSOrderRequest'
+      responses:
+        '200':
+          description: ios scallop order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IOSOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/wechatPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: purchase with wechat pay
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeMemberRequest'
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/shellPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: purchase with shell
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeMemberRequest'
+      responses:
+        '200':
+          description: dummy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/balances/myWallet:
+    get:
+      tags:
+        - Billing
+      summary: get user's wallet
+      responses:
+        '200':
+          description: wallet info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/billingInfo:
+    get:
+      tags:
+        - Billing
+      summary: get current user's billing info
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingInfoResponse'
+    put:
+      tags:
+        - Billing
+      summary: post current user's billing info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutBillingInfoRequest'
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingInfoResponse'
+  /api/v1/balances/skus:
+    get:
+      tags:
+        - Sku
+      summary: get all active skus
+      responses:
+        '200':
+          description: skus info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShellSkusResponse'
+  /api/v1/membership/{id}/skus:
+    parameters:
+      - $ref: "#/components/parameters/idInPath"
+    get:
+      tags:
+        - Sku
+      summary: get all active membership skus
+      responses:
+        '200':
+          description: skus info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipSkusResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -940,6 +1124,16 @@ components:
         - IDENTITY_FASHION
         - IDENTITY_COMIC
         - IDENTITY_OTHERS
+    OrderState:
+      type: string
+      enum:
+        - STATE_NOTPAY
+        - STATE_USERPAYING
+        - STATE_SUCCESS
+        - STATE_CLOSED
+        - STATE_REFUND
+        - STATE_PAYERROR
+        - STATE_REVOKED
     NoticeType:
       type: string
       enum:
@@ -1272,6 +1466,8 @@ components:
           type: string
         islandId:
           type: string
+        userId:
+          type: string
         reporterId:
           type: string
     PostReportRequest:
@@ -1286,6 +1482,9 @@ components:
         islandId:
           type: string
           description: island id to report
+        userId:
+          type: string
+          description: user id to report
         reporterId:
           type: string
           description: user id
@@ -1890,3 +2089,201 @@ components:
           type: string
         isRevoke:
           type: boolean
+    PostIOSOrderRequest:
+      type: object
+      properties:
+        shellSkuId:
+          type: string
+    WechatOrderDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        nounceStr:
+          type: string
+        appId:
+          type: string
+        partnerId:
+          type: string
+        prepayId:
+          type: string
+        signature:
+          type: string
+        userId:
+          type: string
+        feeInCents:
+          type: integer
+          format: int64
+        createdAt:
+          type: integer
+          format: int64
+        state:
+          $ref: '#/components/schemas/OrderState'
+    IOSOrderDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        tradeNumber:
+          type: string
+        userId:
+          type: string
+        skuId:
+          type: string
+        createdAt:
+          type: integer
+          format: int64
+        state:
+          $ref: '#/components/schemas/OrderState'
+    WechatOrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/WechatOrderDTO'
+    IOSOrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IOSOrderDTO'
+    CheckIOSOrderRequest:
+      type: object
+      properties:
+        receiptId:
+          type: string
+    SubscribeMemberRequest:
+      type: object
+      properties:
+        membershipSkuId:
+          type: string
+    BalanceDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        balanceInCents:
+          type: integer
+          format: int64
+        balanceEligibleInCents:
+          type: integer
+          format: int64
+        balanceInShells:
+          type: integer
+          format: int64
+    BalanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BalanceDTO'
+    BillingInfoDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        mobile:
+          type: string
+        identityNumber:
+          type: string
+        account:
+          type: string
+        verified:
+          type: boolean
+    PutBillingInfoRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        mobile:
+          type: string
+        identityNumber:
+          type: string
+        accountNumber:
+          type: string
+      required:
+        - name
+        - mobile
+        - identityNumber
+        - accountNumber
+    BillingInfoResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BillingInfoDTO'
+    ShellSkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        shells:
+          type: integer
+          format: int64
+        priceInCents:
+          type: integer
+          format: int64
+        isDefault:
+          type: boolean
+    ShellSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ShellSkuDTO'
+    MembershipSkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        membershipId:
+          type: string
+        isDefault:
+          type: boolean
+        timeInMonths:
+          type: integer
+        priceInCents:
+          type: integer
+          format: int64
+        priceInShells:
+          type: integer
+          format: int64
+    MembershipSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/MembershipSkuDTO'
+    DeviceTokenRequest:
+      type: object
+      properties:
+        isBind:
+          type: boolean
+        deviceToken:
+          type: string
+        deviceType:
+          type: integer
+      required:
+        - isBind
+        - deviceToken
+        - deviceType
