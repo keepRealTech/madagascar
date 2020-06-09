@@ -15,6 +15,7 @@ import com.keepreal.madagascar.coua.TopMembershipRequest;
 import com.keepreal.madagascar.coua.UpdateMembershipRequest;
 import com.keepreal.madagascar.coua.model.MembershipInfo;
 import com.keepreal.madagascar.coua.service.MembershipService;
+import com.keepreal.madagascar.coua.service.SkuService;
 import com.keepreal.madagascar.coua.service.SubscribeMembershipService;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
@@ -32,17 +33,21 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
 
     private final MembershipService membershipService;
     private final SubscribeMembershipService subscribeMembershipService;
+    private final SkuService skuService;
 
     /**
      * Constructor the membership grpc controller.
      *
-     * @param membershipService     {@link MembershipService}.
-     * @param subscribeMembershipService
+     * @param membershipService             {@link MembershipService}.
+     * @param subscribeMembershipService    {@link SubscribeMembershipService}.
+     * @param skuService                    {@link SkuService}.
      */
     public MembershipGRpcController(MembershipService membershipService,
-                                    SubscribeMembershipService subscribeMembershipService) {
+                                    SubscribeMembershipService subscribeMembershipService,
+                                    SkuService skuService) {
         this.membershipService = membershipService;
         this.subscribeMembershipService = subscribeMembershipService;
+        this.skuService = skuService;
     }
 
     /**
@@ -110,7 +115,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             responseObserver.onCompleted();
             return;
         }
-        membership.setActivate(false);
+        membership.setActive(false);
         updateAndResponse(membership, responseObserver);
     }
 
@@ -188,6 +193,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         membershipInfo.setDescription(request.getDescription());
         membershipInfo.setPricePreMonth(request.getPricePreMonth());
         MembershipInfo membership = membershipService.createMembership(membershipInfo);
+        skuService.createMembershipSkusByMembershipId(membership.getId(), membership.getPricePreMonth());
 
         responseObserver.onNext(MembershipResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())

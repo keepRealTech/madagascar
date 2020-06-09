@@ -1,10 +1,15 @@
 package com.keepreal.madagascar.coua.service;
 
-import com.keepreal.madagascar.coua.dao.SubscribeMembershipRepository;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.vanga.RetrieveMemberCountByIslandIdRequest;
+import com.keepreal.madagascar.vanga.RetrieveMemberCountByMembershipIdRequest;
+import com.keepreal.madagascar.vanga.RetrieveMemberCountResponse;
+import com.keepreal.madagascar.vanga.SubscribeMembershipServiceGrpc;
+import io.grpc.Channel;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
 
 /**
  * Represents the subscribe membership service.
@@ -12,26 +17,56 @@ import java.time.ZoneId;
 @Service
 public class SubscribeMembershipService {
 
-    private final SubscribeMembershipRepository repository;
+    private final Channel channel;
 
     /**
      * Constructor the subscribe membership service.
      *
-     * @param repository    {@link SubscribeMembershipRepository}.
+     * @param channel   GRpc managed channel connection to service Vanga.
      */
-    public SubscribeMembershipService(SubscribeMembershipRepository repository) {
-        this.repository = repository;
+    public SubscribeMembershipService(@Qualifier("vangaChannel") Channel channel) {
+        this.channel = channel;
     }
 
+    /**
+     * retrieve the membership count by island id.
+     *
+     * @param islandId  island id.
+     * @return  member count.
+     */
     public Integer getMemberCountByIslandId(String islandId) {
-        LocalDate localDate = LocalDate.now().plusDays(1L);
-        long deadline = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        return repository.getMemberCountByIslandId(islandId, deadline);
+        SubscribeMembershipServiceGrpc.SubscribeMembershipServiceBlockingStub stub = SubscribeMembershipServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveMemberCountByIslandIdRequest request = RetrieveMemberCountByIslandIdRequest.newBuilder().setIslandId(islandId).build();
+
+        RetrieveMemberCountResponse response;
+        try {
+            response = stub.retrieveMemberCountByIslandId(request);
+        } catch (Exception e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        return response.getMemberCount();
     }
 
+    /**
+     * retrieve the membership count by membership id.
+     *
+     * @param membershipId  membership id.
+     * @return  member count.
+     */
     public Integer getMemberCountByMembershipId(String membershipId) {
-        LocalDate localDate = LocalDate.now().plusDays(1L);
-        long deadline = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        return repository.getMemberCountByMembershipId(membershipId, deadline);
+        SubscribeMembershipServiceGrpc.SubscribeMembershipServiceBlockingStub stub = SubscribeMembershipServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveMemberCountByMembershipIdRequest request = RetrieveMemberCountByMembershipIdRequest.newBuilder().setMembershipId(membershipId).build();
+
+        RetrieveMemberCountResponse response;
+        try {
+            response = stub.retrieveMemberCountByMembershipId(request);
+        } catch (Exception e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        return response.getMemberCount();
     }
 }

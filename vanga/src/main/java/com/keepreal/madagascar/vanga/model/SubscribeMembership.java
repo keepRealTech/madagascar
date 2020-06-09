@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.coua.model;
+package com.keepreal.madagascar.vanga.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

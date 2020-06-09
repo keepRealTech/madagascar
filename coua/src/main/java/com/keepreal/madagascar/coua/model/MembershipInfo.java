@@ -30,9 +30,9 @@ public class MembershipInfo {
     private String name;
     private String description;
     private Integer pricePreMonth;
-    @Column(name = "is_activate")
+    @Column(name = "is_active")
     @Builder.Default
-    private Boolean activate = true;
+    private Boolean active = true;
     @Column(name = "is_top")
     @Builder.Default
     private Boolean top = false;

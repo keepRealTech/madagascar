@@ -10,12 +10,12 @@ import java.util.List;
 @Repository
 public interface MembershipInfoRepository extends JpaRepository<MembershipInfo, String> {
 
-    MembershipInfo findMembershipInfoByIdAndActivateIsTrueAndDeletedIsFalse(String id);
+    MembershipInfo findMembershipInfoByIdAndActiveIsTrueAndDeletedIsFalse(String id);
 
-    List<MembershipInfo> findMembershipInfosByIslandIdAndActivateIsTrueAndDeletedIsFalseOrderByTopDescPricePreMonthAsc(String islandId);
+    List<MembershipInfo> findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePreMonthAsc(String islandId);
 
-    @Query(value = "SELECT color_type FROM membership WHERE island_id = ?1 AND is_activate = TRUE AND is_deleted = FALSE", nativeQuery = true)
+    @Query(value = "SELECT color_type FROM membership WHERE island_id = ?1 AND is_active = TRUE AND is_deleted = FALSE", nativeQuery = true)
     List<Integer> getColorTypeListByIslandId(String islandId);
 
-    MembershipInfo findMembershipInfoByIslandIdAndTopIsTrue(String islandId);
+    MembershipInfo findMembershipInfoByIslandIdAndTopIsTrueAndActiveIsTrueAndDeletedIsFalse(String islandId);
 }
