@@ -51,9 +51,6 @@ public class WechatPayCallbackController {
     public void apiV1OrdersWechatCallback(HttpServletRequest request, HttpServletResponse response) {
         try {
             String requestXml = IOUtils.toString(request.getInputStream(), Charset.forName(request.getCharacterEncoding()));
-
-            log.info(requestXml);
-
             this.orderService.wechatOrderCallback(requestXml);
 
             BufferedOutputStream out = new BufferedOutputStream(response.getOutputStream());
