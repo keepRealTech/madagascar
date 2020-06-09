@@ -43,6 +43,7 @@ message MembershipSkusResponse {
 message CreateMembershipSkusRequest {
   string membershipId = 1;
   uint64 priceInCentsPerMonth = 2;
+  string hostId = 3;
 }
 
 service SkuService {

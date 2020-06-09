@@ -95,7 +95,9 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
     public void createMembershipSkusByMembershipId(CreateMembershipSkusRequest request,
                                                    StreamObserver<MembershipSkusResponse> responseObserver) {
         List<MembershipSku> membershipSkus = this.skuService
-                .createDefaultMembershipSkusByMembershipIdAndCostPerMonth(request.getMembershipId(), request.getPriceInCentsPerMonth());
+                .createDefaultMembershipSkusByMembershipIdAndCostPerMonth(request.getMembershipId(),
+                        request.getHostId(),
+                        request.getPriceInCentsPerMonth());
 
         MembershipSkusResponse response = MembershipSkusResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
