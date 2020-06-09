@@ -88,12 +88,14 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     public void submitSubscribeMembershipWithWechatPay(SubscribeMembershipRequest request,
                                                        StreamObserver<WechatOrderResponse> responseObserver) {
         MembershipSku sku = this.skuService.retrieveMembershipSkuById(request.getMembershipSkuId());
-        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(String.valueOf(sku.getPriceInCents()),
-                String.format("购买会员%s", sku.getId()), "");
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
+                String.valueOf(sku.getPriceInCents()),
+                String.format("购买会员%s", sku.getId()));
         WechatOrderResponse response = WechatOrderResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
                 .build();
+        this.paymentService.createNewWechatPayments(wechatOrder, sku);
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

@@ -6,6 +6,7 @@ import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -19,6 +20,7 @@ import java.util.UUID;
  * Represents the wechat pay service.
  */
 @Service
+@Slf4j
 public class WechatPayService {
 
     private final WXPay client;
@@ -36,16 +38,18 @@ public class WechatPayService {
     /**
      * Places a new wechat payment order with given metadata.
      *
+     * @param userId      User id.
      * @param feeInCents  Cost in cents.
      * @param description Description.
-     * @param attachment  Attachment for callback.
      * @return {@link WechatOrder}.
      */
-    public WechatOrder tryPlaceOrder(String feeInCents, String description, String attachment) {
+    public WechatOrder tryPlaceOrder(String userId, String feeInCents, String description) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
+        log.info(tradeNum);
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
+                .userId(userId)
                 .description(description)
                 .feeInCents(feeInCents)
                 .build();
@@ -57,7 +61,6 @@ public class WechatPayService {
             requestBody.put("out_trade_no", tradeNum);
             requestBody.put("total_fee", feeInCents);
             requestBody.put("body", description);
-            requestBody.put("attach", attachment);
             requestBody.put("spbill_create_ip", this.wechatPayConfiguration.getHostIp());
 
             response = this.client.unifiedOrder(requestBody);
@@ -130,6 +133,7 @@ public class WechatPayService {
 
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("out_trade_no", wechatOrder.getTradeNumber());
+//        requestBody.put("out_trade_no", "eb2201974ea14f17aa12831491d68c7a");
 
         try {
             Map<String, String> response = this.client.orderQuery(requestBody);
@@ -141,6 +145,7 @@ public class WechatPayService {
             } else {
                 wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
                 wechatOrder.setTransactionId(response.get("transactionId"));
+                this.wechatOrderService.update(wechatOrder);
             }
         } catch (Exception ignored) {
         }

@@ -12,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
@@ -27,6 +28,7 @@ import javax.persistence.Table;
 @Table(name = "membershipSku")
 public class MembershipSku {
 
+    @Id
     private String id;
     private String membershipId;
     private String hostId;
