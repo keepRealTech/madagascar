@@ -49,6 +49,7 @@ public class NotificationFactory {
                         .setNotificationService(this.notificationService)
                         .build();
             case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
+            case NOTIFICATION_EVENT_NEW_MEMBER:
                 return new NoticeNotificationBuilder()
                         .setEvent(event)
                         .setNotificationService(this.notificationService)
