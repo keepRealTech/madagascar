@@ -31,15 +31,15 @@ message WechatOrderMessage {
 }
 
 enum WechatOrderState {
-    WECHAT_ORDER_STATE_UNKNOWN = 0;
-    WECHAT_ORDER_STATE_NOTPAY = 1;
-    WECHAT_ORDER_STATE_USERPAYING = 2;
-    WECHAT_ORDER_STATE_SUCCESS = 3;
-    WECHAT_ORDER_STATE_CLOSED = 4;
-    WECHAT_ORDER_STATE_REFUND = 5;
-    WECHAT_ORDER_STATE_PAYERROR = 6;
-    WECHAT_ORDER_STATE_REVOKED = 7;
-    WECHAT_ORDER_STATE_REFUNDED = 8;
+  WECHAT_ORDER_STATE_UNKNOWN = 0;
+  WECHAT_ORDER_STATE_NOTPAY = 1;
+  WECHAT_ORDER_STATE_USERPAYING = 2;
+  WECHAT_ORDER_STATE_SUCCESS = 3;
+  WECHAT_ORDER_STATE_CLOSED = 4;
+  WECHAT_ORDER_STATE_REFUND = 5;
+  WECHAT_ORDER_STATE_PAYERROR = 6;
+  WECHAT_ORDER_STATE_REVOKED = 7;
+  WECHAT_ORDER_STATE_REFUNDED = 8;
 }
 
 message WechatOrderResponse {
@@ -47,8 +47,13 @@ message WechatOrderResponse {
   WechatOrderMessage wechatOrder = 2;
 }
 
+message RetrieveWechatOrderByIdRequest {
+  string id = 1;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
   rpc SubmitSubscribeMembershipWithWechatPay (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
+  rpc RetrieveWechatOrderById (RetrieveWechatOrderByIdRequest) returns (WechatOrderResponse) {};
 }

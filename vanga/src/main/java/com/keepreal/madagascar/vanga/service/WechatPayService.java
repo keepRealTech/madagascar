@@ -182,4 +182,10 @@ public class WechatPayService {
         }
     }
 
+    @PostConstruct
+    public void init() {
+//        this.tryPlaceOrder("101", "test", "content");
+        this.tryUpdateOrder(null);
+    }
+
 }

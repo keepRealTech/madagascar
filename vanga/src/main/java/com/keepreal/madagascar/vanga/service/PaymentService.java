@@ -73,6 +73,7 @@ public class PaymentService {
         balance.setBalanceEligibleInCents(balance.getBalanceEligibleInCents() - amountInCents);
         balance.setBalanceInCents(balance.getBalanceInCents() - amountInCents);
         Payment payment = Payment.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
                 .userId(userId)
                 .amountInCents(amountInCents)
                 .type(PaymentType.WITHDRAW.getValue())
