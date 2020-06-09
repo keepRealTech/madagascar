@@ -128,15 +128,14 @@ public class WechatPayService {
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryUpdateOrder(WechatOrder wechatOrder) {
-//        if (Objects.isNull(wechatOrder)
-//                || (WechatOrderState.NOTPAY.getValue() != wechatOrder.getState()
-//                && WechatOrderState.USERPAYING.getValue() != wechatOrder.getState())) {
-//            return wechatOrder;
-//        }
+        if (Objects.isNull(wechatOrder)
+                || (WechatOrderState.NOTPAY.getValue() != wechatOrder.getState()
+                && WechatOrderState.USERPAYING.getValue() != wechatOrder.getState())) {
+            return wechatOrder;
+        }
 
         Map<String, String> requestBody = new HashMap<>();
-//        requestBody.put("out_trade_no", wechatOrder.getTradeNumber());
-        requestBody.put("out_trade_no", "3e87e7b993974ca1bb24c3b7d703c848");
+        requestBody.put("out_trade_no", wechatOrder.getTradeNumber());
 
         try {
             Map<String, String> response = this.client.orderQuery(requestBody);
@@ -156,6 +155,12 @@ public class WechatPayService {
         return null;
     }
 
+    /**
+     * Implements the callback logic.
+     *
+     * @param callbackPayload Payload.
+     * @return {@link WechatOrder}.
+     */
     public WechatOrder orderCallback(String callbackPayload) {
         if (StringUtils.isEmpty(callbackPayload)) {
             return null;
@@ -215,12 +220,6 @@ public class WechatPayService {
             }
         } catch (Exception ignored) {
         }
-    }
-
-    @PostConstruct
-    public void init() {
-        this.tryPlaceOrder("101", "1", "test");
-//        this.tryUpdateOrder(null);
     }
 
 }
