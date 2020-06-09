@@ -8,6 +8,7 @@ import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
+import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
 import com.keepreal.madagascar.vanga.factory.BalanceMessageFactory;
 import com.keepreal.madagascar.vanga.factory.WechatOrderMessageFactory;
@@ -22,6 +23,8 @@ import com.keepreal.madagascar.vanga.service.WechatPayService;
 import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
+
+import java.util.Objects;
 
 /**
  * Represents the payment grpc controller.
@@ -128,7 +131,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onNext(response);
         responseObserver.onCompleted();
 
-        if (WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()) {
+        if (Objects.isNull(wechatOrder) || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()) {
             return;
         }
 
@@ -139,6 +142,19 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     public void subscribeMembershipWithShell(SubscribeMembershipRequest request,
                                              StreamObserver<CommonStatus> responseObserver) {
         // TODO: checks shell balance, subtracts and inserts payments and membership subscription
+    }
+
+    @Override
+    public void wechatPayCallback(WechatOrderCallbackRequest request,
+                                  StreamObserver<CommonStatus> responseObserver) {
+        WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
+
+        if (Objects.isNull(wechatOrder) || wechatOrder.getState() != WechatOrderState.SUCCESS.getValue()) {
+            return;
+        }
+
+        // TODO: updates the payment draft -> open and inserts membership subscriptions
+
     }
 
 }

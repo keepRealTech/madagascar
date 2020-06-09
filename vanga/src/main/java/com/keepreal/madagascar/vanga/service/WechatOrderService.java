@@ -38,6 +38,16 @@ public class WechatOrderService {
     }
 
     /**
+     * Retrieves wechat order by order trade number.
+     *
+     * @param tradeNumber Order trade number.
+     * @return {@link WechatOrder}.
+     */
+    public WechatOrder retrieveByTradeNumber(String tradeNumber) {
+        return this.wechatOrderRepository.findTopByTradeNumberAndDeletedIsFalse(tradeNumber);
+    }
+
+    /**
      * Update the wechat order.
      *
      * @param order {@link WechatOrder}.

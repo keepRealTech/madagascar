@@ -7,6 +7,7 @@ import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -145,12 +146,42 @@ public class WechatPayService {
             } else {
                 wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
                 wechatOrder.setTransactionId(response.get("transactionId"));
-                return this.wechatOrderService.update(wechatOrder);
             }
+            return this.wechatOrderService.update(wechatOrder);
         } catch (Exception ignored) {
         }
 
-        return wechatOrder;
+        return null;
+    }
+
+    public WechatOrder orderCallback(String callbackPayload) {
+        if (StringUtils.isEmpty(callbackPayload)) {
+            return null;
+        }
+
+        try {
+            Map<String, String> response = this.client.processResponseXml(callbackPayload);
+            if (response.get("return_code").equals(WXPayConstants.FAIL)) {
+               return null;
+            }
+
+            WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
+
+            if (Objects.isNull(wechatOrder) || wechatOrder.getState() == WechatOrderState.SUCCESS.getValue()) {
+                return null;
+            }
+
+            if (response.get("result_code").equals(WXPayConstants.FAIL)) {
+                wechatOrder.setErrorMessage(response.get("err_code_des"));
+            } else {
+                wechatOrder.setState(WechatOrderState.SUCCESS.getValue());
+                wechatOrder.setTransactionId(response.get("transactionId"));
+            }
+            return this.wechatOrderService.update(wechatOrder);
+        } catch (Exception ignored) {
+        }
+
+        return null;
     }
 
     /**
