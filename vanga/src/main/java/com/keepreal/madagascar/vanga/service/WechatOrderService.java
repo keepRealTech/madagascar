@@ -28,13 +28,13 @@ public class WechatOrderService {
     }
 
     /**
-     * Retrieves wechat order by trade number.
+     * Retrieves wechat order by order id.
      *
-     * @param tradeNumber Trade number.
+     * @param id Order id.
      * @return {@link WechatOrder}.
      */
-    public WechatOrder retrieveByTradeNumber(String tradeNumber) {
-        return this.wechatOrderRepository.findTopByTradeNumberAndDeletedIsFalse(tradeNumber);
+    public WechatOrder retrieveById(String id) {
+        return this.wechatOrderRepository.findByIdAndDeletedIsFalse(id);
     }
 
     /**
@@ -42,8 +42,10 @@ public class WechatOrderService {
      *
      * @param order {@link WechatOrder}.
      */
-    public void update(WechatOrder order) {
-        this.wechatOrderRepository.save(order);
+    public WechatOrder update(WechatOrder order) {
+        return this.wechatOrderRepository.save(order);
     }
+
+
 
 }

@@ -22,6 +22,12 @@ public class OrderController implements OrderApi {
     private final OrderService orderService;
     private final WechatOrderDTOFactory wechatOrderDTOFactory;
 
+    /**
+     * Constructs the order controller.
+     *
+     * @param orderService          {@link OrderService}.
+     * @param wechatOrderDTOFactory {@link WechatOrderDTOFactory}.
+     */
     public OrderController(OrderService orderService,
                            WechatOrderDTOFactory wechatOrderDTOFactory) {
         this.orderService = orderService;

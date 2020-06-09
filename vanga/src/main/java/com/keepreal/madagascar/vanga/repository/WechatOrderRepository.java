@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WechatOrderRepository extends JpaRepository<WechatOrder, String> {
 
-    WechatOrder findTopByTradeNumberAndDeletedIsFalse(String tradeNumber);
+    WechatOrder findByIdAndDeletedIsFalse(String tradeNumber);
 
 }

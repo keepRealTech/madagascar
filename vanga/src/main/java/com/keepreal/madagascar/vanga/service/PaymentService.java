@@ -12,6 +12,7 @@ import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -100,7 +101,7 @@ public class PaymentService {
                                 .type(PaymentType.WECHATPAY.getValue())
                                 .amountInCents(sku.getPriceInCents() / sku.getTimeInMonths())
                                 .userId(wechatOrder.getUserId())
-                                .state(PaymentState.OPEN.getValue())
+                                .state(PaymentState.DRAFTED.getValue())
                                 .payeeId(sku.getHostId())
                                 .orderId(wechatOrder.getId())
                                 .tradeNum(wechatOrder.getTradeNumber())
@@ -111,6 +112,25 @@ public class PaymentService {
                         .collect(Collectors.toList());
 
         return this.paymentRepository.saveAll(payments);
+    }
+
+    /**
+     * Retrieves all payments associates to an order.
+     *
+     * @param orderId Order id.
+     * @return {@link Payment}.
+     */
+    public List<Payment> retrievePaymentsByOrderId(String orderId) {
+        return this.paymentRepository.finalAllByOrderIdAndDeletedIsFalse(orderId);
+    }
+
+    /**
+     * Updates the payments.
+     *
+     * @param payments {@link Payment}.
+     */
+    public void updateAll(Iterable<Payment> payments) {
+        this.paymentRepository.saveAll(payments);
     }
 
 }

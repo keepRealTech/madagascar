@@ -5,12 +5,10 @@ import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
-import com.keepreal.madagascar.vanga.wechatPay.WXPayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -125,15 +123,17 @@ public class WechatPayService {
      * Queries the state of an order and update the database.
      *
      * @param wechatOrder {@link WechatOrder}.
+     * @return {@link WechatOrder}.
      */
-    public void tryUpdateOrder(WechatOrder wechatOrder) {
-        if (Objects.isNull(wechatOrder)) {
-            return;
+    public WechatOrder tryUpdateOrder(WechatOrder wechatOrder) {
+        if (Objects.isNull(wechatOrder)
+                || (WechatOrderState.NOTPAY.getValue() != wechatOrder.getState()
+                && WechatOrderState.USERPAYING.getValue() != wechatOrder.getState())) {
+            return wechatOrder;
         }
 
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("out_trade_no", wechatOrder.getTradeNumber());
-//        requestBody.put("out_trade_no", "eb2201974ea14f17aa12831491d68c7a");
 
         try {
             Map<String, String> response = this.client.orderQuery(requestBody);
@@ -145,10 +145,12 @@ public class WechatPayService {
             } else {
                 wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
                 wechatOrder.setTransactionId(response.get("transactionId"));
-                this.wechatOrderService.update(wechatOrder);
+                return this.wechatOrderService.update(wechatOrder);
             }
         } catch (Exception ignored) {
         }
+
+        return wechatOrder;
     }
 
     /**

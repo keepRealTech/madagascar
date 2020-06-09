@@ -9,8 +9,9 @@ import lombok.Getter;
 public enum PaymentState {
 
     UNKNOWN(0),
-    OPEN(1),
-    CLOSED(2),
+    DRAFTED(1),
+    OPEN(2),
+    CLOSED(3),
     ;
 
     private final int value;
