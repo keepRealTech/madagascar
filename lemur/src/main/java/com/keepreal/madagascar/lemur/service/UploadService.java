@@ -43,11 +43,8 @@ public class UploadService {
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, objectName, HttpMethod.PUT);
         LocalDateTime localDateTime = LocalDateTime.now().plusSeconds(expireTimeInSeconds);
         Date date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-        // 设置过期时间。
         request.setExpiration(date);
-        // 设置Content-Type。
         request.setContentType("application/octet-stream");
-        // 生成签名URL（HTTP PUT请求）。
         return ossClient.generatePresignedUrl(request).toString();
     }
 }

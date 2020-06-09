@@ -8,9 +8,10 @@ import lombok.Getter;
 @Getter
 public enum PaymentState {
 
-    DUMMY(0),
-    OPEN(1),
-    CLOSED(2),
+    UNKNOWN(0),
+    DRAFTED(1),
+    OPEN(2),
+    CLOSED(3),
     ;
 
     private final int value;

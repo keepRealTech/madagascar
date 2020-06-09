@@ -33,6 +33,8 @@ public class Payment {
     private String userId;
     private String payeeId;
     @Builder.Default
+    private String tradeNum = "";
+    @Builder.Default
     private Long amountInCents = 0L;
     @Builder.Default
     private Long amountInShells = 0L;

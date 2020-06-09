@@ -6,3 +6,11 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
+
+wechat-pay:
+  app-id:
+  merchant-id:
+  merchant-key:
+  callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
+  cert-path: /Users/sli/development/madagascar/vanga/src/main/resources/apiclient_cert.pem
+  host-ip: 127.0.0.1

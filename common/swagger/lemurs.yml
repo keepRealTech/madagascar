@@ -2117,7 +2117,7 @@ components:
       properties:
         id:
           type: string
-        nounceStr:
+        nonceStr:
           type: string
         appId:
           type: string
@@ -2132,7 +2132,7 @@ components:
         feeInCents:
           type: integer
           format: int64
-        createdAt:
+        timestamp:
           type: integer
           format: int64
         state:

@@ -29,11 +29,12 @@ import java.nio.file.StandardOpenOption;
 @Slf4j
 public class WechatPayConfiguration extends WXPayConfig {
 
-    private String appId = "";
-    private String merchantId = "";
-    private String merchantKey = "";
-    private String certPath = "/Users/sli/development/madagascar/vanga/src/main/resources/apiclient_cert.pem";
-    private String hostIp = "127.0.0.1";
+    private String appId;
+    private String merchantId;
+    private String merchantKey;
+    private String callbackAddress;
+    private String certPath;
+    private String hostIp;
 
     /**
      * Implements the app id getter.
@@ -107,7 +108,7 @@ public class WechatPayConfiguration extends WXPayConfig {
     @Bean
     @SneakyThrows
     public WXPay getWechatPayClient() {
-        return new WXPay(this, "https://www.baidu.com", false);
+        return new WXPay(this, this.callbackAddress, false);
     }
 
 }
