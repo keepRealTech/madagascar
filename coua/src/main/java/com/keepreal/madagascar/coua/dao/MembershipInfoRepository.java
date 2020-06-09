@@ -12,7 +12,7 @@ public interface MembershipInfoRepository extends JpaRepository<MembershipInfo, 
 
     MembershipInfo findMembershipInfoByIdAndActivateIsTrueAndDeletedIsFalse(String id);
 
-    List<MembershipInfo> findMembershipInfosByIslandIdAndActivateIsTrueAndDeletedIsFalse(String islandId);
+    List<MembershipInfo> findMembershipInfosByIslandIdAndActivateIsTrueAndDeletedIsFalseOrderByTopDescPricePreMonthAsc(String islandId);
 
     @Query(value = "SELECT color_type FROM membership WHERE island_id = ?1 AND is_activate = TRUE AND is_deleted = FALSE", nativeQuery = true)
     List<Integer> getColorTypeListByIslandId(String islandId);

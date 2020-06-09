@@ -88,8 +88,11 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             responseObserver.onCompleted();
             return;
         }
-        // TODO
-        super.retrieveMembershipById(request, responseObserver);
+        responseObserver.onNext(MembershipResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setMessage(membershipService.getMembershipMessage(membership))
+                .build());
+        responseObserver.onCompleted();
     }
 
     /**

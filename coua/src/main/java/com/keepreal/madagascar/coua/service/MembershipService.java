@@ -56,7 +56,7 @@ public class MembershipService {
     }
 
     public List<MembershipInfo> getMembershipListByIslandId(String islandId) {
-        return repository.findMembershipInfosByIslandIdAndActivateIsTrueAndDeletedIsFalse(islandId);
+        return repository.findMembershipInfosByIslandIdAndActivateIsTrueAndDeletedIsFalseOrderByTopDescPricePreMonthAsc(islandId);
     }
 
     public MembershipInfo updateMembership(MembershipInfo membershipInfo) {
@@ -78,8 +78,10 @@ public class MembershipService {
 
     public void revokeTopMembership(String islandId) {
         MembershipInfo membershipInfo = repository.findMembershipInfoByIslandIdAndTopIsTrue(islandId);
-        membershipInfo.setTop(false);
-        repository.save(membershipInfo);
+        if (membershipInfo != null) {
+            membershipInfo.setTop(false);
+            repository.save(membershipInfo);
+        }
     }
 
     public FeedMembershipMessage getFeedMembershipMessage(MembershipInfo membershipInfo) {
