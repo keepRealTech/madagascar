@@ -108,7 +108,7 @@ public class WechatPayConfiguration extends WXPayConfig {
     @Bean
     @SneakyThrows
     public WXPay getWechatPayClient() {
-        return new WXPay(this, "https://www.baidu.com", false, true);
+        return new WXPay(this, "https://islands.keepreal.cn/api/v1/order/wechat/callback", false, true);
     }
 
 }

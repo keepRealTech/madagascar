@@ -51,9 +51,14 @@ message RetrieveWechatOrderByIdRequest {
   string id = 1;
 }
 
+message WechatOrderCallbackRequest {
+  string payload = 1;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
   rpc SubmitSubscribeMembershipWithWechatPay (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
   rpc RetrieveWechatOrderById (RetrieveWechatOrderByIdRequest) returns (WechatOrderResponse) {};
+  rpc WechatPayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
 }
