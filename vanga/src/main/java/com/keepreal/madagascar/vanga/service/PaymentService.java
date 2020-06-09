@@ -119,6 +119,7 @@ public class PaymentService {
      * @param orderId Order id.
      * @return {@link Payment}.
      */
+    @Transactional
     public List<Payment> retrievePaymentsByOrderId(String orderId) {
         return this.paymentRepository.findAllByOrderIdAndDeletedIsFalse(orderId);
     }
@@ -128,6 +129,7 @@ public class PaymentService {
      *
      * @param payments {@link Payment}.
      */
+    @Transactional
     public void updateAll(Iterable<Payment> payments) {
         this.paymentRepository.saveAll(payments);
     }
