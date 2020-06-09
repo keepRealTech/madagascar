@@ -31,8 +31,9 @@ public class WechatPayConfiguration extends WXPayConfig {
 
     private String appId = "wx301608aae2f8f0ea";
     private String merchantId = "1594907001";
-//    private String merchantKey = "fbf367eff80d415b889cedf1a2f04890";
-    private String merchantKey = "fc3a8840a79ede31dd23599f1473d40a";
+    private String merchantKey = "fbf367eff80d415b889cedf1a2f04890";
+//    private String merchantKey = "fc3a8840a79ede31dd23599f1473d40a";
+    private String callbackAddress = "http://123.57.72.117:8081/api/v1/orders/wechat/callback";
     private String certPath = "/Users/sli/development/madagascar/vanga/src/main/resources/apiclient_cert.pem";
     private String hostIp = "127.0.0.1";
 
@@ -108,7 +109,7 @@ public class WechatPayConfiguration extends WXPayConfig {
     @Bean
     @SneakyThrows
     public WXPay getWechatPayClient() {
-        return new WXPay(this, "https://islands.keepreal.cn/api/v1/order/wechat/callback", false, true);
+        return new WXPay(this, this.callbackAddress, false);
     }
 
 }

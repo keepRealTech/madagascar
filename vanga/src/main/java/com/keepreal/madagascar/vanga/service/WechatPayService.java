@@ -5,6 +5,7 @@ import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
+import com.keepreal.madagascar.vanga.wechatPay.WXPayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -75,7 +76,7 @@ public class WechatPayService {
                 request.put("noncestr", response.get("nonce_str"));
                 request.put("prepayid", response.get("prepay_id"));
                 request.put("package", "Sign=WXPay");
-                request.put("timestamp", String.valueOf(wechatOrder.getCreatedTime() / 1000));
+                request.put("timestamp", String.valueOf(WXPayUtil.getCurrentTimestamp()));
                 request = this.client.fillPayRequestData(request);
 
                 wechatOrder.setSignature(request.get("sign"));
@@ -127,14 +128,15 @@ public class WechatPayService {
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryUpdateOrder(WechatOrder wechatOrder) {
-        if (Objects.isNull(wechatOrder)
-                || (WechatOrderState.NOTPAY.getValue() != wechatOrder.getState()
-                && WechatOrderState.USERPAYING.getValue() != wechatOrder.getState())) {
-            return wechatOrder;
-        }
+//        if (Objects.isNull(wechatOrder)
+//                || (WechatOrderState.NOTPAY.getValue() != wechatOrder.getState()
+//                && WechatOrderState.USERPAYING.getValue() != wechatOrder.getState())) {
+//            return wechatOrder;
+//        }
 
         Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("out_trade_no", wechatOrder.getTradeNumber());
+//        requestBody.put("out_trade_no", wechatOrder.getTradeNumber());
+        requestBody.put("out_trade_no", "3e87e7b993974ca1bb24c3b7d703c848");
 
         try {
             Map<String, String> response = this.client.orderQuery(requestBody);
@@ -217,8 +219,8 @@ public class WechatPayService {
 
     @PostConstruct
     public void init() {
-//        this.tryPlaceOrder("101", "test", "content");
-        this.tryUpdateOrder(null);
+        this.tryPlaceOrder("101", "1", "test");
+//        this.tryUpdateOrder(null);
     }
 
 }

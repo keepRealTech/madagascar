@@ -14,6 +14,6 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
 
     List<Payment> findAllByTypeAndCreatedTimeAfterAndDeletedIsFalse(Integer type, Long timestampAfter);
 
-    List<Payment> finalAllByOrderIdAndDeletedIsFalse(String orderId);
+    List<Payment> findAllByOrderIdAndDeletedIsFalse(String orderId);
 
 }

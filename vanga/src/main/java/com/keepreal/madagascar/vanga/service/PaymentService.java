@@ -12,7 +12,6 @@ import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.OptimisticLockException;
 import javax.transaction.Transactional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -121,7 +120,7 @@ public class PaymentService {
      * @return {@link Payment}.
      */
     public List<Payment> retrievePaymentsByOrderId(String orderId) {
-        return this.paymentRepository.finalAllByOrderIdAndDeletedIsFalse(orderId);
+        return this.paymentRepository.findAllByOrderIdAndDeletedIsFalse(orderId);
     }
 
     /**
