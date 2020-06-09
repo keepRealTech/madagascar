@@ -17,6 +17,9 @@ grpc:
   mantella:
     host: 127.0.0.1
     port: 12005
+  vanga:
+    host: 127.0.0.1
+    port: 12006
 
 system-notification:
   name: test-user

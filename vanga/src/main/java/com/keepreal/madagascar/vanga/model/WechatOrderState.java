@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public enum WechatOrderState {
 
-    DUMMY(0),
+    UNKNOWN(0),
     NOTPAY(1),
     USERPAYING(2),
     SUCCESS(3),

@@ -67,6 +67,7 @@ public class SkuService {
      */
     @Transactional
     public List<MembershipSku> createDefaultMembershipSkusByMembershipIdAndCostPerMonth(String membershipId,
+                                                                                        String hostId,
                                                                                         Long costInCentsPerMonth) {
         List<MembershipSku> membershipSkus = this.retrieveMembershipSkusByMembershipIdAndActiveIsTrue(membershipId);
         if (Objects.nonNull(membershipSkus) && membershipSkus.isEmpty()) {
@@ -74,10 +75,20 @@ public class SkuService {
         }
 
         membershipSkus = this.membershipPeriods.stream()
-                .map(i -> this.generateMembershipSku(membershipId, costInCentsPerMonth, i))
+                .map(i -> this.generateMembershipSku(membershipId, costInCentsPerMonth, hostId, i))
                 .collect(Collectors.toList());
 
         return this.membershipSkuRepository.saveAll(membershipSkus);
+    }
+
+    /**
+     * Retrieves the membership sku by id.
+     *
+     * @param membershipSkuId        Membership sku id.
+     * @return {@link MembershipSku}.
+     */
+    public MembershipSku retrieveMembershipSkuById(String membershipSkuId) {
+        return this.membershipSkuRepository.findByIdAndActiveIsTrueAndDeletedIsFalse(membershipSkuId);
     }
 
     /**
@@ -85,11 +96,13 @@ public class SkuService {
      *
      * @param membershipId        Membership id.
      * @param costInCentsPerMonth Costs in cents for a month.
+     * @param hostId              Host id.
      * @param timeInMonths        Number of months of subscription.
      * @return {@link MembershipSku}.
      */
     private MembershipSku generateMembershipSku(String membershipId,
                                                 Long costInCentsPerMonth,
+                                                String hostId,
                                                 int timeInMonths) {
         return MembershipSku.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
@@ -99,6 +112,7 @@ public class SkuService {
                 .priceInCents(costInCentsPerMonth * timeInMonths)
                 .priceInShells(costInCentsPerMonth * timeInMonths)
                 .defaultSku(timeInMonths == 3)
+                .hostId(hostId)
                 .build();
     }
 

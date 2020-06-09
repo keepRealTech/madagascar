@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 /**
  * Represents the user balance.
@@ -38,10 +39,16 @@ public class Balance {
     @Builder.Default
     private Long balanceInShells = 0L;
     @Builder.Default
+    private Long withdrawDayLimitInCents = 2000000L;
+    @Builder.Default
+    private Integer withdrawPercent = 88;
+    @Builder.Default
     private Boolean frozen = false;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
+    @Version
+    private Long version;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate

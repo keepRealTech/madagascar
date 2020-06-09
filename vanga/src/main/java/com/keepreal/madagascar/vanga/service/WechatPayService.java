@@ -6,10 +6,11 @@ import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +20,7 @@ import java.util.UUID;
  * Represents the wechat pay service.
  */
 @Service
+@Slf4j
 public class WechatPayService {
 
     private final WXPay client;
@@ -36,16 +38,18 @@ public class WechatPayService {
     /**
      * Places a new wechat payment order with given metadata.
      *
+     * @param userId      User id.
      * @param feeInCents  Cost in cents.
      * @param description Description.
-     * @param attachment  Attachment for callback.
      * @return {@link WechatOrder}.
      */
-    public WechatOrder tryPlaceOrder(String feeInCents, String description, String attachment) {
-//        String tradeNum = UUID.randomUUID().toString().replace("-", "");
-        String tradeNum = "testcase0";
+    public WechatOrder tryPlaceOrder(String userId, String feeInCents, String description) {
+        String tradeNum = UUID.randomUUID().toString().replace("-", "");
+        log.info(tradeNum);
+
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
+                .userId(userId)
                 .description(description)
                 .feeInCents(feeInCents)
                 .build();
@@ -57,7 +61,6 @@ public class WechatPayService {
             requestBody.put("out_trade_no", tradeNum);
             requestBody.put("total_fee", feeInCents);
             requestBody.put("body", description);
-            requestBody.put("attach", attachment);
             requestBody.put("spbill_create_ip", this.wechatPayConfiguration.getHostIp());
 
             response = this.client.unifiedOrder(requestBody);
@@ -73,13 +76,12 @@ public class WechatPayService {
                 request.put("noncestr", response.get("nonce_str"));
                 request.put("prepayid", response.get("prepay_id"));
                 request.put("package", "Sign=WXPay");
-                request.put("timestamp", String.valueOf(wechatOrder.getCreatedTime() / 1000));
+                request.put("timestamp", String.valueOf(WXPayUtil.getCurrentTimestamp()));
                 request = this.client.fillPayRequestData(request);
 
                 wechatOrder.setSignature(request.get("sign"));
                 wechatOrder.setNonceStr(request.get("noncestr"));
                 wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
-
             }
             return wechatOrder;
         } catch (Exception e) {
@@ -123,10 +125,13 @@ public class WechatPayService {
      * Queries the state of an order and update the database.
      *
      * @param wechatOrder {@link WechatOrder}.
+     * @return {@link WechatOrder}.
      */
-    public void tryUpdateOrder(WechatOrder wechatOrder) {
-        if (Objects.isNull(wechatOrder)) {
-            return;
+    public WechatOrder tryUpdateOrder(WechatOrder wechatOrder) {
+        if (Objects.isNull(wechatOrder)
+                || (WechatOrderState.NOTPAY.getValue() != wechatOrder.getState()
+                && WechatOrderState.USERPAYING.getValue() != wechatOrder.getState())) {
+            return wechatOrder;
         }
 
         Map<String, String> requestBody = new HashMap<>();
@@ -143,8 +148,47 @@ public class WechatPayService {
                 wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
                 wechatOrder.setTransactionId(response.get("transactionId"));
             }
+            return this.wechatOrderService.update(wechatOrder);
         } catch (Exception ignored) {
         }
+
+        return null;
+    }
+
+    /**
+     * Implements the callback logic.
+     *
+     * @param callbackPayload Payload.
+     * @return {@link WechatOrder}.
+     */
+    public WechatOrder orderCallback(String callbackPayload) {
+        if (StringUtils.isEmpty(callbackPayload)) {
+            return null;
+        }
+
+        try {
+            Map<String, String> response = this.client.processResponseXml(callbackPayload);
+            if (response.get("return_code").equals(WXPayConstants.FAIL)) {
+               return null;
+            }
+
+            WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
+
+            if (Objects.isNull(wechatOrder) || wechatOrder.getState() == WechatOrderState.SUCCESS.getValue()) {
+                return null;
+            }
+
+            if (response.get("result_code").equals(WXPayConstants.FAIL)) {
+                wechatOrder.setErrorMessage(response.get("err_code_des"));
+            } else {
+                wechatOrder.setState(WechatOrderState.SUCCESS.getValue());
+                wechatOrder.setTransactionId(response.get("transactionId"));
+            }
+            return this.wechatOrderService.update(wechatOrder);
+        } catch (Exception ignored) {
+        }
+
+        return null;
     }
 
     /**
