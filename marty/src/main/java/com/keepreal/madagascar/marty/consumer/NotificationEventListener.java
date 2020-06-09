@@ -43,13 +43,13 @@ public class NotificationEventListener implements MessageListener {
 
             NotificationEvent notificationEvent = NotificationEvent.parseFrom(message.getBody());
             if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_COMMENT)) {
-                String islandId = notificationEvent.getCommentEvent().getFeed().getIslandId();
-                umengPushService.pushComment(islandId);
+                String userId = notificationEvent.getUserId();
+                umengPushService.pushComment(userId);
             }
 
             if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_REACTION)) {
-                String islandId = notificationEvent.getReactionEvent().getFeed().getIslandId();
-                umengPushService.pushReaction(islandId);
+                String userId = notificationEvent.getUserId();
+                umengPushService.pushReaction(userId);
             }
             return Action.CommitMessage;
         } catch (DuplicateKeyException exception) {
