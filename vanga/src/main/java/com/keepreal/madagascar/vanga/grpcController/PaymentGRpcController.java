@@ -13,8 +13,6 @@ import com.keepreal.madagascar.vanga.factory.BalanceMessageFactory;
 import com.keepreal.madagascar.vanga.factory.WechatOrderMessageFactory;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
-import com.keepreal.madagascar.vanga.model.Payment;
-import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.service.PaymentService;
@@ -24,10 +22,6 @@ import com.keepreal.madagascar.vanga.service.WechatPayService;
 import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Represents the payment grpc controller.
@@ -138,20 +132,13 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             return;
         }
 
-        List<Payment> payments = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
-        payments = payments.stream()
-                .filter(Objects::nonNull)
-                .filter(payment -> PaymentState.DRAFTED.getValue() == payment.getState())
-                .peek(payment -> payment.setState(PaymentState.OPEN.getValue()))
-                .collect(Collectors.toList());
-        if (!payments.isEmpty()) {
-            this.paymentService.updateAll(payments);
-        }
+        // TODO: updates the payment draft -> open and inserts membership subscriptions
     }
 
     @Override
     public void subscribeMembershipWithShell(SubscribeMembershipRequest request,
                                              StreamObserver<CommonStatus> responseObserver) {
+        // TODO: checks shell balance, subtracts and inserts payments and membership subscription
     }
 
 }
