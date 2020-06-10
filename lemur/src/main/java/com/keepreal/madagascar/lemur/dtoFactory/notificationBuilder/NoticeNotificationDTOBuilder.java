@@ -116,7 +116,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
 
         switch (noticeMessage.getType()) {
             case NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER:
-                noticeDTO.setNoticeType(NoticeType.ISLAND_NOTICE_NEW_SUBSCRIBER);
+                noticeDTO.setNoticeType(NoticeType.SUBSCRIBER);
 
                 if (Objects.isNull(noticeMessage.getSubscribeNotice())) {
                     return noticeDTO;
@@ -131,6 +131,26 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                                 this.userService.retrieveUserById(
                                         noticeMessage.getSubscribeNotice().getSubscriberId())));
                 return noticeDTO;
+            case NOTICE_TYPE_ISLAND_NEW_MEMBER:
+                noticeDTO.setNoticeType(NoticeType.MEMBER);
+
+                if (Objects.isNull(noticeMessage.getMemberNotice())) {
+                    return noticeDTO;
+                }
+
+                noticeDTO.setIsland(
+                        this.islandDTOFactory.briefValueOf(
+                                this.islandService.retrieveIslandById(
+                                        noticeMessage.getMemberNotice().getIslandId())));
+                noticeDTO.setMember(
+                        this.userDTOFactory.briefValueOf(
+                                this.userService.retrieveUserById(
+                                        noticeMessage.getMemberNotice().getMemberId())));
+                noticeDTO.setMembershipId(noticeMessage.getMemberNotice().getMembershipId());
+                noticeDTO.setMembershipName(noticeMessage.getMemberNotice().getMembershipName());
+                noticeDTO.setPricePerMonthInCents(noticeMessage.getMemberNotice().getPricePerMonthInCents());
+                return noticeDTO;
+
             default:
         }
 
