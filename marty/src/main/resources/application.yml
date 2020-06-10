@@ -5,6 +5,7 @@ grpc:
   fossa:
     host: 127.0.0.1
     port: 12003
+  port: 12007
 
 rocketmq:
   notification:
