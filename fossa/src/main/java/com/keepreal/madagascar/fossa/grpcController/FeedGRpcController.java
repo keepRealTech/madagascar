@@ -90,6 +90,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         ProtocolStringList islandIdList = request.getIslandIdList();
         ProtocolStringList hostIdList = request.getHostIdList();
         String text = request.hasText() ? request.getText().getValue() : "";
+        ProtocolStringList membershipIdsList = request.getMembershipIdsList();
 
         List<FeedInfo> feedInfoList = new ArrayList<>();
         IntStream.range(0, islandIdList.size()).forEach(i -> {
@@ -101,6 +102,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.fromHost(userId.equals(hostIdList.get(i)));
             builder.imageUrls(request.getImageUrisList());
             builder.text(text);
+            builder.membershipIds(membershipIdsList);
             builder.createdTime(System.currentTimeMillis());
             feedInfoList.add(builder.build());
         });

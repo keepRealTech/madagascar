@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import swagger.model.BriefMembershipDTO;
 import swagger.model.FeedMembershipDTO;
 import swagger.model.MembershipDTO;
+import swagger.model.SimpleMembershipDTO;
 
 import java.util.Arrays;
 
@@ -16,6 +17,14 @@ import java.util.Arrays;
 @Component
 @Slf4j
 public class MembershipDTOFactory {
+
+    public SimpleMembershipDTO simpleValueOf(MembershipMessage membershipMessage) {
+        SimpleMembershipDTO dto = new SimpleMembershipDTO();
+        dto.setMembershipId(membershipMessage.getId());
+        dto.setMembershipName(membershipMessage.getName());
+        dto.setColorType(membershipMessage.getColorType());
+        return dto;
+    }
 
     public BriefMembershipDTO briefValueOf(MembershipMessage membershipMessage) {
         BriefMembershipDTO dto = new BriefMembershipDTO();

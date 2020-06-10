@@ -18,6 +18,7 @@ message NewFeedsRequest {
     repeated string hostId = 3;
     repeated string imageUris = 4;
     google.protobuf.StringValue text = 5;
+    repeated string membershipIds = 6;
 }
 
 message NewFeedsResponse {

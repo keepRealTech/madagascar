@@ -5,8 +5,10 @@ import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
+import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.lemur.service.EhcacheService;
 import com.keepreal.madagascar.lemur.service.IslandService;
+import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,7 +18,6 @@ import swagger.model.FeedDTO;
 import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -35,29 +36,37 @@ public class FeedDTOFactory {
     private final UserDTOFactory userDTOFactory;
     private final CommentDTOFactory commentDTOFactory;
     private final EhcacheService ehcacheService;
+    private final MembershipService membershipService;
+    private final MembershipDTOFactory membershipDTOFactory;
 
     /**
      * Constructs the feed dto factory.
      *
-     * @param islandService     {@link IslandService}.
-     * @param islandDTOFactory  {@link IslandDTOFactory}.
-     * @param userService       {@link UserService}.
-     * @param userDTOFactory    {@link UserDTOFactory}.
-     * @param commentDTOFactory {@link CommentDTOFactory}.
-     * @param ehcacheService    {@link EhcacheService}.
+     * @param islandService         {@link IslandService}.
+     * @param islandDTOFactory      {@link IslandDTOFactory}.
+     * @param userService           {@link UserService}.
+     * @param userDTOFactory        {@link UserDTOFactory}.
+     * @param commentDTOFactory     {@link CommentDTOFactory}.
+     * @param ehcacheService        {@link EhcacheService}.
+     * @param membershipService     {@link MembershipService}.
+     * @param membershipDTOFactory  {@link MembershipDTOFactory}.
      */
     public FeedDTOFactory(IslandService islandService,
                           IslandDTOFactory islandDTOFactory,
                           UserService userService,
                           UserDTOFactory userDTOFactory,
                           CommentDTOFactory commentDTOFactory,
-                          EhcacheService ehcacheService) {
+                          EhcacheService ehcacheService,
+                          MembershipService membershipService,
+                          MembershipDTOFactory membershipDTOFactory) {
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.commentDTOFactory = commentDTOFactory;
         this.ehcacheService = ehcacheService;
+        this.membershipService = membershipService;
+        this.membershipDTOFactory = membershipDTOFactory;
     }
 
     /**
@@ -90,7 +99,11 @@ public class FeedDTOFactory {
             feedDTO.setRepostCount(feed.getRepostCount());
             feedDTO.setCreatedAt(feed.getCreatedAt());
             feedDTO.setIsLiked(feed.getIsLiked());
-
+            feedDTO.setIsAccess(feed.getIsAccess());
+            if (!feed.getIsAccess()) {
+                MembershipMessage membershipMessage = this.membershipService.retrieveMembershipById(feed.getMembershipId());
+                feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessage));
+            }
             feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
             feedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
 

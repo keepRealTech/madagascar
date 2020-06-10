@@ -151,7 +151,7 @@ public class FeedController implements FeedApi {
                 .map(this.imageService::uploadSingleImage)
                 .collect(Collectors.toList());
 
-        this.feedService.createFeed(payload.getIslandIds(), userId, payload.getContent(), imageUris);
+        this.feedService.createFeed(payload.getIslandIds(), payload.getMembershipIds(), userId, payload.getContent(), imageUris);
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);

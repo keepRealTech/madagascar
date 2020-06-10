@@ -30,23 +30,27 @@ public class FeedInfoService {
     private final CommentService commentService;
     private final FeedInfoRepository feedInfoRepository;
     private final ReactionRepository reactionRepository;
+    private final SubscribeMembershipService subscribeMembershipService;
 
     /**
      * Constructs the feed service
      *
-     * @param mongoTemplate         {@link MongoTemplate}.
-     * @param commentService        {@link CommentService}.
-     * @param feedInfoRepository    {@link FeedInfoRepository}.
-     * @param reactionRepository    {@link ReactionRepository}.
+     * @param mongoTemplate                 {@link MongoTemplate}.
+     * @param commentService                {@link CommentService}.
+     * @param feedInfoRepository            {@link FeedInfoRepository}.
+     * @param reactionRepository            {@link ReactionRepository}.
+     * @param subscribeMembershipService    {@link SubscribeMembershipService}.
      */
     public FeedInfoService(MongoTemplate mongoTemplate,
                            CommentService commentService,
                            FeedInfoRepository feedInfoRepository,
-                           ReactionRepository reactionRepository) {
+                           ReactionRepository reactionRepository,
+                           SubscribeMembershipService subscribeMembershipService) {
         this.mongoTemplate = mongoTemplate;
         this.commentService = commentService;
         this.feedInfoRepository = feedInfoRepository;
         this.reactionRepository = reactionRepository;
+        this.subscribeMembershipService = subscribeMembershipService;
     }
 
     /**
@@ -120,9 +124,10 @@ public class FeedInfoService {
     public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
         if (feedInfo == null)
             return null;
+        List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(feedInfo.getIslandId(), userId);
         List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
-        return FeedMessage.newBuilder()
+        FeedMessage.Builder builder = FeedMessage.newBuilder()
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
                 .setUserId(feedInfo.getUserId())
@@ -134,8 +139,23 @@ public class FeedInfoService {
                 .setRepostCount(feedInfo.getRepostCount())
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
-                .setIsDeleted(feedInfo.isDeleted())
-                .build();
+                .setIsDeleted(feedInfo.isDeleted());
+
+        List<String> membershipIds = feedInfo.getMembershipIds();
+        if (membershipIds != null && membershipIds.size() > 0 && myMembershipIds != null && myMembershipIds.size() > 0) {
+            boolean hasAccess = false;
+            for (String id : membershipIds) {
+                hasAccess = myMembershipIds.contains(id);
+            }
+            if (hasAccess) {
+                builder.setIsAccess(true);
+                builder.setMembershipId("");
+            } else {
+                builder.setIsAccess(false);
+                builder.setMembershipId(membershipIds.get(0));
+            }
+        }
+        return builder.build();
     }
 
     /**

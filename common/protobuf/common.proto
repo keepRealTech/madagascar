@@ -162,6 +162,8 @@ message FeedMessage {
     repeated CommentMessage lastComments = 10;
     bool isLiked = 11;
     bool isDeleted = 12;
+    bool isAccess = 13;
+    string membershipId = 14;
 }
 
 message CommentMessage {
