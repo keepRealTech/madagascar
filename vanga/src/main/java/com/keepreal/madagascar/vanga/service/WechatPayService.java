@@ -174,11 +174,14 @@ public class WechatPayService {
 
             WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
 
-            if (Objects.isNull(wechatOrder) || wechatOrder.getState() == WechatOrderState.SUCCESS.getValue()) {
+            if (Objects.isNull(wechatOrder)
+                    || wechatOrder.getState() == WechatOrderState.SUCCESS.getValue()
+                    || wechatOrder.getState() == WechatOrderState.PAYERROR.getValue()) {
                 return null;
             }
 
             if (response.get("result_code").equals(WXPayConstants.FAIL)) {
+                wechatOrder.setState(WechatOrderState.PAYERROR.getValue());
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
                 wechatOrder.setState(WechatOrderState.SUCCESS.getValue());

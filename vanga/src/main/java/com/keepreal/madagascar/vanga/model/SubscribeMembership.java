@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Version;
 
 @Data
 @Table(name = "membership")
@@ -28,7 +29,10 @@ public class SubscribeMembership {
     private String userId;
     private String islandId;
     private String membershipId;
+    private String wechatOrderId;
     private Long expireTime;
+    @Version
+    private Long version;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
@@ -36,4 +40,5 @@ public class SubscribeMembership {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }

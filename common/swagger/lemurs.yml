@@ -37,6 +37,8 @@ tags:
     description: Billings controller
   - name: Sku
     description: SKU controller
+  - name: Membership
+    description: Membership controller
 paths:
   /api/healthcheck:
     head:
