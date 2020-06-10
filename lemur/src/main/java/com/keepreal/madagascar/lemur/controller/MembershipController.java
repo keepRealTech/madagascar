@@ -8,6 +8,7 @@ import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.MembershipDTOFactory;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
+import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -87,11 +88,12 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<MembershipResponse> apiV1IslandsIdMembershipsPost(String id, @Valid PostMembershipRequest postMembershipRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
         MembershipMessage membershipMessage = membershipService.createMembership(postMembershipRequest.getName(),
                 postMembershipRequest.getChargePerMonth(),
                 postMembershipRequest.getDescription(),
                 id,
-                postMembershipRequest.getHostId());
+                userId);
 
         MembershipResponse response = new MembershipResponse();
         response.data(membershipDTOFactory.briefValueOf(membershipMessage));

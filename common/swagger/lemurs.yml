@@ -2519,8 +2519,6 @@ components:
           type: integer
         name:
           type: string
-        hostId:
-          type: string
     PutMembershipRequest:
       type: object
       properties:

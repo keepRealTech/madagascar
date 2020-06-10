@@ -13,12 +13,15 @@ import com.keepreal.madagascar.coua.MembershipsResponse;
 import com.keepreal.madagascar.coua.RetrieveMembershipsRequest;
 import com.keepreal.madagascar.coua.TopMembershipRequest;
 import com.keepreal.madagascar.coua.UpdateMembershipRequest;
+import com.keepreal.madagascar.coua.model.IslandInfo;
 import com.keepreal.madagascar.coua.model.MembershipInfo;
+import com.keepreal.madagascar.coua.service.IslandInfoService;
 import com.keepreal.madagascar.coua.service.MembershipService;
 import com.keepreal.madagascar.coua.service.SkuService;
 import com.keepreal.madagascar.coua.service.SubscribeMembershipService;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 
 import java.util.ArrayList;
@@ -29,11 +32,13 @@ import java.util.stream.Collectors;
  *  Represents the membership grpc controller.
  */
 @GRpcService
+@Slf4j
 public class MembershipGRpcController extends MembershipServiceGrpc.MembershipServiceImplBase {
 
     private final MembershipService membershipService;
     private final SubscribeMembershipService subscribeMembershipService;
     private final SkuService skuService;
+    private final IslandInfoService islandInfoService;
 
     /**
      * Constructor the membership grpc controller.
@@ -41,13 +46,16 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
      * @param membershipService             {@link MembershipService}.
      * @param subscribeMembershipService    {@link SubscribeMembershipService}.
      * @param skuService                    {@link SkuService}.
+     * @param islandInfoService             {@link IslandInfoService}.
      */
     public MembershipGRpcController(MembershipService membershipService,
                                     SubscribeMembershipService subscribeMembershipService,
-                                    SkuService skuService) {
+                                    SkuService skuService,
+                                    IslandInfoService islandInfoService) {
         this.membershipService = membershipService;
         this.subscribeMembershipService = subscribeMembershipService;
         this.skuService = skuService;
+        this.islandInfoService = islandInfoService;
     }
 
     /**
@@ -186,15 +194,25 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
      */
     @Override
     public void createMembership(CreateMembershipRequest request, StreamObserver<MembershipResponse> responseObserver) {
+        String islandId = request.getIslandId();
+        IslandInfo islandInfo = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
+        if (islandInfo == null || !islandInfo.getHostId().equals(request.getHostId())) {
+            responseObserver.onNext(MembershipResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_INVALID_ARGUMENT))
+                    .build());
+            responseObserver.onCompleted();
+            log.error("user id is not island host id! userId is {}, islandId is {}", request.getHostId(), islandId);
+            return;
+        }
         MembershipInfo membershipInfo = new MembershipInfo();
         membershipInfo.setName(request.getName());
-        membershipInfo.setIslandId(request.getIslandId());
+        membershipInfo.setIslandId(islandId);
         membershipInfo.setHostId(request.getHostId());
         membershipInfo.setDescription(request.getDescription());
         membershipInfo.setPricePreMonth(request.getPricePreMonth());
         MembershipInfo membership = membershipService.createMembership(membershipInfo);
         skuService.createMembershipSkusByMembershipId(membership.getId(),
-                membership.getPricePreMonth(), request.getHostId(), request.getIslandId());
+                membership.getPricePreMonth(), request.getHostId(), islandId);
 
         responseObserver.onNext(MembershipResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
