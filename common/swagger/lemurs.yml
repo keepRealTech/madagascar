@@ -967,6 +967,122 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipSkusResponse'
+  /api/v1/islands/{id}/memberships:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Membership
+      summary: Create a new membership for given island
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostMembershipRequest'
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipResponse'
+    get:
+      tags:
+        - Membership
+      summary: Get memberships for island
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipsResponse'
+  /api/v1/islands/{id}/feedMemberships:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Membership
+      summary: Get memberships for island
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedMembershipsResponse'
+  /api/v1/memberships/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Membership
+      summary: Retrieve a membership
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipResponse'
+    put:
+      tags:
+        - Membership
+      summary: Update a membership
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutMembershipRequest'
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipResponse'
+    delete:
+      tags:
+        - Membership
+      summary: Remove a membership
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/memberships/{id}/deactivate:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Membership
+      summary: deletes a membership by id
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/memberships/{id}/top:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+      - $ref: '#/components/parameters/isRevokeInQuery'
+    post:
+      tags:
+        - Membership
+      summary: deletes a membership by id
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1142,16 +1258,6 @@ components:
         - IDENTITY_FASHION
         - IDENTITY_COMIC
         - IDENTITY_OTHERS
-    OrderState:
-      type: string
-      enum:
-        - STATE_NOTPAY
-        - STATE_USERPAYING
-        - STATE_SUCCESS
-        - STATE_CLOSED
-        - STATE_REFUND
-        - STATE_PAYERROR
-        - STATE_REVOKED
     NoticeType:
       type: string
       enum:
@@ -2330,3 +2436,92 @@ components:
         - isBind
         - deviceToken
         - deviceType
+    FeedMembershipDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        membershipName:
+          type: string
+        chargePerMonth:
+          type: integer
+        memberCount:
+          type: integer
+    BriefMembershipDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        hostId:
+          type: string
+        islandId:
+          type: string
+        menbershipName:
+          type: string
+        description:
+          type: array
+          items:
+            type: string
+        chargePerMonth:
+          type: integer
+        colorType:
+          type: integer
+    MembershipDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefMembershipDTO'
+        - type: object
+          properties:
+            memberCount:
+              type: integer
+            isTop:
+              type: boolean
+    PostMembershipRequest:
+      type: object
+      properties:
+        description:
+          type: array
+          items:
+            type: string
+        chargePerMonth:
+          type: integer
+        name:
+          type: string
+        hostId:
+          type: string
+    PutMembershipRequest:
+      type: object
+      properties:
+        description:
+          type: array
+          items:
+            type: string
+        chargePerMonth:
+          type: integer
+          description: can only increase
+        name:
+          type: string
+    MembershipResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BriefMembershipDTO'
+    MembershipsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/MembershipDTO'
+    FeedMembershipsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeedMembershipDTO'
