@@ -4,6 +4,7 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.vanga";
 
 import "common.proto";
+import "google/protobuf/wrappers.proto";
 
 message ShellSkuMessage {
   string id = 1;
@@ -48,8 +49,21 @@ message CreateMembershipSkusRequest {
   string islandId = 5;
 }
 
+message UpdateMembershipSkusByIdRequest {
+  string membershipId = 1;
+  google.protobuf.StringValue membershipName = 2;
+  google.protobuf.Int64Value pricePerMonth = 3;
+  google.protobuf.BoolValue active = 4;
+}
+
+message DeleteMembershipSkusByIdRequest {
+  string membershipId = 1;
+}
+
 service SkuService {
   rpc RetrieveActiveShellSkus (RetrieveShellSkusRequest) returns (ShellSkusResponse) {};
   rpc RetrieveActiveMembershipSkusByMembershipId (RetrieveMembershipSkusByMembershipIdRequest) returns (MembershipSkusResponse) {};
   rpc CreateMembershipSkusByMembershipId (CreateMembershipSkusRequest) returns (MembershipSkusResponse) {};
+  rpc UpdateMembershipSkusByMembershipId (UpdateMembershipSkusByIdRequest) returns (MembershipSkusResponse) {};
+  rpc DeleteMembershipSkusByMembershipId (DeleteMembershipSkusByIdRequest) returns (CommonStatus) {};
 }

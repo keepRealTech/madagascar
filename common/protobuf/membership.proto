@@ -26,7 +26,7 @@ message CreateMembershipRequest {
     string islandId = 1;
     string name = 2;
     string description = 3;
-    int32 pricePreMonth = 4;
+    int32 pricePerMonth = 4;
     string hostId = 5;
 }
 

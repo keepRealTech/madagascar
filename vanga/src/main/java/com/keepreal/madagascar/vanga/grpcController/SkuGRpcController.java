@@ -1,12 +1,15 @@
 package com.keepreal.madagascar.vanga.grpcController;
 
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.vanga.CreateMembershipSkusRequest;
+import com.keepreal.madagascar.vanga.DeleteMembershipSkusByIdRequest;
 import com.keepreal.madagascar.vanga.MembershipSkusResponse;
 import com.keepreal.madagascar.vanga.RetrieveMembershipSkusByMembershipIdRequest;
 import com.keepreal.madagascar.vanga.RetrieveShellSkusRequest;
 import com.keepreal.madagascar.vanga.ShellSkusResponse;
 import com.keepreal.madagascar.vanga.SkuServiceGrpc;
+import com.keepreal.madagascar.vanga.UpdateMembershipSkusByIdRequest;
 import com.keepreal.madagascar.vanga.factory.SkuMessageFactory;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
@@ -18,6 +21,8 @@ import org.lognet.springboot.grpc.GRpcService;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the sku grpc controller.
@@ -96,6 +101,7 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
                                                    StreamObserver<MembershipSkusResponse> responseObserver) {
         List<MembershipSku> membershipSkus = this.skuService
                 .createDefaultMembershipSkusByMembershipIdAndCostPerMonth(request.getMembershipId(),
+                        request.getMembershipName(),
                         request.getHostId(),
                         request.getIslandId(),
                         request.getPriceInCentsPerMonth());
@@ -109,6 +115,52 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
                 .build();
 
         responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the delete membership skus by membership id.
+     *
+     * @param request          {@link DeleteMembershipSkusByIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void deleteMembershipSkusByMembershipId(DeleteMembershipSkusByIdRequest request,
+                                                   StreamObserver<CommonStatus> responseObserver) {
+        this.skuService.deleteMembershipSkusByMembershipId(request.getMembershipId());
+
+        CommonStatus response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Updates the membership skus by membership id.
+     *
+     * @param request {@link UpdateMembershipSkusByIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void updateMembershipSkusByMembershipId(UpdateMembershipSkusByIdRequest request,
+                                                   StreamObserver<MembershipSkusResponse> responseObserver) {
+        List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipId(request.getMembershipId());
+        if (request.hasPricePerMonth()) {
+            membershipSkus = this.skuService.obsoleteMembershipSkusWithNewPrice(membershipSkus, request.getPricePerMonth().getValue());
+        }
+
+        if (request.hasMembershipName()) {
+            membershipSkus = membershipSkus.stream()
+                    .peek(membershipSku -> membershipSku.setMembershipName(request.getMembershipName().getValue()))
+                    .collect(Collectors.toList());
+        }
+
+        if (request.hasActive()) {
+            membershipSkus = membershipSkus.stream()
+                    .peek(membershipSku -> membershipSku.setActive(request.getActive().getValue()))
+                    .collect(Collectors.toList());
+        }
+
+        this.skuService.updateAll(membershipSkus);
         responseObserver.onCompleted();
     }
 

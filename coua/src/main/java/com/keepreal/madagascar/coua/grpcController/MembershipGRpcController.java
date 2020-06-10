@@ -33,21 +33,18 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
 
     private final MembershipService membershipService;
     private final SubscribeMembershipService subscribeMembershipService;
-    private final SkuService skuService;
 
     /**
      * Constructor the membership grpc controller.
      *
      * @param membershipService             {@link MembershipService}.
      * @param subscribeMembershipService    {@link SubscribeMembershipService}.
-     * @param skuService                    {@link SkuService}.
      */
     public MembershipGRpcController(MembershipService membershipService,
                                     SubscribeMembershipService subscribeMembershipService,
                                     SkuService skuService) {
         this.membershipService = membershipService;
         this.subscribeMembershipService = subscribeMembershipService;
-        this.skuService = skuService;
     }
 
     /**
@@ -115,8 +112,11 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             responseObserver.onCompleted();
             return;
         }
-        membership.setActive(false);
-        updateAndResponse(membership, responseObserver);
+
+        this.membershipService.deactivateMembership(membership);
+
+        responseObserver.onNext(CommonStatusUtils.getSuccStatus());
+        responseObserver.onCompleted();
     }
 
     /**
@@ -139,8 +139,10 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             responseObserver.onCompleted();
             return;
         }
-        membership.setDeleted(true);
-        updateAndResponse(membership, responseObserver);
+
+        this.membershipService.deleteMembership(membership);
+        responseObserver.onNext(CommonStatusUtils.getSuccStatus());
+        responseObserver.onCompleted();
     }
 
     /**
@@ -151,8 +153,8 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
      */
     @Override
     public void updateMembership(UpdateMembershipRequest request, StreamObserver<MembershipResponse> responseObserver) {
-        String membershipId = request.getId();
-        MembershipInfo membership = membershipService.getMembershipById(membershipId);
+        MembershipInfo membership = membershipService.getMembershipById(request.getId());
+
         if (membership == null) {
             responseObserver.onNext(MembershipResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUNT_ERROR))
@@ -160,20 +162,17 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             responseObserver.onCompleted();
             return;
         }
-        if (request.hasName()) {
-            membership.setName(request.getName().getValue());
-        }
-        if (request.hasDescription()) {
+
+        if (!request.hasName() && !request.hasPricePreMonth() && request.hasDescription()) {
             membership.setDescription(request.getDescription().getValue());
+            membership = this.membershipService.updateMembership(membership);
+        } else {
+            membership = this.membershipService.updateMembershipWithSku(membership, request);
         }
-        if (request.hasPricePreMonth()) {
-            membership.setPricePreMonth(request.getPricePreMonth().getValue());
-        }
-        MembershipInfo membershipInfo = membershipService.updateMembership(membership);
 
         responseObserver.onNext(MembershipResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
-                .setMessage(membershipService.getMembershipMessage(membershipInfo))
+                .setMessage(membershipService.getMembershipMessage(membership))
                 .build());
         responseObserver.onCompleted();
     }
@@ -191,10 +190,8 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         membershipInfo.setIslandId(request.getIslandId());
         membershipInfo.setHostId(request.getHostId());
         membershipInfo.setDescription(request.getDescription());
-        membershipInfo.setPricePreMonth(request.getPricePreMonth());
+        membershipInfo.setPricePerMonth(request.getPricePerMonth());
         MembershipInfo membership = membershipService.createMembership(membershipInfo);
-        skuService.createMembershipSkusByMembershipId(membership.getId(), membership.getName(),
-                membership.getPricePreMonth(), request.getHostId(), request.getIslandId());
 
         responseObserver.onNext(MembershipResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())

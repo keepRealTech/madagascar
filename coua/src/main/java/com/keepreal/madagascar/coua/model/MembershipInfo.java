@@ -29,7 +29,7 @@ public class MembershipInfo {
     private String hostId;
     private String name;
     private String description;
-    private Integer pricePreMonth;
+    private Integer pricePerMonth;
     @Column(name = "is_active")
     @Builder.Default
     private Boolean active = true;
