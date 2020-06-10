@@ -33,16 +33,19 @@ public class SkuService {
     /**
      * Create membership skus by membership id.
      *
-     * @param membershipId  membership id.
-     * @param pricePreMonth price pre month.
-     * @param hostId        host id.
-     * @param islandId      island id.
+     * @param membershipId   membership id.
+     * @param membershipName membership name.
+     * @param pricePreMonth  price pre month.
+     * @param hostId         host id.
+     * @param islandId       island id.
      */
-    public void createMembershipSkusByMembershipId(String membershipId, Integer pricePreMonth, String hostId, String islandId) {
+    public void createMembershipSkusByMembershipId(String membershipId, String membershipName,
+                                                   Integer pricePreMonth, String hostId, String islandId) {
         SkuServiceGrpc.SkuServiceBlockingStub stub = SkuServiceGrpc.newBlockingStub(this.channel);
 
         CreateMembershipSkusRequest request = CreateMembershipSkusRequest.newBuilder()
                 .setMembershipId(membershipId)
+                .setMembershipName(membershipName)
                 .setPriceInCentsPerMonth(pricePreMonth)
                 .setHostId(hostId)
                 .setIslandId(islandId)

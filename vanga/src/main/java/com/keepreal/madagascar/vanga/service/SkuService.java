@@ -62,6 +62,7 @@ public class SkuService {
      * Creates default membership skus if not exists.
      *
      * @param membershipId        Membership id.
+     * @param membershipName      Membership name.
      * @param hostId              Host id.
      * @param islandId            Island id.
      * @param costInCentsPerMonth Membership cost in cents per month.
@@ -69,6 +70,7 @@ public class SkuService {
      */
     @Transactional
     public List<MembershipSku> createDefaultMembershipSkusByMembershipIdAndCostPerMonth(String membershipId,
+                                                                                        String membershipName,
                                                                                         String hostId,
                                                                                         String islandId,
                                                                                         Long costInCentsPerMonth) {
@@ -78,7 +80,7 @@ public class SkuService {
         }
 
         membershipSkus = this.membershipPeriods.stream()
-                .map(i -> this.generateMembershipSku(membershipId, costInCentsPerMonth, hostId, islandId, i))
+                .map(i -> this.generateMembershipSku(membershipId, membershipName, costInCentsPerMonth, hostId, islandId, i))
                 .collect(Collectors.toList());
 
         return this.membershipSkuRepository.saveAll(membershipSkus);
@@ -99,6 +101,7 @@ public class SkuService {
      * Generates membership sku for given info.
      *
      * @param membershipId        Membership id.
+     * @param membershipName      Membership name.
      * @param costInCentsPerMonth Costs in cents for a month.
      * @param hostId              Host id.
      * @param islandId            Island id.
@@ -106,6 +109,7 @@ public class SkuService {
      * @return {@link MembershipSku}.
      */
     private MembershipSku generateMembershipSku(String membershipId,
+                                                String membershipName,
                                                 Long costInCentsPerMonth,
                                                 String hostId,
                                                 String islandId,
@@ -113,6 +117,7 @@ public class SkuService {
         return MembershipSku.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .membershipId(membershipId)
+                .membershipName(membershipName)
                 .description(String.format("订阅%d个月", timeInMonths))
                 .timeInMonths(timeInMonths)
                 .priceInCents(costInCentsPerMonth * timeInMonths)
