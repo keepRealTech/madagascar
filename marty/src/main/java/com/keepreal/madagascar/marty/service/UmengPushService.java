@@ -44,11 +44,25 @@ public class UmengPushService {
         pushUser(userId, jsonObject);
     }
 
-    public void pushReaction(String islandId) {
+    public void pushReaction(String userId) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("type", "reaction");
-        jsonObject.put("islandId", islandId);
-        pushUser(islandId, jsonObject);
+        jsonObject.put("islandId", "");
+        pushUser(userId, jsonObject);
+    }
+
+    public void pushSubscribe(String userId) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "subscribe");
+        jsonObject.put("islandId", "");
+        pushUser(userId, jsonObject);
+    }
+
+    public void pushMember(String userId) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", "member");
+        jsonObject.put("islandId", "");
+        pushUser(userId, jsonObject);
     }
 
     public void push(String tokens, JSONObject jsonObject) {

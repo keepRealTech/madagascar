@@ -51,6 +51,16 @@ public class NotificationEventListener implements MessageListener {
                 String userId = notificationEvent.getUserId();
                 umengPushService.pushReaction(userId);
             }
+
+            if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_SUBSCRIBE)) {
+                String userId = notificationEvent.getUserId();
+                umengPushService.pushSubscribe(userId);
+            }
+
+            if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_MEMBER)) {
+                String userId = notificationEvent.getUserId();
+                umengPushService.pushMember(userId);
+            }
             return Action.CommitMessage;
         } catch (DuplicateKeyException exception) {
             log.warn("Duplicated consumption, skipped.");
