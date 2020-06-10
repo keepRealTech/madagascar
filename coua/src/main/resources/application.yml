@@ -17,6 +17,9 @@ grpc:
   fossa:
     host: 127.0.0.1
     port: 12003
+  vanga:
+    host: 127.0.0.1
+    port: 12006
   port: 12002
 
 snowflake:
