@@ -16,6 +16,8 @@ public interface SubscribeMembershipRepository extends JpaRepository<SubscribeMe
     @Query(value = "SELECT COUNT(*) FROM subscribe_membership WHERE  membership_id = ?1 AND is_deleted = FALSE AND expire_time < ?2", nativeQuery = true)
     Integer getMemberCountByMembershipId(String membershipId, long deadline);
 
+    SubscribeMembership findByUserIdAndMembershipIdAndDeletedIsFalse(String userId, String membershipId);
+
     @Query(value = "SELECT membership_id FROM subscribe_membership WHERE user_id = ?1 AND island_id = ?2 AND is_deleted = FALSE AND expire_time < ?3")
     List<String> getMembershipIdListByUserIdAndIslandId(String userId, String islandId, long deadline);
 }

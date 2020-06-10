@@ -18,6 +18,7 @@ import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.service.PaymentService;
 import com.keepreal.madagascar.vanga.service.SkuService;
+import com.keepreal.madagascar.vanga.service.SubscribeMembershipService;
 import com.keepreal.madagascar.vanga.service.WechatOrderService;
 import com.keepreal.madagascar.vanga.service.WechatPayService;
 import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
@@ -38,28 +39,31 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final BalanceMessageFactory balanceMessageFactory;
     private final SkuService skuService;
     private final WechatOrderMessageFactory wechatOrderMessageFactory;
+    private final SubscribeMembershipService subscribeMembershipService;
 
     /**
      * Constructs the payment grpc controller.
      *
-     * @param paymentService            {@link PaymentService}.
-     * @param wechatOrderService        {@link WechatOrderService}.
-     * @param wechatPayService          {@link WechatPayService}.
-     * @param balanceMessageFactory     {@link BalanceMessageFactory}.
-     * @param skuService                {@link SkuService}.
-     * @param wechatOrderMessageFactory {@link WechatOrderMessageFactory}.
+     * @param paymentService             {@link PaymentService}.
+     * @param wechatOrderService         {@link WechatOrderService}.
+     * @param wechatPayService           {@link WechatPayService}.
+     * @param balanceMessageFactory      {@link BalanceMessageFactory}.
+     * @param skuService                 {@link SkuService}.
+     * @param wechatOrderMessageFactory  {@link WechatOrderMessageFactory}.
+     * @param subscribeMembershipService {@link SubscribeMembershipService}.
      */
     public PaymentGRpcController(PaymentService paymentService,
                                  WechatOrderService wechatOrderService, WechatPayService wechatPayService,
                                  BalanceMessageFactory balanceMessageFactory,
                                  SkuService skuService,
-                                 WechatOrderMessageFactory wechatOrderMessageFactory) {
+                                 WechatOrderMessageFactory wechatOrderMessageFactory, SubscribeMembershipService subscribeMembershipService) {
         this.paymentService = paymentService;
         this.wechatOrderService = wechatOrderService;
         this.wechatPayService = wechatPayService;
         this.balanceMessageFactory = balanceMessageFactory;
         this.skuService = skuService;
         this.wechatOrderMessageFactory = wechatOrderMessageFactory;
+        this.subscribeMembershipService = subscribeMembershipService;
     }
 
     /**
@@ -131,17 +135,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onNext(response);
         responseObserver.onCompleted();
 
-        if (Objects.isNull(wechatOrder) || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()) {
-            return;
-        }
-
-        // TODO: updates the payment draft -> open and inserts membership subscriptions
-    }
-
-    @Override
-    public void subscribeMembershipWithShell(SubscribeMembershipRequest request,
-                                             StreamObserver<CommonStatus> responseObserver) {
-        // TODO: checks shell balance, subtracts and inserts payments and membership subscription
+        this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
     }
 
     @Override
@@ -149,12 +143,13 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                   StreamObserver<CommonStatus> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
 
-        if (Objects.isNull(wechatOrder) || wechatOrder.getState() != WechatOrderState.SUCCESS.getValue()) {
-            return;
-        }
+        this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
+    }
 
-        // TODO: updates the payment draft -> open and inserts membership subscriptions
-
+    @Override
+    public void subscribeMembershipWithShell(SubscribeMembershipRequest request,
+                                             StreamObserver<CommonStatus> responseObserver) {
+        // TODO: checks shell balance, subtracts and inserts payments and membership subscription
     }
 
 }

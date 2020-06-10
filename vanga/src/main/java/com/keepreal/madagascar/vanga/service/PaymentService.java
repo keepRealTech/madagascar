@@ -25,7 +25,6 @@ import java.util.stream.IntStream;
 @Service
 public class PaymentService {
 
-    private static final Long PAYMENT_SETTLE_IN_DAYS = 30L;
     private final LongIdGenerator idGenerator;
     private final BalanceService balanceService;
     private final PaymentRepository paymentRepository;
@@ -104,9 +103,6 @@ public class PaymentService {
                                 .payeeId(sku.getHostId())
                                 .orderId(wechatOrder.getId())
                                 .tradeNum(wechatOrder.getTradeNumber())
-                                .validAfter(ZonedDateTime.now(ZoneId.systemDefault())
-                                        .plusDays(i * PaymentService.PAYMENT_SETTLE_IN_DAYS)
-                                        .toInstant().toEpochMilli())
                                 .build())
                         .collect(Collectors.toList());
 
