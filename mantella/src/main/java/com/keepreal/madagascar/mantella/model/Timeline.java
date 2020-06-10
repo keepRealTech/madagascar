@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.mantella.model;
 
-import com.keepreal.madagascar.mantella.repository.TimelineRepository;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;

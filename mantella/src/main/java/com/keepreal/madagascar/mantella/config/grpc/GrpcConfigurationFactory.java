@@ -21,4 +21,15 @@ public class GrpcConfigurationFactory {
         return new GrpcConfiguration();
     }
 
+    /**
+     * Represents configurations for fossa.
+     *
+     * @return Grpc configuration.
+     */
+    @Bean(name = "fossaConfiguration")
+    @ConfigurationProperties(prefix = "grpc.fossa", ignoreUnknownFields = false)
+    public GrpcConfiguration fossaConfiguration() {
+        return new GrpcConfiguration();
+    }
+
 }

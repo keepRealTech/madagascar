@@ -106,4 +106,15 @@ public class TimelineService {
                         userId, startTimestamp, PaginationUtils.defaultTimelinePageRequest(pageSize));
     }
 
+    /**
+     * Retrieves the latest timeline by user id.
+     *
+     * @param userId User id.
+     * @return {@link Timeline}.
+     */
+    public Mono<Timeline> retrieveLastFeedTimestampByUserId(String userId) {
+        return this.timelineRepository
+                .findTopByUserIdAndIsDeleteIsTrueOrderByFeedCreatedAtDesc(userId);
+    }
+
 }
