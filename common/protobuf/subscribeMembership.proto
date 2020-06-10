@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.vanga";
+
+import "common.proto";
+
+message RetrieveMemberCountByIslandIdRequest {
+    string islandId = 1;
+}
+
+message RetrieveMemberCountByMembershipIdRequest {
+    string membershipId = 1;
+}
+
+message RetrieveMemberCountResponse {
+    CommonStatus status = 1;
+    int32 memberCount = 2;
+}
+
+service SubscribeMembershipService{
+    rpc RetrieveMemberCountByIslandId (RetrieveMemberCountByIslandIdRequest) returns (RetrieveMemberCountResponse) {};
+    rpc RetrieveMemberCountByMembershipId (RetrieveMemberCountByMembershipIdRequest) returns (RetrieveMemberCountResponse) {};
+}

@@ -9,6 +9,7 @@ import "google/protobuf/wrappers.proto";
 message QueryFeedCondition {
     google.protobuf.StringValue islandId = 1;
     google.protobuf.BoolValue fromHost = 2;
+    google.protobuf.Int64Value timestampAfter = 3;
 }
 
 message NewFeedsRequest {

@@ -194,6 +194,11 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             query.addCriteria(criteria);
         }
 
+        if (condition.hasTimestampAfter()) {
+            Criteria timeCriteria = Criteria.where("createdTime").gt(condition.getTimestampAfter().getValue());
+            query.addCriteria(timeCriteria);
+        }
+
         // 没有条件
         query.with(Sort.by(Sort.Order.desc("createdTime")));
         long totalCount = mongoTemplate.count(query, FeedInfo.class);

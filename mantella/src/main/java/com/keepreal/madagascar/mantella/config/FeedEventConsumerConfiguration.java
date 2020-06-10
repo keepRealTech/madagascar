@@ -1,7 +1,6 @@
 package com.keepreal.madagascar.mantella.config;
 
 import com.aliyun.openservices.ons.api.PropertyKeyConst;
-import com.aliyun.openservices.ons.api.bean.ConsumerBean;
 import com.aliyun.openservices.ons.api.bean.OrderConsumerBean;
 import com.aliyun.openservices.ons.api.bean.Subscription;
 import com.aliyun.openservices.ons.api.order.MessageOrderListener;
@@ -19,9 +18,9 @@ import java.util.Properties;
  * Represents the Rocket mq configurations.
  */
 @Configuration
-@ConfigurationProperties(prefix = "rocketmq", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "rocketmq.feed", ignoreUnknownFields = false)
 @Data
-public class RocketMQConfiguration {
+public class FeedEventConsumerConfiguration {
 
     private final FeedEventListener feedEventListener;
     private String accessKey;
@@ -32,9 +31,9 @@ public class RocketMQConfiguration {
     private String tag;
 
     /**
-     * Constructs the consumer bean {@link ConsumerBean}.
+     * Constructs the consumer bean {@link OrderConsumerBean}.
      *
-     * @return {@link ConsumerBean}.
+     * @return {@link OrderConsumerBean}.
      */
     @Bean(initMethod = "start", destroyMethod = "shutdown")
     public OrderConsumerBean buildConsumer() {

@@ -39,6 +39,7 @@ message NotificationTypeValue {
 enum NoticeType {
     NOTICE_TYPE_NONE = 0;
     NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER = 1;
+    NOTICE_TYPE_ISLAND_NEW_MEMBER = 2;
 }
 
 enum ReactionType {

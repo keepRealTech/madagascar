@@ -33,12 +33,21 @@ message NoticeNotificationMessage {
     NoticeType type = 1;
     oneof notice {
         SubscribeNotice SubscribeNotice = 2;
+        MemberNotice memberNotice = 3;
     }
 }
 
 message SubscribeNotice {
     string IslandId = 1;
     string subscriberId = 2;
+}
+
+message MemberNotice {
+    string islandId = 1;
+    string memberId = 2;
+    string membershipId = 3;
+    string membershipName = 4;
+    uint64 pricePerMonthInCents = 5;
 }
 
 message UnreadNotificationsCountMessage {
