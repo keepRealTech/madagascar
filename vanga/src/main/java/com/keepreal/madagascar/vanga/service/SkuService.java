@@ -142,6 +142,7 @@ public class SkuService {
     /**
      * Retrieves the membership sku by id.
      *
+     * @implNote Do not filter by is deleted since the payment may happen during the obsoleting of a sku.
      * @param membershipSkuId        Membership sku id.
      * @return {@link MembershipSku}.
      */
