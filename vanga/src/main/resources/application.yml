@@ -6,6 +6,11 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
+  redis:
+    host: retail01d
+    port: 6379
+    password: pass
+    ssl: false
 
 wechat-pay:
   app-id:

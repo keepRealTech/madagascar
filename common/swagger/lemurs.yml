@@ -1260,6 +1260,16 @@ components:
         - IDENTITY_FASHION
         - IDENTITY_COMIC
         - IDENTITY_OTHERS
+    OrderState:
+      type: string
+      enum:
+        - STATE_NOTPAY
+        - STATE_USERPAYING
+        - STATE_SUCCESS
+        - STATE_CLOSED
+        - STATE_REFUND
+        - STATE_PAYERROR
+        - STATE_REVOKED
     NoticeType:
       type: string
       enum:

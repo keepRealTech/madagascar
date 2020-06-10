@@ -8,17 +8,18 @@ import com.keepreal.madagascar.vanga.model.SubscribeMembership;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.repository.SubscribeMembershipRepository;
-import lombok.Builder;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import com.keepreal.madagascar.vanga.util.AutoRedisLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.Column;
 import javax.transaction.Transactional;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 /**
  * Represents the subscribe membership service.
@@ -26,27 +27,32 @@ import java.util.Objects;
 @Service
 public class SubscribeMembershipService {
 
+    private static final long PAYMENT_SETTLE_IN_MONTH = 1L;
     private final PaymentService paymentService;
     private final SkuService membershipSkuService;
     private final SubscribeMembershipRepository subscriptionMemberRepository;
     private final LongIdGenerator idGenerator;
+    private final RedissonClient redissonClient;
 
     /**
      * Constructor the subscribe membership service.
      *
-     * @param paymentService                   {@link PaymentService}.
-     * @param membershipSkuService             {@link SkuService}.
-     * @param subscriptionMemberRepository     {@link SubscribeMembershipRepository}.
-     * @param idGenerator                      {@link LongIdGenerator}.
+     * @param paymentService               {@link PaymentService}.
+     * @param membershipSkuService         {@link SkuService}.
+     * @param subscriptionMemberRepository {@link SubscribeMembershipRepository}.
+     * @param idGenerator                  {@link LongIdGenerator}.
+     * @param redissonClient               {@link RedissonClient}.
      */
     public SubscribeMembershipService(PaymentService paymentService,
                                       SkuService membershipSkuService,
                                       SubscribeMembershipRepository subscriptionMemberRepository,
-                                      LongIdGenerator idGenerator) {
+                                      LongIdGenerator idGenerator,
+                                      RedissonClient redissonClient) {
         this.paymentService = paymentService;
         this.membershipSkuService = membershipSkuService;
         this.subscriptionMemberRepository = subscriptionMemberRepository;
         this.idGenerator = idGenerator;
+        this.redissonClient = redissonClient;
     }
 
     /**
@@ -73,6 +79,11 @@ public class SubscribeMembershipService {
         return this.subscriptionMemberRepository.getMemberCountByMembershipId(membershipId, deadline);
     }
 
+    /**
+     * Subscribe member for a newly succeed wechat pay order.
+     *
+     * @param wechatOrder {@link WechatOrder}.
+     */
     @Transactional
     public void subscribeMembershipWithWechatOrder(WechatOrder wechatOrder) {
         if (Objects.isNull(wechatOrder) || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()) {
@@ -85,30 +96,58 @@ public class SubscribeMembershipService {
             return;
         }
 
-        paymentList.stream()
-                .filter(payment -> PaymentState.DRAFTED.getValue() == payment.getState())
-                .forEach(payment -> payment.setState(PaymentState.OPEN.getValue()));
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", wechatOrder.getUserId()))) {
+            List<Payment> innerPaymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
 
-        SubscribeMembership subscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
-                wechatOrder.getUserId(), wechatOrder.getMemberShipSkuId());
+            if (innerPaymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
+                return;
+            }
 
-        this.paymentService.updateAll(paymentList);
+            SubscribeMembership subscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
+                    wechatOrder.getUserId(), wechatOrder.getMemberShipSkuId());
+
+            Instant instant = Objects.isNull(subscribeMembership) ?
+                    Instant.now() : Instant.ofEpochSecond(subscribeMembership.getExpireTime());
+            ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+
+            IntStream.range(0, innerPaymentList.size())
+                    .forEach(i -> {
+                        innerPaymentList.get(i).setState(PaymentState.OPEN.getValue());
+                        innerPaymentList.get(i).setValidAfter(currentExpireTime
+                                .plusMonths(i * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
+                                .toInstant().toEpochMilli());
+                    });
+            this.paymentService.updateAll(innerPaymentList);
+            this.createOrRenewSubscriptionMember(wechatOrder, subscribeMembership, currentExpireTime);
+        }
     }
 
+    /**
+     * Creates or renews the membership subscription.
+     *
+     * @param wechatOrder         {@link WechatOrder}.
+     * @param subscribeMembership {@link SubscribeMembership}.
+     * @param currentExpireTime   {@link ZonedDateTime}.
+     */
     @Transactional
-    public void createSubscriptionMember(WechatOrder wechatOrder) {
+    public void createOrRenewSubscriptionMember(WechatOrder wechatOrder,
+                                                SubscribeMembership subscribeMembership,
+                                                ZonedDateTime currentExpireTime) {
         MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getMemberShipSkuId());
 
+        long expireTime = currentExpireTime.plusMonths(sku.getTimeInMonths()).toInstant().toEpochMilli();
 
-
-
-        SubscribeMembership subscribeMembership = SubscribeMembership.builder()
-                .id(String.valueOf(this.idGenerator.nextId()))
-                .userId(wechatOrder.getUserId())
-                .islandId(sku.getIslandId())
-                .membershipId(sku.getMembershipId())
-                .expireTime(wechatOrder.get)
-                .build();
+        if (Objects.nonNull(subscribeMembership)) {
+            subscribeMembership.setExpireTime(expireTime);
+        } else {
+            subscribeMembership = SubscribeMembership.builder()
+                    .id(String.valueOf(this.idGenerator.nextId()))
+                    .userId(wechatOrder.getUserId())
+                    .islandId(sku.getIslandId())
+                    .membershipId(sku.getMembershipId())
+                    .expireTime(expireTime)
+                    .build();
+        }
 
         this.subscriptionMemberRepository.save(subscribeMembership);
     }

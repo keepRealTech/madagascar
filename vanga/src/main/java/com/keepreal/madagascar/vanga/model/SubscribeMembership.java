@@ -29,10 +29,7 @@ public class SubscribeMembership {
     private String userId;
     private String islandId;
     private String membershipId;
-    private String wechatOrderId;
     private Long expireTime;
-    @Version
-    private Long version;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

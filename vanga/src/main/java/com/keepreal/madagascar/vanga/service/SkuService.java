@@ -90,6 +90,7 @@ public class SkuService {
      * @param membershipSkuId        Membership sku id.
      * @return {@link MembershipSku}.
      */
+    @Transactional
     public MembershipSku retrieveMembershipSkuById(String membershipSkuId) {
         return this.membershipSkuRepository.findByIdAndActiveIsTrueAndDeletedIsFalse(membershipSkuId);
     }
