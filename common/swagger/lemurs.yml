@@ -894,6 +894,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/balances/withdraw:
+    post:
+      tags:
+        - Billing
+      summary: submit a withdraw request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWithdrawRequest'
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
   /api/v1/billingInfo:
     get:
       tags:
@@ -2099,7 +2117,7 @@ components:
       properties:
         id:
           type: string
-        nounceStr:
+        nonceStr:
           type: string
         appId:
           type: string
@@ -2114,7 +2132,7 @@ components:
         feeInCents:
           type: integer
           format: int64
-        createdAt:
+        timestamp:
           type: integer
           format: int64
         state:
@@ -2274,6 +2292,13 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/MembershipSkuDTO'
+    PostWithdrawRequest:
+      type: object
+      properties:
+        amountInCents:
+          type: integer
+          format: int64
+          minimum: 100
     DeviceTokenRequest:
       type: object
       properties:

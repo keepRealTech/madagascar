@@ -21,7 +21,7 @@ public class BalanceService {
      * Constructs the balance service.
      *
      * @param balanceRepository {@link BalanceRepository}.
-     * @param idGenerator {@link LongIdGenerator}.
+     * @param idGenerator       {@link LongIdGenerator}.
      */
     public BalanceService(BalanceRepository balanceRepository,
                           LongIdGenerator idGenerator) {
@@ -31,6 +31,7 @@ public class BalanceService {
 
     /**
      * Retrieves or creates the balance for a given user id.
+     *
      * @param userId User id;
      * @return {@link Balance}.
      */
@@ -45,12 +46,24 @@ public class BalanceService {
     }
 
     /**
+     * Updates balance.
+     *
+     * @param balance {@link Balance}.
+     * @return {@link Balance}.
+     */
+    @Transactional
+    public Balance updateBalance(Balance balance) {
+        return this.balanceRepository.save(balance);
+    }
+
+    /**
      * Creates a new balance for the given user id.
      *
      * @param userId User id.
      * @return {@link Balance}.
      */
-    private Balance createNewBalance(String userId) {
+    @Transactional
+    public Balance createNewBalance(String userId) {
         Balance balance = Balance.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .userId(userId)

@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.BillingInfoMessage;
@@ -12,6 +13,7 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -80,17 +82,28 @@ public class BillingInfoService {
                                                         String idNumber, String mobile) {
         BillingInfoServiceGrpc.BillingInfoServiceBlockingStub stub = BillingInfoServiceGrpc.newBlockingStub(this.channel);
 
-        UpdateBillingInfoByUserIdRequest request = UpdateBillingInfoByUserIdRequest.newBuilder()
-                .setUserId(userId)
-                .setName(name)
-                .setAccountNumber(accountNumber)
-                .setMobile(mobile)
-                .setIdNumber(idNumber)
-                .build();
+        UpdateBillingInfoByUserIdRequest.Builder requestBuilder = UpdateBillingInfoByUserIdRequest.newBuilder()
+                .setUserId(userId);
+
+        if (!StringUtils.isEmpty(name)) {
+            requestBuilder.setName(StringValue.of(name));
+        }
+
+        if (!StringUtils.isEmpty(accountNumber)) {
+            requestBuilder.setAccountNumber(StringValue.of(accountNumber));
+        }
+
+        if (!StringUtils.isEmpty(idNumber)) {
+            requestBuilder.setIdNumber(StringValue.of(idNumber));
+        }
+
+        if (!StringUtils.isEmpty(mobile)) {
+            requestBuilder.setMobile(StringValue.of(mobile));
+        }
 
         BillingInfoResponse billingInfoResponse;
         try {
-            billingInfoResponse = stub.updateBillingInfoByUserId(request);
+            billingInfoResponse = stub.updateBillingInfoByUserId(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

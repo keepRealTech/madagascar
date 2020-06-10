@@ -1,9 +1,7 @@
 package com.keepreal.madagascar.vanga.factory;
 
-import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.ShellSkuMessage;
-import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import org.springframework.stereotype.Component;

@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import org.springframework.stereotype.Component;
+import swagger.model.BriefIslandDTO;
 import swagger.model.BriefUserDTO;
 import swagger.model.FullUserDTO;
 import swagger.model.GenderType;
@@ -22,18 +23,14 @@ import java.util.stream.Collectors;
 public class UserDTOFactory {
 
     private final IslandService islandService;
-    private final IslandDTOFactory islandDTOFactory;
 
     /**
      * Constructs the user dto factory.
      *
      * @param islandService    {@link IslandService}.
-     * @param islandDTOFactory {@link IslandDTOFactory}.
      */
-    public UserDTOFactory(IslandService islandService,
-                          IslandDTOFactory islandDTOFactory) {
+    public UserDTOFactory(IslandService islandService) {
         this.islandService = islandService;
-        this.islandDTOFactory = islandDTOFactory;
     }
 
     /**
@@ -101,7 +98,15 @@ public class UserDTOFactory {
                 this.islandService.retrieveIslands(null, fullUserDTO.getId(), null, 0, Integer.MAX_VALUE)
                         .getIslandsList()
                         .stream()
-                        .map(this.islandDTOFactory::briefValueOf)
+                        .map(islandMessage -> {
+                            BriefIslandDTO briefIslandDTO = new BriefIslandDTO();
+                            briefIslandDTO.setId(islandMessage.getId());
+                            briefIslandDTO.setName(islandMessage.getName());
+                            briefIslandDTO.setDescription(islandMessage.getDescription());
+                            briefIslandDTO.setHostId(islandMessage.getHostId());
+                            briefIslandDTO.setPortraitImageUri(islandMessage.getPortraitImageUri());
+                            return briefIslandDTO;
+                        })
                         .collect(Collectors.toList()));
 
         return fullUserDTO;

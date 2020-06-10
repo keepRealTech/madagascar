@@ -35,6 +35,9 @@ public class BalanceGRpcController extends BalanceServiceGrpc.BalanceServiceImpl
 
     /**
      * Retrieves balance by user id.
+     *
+     * @param request          {@link RetrieveBalanceByUserIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
      */
     @Override
     public void retrieveBalanceByUserId(RetrieveBalanceByUserIdRequest request,
@@ -49,7 +52,7 @@ public class BalanceGRpcController extends BalanceServiceGrpc.BalanceServiceImpl
                     .build();
         } else {
             response = BalanceResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_BALANCE_NOT_FOUND))
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_BALANCE_NOT_FOUND_ERROR))
                     .build();
         }
 
