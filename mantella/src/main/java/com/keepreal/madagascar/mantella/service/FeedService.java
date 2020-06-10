@@ -3,6 +3,7 @@ package com.keepreal.madagascar.mantella.service;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.ReactorFeedServiceGrpc;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
@@ -46,6 +47,10 @@ public class FeedService {
 
         RetrieveMultipleFeedsRequest request = RetrieveMultipleFeedsRequest.newBuilder()
                 .setCondition(condition)
+                .setPageRequest(PageRequest.newBuilder()
+                        .setPage(0)
+                        .setPageSize(pageSize)
+                        .build())
                 .build();
 
         return stub.retrieveMultipleFeeds(request)
