@@ -193,7 +193,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         membershipInfo.setDescription(request.getDescription());
         membershipInfo.setPricePreMonth(request.getPricePreMonth());
         MembershipInfo membership = membershipService.createMembership(membershipInfo);
-        skuService.createMembershipSkusByMembershipId(membership.getId(), membership.getPricePreMonth());
+        skuService.createMembershipSkusByMembershipId(membership.getId(), membership.getPricePreMonth(), request.getHostId());
 
         responseObserver.onNext(MembershipResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
