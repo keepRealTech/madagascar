@@ -1156,6 +1156,7 @@ components:
       type: string
       enum:
         - ISLAND_NOTICE_NEW_SUBSCRIBER
+        - ISLAND_NOTICE_NEW_MEMBER
     MultiMediaType:
       type: string
       enum:
@@ -1800,6 +1801,7 @@ components:
     NoticeDTO:
       oneOf:
         - $ref: '#/components/schemas/SubscribeNoticeDTO'
+        - $ref: '#/components/schemas/MemberNoticeDTO'
     SystemNotificationDTO:
       type: object
       properties:
@@ -1825,6 +1827,22 @@ components:
           $ref: '#/components/schemas/BriefIslandDTO'
         subscriber:
           $ref: '#/components/schemas/BriefUserDTO'
+    MemberNoticeDTO:
+      type: object
+      properties:
+        noticeType:
+          $ref: '#/components/schemas/NoticeType'
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
+        member:
+          $ref: '#/components/schemas/BriefUserDTO'
+        membershipId:
+          type: string
+        membershipName:
+          type: string
+        pricePerMonthInCents:
+          type: integer
+          format: int64
     ReactionNotificationDTO:
       type: object
       properties:

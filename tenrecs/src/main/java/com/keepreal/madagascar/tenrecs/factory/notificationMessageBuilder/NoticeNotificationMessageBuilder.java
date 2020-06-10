@@ -3,6 +3,7 @@ package com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.tenrecs.NoticeNotificationMessage;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
+import com.keepreal.madagascar.tenrecs.MemberNotice;
 import com.keepreal.madagascar.tenrecs.SubscribeNotice;
 import com.keepreal.madagascar.tenrecs.factory.notificationBuilder.NotificationBuilder;
 import com.keepreal.madagascar.tenrecs.model.Notice;
@@ -88,6 +89,20 @@ public class NoticeNotificationMessageBuilder implements NotificationMessageBuil
                         .setSubscriberId(notice.getSubscribeNotice().getSubscriberId())
                         .build();
                 noticeNotificationMessageBuilder.setSubscribeNotice(subscribeNotice);
+                return noticeNotificationMessageBuilder.build();
+            case NOTICE_TYPE_ISLAND_NEW_MEMBER:
+                if (Objects.isNull(notice.getMemberNotice())) {
+                    return noticeNotificationMessageBuilder.build();
+                }
+
+                MemberNotice memberNotice = MemberNotice.newBuilder()
+                        .setIslandId(notice.getMemberNotice().getIslandId())
+                        .setMemberId(notice.getMemberNotice().getMemberId())
+                        .setMembershipId(notice.getMemberNotice().getMembershipId())
+                        .setMembershipName(notice.getMemberNotice().getMembershipName())
+                        .setPricePerMonthInCents(notice.getMemberNotice().getPricePerMonthInCents())
+                        .build();
+                noticeNotificationMessageBuilder.setMemberNotice(memberNotice);
                 return noticeNotificationMessageBuilder.build();
             default:
         }

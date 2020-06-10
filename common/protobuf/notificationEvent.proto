@@ -10,11 +10,20 @@ enum NotificationEventType {
     NOTIFICATION_EVENT_NEW_SUBSCRIBE = 1;
     NOTIFICATION_EVENT_NEW_COMMENT = 2;
     NOTIFICATION_EVENT_NEW_REACTION = 3;
+    NOTIFICATION_EVENT_NEW_MEMBER = 4;
 }
 
 message SubscribeEvent {
     string islandId = 1;
     string subscriberId = 2;
+}
+
+message MemberEvent {
+    string islandId = 1;
+    string memberId = 2;
+    string membershipId = 3;
+    string membershipName = 4;
+    uint64 pricePerMonthInCents = 5;
 }
 
 message CommentEvent {
@@ -34,7 +43,8 @@ message NotificationEvent {
         SubscribeEvent subscribeEvent = 3;
         CommentEvent commentEvent = 4;
         ReactionEvent reactionEvent = 5;
+        MemberEvent memberEvent = 6;
     }
-    uint64 timestamp = 6;
-    string eventId = 7;
+    uint64 timestamp = 7;
+    string eventId = 8;
 }
