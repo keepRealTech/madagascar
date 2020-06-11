@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -63,7 +62,7 @@ public class SubscribeMembershipService {
      * @return member count.
      */
     public Integer getMemberCountByIslandId(String islandId) {
-        return this.subscriptionMemberRepository.getMemberCountByIslandId(islandId, getDeadline());
+        return this.subscriptionMemberRepository.getMemberCountByIslandId(islandId, getCurrentTime());
     }
 
     /**
@@ -73,7 +72,7 @@ public class SubscribeMembershipService {
      * @return member count.
      */
     public Integer getMemberCountByMembershipId(String membershipId) {
-        return this.subscriptionMemberRepository.getMemberCountByMembershipId(membershipId, getDeadline());
+        return this.subscriptionMemberRepository.getMemberCountByMembershipId(membershipId, getCurrentTime());
     }
 
     /**
@@ -157,11 +156,10 @@ public class SubscribeMembershipService {
      * @return  membership id list.
      */
     public List<String> getMembershipIdListByUserIdAndIslandId(String userId, String islandId) {
-        return subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getDeadline());
+        return subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getCurrentTime());
     }
 
-    private long getDeadline() {
-        LocalDate localDate = LocalDate.now().plusDays(1L);
-        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    private long getCurrentTime() {
+        return LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 }
