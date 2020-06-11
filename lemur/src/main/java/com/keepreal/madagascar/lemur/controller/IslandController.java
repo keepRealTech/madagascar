@@ -563,14 +563,12 @@ public class IslandController implements IslandApi {
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
                 this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, 0, pageSize);
 
-        FeedsResponse response = new FeedsResponse();
+        TimelinesResponse response = new TimelinesResponse();
         response.setData(feedsResponse.getFeedList()
                 .stream()
                 .map(this.feedDTOFactory::valueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
-        response.setCurrentTime(System.currentTimeMillis());
-        response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -603,8 +601,8 @@ public class IslandController implements IslandApi {
      * @return {@link PosterFeedDTO}.
      */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
-    private List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
-        return feedService.retrieveIslandFeeds(islandId, null, userId, 0, 5)
+    public List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
+        return feedService.retrieveIslandFeeds(islandId, null, userId, 0L, 0, 5)
                 .getFeedList()
                 .stream()
                 .map(feedDTOFactory::posterValueOf)
