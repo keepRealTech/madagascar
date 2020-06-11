@@ -21,6 +21,6 @@ public interface FeedInfoRepository extends MongoRepository<FeedInfo, String> {
 
     FeedInfo findTopByUserIdAndDeletedIsFalseOrderByCreatedTimeDesc(String userId);
 
-    List<FeedInfo> findAllByIdsAndDeletedIsFalse(Iterable<String> ids);
+    List<FeedInfo> findAllByIdInAndDeletedIsFalse(Iterable<String> ids);
 
 }

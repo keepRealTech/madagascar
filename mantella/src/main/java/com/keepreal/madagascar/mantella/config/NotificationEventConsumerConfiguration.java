@@ -35,7 +35,7 @@ public class NotificationEventConsumerConfiguration {
      *
      * @return {@link ConsumerBean}.
      */
-    @Bean(initMethod = "start", destroyMethod = "shutdown")
+    @Bean(name = "notification-event-consumer", initMethod = "start", destroyMethod = "shutdown")
     public ConsumerBean buildConsumer() {
         ConsumerBean consumerBean = new ConsumerBean();
 

@@ -49,7 +49,7 @@ public class WXPayRequest {
         BasicHttpClientConnectionManager connManager;
         if (useCert) {
             // 证书
-            char[] password = config.getMchID().toCharArray();
+            char[] password = config.getMchId().toCharArray();
             InputStream certStream = config.getCertStream();
             KeyStore ks = KeyStore.getInstance("PKCS12");
             ks.load(certStream, password);
@@ -102,7 +102,7 @@ public class WXPayRequest {
 
         StringEntity postEntity = new StringEntity(data, "UTF-8");
         httpPost.addHeader("Content-Type", "text/xml");
-        httpPost.addHeader("User-Agent", USER_AGENT + " " + config.getMchID());
+        httpPost.addHeader("User-Agent", USER_AGENT + " " + config.getMchId());
         httpPost.setEntity(postEntity);
 
         HttpResponse httpResponse = httpClient.execute(httpPost);

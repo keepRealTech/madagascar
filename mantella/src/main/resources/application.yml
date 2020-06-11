@@ -5,6 +5,7 @@ spring:
       uri: mongodb://root:password@127.0.0.1:27017
 
 grpc:
+  port: 12005
   coua:
     host: 127.0.0.1
     port: 12002

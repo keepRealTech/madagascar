@@ -37,8 +37,8 @@ public class WechatOrderMessageFactory {
         }
 
         return  WechatOrderMessage.newBuilder()
-                .setAppId(this.wechatPayConfiguration.getAppID())
-                .setPartnerId(this.wechatPayConfiguration.getMchID())
+                .setAppId(this.wechatPayConfiguration.getAppId())
+                .setPartnerId(this.wechatPayConfiguration.getMchId())
                 .setNonceStr(wechatOrder.getNonceStr())
                 .setTimestamp(wechatOrder.getCreatedTime())
                 .setPrepayId(wechatOrder.getPrepayId())

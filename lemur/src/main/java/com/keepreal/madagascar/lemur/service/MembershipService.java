@@ -140,15 +140,15 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
-    public MembershipMessage updateMembershipById(String membershipId, String name, List<String> descriptions, Integer pricePreMonth) {
+    public MembershipMessage updateMembershipById(String membershipId, String name, List<String> descriptions, Integer pricePerMonth) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         UpdateMembershipRequest.Builder builder = UpdateMembershipRequest.newBuilder().setId(membershipId);
         if (!StringUtils.isEmpty(name)) {
             builder.setName(StringValue.of(name));
         }
-        if (pricePreMonth != null) {
-            builder.setPricePreMonth(Int32Value.of(pricePreMonth));
+        if (pricePerMonth != null) {
+            builder.setPricePerMonth(Int32Value.of(pricePerMonth));
         }
         if (descriptions.size() > 0) {
             String descriptionStr = descriptions.toString();

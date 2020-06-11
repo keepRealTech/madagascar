@@ -2,20 +2,20 @@ spring:
   application:
     name: vanga
   datasource:
-    url: jdbc:mysql://root:pass@localhost:3306/coua
+    url: jdbc:mysql://root:123456@localhost:3306/guns_advanced
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
   redis:
-    host: retail01d
+    host: 127.0.0.1
     port: 6379
     password: pass
     ssl: false
 
 wechat-pay:
-  app-id:
-  merchant-id:
-  merchant-key:
+  app-id: xxx
+  merchant-id: xxx
+  merchant-key: xxx
   callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
   cert-path: /Users/sli/development/madagascar/vanga/src/main/resources/apiclient_cert.pem
   host-ip: 127.0.0.1

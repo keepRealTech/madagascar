@@ -19,7 +19,7 @@ message UpdateMembershipRequest {
     string id = 1;
     google.protobuf.StringValue name = 2;
     google.protobuf.StringValue description = 3;
-    google.protobuf.Int32Value pricePreMonth = 4;
+    google.protobuf.Int32Value pricePerMonth = 4;
 }
 
 message CreateMembershipRequest {
@@ -40,7 +40,7 @@ message MembershipMessage {
     string islandId = 3;
     string name = 4;
     string description = 5;
-    int32 pricePreMonth = 6;
+    int32 pricePerMonth = 6;
     int32 colorType = 7;
     bool isTop = 8;
     int32 memberCount = 9;
@@ -59,7 +59,7 @@ message MembershipsResponse {
 message FeedMembershipMessage {
     string id = 1;
     string name = 2;
-    int32 pricePreMonth = 3;
+    int32 pricePerMonth = 3;
     int32 memberCount = 4;
 }
 

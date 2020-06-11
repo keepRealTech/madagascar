@@ -35,7 +35,7 @@ public class FeedEventConsumerConfiguration {
      *
      * @return {@link OrderConsumerBean}.
      */
-    @Bean(initMethod = "start", destroyMethod = "shutdown")
+    @Bean(name = "feed-event-consumer", initMethod = "start", destroyMethod = "shutdown")
     public OrderConsumerBean buildConsumer() {
         OrderConsumerBean orderConsumerBean = new OrderConsumerBean();
 
