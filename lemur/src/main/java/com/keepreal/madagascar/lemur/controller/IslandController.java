@@ -26,11 +26,13 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import swagger.api.ApiUtil;
 import swagger.api.IslandApi;
 import swagger.model.BriefIslandResponse;
 import swagger.model.BriefIslandsResponse;
@@ -50,6 +52,7 @@ import swagger.model.PutIslandPayload;
 import swagger.model.RepostResponse;
 import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
+import swagger.model.TimelinesResponse;
 import swagger.model.UsersResponse;
 
 import javax.validation.Valid;
@@ -527,7 +530,38 @@ public class IslandController implements IslandApi {
                                                                 Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, page, pageSize);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, page, pageSize);
+
+        FeedsResponse response = new FeedsResponse();
+        response.setData(feedsResponse.getFeedList()
+                .stream()
+                .map(this.feedDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setCurrentTime(System.currentTimeMillis());
+        response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the island feeds get v1.1 api.
+     *
+     * @param id           id (required) Island id.
+     * @param fromHost     (optional) Whether from host.
+     * @param minTimestamp timestamp after (optional, default to 0).
+     * @param pageSize     size of a page (optional, default to 10).
+     * @return {@link FeedsResponse}.
+     */
+    @Override
+    public ResponseEntity<TimelinesResponse> apiV11IslandsIdFeedsGet(String id,
+                                                                     Boolean fromHost,
+                                                                     Long minTimestamp,
+                                                                     Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, 0, pageSize);
 
         FeedsResponse response = new FeedsResponse();
         response.setData(feedsResponse.getFeedList()
