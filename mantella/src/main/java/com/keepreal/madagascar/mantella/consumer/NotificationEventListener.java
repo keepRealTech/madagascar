@@ -57,22 +57,35 @@ public class NotificationEventListener implements MessageListener {
         try {
             NotificationEvent event = NotificationEvent.parseFrom(message.getBody());
 
-            if (Objects.isNull(event)
-                    || !NotificationEventType.NOTIFICATION_EVENT_NEW_SUBSCRIBE.equals(event.getType())
-                    || Objects.isNull(event.getSubscribeEvent())
-                    || StringUtils.isEmpty(event.getSubscribeEvent().getSubscriberId())) {
+            if (Objects.isNull(event)) {
                 return Action.CommitMessage;
             }
 
-            this.timelineService.retrieveLastFeedTimestampByUserId(event.getSubscribeEvent().getSubscriberId())
-                    .map(Timeline::getFeedCreatedAt)
-                    .switchIfEmpty(Mono.just(0L))
-                    .flatMapMany(timestamp -> this.feedService.retrieveFeedsByIslandIdAndTimestampAfter(event.getSubscribeEvent().getIslandId(),
-                            timestamp, NotificationEventListener.TIMELINE_PULL_PAGESIZE))
-                    .map(feed -> this.timelineFactory.valueOf(feed.getId(), feed.getIslandId(),
-                            feed.getUserId(), feed.getCreatedAt(), event.getEventId()))
-                    .compose(this.timelineService::insertAll)
-                    .blockLast();
+
+            switch (event.getType()) {
+                case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
+                    if (Objects.isNull(event.getSubscribeEvent())
+                        || StringUtils.isEmpty(event.getSubscribeEvent().getSubscriberId())) {
+                        break;
+                    }
+                    this.timelineService.retrieveLastFeedTimestampByUserId(event.getSubscribeEvent().getSubscriberId())
+                            .map(Timeline::getFeedCreatedAt)
+                            .switchIfEmpty(Mono.just(0L))
+                            .flatMapMany(timestamp -> this.feedService.retrieveFeedsByIslandIdAndTimestampAfter(event.getSubscribeEvent().getIslandId(),
+                                    timestamp, NotificationEventListener.TIMELINE_PULL_PAGESIZE))
+                            .map(feed -> this.timelineFactory.valueOf(feed.getId(), feed.getIslandId(),
+                                    feed.getUserId(), feed.getCreatedAt(), event.getEventId()))
+                            .compose(this.timelineService::insertAll)
+                            .blockLast();
+                case NOTIFICATION_EVENT_NEW_UNSUBSCRIBE:
+                    if (Objects.isNull(event.getUnsubscribeEvent())
+                            || StringUtils.isEmpty(event.getUnsubscribeEvent().getSubscriberId())) {
+                        break;
+                    }
+                    this.timelineService.deleteByUserIdAndIslandId(event.getUnsubscribeEvent().getSubscriberId(), event.getUnsubscribeEvent().getIslandId())
+                            .block();
+                default:
+            }
 
             return Action.CommitMessage;
         } catch (Exception e) {

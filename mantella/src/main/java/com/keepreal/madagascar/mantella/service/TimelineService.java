@@ -117,4 +117,15 @@ public class TimelineService {
                 .findTopByUserIdAndIsDeleteIsFalseOrderByFeedCreatedAtDesc(userId);
     }
 
+    /**
+     * Deletes timelines by user id and island id.
+     *
+     * @param userId   User id.
+     * @param islandId Island id.
+     * @return {@link Void}.
+     */
+    public Mono<Void> deleteByUserIdAndIslandId(String userId, String islandId) {
+        return this.timelineStorage.deleteByUserIdAndIslandId(userId, islandId);
+    }
+
 }

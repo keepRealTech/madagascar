@@ -54,6 +54,7 @@ public class NotificationFactory {
                         .setEvent(event)
                         .setNotificationService(this.notificationService)
                         .build();
+            case NOTIFICATION_EVENT_NEW_UNSUBSCRIBE:
             default:
                 return null;
         }
