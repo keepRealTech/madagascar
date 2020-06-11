@@ -31,6 +31,7 @@ public class MembershipSku {
     @Id
     private String id;
     private String membershipId;
+    private String membershipName;
     private String hostId;
     private String islandId;
     @Builder.Default

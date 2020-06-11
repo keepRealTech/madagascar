@@ -123,8 +123,11 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             responseObserver.onCompleted();
             return;
         }
-        membership.setActive(false);
-        updateAndResponse(membership, responseObserver);
+
+        this.membershipService.deactivateMembership(membership);
+
+        responseObserver.onNext(CommonStatusUtils.getSuccStatus());
+        responseObserver.onCompleted();
     }
 
     /**
@@ -147,8 +150,10 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             responseObserver.onCompleted();
             return;
         }
-        membership.setDeleted(true);
-        updateAndResponse(membership, responseObserver);
+
+        this.membershipService.deleteMembership(membership);
+        responseObserver.onNext(CommonStatusUtils.getSuccStatus());
+        responseObserver.onCompleted();
     }
 
     /**
@@ -159,8 +164,8 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
      */
     @Override
     public void updateMembership(UpdateMembershipRequest request, StreamObserver<MembershipResponse> responseObserver) {
-        String membershipId = request.getId();
-        MembershipInfo membership = membershipService.getMembershipById(membershipId);
+        MembershipInfo membership = membershipService.getMembershipById(request.getId());
+
         if (membership == null) {
             responseObserver.onNext(MembershipResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUNT_ERROR))
@@ -168,20 +173,17 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             responseObserver.onCompleted();
             return;
         }
-        if (request.hasName()) {
-            membership.setName(request.getName().getValue());
-        }
-        if (request.hasDescription()) {
+
+        if (!request.hasName() && !request.hasPricePreMonth() && request.hasDescription()) {
             membership.setDescription(request.getDescription().getValue());
+            membership = this.membershipService.updateMembership(membership);
+        } else {
+            membership = this.membershipService.updateMembershipWithSku(membership, request);
         }
-        if (request.hasPricePreMonth()) {
-            membership.setPricePreMonth(request.getPricePreMonth().getValue());
-        }
-        MembershipInfo membershipInfo = membershipService.updateMembership(membership);
 
         responseObserver.onNext(MembershipResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
-                .setMessage(membershipService.getMembershipMessage(membershipInfo))
+                .setMessage(membershipService.getMembershipMessage(membership))
                 .build());
         responseObserver.onCompleted();
     }
@@ -209,10 +211,8 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         membershipInfo.setIslandId(islandId);
         membershipInfo.setHostId(request.getHostId());
         membershipInfo.setDescription(request.getDescription());
-        membershipInfo.setPricePreMonth(request.getPricePreMonth());
+        membershipInfo.setPricePerMonth(request.getPricePerMonth());
         MembershipInfo membership = membershipService.createMembership(membershipInfo);
-        skuService.createMembershipSkusByMembershipId(membership.getId(),
-                membership.getPricePreMonth(), request.getHostId(), islandId);
 
         responseObserver.onNext(MembershipResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
