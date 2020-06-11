@@ -67,7 +67,7 @@ public class FeedService {
      * @param text      Text content.
      * @param imageUris Image uris.
      */
-    public void createFeed(List<String> islandIds, String userId, String text, List<String> imageUris) {
+    public void createFeed(List<String> islandIds, List<String> membershipIds, String userId, String text, List<String> imageUris) {
         if (Objects.isNull(islandIds) || islandIds.size() == 0) {
             log.error("param islandIds is invalid");
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
@@ -82,6 +82,7 @@ public class FeedService {
                 .setUserId(userId)
                 .setText(StringValue.of(text))
                 .addAllImageUris(imageUris)
+                .addAllMembershipIds(membershipIds)
                 .build();
 
         NewFeedsResponse newFeedsResponse;

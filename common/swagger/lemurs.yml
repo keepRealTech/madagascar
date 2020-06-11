@@ -1716,6 +1716,15 @@ components:
               type: boolean
             isSubscribed:
               type: boolean
+    SimpleMembershipDTO:
+      type: object
+      properties:
+        membershipId:
+          type: string
+        membershipName:
+          type: string
+        color_type:
+          type: integer
     FeedDTO:
       allOf:
         - $ref: '#/components/schemas/BriefFeedDTO'
@@ -1729,10 +1738,18 @@ components:
               type: integer
             isLiked:
               type: boolean
+            isAccess:
+              type: boolean
+            membership:
+              $ref: '#/components/schemas/SimpleMembershipDTO'
     PostFeedPayload:
       type: object
       properties:
         islandIds:
+          type: array
+          items:
+            type: string
+        membershipIds:
           type: array
           items:
             type: string
@@ -1755,6 +1772,10 @@ components:
       properties:
         islandId:
           type: string
+        membershipIds:
+          type: array
+          items:
+            type: string
         content:
           type: string
         multimedia:
@@ -2497,8 +2518,6 @@ components:
         chargePerMonth:
           type: integer
         name:
-          type: string
-        hostId:
           type: string
     PutMembershipRequest:
       type: object

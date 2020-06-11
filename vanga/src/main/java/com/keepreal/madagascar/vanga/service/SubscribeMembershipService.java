@@ -16,8 +16,8 @@ import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -66,9 +66,7 @@ public class SubscribeMembershipService {
      * @return member count.
      */
     public Integer getMemberCountByIslandId(String islandId) {
-        LocalDate localDate = LocalDate.now().plusDays(1L);
-        long deadline = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        return this.subscriptionMemberRepository.getMemberCountByIslandId(islandId, deadline);
+        return this.subscriptionMemberRepository.getMemberCountByIslandId(islandId, getCurrentTime());
     }
 
     /**
@@ -78,9 +76,7 @@ public class SubscribeMembershipService {
      * @return member count.
      */
     public Integer getMemberCountByMembershipId(String membershipId) {
-        LocalDate localDate = LocalDate.now().plusDays(1L);
-        long deadline = localDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        return this.subscriptionMemberRepository.getMemberCountByMembershipId(membershipId, deadline);
+        return this.subscriptionMemberRepository.getMemberCountByMembershipId(membershipId, getCurrentTime());
     }
 
     /**
@@ -157,4 +153,18 @@ public class SubscribeMembershipService {
         this.notificationEventProducerService.produceNewMemberNotificationEventAsync(subscribeMembership, sku);
     }
 
+    /**
+     * retrieve the membership id list by user id and island id.
+     *
+     * @param userId    user id.
+     * @param islandId  island id.
+     * @return  membership id list.
+     */
+    public List<String> getMembershipIdListByUserIdAndIslandId(String userId, String islandId) {
+        return subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getCurrentTime());
+    }
+
+    private long getCurrentTime() {
+        return LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
 }
