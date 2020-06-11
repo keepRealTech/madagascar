@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -205,13 +206,15 @@ public class FeedService {
     /**
      * Retrieves feeds.
      *
-     * @param islandId Island id.
-     * @param fromHost Whether filter by from host.
-     * @param page     Page index.
-     * @param pageSize Page size.
+     * @param islandId       Island id.
+     * @param fromHost       Whether filter by from host.
+     * @param userId         User id.
+     * @param timestampAfter Timestamp after.
+     * @param page           Page index.
+     * @param pageSize       Page size.
      * @return {@link FeedsResponse}.
      */
-    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, int page, int pageSize) {
+    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, Long timestampAfter, int page, int pageSize) {
         Assert.hasText(islandId, "Island id is null.");
 
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
@@ -221,6 +224,10 @@ public class FeedService {
 
         if (Objects.nonNull(fromHost)) {
             conditionBuilder.setFromHost(BoolValue.of(fromHost));
+        }
+
+        if (Objects.nonNull(timestampAfter)) {
+            conditionBuilder.setTimestampAfter(Int64Value.of(timestampAfter));
         }
 
         RetrieveMultipleFeedsRequest request = RetrieveMultipleFeedsRequest.newBuilder()

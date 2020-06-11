@@ -14,8 +14,8 @@ import swagger.model.PostReportRequest;
 import swagger.model.ReportResponse;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the report controller.

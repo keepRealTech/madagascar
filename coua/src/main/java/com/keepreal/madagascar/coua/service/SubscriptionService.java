@@ -16,6 +16,7 @@ import com.keepreal.madagascar.coua.common.SubscriptionState;
 import com.keepreal.madagascar.coua.config.MqConfig;
 import com.keepreal.madagascar.coua.dao.SubscriptionRepository;
 import com.keepreal.madagascar.coua.model.Subscription;
+import com.keepreal.madagascar.tenrecs.UnsubscribeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -223,10 +224,35 @@ public class SubscriptionService {
      */
     public void unsubscribeIsland(String islandId, String userId) {
         Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
-        if (subscription != null) {
-            subscription.setState(SubscriptionState.LEAVE.getValue());
-            subscriptionRepository.save(subscription);
+        if (subscription == null) {
+            return;
         }
+
+        subscription.setState(SubscriptionState.LEAVE.getValue());
+        subscriptionRepository.save(subscription);
+
+        String uuid = UUID.randomUUID().toString();
+        UnsubscribeEvent unsubscribeEvent = UnsubscribeEvent.newBuilder()
+                .setIslandId(islandId)
+                .setSubscriberId(userId)
+                .build();
+        NotificationEvent event = NotificationEvent.newBuilder()
+                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_UNSUBSCRIBE)
+                .setUserId(userId)
+                .setUnsubscribeEvent(unsubscribeEvent)
+                .setTimestamp(System.currentTimeMillis())
+                .setEventId(uuid)
+                .build();
+        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
+        message.setKey(uuid);
+        producerBean.sendAsync(message, new SendCallback() {
+            @Override
+            public void onSuccess(SendResult sendResult) { }
+            @Override
+            public void onException(OnExceptionContext context) {
+                log.error("this message send failure, message Id is {}", context.getMessageId());
+            }
+        });
     }
 
     public List<String> getSubscribeIslandIdByUserId(String userId, List<String> islandIdList) {

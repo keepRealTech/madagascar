@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 /**
- *  Represents the membership service.
+ * Represents the membership service.
  */
 @Service
 public class MembershipService {

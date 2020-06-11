@@ -18,7 +18,6 @@ import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
-import com.keepreal.madagascar.fossa.RetrieveLatestFeedByUserIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
@@ -214,35 +213,6 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
         responseObserver.onNext(feedsResponse);
-        responseObserver.onCompleted();
-    }
-
-    /**
-     * implements the get latest feed by userId method
-     *
-     * @param request          {@link RetrieveLatestFeedByUserIdRequest}.
-     * @param responseObserver {@link FeedResponse} Callback.
-     */
-    @Override
-    public void retrieveLatestFeedByUserId(RetrieveLatestFeedByUserIdRequest request, StreamObserver<FeedResponse> responseObserver) {
-        String userId = request.getUserId();
-
-        FeedInfo feedInfo = feedInfoService.findTopByUserIdAndDeletedIsFalseOrderByCreatedTimeDesc(userId);
-        if (feedInfo == null) {
-            log.error("[retrieveLatestFeedByUserId] feed not found error! user id is [{}]", userId);
-            responseObserver.onNext(FeedResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR))
-                    .build());
-            responseObserver.onCompleted();
-            return;
-        }
-
-        FeedResponse feedResponse = FeedResponse.newBuilder()
-                .setUserId(userId)
-                .setFeed(feedInfoService.getFeedMessage(feedInfo, userId))
-                .setStatus(CommonStatusUtils.getSuccStatus())
-                .build();
-        responseObserver.onNext(feedResponse);
         responseObserver.onCompleted();
     }
 

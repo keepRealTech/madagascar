@@ -26,8 +26,8 @@ public class IslandDTOFactory {
     /**
      * Constructs the island dto factory.
      *
-     * @param userDTOFactory {@link UserDTOFactory}.
-     * @param generalConfiguration  {@link GeneralConfiguration}.
+     * @param userDTOFactory       {@link UserDTOFactory}.
+     * @param generalConfiguration {@link GeneralConfiguration}.
      */
     public IslandDTOFactory(UserDTOFactory userDTOFactory,
                             GeneralConfiguration generalConfiguration) {
@@ -84,7 +84,7 @@ public class IslandDTOFactory {
     /**
      * Converts {@link IslandMessage} to {@link FullIslandDTO}.
      *
-     * @param island {@link IslandMessage}.
+     * @param island     {@link IslandMessage}.
      * @param maskSecret True if should mask secret.
      * @return {@link FullIslandDTO}.
      */
@@ -113,7 +113,7 @@ public class IslandDTOFactory {
      * Converts {@link IslandProfileResponse} to {@link IslandDTO}.
      *
      * @param islandProfileResponse {@link IslandProfileResponse}.
-     * @param userId  User id.
+     * @param userId                User id.
      * @return {@link IslandProfileDTO}.
      */
     public IslandProfileDTO valueOf(IslandProfileResponse islandProfileResponse, String userId) {
