@@ -18,6 +18,7 @@ import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -141,6 +142,7 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
      * @param responseObserver {@link StreamObserver}.
      */
     @Override
+    @Transactional
     public void updateMembershipSkusByMembershipId(UpdateMembershipSkusByIdRequest request,
                                                    StreamObserver<MembershipSkusResponse> responseObserver) {
         List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipId(request.getMembershipId());

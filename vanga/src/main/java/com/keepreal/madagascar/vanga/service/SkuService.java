@@ -107,6 +107,7 @@ public class SkuService {
      *
      * @param membershipSkus {@link MembershipSku}.
      */
+    @Transactional
     public void updateAll(Iterable<MembershipSku> membershipSkus) {
         this.membershipSkuRepository.saveAll(membershipSkus);
     }
