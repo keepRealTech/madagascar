@@ -65,7 +65,7 @@ public class MembershipService {
     }
 
     public List<MembershipInfo> getMembershipListByIslandId(String islandId) {
-        return repository.findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePreMonthAsc(islandId);
+        return repository.findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandId);
     }
 
     public MembershipInfo updateMembership(MembershipInfo membershipInfo) {
@@ -97,7 +97,7 @@ public class MembershipService {
         return FeedMembershipMessage.newBuilder()
                 .setId(membershipInfo.getId())
                 .setName(membershipInfo.getName())
-                .setPricePreMonth(membershipInfo.getPricePerMonth())
+                .setPricePerMonth(membershipInfo.getPricePerMonth())
                 .setMemberCount(subscribeMembershipService.getMemberCountByMembershipId(membershipInfo.getId()))
                 .build();
     }
@@ -108,7 +108,7 @@ public class MembershipService {
                 .setHostId(membershipInfo.getHostId())
                 .setIslandId(membershipInfo.getIslandId())
                 .setDescription(membershipInfo.getDescription())
-                .setPricePreMonth(membershipInfo.getPricePerMonth())
+                .setPricePerMonth(membershipInfo.getPricePerMonth())
                 .setName(membershipInfo.getName())
                 .setColorType(membershipInfo.getColorType())
                 .setIsTop(membershipInfo.getTop())
@@ -153,8 +153,8 @@ public class MembershipService {
         }
 
         Integer newPrice = null;
-        if (request.hasPricePreMonth()) {
-            newPrice = request.getPricePreMonth().getValue();
+        if (request.hasPricePerMonth()) {
+            newPrice = request.getPricePerMonth().getValue();
             membershipInfo.setPricePerMonth(newPrice);
         }
 

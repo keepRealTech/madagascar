@@ -95,13 +95,13 @@ public class MembershipService {
         }
     }
 
-    public MembershipMessage createMembership(String name, Integer pricePreMonth, List<String> descriptions, String islandId, String hostId) {
+    public MembershipMessage createMembership(String name, Integer pricePerMonth, List<String> descriptions, String islandId, String hostId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         String descriptionStr = descriptions.toString();
         CreateMembershipRequest request = CreateMembershipRequest.newBuilder()
                 .setName(name)
-                .setPricePerMonth(pricePreMonth)
+                .setPricePerMonth(pricePerMonth)
                 .setIslandId(islandId)
                 .setHostId(hostId)
                 .setDescription(descriptionStr.substring(1, descriptionStr.length() - 1))
@@ -140,15 +140,15 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
-    public MembershipMessage updateMembershipById(String membershipId, String name, List<String> descriptions, Integer pricePreMonth) {
+    public MembershipMessage updateMembershipById(String membershipId, String name, List<String> descriptions, Integer pricePerMonth) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         UpdateMembershipRequest.Builder builder = UpdateMembershipRequest.newBuilder().setId(membershipId);
         if (!StringUtils.isEmpty(name)) {
             builder.setName(StringValue.of(name));
         }
-        if (pricePreMonth != null) {
-            builder.setPricePreMonth(Int32Value.of(pricePreMonth));
+        if (pricePerMonth != null) {
+            builder.setPricePerMonth(Int32Value.of(pricePerMonth));
         }
         if (descriptions.size() > 0) {
             String descriptionStr = descriptions.toString();

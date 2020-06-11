@@ -174,7 +174,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             return;
         }
 
-        if (!request.hasName() && !request.hasPricePreMonth() && request.hasDescription()) {
+        if (!request.hasName() && !request.hasPricePerMonth() && request.hasDescription()) {
             membership.setDescription(request.getDescription().getValue());
             membership = this.membershipService.updateMembership(membership);
         } else {
