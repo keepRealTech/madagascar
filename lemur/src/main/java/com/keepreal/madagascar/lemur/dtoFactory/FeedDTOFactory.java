@@ -42,14 +42,14 @@ public class FeedDTOFactory {
     /**
      * Constructs the feed dto factory.
      *
-     * @param islandService         {@link IslandService}.
-     * @param islandDTOFactory      {@link IslandDTOFactory}.
-     * @param userService           {@link UserService}.
-     * @param userDTOFactory        {@link UserDTOFactory}.
-     * @param commentDTOFactory     {@link CommentDTOFactory}.
-     * @param ehcacheService        {@link EhcacheService}.
-     * @param membershipService     {@link MembershipService}.
-     * @param membershipDTOFactory  {@link MembershipDTOFactory}.
+     * @param islandService        {@link IslandService}.
+     * @param islandDTOFactory     {@link IslandDTOFactory}.
+     * @param userService          {@link UserService}.
+     * @param userDTOFactory       {@link UserDTOFactory}.
+     * @param commentDTOFactory    {@link CommentDTOFactory}.
+     * @param ehcacheService       {@link EhcacheService}.
+     * @param membershipService    {@link MembershipService}.
+     * @param membershipDTOFactory {@link MembershipDTOFactory}.
      */
     public FeedDTOFactory(IslandService islandService,
                           IslandDTOFactory islandDTOFactory,
@@ -173,7 +173,7 @@ public class FeedDTOFactory {
         snapshotFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
         snapshotFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
         Boolean isSubscribed = stateMap.get(feed.getIslandId());
-        snapshotFeedDTO.setIsSubscribed(isSubscribed == null ?  false : isSubscribed);
+        snapshotFeedDTO.setIsSubscribed(isSubscribed == null ? false : isSubscribed);
 
         return snapshotFeedDTO;
     }
@@ -199,8 +199,8 @@ public class FeedDTOFactory {
     /**
      * Converts {@link FeedMessage} into {@link PosterFeedDTO}.
      *
-     * @param feed  {@link FeedMessage}.
-     * @return  {@link PosterFeedDTO}.
+     * @param feed {@link FeedMessage}.
+     * @return {@link PosterFeedDTO}.
      */
     public PosterFeedDTO posterValueOf(FeedMessage feed) {
         if (Objects.isNull(feed)) {

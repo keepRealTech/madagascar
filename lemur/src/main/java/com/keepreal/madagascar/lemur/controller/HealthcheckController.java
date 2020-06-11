@@ -14,7 +14,7 @@ public class HealthcheckController implements HealthcheckApi {
 
     /**
      * Implements the health check head api.
-     * 
+     *
      * @return {@link HttpStatus}.
      */
     @Override

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import swagger.model.NotificationDTO;
 import swagger.model.NotificationType;
 import swagger.model.SystemNoticeDTO;
-import swagger.model.SystemNotificationDTO;
 import swagger.model.UnreadNotificationCountDTO;
 
 import java.util.Objects;
