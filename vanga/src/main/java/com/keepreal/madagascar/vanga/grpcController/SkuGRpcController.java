@@ -98,6 +98,7 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
      * @param request          {@link CreateMembershipSkusRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
+    @Override
     public void createMembershipSkusByMembershipId(CreateMembershipSkusRequest request,
                                                    StreamObserver<MembershipSkusResponse> responseObserver) {
         List<MembershipSku> membershipSkus = this.skuService
@@ -142,12 +143,12 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
      * @param responseObserver {@link StreamObserver}.
      */
     @Override
-    @Transactional
     public void updateMembershipSkusByMembershipId(UpdateMembershipSkusByIdRequest request,
                                                    StreamObserver<MembershipSkusResponse> responseObserver) {
         List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipId(request.getMembershipId());
         if (request.hasPricePerMonth()) {
-            membershipSkus = this.skuService.obsoleteMembershipSkusWithNewPrice(membershipSkus, request.getPricePerMonth().getValue());
+            membershipSkus = this.skuService.obsoleteMembershipSkusWithNewPrice(request.getMembershipId(),
+                    membershipSkus, request.getPricePerMonth().getValue());
         }
 
         if (request.hasMembershipName()) {
