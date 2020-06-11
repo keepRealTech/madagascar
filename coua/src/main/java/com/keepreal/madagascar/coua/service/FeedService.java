@@ -3,9 +3,7 @@ package com.keepreal.madagascar.coua.service;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.CreateDefaultFeedRequest;
-import com.keepreal.madagascar.fossa.FeedResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
-import com.keepreal.madagascar.fossa.RetrieveLatestFeedByUserIdRequest;
 import io.grpc.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -48,31 +46,6 @@ public class FeedService {
         } catch (Exception e) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
-    }
-
-    /**
-     * Retrieve latest feed by userId and get islandId.
-     *
-     * @param userId userId
-     * @return islandId
-     */
-    public String retrieveLatestFeedByUserIdGetIslandId(String userId) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
-        FeedResponse response;
-
-        try {
-            response = stub.retrieveLatestFeedByUserId(RetrieveLatestFeedByUserIdRequest.newBuilder().setUserId(userId).build());
-        } catch (Exception e) {
-            log.error("call fossa error");
-            return null;
-        }
-
-        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
-            log.error("call fossa feed not found error");
-            return null;
-        }
-
-        return response.getFeed().getIslandId();
     }
 
 }
