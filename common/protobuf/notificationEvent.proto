@@ -11,9 +11,15 @@ enum NotificationEventType {
     NOTIFICATION_EVENT_NEW_COMMENT = 2;
     NOTIFICATION_EVENT_NEW_REACTION = 3;
     NOTIFICATION_EVENT_NEW_MEMBER = 4;
+    NOTIFICATION_EVENT_NEW_UNSUBSCRIBE = 5;
 }
 
 message SubscribeEvent {
+    string islandId = 1;
+    string subscriberId = 2;
+}
+
+message UnsubscribeEvent {
     string islandId = 1;
     string subscriberId = 2;
 }
@@ -41,10 +47,11 @@ message NotificationEvent {
     string userId = 2;
     oneof event {
         SubscribeEvent subscribeEvent = 3;
-        CommentEvent commentEvent = 4;
-        ReactionEvent reactionEvent = 5;
-        MemberEvent memberEvent = 6;
+        UnsubscribeEvent unsubscribeEvent = 4;
+        CommentEvent commentEvent = 5;
+        ReactionEvent reactionEvent = 6;
+        MemberEvent memberEvent = 7;
     }
-    uint64 timestamp = 7;
-    string eventId = 8;
+    uint64 timestamp = 8;
+    string eventId = 9;
 }

@@ -41,4 +41,22 @@ public class TimelineStorage {
                 .then();
     }
 
+    /**
+     * Deletes timelines by user id and island id.
+     *
+     * @param userId    User id.
+     * @param islandId  Island id.
+     * @return Void.
+     */
+    public Mono<Void> deleteByUserIdAndIslandId(String userId, String islandId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("userId").is(userId));
+        query.addCriteria(Criteria.where("islandId").is(islandId));
+        Update update = new Update()
+                .set("isDeleted", true)
+                .set("updatedAt", System.currentTimeMillis());
+        return this.reactiveMongoTemplate.updateMulti(query, update, Timeline.class)
+                .then();
+    }
+
 }
