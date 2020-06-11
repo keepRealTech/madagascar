@@ -2,9 +2,7 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.FeedMembershipMessage;
-import com.keepreal.madagascar.coua.FeedMembershipResponse;
 import com.keepreal.madagascar.coua.MembershipMessage;
-import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.MembershipDTOFactory;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
@@ -36,8 +34,8 @@ public class MembershipController implements MembershipApi {
     /**
      * Constructs the membership controller.
      *
-     * @param membershipService     {@link MembershipService}.
-     * @param membershipDTOFactory  {@link MembershipDTOFactory}.
+     * @param membershipService    {@link MembershipService}.
+     * @param membershipDTOFactory {@link MembershipDTOFactory}.
      */
     public MembershipController(MembershipService membershipService,
                                 MembershipDTOFactory membershipDTOFactory) {
@@ -49,7 +47,7 @@ public class MembershipController implements MembershipApi {
      * Implements the get feed memberships api.
      *
      * @param id island id.
-     * @return   {@link FeedMembershipsResponse}.
+     * @return {@link FeedMembershipsResponse}.
      */
     @Override
     public ResponseEntity<FeedMembershipsResponse> apiV1IslandsIdFeedMembershipsGet(String id) {
@@ -66,7 +64,7 @@ public class MembershipController implements MembershipApi {
      * Implements the get memberships api(with top flag and color type).
      *
      * @param id island id.
-     * @return   {@link MembershipResponse}.
+     * @return {@link MembershipResponse}.
      */
     @Override
     public ResponseEntity<MembershipsResponse> apiV1IslandsIdMembershipsGet(String id) {
@@ -84,7 +82,7 @@ public class MembershipController implements MembershipApi {
      *
      * @param id                    island id.
      * @param postMembershipRequest {@link PostMembershipRequest}.
-     * @return                      {@link MembershipResponse}.
+     * @return {@link MembershipResponse}.
      */
     @Override
     public ResponseEntity<MembershipResponse> apiV1IslandsIdMembershipsPost(String id, @Valid PostMembershipRequest postMembershipRequest) {
@@ -106,7 +104,7 @@ public class MembershipController implements MembershipApi {
      * Implements the deactivate membership api.
      *
      * @param id membership id.
-     * @return   {@link DummyResponse}.
+     * @return {@link DummyResponse}.
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1MembershipsIdDeactivatePut(String id) {
@@ -121,7 +119,7 @@ public class MembershipController implements MembershipApi {
      * Implements the delete membership api.
      *
      * @param id membership id.
-     * @return   {@link DummyResponse}.
+     * @return {@link DummyResponse}.
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1MembershipsIdDelete(String id) {
@@ -136,7 +134,7 @@ public class MembershipController implements MembershipApi {
      * Implements get membership api.
      *
      * @param id membership id.
-     * @return   {@link MembershipResponse}.
+     * @return {@link MembershipResponse}.
      */
     @Override
     public ResponseEntity<MembershipResponse> apiV1MembershipsIdGet(String id) {
@@ -152,9 +150,9 @@ public class MembershipController implements MembershipApi {
     /**
      * Implements the update membership api.
      *
-     * @param id                    membership id.
-     * @param putMembershipRequest  {@link PutMembershipRequest}.
-     * @return  {@link MembershipResponse}.
+     * @param id                   membership id.
+     * @param putMembershipRequest {@link PutMembershipRequest}.
+     * @return {@link MembershipResponse}.
      */
     @Override
     public ResponseEntity<MembershipResponse> apiV1MembershipsIdPut(String id, @Valid PutMembershipRequest putMembershipRequest) {
@@ -173,9 +171,9 @@ public class MembershipController implements MembershipApi {
     /**
      * Implements the top membership api.
      *
-     * @param id        membership id.
-     * @param isRevoke  whether is revoking
-     * @return  {@link DummyResponse}.
+     * @param id       membership id.
+     * @param isRevoke whether is revoking
+     * @return {@link DummyResponse}.
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1MembershipsIdTopPost(String id, @Valid Boolean isRevoke) {

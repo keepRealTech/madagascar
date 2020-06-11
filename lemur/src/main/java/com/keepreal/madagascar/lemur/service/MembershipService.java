@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
 import java.util.List;
 
 /**
- *  Represents the membership service.
+ * Represents the membership service.
  */
 @Service
 public class MembershipService {
@@ -95,13 +95,13 @@ public class MembershipService {
         }
     }
 
-    public MembershipMessage createMembership(String name, Integer pricePreMonth, List<String> descriptions, String islandId, String hostId) {
+    public MembershipMessage createMembership(String name, Integer pricePerMonth, List<String> descriptions, String islandId, String hostId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         String descriptionStr = descriptions.toString();
         CreateMembershipRequest request = CreateMembershipRequest.newBuilder()
                 .setName(name)
-                .setPricePreMonth(pricePreMonth)
+                .setPricePerMonth(pricePerMonth)
                 .setIslandId(islandId)
                 .setHostId(hostId)
                 .setDescription(descriptionStr.substring(1, descriptionStr.length() - 1))

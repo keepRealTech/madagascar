@@ -2,7 +2,6 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.lemur.config.SystemNotificationConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.NotificationDTOFactory;
 import com.keepreal.madagascar.lemur.service.NotificationService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
@@ -32,8 +31,8 @@ public class NotificationController implements NotificationApi {
     /**
      * Constructs the notification controller.
      *
-     * @param notificationService             {@link NotificationService}.
-     * @param notificationDTOFactory          {@link NotificationDTOFactory}.
+     * @param notificationService    {@link NotificationService}.
+     * @param notificationDTOFactory {@link NotificationDTOFactory}.
      */
     public NotificationController(NotificationService notificationService,
                                   NotificationDTOFactory notificationDTOFactory) {

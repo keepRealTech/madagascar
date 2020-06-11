@@ -71,6 +71,7 @@ public class ImageService {
 
     /**
      * Uploads multiple images.
+     *
      * @param images Images.
      * @return Image uris.
      */

@@ -36,8 +36,8 @@ public class UploadService {
     /**
      * retrieve upload url
      *
-     * @param objectName    object name.
-     * @return  upload url.
+     * @param objectName object name.
+     * @return upload url.
      */
     public String retrieveUploadUrl(String objectName) {
         GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, objectName, HttpMethod.PUT);

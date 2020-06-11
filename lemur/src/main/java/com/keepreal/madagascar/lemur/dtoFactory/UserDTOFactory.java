@@ -27,7 +27,7 @@ public class UserDTOFactory {
     /**
      * Constructs the user dto factory.
      *
-     * @param islandService    {@link IslandService}.
+     * @param islandService {@link IslandService}.
      */
     public UserDTOFactory(IslandService islandService) {
         this.islandService = islandService;

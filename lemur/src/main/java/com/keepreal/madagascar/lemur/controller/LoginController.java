@@ -153,8 +153,8 @@ public class LoginController implements LoginApi {
     /**
      * Implements the set device token api.
      *
-     * @param deviceTokenRequest  {@link DeviceTokenRequest}.
-     * @return  {@link DummyResponse}.
+     * @param deviceTokenRequest {@link DeviceTokenRequest}.
+     * @return {@link DummyResponse}.
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1DeviceTokensPost(@Valid DeviceTokenRequest deviceTokenRequest) {
@@ -210,5 +210,5 @@ public class LoginController implements LoginApi {
         briefTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
         return briefTokenInfo;
     }
-    
+
 }

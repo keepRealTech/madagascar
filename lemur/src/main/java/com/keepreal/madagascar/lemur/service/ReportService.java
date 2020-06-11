@@ -54,7 +54,7 @@ public class ReportService {
 
         if (!StringUtils.isEmpty(feedId)) {
             requestBuilder.setFeedId(StringValue.of(feedId));
-        } else if (!StringUtils.isEmpty(islandId)){
+        } else if (!StringUtils.isEmpty(islandId)) {
             requestBuilder.setFeedId(StringValue.of(islandId));
         } else {
             requestBuilder.setUserId(StringValue.of(userId));

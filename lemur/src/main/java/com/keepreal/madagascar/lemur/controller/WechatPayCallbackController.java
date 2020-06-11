@@ -44,7 +44,7 @@ public class WechatPayCallbackController {
     /**
      * Implements the wechat order callback api.
      *
-     * @param request {@link HttpServletRequest}.
+     * @param request  {@link HttpServletRequest}.
      * @param response {@link HttpServletResponse}.
      */
     @RequestMapping(value = "/api/v1/orders/wechat/callback", method = RequestMethod.POST)
