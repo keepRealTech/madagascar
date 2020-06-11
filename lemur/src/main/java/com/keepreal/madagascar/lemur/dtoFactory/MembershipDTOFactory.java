@@ -20,7 +20,7 @@ public class MembershipDTOFactory {
 
     public SimpleMembershipDTO simpleValueOf(MembershipMessage membershipMessage) {
         SimpleMembershipDTO dto = new SimpleMembershipDTO();
-        dto.setMembershipId(membershipMessage.getId());
+        dto.id(membershipMessage.getId());
         dto.setMembershipName(membershipMessage.getName());
         dto.setColorType(membershipMessage.getColorType());
         return dto;
@@ -32,7 +32,7 @@ public class MembershipDTOFactory {
         dto.setIslandId(membershipMessage.getIslandId());
         dto.setHostId(membershipMessage.getHostId());
         dto.setDescription(Arrays.asList(membershipMessage.getDescription().split(",")));
-        dto.setMenbershipName(membershipMessage.getName());
+        dto.setMembershipName(membershipMessage.getName());
         dto.setColorType(membershipMessage.getColorType());
         dto.setChargePerMonth(membershipMessage.getPricePerMonth());
         return dto;
@@ -54,7 +54,7 @@ public class MembershipDTOFactory {
         dto.setIslandId(membershipMessage.getIslandId());
         dto.setChargePerMonth(membershipMessage.getPricePerMonth());
         dto.setDescription(Arrays.asList(membershipMessage.getDescription().split(",")));
-        dto.setMenbershipName(membershipMessage.getName());
+        dto.setMembershipName(membershipMessage.getName());
         dto.setColorType(membershipMessage.getColorType());
         dto.setIsTop(membershipMessage.getIsTop());
         dto.setMemberCount(membershipMessage.getMemberCount());

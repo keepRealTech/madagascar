@@ -1719,11 +1719,11 @@ components:
     SimpleMembershipDTO:
       type: object
       properties:
-        membershipId:
+        id:
           type: string
         membershipName:
           type: string
-        color_type:
+        colorType:
           type: integer
     FeedDTO:
       allOf:
@@ -2489,7 +2489,7 @@ components:
           type: string
         islandId:
           type: string
-        menbershipName:
+        membershipName:
           type: string
         description:
           type: array
