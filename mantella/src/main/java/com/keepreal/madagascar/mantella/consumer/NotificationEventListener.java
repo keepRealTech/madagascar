@@ -11,6 +11,7 @@ import com.keepreal.madagascar.mantella.service.FeedService;
 import com.keepreal.madagascar.mantella.service.TimelineService;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
@@ -21,6 +22,7 @@ import java.util.Objects;
  * Represents the notification event listener.
  */
 @Component
+@Slf4j
 public class NotificationEventListener implements MessageListener {
 
     private final static int TIMELINE_PULL_PAGESIZE = 1000;
@@ -65,7 +67,7 @@ public class NotificationEventListener implements MessageListener {
             this.timelineService.retrieveLastFeedTimestampByUserId(event.getSubscribeEvent().getSubscriberId())
                     .map(Timeline::getFeedCreatedAt)
                     .switchIfEmpty(Mono.just(0L))
-                    .flatMapMany(timestamp -> this.feedService.retrieveFeedsByIslandIdAnd(event.getSubscribeEvent().getIslandId(),
+                    .flatMapMany(timestamp -> this.feedService.retrieveFeedsByIslandIdAndTimestampAfter(event.getSubscribeEvent().getIslandId(),
                             timestamp, NotificationEventListener.TIMELINE_PULL_PAGESIZE))
                     .map(feed -> this.timelineFactory.valueOf(feed.getId(), feed.getIslandId(),
                             feed.getUserId(), feed.getCreatedAt(), event.getEventId()))
@@ -74,6 +76,7 @@ public class NotificationEventListener implements MessageListener {
 
             return Action.CommitMessage;
         } catch (Exception e) {
+            log.error("Failed to commit new subscription event.");
             return Action.ReconsumeLater;
         }
     }

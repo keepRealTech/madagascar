@@ -37,7 +37,7 @@ public class FeedService {
      * @param pageSize       Page size.
      * @return {@link FeedMessage}.
      */
-    public Flux<FeedMessage> retrieveFeedsByIslandIdAnd(String islandId, Long timestampAfter, Integer pageSize) {
+    public Flux<FeedMessage> retrieveFeedsByIslandIdAndTimestampAfter(String islandId, Long timestampAfter, Integer pageSize) {
         ReactorFeedServiceGrpc.ReactorFeedServiceStub stub = ReactorFeedServiceGrpc.newReactorStub(this.fossaChannel);
 
         QueryFeedCondition condition = QueryFeedCondition.newBuilder()

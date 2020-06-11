@@ -21,6 +21,13 @@ public class TimelineGRpcController extends ReactorTimelineServiceGrpc.TimelineS
     private final TimelineMessageFactory timelineMessageFactory;
     private final CommonStatusUtils commonStatusUtils;
 
+    /**
+     * Constructs the timeline grpc controller.
+     *
+     * @param timelineService        {@link TimelineService}.
+     * @param timelineMessageFactory {@link TimelineMessageFactory}.
+     * @param commonStatusUtils      {@link CommonStatusUtils}.
+     */
     public TimelineGRpcController(TimelineService timelineService,
                                   TimelineMessageFactory timelineMessageFactory,
                                   CommonStatusUtils commonStatusUtils) {
@@ -50,7 +57,10 @@ public class TimelineGRpcController extends ReactorTimelineServiceGrpc.TimelineS
                             .setStatus(commonStatus)
                             .addAllTimelines(timelineMessages)
                             .build();
-                });
+                })
+                .onErrorReturn(TimelinesResponse.newBuilder()
+                        .setStatus(this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_TIMELINE_RETRIEVE_ERROR))
+                        .build());
     }
 
 }
