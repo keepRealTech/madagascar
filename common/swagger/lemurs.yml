@@ -1725,6 +1725,9 @@ components:
           type: string
         colorType:
           type: integer
+        pricePerMonthInCents:
+          type: integer
+          format: int64
     FeedDTO:
       allOf:
         - $ref: '#/components/schemas/BriefFeedDTO'
@@ -1975,13 +1978,8 @@ components:
           $ref: '#/components/schemas/BriefIslandDTO'
         member:
           $ref: '#/components/schemas/BriefUserDTO'
-        membershipId:
-          type: string
-        membershipName:
-          type: string
-        pricePerMonthInCents:
-          type: integer
-          format: int64
+        membership:
+          $ref: '#/components/schemas/SimpleMembershipDTO'
     ReactionNotificationDTO:
       type: object
       properties:
