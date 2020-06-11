@@ -53,10 +53,10 @@ public class WXPay {
         if (this.config == null) {
             throw new Exception("config is null");
         }
-        if (this.config.getAppID() == null || this.config.getAppID().trim().length() == 0) {
+        if (this.config.getAppId() == null || this.config.getAppId().trim().length() == 0) {
             throw new Exception("appid in config is empty");
         }
-        if (this.config.getMchID() == null || this.config.getMchID().trim().length() == 0) {
+        if (this.config.getMchId() == null || this.config.getMchId().trim().length() == 0) {
             throw new Exception("appid in config is empty");
         }
         if (this.config.getCertStream() == null) {
@@ -84,8 +84,8 @@ public class WXPay {
      * @throws Exception
      */
     public Map<String, String> fillRequestData(Map<String, String> reqData) throws Exception {
-        reqData.put("appid", config.getAppID());
-        reqData.put("mch_id", config.getMchID());
+        reqData.put("appid", config.getAppId());
+        reqData.put("mch_id", config.getMchId());
         reqData.put("nonce_str", WXPayUtil.generateNonceStr());
         if (SignType.MD5.equals(this.signType)) {
             reqData.put("sign_type", WXPayConstants.MD5);
@@ -106,8 +106,8 @@ public class WXPay {
      * @throws Exception
      */
     public Map<String, String> fillPayRequestData(Map<String, String> reqData) throws Exception {
-        reqData.put("appid", config.getAppID());
-        reqData.put("partnerid", config.getMchID());
+        reqData.put("appid", config.getAppId());
+        reqData.put("partnerid", config.getMchId());
         reqData.put("sign", WXPayUtil.generateSignature(reqData, config.getKey(), this.signType));
         return reqData;
     }

@@ -41,7 +41,7 @@ public class WechatPayConfiguration extends WXPayConfig {
      *
      * @return App id.
      */
-    public String getAppID() {
+    public String getAppId() {
         return this.appId;
     }
 
@@ -50,7 +50,7 @@ public class WechatPayConfiguration extends WXPayConfig {
      *
      * @return merchant id.
      */
-    public String getMchID() {
+    public String getMchId() {
         return this.merchantId;
     }
 

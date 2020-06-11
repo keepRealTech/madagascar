@@ -114,7 +114,7 @@ public class TimelineService {
      */
     public Mono<Timeline> retrieveLastFeedTimestampByUserId(String userId) {
         return this.timelineRepository
-                .findTopByUserIdAndIsDeleteIsTrueOrderByFeedCreatedAtDesc(userId);
+                .findTopByUserIdAndIsDeletedIsTrueOrderByFeedCreatedAtDesc(userId);
     }
 
 }

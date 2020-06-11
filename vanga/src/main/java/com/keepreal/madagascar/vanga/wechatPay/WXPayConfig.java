@@ -9,7 +9,7 @@ public abstract class WXPayConfig {
      *
      * @return App ID
      */
-    protected abstract String getAppID();
+    protected abstract String getAppId();
 
 
     /**
@@ -17,7 +17,7 @@ public abstract class WXPayConfig {
      *
      * @return Mch ID
      */
-    protected abstract String getMchID();
+    protected abstract String getMchId();
 
 
     /**
