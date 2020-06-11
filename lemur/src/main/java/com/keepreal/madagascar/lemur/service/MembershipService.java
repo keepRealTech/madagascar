@@ -101,7 +101,7 @@ public class MembershipService {
         String descriptionStr = descriptions.toString();
         CreateMembershipRequest request = CreateMembershipRequest.newBuilder()
                 .setName(name)
-                .setPricePreMonth(pricePreMonth)
+                .setPricePerMonth(pricePreMonth)
                 .setIslandId(islandId)
                 .setHostId(hostId)
                 .setDescription(descriptionStr.substring(1, descriptionStr.length() - 1))
