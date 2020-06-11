@@ -33,26 +33,30 @@ public class SubscribeMembershipService {
     private final SubscribeMembershipRepository subscriptionMemberRepository;
     private final LongIdGenerator idGenerator;
     private final RedissonClient redissonClient;
+    private final NotificationEventProducerService notificationEventProducerService;
 
     /**
      * Constructor the subscribe membership service.
      *
-     * @param paymentService               {@link PaymentService}.
-     * @param membershipSkuService         {@link SkuService}.
-     * @param subscriptionMemberRepository {@link SubscribeMembershipRepository}.
-     * @param idGenerator                  {@link LongIdGenerator}.
-     * @param redissonClient               {@link RedissonClient}.
+     * @param paymentService                   {@link PaymentService}.
+     * @param membershipSkuService             {@link SkuService}.
+     * @param subscriptionMemberRepository     {@link SubscribeMembershipRepository}.
+     * @param idGenerator                      {@link LongIdGenerator}.
+     * @param redissonClient                   {@link RedissonClient}.
+     * @param notificationEventProducerService {@link NotificationEventProducerService}.
      */
     public SubscribeMembershipService(PaymentService paymentService,
                                       SkuService membershipSkuService,
                                       SubscribeMembershipRepository subscriptionMemberRepository,
                                       LongIdGenerator idGenerator,
-                                      RedissonClient redissonClient) {
+                                      RedissonClient redissonClient,
+                                      NotificationEventProducerService notificationEventProducerService) {
         this.paymentService = paymentService;
         this.membershipSkuService = membershipSkuService;
         this.subscriptionMemberRepository = subscriptionMemberRepository;
         this.idGenerator = idGenerator;
         this.redissonClient = redissonClient;
+        this.notificationEventProducerService = notificationEventProducerService;
     }
 
     /**
@@ -150,6 +154,7 @@ public class SubscribeMembershipService {
         }
 
         this.subscriptionMemberRepository.save(subscribeMembership);
+        this.notificationEventProducerService.produceNewMemberNotificationEventAsync(subscribeMembership, sku);
     }
 
 }

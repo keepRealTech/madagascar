@@ -19,3 +19,11 @@ wechat-pay:
   callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
   cert-path: /Users/sli/development/madagascar/vanga/src/main/resources/apiclient_cert.pem
   host-ip: 127.0.0.1
+
+rocketmq:
+  notification:
+    accessKey: xxx
+    secretKey: xxx
+    topic: notification-event
+    tag: event
+    nameSrvAddr: 127.0.0.1:9876

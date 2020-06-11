@@ -8,6 +8,7 @@ import com.keepreal.madagascar.vanga.repository.ShellSkuRepository;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.lang.reflect.Member;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -54,14 +55,68 @@ public class SkuService {
      * @param membershipId Membership id.
      * @return {@link MembershipSku}.
      */
+    public List<MembershipSku> retrieveMembershipSkusByMembershipId(String membershipId) {
+        return this.membershipSkuRepository.findAllByMembershipIdAndDeletedIsFalse(membershipId);
+    }
+
+    /**
+     * Obsoletes the membership skus.
+     *
+     * @param membershipSkus {@link MembershipSku}.
+     * @param pricePerMonth  New price per month.
+     * @return {@link MembershipSku}.
+     */
+    @Transactional
+    public List<MembershipSku> obsoleteMembershipSkusWithNewPrice(List<MembershipSku> membershipSkus, Long pricePerMonth) {
+        List<MembershipSku> newMembershipSkus = membershipSkus.stream()
+                .map(membershipSku -> this.generateMembershipSku(membershipSku.getMembershipId(),
+                        membershipSku.getMembershipName(),
+                        pricePerMonth,
+                        membershipSku.getHostId(),
+                        membershipSku.getIslandId(),
+                        membershipSku.getTimeInMonths()))
+                .collect(Collectors.toList());
+        membershipSkus = membershipSkus.stream().peek(membershipSku -> membershipSku.setDeleted(true)).collect(Collectors.toList());
+        this.membershipSkuRepository.saveAll(membershipSkus);
+        return this.membershipSkuRepository.saveAll(newMembershipSkus);
+    }
+
+    /**
+     * Retrieves active membership skus for a given membership id.
+     *
+     * @param membershipId Membership id.
+     * @return {@link MembershipSku}.
+     */
     public List<MembershipSku> retrieveMembershipSkusByMembershipIdAndActiveIsTrue(String membershipId) {
         return this.membershipSkuRepository.findAllByMembershipIdAndActiveIsTrueAndDeletedIsFalse(membershipId);
+    }
+
+    /**
+     * Deletes membership skus.
+     *
+     * @param membershipId Membership id.
+     */
+    public void deleteMembershipSkusByMembershipId(String membershipId) {
+        List<MembershipSku> membershipSkus = this.membershipSkuRepository.findAllByMembershipIdAndDeletedIsFalse(membershipId);
+        membershipSkus = membershipSkus.stream().peek(membershipSku -> membershipSku.setDeleted(true)).collect(Collectors.toList());
+        this.membershipSkuRepository.saveAll(membershipSkus);
+    }
+
+    /**
+     * Updates all membership skus.
+     *
+     * @param membershipSkus {@link MembershipSku}.
+     */
+    @Transactional
+    public void updateAll(Iterable<MembershipSku> membershipSkus) {
+        this.membershipSkuRepository.saveAll(membershipSkus);
     }
 
     /**
      * Creates default membership skus if not exists.
      *
      * @param membershipId        Membership id.
+     * @param membershipName      Membership name.
      * @param hostId              Host id.
      * @param islandId            Island id.
      * @param costInCentsPerMonth Membership cost in cents per month.
@@ -69,6 +124,7 @@ public class SkuService {
      */
     @Transactional
     public List<MembershipSku> createDefaultMembershipSkusByMembershipIdAndCostPerMonth(String membershipId,
+                                                                                        String membershipName,
                                                                                         String hostId,
                                                                                         String islandId,
                                                                                         Long costInCentsPerMonth) {
@@ -78,7 +134,7 @@ public class SkuService {
         }
 
         membershipSkus = this.membershipPeriods.stream()
-                .map(i -> this.generateMembershipSku(membershipId, costInCentsPerMonth, hostId, islandId, i))
+                .map(i -> this.generateMembershipSku(membershipId, membershipName, costInCentsPerMonth, hostId, islandId, i))
                 .collect(Collectors.toList());
 
         return this.membershipSkuRepository.saveAll(membershipSkus);
@@ -87,18 +143,19 @@ public class SkuService {
     /**
      * Retrieves the membership sku by id.
      *
+     * @implNote Do not filter by is deleted since the payment may happen during the obsoleting of a sku.
      * @param membershipSkuId        Membership sku id.
      * @return {@link MembershipSku}.
      */
-    @Transactional
     public MembershipSku retrieveMembershipSkuById(String membershipSkuId) {
-        return this.membershipSkuRepository.findByIdAndActiveIsTrueAndDeletedIsFalse(membershipSkuId);
+        return this.membershipSkuRepository.findById(membershipSkuId).orElse(null);
     }
 
     /**
      * Generates membership sku for given info.
      *
      * @param membershipId        Membership id.
+     * @param membershipName      Membership name.
      * @param costInCentsPerMonth Costs in cents for a month.
      * @param hostId              Host id.
      * @param islandId            Island id.
@@ -106,6 +163,7 @@ public class SkuService {
      * @return {@link MembershipSku}.
      */
     private MembershipSku generateMembershipSku(String membershipId,
+                                                String membershipName,
                                                 Long costInCentsPerMonth,
                                                 String hostId,
                                                 String islandId,
@@ -113,6 +171,7 @@ public class SkuService {
         return MembershipSku.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .membershipId(membershipId)
+                .membershipName(membershipName)
                 .description(String.format("订阅%d个月", timeInMonths))
                 .timeInMonths(timeInMonths)
                 .priceInCents(costInCentsPerMonth * timeInMonths)
