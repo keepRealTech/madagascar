@@ -18,3 +18,7 @@ deploy:
 fossa:
   host: fossa
   port: 6565
+
+vanga:
+  host: vanga
+  port: 6565

@@ -8,8 +8,12 @@ common_configs:
   cpu: 500m
 
 rocketmq:
-  topic: notification-event
-  tag: event
+  notification:
+    topic: notification-event
+    tag: event
+  feed:
+    topic: feed-event
+    tag: event
 
 jpa:
   show_sql: false
@@ -19,6 +23,10 @@ mongodb:
 
 coua:
   host: coua
+  port: 6565
+
+vanga:
+  host: vanga
   port: 6565
 
 deploy:

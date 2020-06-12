@@ -44,17 +44,32 @@ spec:
             - configMapRef:
                 name: fossa
           env:
-            - name: ROCKETMQ_ACCESSKEY
+            - name: ROCKETMQ_NOTIFICATION_ACCESSKEY
               valueFrom:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-key
-            - name: ROCKETMQ_SECRETKEY
+            - name: ROCKETMQ_NOTIFICATION_SECRETKEY
               valueFrom:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
-            - name: ROCKETMQ_NAMESRVADDR
+            - name: ROCKETMQ_NOTIFICATION_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
+            - name: ROCKETMQ_FEED_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-key
+            - name: ROCKETMQ_FEED_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-secret
+            - name: ROCKETMQ_FEED_NAMESRVADDR
               valueFrom:
                 secretKeyRef:
                   name: aliyun-rmq

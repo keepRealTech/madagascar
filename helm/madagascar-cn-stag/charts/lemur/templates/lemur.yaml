@@ -58,6 +58,16 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: name-server
+            - name: ALIYUNOSS_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-oss
+                  key: access-key
+            - name: ALIYUNOSS_ACCESSSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-oss
+                  key: access-secret
           volumeMounts:
             - name: lemur-dictionary
               mountPath: "/app/good-dictionary.txt"
