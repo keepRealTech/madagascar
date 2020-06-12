@@ -54,10 +54,10 @@ spec:
                   name: aliyun-rmq
                   key: access-secret
             - name: ROCKETMQ_NAMESRVADDR
-                valueFrom:
-                  secretKeyRef:
-                    name: aliyun-rmq
-                    key: name-server
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
           volumeMounts:
             - name: lemur-dictionary
               mountPath: "/app/good-dictionary.txt"
