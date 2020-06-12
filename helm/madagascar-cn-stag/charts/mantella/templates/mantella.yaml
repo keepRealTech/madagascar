@@ -1,13 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: marty
+  name: mantella
   namespace: {{ .Values.global.common_configs.namespace }}
 spec:
   replicas: {{ .Values.common_configs.replicas }}
   selector:
     matchLabels:
-      app: marty
+      app: mantella
   template:
     metadata:
       annotations:
@@ -17,7 +17,7 @@ spec:
         config.linkerd.io/proxy-image-version: stable-2.7.1
         linkerd.io/inject: enabled
       labels:
-        app: marty
+        app: mantella
     spec:
       initContainers:
         - name: sysctl
@@ -36,12 +36,12 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
-        - name: marty
-          image: {{ .Values.images.marty.name }}:{{ .Values.images.marty.tag }}
-          imagePullPolicy: {{ .Values.images.marty.imagePullPolicy }}
+        - name: mantella
+          image: {{ .Values.images.mantella.name }}:{{ .Values.images.mantella.tag }}
+          imagePullPolicy: {{ .Values.images.mantella.imagePullPolicy }}
           envFrom:
             - configMapRef:
-                name: marty
+                name: mantella
           env:
             - name: ROCKETMQ_NOTIFICATION_ACCESSKEY
               valueFrom:
@@ -73,22 +73,20 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: name-server
-            - name: UMENG_ANDROIDAPPKEY
+            - name: SPRING_DATA_MONGODB_URI
               valueFrom:
                 secretKeyRef:
-                  name: umeng
-                  key: app-key
-            - name: UMENG_ANDROIDAPPMASTERSECRET
-              valueFrom:
-                secretKeyRef:
-                  name: umeng
-                  key: app-secret
+                  name: aliyun-mongo
+                  key: connection-string
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}
             requests:
               cpu: {{ .Values.common_configs.cpu }}
               memory: {{ .Values.common_configs.memory }}
+          ports:
+            - containerPort: 12005
+              name: mantella-grpc
         {{ if .Values.deploy.opentracing.enable_jaeger }}
         - name: jaeger-agent
           image: jaegertracing/jaeger-agent:1.17.1
@@ -113,3 +111,15 @@ spec:
             - --reporter.tchannel.host-port=simplest-collector-headless.keepreal-prod.svc:14267
             - --reporter.type=tchannel
         {{ end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mantella
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6565
+      targetPort: mantella-grpc
+  selector:
+    app: mantella

@@ -1,5 +1,4 @@
 grpc:
-  port: 12007
   coua:
     host: 127.0.0.1
     port: 12002
