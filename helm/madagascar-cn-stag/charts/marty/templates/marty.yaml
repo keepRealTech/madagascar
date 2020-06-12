@@ -63,6 +63,16 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
+            - name: ROCKETMQ_NOTIFICATION_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
+            - name: ROCKETMQ_FEED_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
             - name: UMENG_ANDROIDAPPKEY
               valueFrom:
                 secretKeyRef:

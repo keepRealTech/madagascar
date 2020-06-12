@@ -15,12 +15,10 @@ images:
 
 rocketmq:
   notification:
-    name_server_address: http://MQ_INST_1398284016177859_BcZsViQg.cn-beijing.mq-internal.aliyuncs.com:8080
     topic: notification-event
     group_id: GID-marty-default
     tag: event
   feed:
-    name_server_address: http://MQ_INST_1398284016177859_BcZsViQg.cn-beijing.mq-internal.aliyuncs.com:8080
     topic: feed-event
     group_id: GID-marty-default
     tag: event
@@ -34,7 +32,7 @@ fossa:
   port: 6565
 
 umeng:
-  url: 
+  url: https://msgapi.umeng.com/api/send?sign=mysign
 
 deploy:
   opentracing:
