@@ -1,11 +1,11 @@
 grpc:
+  port: 12007
   coua:
     host: 127.0.0.1
     port: 12002
   fossa:
     host: 127.0.0.1
     port: 12003
-  port: 12007
 
 rocketmq:
   notification:
@@ -27,3 +27,7 @@ umeng:
   androidAppKey: xxx
   androidAppMasterSecret: xxx
   url: xxx
+
+spring:
+  main:
+    web-application-type: NONE

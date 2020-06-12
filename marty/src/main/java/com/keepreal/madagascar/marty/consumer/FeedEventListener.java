@@ -8,7 +8,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.keepreal.madagascar.mantella.FeedEventMessage;
 import com.keepreal.madagascar.marty.service.UmengPushService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -46,9 +45,6 @@ public class FeedEventListener implements MessageListener {
                 String islandId = feedEventMessage.getFeedCreateEvent().getIslandId();
                 umengPushService.pushFeed(islandId);
             }
-            return Action.CommitMessage;
-        } catch (DuplicateKeyException exception) {
-            log.warn("Duplicated consumption, skipped.");
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {
             log.warn("Bad formatted notification event, skipped.");
