@@ -162,7 +162,16 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
                     .collect(Collectors.toList());
         }
 
-        this.skuService.updateAll(membershipSkus);
+        List<MembershipSku> membershipSkuList = this.skuService.updateAll(membershipSkus);
+        MembershipSkusResponse response = MembershipSkusResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .addAllMembershipSkus(membershipSkuList.stream()
+                        .map(this.skuMessageFactory::valueOf)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .build();
+
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 

@@ -102,7 +102,7 @@ public class TimelineService {
      */
     public Flux<Timeline> retrieveByUserIdAndCreatedTimestampAfter(String userId, long startTimestamp, int pageSize) {
         return this.timelineRepository
-                .findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsTrue(
+                .findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsFalse(
                         userId, startTimestamp, PaginationUtils.defaultTimelinePageRequest(pageSize));
     }
 
@@ -114,7 +114,7 @@ public class TimelineService {
      */
     public Mono<Timeline> retrieveLastFeedTimestampByUserId(String userId) {
         return this.timelineRepository
-                .findTopByUserIdAndIsDeleteIsFalseOrderByFeedCreatedAtDesc(userId);
+                .findTopByUserIdAndIsDeletedIsFalseOrderByFeedCreatedAtDesc(userId);
     }
 
     /**

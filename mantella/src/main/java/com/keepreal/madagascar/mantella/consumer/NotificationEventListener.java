@@ -74,7 +74,7 @@ public class NotificationEventListener implements MessageListener {
                             .flatMapMany(timestamp -> this.feedService.retrieveFeedsByIslandIdAndTimestampAfter(event.getSubscribeEvent().getIslandId(),
                                     timestamp, NotificationEventListener.TIMELINE_PULL_PAGESIZE))
                             .map(feed -> this.timelineFactory.valueOf(feed.getId(), feed.getIslandId(),
-                                    feed.getUserId(), feed.getCreatedAt(), event.getEventId()))
+                                    event.getSubscribeEvent().getSubscriberId(), feed.getCreatedAt(), event.getEventId()))
                             .compose(this.timelineService::insertAll)
                             .blockLast();
                 case NOTIFICATION_EVENT_NEW_UNSUBSCRIBE:

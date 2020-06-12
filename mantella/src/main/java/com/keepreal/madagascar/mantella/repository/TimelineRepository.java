@@ -13,8 +13,8 @@ public interface TimelineRepository extends ReactiveMongoRepository<Timeline, St
 
     Mono<Boolean> existsByEventId(String eventId);
 
-    Flux<Timeline> findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsTrue(String userId, long startTimestamp, Pageable pageable);
+    Flux<Timeline> findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsFalse(String userId, long startTimestamp, Pageable pageable);
 
-    Mono<Timeline> findTopByUserIdAndIsDeleteIsFalseOrderByFeedCreatedAtDesc(String userId);
+    Mono<Timeline> findTopByUserIdAndIsDeletedIsFalseOrderByFeedCreatedAtDesc(String userId);
 
 }

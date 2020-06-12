@@ -16,6 +16,7 @@ import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -161,7 +162,8 @@ public class SubscribeMembershipService {
      * @return  membership id list.
      */
     public List<String> getMembershipIdListByUserIdAndIslandId(String userId, String islandId) {
-        return subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getCurrentTime());
+        List<String> membershipIdList = subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getCurrentTime());
+        return membershipIdList == null ? Collections.emptyList() : membershipIdList;
     }
 
     private long getCurrentTime() {

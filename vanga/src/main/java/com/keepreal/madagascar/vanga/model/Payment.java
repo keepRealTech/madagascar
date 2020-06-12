@@ -31,14 +31,16 @@ public class Payment {
     @Id
     private String id;
     private String userId;
-    private String payeeId;
+    @Builder.Default
+    private String payeeId = "";
     @Builder.Default
     private String tradeNum = "";
     @Builder.Default
     private Long amountInCents = 0L;
     @Builder.Default
     private Long amountInShells = 0L;
-    private String orderId;
+    @Builder.Default
+    private String orderId = "";
     private Integer type;
     @Builder.Default
     private Integer state = 1;

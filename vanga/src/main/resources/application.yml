@@ -2,7 +2,7 @@ spring:
   application:
     name: vanga
   datasource:
-    url: jdbc:mysql://root:123456@localhost:3306/guns_advanced
+    url: jdbc:mysql://root:123456@localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
@@ -27,3 +27,9 @@ rocketmq:
     topic: notification-event
     tag: event
     nameSrvAddr: 127.0.0.1:9876
+
+grpc:
+  port: 12006
+
+server:
+  port: 8083
