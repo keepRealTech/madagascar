@@ -37,8 +37,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: lemur
-          image: {{ .Values.images.lemur.name }}:{{ .Values.images.lemur.tag }}
-          imagePullPolicy: {{ .Values.images.lemur.imagePullPolicy }}
+          image: {{ .Values.global.images.lemur.name }}:{{ .Values.global.images.lemur.tag }}
+          imagePullPolicy: {{ .Values.global.images.lemur.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: lemur

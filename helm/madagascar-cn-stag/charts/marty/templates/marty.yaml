@@ -37,8 +37,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: marty
-          image: {{ .Values.images.marty.name }}:{{ .Values.images.marty.tag }}
-          imagePullPolicy: {{ .Values.images.marty.imagePullPolicy }}
+          image: {{ .Values.global.images.marty.name }}:{{ .Values.global.images.marty.tag }}
+          imagePullPolicy: {{ .Values.global.images.marty.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: marty

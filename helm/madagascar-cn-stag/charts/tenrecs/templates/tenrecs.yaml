@@ -38,8 +38,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: tenrecs
-          image: {{ .Values.images.tenrecs.name }}:{{ .Values.images.tenrecs.tag }}
-          imagePullPolicy: {{ .Values.images.tenrecs.imagePullPolicy }}
+          image: {{ .Values.global.images.tenrecs.name }}:{{ .Values.global.images.tenrecs.tag }}
+          imagePullPolicy: {{ .Values.global.images.tenrecs.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: tenrecs

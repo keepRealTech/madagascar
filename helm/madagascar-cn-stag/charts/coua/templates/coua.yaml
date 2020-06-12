@@ -38,8 +38,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: coua
-          image: {{ .Values.images.coua.name }}:{{ .Values.images.coua.tag }}
-          imagePullPolicy: {{ .Values.images.coua.imagePullPolicy }}
+          image: {{ .Values.global.images.coua.name }}:{{ .Values.global.images.coua.tag }}
+          imagePullPolicy: {{ .Values.global.images.coua.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: coua

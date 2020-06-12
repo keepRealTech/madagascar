@@ -37,8 +37,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: baobob
-          image: {{ .Values.images.baobob.name }}:{{ .Values.images.baobob.tag }}
-          imagePullPolicy: {{ .Values.images.baobob.imagePullPolicy }}
+          image: {{ .Values.global.images.baobob.name }}:{{ .Values.global.images.baobob.tag }}
+          imagePullPolicy: {{ .Values.global.images.baobob.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: baobob

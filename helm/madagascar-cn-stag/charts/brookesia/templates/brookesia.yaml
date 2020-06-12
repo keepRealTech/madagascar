@@ -17,8 +17,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: brookesia
-          image: {{ .Values.images.brookesia.name }}:{{ .Values.images.brookesia.tag }}
-          imagePullPolicy: {{ .Values.images.brookesia.imagePullPolicy }}
+          image: {{ .Values.global.images.brookesia.name }}:{{ .Values.global.images.brookesia.tag }}
+          imagePullPolicy: {{ .Values.global.images.brookesia.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: brookesia

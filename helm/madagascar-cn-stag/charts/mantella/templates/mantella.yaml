@@ -37,8 +37,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: mantella
-          image: {{ .Values.images.mantella.name }}:{{ .Values.images.mantella.tag }}
-          imagePullPolicy: {{ .Values.images.mantella.imagePullPolicy }}
+          image: {{ .Values.global.images.mantella.name }}:{{ .Values.global.images.mantella.tag }}
+          imagePullPolicy: {{ .Values.global.images.mantella.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: mantella

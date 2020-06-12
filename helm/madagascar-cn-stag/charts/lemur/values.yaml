@@ -7,12 +7,6 @@ common_configs:
   memory: 2.5Gi
   cpu: 500m
 
-images:
-  lemur:
-    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-    tag: 1.0.6
-    imagePullPolicy: Always
-
 coua:
   host: coua
   port: 6565

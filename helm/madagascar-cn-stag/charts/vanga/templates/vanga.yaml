@@ -37,8 +37,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: vanga
-          image: {{ .Values.images.vanga.name }}:{{ .Values.images.vanga.tag }}
-          imagePullPolicy: {{ .Values.images.vanga.imagePullPolicy }}
+          image: {{ .Values.global.images.vanga.name }}:{{ .Values.global.images.vanga.tag }}
+          imagePullPolicy: {{ .Values.global.images.vanga.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: vanga

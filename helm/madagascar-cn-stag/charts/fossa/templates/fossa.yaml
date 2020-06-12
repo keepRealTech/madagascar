@@ -38,8 +38,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: fossa
-          image: {{ .Values.images.fossa.name }}:{{ .Values.images.fossa.tag }}
-          imagePullPolicy: {{ .Values.images.fossa.imagePullPolicy }}
+          image: {{ .Values.global.images.fossa.name }}:{{ .Values.global.images.fossa.tag }}
+          imagePullPolicy: {{ .Values.global.images.fossa.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: fossa
