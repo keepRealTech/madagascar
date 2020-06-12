@@ -5,7 +5,6 @@ metadata:
   namespace: {{ .Values.global.common_configs.namespace }}
 data:
   aliyun_logs_madagascar-prod: stdout
-  ROCKETMQ_NAMESRVADDR: {{ .Values.rocketmq.name_server_address }}
   ROCKETMQ_TOPIC: {{ .Values.rocketmq.topic }}
   ROCKETMQ_TAG: {{ .Values.rocketmq.tag }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'

@@ -9,7 +9,6 @@ data:
   SPRING_JPA_SHOWSQL: '{{ .Values.jpa.show_sql }}'
   GRPC_COUA_HOST: {{ .Values.coua.host }}
   GRPC_COUA_PORT: '{{ .Values.coua.port }}'
-  ROCKETMQ_NAMESRVADDR: {{ .Values.rocketmq.name_server_address }}
   ROCKETMQ_TOPIC: {{ .Values.rocketmq.topic }}
   ROCKETMQ_TAG: {{ .Values.rocketmq.tag }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'

@@ -14,7 +14,6 @@ images:
     imagePullPolicy: Always
 
 rocketmq:
-  name_server_address: http://MQ_INST_1398284016177859_BcaZSx5M.cn-beijing.mq-internal.aliyuncs.com:8080
   topic: notification-event
   tag: event
 
