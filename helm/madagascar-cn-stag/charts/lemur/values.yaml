@@ -3,14 +3,15 @@
 # Declare variables to be passed into your templates.
 
 common_configs:
-  replicas: 1
+  namespace: keepreal-prod
+  replicas: 2
   memory: 2.5Gi
   cpu: 500m
 
 images:
   lemur:
     name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-    tag: 1.0.0
+    tag: 1.0.6
     imagePullPolicy: Always
 
 coua:
@@ -38,8 +39,8 @@ file:
   max_request_size: 20MB
 
 system_notification:
-  name: default-helper
-  content: hello, handsome.
+  name: 岛蛋
+  content: 你好呀～我是岛蛋！有什么问题都可以来问我喔～(●′ω`●)
   portrait_image_uri: keepreal-helper.jpg
 
 rocketmq:
@@ -49,4 +50,24 @@ rocketmq:
 
 deploy:
   opentracing:
-    enable_jaeger: true
+    enable_jaeger: false
+
+release:
+  strategy: Stochastic
+  ratio: 100
+
+client:
+  android:
+    setup_info:
+      version: 1
+      address: https://images.keepreal.cn/tiaodao_v100_kr.apk
+
+security:
+  oauth2:
+    resource:
+      token_info_uri: http://baobob:8080/oauth/check_token
+
+aliyun_oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  bucketName: kr-thumbnail-staging-cn2-01
+  expireTimeInSeconds: 30

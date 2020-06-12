@@ -24,4 +24,4 @@ rocketmq:
 
 deploy:
   opentracing:
-    enable_jaeger: true
+    enable_jaeger: false

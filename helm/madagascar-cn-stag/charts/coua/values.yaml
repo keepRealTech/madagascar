@@ -3,14 +3,15 @@
 # Declare variables to be passed into your templates.
 
 common_configs:
-  replicas: 1
+  namespace: keepreal-prod
+  replicas: 2
   memory: 2.5Gi
   cpu: 500m
 
 images:
   coua:
     name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-    tag: 1.0.0
+    tag: 1.0.4
     imagePullPolicy: Always
 
 rocketmq:
@@ -20,7 +21,7 @@ rocketmq:
 
 deploy:
   opentracing:
-    enable_jaeger: true
+    enable_jaeger: false
 
 fossa:
   host: fossa

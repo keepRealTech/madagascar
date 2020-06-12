@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: baobob
-  namespace: {{ .Values.global.common_configs.namespace }}
+  namespace: {{ .Values.common_configs.namespace }}
 data:
   aliyun_logs_madagascar-prod: stdout
   WECHAT_OAUTH_HOST: {{ .Values.wechat.host }}
