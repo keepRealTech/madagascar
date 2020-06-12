@@ -146,11 +146,13 @@ public class FeedInfoService {
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
             builder.setIsAccess(true);
             builder.setMembershipId("");
+            builder.setIsMembership(false);
         } else {
-            List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(feedInfo.getIslandId(), userId);
-            if (membershipIds.stream().anyMatch(myMembershipIds::contains)) {
+            builder.setIsMembership(true);
+            List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(userId, feedInfo.getIslandId());
+            if (userId.equals(feedInfo.getHostId()) || membershipIds.stream().anyMatch(myMembershipIds::contains)) {
                 builder.setIsAccess(true);
-                builder.setMembershipId("");
+                builder.setMembershipId(membershipIds.get(0));
             } else {
                 builder.setIsAccess(false);
                 builder.setMembershipId(membershipIds.get(0));

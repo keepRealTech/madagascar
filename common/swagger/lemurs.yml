@@ -1740,6 +1740,8 @@ components:
               type: boolean
             isAccess:
               type: boolean
+            isMembership:
+              type: boolean
             membership:
               $ref: '#/components/schemas/SimpleMembershipDTO'
     PostFeedPayload:

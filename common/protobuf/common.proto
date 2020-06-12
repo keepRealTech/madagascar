@@ -164,6 +164,7 @@ message FeedMessage {
     bool isDeleted = 12;
     bool isAccess = 13;
     string membershipId = 14;
+    bool isMembership = 15;
 }
 
 message CommentMessage {

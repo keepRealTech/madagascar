@@ -95,7 +95,7 @@ public class SubscriptionService {
      */
     public boolean isSubScribedIsland(String islandId, String userId) {
         Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
-        return subscription != null;
+        return subscription != null && subscription.getState() > 0;
     }
 
     /**
@@ -257,6 +257,11 @@ public class SubscriptionService {
 
     public List<String> getSubscribeIslandIdByUserId(String userId, List<String> islandIdList) {
         return subscriptionRepository.getIslandIdListByUserSubscribedIn(userId, islandIdList);
+    }
+
+    public boolean isSubscribed(String userId, String islandId) {
+        Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
+        return subscription != null && subscription.getState() > 0;
     }
 
     private void insertSubscription(Subscription subscription) {

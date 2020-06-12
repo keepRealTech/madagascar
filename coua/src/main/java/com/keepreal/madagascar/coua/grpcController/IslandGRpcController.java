@@ -358,6 +358,13 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         String islandId = request.getId();
         String secret = request.getSecret();
         String userId = request.getUserId();
+        if (subscriptionService.isSubScribedIsland(islandId, userId)) {
+            responseObserver.onNext(SubscribeIslandResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.getSuccStatus())
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
         SubscribeIslandResponse.Builder responseBuilder = SubscribeIslandResponse.newBuilder();
         IslandInfo islandInfo = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
         if (islandInfo != null) {

@@ -42,6 +42,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "哎呀，重新登录试试";
             case REQUEST_USER_BALANCE_WITHDRAW_DAY_LIMIT_ERROR:
                 return "单日提现上限为两万人民币，请重新输入";
+            case REQUEST_MEMBERSHIP_DELETE_ERROR:
+                return "已经有用户订阅的会员不能删除哦";
             default:
                 return errorCode.getValueDescriptor().getName();
         }

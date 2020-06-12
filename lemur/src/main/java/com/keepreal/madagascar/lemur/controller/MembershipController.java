@@ -108,7 +108,8 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1MembershipsIdDeactivatePut(String id) {
-        membershipService.deactivateMembershipById(id);
+        String userId = HttpContextUtils.getUserIdFromContext();
+        membershipService.deactivateMembershipById(id, userId);
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
@@ -123,7 +124,8 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1MembershipsIdDelete(String id) {
-        membershipService.deleteMembershipById(id);
+        String userId = HttpContextUtils.getUserIdFromContext();
+        membershipService.deleteMembershipById(id, userId);
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
@@ -156,10 +158,12 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<MembershipResponse> apiV1MembershipsIdPut(String id, @Valid PutMembershipRequest putMembershipRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
         MembershipMessage membershipMessage = membershipService.updateMembershipById(id,
                 putMembershipRequest.getName(),
                 putMembershipRequest.getDescription(),
-                putMembershipRequest.getChargePerMonth());
+                putMembershipRequest.getChargePerMonth(),
+                userId);
 
         MembershipResponse response = new MembershipResponse();
         response.data(membershipDTOFactory.briefValueOf(membershipMessage));
@@ -177,7 +181,8 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1MembershipsIdTopPost(String id, @Valid Boolean isRevoke) {
-        membershipService.topMembershipById(id, isRevoke);
+        String userId = HttpContextUtils.getUserIdFromContext();
+        membershipService.topMembershipById(id, isRevoke, userId);
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);

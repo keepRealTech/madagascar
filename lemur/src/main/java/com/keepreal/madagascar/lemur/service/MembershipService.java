@@ -41,12 +41,13 @@ public class MembershipService {
         this.channel = channel;
     }
 
-    public void topMembershipById(String membershipId, Boolean isRevoke) {
+    public void topMembershipById(String membershipId, Boolean isRevoke, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         TopMembershipRequest request = TopMembershipRequest.newBuilder()
                 .setId(membershipId)
                 .setIsRevoke(isRevoke)
+                .setUserId(userId)
                 .build();
 
         CommonStatus commonStatus;
@@ -61,10 +62,13 @@ public class MembershipService {
         }
     }
 
-    public void deactivateMembershipById(String membershipId) {
+    public void deactivateMembershipById(String membershipId, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
-        MembershipIdRequest request = MembershipIdRequest.newBuilder().setId(membershipId).build();
+        MembershipIdRequest request = MembershipIdRequest.newBuilder()
+                .setId(membershipId)
+                .setUserId(userId)
+                .build();
 
         CommonStatus commonStatus;
         try {
@@ -78,10 +82,13 @@ public class MembershipService {
         }
     }
 
-    public void deleteMembershipById(String membershipId) {
+    public void deleteMembershipById(String membershipId, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
-        MembershipIdRequest request = MembershipIdRequest.newBuilder().setId(membershipId).build();
+        MembershipIdRequest request = MembershipIdRequest.newBuilder()
+                .setId(membershipId)
+                .setUserId(userId)
+                .build();
 
         CommonStatus commonStatus;
         try {
@@ -140,10 +147,12 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
-    public MembershipMessage updateMembershipById(String membershipId, String name, List<String> descriptions, Integer pricePerMonth) {
+    public MembershipMessage updateMembershipById(String membershipId, String name, List<String> descriptions, Integer pricePerMonth, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
-        UpdateMembershipRequest.Builder builder = UpdateMembershipRequest.newBuilder().setId(membershipId);
+        UpdateMembershipRequest.Builder builder = UpdateMembershipRequest.newBuilder()
+                .setId(membershipId)
+                .setUserId(userId);
         if (!StringUtils.isEmpty(name)) {
             builder.setName(StringValue.of(name));
         }
