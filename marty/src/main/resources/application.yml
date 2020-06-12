@@ -29,5 +29,7 @@ umeng:
   url: xxx
 
 spring:
+  application:
+    name: marty
   main:
     web-application-type: NONE
