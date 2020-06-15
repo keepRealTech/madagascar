@@ -116,8 +116,8 @@ public class SkuService {
      * @param membershipSkus {@link MembershipSku}.
      */
     @Transactional
-    public void updateAll(Iterable<MembershipSku> membershipSkus) {
-        this.membershipSkuRepository.saveAll(membershipSkus);
+    public List<MembershipSku> updateAll(Iterable<MembershipSku> membershipSkus) {
+        return this.membershipSkuRepository.saveAll(membershipSkus);
     }
 
     /**
@@ -137,7 +137,7 @@ public class SkuService {
                                                                                         String islandId,
                                                                                         Long costInCentsPerMonth) {
         List<MembershipSku> membershipSkus = this.retrieveMembershipSkusByMembershipIdAndActiveIsTrue(membershipId);
-        if (Objects.nonNull(membershipSkus) && membershipSkus.isEmpty()) {
+        if (Objects.nonNull(membershipSkus) && !membershipSkus.isEmpty()) {
             return membershipSkus;
         }
 

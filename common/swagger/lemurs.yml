@@ -1743,6 +1743,8 @@ components:
               type: boolean
             isAccess:
               type: boolean
+            isMembership:
+              type: boolean
             membership:
               $ref: '#/components/schemas/SimpleMembershipDTO'
     PostFeedPayload:
@@ -2515,6 +2517,7 @@ components:
             type: string
         chargePerMonth:
           type: integer
+          minimum: 100
         name:
           type: string
     PutMembershipRequest:
@@ -2526,6 +2529,7 @@ components:
             type: string
         chargePerMonth:
           type: integer
+          minimum: 100
           description: can only increase
         name:
           type: string

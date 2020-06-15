@@ -56,19 +56,19 @@ public class BillingInfoService {
     public BillingInfo updateBillingInfoByUserId(String userId, String name, String mobile, String accountNumber, String idNumber) {
         BillingInfo billingInfo = this.retrieveOrCreateBillingInfoIfNotExistsByUserId(userId);
 
-        if (StringUtils.isEmpty(name)) {
+        if (!StringUtils.isEmpty(name)) {
             billingInfo.setName(name);
         }
 
-        if (StringUtils.isEmpty(mobile)) {
+        if (!StringUtils.isEmpty(mobile)) {
             billingInfo.setMobile(mobile);
         }
 
-        if (StringUtils.isEmpty(accountNumber)) {
+        if (!StringUtils.isEmpty(accountNumber)) {
             billingInfo.setAccountNumber(accountNumber);
         }
 
-        if (StringUtils.isEmpty(idNumber)) {
+        if (!StringUtils.isEmpty(idNumber)) {
             billingInfo.setIdNumber(idNumber);
         }
 

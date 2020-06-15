@@ -8,11 +8,13 @@ import "google/protobuf/wrappers.proto";
 
 message MembershipIdRequest {
     string id = 1;
+    string userId = 2;
 }
 
 message TopMembershipRequest {
     string id = 1;
     bool isRevoke = 2;
+    string userId = 3;
 }
 
 message UpdateMembershipRequest {
@@ -20,6 +22,7 @@ message UpdateMembershipRequest {
     google.protobuf.StringValue name = 2;
     google.protobuf.StringValue description = 3;
     google.protobuf.Int32Value pricePerMonth = 4;
+    string userId = 5;
 }
 
 message CreateMembershipRequest {

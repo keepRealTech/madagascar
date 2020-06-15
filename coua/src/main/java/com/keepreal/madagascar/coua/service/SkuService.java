@@ -94,11 +94,11 @@ public class SkuService {
         UpdateMembershipSkusByIdRequest.Builder requestBuilder = UpdateMembershipSkusByIdRequest.newBuilder()
                 .setMembershipId(membershipId);
 
-        if (StringUtils.isEmpty(membershipName)) {
+        if (!StringUtils.isEmpty(membershipName)) {
             requestBuilder.setMembershipName(StringValue.of(membershipName));
         }
 
-        if (StringUtils.isEmpty(pricePerMonth)) {
+        if (!StringUtils.isEmpty(pricePerMonth)) {
             requestBuilder.setPricePerMonth(Int64Value.of(pricePerMonth));
         }
 

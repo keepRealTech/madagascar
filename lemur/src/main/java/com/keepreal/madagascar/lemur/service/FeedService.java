@@ -272,7 +272,7 @@ public class FeedService {
         return this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
                 .stream()
                 .map(TimelineMessage::getFeedId)
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList()), userId);
     }
 
     /**
@@ -318,7 +318,7 @@ public class FeedService {
      * @param feedIds Feed ids.
      * @return {@link FeedsResponse}.
      */
-    private FeedsResponse retrieveFeedsByIds(List<String> feedIds) {
+    private FeedsResponse retrieveFeedsByIds(List<String> feedIds, String userId) {
         if (feedIds.isEmpty()) {
             return FeedsResponse.newBuilder().build();
         }
@@ -326,6 +326,7 @@ public class FeedService {
         FeedServiceGrpc.FeedServiceBlockingStub fossaStub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
         RetrieveFeedsByIdsRequest byIdsRequest = RetrieveFeedsByIdsRequest.newBuilder()
                 .addAllIds(feedIds)
+                .setUserId(userId)
                 .build();
 
         FeedsResponse feedsResponse;

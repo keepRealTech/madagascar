@@ -12,7 +12,7 @@ public interface UserDeviceInfoRepository extends JpaRepository<UserDeviceInfo, 
 
     UserDeviceInfo findByUserIdAndDeviceTokenAndDeviceTypeAndDeletedIsFalse(String userId, String deviceToken, Integer deviceType);
 
-    @Query(value = "SELECT device_token, device_type FROM uesr_device WHERE user_id IN ?1 AND is_binded = TRUE AND is_deleted = FALSE", nativeQuery = true)
+    @Query(value = "SELECT device_token, device_type FROM user_device WHERE user_id IN ?1 AND is_binded = TRUE AND is_deleted = FALSE", nativeQuery = true)
     List<UserDeviceInfo> findDeviceTokenListByUserIdList(List<String> userIdList);
 
     @Query(value = "SELECT device_token, device_type FROM user_device WHERE user_id = ?1 AND is_binded = TRUE AND is_deleted = FALSE", nativeQuery = true)

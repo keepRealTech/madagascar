@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -124,7 +125,7 @@ public class FeedInfoService {
     public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
         if (feedInfo == null)
             return null;
-        List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(feedInfo.getIslandId(), userId);
+
         List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
         FeedMessage.Builder builder = FeedMessage.newBuilder()
@@ -142,19 +143,22 @@ public class FeedInfoService {
                 .setIsDeleted(feedInfo.isDeleted());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
-        if (membershipIds != null && membershipIds.size() > 0 && myMembershipIds != null && myMembershipIds.size() > 0) {
-            boolean hasAccess = false;
-            for (String id : membershipIds) {
-                hasAccess = myMembershipIds.contains(id);
-            }
-            if (hasAccess) {
+        if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
+            builder.setIsAccess(true);
+            builder.setMembershipId("");
+            builder.setIsMembership(false);
+        } else {
+            builder.setIsMembership(true);
+            List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(userId, feedInfo.getIslandId());
+            if (userId.equals(feedInfo.getHostId()) || membershipIds.stream().anyMatch(myMembershipIds::contains)) {
                 builder.setIsAccess(true);
-                builder.setMembershipId("");
+                builder.setMembershipId(membershipIds.get(0));
             } else {
                 builder.setIsAccess(false);
                 builder.setMembershipId(membershipIds.get(0));
             }
         }
+
         return builder.build();
     }
 

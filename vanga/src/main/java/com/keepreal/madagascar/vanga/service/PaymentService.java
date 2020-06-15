@@ -74,6 +74,7 @@ public class PaymentService {
         Payment payment = Payment.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .userId(userId)
+                .state(PaymentState.OPEN.getValue())
                 .amountInCents(amountInCents)
                 .type(PaymentType.WITHDRAW.getValue())
                 .build();
