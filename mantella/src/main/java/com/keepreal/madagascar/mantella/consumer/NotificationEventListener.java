@@ -54,6 +54,7 @@ public class NotificationEventListener implements MessageListener {
      */
     @Override
     public Action consume(Message message, ConsumeContext context) {
+        log.info("starting consuming a message.");
         try {
             NotificationEvent event = NotificationEvent.parseFrom(message.getBody());
 
@@ -61,8 +62,11 @@ public class NotificationEventListener implements MessageListener {
                 return Action.CommitMessage;
             }
 
+            log.info(event.toString());
+
             switch (event.getType()) {
                 case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
+                    log.info("dealing new subscription.");
                     if (Objects.isNull(event.getSubscribeEvent())
                         || StringUtils.isEmpty(event.getSubscribeEvent().getSubscriberId())) {
                         break;
@@ -76,13 +80,16 @@ public class NotificationEventListener implements MessageListener {
                                     event.getSubscribeEvent().getSubscriberId(), feed.getCreatedAt(), event.getEventId()))
                             .compose(this.timelineService::insertAll)
                             .blockLast();
+                    break;
                 case NOTIFICATION_EVENT_NEW_UNSUBSCRIBE:
+                    log.info("dealing new unsubscription.");
                     if (Objects.isNull(event.getUnsubscribeEvent())
                             || StringUtils.isEmpty(event.getUnsubscribeEvent().getSubscriberId())) {
                         break;
                     }
                     this.timelineService.deleteByUserIdAndIslandId(event.getUnsubscribeEvent().getSubscriberId(), event.getUnsubscribeEvent().getIslandId())
                             .block();
+                    break;
                 default:
             }
 
