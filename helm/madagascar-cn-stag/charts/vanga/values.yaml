@@ -13,7 +13,7 @@ rocketmq:
     tag: event
 
 wechat_pay:
-  callback_address: http://123.57.72.117/api/v1/orders/wechat/callback
+  callback_address: https://staging.keepreal.cn/api/v1/orders/wechat/callback
   cert_path: /app/apiclient_cert.pem
 
 deploy:
