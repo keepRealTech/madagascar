@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: vanga
   namespace: {{ .Values.global.common_configs.namespace }}
@@ -8,6 +8,7 @@ spec:
   selector:
     matchLabels:
       app: vanga
+  serviceName: vanga
   template:
     metadata:
       annotations:
