@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import swagger.model.NotificationDTO;
 import swagger.model.NotificationType;
 import swagger.model.SystemNoticeDTO;
+import swagger.model.UnreadIslandNoticesCountDTO;
 import swagger.model.UnreadNotificationCountDTO;
 
 import java.util.Objects;
@@ -78,10 +79,15 @@ public class NotificationDTOFactory {
 
         UnreadNotificationCountDTO countDTO = new UnreadNotificationCountDTO();
         countDTO.setUnreadCommentsCount(unreadNotificationsCountMessage.getUnreadCommentsCount());
-        countDTO.setUnreadIslandNoticesCount(unreadNotificationsCountMessage.getUnreadIslandNoticesCount());
         countDTO.setUnreadReactionsCount(unreadNotificationsCountMessage.getUnreadReactionsCount());
+
+        UnreadIslandNoticesCountDTO islandNoticesCountDTO = new UnreadIslandNoticesCountDTO();
+        islandNoticesCountDTO.setUnreadNewMemberNoticeCount(unreadNotificationsCountMessage.getUnreadNewMembersCount());
+        islandNoticesCountDTO.setUnreadNewSubscriberNoticeCount(unreadNotificationsCountMessage.getUnreadNewSubscribersCount());
+
+        countDTO.setUnreadIslandNoticesCountDTO(islandNoticesCountDTO);
         countDTO.setHasUnread(countDTO.getUnreadCommentsCount() > 0
-                || countDTO.getUnreadIslandNoticesCount() > 0
+                || unreadNotificationsCountMessage.getUnreadIslandNoticesCount() > 0
                 || countDTO.getUnreadReactionsCount() > 0);
 
         return countDTO;

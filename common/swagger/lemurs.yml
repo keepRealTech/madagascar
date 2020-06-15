@@ -711,6 +711,7 @@ paths:
     get:
       parameters:
         - $ref: '#/components/parameters/notificationTypeInQuery'
+        - $ref: '#/components/parameters/noticeTypeInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -1181,6 +1182,12 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/NotificationType'
+    noticeTypeInQuery:
+      in: query
+      name: noticeType
+      required: false
+      schema:
+        $ref: '#/components/schemas/NoticeType'
     isRevokeInQuery:
       in: query
       name: isRevoke
@@ -2028,6 +2035,13 @@ components:
         createdAt:
           type: integer
           format: int64
+    UnreadIslandNoticesCountDTO:
+      type: object
+      properties:
+        unreadNewSubscriberNoticeCount:
+          type: integer
+        unreadNewMemberNoticeCount:
+          type: integer
     UnreadNotificationCountDTO:
       type: object
       properties:
@@ -2037,8 +2051,8 @@ components:
           type: integer
         UnreadReactionsCount:
           type: integer
-        UnreadIslandNoticesCount:
-          type: integer
+        UnreadIslandNoticesCountDTO:
+          $ref: '#/components/schemas/UnreadIslandNoticesCountDTO'
     UploadUrlDTO:
       type: object
       properties:
