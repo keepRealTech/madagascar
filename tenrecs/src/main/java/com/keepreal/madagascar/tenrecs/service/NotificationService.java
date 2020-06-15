@@ -75,6 +75,18 @@ public class NotificationService {
     }
 
     /**
+     * Retrieves notifications by user id and notice type.
+     *
+     * @param userId      User id.
+     * @param noticeType  {@link NoticeType}.
+     * @param pageRequest {@link PageRequest}.
+     * @return {@link Notification}.
+     */
+    public Page<Notification> retrieveByUserIdAndNoticeTypeWithPagination(String userId, NoticeType noticeType, PageRequest pageRequest) {
+        return this.notificationRepository.findAllByUserIdAndNotice_TypeAndIsDeletedIsFalse(userId, noticeType, PaginationUtils.valueOf(pageRequest));
+    }
+
+    /**
      * Retrieves notifications by user id.
      *
      * @param userId      User id.
@@ -89,7 +101,7 @@ public class NotificationService {
      * Retrieves the latest notification by user id and feed id.
      *
      * @param authorId User id.
-     * @param feedId Feed id.
+     * @param feedId   Feed id.
      * @return {@link Notification}.
      */
     public Optional<Notification> retrieveLastByReactionAuthorIdAndReactionFeedId(String authorId, String feedId) {
@@ -99,7 +111,7 @@ public class NotificationService {
     /**
      * Retrieves the latest subscribe notification by island id and subscriber id.
      *
-     * @param islandId Island id.
+     * @param islandId     Island id.
      * @param subscriberId Subscriber id.
      * @return {@link Notification}.
      */

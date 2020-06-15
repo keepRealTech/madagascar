@@ -85,7 +85,13 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
         if (!request.getCondition().hasType()) {
             notifications = this.notificationService.retrieveByUserIdWithPagination(userId, pageRequest);
         } else {
-            notifications = this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
+            if (NotificationType.NOTIFICATION_ISLAND_NOTICE.equals(request.getCondition().getType().getValue())
+                    && request.getCondition().hasNoticeType()) {
+                notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId, 
+                        request.getCondition().getNoticeType().getValue(), pageRequest);
+            } else {
+                notifications = this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
+            }
         }
 
         NotificationsResponse response = NotificationsResponse.newBuilder()
@@ -102,6 +108,17 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 break;
             case NOTIFICATION_ISLAND_NOTICE:
                 record.setLastReadIslandNoticeNotificationTimestamp(timestamp);
+                if (request.getCondition().hasNoticeType()) {
+                    switch (request.getCondition().getNoticeType().getValue()) {
+                        case NOTICE_TYPE_ISLAND_NEW_MEMBER:
+                            record.setLastReadIslandNoticeNewMemberNotificationTimestamp(timestamp);
+                            break;
+                        case NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER:
+                            record.setLastReadIslandNoticeNewSubscriberNotificationTimestamp(timestamp);
+                            break;
+                        default:
+                    }
+                }
                 break;
             case NOTIFICATION_COMMENTS:
                 record.setLastReadCommentNotificationTimestamp(timestamp);
@@ -110,6 +127,8 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 record.setLastReadReactionNotificationTimestamp(timestamp);
                 record.setLastReadIslandNoticeNotificationTimestamp(timestamp);
                 record.setLastReadCommentNotificationTimestamp(timestamp);
+                record.setLastReadIslandNoticeNewSubscriberNotificationTimestamp(timestamp);
+                record.setLastReadIslandNoticeNewMemberNotificationTimestamp(timestamp);
         }
 
         this.userNotificationRecordService.update(record);
