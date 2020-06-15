@@ -52,4 +52,6 @@ global:
 deploy:
   enable_http: true
   ssl:
-    cert_id: 1398284016177859_1720332b91b_1749325862_1022387165
+    cert_id: 1398284016177859_172b68dcaf5_-912083987_509863008
+  slb:
+    id: lb-2zefgb9ngv8jjig5oscyj
