@@ -7,14 +7,6 @@ common_configs:
   memory: 2.5Gi
   cpu: 500m
 
-rocketmq:
-  topic: notification-event
-  tag: event
-
-deploy:
-  opentracing:
-    enable_jaeger: false
-
 fossa:
   host: fossa
   port: 6565
@@ -22,3 +14,11 @@ fossa:
 vanga:
   host: vanga
   port: 6565
+
+rocketmq:
+  topic: notification-event
+  tag: event
+
+deploy:
+  opentracing:
+    enable_jaeger: false

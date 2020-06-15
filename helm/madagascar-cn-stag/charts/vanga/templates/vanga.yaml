@@ -59,15 +59,15 @@ spec:
                   name: aliyun-rmq
                   key: name-server
             - name: WECHATPAY_APPID
-                valueFrom:
-                  secretKeyRef:
-                    name: wechat-pay
-                    key: app-id
+              valueFrom:
+                secretKeyRef:
+                  name: wechat-pay
+                  key: app-id
             - name: WECHATPAY_MERCHANTID
-                valueFrom:
-                  secretKeyRef:
-                    name: wechat-pay
-                    key: mch-id
+              valueFrom:
+                secretKeyRef:
+                  name: wechat-pay
+                  key: mch-id
             - name: WECHATPAY_MERCHANTKEY
               valueFrom:
                 secretKeyRef:
@@ -90,8 +90,8 @@ spec:
               cpu: {{ .Values.common_configs.cpu }}
               memory: {{ .Values.common_configs.memory }}
           ports:
-            - containerPort: 12005
-              name: mantella-grpc
+            - containerPort: 12006
+              name: vanga-grpc
         {{ if .Values.deploy.opentracing.enable_jaeger }}
         - name: jaeger-agent
           image: jaegertracing/jaeger-agent:1.17.1
@@ -120,11 +120,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: mantella
+  name: vanga
 spec:
   type: ClusterIP
   ports:
     - port: 6565
-      targetPort: mantella-grpc
+      targetPort: vanga-grpc
   selector:
-    app: mantella
+    app: vanga

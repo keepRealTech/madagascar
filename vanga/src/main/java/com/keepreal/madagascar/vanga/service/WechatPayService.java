@@ -44,7 +44,7 @@ public class WechatPayService {
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryPlaceOrder(String userId, String feeInCents, String description) {
-        String tradeNum = UUID.randomUUID().toString().replace("-", "");
+        String tradeNum = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
         log.info(tradeNum);
 
         WechatOrder wechatOrder = WechatOrder.builder()
