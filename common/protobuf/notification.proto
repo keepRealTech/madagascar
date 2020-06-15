@@ -54,12 +54,15 @@ message UnreadNotificationsCountMessage {
     int32 unreadCommentsCount = 1;
     int32 unreadReactionsCount = 2;
     int32 unreadIslandNoticesCount = 3;
+    int32 unreadNewSubscribersCount = 4;
+    int32 unreadNewMembersCount = 5;
 }
 
 message QueryNotificationCondition {
     google.protobuf.StringValue id = 1;
     google.protobuf.StringValue userId = 2;
     NotificationTypeValue type = 3;
+    NoticeTypeValue noticeType = 4;
 }
 
 message CountUnreadNotificationsRequest {

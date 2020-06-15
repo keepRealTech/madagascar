@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.tenrecs.grpcController;
 
+import com.keepreal.madagascar.common.NoticeType;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -22,6 +23,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -83,7 +85,13 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
         if (!request.getCondition().hasType()) {
             notifications = this.notificationService.retrieveByUserIdWithPagination(userId, pageRequest);
         } else {
-            notifications = this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
+            if (NotificationType.NOTIFICATION_ISLAND_NOTICE.equals(request.getCondition().getType().getValue())
+                    && request.getCondition().hasNoticeType()) {
+                notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId, 
+                        request.getCondition().getNoticeType().getValue(), pageRequest);
+            } else {
+                notifications = this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
+            }
         }
 
         NotificationsResponse response = NotificationsResponse.newBuilder()
@@ -100,6 +108,20 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 break;
             case NOTIFICATION_ISLAND_NOTICE:
                 record.setLastReadIslandNoticeNotificationTimestamp(timestamp);
+                if (request.getCondition().hasNoticeType()) {
+                    switch (request.getCondition().getNoticeType().getValue()) {
+                        case NOTICE_TYPE_ISLAND_NEW_MEMBER:
+                            record.setLastReadIslandNoticeNewMemberNotificationTimestamp(timestamp);
+                            break;
+                        case NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER:
+                            record.setLastReadIslandNoticeNewSubscriberNotificationTimestamp(timestamp);
+                            break;
+                        default:
+                    }
+                } else {
+                    record.setLastReadIslandNoticeNewMemberNotificationTimestamp(timestamp);
+                    record.setLastReadIslandNoticeNewSubscriberNotificationTimestamp(timestamp);
+                }
                 break;
             case NOTIFICATION_COMMENTS:
                 record.setLastReadCommentNotificationTimestamp(timestamp);
@@ -108,6 +130,8 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 record.setLastReadReactionNotificationTimestamp(timestamp);
                 record.setLastReadIslandNoticeNotificationTimestamp(timestamp);
                 record.setLastReadCommentNotificationTimestamp(timestamp);
+                record.setLastReadIslandNoticeNewSubscriberNotificationTimestamp(timestamp);
+                record.setLastReadIslandNoticeNewMemberNotificationTimestamp(timestamp);
         }
 
         this.userNotificationRecordService.update(record);
@@ -128,6 +152,18 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
         String userId = request.getUserId();
         UserNotificationRecord record = this.userNotificationRecordService.retrieveByUserId(userId);
 
+        int newSubscriberCount = this.notificationService.countByUserIdAndNoticeTypeAndCreatedAtAfter(
+                userId,
+                NoticeType.NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER,
+                Objects.isNull(record.getLastReadIslandNoticeNewSubscriberNotificationTimestamp())
+                        ? 0 : record.getLastReadIslandNoticeNewSubscriberNotificationTimestamp());
+
+        int newMemberCount = this.notificationService.countByUserIdAndNoticeTypeAndCreatedAtAfter(
+                userId,
+                NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER,
+                Objects.isNull(record.getLastReadIslandNoticeNewMemberNotificationTimestamp())
+                        ? 0 : record.getLastReadIslandNoticeNewMemberNotificationTimestamp());
+
         UnreadNotificationsCountMessage unreadNotificationsCountMessage =
                 UnreadNotificationsCountMessage.newBuilder()
                         .setUnreadCommentsCount(
@@ -139,10 +175,9 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                                 userId,
                                 NotificationType.NOTIFICATION_REACTIONS,
                                 record.getLastReadReactionNotificationTimestamp()))
-                        .setUnreadIslandNoticesCount(this.notificationService.countByUserIdAndTypeAndCreatedAtAfter(
-                                userId,
-                                NotificationType.NOTIFICATION_ISLAND_NOTICE,
-                                record.getLastReadIslandNoticeNotificationTimestamp()))
+                        .setUnreadIslandNoticesCount(newMemberCount + newSubscriberCount)
+                        .setUnreadNewSubscribersCount(newSubscriberCount)
+                        .setUnreadNewMembersCount(newMemberCount)
                         .build();
 
         CountUnreadNotificationsResponse response = CountUnreadNotificationsResponse.newBuilder()

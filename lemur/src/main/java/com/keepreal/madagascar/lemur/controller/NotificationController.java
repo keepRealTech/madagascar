@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.NoticeType;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.dtoFactory.NotificationDTOFactory;
@@ -69,6 +70,7 @@ public class NotificationController implements NotificationApi {
     @Cacheable(value = "default-system-notice-response", condition = "T(swagger.model.NotificationType).SYSTEM_NOTICE.equals(#type)")
     @Override
     public ResponseEntity<NotificationsResponse> apiV1NotificationsGet(swagger.model.NotificationType type,
+                                                                       swagger.model.NoticeType noticeType,
                                                                        Integer page,
                                                                        Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -80,7 +82,8 @@ public class NotificationController implements NotificationApi {
                     .build();
         } else {
             notificationsResponse =
-                    this.notificationService.retrieveNotifications(userId, this.convertType(type), page, pageSize);
+                    this.notificationService.retrieveNotifications(userId, this.convertType(type),
+                            this.convertNoticeType(noticeType), page, pageSize);
         }
 
         NotificationsResponse response = new NotificationsResponse();
@@ -117,6 +120,27 @@ public class NotificationController implements NotificationApi {
                 return NotificationType.NOTIFICATION_ISLAND_NOTICE;
             default:
                 return NotificationType.UNRECOGNIZED;
+        }
+    }
+
+    /**
+     * Converts {@link swagger.model.NoticeType} to {@link NoticeType}.
+     *
+     * @param noticeType {@link swagger.model.NoticeType}.
+     * @return {@link NoticeType}.
+     */
+    private NoticeType convertNoticeType(swagger.model.NoticeType noticeType) {
+        if (Objects.isNull(noticeType)) {
+            return null;
+        }
+
+        switch (noticeType) {
+            case SUBSCRIBER:
+                return NoticeType.NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER;
+            case MEMBER:
+                return NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER;
+            default:
+                return NoticeType.UNRECOGNIZED;
         }
     }
 
