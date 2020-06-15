@@ -25,6 +25,10 @@ public class UserNotificationRecord {
     @Builder.Default
     private Long lastReadIslandNoticeNotificationTimestamp = 0L;
     @Builder.Default
+    private Long lastReadIslandNoticeNewSubscriberNotificationTimestamp = 0L;
+    @Builder.Default
+    private Long lastReadIslandNoticeNewMemberNotificationTimestamp = 0L;
+    @Builder.Default
     private Boolean isDeleted = false;
     @CreatedDate
     private Long createdAt;

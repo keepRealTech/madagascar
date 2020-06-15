@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.tenrecs.grpcController;
 
+import com.keepreal.madagascar.common.NoticeType;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -22,6 +23,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -128,6 +130,18 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
         String userId = request.getUserId();
         UserNotificationRecord record = this.userNotificationRecordService.retrieveByUserId(userId);
 
+        int newSubscriberCount = this.notificationService.countByUserIdAndNoticeTypeAndCreatedAtAfter(
+                userId,
+                NoticeType.NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER,
+                Objects.isNull(record.getLastReadIslandNoticeNewSubscriberNotificationTimestamp())
+                        ? 0 : record.getLastReadIslandNoticeNewSubscriberNotificationTimestamp());
+
+        int newMemberCount = this.notificationService.countByUserIdAndNoticeTypeAndCreatedAtAfter(
+                userId,
+                NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER,
+                Objects.isNull(record.getLastReadIslandNoticeNewMemberNotificationTimestamp())
+                        ? 0 : record.getLastReadIslandNoticeNewMemberNotificationTimestamp());
+
         UnreadNotificationsCountMessage unreadNotificationsCountMessage =
                 UnreadNotificationsCountMessage.newBuilder()
                         .setUnreadCommentsCount(
@@ -139,10 +153,9 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                                 userId,
                                 NotificationType.NOTIFICATION_REACTIONS,
                                 record.getLastReadReactionNotificationTimestamp()))
-                        .setUnreadIslandNoticesCount(this.notificationService.countByUserIdAndTypeAndCreatedAtAfter(
-                                userId,
-                                NotificationType.NOTIFICATION_ISLAND_NOTICE,
-                                record.getLastReadIslandNoticeNotificationTimestamp()))
+                        .setUnreadIslandNoticesCount(newMemberCount + newSubscriberCount)
+                        .setUnreadNewSubscribersCount(newSubscriberCount)
+                        .setUnreadNewMembersCount(newMemberCount)
                         .build();
 
         CountUnreadNotificationsResponse response = CountUnreadNotificationsResponse.newBuilder()

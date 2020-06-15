@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.tenrecs.service;
 
+import com.keepreal.madagascar.common.NoticeType;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.snowflake.generator.DefaultSnowflakeIdGenerator;
@@ -46,6 +47,19 @@ public class NotificationService {
     public int countByUserIdAndTypeAndCreatedAtAfter(String userId, NotificationType type, long timestamp) {
         return Math.toIntExact(
                 this.notificationRepository.countByUserIdAndTypeIsAndTimestampAfterAndIsDeletedIsFalse(userId, type, timestamp));
+    }
+
+    /**
+     * Counts the notifications.
+     *
+     * @param userId    User id.
+     * @param type      {@link NoticeType}.
+     * @param timestamp Created timestamp after.
+     * @return Count.
+     */
+    public int countByUserIdAndNoticeTypeAndCreatedAtAfter(String userId, NoticeType type, long timestamp) {
+        return Math.toIntExact(
+                this.notificationRepository.countByUserIdAndNotice_TypeIsAndTimestampAfterAndIsDeletedIsFalse(userId, type, timestamp));
     }
 
     /**
