@@ -61,7 +61,6 @@ public class NotificationEventListener implements MessageListener {
                 return Action.CommitMessage;
             }
 
-
             switch (event.getType()) {
                 case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
                     if (Objects.isNull(event.getSubscribeEvent())
