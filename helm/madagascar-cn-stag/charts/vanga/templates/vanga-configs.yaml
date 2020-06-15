@@ -9,6 +9,6 @@ data:
   ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
   WECHATPAY_CALLBACKADDRESS: {{ .Values.wechat_pay.callback_address }}
   WECHATPAY_CERTPATH: {{ .Values.wechat_pay.cert_path }}
-  SPRING_REDIS_SSL: 'false'
+  SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'

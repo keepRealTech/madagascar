@@ -79,11 +79,16 @@ spec:
                 secretKeyRef:
                   name: aliyun-rdb
                   key: vanga-connection-string
-            - name: SPRING_REDIS_URL
+            - name: SPRING_REDIS_HOST
               valueFrom:
                 secretKeyRef:
                   name: aliyun-redis
-                  key: connection-string
+                  key: host
+            - name: SPRING_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-redis
+                  key: password
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}

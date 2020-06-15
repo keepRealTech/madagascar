@@ -7,7 +7,9 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
   redis:
-    url: redis://user:pass@127.0.0.1:6379
+    host: r-2ze4jhfytptucbsu8d.redis.rds.aliyuncs.com
+    port: 6379
+    password: GcrkNYTcST4PzlV@
     ssl: false
 
 grpc:
