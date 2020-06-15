@@ -46,7 +46,7 @@ public class NotificationService {
      */
     public int countByUserIdAndTypeAndCreatedAtAfter(String userId, NotificationType type, long timestamp) {
         return Math.toIntExact(
-                this.notificationRepository.countByUserIdAndTypeIsAndTimestampAfterAndIsDeletedIsFalse(userId, type, timestamp));
+                this.notificationRepository.countByUserIdAndTypeAndTimestampAfterAndIsDeletedIsFalse(userId, type, timestamp));
     }
 
     /**
@@ -59,7 +59,7 @@ public class NotificationService {
      */
     public int countByUserIdAndNoticeTypeAndCreatedAtAfter(String userId, NoticeType type, long timestamp) {
         return Math.toIntExact(
-                this.notificationRepository.countByUserIdAndNotice_TypeIsAndTimestampAfterAndIsDeletedIsFalse(userId, type, timestamp));
+                this.notificationRepository.countByUserIdAndNotice_TypeAndTimestampAfterAndIsDeletedIsFalse(userId, type, timestamp));
     }
 
     /**
