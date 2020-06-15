@@ -118,6 +118,9 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                             break;
                         default:
                     }
+                } else {
+                    record.setLastReadIslandNoticeNewMemberNotificationTimestamp(timestamp);
+                    record.setLastReadIslandNoticeNewSubscriberNotificationTimestamp(timestamp);
                 }
                 break;
             case NOTIFICATION_COMMENTS:
