@@ -13,8 +13,6 @@ rocketmq:
     tag: event
 
 wechat_pay:
-  app_id: wx301608aae2f8f0ea
-  merchant_id: 1594907001
   callback_address: http://123.57.72.117/api/v1/orders/wechat/callback
   cert_path: /app/apiclient_cert.pem
 

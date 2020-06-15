@@ -58,6 +58,16 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: name-server
+            - name: WECHATPAY_APPID
+                valueFrom:
+                  secretKeyRef:
+                    name: wechat-pay
+                    key: app-id
+            - name: WECHATPAY_MERCHANTID
+                valueFrom:
+                  secretKeyRef:
+                    name: wechat-pay
+                    key: mch-id
             - name: WECHATPAY_MERCHANTKEY
               valueFrom:
                 secretKeyRef:

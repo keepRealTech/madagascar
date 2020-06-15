@@ -7,8 +7,6 @@ data:
   aliyun_logs_madagascar-prod: stdout
   ROCKETMQ_NOTIFICATION_TOPIC: {{ .Values.rocketmq.notification.topic }}
   ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
-  WECHATPAY_APPID: {{ .Values.wechat_pay.app_id }}
-  WECHATPAY_MERCHANTID: {{ .Values.wechat_pay.merchant_id }}
   WECHATPAY_CALLBACKADDRESS: {{ .Values.wechat_pay.callback_address }}
   WECHATPAY_CERTPATH: {{ .Values.wechat_pay.cert_path }}
   SPRING_REDIS_SSL: 'false'
