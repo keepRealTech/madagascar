@@ -5,10 +5,11 @@ import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.repository.MembershipSkuRepository;
 import com.keepreal.madagascar.vanga.repository.ShellSkuRepository;
+import com.keepreal.madagascar.vanga.util.AutoRedisLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.lang.reflect.Member;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -24,6 +25,7 @@ public class SkuService {
     private final MembershipSkuRepository membershipSkuRepository;
     private final LongIdGenerator idGenerator;
     private final List<Integer> membershipPeriods = Stream.of(1, 3, 6, 12).collect(Collectors.toList());
+    private final RedissonClient redissonClient;
 
     /**
      * Constructs the sku service.
@@ -31,13 +33,16 @@ public class SkuService {
      * @param shellSkuRepository      {@link ShellSkuRepository}.
      * @param membershipSkuRepository {@link MembershipSkuRepository}.
      * @param idGenerator             {@link LongIdGenerator}.
+     * @param redissonClient          {@link RedissonClient}.
      */
     public SkuService(ShellSkuRepository shellSkuRepository,
                       MembershipSkuRepository membershipSkuRepository,
-                      LongIdGenerator idGenerator) {
+                      LongIdGenerator idGenerator,
+                      RedissonClient redissonClient) {
         this.shellSkuRepository = shellSkuRepository;
         this.membershipSkuRepository = membershipSkuRepository;
         this.idGenerator = idGenerator;
+        this.redissonClient = redissonClient;
     }
 
     /**
@@ -62,23 +67,26 @@ public class SkuService {
     /**
      * Obsoletes the membership skus.
      *
+     * @param membershipId   Membership id.
      * @param membershipSkus {@link MembershipSku}.
      * @param pricePerMonth  New price per month.
      * @return {@link MembershipSku}.
      */
     @Transactional
-    public List<MembershipSku> obsoleteMembershipSkusWithNewPrice(List<MembershipSku> membershipSkus, Long pricePerMonth) {
-        List<MembershipSku> newMembershipSkus = membershipSkus.stream()
-                .map(membershipSku -> this.generateMembershipSku(membershipSku.getMembershipId(),
-                        membershipSku.getMembershipName(),
-                        pricePerMonth,
-                        membershipSku.getHostId(),
-                        membershipSku.getIslandId(),
-                        membershipSku.getTimeInMonths()))
-                .collect(Collectors.toList());
-        membershipSkus = membershipSkus.stream().peek(membershipSku -> membershipSku.setDeleted(true)).collect(Collectors.toList());
-        this.membershipSkuRepository.saveAll(membershipSkus);
-        return this.membershipSkuRepository.saveAll(newMembershipSkus);
+    public List<MembershipSku> obsoleteMembershipSkusWithNewPrice(String membershipId, List<MembershipSku> membershipSkus, Long pricePerMonth) {
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("obsolete-membershipsku-%s", membershipId))) {
+            List<MembershipSku> newMembershipSkus = membershipSkus.stream()
+                    .map(membershipSku -> this.generateMembershipSku(membershipSku.getMembershipId(),
+                            membershipSku.getMembershipName(),
+                            pricePerMonth,
+                            membershipSku.getHostId(),
+                            membershipSku.getIslandId(),
+                            membershipSku.getTimeInMonths()))
+                    .collect(Collectors.toList());
+            membershipSkus = membershipSkus.stream().peek(membershipSku -> membershipSku.setDeleted(true)).collect(Collectors.toList());
+            this.membershipSkuRepository.saveAll(membershipSkus);
+            return this.membershipSkuRepository.saveAll(newMembershipSkus);
+        }
     }
 
     /**
