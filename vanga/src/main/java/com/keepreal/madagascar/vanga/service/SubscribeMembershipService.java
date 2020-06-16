@@ -104,11 +104,13 @@ public class SubscribeMembershipService {
                 return;
             }
 
-            SubscribeMembership subscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
-                    wechatOrder.getUserId(), wechatOrder.getMemberShipSkuId());
+            MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getMemberShipSkuId());
 
-            Instant instant = Objects.isNull(subscribeMembership) ?
-                    Instant.now() : Instant.ofEpochSecond(subscribeMembership.getExpireTime());
+            SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
+                    wechatOrder.getUserId(), sku.getMembershipId());
+
+            Instant instant = Objects.isNull(currentSubscribeMembership) ?
+                    Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
             ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
 
             IntStream.range(0, innerPaymentList.size())
@@ -119,22 +121,23 @@ public class SubscribeMembershipService {
                                 .toInstant().toEpochMilli());
                     });
             this.paymentService.updateAll(innerPaymentList);
-            this.createOrRenewSubscriptionMember(wechatOrder, subscribeMembership, currentExpireTime);
+            this.createOrRenewSubscriptionMember(wechatOrder.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
         }
     }
 
     /**
      * Creates or renews the membership subscription.
      *
-     * @param wechatOrder         {@link WechatOrder}.
+     * @param userId              User id.
+     * @param sku                 {@link MembershipSku}.
      * @param subscribeMembership {@link SubscribeMembership}.
      * @param currentExpireTime   {@link ZonedDateTime}.
      */
     @Transactional
-    public void createOrRenewSubscriptionMember(WechatOrder wechatOrder,
+    public void createOrRenewSubscriptionMember(String userId,
+                                                MembershipSku sku,
                                                 SubscribeMembership subscribeMembership,
                                                 ZonedDateTime currentExpireTime) {
-        MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getMemberShipSkuId());
 
         long expireTime = currentExpireTime.plusMonths(sku.getTimeInMonths()).toInstant().toEpochMilli();
 
@@ -143,7 +146,7 @@ public class SubscribeMembershipService {
         } else {
             subscribeMembership = SubscribeMembership.builder()
                     .id(String.valueOf(this.idGenerator.nextId()))
-                    .userId(wechatOrder.getUserId())
+                    .userId(userId)
                     .islandId(sku.getIslandId())
                     .membershipId(sku.getMembershipId())
                     .expireTime(expireTime)
