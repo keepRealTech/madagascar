@@ -78,7 +78,6 @@ public class WechatPayService {
                 return null;
             }
 
-            wechatOrder.setPrepayId(response.get("prepay_id"));
 
             Map<String, String> request = new HashMap<>();
             request.put("noncestr", response.get("nonce_str"));
@@ -87,11 +86,14 @@ public class WechatPayService {
             request.put("timestamp", String.valueOf(WXPayUtil.getCurrentTimestamp()));
             request = this.client.fillPayRequestData(request);
 
+            wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
+            wechatOrder = this.wechatOrderService.insert(wechatOrder);
+
+            wechatOrder.setPrepayId(response.get("prepay_id"));
             wechatOrder.setSignature(request.get("sign"));
             wechatOrder.setNonceStr(request.get("noncestr"));
-            wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
 
-            return this.wechatOrderService.insert(wechatOrder);
+            return wechatOrder;
         } catch (Exception e) {
             wechatOrder.setErrorMessage(e.getMessage());
             wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());

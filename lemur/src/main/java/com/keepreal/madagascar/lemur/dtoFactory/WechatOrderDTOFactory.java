@@ -27,7 +27,7 @@ public class WechatOrderDTOFactory {
 
         WechatOrderDTO wechatOrderDTO = new WechatOrderDTO();
         wechatOrderDTO.setId(wechatOrder.getId());
-        wechatOrderDTO.setAppId(wechatOrderDTO.getAppId());
+        wechatOrderDTO.setAppId(wechatOrder.getAppId());
         wechatOrderDTO.setPartnerId(wechatOrder.getPartnerId());
         wechatOrderDTO.setNonceStr(wechatOrder.getNonceStr());
         wechatOrderDTO.setTimestamp(wechatOrder.getTimestamp());
