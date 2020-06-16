@@ -51,7 +51,7 @@ public class MembershipService {
     public MembershipInfo createMembership(MembershipInfo membershipInfo) {
         membershipInfo.setId(String.valueOf(idGenerator.nextId()));
         List<Integer> colorTypeList = repository.getColorTypeListByIslandId(membershipInfo.getIslandId());
-        colorTypeList.forEach(defaultColorTypeList::remove);
+        colorTypeList.forEach(new ArrayList<>(defaultColorTypeList)::remove);
         membershipInfo.setColorType(defaultColorTypeList.get(0));
 
         this.skuService.createMembershipSkusByMembershipId(membershipInfo.getId(), membershipInfo.getName(),

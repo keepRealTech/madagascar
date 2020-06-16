@@ -30,30 +30,30 @@ public class UmengPushService {
         this.userService = userService;
     }
 
-    public void pushFeed(String userId) {
+    public void pushFeed(String islandId) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", "feed");
-        jsonObject.put("islandId", "");
-        pushIslanders(userId, jsonObject);
+        jsonObject.put("type", 1001L);
+        jsonObject.put("islandId", islandId);
+        pushIslanders(islandId, jsonObject);
     }
 
     public void pushComment(String userId) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", "comment");
+        jsonObject.put("type", 1002L);
         jsonObject.put("islandId", "");
         pushUser(userId, jsonObject);
     }
 
     public void pushReaction(String userId) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", "reaction");
+        jsonObject.put("type", 1003L);
         jsonObject.put("islandId", "");
         pushUser(userId, jsonObject);
     }
 
     public void pushSubscribe(String userId) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("type", "subscribe");
+        jsonObject.put("type", 1004L);
         jsonObject.put("islandId", "");
         pushUser(userId, jsonObject);
     }
