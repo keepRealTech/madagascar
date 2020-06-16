@@ -1195,6 +1195,7 @@ components:
       required: false
       schema:
         type: boolean
+        default: false
     configTypeInQuery:
       in: query
       name: configType
