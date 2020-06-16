@@ -23,14 +23,17 @@ import com.keepreal.madagascar.vanga.service.WechatOrderService;
 import com.keepreal.madagascar.vanga.service.WechatPayService;
 import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 
+import javax.transaction.Transactional;
 import java.util.Objects;
 
 /**
  * Represents the payment grpc controller.
  */
 @GRpcService
+@Slf4j
 public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImplBase {
 
     private final PaymentService paymentService;
@@ -105,11 +108,19 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId());
-        WechatOrderResponse response = WechatOrderResponse.newBuilder()
-                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
-                .build();
-        this.paymentService.createNewWechatPayments(wechatOrder, sku);
+
+        WechatOrderResponse response;
+        if (Objects.nonNull(wechatOrder)) {
+             response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .build();
+            this.paymentService.createNewWechatPayments(wechatOrder, sku);
+        } else {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -138,6 +149,12 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
     }
 
+    /**
+     * Implements the wechat order pay callback api.
+     *
+     * @param request          {@link WechatOrderCallbackRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
     @Override
     public void wechatPayCallback(WechatOrderCallbackRequest request,
                                   StreamObserver<CommonStatus> responseObserver) {

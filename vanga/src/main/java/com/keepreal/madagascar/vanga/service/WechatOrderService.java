@@ -21,10 +21,11 @@ public class WechatOrderService {
      * Inserts the wechat order.
      *
      * @param order {@link WechatOrder}.
+     * @return {@link WechatOrder}.
      */
-    public void insert(WechatOrder order) {
+    public WechatOrder insert(WechatOrder order) {
         order.setId(String.valueOf(this.idGenerator.nextId()));
-        this.wechatOrderRepository.save(order);
+        return this.wechatOrderRepository.save(order);
     }
 
     /**
@@ -55,7 +56,5 @@ public class WechatOrderService {
     public WechatOrder update(WechatOrder order) {
         return this.wechatOrderRepository.save(order);
     }
-
-
 
 }
