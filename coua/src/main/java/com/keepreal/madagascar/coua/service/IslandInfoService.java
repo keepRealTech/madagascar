@@ -10,6 +10,8 @@ import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
 import com.keepreal.madagascar.coua.model.IslandInfo;
 import com.keepreal.madagascar.coua.util.PageResponseUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -128,11 +130,16 @@ public class IslandInfoService {
      * @return {@link IslandInfo}.
      */
     public List<IslandInfo> getIslandByName(String islandName) {
-        IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(islandName);
-        if (islandInfo == null) {
-            return Collections.emptyList();
-        }
-        return Collections.singletonList(islandInfo);
+        IslandInfo islandInfo = IslandInfo.builder().islandName(islandName).deleted(false).build();
+
+        ExampleMatcher matcher = ExampleMatcher.matchingAll()
+                .withMatcher("island_name", ExampleMatcher.GenericPropertyMatchers.contains())
+                .withMatcher("is_deleted", ExampleMatcher.GenericPropertyMatchers.exact())
+                .withIgnoreCase("island_name");
+
+        Example<IslandInfo> example = Example.of(islandInfo, matcher);
+
+        return islandInfoRepository.findAll(example);
     }
 
     /**
