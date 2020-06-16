@@ -3,26 +3,22 @@
 # Declare variables to be passed into your templates.
 
 common_configs:
-  namespace: keepreal-prod
-  replicas: 2
+  replicas: 1
   memory: 2.5Gi
   cpu: 500m
 
-images:
-  coua:
-    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-    tag: 1.0.0
-    imagePullPolicy: Always
+fossa:
+  host: fossa
+  port: 6565
+
+vanga:
+  host: vanga
+  port: 6565
 
 rocketmq:
-  name_server_address: http://MQ_INST_1398284016177859_BcaZSx5M.cn-beijing.mq-internal.aliyuncs.com:8080
   topic: notification-event
   tag: event
 
 deploy:
   opentracing:
-    enable_jaeger: true
-
-fossa:
-  host: fossa
-  port: 6565
+    enable_jaeger: false

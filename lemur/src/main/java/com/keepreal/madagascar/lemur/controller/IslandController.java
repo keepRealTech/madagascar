@@ -162,6 +162,10 @@ public class IslandController implements IslandApi {
                                                                          Integer page,
                                                                          Integer pageSize) {
         String subscriberId = (Objects.nonNull(subscribed) && subscribed) ? HttpContextUtils.getUserIdFromContext() : null;
+        if (Objects.nonNull(subscriberId) && subscriberId.equals("99999999")) {
+            pageSize = 1000;
+        }
+
         IslandsResponse islandsResponse = this.islandService.retrieveIslands(
                 name, null, subscriberId, page, pageSize);
 
