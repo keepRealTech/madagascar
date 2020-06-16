@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.fossa.model;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -17,6 +18,7 @@ import java.util.Set;
  * @create: 2020-04-27
  **/
 
+@Builder
 @Data
 @Document(value = "reactionInfo")
 @EntityListeners(AuditingEntityListener.class)
@@ -27,10 +29,12 @@ public class ReactionInfo {
     private String feedId;
     private String userId;
     private Set<Integer> reactionTypeList;
+    @Builder.Default
     @Column(name = "is_deleted")
-    private Boolean deleted;
+    private Boolean deleted = false;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }

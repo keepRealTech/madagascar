@@ -43,4 +43,5 @@ public class CommentInfo {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }
