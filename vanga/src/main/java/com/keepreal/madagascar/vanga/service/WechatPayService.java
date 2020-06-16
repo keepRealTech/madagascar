@@ -44,13 +44,14 @@ public class WechatPayService {
      */
     public WechatOrder tryPlaceOrder(String userId, String feeInCents, String membershipSkuId) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        String description = String.format("购买会员%s", membershipSkuId);
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
                 .userId(userId)
                 .tradeNumber(tradeNum)
                 .memberShipSkuId(membershipSkuId)
-                .description(String.format("购买会员%s", membershipSkuId))
+                .description(description)
                 .feeInCents(feeInCents)
                 .build();
 
@@ -67,22 +68,29 @@ public class WechatPayService {
 
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
+                wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());
+                this.wechatOrderService.insert(wechatOrder);
+                return null;
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
-            } else {
-                wechatOrder.setPrepayId(response.get("prepay_id"));
-
-                Map<String, String> request = new HashMap<>();
-                request.put("noncestr", response.get("nonce_str"));
-                request.put("prepayid", response.get("prepay_id"));
-                request.put("package", "Sign=WXPay");
-                request.put("timestamp", String.valueOf(WXPayUtil.getCurrentTimestamp()));
-                request = this.client.fillPayRequestData(request);
-
-                wechatOrder.setSignature(request.get("sign"));
-                wechatOrder.setNonceStr(request.get("noncestr"));
-                wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
+                wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());
+                this.wechatOrderService.insert(wechatOrder);
+                return null;
             }
+
+            wechatOrder.setPrepayId(response.get("prepay_id"));
+
+            Map<String, String> request = new HashMap<>();
+            request.put("noncestr", response.get("nonce_str"));
+            request.put("prepayid", response.get("prepay_id"));
+            request.put("package", "Sign=WXPay");
+            request.put("timestamp", String.valueOf(WXPayUtil.getCurrentTimestamp()));
+            request = this.client.fillPayRequestData(request);
+
+            wechatOrder.setSignature(request.get("sign"));
+            wechatOrder.setNonceStr(request.get("noncestr"));
+            wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
+
             return this.wechatOrderService.insert(wechatOrder);
         } catch (Exception e) {
             wechatOrder.setErrorMessage(e.getMessage());

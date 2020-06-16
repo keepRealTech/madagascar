@@ -105,11 +105,19 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId());
-        WechatOrderResponse response = WechatOrderResponse.newBuilder()
-                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
-                .build();
-        this.paymentService.createNewWechatPayments(wechatOrder, sku);
+
+        WechatOrderResponse response;
+        if (Objects.nonNull(wechatOrder)) {
+             response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .build();
+            this.paymentService.createNewWechatPayments(wechatOrder, sku);
+        } else {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
