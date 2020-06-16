@@ -30,7 +30,6 @@ public class ReactionInfo {
     private String userId;
     private Set<Integer> reactionTypeList;
     @Builder.Default
-    @Column(name = "is_deleted")
     private Boolean deleted = false;
     @CreatedDate
     private Long createdTime;
