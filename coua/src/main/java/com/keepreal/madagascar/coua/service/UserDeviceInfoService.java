@@ -2,6 +2,7 @@ package com.keepreal.madagascar.coua.service;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.dao.UserDeviceInfoRepository;
+import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
 import com.keepreal.madagascar.coua.model.UserDeviceInfo;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +36,11 @@ public class UserDeviceInfoService {
      * @param deviceToken   device token.
      */
     public void bindDeviceToken(String userId, String deviceToken, Integer deviceType) {
-        UserDeviceInfo userDeviceInfo = new UserDeviceInfo();
+        UserDeviceInfo userDeviceInfo = userDeviceInfoRepository.findByUserIdAndDeviceTokenAndDeviceTypeAndDeletedIsFalse(userId, deviceToken, deviceType);
+        if (userDeviceInfo != null) {
+            return;
+        }
+        userDeviceInfo = new UserDeviceInfo();
         userDeviceInfo.setId(String.valueOf(idGenerator.nextId()));
         userDeviceInfo.setUserId(userId);
         userDeviceInfo.setBinded(true);
@@ -65,7 +70,7 @@ public class UserDeviceInfoService {
      * @param userIdList    user id list.
      * @return  device token list.
      */
-    public List<UserDeviceInfo> getDeviceTokenListByUserIdList(List<String> userIdList) {
+    public List<SimpleDeviceToken> getDeviceTokenListByUserIdList(List<String> userIdList) {
         return userDeviceInfoRepository.findDeviceTokenListByUserIdList(userIdList);
     }
 
@@ -75,7 +80,7 @@ public class UserDeviceInfoService {
      * @param userId    user id.
      * @return  device token list.
      */
-    public List<UserDeviceInfo> getDeviceTokenByUserId(String userId) {
+    public List<SimpleDeviceToken> getDeviceTokenByUserId(String userId) {
         return userDeviceInfoRepository.findDeviceTokensByUserId(userId);
     }
 }

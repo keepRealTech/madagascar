@@ -26,7 +26,7 @@ fossa:
   port: 6565
 
 umeng:
-  url: https://msgapi.umeng.com/api/send?sign=mysign
+  url: https://msgapi.umeng.com/api/send
 
 deploy:
   opentracing:

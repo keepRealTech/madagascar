@@ -83,6 +83,8 @@ spec:
                 secretKeyRef:
                   name: umeng
                   key: app-secret
+            - name: RESTART
+              value: "1"
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}

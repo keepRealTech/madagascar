@@ -3,13 +3,16 @@ package com.keepreal.madagascar.marty.umengPush.android;
 import com.aliyun.openservices.shade.com.alibaba.fastjson.JSONObject;
 import com.keepreal.madagascar.marty.umengPush.UmengBaseMessageBody;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Build android list cast message body
  */
 public class AndroidListCast extends UmengBaseMessageBody {
 
-    private JSONObject payloadJsonObject = new JSONObject();
-    private JSONObject bodyJsonObject = new JSONObject();
+    private Map<String, Object> payloadJsonObject = new HashMap<>();
+    private Map<String, Object> bodyJsonObject = new HashMap<>();
 
     public AndroidListCast(String appkey) {
         super(appkey);
@@ -24,7 +27,7 @@ public class AndroidListCast extends UmengBaseMessageBody {
     }
 
     public void setCustom(JSONObject jsonObject) {
-        this.bodyJsonObject.put("custom", jsonObject.toJSONString());
+        this.bodyJsonObject.put("custom", jsonObject);
     }
 
     public void setTicker(String ticker) {
@@ -46,6 +49,7 @@ public class AndroidListCast extends UmengBaseMessageBody {
     @Override
     public String toString() {
         this.payloadJsonObject.put("body", this.bodyJsonObject);
+        setType("listcast");
         setPayload(this.payloadJsonObject);
         return super.toString();
     }

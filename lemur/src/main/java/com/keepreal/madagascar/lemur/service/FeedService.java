@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -83,7 +84,7 @@ public class FeedService {
                 .setUserId(userId)
                 .setText(StringValue.of(text))
                 .addAllImageUris(imageUris)
-                .addAllMembershipIds(membershipIds)
+                .addAllMembershipIds(membershipIds == null ? Collections.emptyList() : membershipIds)
                 .build();
 
         NewFeedsResponse newFeedsResponse;

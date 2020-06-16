@@ -7,12 +7,14 @@ import com.keepreal.madagascar.coua.RetrieveDeviceTokensResponse;
 import com.keepreal.madagascar.marty.umengPush.UmengPushClient;
 import com.keepreal.madagascar.marty.umengPush.android.AndroidListCast;
 import com.keepreal.madagascar.marty.config.UmengConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
  * Represents the umeng push service.
  */
 @Service
+@Slf4j
 public class UmengPushService {
 
     private final IslandService islandService;
