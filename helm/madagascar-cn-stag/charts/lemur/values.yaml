@@ -3,16 +3,9 @@
 # Declare variables to be passed into your templates.
 
 common_configs:
-  namespace: keepreal-prod
-  replicas: 2
+  replicas: 1
   memory: 2.5Gi
   cpu: 500m
-
-images:
-  lemur:
-    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-    tag: 1.0.0
-    imagePullPolicy: Always
 
 coua:
   host: coua
@@ -34,20 +27,47 @@ tenrecs:
   host: tenrecs
   port: 6565
 
+vanga:
+  host: vanga
+  port: 6565
+
+mantella:
+  host: mantella
+  port: 6565
+
 file:
   max_file_size: 10MB
   max_request_size: 20MB
 
 system_notification:
-  name: default-helper
-  content: hello, handsome.
+  name: 岛蛋
+  content: 你好呀～我是岛蛋！有什么问题都可以来问我喔～(●′ω`●)
   portrait_image_uri: keepreal-helper.jpg
 
 rocketmq:
-  name_server_address: http://MQ_INST_1398284016177859_BcaZSx5M.cn-beijing.mq-internal.aliyuncs.com:8080
   topic: stats-event
   tag: event
 
 deploy:
   opentracing:
-    enable_jaeger: true
+    enable_jaeger: false
+
+release:
+  strategy: Stochastic
+  ratio: 100
+
+client:
+  android:
+    setup_info:
+      version: 1
+      address: https://images.keepreal.cn/tiaodao_v100_kr.apk
+
+security:
+  oauth2:
+    resource:
+      token_info_uri: http://baobob:8080/oauth/check_token
+
+aliyun_oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  bucket_name: kr-thumbnail-staging-cn2-01
+  expire_time_in_seconds: 30

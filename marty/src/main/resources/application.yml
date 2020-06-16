@@ -5,7 +5,6 @@ grpc:
   fossa:
     host: 127.0.0.1
     port: 12003
-  port: 12007
 
 rocketmq:
   notification:
@@ -27,3 +26,9 @@ umeng:
   androidAppKey: xxx
   androidAppMasterSecret: xxx
   url: xxx
+
+spring:
+  application:
+    name: marty
+  main:
+    web-application-type: NONE

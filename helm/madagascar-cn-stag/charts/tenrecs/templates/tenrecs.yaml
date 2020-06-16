@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: tenrecs
-  namespace: {{ .Values.common_configs.namespace }}
+  namespace: {{ .Values.global.common_configs.namespace }}
 spec:
   replicas: {{ .Values.common_configs.replicas }}
   selector:
@@ -38,8 +38,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: tenrecs
-          image: {{ .Values.images.tenrecs.name }}:{{ .Values.images.tenrecs.tag }}
-          imagePullPolicy: {{ .Values.images.tenrecs.imagePullPolicy }}
+          image: {{ .Values.global.images.tenrecs.name }}:{{ .Values.global.images.tenrecs.tag }}
+          imagePullPolicy: {{ .Values.global.images.tenrecs.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: tenrecs
@@ -54,6 +54,11 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
+            - name: ROCKETMQ_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
             - name: SPRING_DATA_MONGODB_URI
               valueFrom:
                 secretKeyRef:

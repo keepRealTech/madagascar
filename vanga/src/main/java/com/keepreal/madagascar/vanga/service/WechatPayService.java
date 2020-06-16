@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -38,19 +37,20 @@ public class WechatPayService {
     /**
      * Places a new wechat payment order with given metadata.
      *
-     * @param userId      User id.
-     * @param feeInCents  Cost in cents.
-     * @param description Description.
+     * @param userId          User id.
+     * @param feeInCents      Cost in cents.
+     * @param membershipSkuId Membership sku id.
      * @return {@link WechatOrder}.
      */
-    public WechatOrder tryPlaceOrder(String userId, String feeInCents, String description) {
-        String tradeNum = UUID.randomUUID().toString().replace("-", "");
-        log.info(tradeNum);
+    public WechatOrder tryPlaceOrder(String userId, String feeInCents, String membershipSkuId) {
+        String tradeNum = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
                 .userId(userId)
-                .description(description)
+                .tradeNumber(tradeNum)
+                .memberShipSkuId(membershipSkuId)
+                .description(String.format("购买会员%s", membershipSkuId))
                 .feeInCents(feeInCents)
                 .build();
 
@@ -83,13 +83,14 @@ public class WechatPayService {
                 wechatOrder.setNonceStr(request.get("noncestr"));
                 wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
             }
-            return wechatOrder;
+            return this.wechatOrderService.insert(wechatOrder);
         } catch (Exception e) {
             wechatOrder.setErrorMessage(e.getMessage());
-            return null;
-        } finally {
+            wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());
             this.wechatOrderService.insert(wechatOrder);
+            return null;
         }
+
     }
 
     /**
@@ -169,7 +170,7 @@ public class WechatPayService {
         try {
             Map<String, String> response = this.client.processResponseXml(callbackPayload);
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
-               return null;
+                return null;
             }
 
             WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));

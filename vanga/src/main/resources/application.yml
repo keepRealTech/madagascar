@@ -7,17 +7,20 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
   redis:
-    host: 127.0.0.1
+    host: r-2ze4jhfytptucbsu8d.redis.rds.aliyuncs.com
     port: 6379
-    password: pass
+    password: GcrkNYTcST4PzlV@
     ssl: false
+
+grpc:
+  port: 12006
 
 wechat-pay:
   app-id: xxx
   merchant-id: xxx
   merchant-key: xxx
   callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
-  cert-path: /Users/sli/development/madagascar/vanga/src/main/resources/apiclient_cert.pem
+  cert-path: /app/apiclient_cert.pem
   host-ip: 127.0.0.1
 
 rocketmq:
@@ -28,8 +31,5 @@ rocketmq:
     tag: event
     nameSrvAddr: 127.0.0.1:9876
 
-grpc:
-  port: 12006
-
-server:
-  port: 8083
+snowflake:
+  nodeId: 0
