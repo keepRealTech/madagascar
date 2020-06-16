@@ -125,14 +125,14 @@ public class IslandInfoService {
      * Retrieve islandList by islandName.
      *
      * @param islandName islandName.
+     * @param pageable   {@link Pageable}.
+     * @param builder    {@link com.keepreal.madagascar.coua.IslandResponse.Builder}.
      * @return {@link IslandInfo}.
      */
-    public List<IslandInfo> getIslandByName(String islandName) {
-        IslandInfo islandInfo = islandInfoRepository.findTopByIslandNameAndDeletedIsFalse(islandName);
-        if (islandInfo == null) {
-            return Collections.emptyList();
-        }
-        return Collections.singletonList(islandInfo);
+    public List<IslandInfo> getIslandByName(String islandName, Pageable pageable, IslandsResponse.Builder builder) {
+        Page<IslandInfo> islandIdListPageable = islandInfoRepository.findByIslandNameStartingWithAndDeletedIsFalse(islandName, pageable);
+        builder.setPageResponse(PageResponseUtil.buildResponse(islandIdListPageable));
+        return islandIdListPageable.getContent();
     }
 
     /**
