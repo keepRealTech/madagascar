@@ -252,7 +252,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             } else if (hasSubscribedUserId) {
                 islandInfoList = islandInfoService.getIslandBySubscribed(requestCondition.getSubscribedUserId().getValue(), pageable, builder);
             } else if (hasName) {
-                islandInfoList = islandInfoService.getIslandByName(requestCondition.getName().getValue());
+                islandInfoList = islandInfoService.getIslandByName(requestCondition.getName().getValue(), pageable, builder);
             } else {
                 islandInfoList = islandInfoService.getIsland(pageable, builder);
             }

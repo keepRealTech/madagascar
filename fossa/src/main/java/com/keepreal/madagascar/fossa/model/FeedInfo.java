@@ -8,7 +8,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.persistence.Column;
 import javax.persistence.EntityListeners;
 import java.util.List;
 
@@ -41,9 +40,10 @@ public class FeedInfo {
     private Integer repostCount = 0;
     private Integer state;
     @Builder.Default
-    private boolean deleted = false;
+    private Boolean deleted = false;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }
