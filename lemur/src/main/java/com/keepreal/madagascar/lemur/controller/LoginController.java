@@ -160,8 +160,9 @@ public class LoginController implements LoginApi {
     public ResponseEntity<DummyResponse> apiV1DeviceTokensPost(@Valid DeviceTokenRequest deviceTokenRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         userService.updateDeviceToken(userId, deviceTokenRequest.getDeviceToken(), deviceTokenRequest.getIsBind(), deviceTokenRequest.getDeviceType());
-        DummyResponseUtils.setRtnAndMessage(new DummyResponse(), ErrorCode.REQUEST_SUCC);
-        return new ResponseEntity<>(HttpStatus.OK);
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
