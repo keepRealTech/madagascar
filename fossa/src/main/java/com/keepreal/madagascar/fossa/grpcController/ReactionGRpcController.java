@@ -85,14 +85,13 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
         boolean requestHasLikeType = reactionTypesSet.contains(ReactionType.REACTION_LIKE_VALUE);
         ReactionInfo reactionInfo = reactionRepository.findTopByFeedIdAndUserId(feedId, userId);
         if (reactionInfo == null) {
-            reactionInfo = new ReactionInfo();
-            reactionInfo.setId(id);
-            reactionInfo.setUserId(request.getUserId());
-            reactionInfo.setUpdatedTime(Long.valueOf(userId));
-            reactionInfo.setFeedId(feedId);
-            reactionInfo.setReactionTypeList(reactionTypesSet);
-            reactionInfo.setDeleted(false);
-            reactionInfo.setCreatedTime(System.currentTimeMillis());
+            reactionInfo = ReactionInfo.builder()
+                    .id(id)
+                    .userId(userId)
+                    .feedId(feedId)
+                    .createdTime(System.currentTimeMillis())
+                    .reactionTypeList(reactionTypesSet)
+                    .build();
             if (requestHasLikeType) {
                 feedInfoService.incFeedCount(feedId, FeedCountType.LIKES_COUNT);
             }

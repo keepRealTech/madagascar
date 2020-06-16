@@ -36,11 +36,11 @@ public class CommentInfo {
     private String content;
     @Builder.Default
     private String replyToId = "";
-    @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }
