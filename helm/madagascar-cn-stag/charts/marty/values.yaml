@@ -10,11 +10,11 @@ common_configs:
 rocketmq:
   notification:
     topic: notification-event
-    group_id: GID-marty-default
+    group_id: GID-marty-notification-default
     tag: event
   feed:
     topic: feed-event
-    group_id: GID-marty-default
+    group_id: GID-marty-feed-default
     tag: event
 
 coua:
