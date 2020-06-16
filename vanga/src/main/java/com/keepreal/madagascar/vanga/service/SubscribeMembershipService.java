@@ -110,7 +110,7 @@ public class SubscribeMembershipService {
                     wechatOrder.getUserId(), sku.getMembershipId());
 
             Instant instant = Objects.isNull(currentSubscribeMembership) ?
-                    Instant.now() : Instant.ofEpochSecond(currentSubscribeMembership.getExpireTime());
+                    Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
             ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
 
             IntStream.range(0, innerPaymentList.size())
