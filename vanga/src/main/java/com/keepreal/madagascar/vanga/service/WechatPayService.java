@@ -43,14 +43,15 @@ public class WechatPayService {
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryPlaceOrder(String userId, String feeInCents, String membershipSkuId) {
-        String tradeNum = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        String tradeNum = UUID.randomUUID().toString().replace("-", "");
+        String description = String.format("购买会员%s", membershipSkuId);
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
                 .userId(userId)
                 .tradeNumber(tradeNum)
                 .memberShipSkuId(membershipSkuId)
-                .description(String.format("购买会员%s", membershipSkuId))
+                .description(description)
                 .feeInCents(feeInCents)
                 .build();
 
@@ -67,23 +68,32 @@ public class WechatPayService {
 
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
+                wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());
+                this.wechatOrderService.insert(wechatOrder);
+                return null;
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
-            } else {
-                wechatOrder.setPrepayId(response.get("prepay_id"));
-
-                Map<String, String> request = new HashMap<>();
-                request.put("noncestr", response.get("nonce_str"));
-                request.put("prepayid", response.get("prepay_id"));
-                request.put("package", "Sign=WXPay");
-                request.put("timestamp", String.valueOf(WXPayUtil.getCurrentTimestamp()));
-                request = this.client.fillPayRequestData(request);
-
-                wechatOrder.setSignature(request.get("sign"));
-                wechatOrder.setNonceStr(request.get("noncestr"));
-                wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
+                wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());
+                this.wechatOrderService.insert(wechatOrder);
+                return null;
             }
-            return this.wechatOrderService.insert(wechatOrder);
+
+
+            Map<String, String> request = new HashMap<>();
+            request.put("noncestr", response.get("nonce_str"));
+            request.put("prepayid", response.get("prepay_id"));
+            request.put("package", "Sign=WXPay");
+            request.put("timestamp", String.valueOf(WXPayUtil.getCurrentTimestamp()));
+            request = this.client.fillPayRequestData(request);
+
+            wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
+            wechatOrder = this.wechatOrderService.insert(wechatOrder);
+
+            wechatOrder.setPrepayId(response.get("prepay_id"));
+            wechatOrder.setSignature(request.get("sign"));
+            wechatOrder.setNonceStr(request.get("noncestr"));
+
+            return wechatOrder;
         } catch (Exception e) {
             wechatOrder.setErrorMessage(e.getMessage());
             wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());
@@ -147,7 +157,7 @@ public class WechatPayService {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
                 wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
-                wechatOrder.setTransactionId(response.get("transactionId"));
+                wechatOrder.setTransactionId(response.get("transaction_id"));
             }
             return this.wechatOrderService.update(wechatOrder);
         } catch (Exception ignored) {
@@ -169,6 +179,7 @@ public class WechatPayService {
 
         try {
             Map<String, String> response = this.client.processResponseXml(callbackPayload);
+
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 return null;
             }
@@ -186,7 +197,7 @@ public class WechatPayService {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
                 wechatOrder.setState(WechatOrderState.SUCCESS.getValue());
-                wechatOrder.setTransactionId(response.get("transactionId"));
+                wechatOrder.setTransactionId(response.get("transaction_id"));
             }
             return this.wechatOrderService.update(wechatOrder);
         } catch (Exception ignored) {

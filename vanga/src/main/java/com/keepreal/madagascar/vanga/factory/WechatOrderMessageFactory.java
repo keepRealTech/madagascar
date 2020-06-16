@@ -5,6 +5,7 @@ import com.keepreal.madagascar.vanga.WechatOrderState;
 import com.keepreal.madagascar.vanga.config.WechatPayConfiguration;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -36,11 +37,23 @@ public class WechatOrderMessageFactory {
             return null;
         }
 
+        if (StringUtils.isEmpty(wechatOrder.getNonceStr())) {
+            wechatOrder.setNonceStr("");
+        }
+
+        if (StringUtils.isEmpty(wechatOrder.getPrepayId())) {
+            wechatOrder.setPrepayId("");
+        }
+
+        if (StringUtils.isEmpty(wechatOrder.getSignature())) {
+            wechatOrder.setSignature("");
+        }
+
         return  WechatOrderMessage.newBuilder()
                 .setAppId(this.wechatPayConfiguration.getAppId())
                 .setPartnerId(this.wechatPayConfiguration.getMchId())
-                .setNonceStr(wechatOrder.getNonceStr())
                 .setTimestamp(wechatOrder.getCreatedTime())
+                .setNonceStr(wechatOrder.getNonceStr())
                 .setPrepayId(wechatOrder.getPrepayId())
                 .setSignature(wechatOrder.getSignature())
                 .setUserId(wechatOrder.getUserId())
