@@ -57,6 +57,4 @@ public class WechatOrderService {
         return this.wechatOrderRepository.save(order);
     }
 
-
-
 }

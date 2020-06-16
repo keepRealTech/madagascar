@@ -23,14 +23,17 @@ import com.keepreal.madagascar.vanga.service.WechatOrderService;
 import com.keepreal.madagascar.vanga.service.WechatPayService;
 import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
+import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 
+import javax.transaction.Transactional;
 import java.util.Objects;
 
 /**
  * Represents the payment grpc controller.
  */
 @GRpcService
+@Slf4j
 public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImplBase {
 
     private final PaymentService paymentService;
@@ -146,10 +149,18 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
     }
 
+    /**
+     * Implements the wechat order pay callback api.
+     *
+     * @param request          {@link WechatOrderCallbackRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
     @Override
     public void wechatPayCallback(WechatOrderCallbackRequest request,
                                   StreamObserver<CommonStatus> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
+
+        log.info(wechatOrder.toString());
 
         this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
     }

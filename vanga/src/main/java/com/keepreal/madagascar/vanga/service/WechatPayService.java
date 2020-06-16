@@ -43,7 +43,7 @@ public class WechatPayService {
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryPlaceOrder(String userId, String feeInCents, String membershipSkuId) {
-        String tradeNum = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        String tradeNum = UUID.randomUUID().toString().replace("-", "");
         String description = String.format("购买会员%s", membershipSkuId);
 
         WechatOrder wechatOrder = WechatOrder.builder()
@@ -157,7 +157,7 @@ public class WechatPayService {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
                 wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
-                wechatOrder.setTransactionId(response.get("transactionId"));
+                wechatOrder.setTransactionId(response.get("transaction_id"));
             }
             return this.wechatOrderService.update(wechatOrder);
         } catch (Exception ignored) {
@@ -179,6 +179,7 @@ public class WechatPayService {
 
         try {
             Map<String, String> response = this.client.processResponseXml(callbackPayload);
+
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 return null;
             }
@@ -196,7 +197,7 @@ public class WechatPayService {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
                 wechatOrder.setState(WechatOrderState.SUCCESS.getValue());
-                wechatOrder.setTransactionId(response.get("transactionId"));
+                wechatOrder.setTransactionId(response.get("transaction_id"));
             }
             return this.wechatOrderService.update(wechatOrder);
         } catch (Exception ignored) {
