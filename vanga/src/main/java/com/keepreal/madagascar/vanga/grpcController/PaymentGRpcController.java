@@ -160,8 +160,6 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                   StreamObserver<CommonStatus> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
 
-        log.info(wechatOrder.toString());
-
         this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
     }
 
