@@ -38,15 +38,16 @@ public class UserDeviceInfoService {
     public void bindDeviceToken(String userId, String deviceToken, Integer deviceType) {
         UserDeviceInfo userDeviceInfo = userDeviceInfoRepository.findByUserIdAndDeviceTokenAndDeviceTypeAndDeletedIsFalse(userId, deviceToken, deviceType);
         if (userDeviceInfo != null) {
-            return;
+            userDeviceInfo.setBinded(true);
+        } else {
+            userDeviceInfo = new UserDeviceInfo();
+            userDeviceInfo.setId(String.valueOf(idGenerator.nextId()));
+            userDeviceInfo.setUserId(userId);
+            userDeviceInfo.setBinded(true);
+            userDeviceInfo.setDeviceToken(deviceToken);
+            userDeviceInfo.setDeviceType(deviceType);
+            userDeviceInfo.setUpdatedTime(System.currentTimeMillis());
         }
-        userDeviceInfo = new UserDeviceInfo();
-        userDeviceInfo.setId(String.valueOf(idGenerator.nextId()));
-        userDeviceInfo.setUserId(userId);
-        userDeviceInfo.setBinded(true);
-        userDeviceInfo.setDeviceToken(deviceToken);
-        userDeviceInfo.setDeviceType(deviceType);
-        userDeviceInfo.setUpdatedTime(System.currentTimeMillis());
         userDeviceInfoRepository.save(userDeviceInfo);
     }
 

@@ -47,7 +47,8 @@ message MemberNotice {
     string memberId = 2;
     string membershipId = 3;
     string membershipName = 4;
-    uint64 pricePerMonthInCents = 5;
+    uint64 priceInCents = 5;
+    int32 timeInMonths = 6;
 }
 
 message UnreadNotificationsCountMessage {
