@@ -1989,7 +1989,17 @@ components:
         member:
           $ref: '#/components/schemas/BriefUserDTO'
         membership:
-          $ref: '#/components/schemas/SimpleMembershipDTO'
+          $ref: '#/components/schemas/SkuMembershipDTO'
+    SkuMembershipDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefMembershipDTO'
+        - type: object
+          properties:
+            priceInCents:
+              type: integer
+              format: int64
+            timeInMonths:
+              type: integer
     ReactionNotificationDTO:
       type: object
       properties:

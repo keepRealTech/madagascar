@@ -14,7 +14,7 @@ import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
-import com.keepreal.madagascar.coua.model.UserDeviceInfo;
+import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
 import com.keepreal.madagascar.coua.service.UserIdentityService;
@@ -202,7 +202,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void retrieveDeviceTokenByUserId(RetrieveDeviceTokenRequest request, StreamObserver<RetrieveDeviceTokenResponse> responseObserver) {
         String userId = request.getUserId();
-        List<UserDeviceInfo> userDeviceInfos = userDeviceInfoService.getDeviceTokenByUserId(userId);
+        List<SimpleDeviceToken> userDeviceInfos = userDeviceInfoService.getDeviceTokenByUserId(userId);
         List<String> androidTokenList = new ArrayList<>();
         List<String> iosTokenList = new ArrayList<>();
         userDeviceInfos.forEach(info -> {

@@ -3,17 +3,18 @@ package com.keepreal.madagascar.marty.umengPush;
 import com.aliyun.openservices.shade.com.alibaba.fastjson.JSONObject;
 import com.aliyun.openservices.shade.org.apache.commons.codec.digest.DigestUtils;
 import com.keepreal.madagascar.marty.config.UmengConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Represent the umeng push client.
  */
 @Component
+@Slf4j
 public class UmengPushClient {
 
     private final String appMasterSecret;
@@ -40,9 +41,13 @@ public class UmengPushClient {
      * @param pushMessage   push message.
      */
     public void push(String pushMessage) {
-        Map<String, String> urlVariables = new HashMap<>();
-        urlVariables.put("sign", generatorSign(pushMessage));
-        JSONObject responseJsonObject = restTemplate.postForObject(url, pushMessage, JSONObject.class, urlVariables);
+        try {
+            String sign = "?sign="+generatorSign(pushMessage);
+            restTemplate.postForObject(url + sign, pushMessage, JSONObject.class);
+        } catch (RestClientException e) {
+            e.printStackTrace();
+            log.error("exception: {}", e);
+        }
     }
 
     /**

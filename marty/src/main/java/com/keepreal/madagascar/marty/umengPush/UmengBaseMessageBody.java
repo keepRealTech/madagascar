@@ -14,8 +14,8 @@ public abstract class UmengBaseMessageBody {
         jsonObject.put("timestamp", String.valueOf(System.currentTimeMillis()));
     }
 
-    public void setPayload(JSONObject payloadJsonObject) {
-        jsonObject.put("payload", payloadJsonObject.toJSONString());
+    public void setPayload(Object payloadJsonObject) {
+        jsonObject.put("payload", payloadJsonObject);
     }
 
     public void setDeviceToken(String tokens) {

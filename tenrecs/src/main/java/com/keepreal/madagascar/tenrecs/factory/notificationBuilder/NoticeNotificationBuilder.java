@@ -113,7 +113,8 @@ public class NoticeNotificationBuilder implements NotificationBuilder {
                         .memberId(this.event.getMemberEvent().getMemberId())
                         .membershipId(this.event.getMemberEvent().getMembershipId())
                         .membershipName(this.event.getMemberEvent().getMembershipName())
-                        .pricePerMonthInCents(this.event.getMemberEvent().getPricePerMonthInCents())
+                        .priceInCents(this.event.getMemberEvent().getPriceInCents())
+                        .timeInMonths(this.event.getMemberEvent().getTimeInMonths())
                         .build();
                 noticeBuilder.memberNotice(memberNotice);
 

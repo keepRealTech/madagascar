@@ -10,7 +10,7 @@ import swagger.model.NoticeDTO;
 import swagger.model.NoticeType;
 import swagger.model.NotificationDTO;
 import swagger.model.NotificationType;
-import swagger.model.SimpleMembershipDTO;
+import swagger.model.SkuMembershipDTO;
 
 import java.util.Objects;
 
@@ -148,11 +148,12 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                                 this.userService.retrieveUserById(
                                         noticeMessage.getMemberNotice().getMemberId())));
                 
-                SimpleMembershipDTO simpleMembershipDTO = new SimpleMembershipDTO();
-                simpleMembershipDTO.setId(noticeMessage.getMemberNotice().getMembershipId());
-                simpleMembershipDTO.setMembershipName(noticeMessage.getMemberNotice().getMembershipName());
-                simpleMembershipDTO.setPricePerMonthInCents(noticeMessage.getMemberNotice().getPricePerMonthInCents());
-                noticeDTO.setMembership(simpleMembershipDTO);
+                SkuMembershipDTO skuMembershipDTO = new SkuMembershipDTO();
+                skuMembershipDTO.setId(noticeMessage.getMemberNotice().getMembershipId());
+                skuMembershipDTO.setMembershipName(noticeMessage.getMemberNotice().getMembershipName());
+                skuMembershipDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
+                skuMembershipDTO.setTimeInMonths(noticeMessage.getMemberNotice().getTimeInMonths());
+                noticeDTO.setMembership(skuMembershipDTO);
                 return noticeDTO;
 
             default:

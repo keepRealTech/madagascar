@@ -14,6 +14,7 @@ public class MemberNotice {
     private String memberId;
     private String membershipId;
     private String membershipName;
-    private Long pricePerMonthInCents;
+    private Long priceInCents;
+    private Integer timeInMonths;
 
 }

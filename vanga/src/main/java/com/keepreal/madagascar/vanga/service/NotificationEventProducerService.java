@@ -96,7 +96,8 @@ public class NotificationEventProducerService {
                 .setMemberId(subscribeMembership.getUserId())
                 .setMembershipId(subscribeMembership.getMembershipId())
                 .setMembershipName(membershipSku.getMembershipName())
-                .setPricePerMonthInCents(membershipSku.getPriceInCents())
+                .setPriceInCents(membershipSku.getPriceInCents())
+                .setTimeInMonths(membershipSku.getTimeInMonths())
                 .build();
 
         String uuid = UUID.randomUUID().toString();
