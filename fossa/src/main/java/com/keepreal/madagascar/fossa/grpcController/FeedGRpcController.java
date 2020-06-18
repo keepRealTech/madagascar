@@ -103,6 +103,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.text(text);
             builder.membershipIds(membershipIdsList);
             builder.createdTime(System.currentTimeMillis());
+            builder.toppedTime(System.currentTimeMillis());
             feedInfoList.add(builder.build());
         });
 
@@ -201,7 +202,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
 
         // 没有条件
-        query.with(Sort.by(Sort.Order.desc("createdTime")));
+        query.with(Sort.by(Sort.Order.desc("toppedTime"), Sort.Order.desc("createdTime")));
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
         List<FeedMessage> feedMessageList = feedInfoList.stream().map(info -> feedInfoService.getFeedMessage(info, userId)).filter(Objects::nonNull).collect(Collectors.toList());

@@ -8,6 +8,7 @@ import com.keepreal.madagascar.coua.UpdateMembershipRequest;
 import com.keepreal.madagascar.coua.dao.MembershipInfoRepository;
 import com.keepreal.madagascar.coua.model.MembershipInfo;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -78,10 +79,12 @@ public class MembershipService {
                 .setName("所有岛民")
                 .setMemberCount(subscriptionService.getMemberCountByIslandId(islandId))
                 .build());
-        list.add(FeedMembershipMessage.newBuilder()
-                .setName("所有会员")
-                .setMemberCount(subscribeMembershipService.getMemberCountByIslandId(islandId))
-                .build());
+        if (!StringUtils.isEmpty(islandId)) {
+            list.add(FeedMembershipMessage.newBuilder()
+                    .setName("所有会员")
+                    .setMemberCount(subscribeMembershipService.getMemberCountByIslandId(islandId))
+                    .build());
+        }
         return list;
     }
 
