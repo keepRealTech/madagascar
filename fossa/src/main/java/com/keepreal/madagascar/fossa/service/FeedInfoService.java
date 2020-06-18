@@ -140,7 +140,7 @@ public class FeedInfoService {
                 .setRepostCount(feedInfo.getRepostCount())
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
-                .setIsDeleted(feedInfo.isDeleted());
+                .setIsDeleted(feedInfo.getDeleted());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
