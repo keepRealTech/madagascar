@@ -227,12 +227,10 @@ public class FeedService {
             conditionBuilder.setFromHost(BoolValue.of(fromHost));
         }
 
-        if (Objects.nonNull(timestampAfter)) {
-            conditionBuilder.setTimestampAfter(Int64Value.of(timestampAfter));
-        }
-
         if (Objects.nonNull(timestampBefore)) {
             conditionBuilder.setTimestampBefore(Int64Value.of(timestampBefore));
+        } else {
+            conditionBuilder.setTimestampAfter(Int64Value.of(timestampAfter == null ? 0L : timestampAfter));
         }
 
         RetrieveMultipleFeedsRequest request = RetrieveMultipleFeedsRequest.newBuilder()
@@ -294,13 +292,12 @@ public class FeedService {
         RetrieveMultipleTimelinesRequest.Builder builder = RetrieveMultipleTimelinesRequest.newBuilder()
                 .setUserId(userId)
                 .setPageRequest(PaginationUtils.buildPageRequest(0, pageSize));
-        if (timestampAfter != null) {
-            builder.setTimestamp(timestampAfter);
-            builder.setIsAfter(true);
-        }
         if (timestampBefore != null) {
             builder.setTimestamp(timestampBefore);
             builder.setIsAfter(false);
+        } else {
+            builder.setTimestamp(timestampAfter == null ? 0L : timestampAfter);
+            builder.setIsAfter(true);
         }
 
         TimelinesResponse timelinesResponse;

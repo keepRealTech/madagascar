@@ -1110,7 +1110,6 @@ components:
       schema:
         type: integer
         format: int64
-        default: 0
     timestampBefore:
       in: query
       name: maxTimestamp
@@ -1119,7 +1118,6 @@ components:
       schema:
         type: integer
         format: int64
-        default: 0
     page:
       in: query
       name: page
