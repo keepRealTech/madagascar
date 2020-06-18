@@ -110,7 +110,7 @@ public class FeedDTOFactory {
 
             return feedDTO;
         } catch (KeepRealBusinessException exception) {
-            log.error("Failed to serialize feed {}.", feed.getId());
+            log.error("Failed to serialize feed {}, cause {}.", feed.getId(), exception.getErrorCode());
             return null;
         }
     }

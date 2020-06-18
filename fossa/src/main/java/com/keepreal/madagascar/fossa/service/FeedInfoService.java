@@ -212,7 +212,7 @@ public class FeedInfoService {
      * @return List of {@link FeedInfo}.
      */
     public List<FeedInfo> findByIds(Iterable<String> ids) {
-        return this.feedInfoRepository.findAllByIdInAndDeletedIsFalse(ids);
+        return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
     }
 
 }
