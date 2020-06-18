@@ -207,10 +207,11 @@ public class FeedController implements FeedApi {
      */
     @Override
     public ResponseEntity<TimelinesResponse> apiV1FeedsGet(Long minTimestamp,
+                                                           Long maxTimestamp,
                                                            Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveUserFeeds(userId, minTimestamp, pageSize);
+                this.feedService.retrieveUserFeeds(userId, minTimestamp, maxTimestamp, pageSize);
 
         TimelinesResponse response = new TimelinesResponse();
         response.setData(feedsResponse.getFeedList()

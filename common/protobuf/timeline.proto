@@ -13,7 +13,8 @@ message TimelineMessage {
 message RetrieveMultipleTimelinesRequest {
     string userId = 1;
     PageRequest pageRequest = 2;
-    uint64 createdAfter = 3;
+    uint64 timestamp = 3;
+    bool isAfter = 4;
 }
 
 message TimelinesResponse {

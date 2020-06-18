@@ -100,10 +100,16 @@ public class TimelineService {
      * @param pageSize       The chunk size.
      * @return A flux of {@link Timeline}.
      */
-    public Flux<Timeline> retrieveByUserIdAndCreatedTimestampAfter(String userId, long startTimestamp, int pageSize) {
-        return this.timelineRepository
-                .findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsFalse(
-                        userId, startTimestamp, PaginationUtils.defaultTimelinePageRequest(pageSize));
+    public Flux<Timeline> retrieveByUserIdAndCreatedTimestampAfter(String userId, long startTimestamp, int pageSize, boolean isAfter) {
+        if (isAfter) {
+            return this.timelineRepository
+                    .findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsFalse(
+                            userId, startTimestamp, PaginationUtils.defaultTimelinePageRequest(pageSize));
+        } else {
+            return this.timelineRepository
+                    .findTopByUserIdAndFeedCreatedAtBeforeAndIsDeletedIsFalse(
+                            userId, startTimestamp, PaginationUtils.defaultTimelinePageRequest(pageSize));
+        }
     }
 
     /**

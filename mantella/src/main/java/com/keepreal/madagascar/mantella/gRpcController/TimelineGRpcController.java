@@ -47,8 +47,9 @@ public class TimelineGRpcController extends ReactorTimelineServiceGrpc.TimelineS
         return request.flatMapMany(retrieveMultipleTimelinesRequest ->
                 this.timelineService.retrieveByUserIdAndCreatedTimestampAfter(
                         retrieveMultipleTimelinesRequest.getUserId(),
-                        retrieveMultipleTimelinesRequest.getCreatedAfter(),
-                        retrieveMultipleTimelinesRequest.getPageRequest().getPageSize()))
+                        retrieveMultipleTimelinesRequest.getTimestamp(),
+                        retrieveMultipleTimelinesRequest.getPageRequest().getPageSize(),
+                        retrieveMultipleTimelinesRequest.getIsAfter()))
                 .map(this.timelineMessageFactory::valueOf)
                 .collectList()
                 .map(timelineMessages -> {
