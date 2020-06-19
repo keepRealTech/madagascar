@@ -71,11 +71,8 @@ public class NotificationEventListener implements MessageListener {
                         || StringUtils.isEmpty(event.getSubscribeEvent().getSubscriberId())) {
                         break;
                     }
-                    this.timelineService.retrieveLastFeedTimestampByUserId(event.getSubscribeEvent().getSubscriberId())
-                            .map(Timeline::getFeedCreatedAt)
-                            .switchIfEmpty(Mono.just(0L))
-                            .flatMapMany(timestamp -> this.feedService.retrieveFeedsByIslandIdAndTimestampAfter(event.getSubscribeEvent().getIslandId(),
-                                    timestamp, NotificationEventListener.TIMELINE_PULL_PAGESIZE))
+                    this.feedService.retrieveFeedsByIslandIdAndTimestampAfter(event.getSubscribeEvent().getIslandId(),
+                                    System.currentTimeMillis(), NotificationEventListener.TIMELINE_PULL_PAGESIZE)
                             .map(feed -> this.timelineFactory.valueOf(feed.getId(), feed.getIslandId(),
                                     event.getSubscribeEvent().getSubscriberId(), feed.getCreatedAt(), event.getEventId()))
                             .compose(this.timelineService::insertAll)

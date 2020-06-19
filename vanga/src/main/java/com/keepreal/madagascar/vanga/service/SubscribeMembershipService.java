@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.vanga.service;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
@@ -35,6 +36,7 @@ public class SubscribeMembershipService {
     private final LongIdGenerator idGenerator;
     private final RedissonClient redissonClient;
     private final NotificationEventProducerService notificationEventProducerService;
+    private final BalanceService balanceService;
 
     /**
      * Constructor the subscribe membership service.
@@ -45,19 +47,21 @@ public class SubscribeMembershipService {
      * @param idGenerator                      {@link LongIdGenerator}.
      * @param redissonClient                   {@link RedissonClient}.
      * @param notificationEventProducerService {@link NotificationEventProducerService}.
+     * @param balanceService                   {@link BalanceService}.
      */
     public SubscribeMembershipService(PaymentService paymentService,
                                       SkuService membershipSkuService,
                                       SubscribeMembershipRepository subscriptionMemberRepository,
                                       LongIdGenerator idGenerator,
                                       RedissonClient redissonClient,
-                                      NotificationEventProducerService notificationEventProducerService) {
+                                      NotificationEventProducerService notificationEventProducerService, BalanceService balanceService) {
         this.paymentService = paymentService;
         this.membershipSkuService = membershipSkuService;
         this.subscriptionMemberRepository = subscriptionMemberRepository;
         this.idGenerator = idGenerator;
         this.redissonClient = redissonClient;
         this.notificationEventProducerService = notificationEventProducerService;
+        this.balanceService = balanceService;
     }
 
     /**
@@ -106,6 +110,10 @@ public class SubscribeMembershipService {
 
             MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getMemberShipSkuId());
 
+            Balance balance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
+            Long price = sku.getPriceInCents();
+            balance.setBalanceInCents(balance.getBalanceInCents() + price);
+
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
                     wechatOrder.getUserId(), sku.getMembershipId());
 
@@ -120,6 +128,7 @@ public class SubscribeMembershipService {
                                 .plusMonths(i * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
                                 .toInstant().toEpochMilli());
                     });
+            this.balanceService.updateBalance(balance);
             this.paymentService.updateAll(innerPaymentList);
             this.createOrRenewSubscriptionMember(wechatOrder.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
         }

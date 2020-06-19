@@ -88,7 +88,7 @@ public class FeedDTOFactory {
             feedDTO.setId(feed.getId());
             feedDTO.setText(feed.getText());
             feedDTO.setImagesUris(feed.getImageUrisList());
-            feedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
+            feedDTO.setFromHost(feed.getFromHost());
             feedDTO.setLikesCount(feed.getLikesCount());
             feedDTO.setCommentsCount(feed.getCommentsCount());
             feedDTO.setComments(feed.getLastCommentsList()
@@ -101,7 +101,7 @@ public class FeedDTOFactory {
             feedDTO.setIsLiked(feed.getIsLiked());
             feedDTO.setIsAccess(feed.getIsAccess());
             feedDTO.setIsMembership(feed.getIsMembership());
-            if (!feed.getIsAccess()) {
+            if (feed.getIsMembership()) {
                 MembershipMessage membershipMessage = this.membershipService.retrieveMembershipById(feed.getMembershipId());
                 feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessage));
             }
