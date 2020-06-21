@@ -111,6 +111,30 @@ public class PaymentService {
     }
 
     /**
+     * Creates new shell payments.
+     *
+     * @param userId User id.
+     * @param sku    {@link MembershipSku}.
+     * @return {@link Payment}.
+     */
+    @Transactional
+    public List<Payment> createNewShellPayments(String userId, MembershipSku sku) {
+        List<Payment> payments =
+                IntStream.range(0, sku.getTimeInMonths())
+                        .mapToObj(i -> Payment.builder()
+                                .id(String.valueOf(this.idGenerator.nextId()))
+                                .type(PaymentType.SHELLPAY.getValue())
+                                .amountInCents(sku.getPriceInCents() / sku.getTimeInMonths())
+                                .userId(userId)
+                                .state(PaymentState.OPEN.getValue())
+                                .payeeId(sku.getHostId())
+                                .build())
+                        .collect(Collectors.toList());
+
+        return this.paymentRepository.saveAll(payments);
+    }
+
+    /**
      * Retrieves all payments associates to an order.
      *
      * @param orderId Order id.
