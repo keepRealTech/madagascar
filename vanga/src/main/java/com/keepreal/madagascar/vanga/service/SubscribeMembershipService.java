@@ -114,6 +114,9 @@ public class SubscribeMembershipService {
                 return;
             }
 
+            Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
+            hostBalance.setBalanceInCents(hostBalance.getBalanceInCents() + (sku.getPriceInCents() / 100L) * hostBalance.getWithdrawPercent());
+
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
                     wechatOrder.getUserId(), sku.getMembershipId());
 
@@ -124,11 +127,14 @@ public class SubscribeMembershipService {
             List<Payment> finalInnerPaymentList = innerPaymentList;
             IntStream.range(0, innerPaymentList.size())
                     .forEach(i -> {
+                        finalInnerPaymentList.get(i).setWithdrawPercent(hostBalance.getWithdrawPercent());
                         finalInnerPaymentList.get(i).setState(PaymentState.OPEN.getValue());
                         finalInnerPaymentList.get(i).setValidAfter(currentExpireTime
                                 .plusMonths(i * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
                                 .toInstant().toEpochMilli());
                     });
+
+            this.balanceService.updateBalance(hostBalance);
             this.paymentService.updateAll(innerPaymentList);
             this.createOrRenewSubscriptionMember(wechatOrder.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
         }
@@ -144,11 +150,9 @@ public class SubscribeMembershipService {
     public void subscribeMembershipWithShell(String userId, MembershipSku sku) {
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-shell-%s", userId))) {
             Balance userBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(userId);
-
             if (userBalance.getBalanceInShells() < sku.getPriceInShells()) {
                 throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_SHELL_INSUFFICIENT_ERROR);
             }
-
             userBalance.setBalanceInShells(userBalance.getBalanceInShells() - sku.getPriceInShells());
 
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
@@ -157,8 +161,12 @@ public class SubscribeMembershipService {
                     Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
             ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
 
+            Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
+            hostBalance.setBalanceInCents(hostBalance.getBalanceInCents() + (sku.getPriceInShells() / 100L) * hostBalance.getWithdrawPercent());
+
             this.balanceService.updateBalance(userBalance);
-            this.paymentService.createNewShellPayments(userId, sku);
+            this.balanceService.updateBalance(hostBalance);
+            this.paymentService.createNewShellPayments(userId, hostBalance.getWithdrawPercent(), sku);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
         }
     }
