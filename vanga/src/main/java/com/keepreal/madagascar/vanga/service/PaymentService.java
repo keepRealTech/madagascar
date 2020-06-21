@@ -54,10 +54,7 @@ public class PaymentService {
     @Transactional
     public Balance createWithdrawPayment(String userId, Long amountInCents) {
         Balance balance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(userId);
-
-        if (balance.getBalanceEligibleInCents() < amountInCents) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_BALANCE_WITHDRAW_LIMIT_ERROR);
-        }
+        balance = this.balanceService.withdraw(balance, amountInCents);
 
         ZonedDateTime todayStart = ZonedDateTime.now().toLocalDate().atStartOfDay(ZoneId.systemDefault());
 
@@ -69,8 +66,6 @@ public class PaymentService {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_BALANCE_WITHDRAW_DAY_LIMIT_ERROR);
         }
 
-        balance.setBalanceEligibleInCents(balance.getBalanceEligibleInCents() - amountInCents);
-        balance.setBalanceInCents(balance.getBalanceInCents() - amountInCents);
         Payment payment = Payment.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .userId(userId)
@@ -78,7 +73,7 @@ public class PaymentService {
                 .amountInCents(amountInCents)
                 .type(PaymentType.WITHDRAW.getValue())
                 .build();
-        balance = this.balanceService.updateBalance(balance);
+
         this.paymentRepository.save(payment);
 
         return balance;

@@ -1,5 +1,7 @@
 package com.keepreal.madagascar.vanga.service;
 
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.repository.BalanceRepository;
@@ -70,6 +72,76 @@ public class BalanceService {
                 .build();
 
         return this.balanceRepository.save(balance);
+    }
+
+    /**
+     * Withdraws from the balance.
+     *
+     * @param balance       {@link Balance}.
+     * @param amountInCents Amount to withdraw.
+     * @return {@link Balance}.
+     */
+    @Transactional
+    public Balance withdraw(Balance balance, Long amountInCents) {
+        balance = this.balanceRepository.findByIdAndDeletedIsFalse(balance.getId());
+
+        if (balance.getBalanceEligibleInCents() < amountInCents) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_BALANCE_WITHDRAW_LIMIT_ERROR);
+        }
+
+        balance.setBalanceEligibleInCents(balance.getBalanceEligibleInCents() - amountInCents);
+        balance.setBalanceInCents(balance.getBalanceInCents() - amountInCents);
+
+        return this.updateBalance(balance);
+    }
+
+    /**
+     * Adds cents to the balance.
+     *
+     * @param balance       {@link Balance}.
+     * @param amountInCents Amount to adds on.
+     * @return {@link Balance}.
+     */
+    @Transactional
+    public Balance addOnCents(Balance balance, Long amountInCents) {
+        balance = this.balanceRepository.findByIdAndDeletedIsFalse(balance.getId());
+        balance.setBalanceInCents(balance.getBalanceInCents() + amountInCents);
+
+        return this.updateBalance(balance);
+    }
+
+    /**
+     * Consumes shells from the balance.
+     *
+     * @param balance        {@link Balance}.
+     * @param amountInShells Amount to consume.
+     * @return {@link Balance}.
+     */
+    @Transactional
+    public Balance consumeShells(Balance balance, Long amountInShells) {
+        balance = this.balanceRepository.findByIdAndDeletedIsFalse(balance.getId());
+
+        if (balance.getBalanceInShells() < amountInShells) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_SHELL_INSUFFICIENT_ERROR);
+        }
+        balance.setBalanceInShells(balance.getBalanceInShells() - amountInShells);
+
+        return this.updateBalance(balance);
+    }
+
+    /**
+     * Adds on shells from the balance.
+     *
+     * @param balance        {@link Balance}.
+     * @param amountInShells Amount to add on.
+     * @return {@link Balance}.
+     */
+    @Transactional
+    public Balance addOnShells(Balance balance, Long amountInShells) {
+        balance = this.balanceRepository.findByIdAndDeletedIsFalse(balance.getId());
+        balance.setBalanceInShells(balance.getBalanceInShells() + amountInShells);
+
+        return this.updateBalance(balance);
     }
 
 }
