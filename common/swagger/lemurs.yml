@@ -2457,6 +2457,8 @@ components:
       properties:
         id:
           type: string
+        appleSkuId:
+          type: string
         description:
           type: string
         shells:

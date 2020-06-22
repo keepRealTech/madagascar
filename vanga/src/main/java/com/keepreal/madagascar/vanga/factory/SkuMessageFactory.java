@@ -27,6 +27,7 @@ public class SkuMessageFactory {
 
         return ShellSkuMessage.newBuilder()
                 .setId(shellSku.getId())
+                .setAppleSkuId(shellSku.getAppleSkuId())
                 .setDescription(shellSku.getDescription())
                 .setIsDefault(shellSku.getDefaultSku())
                 .setPriceInCents(shellSku.getPriceInCents())
