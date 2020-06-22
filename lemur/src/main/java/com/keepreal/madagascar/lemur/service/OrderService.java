@@ -2,6 +2,9 @@ package com.keepreal.madagascar.lemur.service;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.vanga.BalanceMessage;
+import com.keepreal.madagascar.vanga.BalanceResponse;
+import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
@@ -79,6 +82,43 @@ public class OrderService {
                 .build();
 
         stub.wechatPayCallback(request);
+    }
+
+    /**
+     * Buys shell with ios receipt.
+     *
+     * @param userId     User id.
+     * @param shellSkuId Shell sku id.
+     * @param receipt    Receipt content.
+     * @return {@link BalanceMessage}.
+     */
+    public BalanceMessage iosBuyShell(String userId, String shellSkuId, String receipt) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        IOSOrderBuyShellRequest request = IOSOrderBuyShellRequest.newBuilder()
+                .setUserId(userId)
+                .setShellSkuId(shellSkuId)
+                .setAppleReceipt(receipt)
+                .build();
+
+        BalanceResponse response;
+        try {
+            response = stub.iOSBuyShell(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Buy shell returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getBalance();
     }
 
 }

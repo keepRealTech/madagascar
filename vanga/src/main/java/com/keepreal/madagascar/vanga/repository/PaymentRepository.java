@@ -16,4 +16,6 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
 
     List<Payment> findAllByOrderIdAndDeletedIsFalse(String orderId);
 
+    Payment findTopByTradeNumAndTypeAndDeletedIsFalse(String tradeNum, Integer type);
+
 }

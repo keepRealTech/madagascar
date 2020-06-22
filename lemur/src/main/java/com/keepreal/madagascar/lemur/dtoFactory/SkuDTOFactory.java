@@ -27,6 +27,7 @@ public class SkuDTOFactory {
 
         ShellSkuDTO shellSkuDTO = new ShellSkuDTO();
         shellSkuDTO.setId(shellSku.getId());
+        shellSkuDTO.setAppleSkuId(shellSku.getAppleSkuId());
         shellSkuDTO.setDescription(shellSku.getDescription());
         shellSkuDTO.setIsDefault(shellSku.getIsDefault());
         shellSkuDTO.setShells(shellSku.getShells());

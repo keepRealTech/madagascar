@@ -838,27 +838,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IOSOrderResponse'
-  /api/v1/orders/ios/{id}/check:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    post:
-      tags:
-        - Order
-      summary: checks an ios order
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CheckIOSOrderRequest'
-      responses:
-        '200':
-          description: ios scallop order
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IOSOrderResponse'
+                $ref: '#/components/schemas/BalanceResponse'
   /api/v1/islands/{id}/memberSubscription/wechatPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2329,6 +2309,8 @@ components:
       properties:
         shellSkuId:
           type: string
+        receipt:
+          type: string
     WechatOrderDTO:
       type: object
       properties:
@@ -2354,22 +2336,6 @@ components:
           format: int64
         state:
           $ref: '#/components/schemas/OrderState'
-    IOSOrderDTO:
-      type: object
-      properties:
-        id:
-          type: string
-        tradeNumber:
-          type: string
-        userId:
-          type: string
-        skuId:
-          type: string
-        createdAt:
-          type: integer
-          format: int64
-        state:
-          $ref: '#/components/schemas/OrderState'
     WechatOrderResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -2377,18 +2343,6 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/WechatOrderDTO'
-    IOSOrderResponse:
-      allOf:
-        - $ref: '#/components/schemas/CommonResponse'
-        - type: object
-          properties:
-            data:
-              $ref: '#/components/schemas/IOSOrderDTO'
-    CheckIOSOrderRequest:
-      type: object
-      properties:
-        receiptId:
-          type: string
     SubscribeMemberRequest:
       type: object
       properties:
@@ -2461,6 +2415,8 @@ components:
       type: object
       properties:
         id:
+          type: string
+        appleSkuId:
           type: string
         description:
           type: string

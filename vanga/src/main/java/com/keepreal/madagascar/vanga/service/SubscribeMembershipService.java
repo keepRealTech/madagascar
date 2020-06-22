@@ -158,7 +158,7 @@ public class SubscribeMembershipService {
 
             this.balanceService.consumeShells(userBalance, sku.getPriceInShells());
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
-            this.paymentService.createNewShellPayments(userId, hostBalance.getWithdrawPercent(), sku);
+            this.paymentService.createPayShellPayments(userId, hostBalance.getWithdrawPercent(), sku);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
         }
     }

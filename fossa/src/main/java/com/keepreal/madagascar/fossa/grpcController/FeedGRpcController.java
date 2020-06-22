@@ -34,6 +34,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -92,6 +93,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         ProtocolStringList membershipIdsList = request.getMembershipIdsList();
 
         List<FeedInfo> feedInfoList = new ArrayList<>();
+        long timestamp = Instant.now().toEpochMilli();
         IntStream.range(0, islandIdList.size()).forEach(i -> {
             FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
             builder.id(String.valueOf(idGenerator.nextId()));
@@ -102,13 +104,13 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.imageUrls(request.getImageUrisList());
             builder.text(text);
             builder.membershipIds(membershipIdsList);
-            builder.createdTime(System.currentTimeMillis());
-            builder.toppedTime(System.currentTimeMillis());
+            builder.createdTime(timestamp);
+            builder.toppedTime(timestamp);
             feedInfoList.add(builder.build());
         });
 
         List<FeedInfo> feedInfos = feedInfoService.saveAll(feedInfoList);
-        islandService.callCouaUpdateIslandLastFeedAt(islandIdList);
+        islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp);
 
         feedInfos.forEach(this.feedEventProducerService::produceNewFeedEventAsync);
 

@@ -8,10 +8,11 @@ import "google/protobuf/wrappers.proto";
 
 message ShellSkuMessage {
   string id = 1;
-  string description = 2;
-  uint64 shells = 3;
-  uint64 priceInCents = 4;
-  bool isDefault = 5;
+  string appleSkuId = 2;
+  string description = 3;
+  uint64 shells = 4;
+  uint64 priceInCents = 5;
+  bool isDefault = 6;
 }
 
 message RetrieveShellSkusRequest {

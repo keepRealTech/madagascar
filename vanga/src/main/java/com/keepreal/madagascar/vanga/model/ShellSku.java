@@ -30,6 +30,7 @@ public class ShellSku {
 
     @Id
     private String id;
+    private String appleSkuId;
     @Builder.Default
     private String description = "";
     @Builder.Default
