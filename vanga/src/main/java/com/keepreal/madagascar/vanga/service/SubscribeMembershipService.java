@@ -37,7 +37,6 @@ public class SubscribeMembershipService {
     private final LongIdGenerator idGenerator;
     private final RedissonClient redissonClient;
     private final NotificationEventProducerService notificationEventProducerService;
-    private final BalanceService balanceService;
 
     /**
      * Constructor the subscribe membership service.
@@ -49,7 +48,6 @@ public class SubscribeMembershipService {
      * @param idGenerator                      {@link LongIdGenerator}.
      * @param redissonClient                   {@link RedissonClient}.
      * @param notificationEventProducerService {@link NotificationEventProducerService}.
-     * @param balanceService                   {@link BalanceService}.
      */
     public SubscribeMembershipService(BalanceService balanceService, 
                                       PaymentService paymentService,
@@ -65,7 +63,6 @@ public class SubscribeMembershipService {
         this.idGenerator = idGenerator;
         this.redissonClient = redissonClient;
         this.notificationEventProducerService = notificationEventProducerService;
-        this.balanceService = balanceService;
     }
 
     /**
