@@ -1642,12 +1642,8 @@ components:
         userId:
           type: string
           description: user id to report
-        reporterId:
-          type: string
-          description: user id
       required:
         - reportType
-        - reporterId
     ReportResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
