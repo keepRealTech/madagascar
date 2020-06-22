@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
+import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
@@ -14,8 +15,10 @@ import com.keepreal.madagascar.vanga.factory.BalanceMessageFactory;
 import com.keepreal.madagascar.vanga.factory.WechatOrderMessageFactory;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
+import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.service.PaymentService;
+import com.keepreal.madagascar.vanga.service.ShellService;
 import com.keepreal.madagascar.vanga.service.SkuService;
 import com.keepreal.madagascar.vanga.service.SubscribeMembershipService;
 import com.keepreal.madagascar.vanga.service.WechatOrderService;
@@ -39,6 +42,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final WechatPayService wechatPayService;
     private final BalanceMessageFactory balanceMessageFactory;
     private final SkuService skuService;
+    private final ShellService shellService;
     private final WechatOrderMessageFactory wechatOrderMessageFactory;
     private final SubscribeMembershipService subscribeMembershipService;
 
@@ -50,19 +54,24 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param wechatPayService           {@link WechatPayService}.
      * @param balanceMessageFactory      {@link BalanceMessageFactory}.
      * @param skuService                 {@link SkuService}.
+     * @param shellService               {@link ShellService}.
      * @param wechatOrderMessageFactory  {@link WechatOrderMessageFactory}.
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      */
     public PaymentGRpcController(PaymentService paymentService,
-                                 WechatOrderService wechatOrderService, WechatPayService wechatPayService,
+                                 WechatOrderService wechatOrderService,
+                                 WechatPayService wechatPayService,
                                  BalanceMessageFactory balanceMessageFactory,
                                  SkuService skuService,
-                                 WechatOrderMessageFactory wechatOrderMessageFactory, SubscribeMembershipService subscribeMembershipService) {
+                                 ShellService shellService,
+                                 WechatOrderMessageFactory wechatOrderMessageFactory,
+                                 SubscribeMembershipService subscribeMembershipService) {
         this.paymentService = paymentService;
         this.wechatOrderService = wechatOrderService;
         this.wechatPayService = wechatPayService;
         this.balanceMessageFactory = balanceMessageFactory;
         this.skuService = skuService;
+        this.shellService = shellService;
         this.wechatOrderMessageFactory = wechatOrderMessageFactory;
         this.subscribeMembershipService = subscribeMembershipService;
     }
@@ -182,7 +191,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         MembershipSku sku = this.skuService.retrieveMembershipSkuById(request.getMembershipSkuId());
         CommonStatus response;
         if (Objects.isNull(sku)) {
-             response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR);
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR);
             responseObserver.onNext(response);
             responseObserver.onCompleted();
             return;
@@ -193,6 +202,41 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         } catch (KeepRealBusinessException exception) {
             response = CommonStatusUtils.buildCommonStatus(exception.getErrorCode());
+        }
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the ios buy shell api.
+     *
+     * @param request          {@link IOSOrderBuyShellRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void iOSBuyShell(IOSOrderBuyShellRequest request,
+                            StreamObserver<BalanceResponse> responseObserver) {
+        ShellSku sku = this.skuService.retrieveShellSkuById(request.getShellSkuId());
+        BalanceResponse response;
+        if (Objects.isNull(sku)) {
+            response = BalanceResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_IOS_ORDER_PLACE_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        try {
+            Balance balance = this.shellService.buyShell(request.getUserId(), request.getAppleReceipt(), sku);
+            response = BalanceResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setBalance(this.balanceMessageFactory.valueOf(balance))
+                    .build();
+        } catch (KeepRealBusinessException exception) {
+            response = BalanceResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(exception.getErrorCode()))
+                    .build();
         }
         responseObserver.onNext(response);
         responseObserver.onCompleted();

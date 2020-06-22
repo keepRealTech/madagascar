@@ -151,12 +151,25 @@ public class SkuService {
     /**
      * Retrieves the membership sku by id.
      *
-     * @implNote Do not filter by is deleted since the payment may happen during the obsoleting of a sku.
-     * @param membershipSkuId        Membership sku id.
+     * @param membershipSkuId Membership sku id.
      * @return {@link MembershipSku}.
+     * @implNote Do not filter by is deleted since the payment may happen during the obsoleting of a sku,
+     * or a proper error prorogation should be implemented.
      */
     public MembershipSku retrieveMembershipSkuById(String membershipSkuId) {
         return this.membershipSkuRepository.findById(membershipSkuId).orElse(null);
+    }
+
+    /**
+     * Retrieves the shell sku by id.
+     *
+     * @param shellSkuId Shell sku id,
+     * @return {@link ShellSku}.
+     * @implNote Do not filter by is deleted since the payment may happen during the obsoleting of a sku,
+     * or a proper error prorogation should be implemented.
+     */
+    public ShellSku retrieveShellSkuById(String shellSkuId) {
+        return this.shellSkuRepository.findById(shellSkuId).orElse(null);
     }
 
     /**
