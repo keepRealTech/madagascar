@@ -131,7 +131,7 @@ public class SubscribeMembershipService {
                                 .toInstant().toEpochMilli());
                     });
 
-            this.balanceService.addOnCents(hostBalance, (sku.getPriceInCents() / 100L) * hostBalance.getWithdrawPercent());
+            this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.updateAll(innerPaymentList);
             this.createOrRenewSubscriptionMember(wechatOrder.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
         }
@@ -156,7 +156,7 @@ public class SubscribeMembershipService {
             Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
 
             this.balanceService.consumeShells(userBalance, sku.getPriceInShells());
-            this.balanceService.addOnCents(hostBalance, (sku.getPriceInShells() / 100L) * hostBalance.getWithdrawPercent());
+            this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.createNewShellPayments(userId, hostBalance.getWithdrawPercent(), sku);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
         }
@@ -213,6 +213,23 @@ public class SubscribeMembershipService {
      */
     private long getStartOfDayTime() {
         return LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    /**
+     * Calculates the amount after withdraw ratio.
+     *
+     * @param amount Amount.
+     * @param ratio  Ratio.
+     * @return Final amount.
+     */
+    private Long calculateAmount(Long amount, int ratio) {
+        assert amount > 0;
+
+        if (amount < 100L) {
+            return amount * ratio / 100L;
+        } else {
+            return amount / 100L * ratio;
+        }
     }
 
 }
