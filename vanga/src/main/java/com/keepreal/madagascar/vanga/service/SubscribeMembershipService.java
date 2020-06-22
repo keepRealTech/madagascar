@@ -132,7 +132,6 @@ public class SubscribeMembershipService {
                                 .toInstant().toEpochMilli());
                     });
 
-
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.updateAll(innerPaymentList);
             this.createOrRenewSubscriptionMember(wechatOrder.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
