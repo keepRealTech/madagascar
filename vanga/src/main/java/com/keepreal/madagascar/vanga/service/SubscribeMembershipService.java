@@ -49,7 +49,8 @@ public class SubscribeMembershipService {
      * @param redissonClient                   {@link RedissonClient}.
      * @param notificationEventProducerService {@link NotificationEventProducerService}.
      */
-    public SubscribeMembershipService(BalanceService balanceService, PaymentService paymentService,
+    public SubscribeMembershipService(BalanceService balanceService, 
+                                      PaymentService paymentService,
                                       SkuService membershipSkuService,
                                       SubscribeMembershipRepository subscriptionMemberRepository,
                                       LongIdGenerator idGenerator,

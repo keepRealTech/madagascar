@@ -43,6 +43,8 @@ public class FeedInfo {
     private Boolean deleted = false;
     @CreatedDate
     private Long createdTime;
+    @CreatedDate
+    private Long toppedTime;
     @LastModifiedDate
     private Long updatedTime;
 

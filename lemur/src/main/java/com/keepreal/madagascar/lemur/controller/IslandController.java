@@ -534,7 +534,7 @@ public class IslandController implements IslandApi {
                                                                 Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, page, pageSize);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, null, page, pageSize);
 
         FeedsResponse response = new FeedsResponse();
         response.setData(feedsResponse.getFeedList()
@@ -562,10 +562,11 @@ public class IslandController implements IslandApi {
     public ResponseEntity<TimelinesResponse> apiV11IslandsIdFeedsGet(String id,
                                                                      Boolean fromHost,
                                                                      Long minTimestamp,
+                                                                     Long maxTimestamp,
                                                                      Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, 0, pageSize);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize);
 
         TimelinesResponse response = new TimelinesResponse();
         response.setData(feedsResponse.getFeedList()
@@ -606,7 +607,7 @@ public class IslandController implements IslandApi {
      */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
     public List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
-        return feedService.retrieveIslandFeeds(islandId, null, userId, 0L, 0, 5)
+        return feedService.retrieveIslandFeeds(islandId, null, userId, 0L, null, 0, 5)
                 .getFeedList()
                 .stream()
                 .map(feedDTOFactory::posterValueOf)

@@ -312,6 +312,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/fromHostInQuery'
         - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
         - $ref: '#/components/parameters/pageSize'
       tags:
         - Island
@@ -482,6 +483,7 @@ paths:
     get:
       parameters:
         - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
         - $ref: '#/components/parameters/pageSize'
       tags:
         - Feed
@@ -1100,7 +1102,14 @@ components:
       schema:
         type: integer
         format: int64
-        default: 0
+    timestampBefore:
+      in: query
+      name: maxTimestamp
+      description: timestamp before
+      required: false
+      schema:
+        type: integer
+        format: int64
     page:
       in: query
       name: page
@@ -1622,12 +1631,8 @@ components:
         userId:
           type: string
           description: user id to report
-        reporterId:
-          type: string
-          description: user id
       required:
         - reportType
-        - reporterId
     ReportResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

@@ -140,7 +140,8 @@ public class FeedInfoService {
                 .setRepostCount(feedInfo.getRepostCount())
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
-                .setIsDeleted(feedInfo.isDeleted());
+                .setIsDeleted(feedInfo.getDeleted())
+                .setFromHost(feedInfo.getFromHost());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
@@ -212,7 +213,7 @@ public class FeedInfoService {
      * @return List of {@link FeedInfo}.
      */
     public List<FeedInfo> findByIds(Iterable<String> ids) {
-        return this.feedInfoRepository.findAllByIdInAndDeletedIsFalse(ids);
+        return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
     }
 
 }

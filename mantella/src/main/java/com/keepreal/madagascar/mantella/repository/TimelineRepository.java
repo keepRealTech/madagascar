@@ -15,6 +15,8 @@ public interface TimelineRepository extends ReactiveMongoRepository<Timeline, St
 
     Flux<Timeline> findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsFalse(String userId, long startTimestamp, Pageable pageable);
 
+    Flux<Timeline> findTopByUserIdAndFeedCreatedAtBeforeAndIsDeletedIsFalse(String userId, long startTimestamp, Pageable pageable);
+
     Mono<Timeline> findTopByUserIdAndIsDeletedIsFalseOrderByFeedCreatedAtDesc(String userId);
 
 }
