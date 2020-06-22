@@ -45,6 +45,7 @@ public class ReportGRpcController extends ReportServiceGrpc.ReportServiceImplBas
     public void createReport(NewReportRequest request, StreamObserver<ReportResponse> responseObserver) {
         ReportInfo.ReportInfoBuilder reportInfoBuilder = ReportInfo.builder()
                 .id(String.valueOf(idGenerator.nextId()))
+                .reporterId(request.getReporterId())
                 .type(request.getTypeValue());
 
         if (request.hasFeedId()) {
@@ -59,6 +60,7 @@ public class ReportGRpcController extends ReportServiceGrpc.ReportServiceImplBas
 
         ReportMessage.Builder reportMessageBuilder = ReportMessage.newBuilder()
                 .setId(reportInfo.getId())
+                .setReporterId(reportInfo.getReporterId())
                 .setTypeValue(request.getTypeValue());
 
         if (!StringUtils.isEmpty(reportInfo.getFeedId())) {
