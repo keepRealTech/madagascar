@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.ReportMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.ReportDTOFactory;
 import com.keepreal.madagascar.lemur.service.ReportService;
+import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -48,15 +49,17 @@ public class ReportController implements ReportApi {
         List<String> params = new ArrayList<>();
         params.add(postReportRequest.getFeedId());
         params.add(postReportRequest.getIslandId());
-        params.add(postReportRequest.getReporterId());
+        params.add(postReportRequest.getUserId());
         if (2 != params.stream().filter(StringUtils::isEmpty).count()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        String userId = HttpContextUtils.getUserIdFromContext();
+
         ReportMessage reportMessage = this.reportService.createReport(postReportRequest.getFeedId(),
                 postReportRequest.getIslandId(),
                 postReportRequest.getUserId(),
-                postReportRequest.getReporterId(),
+                userId,
                 this.convertReportType(postReportRequest.getReportType()));
 
         ReportResponse response = new ReportResponse();

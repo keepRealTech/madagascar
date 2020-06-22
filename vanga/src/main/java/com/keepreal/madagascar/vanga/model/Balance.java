@@ -47,8 +47,6 @@ public class Balance {
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
-    @Version
-    private Long version;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate

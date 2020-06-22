@@ -18,24 +18,31 @@ import java.util.stream.Collectors;
  * Represents user service.
  */
 @Service
-public class UserInfoService{
+public class UserInfoService {
 
     private final UserInfoRepository userInfoRepository;
     private final UserIdentityService userIdentityService;
+    private final BalanceService balanceService;
     private final LongIdGenerator idGenerator;
     private final DisplayIdGenerator displayIdGenerator;
 
     /**
      * Constructs user service.
      *
-     * @param userInfoRepository    {@link UserInfoRepository}.
-     * @param userIdentityService   {@link UserIdentityService}.
-     * @param idGenerator           {@link LongIdGenerator}.
-     * @param displayIdGenerator    {@link DisplayIdGenerator}.
+     * @param userInfoRepository  {@link UserInfoRepository}.
+     * @param userIdentityService {@link UserIdentityService}.
+     * @param balanceService      {@link BalanceService}.
+     * @param idGenerator         {@link LongIdGenerator}.
+     * @param displayIdGenerator  {@link DisplayIdGenerator}.
      */
-    public UserInfoService(UserInfoRepository userInfoRepository, UserIdentityService userIdentityService, LongIdGenerator idGenerator, DisplayIdGenerator displayIdGenerator) {
+    public UserInfoService(UserInfoRepository userInfoRepository,
+                           UserIdentityService userIdentityService,
+                           BalanceService balanceService,
+                           LongIdGenerator idGenerator,
+                           DisplayIdGenerator displayIdGenerator) {
         this.userInfoRepository = userInfoRepository;
         this.userIdentityService = userIdentityService;
+        this.balanceService = balanceService;
         this.idGenerator = idGenerator;
         this.displayIdGenerator = displayIdGenerator;
     }
@@ -43,13 +50,17 @@ public class UserInfoService{
     /**
      * Set userId and displayId and save.
      *
-     * @param userInfo  {@link UserInfo}.
-     * @return  {@link UserInfo}.
+     * @param userInfo {@link UserInfo}.
+     * @return {@link UserInfo}.
      */
     public UserInfo createUser(UserInfo userInfo) {
         userInfo.setId(String.valueOf(idGenerator.nextId()));
         userInfo.setDisplayId(displayIdGenerator.nextDisplayId());
-        return userInfoRepository.save(userInfo);
+        userInfo = userInfoRepository.save(userInfo);
+
+        this.balanceService.createBalanceByUserId(userInfo.getId());
+
+        return userInfo;
     }
 
     public UserInfo updateUser(UserInfo userInfo) {
@@ -59,8 +70,8 @@ public class UserInfoService{
     /**
      * Retrieve userMessage by userId.
      *
-     * @param userId    user id.
-     * @return  {@link UserMessage}.
+     * @param userId user id.
+     * @return {@link UserMessage}.
      */
     public UserMessage getUserMessageById(String userId) {
         UserInfo userInfo = userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
@@ -73,8 +84,8 @@ public class UserInfoService{
     /**
      * Retrieve userMessageList by userIdList.
      *
-     * @param userIdList    user id list.
-     * @return  {@link UserMessage}.
+     * @param userIdList user id list.
+     * @return {@link UserMessage}.
      */
     public List<UserMessage> getUserMessageListByIdList(List<String> userIdList) {
         List<UserInfo> userInfoList = userInfoRepository.findUserInfoInfosByIdInAndDeletedIsFalse(userIdList);
@@ -85,7 +96,7 @@ public class UserInfoService{
      * Retrieve userMessage.
      *
      * @param userInfo {@link UserInfo}.
-     * @return  {@link UserMessage}.
+     * @return {@link UserMessage}.
      */
     public UserMessage getUserMessage(UserInfo userInfo) {
         List<Integer> identities = userIdentityService.getAllIdentitiesByUserId(userInfo.getId());
@@ -111,8 +122,8 @@ public class UserInfoService{
     /**
      * Retrieve {@link UserInfo} by userId.
      *
-     * @param userId    userId.
-     * @return  {@link UserInfo}.
+     * @param userId userId.
+     * @return {@link UserInfo}.
      */
     public UserInfo findUserInfoByIdAndDeletedIsFalse(String userId) {
         return userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
@@ -121,8 +132,8 @@ public class UserInfoService{
     /**
      * Retrieve {@link UserInfo} by unionId.
      *
-     * @param unionId   unionId.
-     * @return  {@link UserInfo}.
+     * @param unionId unionId.
+     * @return {@link UserInfo}.
      */
     public UserInfo findUserInfoByUnionIdAndDeletedIsFalse(String unionId) {
         return userInfoRepository.findUserInfoByUnionIdAndDeletedIsFalse(unionId);
@@ -132,7 +143,7 @@ public class UserInfoService{
      * Retrieve {@link UserInfo} by displayId.
      *
      * @param displayId displayId.
-     * @return  {@link UserInfo}.
+     * @return {@link UserInfo}.
      */
     public UserInfo findUserInfoByDisplayIdAndDeletedIsFalse(String displayId) {
         return userInfoRepository.findUserInfoByDisplayIdAndDeletedIsFalse(displayId);

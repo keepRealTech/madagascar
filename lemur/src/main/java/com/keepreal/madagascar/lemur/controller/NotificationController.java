@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.NotificationApi;
 import swagger.model.NotificationsCountResponse;
+import swagger.model.NotificationsCountResponseV2;
 import swagger.model.NotificationsResponse;
 
 import java.util.Objects;
@@ -54,6 +55,24 @@ public class NotificationController implements NotificationApi {
 
         NotificationsCountResponse response = new NotificationsCountResponse();
         response.setData(this.notificationDTOFactory.valueOf(unreadNotificationsCountMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the notification count api.
+     *
+     * @return {@link NotificationsCountResponseV2}.
+     */
+    @Override
+    public ResponseEntity<NotificationsCountResponseV2> apiV11NotificationsCountGet() {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        UnreadNotificationsCountMessage unreadNotificationsCountMessage = this.notificationService.countUnreadNotifications(userId);
+
+        NotificationsCountResponseV2 response = new NotificationsCountResponseV2();
+        response.setData(this.notificationDTOFactory.valueOfV2(unreadNotificationsCountMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

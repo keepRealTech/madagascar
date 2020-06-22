@@ -53,7 +53,7 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
-            - name: ROCKETMQ_NAMESRVADDR
+            - name: ROCKETMQ_STATSEVENT_NAMESRVADDR
               valueFrom:
                 secretKeyRef:
                   name: aliyun-rmq
