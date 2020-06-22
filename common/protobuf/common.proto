@@ -169,6 +169,7 @@ message FeedMessage {
     bool isAccess = 13;
     string membershipId = 14;
     bool isMembership = 15;
+    bool fromHost = 16;
 }
 
 message CommentMessage {

@@ -8,6 +8,7 @@ import com.keepreal.madagascar.coua.UpdateMembershipRequest;
 import com.keepreal.madagascar.coua.dao.MembershipInfoRepository;
 import com.keepreal.madagascar.coua.model.MembershipInfo;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +24,6 @@ public class MembershipService {
     private final LongIdGenerator idGenerator;
     private final SubscribeMembershipService subscribeMembershipService;
     private final SubscriptionService subscriptionService;
-    private final List<Integer> defaultColorTypeList;
     private final SkuService skuService;
 
     /**
@@ -45,14 +45,14 @@ public class MembershipService {
         this.subscribeMembershipService = subscribeMembershipService;
         this.subscriptionService = subscriptionService;
         this.skuService = skuService;
-        this.defaultColorTypeList = new ArrayList<>(Arrays.asList(1, 2, 3, 1, 2));
     }
 
     public MembershipInfo createMembership(MembershipInfo membershipInfo) {
         membershipInfo.setId(String.valueOf(idGenerator.nextId()));
         List<Integer> colorTypeList = repository.getColorTypeListByIslandId(membershipInfo.getIslandId());
-        colorTypeList.forEach(new ArrayList<>(defaultColorTypeList)::remove);
-        membershipInfo.setColorType(defaultColorTypeList.get(0));
+        ArrayList<Integer> defaultColorList = new ArrayList<>(Arrays.asList(1, 2, 3, 1, 2));
+        colorTypeList.forEach(defaultColorList::remove);
+        membershipInfo.setColorType(defaultColorList.get(0));
 
         this.skuService.createMembershipSkusByMembershipId(membershipInfo.getId(), membershipInfo.getName(),
                 membershipInfo.getPricePerMonth(), membershipInfo.getHostId(), membershipInfo.getIslandId());
@@ -78,10 +78,12 @@ public class MembershipService {
                 .setName("所有岛民")
                 .setMemberCount(subscriptionService.getMemberCountByIslandId(islandId))
                 .build());
-        list.add(FeedMembershipMessage.newBuilder()
-                .setName("所有会员")
-                .setMemberCount(subscribeMembershipService.getMemberCountByIslandId(islandId))
-                .build());
+        if (!StringUtils.isEmpty(islandId)) {
+            list.add(FeedMembershipMessage.newBuilder()
+                    .setName("所有会员")
+                    .setMemberCount(subscribeMembershipService.getMemberCountByIslandId(islandId))
+                    .build());
+        }
         return list;
     }
 

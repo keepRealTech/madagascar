@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.mantella.service;
 
+import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.mantella.FeedCreateEvent;
 import com.keepreal.madagascar.mantella.model.Timeline;
@@ -95,15 +96,22 @@ public class TimelineService {
     /**
      * Retrieves the timelines by user id with pagination.
      *
-     * @param userId         User id.
-     * @param startTimestamp Timestamp.
-     * @param pageSize       The chunk size.
+     * @param userId          User id.
+     * @param timestampAfter  TimestampAfter.
+     * @param pageSize        The chunk size.
+     * @param timestampBefore TimestampBefore
      * @return A flux of {@link Timeline}.
      */
-    public Flux<Timeline> retrieveByUserIdAndCreatedTimestampAfter(String userId, long startTimestamp, int pageSize) {
-        return this.timelineRepository
-                .findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsFalse(
-                        userId, startTimestamp, PaginationUtils.defaultTimelinePageRequest(pageSize));
+    public Flux<Timeline> retrieveByUserIdAndCreatedTimestamp(String userId, UInt64Value timestampAfter, int pageSize, UInt64Value timestampBefore) {
+        if (timestampBefore != null) {
+            return this.timelineRepository
+                    .findTopByUserIdAndFeedCreatedAtBeforeAndIsDeletedIsFalse(
+                            userId, timestampBefore.getValue(), PaginationUtils.defaultTimelinePageRequest(pageSize));
+        } else {
+            return this.timelineRepository
+                    .findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsFalse(
+                            userId, timestampAfter.getValue(), PaginationUtils.defaultTimelinePageRequest(pageSize));
+        }
     }
 
     /**

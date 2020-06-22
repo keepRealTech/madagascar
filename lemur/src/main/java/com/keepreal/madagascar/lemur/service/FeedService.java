@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.service;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -215,7 +216,7 @@ public class FeedService {
      * @param pageSize       Page size.
      * @return {@link FeedsResponse}.
      */
-    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, Long timestampAfter, int page, int pageSize) {
+    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, Long timestampAfter, Long timestampBefore, int page, int pageSize) {
         Assert.hasText(islandId, "Island id is null.");
 
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
@@ -227,8 +228,10 @@ public class FeedService {
             conditionBuilder.setFromHost(BoolValue.of(fromHost));
         }
 
-        if (Objects.nonNull(timestampAfter)) {
-            conditionBuilder.setTimestampAfter(Int64Value.of(timestampAfter));
+        if (Objects.nonNull(timestampBefore)) {
+            conditionBuilder.setTimestampBefore(Int64Value.of(timestampBefore));
+        } else {
+            conditionBuilder.setTimestampAfter(Int64Value.of(timestampAfter == null ? 0L : timestampAfter));
         }
 
         RetrieveMultipleFeedsRequest request = RetrieveMultipleFeedsRequest.newBuilder()
@@ -265,10 +268,10 @@ public class FeedService {
      * @param pageSize       Page size.
      * @return {@link FeedsResponse}.
      */
-    public FeedsResponse retrieveUserFeeds(String userId, long timestampAfter, int pageSize) {
+    public FeedsResponse retrieveUserFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
         Assert.hasText(userId, "User id is null.");
 
-        TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(userId, timestampAfter, pageSize);
+        TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(userId, timestampAfter, timestampBefore, pageSize);
 
         return this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
                 .stream()
@@ -284,18 +287,21 @@ public class FeedService {
      * @param pageSize       Page size.
      * @return {@link TimelinesResponse}.
      */
-    private TimelinesResponse retrieveTimelinesByUserId(String userId, long timestampAfter, int pageSize) {
+    private TimelinesResponse retrieveTimelinesByUserId(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
         TimelineServiceGrpc.TimelineServiceBlockingStub mantellaStub = TimelineServiceGrpc.newBlockingStub(this.mantellaChannel);
 
-        RetrieveMultipleTimelinesRequest timelinesRequest = RetrieveMultipleTimelinesRequest.newBuilder()
-                .setCreatedAfter(timestampAfter)
+        RetrieveMultipleTimelinesRequest.Builder builder = RetrieveMultipleTimelinesRequest.newBuilder()
                 .setUserId(userId)
-                .setPageRequest(PaginationUtils.buildPageRequest(0, pageSize))
-                .build();
+                .setPageRequest(PaginationUtils.buildPageRequest(0, pageSize));
+        if (timestampBefore != null) {
+            builder.setTimestampBefore(UInt64Value.of(timestampBefore));
+        } else {
+            builder.setTimestampAfter(timestampAfter == null ? UInt64Value.of(0L) : UInt64Value.of(timestampAfter));
+        }
 
         TimelinesResponse timelinesResponse;
         try {
-            timelinesResponse = mantellaStub.retrieveMultipleTimelines(timelinesRequest);
+            timelinesResponse = mantellaStub.retrieveMultipleTimelines(builder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

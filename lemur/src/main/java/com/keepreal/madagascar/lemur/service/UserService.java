@@ -33,7 +33,7 @@ import java.util.Objects;
 public class UserService {
 
     private static final int NAME_LENGTH_THRESHOLD = 32;
-    private static final int DESCRIPTION_LENGTH_THRESHOLD = 60;
+    private static final int DESCRIPTION_LENGTH_THRESHOLD = 120;
 
     private final Channel channel;
 

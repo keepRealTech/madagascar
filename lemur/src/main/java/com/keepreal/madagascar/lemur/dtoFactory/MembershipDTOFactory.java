@@ -23,6 +23,7 @@ public class MembershipDTOFactory {
         dto.id(membershipMessage.getId());
         dto.setMembershipName(membershipMessage.getName());
         dto.setColorType(membershipMessage.getColorType());
+        dto.setPricePerMonthInCents((long) membershipMessage.getPricePerMonth());
         return dto;
     }
 
