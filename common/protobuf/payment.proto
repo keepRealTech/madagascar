@@ -55,10 +55,17 @@ message WechatOrderCallbackRequest {
   string payload = 1;
 }
 
+message IOSOrderBuyShellRequest {
+  string userId = 1;
+  string shellSkuId = 2;
+  string appleReceipt = 3;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
   rpc SubmitSubscribeMembershipWithWechatPay (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
   rpc RetrieveWechatOrderById (RetrieveWechatOrderByIdRequest) returns (WechatOrderResponse) {};
   rpc WechatPayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
+  rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};
 }
