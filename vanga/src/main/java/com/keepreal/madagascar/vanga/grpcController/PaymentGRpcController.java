@@ -15,7 +15,6 @@ import com.keepreal.madagascar.vanga.factory.WechatOrderMessageFactory;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
-import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.service.PaymentService;
 import com.keepreal.madagascar.vanga.service.SkuService;
 import com.keepreal.madagascar.vanga.service.SubscribeMembershipService;
@@ -26,7 +25,6 @@ import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 
-import javax.transaction.Transactional;
 import java.util.Objects;
 
 /**
@@ -105,13 +103,22 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     public void submitSubscribeMembershipWithWechatPay(SubscribeMembershipRequest request,
                                                        StreamObserver<WechatOrderResponse> responseObserver) {
         MembershipSku sku = this.skuService.retrieveMembershipSkuById(request.getMembershipSkuId());
+        if (Objects.isNull(sku)) {
+            WechatOrderResponse response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId());
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
-             response = WechatOrderResponse.newBuilder()
+            response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
                     .build();
@@ -163,10 +170,32 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
     }
 
+    /**
+     * Implements the shell pay api.
+     *
+     * @param request          {@link SubscribeMembershipRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
     @Override
     public void subscribeMembershipWithShell(SubscribeMembershipRequest request,
                                              StreamObserver<CommonStatus> responseObserver) {
-        // TODO: checks shell balance, subtracts and inserts payments and membership subscription
+        MembershipSku sku = this.skuService.retrieveMembershipSkuById(request.getMembershipSkuId());
+        CommonStatus response;
+        if (Objects.isNull(sku)) {
+             response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR);
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        try {
+            this.subscribeMembershipService.subscribeMembershipWithShell(request.getUserId(), sku);
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
+        } catch (KeepRealBusinessException exception) {
+            response = CommonStatusUtils.buildCommonStatus(exception.getErrorCode());
+        }
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
 }

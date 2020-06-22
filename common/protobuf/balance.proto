@@ -17,11 +17,16 @@ message RetrieveBalanceByUserIdRequest {
   string userId = 1;
 }
 
+message CreateBalanceByUserIdRequest {
+  string userId = 1;
+}
+
 message BalanceResponse {
   CommonStatus status = 1;
   BalanceMessage balance = 2;
 }
 
 service BalanceService {
-  rpc RetrieveBalanceByUserId (RetrieveBalanceByUserIdRequest) returns (BalanceResponse) {};
+  rpc RetrieveBalanceByUserId(RetrieveBalanceByUserIdRequest) returns (BalanceResponse) {};
+  rpc CreateBalanceByUserId(CreateBalanceByUserIdRequest) returns(CommonStatus) {};
 }
