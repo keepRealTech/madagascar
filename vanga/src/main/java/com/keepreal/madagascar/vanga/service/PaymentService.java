@@ -8,6 +8,7 @@ import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.PaymentType;
+import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import javax.transaction.Transactional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -114,7 +116,7 @@ public class PaymentService {
      * @return {@link Payment}.
      */
     @Transactional
-    public List<Payment> createNewShellPayments(String userId, Integer withdrawPercent, MembershipSku sku) {
+    public List<Payment> createPayShellPayments(String userId, Integer withdrawPercent, MembershipSku sku) {
         List<Payment> payments =
                 IntStream.range(0, sku.getTimeInMonths())
                         .mapToObj(i -> Payment.builder()
@@ -131,7 +133,33 @@ public class PaymentService {
         return this.paymentRepository.saveAll(payments);
     }
 
+    /**
+     * Creates new buy shell payments.
+     *
+     * @param userId          User id.
+     * @param sku             {@link ShellSku}.
+     * @param transactionId   Transaction id.
+     * @return {@link Payment}.
+     */
+    @Transactional
+    public Payment createBuyShellPayments(String userId, ShellSku sku, String transactionId) {
+        Payment payment = this.paymentRepository.findTopByTradeNumAndTypeAndDeletedIsFalse(transactionId, PaymentType.SHELLBUY.getValue());
 
+        if (Objects.nonNull(payment)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_SHELL_IOS_RECEIPT_DUPLICATE_ERROR);
+        }
+
+        payment = Payment.builder()
+                        .id(String.valueOf(this.idGenerator.nextId()))
+                        .type(PaymentType.SHELLBUY.getValue())
+                        .amountInShells(sku.getShells())
+                        .amountInCents(sku.getPriceInCents())
+                        .userId(userId)
+                        .state(PaymentState.CLOSED.getValue())
+                        .tradeNum(transactionId)
+                        .build();
+        return this.paymentRepository.save(payment);
+    }
 
     /**
      * Retrieves all payments associates to an order.

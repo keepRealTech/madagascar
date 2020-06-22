@@ -1,5 +1,7 @@
-package com.keepreal.madagascar.marty.config;
+package com.keepreal.madagascar.vanga.config;
 
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
@@ -8,7 +10,11 @@ import org.springframework.web.client.RestTemplate;
  * Represents the rest template configurations.
  */
 @Configuration
-public class RestTemplateConfiguration {
+@ConfigurationProperties(prefix = "ios-pay", ignoreUnknownFields = false)
+@Data
+public class IOSPayConfiguration {
+
+    private String verifyUrl;
 
     /**
      * TODO: config connection pool, timeout

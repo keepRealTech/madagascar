@@ -23,6 +23,9 @@ wechat-pay:
   cert-path: /app/apiclient_cert.pem
   host-ip: 127.0.0.1
 
+ios-pay:
+  verify-url: https://buy.itunes.apple.com/verifyReceipt
+
 rocketmq:
   notification:
     accessKey: xxx
