@@ -13,8 +13,8 @@ message TimelineMessage {
 message RetrieveMultipleTimelinesRequest {
     string userId = 1;
     PageRequest pageRequest = 2;
-    uint64 timestamp = 3;
-    bool isAfter = 4;
+    google.protobuf.UInt64Value timestampAfter = 3;
+    google.protobuf.UInt64Value timestampBefore = 4;
 }
 
 message TimelinesResponse {

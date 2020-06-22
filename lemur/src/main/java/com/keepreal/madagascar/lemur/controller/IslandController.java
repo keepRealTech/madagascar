@@ -534,7 +534,7 @@ public class IslandController implements IslandApi {
                                                                 Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null,null, page, pageSize);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, null, page, pageSize);
 
         FeedsResponse response = new FeedsResponse();
         response.setData(feedsResponse.getFeedList()

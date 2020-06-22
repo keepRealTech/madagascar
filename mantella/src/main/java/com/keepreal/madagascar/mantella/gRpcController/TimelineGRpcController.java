@@ -45,11 +45,18 @@ public class TimelineGRpcController extends ReactorTimelineServiceGrpc.TimelineS
     @Override
     public Mono<TimelinesResponse> retrieveMultipleTimelines(Mono<RetrieveMultipleTimelinesRequest> request) {
         return request.flatMapMany(retrieveMultipleTimelinesRequest ->
-                this.timelineService.retrieveByUserIdAndCreatedTimestampAfter(
-                        retrieveMultipleTimelinesRequest.getUserId(),
-                        retrieveMultipleTimelinesRequest.getTimestamp(),
-                        retrieveMultipleTimelinesRequest.getPageRequest().getPageSize(),
-                        retrieveMultipleTimelinesRequest.getIsAfter()))
+                retrieveMultipleTimelinesRequest.hasTimestampBefore() ?
+                    this.timelineService.retrieveByUserIdAndCreatedTimestamp(
+                            retrieveMultipleTimelinesRequest.getUserId(),
+                            retrieveMultipleTimelinesRequest.getTimestampAfter(),
+                            retrieveMultipleTimelinesRequest.getPageRequest().getPageSize(),
+                            retrieveMultipleTimelinesRequest.getTimestampBefore()) :
+                    this.timelineService.retrieveByUserIdAndCreatedTimestamp(
+                            retrieveMultipleTimelinesRequest.getUserId(),
+                            retrieveMultipleTimelinesRequest.getTimestampAfter(),
+                            retrieveMultipleTimelinesRequest.getPageRequest().getPageSize(),
+                            null
+                    ))
                 .map(this.timelineMessageFactory::valueOf)
                 .collectList()
                 .map(timelineMessages -> {

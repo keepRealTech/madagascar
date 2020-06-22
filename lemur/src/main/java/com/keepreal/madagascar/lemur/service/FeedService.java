@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.service;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -293,11 +294,9 @@ public class FeedService {
                 .setUserId(userId)
                 .setPageRequest(PaginationUtils.buildPageRequest(0, pageSize));
         if (timestampBefore != null) {
-            builder.setTimestamp(timestampBefore);
-            builder.setIsAfter(false);
+            builder.setTimestampBefore(UInt64Value.of(timestampBefore));
         } else {
-            builder.setTimestamp(timestampAfter == null ? 0L : timestampAfter);
-            builder.setIsAfter(true);
+            builder.setTimestampAfter(timestampAfter == null ? UInt64Value.of(0L) : UInt64Value.of(timestampAfter));
         }
 
         TimelinesResponse timelinesResponse;
