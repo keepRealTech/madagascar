@@ -1,8 +1,10 @@
 package com.keepreal.madagascar.vanga.grpcController;
 
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.BalanceServiceGrpc;
+import com.keepreal.madagascar.vanga.CreateBalanceByUserIdRequest;
 import com.keepreal.madagascar.vanga.RetrieveBalanceByUserIdRequest;
 import com.keepreal.madagascar.vanga.factory.BalanceMessageFactory;
 import com.keepreal.madagascar.vanga.model.Balance;
@@ -12,6 +14,8 @@ import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 
 import java.util.Objects;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the balance grpc controller.
@@ -56,6 +60,22 @@ public class BalanceGRpcController extends BalanceServiceGrpc.BalanceServiceImpl
                     .build();
         }
 
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Creates balance for user.
+     *
+     * @param request {@link CreateBalanceByUserIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void createBalanceByUserId(CreateBalanceByUserIdRequest request,
+                                     StreamObserver<CommonStatus> responseObserver) {
+        this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(request.getUserId());
+
+        CommonStatus response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

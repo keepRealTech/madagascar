@@ -738,6 +738,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotificationsCountResponse'
+  /api/v1.1/notifications/count:
+    get:
+      tags:
+        - Notification
+      summary: retrieves the count of unread notifications
+      responses:
+        '200':
+          description: notifications count response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsCountResponseV2'
   /api/v1/configs:
     get:
       parameters:
@@ -2058,11 +2070,22 @@ components:
     UnreadIslandNoticesCountDTO:
       type: object
       properties:
-        unreadNewSubscriberNoticeCount:
+        UnreadNewSubscriberNoticeCount:
           type: integer
-        unreadNewMemberNoticeCount:
+        UnreadNewMemberNoticeCount:
           type: integer
     UnreadNotificationCountDTO:
+      type: object
+      properties:
+        hasUnread:
+          type: boolean
+        UnreadCommentsCount:
+          type: integer
+        UnreadReactionsCount:
+          type: integer
+        UnreadIslandNoticesCount:
+          type: integer
+    UnreadNotificationCountDTOV2:
       type: object
       properties:
         hasUnread:
@@ -2096,6 +2119,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UnreadNotificationCountDTO'
+    NotificationsCountResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UnreadNotificationCountDTOV2'
     NotificationsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

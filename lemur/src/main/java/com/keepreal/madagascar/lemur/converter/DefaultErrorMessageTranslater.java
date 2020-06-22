@@ -44,6 +44,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "单日提现上限为两万人民币，请重新输入";
             case REQUEST_MEMBERSHIP_DELETE_ERROR:
                 return "已经有用户订阅的会员不能删除哦";
+            case REQUEST_USER_SHELL_INSUFFICIENT_ERROR:
+                return "当前贝壳余额不足，请充值后再试";
             default:
                 return errorCode.getValueDescriptor().getName();
         }

@@ -30,6 +30,7 @@ import java.util.stream.IntStream;
 public class SubscribeMembershipService {
 
     private static final long PAYMENT_SETTLE_IN_MONTH = 1L;
+    private final BalanceService balanceService;
     private final PaymentService paymentService;
     private final SkuService membershipSkuService;
     private final SubscribeMembershipRepository subscriptionMemberRepository;
@@ -41,6 +42,7 @@ public class SubscribeMembershipService {
     /**
      * Constructor the subscribe membership service.
      *
+     * @param balanceService                   {@link BalanceService}.
      * @param paymentService                   {@link PaymentService}.
      * @param membershipSkuService             {@link SkuService}.
      * @param subscriptionMemberRepository     {@link SubscribeMembershipRepository}.
@@ -49,12 +51,14 @@ public class SubscribeMembershipService {
      * @param notificationEventProducerService {@link NotificationEventProducerService}.
      * @param balanceService                   {@link BalanceService}.
      */
-    public SubscribeMembershipService(PaymentService paymentService,
+    public SubscribeMembershipService(BalanceService balanceService, 
+                                      PaymentService paymentService,
                                       SkuService membershipSkuService,
                                       SubscribeMembershipRepository subscriptionMemberRepository,
                                       LongIdGenerator idGenerator,
                                       RedissonClient redissonClient,
-                                      NotificationEventProducerService notificationEventProducerService, BalanceService balanceService) {
+                                      NotificationEventProducerService notificationEventProducerService) {
+        this.balanceService = balanceService;
         this.paymentService = paymentService;
         this.membershipSkuService = membershipSkuService;
         this.subscriptionMemberRepository = subscriptionMemberRepository;
@@ -71,7 +75,7 @@ public class SubscribeMembershipService {
      * @return member count.
      */
     public Integer getMemberCountByIslandId(String islandId) {
-        return this.subscriptionMemberRepository.getMemberCountByIslandId(islandId, getCurrentTime());
+        return this.subscriptionMemberRepository.getMemberCountByIslandId(islandId, getStartOfDayTime());
     }
 
     /**
@@ -81,7 +85,7 @@ public class SubscribeMembershipService {
      * @return member count.
      */
     public Integer getMemberCountByMembershipId(String membershipId) {
-        return this.subscriptionMemberRepository.getMemberCountByMembershipId(membershipId, getCurrentTime());
+        return this.subscriptionMemberRepository.getMemberCountByMembershipId(membershipId, getStartOfDayTime());
     }
 
     /**
@@ -101,18 +105,18 @@ public class SubscribeMembershipService {
             return;
         }
 
-        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", wechatOrder.getUserId()))) {
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-wechat-%s", wechatOrder.getUserId()))) {
             List<Payment> innerPaymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
-
-            if (innerPaymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
-                return;
-            }
 
             MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getMemberShipSkuId());
 
-            Balance balance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
-            Long price = sku.getPriceInCents();
-            balance.setBalanceInCents(balance.getBalanceInCents() + price);
+            if (innerPaymentList.isEmpty()) {
+                innerPaymentList = this.paymentService.createNewWechatPayments(wechatOrder, sku);
+            } else if (innerPaymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
+                return;
+            }
+
+            Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
 
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
                     wechatOrder.getUserId(), sku.getMembershipId());
@@ -121,16 +125,45 @@ public class SubscribeMembershipService {
                     Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
             ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
 
+            List<Payment> finalInnerPaymentList = innerPaymentList;
             IntStream.range(0, innerPaymentList.size())
                     .forEach(i -> {
-                        innerPaymentList.get(i).setState(PaymentState.OPEN.getValue());
-                        innerPaymentList.get(i).setValidAfter(currentExpireTime
+                        finalInnerPaymentList.get(i).setWithdrawPercent(hostBalance.getWithdrawPercent());
+                        finalInnerPaymentList.get(i).setState(PaymentState.OPEN.getValue());
+                        finalInnerPaymentList.get(i).setValidAfter(currentExpireTime
                                 .plusMonths(i * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
                                 .toInstant().toEpochMilli());
                     });
-            this.balanceService.updateBalance(balance);
+
+
+            this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.updateAll(innerPaymentList);
             this.createOrRenewSubscriptionMember(wechatOrder.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
+        }
+    }
+
+    /**
+     * Subscribes membership with shell.
+     *
+     * @param userId User id.
+     * @param sku    {@link MembershipSku}.
+     */
+    @Transactional
+    public void subscribeMembershipWithShell(String userId, MembershipSku sku) {
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-shell-%s", userId))) {
+            SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
+                    userId, sku.getMembershipId());
+            Instant instant = Objects.isNull(currentSubscribeMembership) ?
+                    Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
+            ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+
+            Balance userBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(userId);
+            Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
+
+            this.balanceService.consumeShells(userBalance, sku.getPriceInShells());
+            this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
+            this.paymentService.createNewShellPayments(userId, hostBalance.getWithdrawPercent(), sku);
+            this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
         }
     }
 
@@ -174,11 +207,34 @@ public class SubscribeMembershipService {
      * @return  membership id list.
      */
     public List<String> getMembershipIdListByUserIdAndIslandId(String userId, String islandId) {
-        List<String> membershipIdList = subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getCurrentTime());
+        List<String> membershipIdList = subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getStartOfDayTime());
         return membershipIdList == null ? Collections.emptyList() : membershipIdList;
     }
 
-    private long getCurrentTime() {
+    /**
+     * Gets the current day start timestamp.
+     *
+     * @return Timestamp.
+     */
+    private long getStartOfDayTime() {
         return LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
+
+    /**
+     * Calculates the amount after withdraw ratio.
+     *
+     * @param amount Amount.
+     * @param ratio  Ratio.
+     * @return Final amount.
+     */
+    private Long calculateAmount(Long amount, int ratio) {
+        assert amount > 0;
+
+        if (amount < 100L) {
+            return amount * ratio / 100L;
+        } else {
+            return amount / 100L * ratio;
+        }
+    }
+
 }

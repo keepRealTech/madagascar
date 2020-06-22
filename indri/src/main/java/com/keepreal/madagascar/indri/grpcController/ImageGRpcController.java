@@ -69,9 +69,9 @@ public class ImageGRpcController extends ReactorImageServiceGrpc.ImageServiceImp
                         new ByteArrayInputStream(simpleEntry.getValue()))))
                 .last()
                 .map(putObjectResult -> this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .doOnError(error -> log.error(error.toString()))
                 .onErrorReturn(NoSuchElementException.class, this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                .onErrorReturn(this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_IMAGE_UPLOAD_ERROR))
-                .doOnError(error -> log.error(error.toString()));
+                .onErrorReturn(this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_IMAGE_UPLOAD_ERROR));
     }
 
     /**
@@ -95,8 +95,8 @@ public class ImageGRpcController extends ReactorImageServiceGrpc.ImageServiceImp
                                             migrateImageRequest.getDestinationUri(),
                                             new ByteArrayInputStream(bytes)))))
                 .map(putObjectResult -> this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                .onErrorReturn(this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_IMAGE_UPLOAD_ERROR))
-                .doOnError(error -> log.error(error.toString()));
+                .doOnError(error -> log.error(error.toString()))
+                .onErrorReturn(this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_IMAGE_UPLOAD_ERROR));
     }
 
 }
