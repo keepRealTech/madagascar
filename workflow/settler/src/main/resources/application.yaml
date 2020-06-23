@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: settler
+  datasource:
+    url: jdbc:mysql://kr_admin:gYvi89kGKJoqZbzk@rm-2ze0p9v29ef1p05us6o.mysql.rds.aliyuncs.com:3306/coua?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+  data:
+    mongodb:
+      database: settler
+      uri: mongodb://root:05GEJ9k7heSCM3E@dds-2ze9a184c36df9441.mongodb.rds.aliyuncs.com:3717,dds-2ze9a184c36df9442.mongodb.rds.aliyuncs.com:3717/admin?replicaSet=mgset-31197927&readPreference=secondaryPreferred&maxIdleTimeMS=300000
+  redis:
+    host: r-2ze4jhfytptucbsu8d.redis.rds.aliyuncs.com
+    port: 6379
+    password: GcrkNYTcST4PzlV@
+    ssl: false
+
+executor:
+  thread: 20
