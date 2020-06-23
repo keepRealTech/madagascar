@@ -12,6 +12,6 @@ import java.util.List;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, String> {
 
-    List<Payment> findTop5000ByTypeInAndStateAndValidAfterBeforeAndDeletedIsFalse(List<Integer> types, Integer state, Long validAfter);
+    List<Payment> findTop5000ByTypeInAndStateAndValidAfterBeforeAndDeletedIsFalseOrderByCreatedTime(List<Integer> types, Integer state, Long validAfter);
 
 }

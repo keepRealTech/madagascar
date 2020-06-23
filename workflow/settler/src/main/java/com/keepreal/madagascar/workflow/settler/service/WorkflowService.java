@@ -12,7 +12,7 @@ import java.time.Instant;
 @Service
 public class WorkflowService {
 
-    private static final String WORKFLOW_TYPE = "Settler-daily";
+    private static final String WORKFLOW_TYPE = "settler-daily";
     private final WorkflowRepository workflowRepository;
 
     /**

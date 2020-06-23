@@ -38,12 +38,12 @@ public class PaymentService {
      */
     public List<Payment> retrieveTop5000UnsettledPayments() {
         long today = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        return this.paymentRepository.findTop5000ByTypeInAndStateAndValidAfterBeforeAndDeletedIsFalse(this.unsettledType,
+        return this.paymentRepository.findTop5000ByTypeInAndStateAndValidAfterBeforeAndDeletedIsFalseOrderByCreatedTime(this.unsettledType,
                 PaymentState.OPEN.getValue(), today);
     }
 
     /**
-     * Updates the state of payments to {@link PaymentState.CLOSED}.
+     * Updates the state of payments to {@link PaymentState}.
      *
      * @param payments {@link Payment}.
      * @return {@link Payment}.

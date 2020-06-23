@@ -41,6 +41,7 @@ public class SettlerApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
         this.settlerService.run(args);
+        System.exit(0);
     }
 
 }
