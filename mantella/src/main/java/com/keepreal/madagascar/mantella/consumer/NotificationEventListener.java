@@ -54,15 +54,13 @@ public class NotificationEventListener implements MessageListener {
      */
     @Override
     public Action consume(Message message, ConsumeContext context) {
-        log.info("starting consuming a message.");
+        log.info("starting consuming a notification message.");
         try {
             NotificationEvent event = NotificationEvent.parseFrom(message.getBody());
 
             if (Objects.isNull(event)) {
                 return Action.CommitMessage;
             }
-
-            log.info(event.toString());
 
             switch (event.getType()) {
                 case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
