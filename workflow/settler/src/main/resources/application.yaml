@@ -10,12 +10,11 @@ spring:
   data:
     mongodb:
       database: settler
-      uri: mongodb://root:05GEJ9k7heSCM3E@dds-2ze9a184c36df9441.mongodb.rds.aliyuncs.com:3717,dds-2ze9a184c36df9442.mongodb.rds.aliyuncs.com:3717/admin?replicaSet=mgset-31197927&readPreference=secondaryPreferred&maxIdleTimeMS=300000
+      uri: mongodb://root:05GEJ9k7heSCM3E@dds-2ze9a184c36df9441710-pub.mongodb.rds.aliyuncs.com:3717/admin?maxIdleTimeMS=300000
   redis:
-    host: r-2ze4jhfytptucbsu8d.redis.rds.aliyuncs.com
+    host: 127.0.0.1
     port: 6379
-    password: GcrkNYTcST4PzlV@
     ssl: false
 
 executor:
-  thread: 20
+  threads: 20
