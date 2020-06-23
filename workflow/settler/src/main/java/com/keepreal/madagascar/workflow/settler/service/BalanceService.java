@@ -55,7 +55,7 @@ public class BalanceService {
     @Transactional
     public Balance addOnCents(Balance balance, Long amountInCents) {
         balance = this.balanceRepository.findByIdAndDeletedIsFalse(balance.getId());
-        balance.setBalanceInCents(balance.getBalanceInCents() + amountInCents);
+        balance.setBalanceInCents(balance.getBalanceEligibleInCents() + amountInCents);
 
         return this.updateBalance(balance);
     }
