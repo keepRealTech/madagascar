@@ -50,7 +50,7 @@ public class IslandInfo {
     @Builder.Default
     private Boolean deleted = false;
     @Builder.Default
-    private Integer lockedUntil = 0;
+    private Long lockedUntil = 0L;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate
