@@ -40,6 +40,7 @@ public class FeedEventListener implements MessageOrderListener {
      */
     @Override
     public OrderAction consume(Message message, ConsumeOrderContext context) {
+        log.info("starting consuming a feed message.");
         try {
             if (Objects.isNull(message) || Objects.isNull(message.getBody())) {
                 return OrderAction.Success;
