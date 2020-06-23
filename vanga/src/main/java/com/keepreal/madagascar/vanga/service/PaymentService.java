@@ -110,13 +110,14 @@ public class PaymentService {
     /**
      * Creates new shell payments.
      *
-     * @param userId          User id.
-     * @param withdrawPercent Withdraw percent.
-     * @param sku             {@link MembershipSku}.
+     * @param userId            User id.
+     * @param withdrawPercent   Withdraw percent.
+     * @param sku               {@link MembershipSku}.
+     * @param currentExpireTime {@link ZonedDateTime}.
      * @return {@link Payment}.
      */
     @Transactional
-    public List<Payment> createPayShellPayments(String userId, Integer withdrawPercent, MembershipSku sku) {
+    public List<Payment> createPayShellPayments(String userId, Integer withdrawPercent, MembershipSku sku, ZonedDateTime currentExpireTime) {
         List<Payment> payments =
                 IntStream.range(0, sku.getTimeInMonths())
                         .mapToObj(i -> Payment.builder()
@@ -127,6 +128,9 @@ public class PaymentService {
                                 .withdrawPercent(withdrawPercent)
                                 .state(PaymentState.OPEN.getValue())
                                 .payeeId(sku.getHostId())
+                                .validAfter(currentExpireTime
+                                        .plusMonths((i + 1) * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
+                                        .toInstant().toEpochMilli())
                                 .build())
                         .collect(Collectors.toList());
 
@@ -136,9 +140,9 @@ public class PaymentService {
     /**
      * Creates new buy shell payments.
      *
-     * @param userId          User id.
-     * @param sku             {@link ShellSku}.
-     * @param transactionId   Transaction id.
+     * @param userId        User id.
+     * @param sku           {@link ShellSku}.
+     * @param transactionId Transaction id.
      * @return {@link Payment}.
      */
     @Transactional
@@ -150,14 +154,14 @@ public class PaymentService {
         }
 
         payment = Payment.builder()
-                        .id(String.valueOf(this.idGenerator.nextId()))
-                        .type(PaymentType.SHELLBUY.getValue())
-                        .amountInShells(sku.getShells())
-                        .amountInCents(sku.getPriceInCents())
-                        .userId(userId)
-                        .state(PaymentState.CLOSED.getValue())
-                        .tradeNum(transactionId)
-                        .build();
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .type(PaymentType.SHELLBUY.getValue())
+                .amountInShells(sku.getShells())
+                .amountInCents(sku.getPriceInCents())
+                .userId(userId)
+                .state(PaymentState.CLOSED.getValue())
+                .tradeNum(transactionId)
+                .build();
         return this.paymentRepository.save(payment);
     }
 
