@@ -63,7 +63,7 @@ public class SettlerService {
                 1L,
                 TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(100),
-                new CustomizableThreadFactory("stats-event-producer-"));
+                new CustomizableThreadFactory("settler-"));
     }
 
     /**
@@ -99,7 +99,7 @@ public class SettlerService {
                             futures.add(CompletableFuture.supplyAsync(() -> this.batchSettle(value), this.executorService)
                                     .thenAccept(succeedIds -> workflowLog.getPaymentIds().addAll(succeedIds))));
 
-                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()]));
+                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).get();
                 }
 
                 this.workflowService.succeed(workflowLog);
