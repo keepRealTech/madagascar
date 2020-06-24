@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.EntityListeners;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,7 +25,8 @@ public class WorkflowLog {
     private String id;
     private String type;
 
-    private List<String> paymentIds;
+    @Builder.Default
+    private List<String> paymentIds = new ArrayList<>();
 
     private Long startTimestamp;
     private Long finishTimestamp;
