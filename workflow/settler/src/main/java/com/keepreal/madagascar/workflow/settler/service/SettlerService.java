@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -138,7 +139,7 @@ public class SettlerService {
      * @param payments    {@link Payment}.
      * @return Payment ids.
      */
-    @Transactional
+    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     public List<String> settle(Balance userBalance, List<Payment> payments) {
         long amount = this.paymentService.settlePayment(payments);
         this.balanceService.addOnCents(userBalance, amount);

@@ -4,13 +4,16 @@ import com.keepreal.madagascar.workflow.settler.service.SettlerService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.AdviceMode;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * Represents the settler application workflow entrance.
  */
 @SpringBootApplication
 @EnableJpaAuditing
+@EnableTransactionManagement(mode = AdviceMode.ASPECTJ)
 public class SettlerApplication implements CommandLineRunner {
 
     private final SettlerService settlerService;
