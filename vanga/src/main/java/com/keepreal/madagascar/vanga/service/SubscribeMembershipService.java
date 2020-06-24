@@ -17,9 +17,9 @@ import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -29,7 +29,7 @@ import java.util.stream.IntStream;
 @Service
 public class SubscribeMembershipService {
 
-    private static final long PAYMENT_SETTLE_IN_MONTH = 1L;
+    public static final long PAYMENT_SETTLE_IN_MONTH = 1L;
     private final BalanceService balanceService;
     private final PaymentService paymentService;
     private final SkuService membershipSkuService;
@@ -49,7 +49,7 @@ public class SubscribeMembershipService {
      * @param redissonClient                   {@link RedissonClient}.
      * @param notificationEventProducerService {@link NotificationEventProducerService}.
      */
-    public SubscribeMembershipService(BalanceService balanceService, 
+    public SubscribeMembershipService(BalanceService balanceService,
                                       PaymentService paymentService,
                                       SkuService membershipSkuService,
                                       SubscribeMembershipRepository subscriptionMemberRepository,
@@ -128,7 +128,7 @@ public class SubscribeMembershipService {
                         finalInnerPaymentList.get(i).setWithdrawPercent(hostBalance.getWithdrawPercent());
                         finalInnerPaymentList.get(i).setState(PaymentState.OPEN.getValue());
                         finalInnerPaymentList.get(i).setValidAfter(currentExpireTime
-                                .plusMonths(i * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
+                                .plusMonths((i + 1) * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
                                 .toInstant().toEpochMilli());
                     });
 
@@ -158,7 +158,7 @@ public class SubscribeMembershipService {
 
             this.balanceService.consumeShells(userBalance, sku.getPriceInShells());
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
-            this.paymentService.createPayShellPayments(userId, hostBalance.getWithdrawPercent(), sku);
+            this.paymentService.createPayShellPayments(userId, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
         }
     }
@@ -198,9 +198,9 @@ public class SubscribeMembershipService {
     /**
      * retrieve the membership id list by user id and island id.
      *
-     * @param userId    user id.
-     * @param islandId  island id.
-     * @return  membership id list.
+     * @param userId   user id.
+     * @param islandId island id.
+     * @return membership id list.
      */
     public List<String> getMembershipIdListByUserIdAndIslandId(String userId, String islandId) {
         List<String> membershipIdList = subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getStartOfDayTime());
