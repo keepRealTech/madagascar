@@ -141,7 +141,7 @@ public class FeedInfoService {
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
                 .setIsDeleted(feedInfo.getDeleted())
-                .setFromHost(feedInfo.getFromHost());
+                .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
