@@ -13,4 +13,4 @@ include 'brookesia'
 include 'mantella'
 include 'marty'
 include 'vanga'
-
+include 'workflow:settler'

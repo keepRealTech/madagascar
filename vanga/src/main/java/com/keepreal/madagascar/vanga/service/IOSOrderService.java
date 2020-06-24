@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -70,7 +71,7 @@ public class IOSOrderService {
                 JSONObject.parseObject(responseData.getString("receipt")).getString("in_app"), HashMap.class);
 
         Map<String, HashMap> dictionary = inApps.stream()
-                .collect(Collectors.toMap(app -> app.get("product_id").toString(), app -> app));
+                .collect(Collectors.toMap(app -> app.get("product_id").toString(), Function.identity()));
 
         if (dictionary.containsKey(sku.getAppleSkuId())) {
             return dictionary.get(sku.getAppleSkuId()).get("transaction_id").toString();

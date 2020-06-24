@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<aspectj>
+    <weaver options="-showWeaveInfo -Xlint:ignore">
+    </weaver>
+    <weaver options="-Xset:weaveJavaxPackages=true"/>
+</aspectj>
