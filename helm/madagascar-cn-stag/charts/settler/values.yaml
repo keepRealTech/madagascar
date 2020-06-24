@@ -1,0 +1,14 @@
+# Default values for test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+common_configs:
+  replicas: 1
+  memory: 1Gi
+  cpu: 200m
+
+mongodb:
+  database: settler
+
+redis:
+  port: 6379

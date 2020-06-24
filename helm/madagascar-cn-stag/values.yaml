@@ -48,6 +48,10 @@ global:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
       tag: 1.0.0
       imagePullPolicy: Always
+    settler:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/settler
+      tag: 1.0.0
+      imagePullPolicy: Always
 
 deploy:
   enable_http: true
