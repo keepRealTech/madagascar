@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.ReactorFeedServiceGrpc;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
+import com.keepreal.madagascar.fossa.TimelineFeedMessage;
 import io.grpc.Channel;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class FeedService {
      * @param pageSize       Page size.
      * @return {@link FeedMessage}.
      */
-    public Flux<FeedMessage> retrieveFeedsByIslandIdAndTimestampBefore(String islandId, Long timestampAfter, Integer pageSize) {
+    public Flux<TimelineFeedMessage> retrieveFeedsByIslandIdAndTimestampBefore(String islandId, Long timestampAfter, Integer pageSize) {
         ReactorFeedServiceGrpc.ReactorFeedServiceStub stub = ReactorFeedServiceGrpc.newReactorStub(this.fossaChannel);
 
         QueryFeedCondition condition = QueryFeedCondition.newBuilder()
@@ -53,8 +54,8 @@ public class FeedService {
                         .build())
                 .build();
 
-        return stub.retrieveMultipleFeeds(request)
-                .flatMapMany(feedsResponse -> Flux.fromIterable(feedsResponse.getFeedList()));
+        return stub.retrieveMultipleTimelineFeeds(request)
+                .flatMapMany(feedsResponse -> Flux.fromIterable(feedsResponse.getMessageList()));
     }
 
 }

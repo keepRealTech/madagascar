@@ -73,6 +73,17 @@ message CreateDefaultFeedResponse {
     CommonStatus status = 1;
 }
 
+message TimelineFeedMessage {
+    string id = 1;
+    string islandId = 2;
+    int64 createdAt = 3;
+}
+
+message TimelineFeedsResponse {
+    CommonStatus status = 1;
+    repeated TimelineFeedMessage message = 2;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
@@ -80,4 +91,5 @@ service FeedService {
     rpc RetrieveFeedsByIds (RetrieveFeedsByIdsRequest) returns (FeedsResponse) {};
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
     rpc CreateDefaultFeed (CreateDefaultFeedRequest) returns (CreateDefaultFeedResponse) {}
+    rpc RetrieveMultipleTimelineFeeds (RetrieveMultipleFeedsRequest) returns (TimelineFeedsResponse) {}
 }
