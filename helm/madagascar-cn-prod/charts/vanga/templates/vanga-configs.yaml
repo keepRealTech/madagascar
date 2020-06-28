@@ -1,19 +1,14 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: fossa
+  name: vanga
   namespace: {{ .Values.global.common_configs.namespace }}
 data:
   aliyun_logs_madagascar-prod: stdout
-  SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
-  SPRING_JPA_SHOWSQL: '{{ .Values.jpa.show_sql }}'
-  GRPC_COUA_HOST: {{ .Values.coua.host }}
-  GRPC_COUA_PORT: '{{ .Values.coua.port }}'
-  GRPC_VANGA_HOST: {{ .Values.vanga.host }}
-  GRPC_VANGA_PORT: '{{ .Values.vanga.port }}'
   ROCKETMQ_NOTIFICATION_TOPIC: {{ .Values.rocketmq.notification.topic }}
   ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
-  ROCKETMQ_FEED_TOPIC: {{ .Values.rocketmq.feed.topic }}
-  ROCKETMQ_FEED_TAG: {{ .Values.rocketmq.feed.tag }}
+  WECHATPAY_CALLBACKADDRESS: {{ .Values.wechat_pay.callback_address }}
+  WECHATPAY_CERTPATH: {{ .Values.wechat_pay.cert_path }}
+  SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'

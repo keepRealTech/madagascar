@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: lemur
-  namespace: {{ .Values.common_configs.namespace }}
+  namespace: {{ .Values.global.common_configs.namespace }}
 data:
   aliyun_logs_madagascar-prod: stdout
   GRPC_COUA_HOST: {{ .Values.coua.host }}
@@ -15,12 +15,15 @@ data:
   GRPC_FOSSA_PORT: '{{ .Values.fossa.port }}'
   GRPC_TENRECS_HOST: {{ .Values.tenrecs.host }}
   GRPC_TENRECS_PORT: '{{ .Values.tenrecs.port }}'
+  GRPC_VANGA_HOST: {{ .Values.vanga.host }}
+  GRPC_VANGA_PORT: '{{ .Values.vanga.port }}'
+  GRPC_MANTELLA_HOST: {{ .Values.mantella.host }}
+  GRPC_MANTELLA_PORT: '{{ .Values.mantella.port }}'
   SPRING_SERVLET_MULTIPART_MAXFILESIZE: {{ .Values.file.max_file_size }}
   SPRING_SERVLET_MULTIPART_MAXREQUESTSIZE: {{ .Values.file.max_request_size }}
   SYSTEMNOTIFICATION_NAME: {{ .Values.system_notification.name }}
   SYSTEMNOTIFICATION_CONTENT: {{ .Values.system_notification.content }}
   SYSTEMNOTIFICATION_PORTRAITIMAGEURI: {{ .Values.system_notification.portrait_image_uri }}
-  ROCKETMQ_STATSEVENT_NAMESRVADDR: {{ .Values.rocketmq.name_server_address }}
   ROCKETMQ_STATSEVENT_TOPIC: {{ .Values.rocketmq.topic }}
   ROCKETMQ_STATSEVENT_TAG: {{ .Values.rocketmq.tag }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
@@ -53,6 +56,15 @@ data:
   CLIENT_IOS_VERSIONINFOMAP_100_AUDIT: 'false'
   CLIENT_IOS_UPDATEINFOMAP_100_CURRENTVERSION: '100'
   CLIENT_IOS_UPDATEINFOMAP_100_NEXTVERSION: '100'
+  CLIENT_IOS_VERSIONINFOMAP_110_ISLANDFEEDLOOPINTERVAL: '10'
+  CLIENT_IOS_VERSIONINFOMAP_110_MYISLANDS-PAGE-SIZE: '100'
+  CLIENT_IOS_VERSIONINFOMAP_110_MESSAGE-LOOP-INTERVAL: '10'
+  CLIENT_IOS_VERSIONINFOMAP_110_GUEST-PAGE-SIZE: '5'
+  CLIENT_IOS_VERSIONINFOMAP_110_ISLAND-CHECK-INTERVAL: '10'
+  CLIENT_IOS_VERSIONINFOMAP_110_CONFIG-TIMEOUT: '1000'
+  CLIENT_IOS_VERSIONINFOMAP_110_AUDIT: 'true'
+  CLIENT_IOS_UPDATEINFOMAP_110_CURRENTVERSION: '100'
+  CLIENT_IOS_UPDATEINFOMAP_110_NEXTVERSION: '100'
   ALIYUNOSS_ENDPOINT: {{ .Values.aliyun_oss.endpoint }}
-  ALIYUNOSS_BUCKETNAME: {{ .Values.aliyun_oss.bucketName }}
-  ALIYUNOSS_EXPIRETIMEINSECONDS: '{{ .Values.aliyun_oss.expireTimeInSeconds }}'
+  ALIYUNOSS_BUCKETNAME: {{ .Values.aliyun_oss.bucket_name }}
+  ALIYUNOSS_EXPIRETIMEINSECONDS: '{{ .Values.aliyun_oss.expire_time_in_seconds }}'

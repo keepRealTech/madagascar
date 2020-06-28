@@ -3,22 +3,14 @@
 # Declare variables to be passed into your templates.
 
 common_configs:
-  namespace: keepreal-prod
-  replicas: 1
+  replicas: 2
   memory: 2.5Gi
   cpu: 500m
-
-images:
-  brookesia:
-    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/brookesia
-    tag: 1.0.0
-    imagePullPolicy: Always
 
 mongodb:
   database: brookesia
 
 rocketmq:
-  name_server_address: http://MQ_INST_1398284016177859_BcaZSx5M.cn-beijing.mq-internal.aliyuncs.com:8080
   topic: stats-event
   group_id: GID-brookesia-default
   tag: event
