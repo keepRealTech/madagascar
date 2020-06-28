@@ -2534,6 +2534,7 @@ components:
         chargePerMonth:
           type: integer
           minimum: 100
+          maximum: 1000000000
         name:
           type: string
     PutMembershipRequest:

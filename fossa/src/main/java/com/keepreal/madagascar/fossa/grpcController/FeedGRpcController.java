@@ -19,6 +19,7 @@ import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
+import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
@@ -180,38 +181,11 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     public void retrieveMultipleFeeds(RetrieveMultipleFeedsRequest request, StreamObserver<FeedsResponse> responseObserver) {
         int page = request.getPageRequest().getPage();
         int pageSize = request.getPageRequest().getPageSize();
-        QueryFeedCondition condition = request.getCondition();
-        boolean fromHost = condition.hasFromHost();
-        boolean hasIslandId = condition.hasIslandId();
         String userId = request.getUserId();
-
-        Query query = new Query();
-        query.addCriteria(Criteria.where("deleted").is(false));
-        if (fromHost && hasIslandId) {
-            Criteria criteria = Criteria
-                    .where("islandId").is(condition.getIslandId().getValue())
-                    .and("fromHost").is(true);
-            query.addCriteria(criteria);
-        } else if (fromHost || hasIslandId) {
-            Criteria criteria = fromHost ? Criteria.where("fromHost").is(true)
-                    : Criteria.where("islandId").is(condition.getIslandId().getValue());
-            query.addCriteria(criteria);
-        }
-
-        if (condition.hasTimestampAfter()) {
-            Criteria timeCriteria = Criteria.where("createdTime").gt(condition.getTimestampAfter().getValue());
-            query.addCriteria(timeCriteria);
-        }
-
-        if (condition.hasTimestampBefore()) {
-            Criteria timeCriteria = Criteria.where("createdTime").lt(condition.getTimestampBefore().getValue());
-            query.addCriteria(timeCriteria);
-        }
-
-        // 没有条件
-        query.with(Sort.by(Sort.Order.desc("toppedTime"), Sort.Order.desc("createdTime")));
+        Query query = generatorQueryByRequest(request);
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
+
         List<FeedMessage> feedMessageList = feedInfoList.stream().map(info -> feedInfoService.getFeedMessage(info, userId)).filter(Objects::nonNull).collect(Collectors.toList());
 
         PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(page, pageSize, totalCount);
@@ -274,4 +248,57 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Implements the retrieves multiple timeline feeds method.
+     *
+     * @param request
+     * @param responseObserver
+     */
+    @Override
+    public void retrieveMultipleTimelineFeeds(RetrieveMultipleFeedsRequest request, StreamObserver<TimelineFeedsResponse> responseObserver) {
+        int page = request.getPageRequest().getPage();
+        int pageSize = request.getPageRequest().getPageSize();
+        Query query = generatorQueryByRequest(request);
+        List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
+
+        responseObserver.onNext(TimelineFeedsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllMessage(feedInfoList.stream()
+                        .map(this.feedInfoService::getTimelineFeedMessage)
+                        .collect(Collectors.toList()))
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    private Query generatorQueryByRequest(RetrieveMultipleFeedsRequest request) {
+        QueryFeedCondition condition = request.getCondition();
+        boolean fromHost = condition.hasFromHost();
+        boolean hasIslandId = condition.hasIslandId();
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("deleted").is(false));
+        if (fromHost && hasIslandId) {
+            Criteria criteria = Criteria
+                    .where("islandId").is(condition.getIslandId().getValue())
+                    .and("fromHost").is(true);
+            query.addCriteria(criteria);
+        } else if (fromHost || hasIslandId) {
+            Criteria criteria = fromHost ? Criteria.where("fromHost").is(true)
+                    : Criteria.where("islandId").is(condition.getIslandId().getValue());
+            query.addCriteria(criteria);
+        }
+
+        if (condition.hasTimestampAfter()) {
+            Criteria timeCriteria = Criteria.where("createdTime").gt(condition.getTimestampAfter().getValue());
+            query.addCriteria(timeCriteria);
+        }
+
+        if (condition.hasTimestampBefore()) {
+            Criteria timeCriteria = Criteria.where("createdTime").lt(condition.getTimestampBefore().getValue());
+            query.addCriteria(timeCriteria);
+        }
+
+        // 没有条件
+        return query.with(Sort.by(Sort.Order.desc("toppedTime"), Sort.Order.desc("createdTime")));
+    }
 }

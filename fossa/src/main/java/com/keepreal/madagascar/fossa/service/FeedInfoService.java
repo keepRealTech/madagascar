@@ -3,6 +3,7 @@ package com.keepreal.madagascar.fossa.service;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.ReactionType;
+import com.keepreal.madagascar.fossa.TimelineFeedMessage;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
@@ -115,6 +116,14 @@ public class FeedInfoService {
         mongoTemplate.updateFirst(Query.query(Criteria.where("id").is(feedId)), update, FeedInfo.class);
     }
 
+    public TimelineFeedMessage getTimelineFeedMessage(FeedInfo feedInfo) {
+        if (feedInfo == null)
+            return null;
+        return TimelineFeedMessage.newBuilder().setId(feedInfo.getId())
+                .setIslandId(feedInfo.getIslandId())
+                .setCreatedAt(feedInfo.getCreatedTime()).build();
+    }
+
     /**
      * Retrieves the feed message.
      *
@@ -141,7 +150,7 @@ public class FeedInfoService {
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
                 .setIsDeleted(feedInfo.getDeleted())
-                .setFromHost(feedInfo.getFromHost());
+                .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
