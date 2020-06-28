@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: brookesia
-  namespace: {{ .Values.common_configs.namespace }}
+  namespace: {{ .Values.global.common_configs.namespace }}
 spec:
   replicas: {{ .Values.common_configs.replicas }}
   selector:
@@ -17,8 +17,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: brookesia
-          image: {{ .Values.images.brookesia.name }}:{{ .Values.images.brookesia.tag }}
-          imagePullPolicy: {{ .Values.images.brookesia.imagePullPolicy }}
+          image: {{ .Values.global.images.brookesia.name }}:{{ .Values.global.images.brookesia.tag }}
+          imagePullPolicy: {{ .Values.global.images.brookesia.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: brookesia
@@ -33,6 +33,11 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
+            - name: ROCKETMQ_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
             - name: SPRING_DATA_MONGODB_URI
               valueFrom:
                 secretKeyRef:

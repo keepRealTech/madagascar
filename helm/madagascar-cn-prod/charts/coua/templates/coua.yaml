@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: coua
-  namespace: {{ .Values.common_configs.namespace }}
+  namespace: {{ .Values.global.common_configs.namespace }}
 spec:
   replicas: {{ .Values.common_configs.replicas }}
   selector:
@@ -38,8 +38,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: coua
-          image: {{ .Values.images.coua.name }}:{{ .Values.images.coua.tag }}
-          imagePullPolicy: {{ .Values.images.coua.imagePullPolicy }}
+          image: {{ .Values.global.images.coua.name }}:{{ .Values.global.images.coua.tag }}
+          imagePullPolicy: {{ .Values.global.images.coua.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: coua
@@ -54,6 +54,11 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
+            - name: ROCKETMQ_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:

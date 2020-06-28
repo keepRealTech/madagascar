@@ -10,24 +10,23 @@ common_configs:
 rocketmq:
   notification:
     topic: notification-event
+    group_id: GID-marty-notification-default
     tag: event
   feed:
     topic: feed-event
+    group_id: GID-marty-feed-default
     tag: event
-
-jpa:
-  show_sql: false
-
-mongodb:
-  database: fossa
 
 coua:
   host: coua
   port: 6565
 
-vanga:
-  host: vanga
+fossa:
+  host: fossa
   port: 6565
+
+umeng:
+  url: https://msgapi.umeng.com/api/send
 
 deploy:
   opentracing:

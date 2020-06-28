@@ -159,8 +159,8 @@ public class ConfigurationController implements ConfigApi {
         Map<String, Boolean> channelMap = this.androidConfigVersionMap.get(version);
 
         if (Objects.isNull(channelMap)
-                || Objects.isNull(channelMap.get(channel))
-                || !channelMap.get(channel)) {
+                || Objects.isNull(channelMap.get(channel.toLowerCase()))
+                || !channelMap.get(channel.toLowerCase())) {
             return configurationDTO;
         }
 
