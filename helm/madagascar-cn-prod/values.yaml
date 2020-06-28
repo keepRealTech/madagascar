@@ -54,7 +54,7 @@ global:
       imagePullPolicy: Always
 
 deploy:
-  enable_http: true
+  enable_http: false
   ssl:
     cert_id: 1398284016177859_1720332b91b_1749325862_1022387165
   slb:
