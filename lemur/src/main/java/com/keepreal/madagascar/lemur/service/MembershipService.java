@@ -111,7 +111,7 @@ public class MembershipService {
                 .setPricePerMonth(pricePerMonth)
                 .setIslandId(islandId)
                 .setHostId(hostId)
-                .setDescription(descriptionStr.substring(1, descriptionStr.length() - 1))
+                .setDescription(descriptionStr)
                 .build();
 
         MembershipResponse membershipResponse;
