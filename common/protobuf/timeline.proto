@@ -20,6 +20,7 @@ message RetrieveMultipleTimelinesRequest {
 message TimelinesResponse {
     CommonStatus status = 1;
     repeated TimelineMessage timelines = 2;
+    bool hasMore = 3;
 }
 
 service TimelineService {

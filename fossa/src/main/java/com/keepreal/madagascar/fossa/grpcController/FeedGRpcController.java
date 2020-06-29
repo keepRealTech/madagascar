@@ -186,7 +186,10 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
 
-        List<FeedMessage> feedMessageList = feedInfoList.stream().map(info -> feedInfoService.getFeedMessage(info, userId)).filter(Objects::nonNull).collect(Collectors.toList());
+        List<FeedMessage> feedMessageList = feedInfoList.stream()
+                .map(info -> feedInfoService.getFeedMessage(info, userId))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(page, pageSize, totalCount);
         FeedsResponse feedsResponse = FeedsResponse.newBuilder()

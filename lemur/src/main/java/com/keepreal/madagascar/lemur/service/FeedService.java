@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -268,15 +269,16 @@ public class FeedService {
      * @param pageSize       Page size.
      * @return {@link FeedsResponse}.
      */
-    public FeedsResponse retrieveUserFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
+    public AbstractMap.SimpleEntry<Boolean, FeedsResponse> retrieveUserFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
         Assert.hasText(userId, "User id is null.");
 
         TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(userId, timestampAfter, timestampBefore, pageSize);
 
-        return this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
+        return new AbstractMap.SimpleEntry<>(timelinesResponse.getHasMore(),
+                this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
                 .stream()
                 .map(TimelineMessage::getFeedId)
-                .collect(Collectors.toList()), userId);
+                .collect(Collectors.toList()), userId));
     }
 
     /**

@@ -12,6 +12,7 @@ import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrig
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.FeedRepostsResponse;
+import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.lemur.dtoFactory.CommentDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.ReactionDTOFactory;
@@ -52,6 +53,7 @@ import swagger.model.RepostsResponse;
 import swagger.model.TimelinesResponse;
 
 import javax.validation.Valid;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -202,6 +204,7 @@ public class FeedController implements FeedApi {
      * Implements the get feeds api.
      *
      * @param minTimestamp (optional, default to 0) minimal feed created timestamp.
+     * @param maxTimestamp (optional, default to 0) maximal feed created timestamp.
      * @param pageSize     (optional, default to 10) size of a page .
      * @return {@link TimelinesResponse}.
      */
@@ -210,15 +213,16 @@ public class FeedController implements FeedApi {
                                                            Long maxTimestamp,
                                                            Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
+        AbstractMap.SimpleEntry<Boolean, FeedsResponse> entry =
                 this.feedService.retrieveUserFeeds(userId, minTimestamp, maxTimestamp, pageSize);
 
         TimelinesResponse response = new TimelinesResponse();
-        response.setData(feedsResponse.getFeedList()
+        response.setData(entry.getValue().getFeedList()
                 .stream()
                 .map(this.feedDTOFactory::valueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
+        response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().getFeedCount() > 0, entry.getKey(), pageSize));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

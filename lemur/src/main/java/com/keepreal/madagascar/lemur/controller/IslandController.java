@@ -24,6 +24,7 @@ import com.keepreal.madagascar.lemur.textFilter.TextContentFilter;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -65,6 +66,7 @@ import java.util.stream.Collectors;
  * Represents the island controller.
  */
 @RestController
+@Slf4j
 public class IslandController implements IslandApi {
 
     private final ImageService imageService;
@@ -574,6 +576,7 @@ public class IslandController implements IslandApi {
                 .map(this.feedDTOFactory::valueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
+        response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -29,6 +29,23 @@ public class PaginationUtils {
     }
 
     /**
+     * Converts has more into page info.
+     *
+     * @param hasContent  Whether has content.
+     * @param hasMore     Whether has more.
+     * @param pageSize    Page size.
+     * @return {@link PageInfo}.
+     */
+    public static PageInfo getPageInfo(boolean hasContent, boolean hasMore, int pageSize) {
+        PageInfo pageInfo = new PageInfo();
+        pageInfo.setPageSize(pageSize);
+        pageInfo.setPage(0);
+        pageInfo.setHasContent(hasContent);
+        pageInfo.setHasMore(hasMore);
+        return pageInfo;
+    }
+
+    /**
      * Constructs a {@link PageRequest}.
      *
      * @param page     Page index.
