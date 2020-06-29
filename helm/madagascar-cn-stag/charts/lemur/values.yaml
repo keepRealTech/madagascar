@@ -60,7 +60,7 @@ client:
   android:
     setup_info:
       version: 110
-      address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02-v110.apk
+      address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
 
 security:
   oauth2:

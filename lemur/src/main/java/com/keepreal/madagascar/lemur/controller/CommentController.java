@@ -1,8 +1,12 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.CommentMessage;
+import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.service.CommentService;
+import com.keepreal.madagascar.lemur.service.FeedService;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.http.HttpStatus;
@@ -18,14 +22,21 @@ import swagger.model.DummyResponse;
 public class CommentController implements CommentApi {
 
     private final CommentService commentService;
+    private final FeedService feedService;
+    private final IslandService islandService;
 
     /**
      * Constructs the comment controller.
      *
      * @param commentService {@link CommentService}.
+     * @param feedService    {@link FeedService}.
+     * @param islandService  {@link IslandService}.
      */
-    public CommentController(CommentService commentService) {
+    public CommentController(CommentService commentService,
+                             FeedService feedService, IslandService islandService) {
         this.commentService = commentService;
+        this.feedService = feedService;
+        this.islandService = islandService;
     }
 
     /**
@@ -38,7 +49,11 @@ public class CommentController implements CommentApi {
     public ResponseEntity<DummyResponse> apiV1CommentsIdDelete(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
         CommentMessage commentMessage = this.commentService.retrieveCommentById(id);
-        if (!userId.equals(commentMessage.getUserId())) {
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(commentMessage.getFeedId(), commentMessage.getUserId());
+        IslandMessage islandMessage = islandService.retrieveIslandById(feedMessage.getIslandId());
+        if (!userId.equals(commentMessage.getUserId())
+                && !userId.equals(feedMessage.getUserId())
+                && !userId.equals(islandMessage.getHostId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
