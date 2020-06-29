@@ -78,7 +78,7 @@ public class MembershipService {
                 .setName("所有岛民")
                 .setMemberCount(subscriptionService.getMemberCountByIslandId(islandId))
                 .build());
-        if (!StringUtils.isEmpty(islandId)) {
+        if (!StringUtils.isEmpty(islandId) && repository.countByIslandIdAndDeletedIsFalse(islandId) > 0) {
             list.add(FeedMembershipMessage.newBuilder()
                     .setName("所有会员")
                     .setMemberCount(subscribeMembershipService.getMemberCountByIslandId(islandId))

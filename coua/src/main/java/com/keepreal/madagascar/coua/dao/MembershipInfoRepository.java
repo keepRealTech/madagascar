@@ -18,4 +18,6 @@ public interface MembershipInfoRepository extends JpaRepository<MembershipInfo, 
     List<Integer> getColorTypeListByIslandId(String islandId);
 
     MembershipInfo findMembershipInfoByIslandIdAndTopIsTrueAndActiveIsTrueAndDeletedIsFalse(String islandId);
+
+    Integer countByIslandIdAndDeletedIsFalse(String islandId);
 }
