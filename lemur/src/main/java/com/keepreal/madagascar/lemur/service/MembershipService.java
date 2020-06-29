@@ -105,13 +105,13 @@ public class MembershipService {
     public MembershipMessage createMembership(String name, Integer pricePerMonth, List<String> descriptions, String islandId, String hostId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
-        String descriptionStr = descriptions.toString();
+        String descriptionStr = String.join(",", descriptions);
         CreateMembershipRequest request = CreateMembershipRequest.newBuilder()
                 .setName(name)
                 .setPricePerMonth(pricePerMonth)
                 .setIslandId(islandId)
                 .setHostId(hostId)
-                .setDescription(descriptionStr.substring(1, descriptionStr.length() - 1))
+                .setDescription(descriptionStr)
                 .build();
 
         MembershipResponse membershipResponse;
