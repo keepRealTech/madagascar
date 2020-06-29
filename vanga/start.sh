@@ -4,4 +4,4 @@ export SNOWFLAKE_NODEID=$pod_index
 export WECHATPAY_HOSTIP=$(dig +short myip.opendns.com @resolver1.opendns.com)
 
 export
-java -Xms2g -Xmx2g -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 -cp app:app/lib/* com.keepreal.madagascar.vanga.VangaApplication
+java -Xms2g -Xmx2g -cp app:app/lib/* com.keepreal.madagascar.vanga.VangaApplication
