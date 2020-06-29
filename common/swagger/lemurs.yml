@@ -1837,6 +1837,8 @@ components:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
             data:
               type: array
               items:
