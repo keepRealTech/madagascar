@@ -9,7 +9,7 @@ spring:
     database-platform: org.hibernate.dialect.MySQLDialect
   data:
     mongodb:
-      database: settler
+      database: workflow
       uri: mongodb://root:pass@host:port
   redis:
     host: 127.0.0.1

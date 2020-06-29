@@ -52,6 +52,10 @@ global:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/settler
       tag: 1.0.0
       imagePullPolicy: Always
+    reconsiliation:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/reconsiliation
+      tag: 1.0.0
+      imagePullPolicy: Always
 
 deploy:
   enable_http: false
