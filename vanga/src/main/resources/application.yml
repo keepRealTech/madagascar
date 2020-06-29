@@ -24,7 +24,7 @@ wechat-pay:
   host-ip: 127.0.0.1
 
 ios-pay:
-  verify-url: https://buy.itunes.apple.com/verifyReceipt
+  verify-url: https://sandbox.itunes.apple.com/verifyReceipt
 
 rocketmq:
   notification:
