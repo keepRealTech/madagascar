@@ -54,7 +54,7 @@ public class MembershipDTOFactory {
         dto.setHostId(membershipMessage.getHostId());
         dto.setIslandId(membershipMessage.getIslandId());
         dto.setChargePerMonth(membershipMessage.getPricePerMonth());
-        dto.setDescription(Arrays.asList(membershipMessage.getDescription().split(",")));
+        dto.setDescription(Arrays.asList(membershipMessage.getDescription().split(", ")));
         dto.setMembershipName(membershipMessage.getName());
         dto.setColorType(membershipMessage.getColorType());
         dto.setIsTop(membershipMessage.getIsTop());
