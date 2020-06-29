@@ -6,7 +6,7 @@ global:
   acr:
     acr_secret_name: keepreal-acr-secret
   common_configs:
-    namespace: keepreal-stag
+    namespace: keepreal-prod
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
