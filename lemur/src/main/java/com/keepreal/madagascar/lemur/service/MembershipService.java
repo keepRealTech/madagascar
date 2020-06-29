@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Represents the membership service.
@@ -105,7 +106,7 @@ public class MembershipService {
     public MembershipMessage createMembership(String name, Integer pricePerMonth, List<String> descriptions, String islandId, String hostId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
-        String descriptionStr = descriptions.toString();
+        String descriptionStr = String.join(",", descriptions);
         CreateMembershipRequest request = CreateMembershipRequest.newBuilder()
                 .setName(name)
                 .setPricePerMonth(pricePerMonth)
