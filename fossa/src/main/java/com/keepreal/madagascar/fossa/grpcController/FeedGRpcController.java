@@ -288,13 +288,16 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             query.addCriteria(criteria);
         }
 
-        if (condition.hasTimestampAfter()) {
-            Criteria timeCriteria = Criteria.where("createdTime").gt(condition.getTimestampAfter().getValue());
+        if (condition.hasTimestampBefore() && condition.hasTimestampAfter()) {
+            Criteria timeCriteria = Criteria.where("createdTime")
+                    .gt(condition.getTimestampAfter().getValue())
+                    .andOperator(Criteria.where("createdTime")
+                            .lt(condition.getTimestampBefore().getValue()));
             query.addCriteria(timeCriteria);
-        }
-
-        if (condition.hasTimestampBefore()) {
-            Criteria timeCriteria = Criteria.where("createdTime").lt(condition.getTimestampBefore().getValue());
+        } else if (condition.hasTimestampBefore() || condition.hasTimestampAfter()) {
+            Criteria timeCriteria = condition.hasTimestampBefore() ?
+                    Criteria.where("createdTime").lt(condition.getTimestampBefore().getValue()) :
+                    Criteria.where("createdTime").gt(condition.getTimestampAfter().getValue());
             query.addCriteria(timeCriteria);
         }
 
