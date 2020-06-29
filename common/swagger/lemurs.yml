@@ -482,8 +482,9 @@ paths:
   /api/v1/feeds:
     get:
       parameters:
-        - $ref: '#/components/parameters/timestampAfter'
-        - $ref: '#/components/parameters/timestampBefore'
+        - $ref: '#/components/parameters/islandidInPath'
+        - $ref: '#/components/parameters/fromHostInQuery'
+        - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
         - Feed
@@ -494,7 +495,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TimelinesResponse'
+                $ref: '#/components/schemas/FeedsResponse'
     post:
       tags:
         - Feed
@@ -513,6 +514,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
   /api/v1.1/feeds:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Feed
+      summary: retrieves a list of feeds with pagination
+      responses:
+        '200':
+          description: feeds response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinesResponse'
     post:
       tags:
         - Feed

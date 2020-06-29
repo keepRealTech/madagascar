@@ -203,13 +203,44 @@ public class FeedController implements FeedApi {
     /**
      * Implements the get feeds api.
      *
+     * @param islandId island id (optional) Island id.
+     * @param fromHost (optional) Whether from host.
+     * @param page     page number (optional, default to 0).
+     * @param pageSize size of a page (optional, default to 10).
+     * @return {@link FeedsResponse}.
+     */
+    @Override
+    public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedsGet(String islandId,
+                                                       Boolean fromHost,
+                                                       Integer page,
+                                                       Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
+                this.feedService.retrieveIslandFeeds(islandId, fromHost, userId, null, null, page, pageSize);
+
+        swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
+        response.setData(feedsResponse.getFeedList()
+                .stream()
+                .map(this.feedDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setCurrentTime(System.currentTimeMillis());
+        response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the get feeds api.
+     *
      * @param minTimestamp (optional, default to 0) minimal feed created timestamp.
      * @param maxTimestamp (optional, default to 0) maximal feed created timestamp.
      * @param pageSize     (optional, default to 10) size of a page .
      * @return {@link TimelinesResponse}.
      */
     @Override
-    public ResponseEntity<TimelinesResponse> apiV1FeedsGet(Long minTimestamp,
+    public ResponseEntity<TimelinesResponse> apiV11FeedsGet(Long minTimestamp,
                                                            Long maxTimestamp,
                                                            Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
