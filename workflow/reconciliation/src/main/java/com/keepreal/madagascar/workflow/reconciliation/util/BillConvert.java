@@ -11,7 +11,6 @@ public class BillConvert {
         List<WeChatBill> bills = new ArrayList<WeChatBill>();
         String tradeMsg = result.substring(result.indexOf("`")); //去标题
         String tradeInfo = tradeMsg.substring(0, tradeMsg.indexOf("总")).replaceFirst(date, "").replaceAll("`", "");
-        ;// 去掉汇总数据
         String[] tradeArray = tradeInfo.split(date); //通过交易时间分隔   订单数
         for (String trade : tradeArray) {
             String[] order = trade.split(",");

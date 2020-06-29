@@ -26,8 +26,6 @@ public class WorkflowLog {
     private String type;
 
     @Builder.Default
-    private List<String> paymentIds = new ArrayList<>();
-    @Builder.Default
     private List<ReconciliationInfo> reconciliationInfos = new ArrayList<>();
 
     private Long startTimestamp;
