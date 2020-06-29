@@ -1853,6 +1853,9 @@ components:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
+            currentTime:
+              type: integer
+              format: int64
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
