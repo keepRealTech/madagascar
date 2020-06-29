@@ -47,4 +47,5 @@ public class UploadService {
         request.setContentType("application/octet-stream");
         return ossClient.generatePresignedUrl(request).toString();
     }
+
 }

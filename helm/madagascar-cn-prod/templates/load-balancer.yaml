@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nginx-ingress-lb
-  namespace: {{ .Values.common_configs.namespace }}
+  namespace: {{ .Values.global.common_configs.namespace }}
   labels:
     app: nginx-ingress-lb
   annotations:
@@ -11,7 +11,7 @@ metadata:
     # 指定网络类型
     service.beta.kubernetes.io/alibaba-cloud-loadbalancer-network-type: vpc
     # 修改为您的私网SLB实例ID
-    service.beta.kubernetes.io/alicloud-loadbalancer-id: lb-2ze2ccvjnvhdwq8nkqd66
+    service.beta.kubernetes.io/alicloud-loadbalancer-id: {{ .Values.deploy.slb.id }}
     # 是否自动创建SLB端口监听（会覆写已有端口监听），也可手动创建端口监听
     service.beta.kubernetes.io/alicloud-loadbalancer-force-override-listeners: 'true'
     # 配置https

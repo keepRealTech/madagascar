@@ -7,17 +7,17 @@ common_configs:
   memory: 2.5Gi
   cpu: 500m
 
-fossa:
-  host: fossa
-  port: 6565
-
-vanga:
-  host: vanga
-  port: 6565
-
 rocketmq:
-  topic: notification-event
-  tag: event
+  notification:
+    topic: notification-event
+    tag: event
+
+wechat_pay:
+  callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/callback
+  cert_path: /app/apiclient_cert.pem
+
+redis:
+  port: 6379
 
 deploy:
   opentracing:

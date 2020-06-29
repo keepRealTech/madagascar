@@ -72,4 +72,5 @@ public class UploadController implements UploadApi {
         String randomName = UUID.randomUUID().toString().replace("-", "");
         return randomName + extension;
     }
+
 }
