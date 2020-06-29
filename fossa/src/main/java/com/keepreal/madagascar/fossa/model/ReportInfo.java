@@ -33,7 +33,9 @@ public class ReportInfo {
     private String id;
     private Integer type;
     private String feedId;
+    private String islandId;
     private String reporterId;
+    private String userId;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
@@ -41,4 +43,5 @@ public class ReportInfo {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }

@@ -3,6 +3,7 @@ package com.keepreal.madagascar.fossa.service;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.ReactionType;
+import com.keepreal.madagascar.fossa.TimelineFeedMessage;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -30,23 +32,27 @@ public class FeedInfoService {
     private final CommentService commentService;
     private final FeedInfoRepository feedInfoRepository;
     private final ReactionRepository reactionRepository;
+    private final SubscribeMembershipService subscribeMembershipService;
 
     /**
      * Constructs the feed service
      *
-     * @param mongoTemplate         {@link MongoTemplate}.
-     * @param commentService        {@link CommentService}.
-     * @param feedInfoRepository    {@link FeedInfoRepository}.
-     * @param reactionRepository    {@link ReactionRepository}.
+     * @param mongoTemplate                 {@link MongoTemplate}.
+     * @param commentService                {@link CommentService}.
+     * @param feedInfoRepository            {@link FeedInfoRepository}.
+     * @param reactionRepository            {@link ReactionRepository}.
+     * @param subscribeMembershipService    {@link SubscribeMembershipService}.
      */
     public FeedInfoService(MongoTemplate mongoTemplate,
                            CommentService commentService,
                            FeedInfoRepository feedInfoRepository,
-                           ReactionRepository reactionRepository) {
+                           ReactionRepository reactionRepository,
+                           SubscribeMembershipService subscribeMembershipService) {
         this.mongoTemplate = mongoTemplate;
         this.commentService = commentService;
         this.feedInfoRepository = feedInfoRepository;
         this.reactionRepository = reactionRepository;
+        this.subscribeMembershipService = subscribeMembershipService;
     }
 
     /**
@@ -110,6 +116,14 @@ public class FeedInfoService {
         mongoTemplate.updateFirst(Query.query(Criteria.where("id").is(feedId)), update, FeedInfo.class);
     }
 
+    public TimelineFeedMessage getTimelineFeedMessage(FeedInfo feedInfo) {
+        if (feedInfo == null)
+            return null;
+        return TimelineFeedMessage.newBuilder().setId(feedInfo.getId())
+                .setIslandId(feedInfo.getIslandId())
+                .setCreatedAt(feedInfo.getCreatedTime()).build();
+    }
+
     /**
      * Retrieves the feed message.
      *
@@ -120,9 +134,10 @@ public class FeedInfoService {
     public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
         if (feedInfo == null)
             return null;
+
         List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
-        return FeedMessage.newBuilder()
+        FeedMessage.Builder builder = FeedMessage.newBuilder()
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
                 .setUserId(feedInfo.getUserId())
@@ -134,8 +149,27 @@ public class FeedInfoService {
                 .setRepostCount(feedInfo.getRepostCount())
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
-                .setIsDeleted(feedInfo.isDeleted())
-                .build();
+                .setIsDeleted(feedInfo.getDeleted())
+                .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost());
+
+        List<String> membershipIds = feedInfo.getMembershipIds();
+        if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
+            builder.setIsAccess(true);
+            builder.setMembershipId("");
+            builder.setIsMembership(false);
+        } else {
+            builder.setIsMembership(true);
+            List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(userId, feedInfo.getIslandId());
+            if (userId.equals(feedInfo.getHostId()) || membershipIds.stream().anyMatch(myMembershipIds::contains)) {
+                builder.setIsAccess(true);
+                builder.setMembershipId(membershipIds.get(0));
+            } else {
+                builder.setIsAccess(false);
+                builder.setMembershipId(membershipIds.get(0));
+            }
+        }
+
+        return builder.build();
     }
 
     /**
@@ -143,8 +177,8 @@ public class FeedInfoService {
      *
      * @param feedInfoList  {@link FeedInfo}.
      */
-    public void saveAll(List<FeedInfo> feedInfoList) {
-        feedInfoRepository.saveAll(feedInfoList);
+    public List<FeedInfo> saveAll(List<FeedInfo> feedInfoList) {
+        return feedInfoRepository.saveAll(feedInfoList);
     }
 
     /**
@@ -180,4 +214,15 @@ public class FeedInfoService {
     public void insert(FeedInfo feedInfo) {
         feedInfoRepository.insert(feedInfo);
     }
+
+    /**
+     * Retrieves a list of feeds by ids.
+     *
+     * @param ids Feed ids.
+     * @return List of {@link FeedInfo}.
+     */
+    public List<FeedInfo> findByIds(Iterable<String> ids) {
+        return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
+    }
+
 }

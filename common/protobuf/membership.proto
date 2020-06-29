@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.coua";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message MembershipIdRequest {
+    string id = 1;
+    string userId = 2;
+}
+
+message TopMembershipRequest {
+    string id = 1;
+    bool isRevoke = 2;
+    string userId = 3;
+}
+
+message UpdateMembershipRequest {
+    string id = 1;
+    google.protobuf.StringValue name = 2;
+    google.protobuf.StringValue description = 3;
+    google.protobuf.Int32Value pricePerMonth = 4;
+    string userId = 5;
+}
+
+message CreateMembershipRequest {
+    string islandId = 1;
+    string name = 2;
+    string description = 3;
+    int32 pricePerMonth = 4;
+    string hostId = 5;
+}
+
+message RetrieveMembershipsRequest {
+    string islandId = 1;
+}
+
+message MembershipMessage {
+    string id = 1;
+    string hostId = 2;
+    string islandId = 3;
+    string name = 4;
+    string description = 5;
+    int32 pricePerMonth = 6;
+    int32 colorType = 7;
+    bool isTop = 8;
+    int32 memberCount = 9;
+}
+
+message MembershipResponse {
+    CommonStatus status = 1;
+    MembershipMessage message = 2;
+}
+
+message MembershipsResponse {
+    CommonStatus status = 1;
+    repeated MembershipMessage message = 2;
+}
+
+message FeedMembershipMessage {
+    string id = 1;
+    string name = 2;
+    int32 pricePerMonth = 3;
+    int32 memberCount = 4;
+}
+
+message FeedMembershipResponse {
+    CommonStatus status = 1;
+    repeated FeedMembershipMessage message = 2;
+}
+
+service MembershipService {
+    rpc TopMembershipById (TopMembershipRequest) returns (CommonStatus) {};
+    rpc RetrieveMembershipById (MembershipIdRequest) returns (MembershipResponse) {};
+    rpc DeactivateMembershipById (MembershipIdRequest) returns (CommonStatus) {};
+    rpc DeleteMembershipById (MembershipIdRequest) returns (CommonStatus) {};
+    rpc UpdateMembership (UpdateMembershipRequest) returns (MembershipResponse) {};
+    rpc CreateMembership (CreateMembershipRequest) returns (MembershipResponse) {};
+    rpc RetrieveMembershipsByIslandId (RetrieveMembershipsRequest) returns (MembershipsResponse) {};
+    rpc RetrieveFeedMembershipsByIslandId (RetrieveMembershipsRequest) returns (FeedMembershipResponse) {};
+}

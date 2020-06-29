@@ -15,6 +15,7 @@ import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrig
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.LoginService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.LoginApi;
 import swagger.model.BriefTokenInfo;
+import swagger.model.DeviceTokenRequest;
+import swagger.model.DummyResponse;
 import swagger.model.LoginResponse;
 import swagger.model.LoginTokenInfo;
 import swagger.model.PostLoginRequest;
@@ -148,6 +151,21 @@ public class LoginController implements LoginApi {
     }
 
     /**
+     * Implements the set device token api.
+     *
+     * @param deviceTokenRequest {@link DeviceTokenRequest}.
+     * @return {@link DummyResponse}.
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1DeviceTokensPost(@Valid DeviceTokenRequest deviceTokenRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        userService.updateDeviceToken(userId, deviceTokenRequest.getDeviceToken(), deviceTokenRequest.getIsBind(), deviceTokenRequest.getDeviceType());
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Implements the get user info api.
      *
      * @return {@link UserResponse}.
@@ -193,5 +211,5 @@ public class LoginController implements LoginApi {
         briefTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
         return briefTokenInfo;
     }
-    
+
 }

@@ -15,8 +15,9 @@ import org.springframework.stereotype.Component;
 import swagger.model.NotificationDTO;
 import swagger.model.NotificationType;
 import swagger.model.SystemNoticeDTO;
-import swagger.model.SystemNotificationDTO;
+import swagger.model.UnreadIslandNoticesCountDTO;
 import swagger.model.UnreadNotificationCountDTO;
+import swagger.model.UnreadNotificationCountDTOV2;
 
 import java.util.Objects;
 
@@ -79,10 +80,38 @@ public class NotificationDTOFactory {
 
         UnreadNotificationCountDTO countDTO = new UnreadNotificationCountDTO();
         countDTO.setUnreadCommentsCount(unreadNotificationsCountMessage.getUnreadCommentsCount());
-        countDTO.setUnreadIslandNoticesCount(unreadNotificationsCountMessage.getUnreadIslandNoticesCount());
         countDTO.setUnreadReactionsCount(unreadNotificationsCountMessage.getUnreadReactionsCount());
+        countDTO.setUnreadIslandNoticesCount(unreadNotificationsCountMessage.getUnreadIslandNoticesCount());
+
         countDTO.setHasUnread(countDTO.getUnreadCommentsCount() > 0
                 || countDTO.getUnreadIslandNoticesCount() > 0
+                || countDTO.getUnreadReactionsCount() > 0);
+
+        return countDTO;
+    }
+
+    /**
+     * Converts {@link UnreadNotificationsCountMessage} to {@link UnreadNotificationCountDTOV2}.
+     *
+     * @param unreadNotificationsCountMessage {@link UnreadNotificationsCountMessage}.
+     * @return {@link UnreadNotificationCountDTOV2}.
+     */
+    public UnreadNotificationCountDTOV2 valueOfV2(UnreadNotificationsCountMessage unreadNotificationsCountMessage) {
+        if (Objects.isNull(unreadNotificationsCountMessage)) {
+            return null;
+        }
+
+        UnreadNotificationCountDTOV2 countDTO = new UnreadNotificationCountDTOV2();
+        countDTO.setUnreadCommentsCount(unreadNotificationsCountMessage.getUnreadCommentsCount());
+        countDTO.setUnreadReactionsCount(unreadNotificationsCountMessage.getUnreadReactionsCount());
+
+        UnreadIslandNoticesCountDTO islandNoticesCountDTO = new UnreadIslandNoticesCountDTO();
+        islandNoticesCountDTO.setUnreadNewMemberNoticeCount(unreadNotificationsCountMessage.getUnreadNewMembersCount());
+        islandNoticesCountDTO.setUnreadNewSubscriberNoticeCount(unreadNotificationsCountMessage.getUnreadNewSubscribersCount());
+
+        countDTO.setUnreadIslandNoticesCountDTO(islandNoticesCountDTO);
+        countDTO.setHasUnread(countDTO.getUnreadCommentsCount() > 0
+                || unreadNotificationsCountMessage.getUnreadIslandNoticesCount() > 0
                 || countDTO.getUnreadReactionsCount() > 0);
 
         return countDTO;

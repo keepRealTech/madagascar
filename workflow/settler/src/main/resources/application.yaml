@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: settler
+  datasource:
+    url: jdbc:mysql://root:pass@host:port
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+  data:
+    mongodb:
+      database: workflow
+      uri: mongodb://root:pass@host:port
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
+    ssl: false
+
+executor:
+  threads: 20

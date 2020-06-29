@@ -33,6 +33,7 @@ message NoticeNotificationMessage {
     NoticeType type = 1;
     oneof notice {
         SubscribeNotice SubscribeNotice = 2;
+        MemberNotice memberNotice = 3;
     }
 }
 
@@ -41,16 +42,28 @@ message SubscribeNotice {
     string subscriberId = 2;
 }
 
+message MemberNotice {
+    string islandId = 1;
+    string memberId = 2;
+    string membershipId = 3;
+    string membershipName = 4;
+    uint64 priceInCents = 5;
+    int32 timeInMonths = 6;
+}
+
 message UnreadNotificationsCountMessage {
     int32 unreadCommentsCount = 1;
     int32 unreadReactionsCount = 2;
     int32 unreadIslandNoticesCount = 3;
+    int32 unreadNewSubscribersCount = 4;
+    int32 unreadNewMembersCount = 5;
 }
 
 message QueryNotificationCondition {
     google.protobuf.StringValue id = 1;
     google.protobuf.StringValue userId = 2;
     NotificationTypeValue type = 3;
+    NoticeTypeValue noticeType = 4;
 }
 
 message CountUnreadNotificationsRequest {

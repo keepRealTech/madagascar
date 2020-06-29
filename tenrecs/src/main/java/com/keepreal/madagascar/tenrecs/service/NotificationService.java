@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.tenrecs.service;
 
+import com.keepreal.madagascar.common.NoticeType;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.snowflake.generator.DefaultSnowflakeIdGenerator;
@@ -45,7 +46,20 @@ public class NotificationService {
      */
     public int countByUserIdAndTypeAndCreatedAtAfter(String userId, NotificationType type, long timestamp) {
         return Math.toIntExact(
-                this.notificationRepository.countByUserIdAndTypeIsAndTimestampAfterAndIsDeletedIsFalse(userId, type, timestamp));
+                this.notificationRepository.countByUserIdAndTypeAndTimestampAfterAndIsDeletedIsFalse(userId, type, timestamp));
+    }
+
+    /**
+     * Counts the notifications.
+     *
+     * @param userId    User id.
+     * @param type      {@link NoticeType}.
+     * @param timestamp Created timestamp after.
+     * @return Count.
+     */
+    public int countByUserIdAndNoticeTypeAndCreatedAtAfter(String userId, NoticeType type, long timestamp) {
+        return Math.toIntExact(
+                this.notificationRepository.countByUserIdAndNotice_TypeAndTimestampAfterAndIsDeletedIsFalse(userId, type, timestamp));
     }
 
     /**
@@ -58,6 +72,18 @@ public class NotificationService {
      */
     public Page<Notification> retrieveByUserIdAndTypeWithPagination(String userId, NotificationType type, PageRequest pageRequest) {
         return this.notificationRepository.findAllByUserIdAndTypeAndIsDeletedIsFalse(userId, type, PaginationUtils.valueOf(pageRequest));
+    }
+
+    /**
+     * Retrieves notifications by user id and notice type.
+     *
+     * @param userId      User id.
+     * @param noticeType  {@link NoticeType}.
+     * @param pageRequest {@link PageRequest}.
+     * @return {@link Notification}.
+     */
+    public Page<Notification> retrieveByUserIdAndNoticeTypeWithPagination(String userId, NoticeType noticeType, PageRequest pageRequest) {
+        return this.notificationRepository.findAllByUserIdAndNotice_TypeAndIsDeletedIsFalse(userId, noticeType, PaginationUtils.valueOf(pageRequest));
     }
 
     /**
@@ -75,7 +101,7 @@ public class NotificationService {
      * Retrieves the latest notification by user id and feed id.
      *
      * @param authorId User id.
-     * @param feedId Feed id.
+     * @param feedId   Feed id.
      * @return {@link Notification}.
      */
     public Optional<Notification> retrieveLastByReactionAuthorIdAndReactionFeedId(String authorId, String feedId) {
@@ -85,7 +111,7 @@ public class NotificationService {
     /**
      * Retrieves the latest subscribe notification by island id and subscriber id.
      *
-     * @param islandId Island id.
+     * @param islandId     Island id.
      * @param subscriberId Subscriber id.
      * @return {@link Notification}.
      */

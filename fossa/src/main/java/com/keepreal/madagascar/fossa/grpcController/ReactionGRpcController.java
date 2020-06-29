@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
-import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
@@ -8,22 +7,19 @@ import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.NewReactionRequest;
-import com.keepreal.madagascar.fossa.common.FeedCountType;
-import com.keepreal.madagascar.fossa.service.FeedInfoService;
-import com.keepreal.madagascar.tenrecs.NotificationEvent;
-import com.keepreal.madagascar.tenrecs.NotificationEventType;
-import com.keepreal.madagascar.tenrecs.ReactionEvent;
 import com.keepreal.madagascar.fossa.ReactionResponse;
 import com.keepreal.madagascar.fossa.ReactionServiceGrpc;
 import com.keepreal.madagascar.fossa.ReactionsResponse;
 import com.keepreal.madagascar.fossa.RetrieveReactionsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.RevokeReactionRequest;
-import com.keepreal.madagascar.fossa.config.MqConfig;
+import com.keepreal.madagascar.fossa.common.FeedCountType;
+import com.keepreal.madagascar.fossa.config.NotificationEventProducerConfiguration;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.ReactionInfo;
+import com.keepreal.madagascar.fossa.service.FeedInfoService;
+import com.keepreal.madagascar.fossa.service.NotificationEventProducerService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
-import com.keepreal.madagascar.fossa.util.ProducerUtils;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
@@ -33,7 +29,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -46,35 +41,39 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
     private final ReactionRepository reactionRepository;
     private final LongIdGenerator idGenerator;
     private final FeedInfoService feedInfoService;
-    private final MqConfig mqConfig;
+    private final NotificationEventProducerConfiguration notificationEventProducerConfiguration;
+    private final NotificationEventProducerService notificationEventProducerService;
     private final ProducerBean producerBean;
 
     /**
      * Construct the reaction grpc controller
      *
-     * @param reactionRepository    {@link ReactionRepository}.
-     * @param idGenerator           {@link LongIdGenerator}.
-     * @param feedInfoService       {@link FeedInfoService}.
-     * @param mqConfig              {@link MqConfig}.
-     * @param producerBean          {@link ProducerBean}.
+     * @param reactionRepository                     {@link ReactionRepository}.
+     * @param idGenerator                            {@link LongIdGenerator}.
+     * @param feedInfoService                        {@link FeedInfoService}.
+     * @param notificationEventProducerConfiguration {@link NotificationEventProducerConfiguration}.
+     * @param notificationEventProducerService       {@link NotificationEventProducerService}.
+     * @param producerBean                           {@link ProducerBean}.
      */
     public ReactionGRpcController(ReactionRepository reactionRepository,
                                   LongIdGenerator idGenerator,
                                   FeedInfoService feedInfoService,
-                                  MqConfig mqConfig,
+                                  NotificationEventProducerConfiguration notificationEventProducerConfiguration,
+                                  NotificationEventProducerService notificationEventProducerService,
                                   ProducerBean producerBean) {
         this.reactionRepository = reactionRepository;
         this.idGenerator = idGenerator;
         this.feedInfoService = feedInfoService;
-        this.mqConfig = mqConfig;
+        this.notificationEventProducerConfiguration = notificationEventProducerConfiguration;
+        this.notificationEventProducerService = notificationEventProducerService;
         this.producerBean = producerBean;
     }
 
     /**
      * Implements create reaction method.
      *
-     * @param request           {@link NewReactionRequest}.
-     * @param responseObserver  {@link ReactionResponse}.
+     * @param request          {@link NewReactionRequest}.
+     * @param responseObserver {@link ReactionResponse}.
      */
     @Override
     public void createReaction(NewReactionRequest request, StreamObserver<ReactionResponse> responseObserver) {
@@ -86,14 +85,13 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
         boolean requestHasLikeType = reactionTypesSet.contains(ReactionType.REACTION_LIKE_VALUE);
         ReactionInfo reactionInfo = reactionRepository.findTopByFeedIdAndUserId(feedId, userId);
         if (reactionInfo == null) {
-            reactionInfo = new ReactionInfo();
-            reactionInfo.setId(id);
-            reactionInfo.setUserId(request.getUserId());
-            reactionInfo.setUpdatedTime(Long.valueOf(userId));
-            reactionInfo.setFeedId(feedId);
-            reactionInfo.setReactionTypeList(reactionTypesSet);
-            reactionInfo.setDeleted(false);
-            reactionInfo.setCreatedTime(System.currentTimeMillis());
+            reactionInfo = ReactionInfo.builder()
+                    .id(id)
+                    .userId(userId)
+                    .feedId(feedId)
+                    .createdTime(System.currentTimeMillis())
+                    .reactionTypeList(reactionTypesSet)
+                    .build();
             if (requestHasLikeType) {
                 feedInfoService.incFeedCount(feedId, FeedCountType.LIKES_COUNT);
             }
@@ -106,30 +104,19 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
         }
         reactionRepository.save(reactionInfo);
 
-        ReactionMessage reactionMessage = getReactionMessage(reactionInfo.getId() ,feedId, userId, request.getReactionTypesList());
+        ReactionMessage reactionMessage = getReactionMessage(reactionInfo.getId(), feedId, userId, request.getReactionTypesList());
         FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
-        ReactionEvent reactionEvent = ReactionEvent.newBuilder()
-                .setReaction(reactionMessage)
-                .setFeed(feedMessage)
-                .build();
-        String uuid = UUID.randomUUID().toString();
-        NotificationEvent event = NotificationEvent.newBuilder()
-                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_REACTION)
-                .setUserId(feedMessage.getUserId())
-                .setReactionEvent(reactionEvent)
-                .setTimestamp(System.currentTimeMillis())
-                .setEventId(uuid)
-                .build();
-        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), uuid, event.toByteArray());
-        ProducerUtils.sendMessageAsync(producerBean, message);
+
+        this.notificationEventProducerService.produceNewReactionsNotificationEventAsync(reactionMessage, feedMessage);
+
         basicReactionResponse(responseObserver, reactionMessage);
     }
 
     /**
      * Implements revoke reaction method.
      *
-     * @param request           {@link RevokeReactionRequest}.
-     * @param responseObserver  {@link ReactionResponse}.
+     * @param request          {@link RevokeReactionRequest}.
+     * @param responseObserver {@link ReactionResponse}.
      */
     @Override
     public void revokeReaction(RevokeReactionRequest request, StreamObserver<ReactionResponse> responseObserver) {
@@ -159,8 +146,8 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
     /**
      * Implements retrieves reactions by feed id method.
      *
-     * @param request           {@link RetrieveReactionsByFeedIdRequest}.
-     * @param responseObserver  {@link ReactionsResponse}.
+     * @param request          {@link RetrieveReactionsByFeedIdRequest}.
+     * @param responseObserver {@link ReactionsResponse}.
      */
     @Override
     public void retrieveReactionsByFeedId(RetrieveReactionsByFeedIdRequest request, StreamObserver<ReactionsResponse> responseObserver) {
@@ -171,12 +158,12 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
         List<ReactionInfo> reactionInfoList = reactionInfoListPageable.getContent();
         List<ReactionMessage> reactionMessageList = reactionInfoList.stream()
                 .map(info -> getReactionMessage(
-                                info.getId(),
-                                info.getFeedId(),
-                                info.getUserId(),
-                                info.getReactionTypeList().stream()
-                                        .map(ReactionType::forNumber)
-                                        .collect(Collectors.toList())
+                        info.getId(),
+                        info.getFeedId(),
+                        info.getUserId(),
+                        info.getReactionTypeList().stream()
+                                .map(ReactionType::forNumber)
+                                .collect(Collectors.toList())
                         )
                 ).collect(Collectors.toList());
 
@@ -193,11 +180,11 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
     /**
      * Retrieves reaction message
      *
-     * @param id        reaction id.
-     * @param feedId    feed id.
-     * @param userId    user id.
-     * @param typeList  reaction type list.
-     * @return  {@link ReactionMessage}.
+     * @param id       reaction id.
+     * @param feedId   feed id.
+     * @param userId   user id.
+     * @param typeList reaction type list.
+     * @return {@link ReactionMessage}.
      */
     private ReactionMessage getReactionMessage(String id, String feedId, String userId, List<ReactionType> typeList) {
         return ReactionMessage.newBuilder()
@@ -212,8 +199,8 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
     /**
      * Reaction response
      *
-     * @param responseObserver  {@link ReactionsResponse}.
-     * @param reactionMessage   {@link ReactionMessage}.
+     * @param responseObserver {@link ReactionsResponse}.
+     * @param reactionMessage  {@link ReactionMessage}.
      */
     private void basicReactionResponse(StreamObserver<ReactionResponse> responseObserver, ReactionMessage reactionMessage) {
         ReactionResponse reactionResponse = ReactionResponse.newBuilder()

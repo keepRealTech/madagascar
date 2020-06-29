@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.mantella";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message TimelineMessage {
+    string feedId = 1;
+}
+
+message RetrieveMultipleTimelinesRequest {
+    string userId = 1;
+    PageRequest pageRequest = 2;
+    google.protobuf.UInt64Value timestampAfter = 3;
+    google.protobuf.UInt64Value timestampBefore = 4;
+}
+
+message TimelinesResponse {
+    CommonStatus status = 1;
+    repeated TimelineMessage timelines = 2;
+    bool hasMore = 3;
+}
+
+service TimelineService {
+    rpc RetrieveMultipleTimelines (RetrieveMultipleTimelinesRequest) returns (TimelinesResponse) {};
+}
+

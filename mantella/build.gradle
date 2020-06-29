@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'com.google.protobuf'
+    id 'com.palantir.docker'
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDirs 'src/main/madagascar-grpc-proto'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":common:exceptions")
+    implementation project(":common:id-generator-starter")
+
+    implementation 'com.aliyun.openservices:ons-client'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+    implementation 'io.projectreactor:reactor-core'
+    implementation 'io.github.lognet:grpc-spring-boot-starter'
+    implementation 'com.salesforce.servicelibs:reactor-grpc-stub'
+    implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'
+    implementation 'io.opentracing.contrib:opentracing-grpc'
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

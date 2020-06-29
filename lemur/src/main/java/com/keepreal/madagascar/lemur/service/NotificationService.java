@@ -1,6 +1,8 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.common.NoticeType;
+import com.keepreal.madagascar.common.NoticeTypeValue;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.NotificationTypeValue;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -42,13 +44,14 @@ public class NotificationService {
     /**
      * Retrieves notifications.
      *
-     * @param userId   User id.
-     * @param type     {@link NotificationType}.
-     * @param page     Page index.
-     * @param pageSize Page size.
+     * @param userId     User id.
+     * @param type       {@link NotificationType}.
+     * @param noticeType {@link NoticeType}.
+     * @param page       Page index.
+     * @param pageSize   Page size.
      * @return {@link NotificationsResponse}.
      */
-    public NotificationsResponse retrieveNotifications(String userId, NotificationType type, int page, int pageSize) {
+    public NotificationsResponse retrieveNotifications(String userId, NotificationType type, NoticeType noticeType, int page, int pageSize) {
         NotificationServiceGrpc.NotificationServiceBlockingStub stub = NotificationServiceGrpc.newBlockingStub(this.channel);
 
         QueryNotificationCondition.Builder conditionBuilder = QueryNotificationCondition.newBuilder()
@@ -56,6 +59,10 @@ public class NotificationService {
 
         if (Objects.nonNull(type)) {
             conditionBuilder.setType(NotificationTypeValue.newBuilder().setValue(type).build());
+        }
+
+        if (NotificationType.NOTIFICATION_ISLAND_NOTICE.equals(type) && Objects.nonNull(noticeType)) {
+            conditionBuilder.setNoticeType(NoticeTypeValue.newBuilder().setValue(noticeType).build());
         }
 
         RetrieveMultipleNotificationsRequest request = RetrieveMultipleNotificationsRequest.newBuilder()

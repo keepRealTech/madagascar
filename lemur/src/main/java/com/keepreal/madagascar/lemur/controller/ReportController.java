@@ -5,14 +5,18 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.ReportMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.ReportDTOFactory;
 import com.keepreal.madagascar.lemur.service.ReportService;
+import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ReportApi;
 import swagger.model.PostReportRequest;
 import swagger.model.ReportResponse;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the report controller.
@@ -42,8 +46,21 @@ public class ReportController implements ReportApi {
      */
     @Override
     public ResponseEntity<ReportResponse> apiV1ReportsPost(@Valid PostReportRequest postReportRequest) {
+        List<String> params = new ArrayList<>();
+        params.add(postReportRequest.getFeedId());
+        params.add(postReportRequest.getIslandId());
+        params.add(postReportRequest.getUserId());
+        if (2 != params.stream().filter(StringUtils::isEmpty).count()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        String userId = HttpContextUtils.getUserIdFromContext();
+
         ReportMessage reportMessage = this.reportService.createReport(postReportRequest.getFeedId(),
-                postReportRequest.getReporterId(), this.convertReportType(postReportRequest.getReportType()));
+                postReportRequest.getIslandId(),
+                postReportRequest.getUserId(),
+                userId,
+                this.convertReportType(postReportRequest.getReportType()));
 
         ReportResponse response = new ReportResponse();
         response.setData(this.reportDTOFactory.valueOf(reportMessage));

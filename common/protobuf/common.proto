@@ -39,6 +39,11 @@ message NotificationTypeValue {
 enum NoticeType {
     NOTICE_TYPE_NONE = 0;
     NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER = 1;
+    NOTICE_TYPE_ISLAND_NEW_MEMBER = 2;
+}
+
+message NoticeTypeValue {
+    NoticeType value = 1;
 }
 
 enum ReactionType {
@@ -68,6 +73,12 @@ enum Gender {
     UNKNOWN = 0;
     MALE = 1;
     FEMALE = 2;
+}
+
+enum DeviceType {
+    UNKNOWN_TYPE = 0;
+    ANDROID = 1;
+    IOS = 2;
 }
 
 message GenderValue {
@@ -155,6 +166,10 @@ message FeedMessage {
     repeated CommentMessage lastComments = 10;
     bool isLiked = 11;
     bool isDeleted = 12;
+    bool isAccess = 13;
+    string membershipId = 14;
+    bool isMembership = 15;
+    bool fromHost = 16;
 }
 
 message CommentMessage {

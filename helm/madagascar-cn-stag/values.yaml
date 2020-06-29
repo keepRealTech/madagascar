@@ -2,14 +2,64 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-common_configs:
-  namespace: keepreal-prod
-
 global:
   acr:
     acr_secret_name: keepreal-acr-secret
+  common_configs:
+    namespace: keepreal-stag
+  images:
+    lemur:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
+      tag: 1.0.7
+      imagePullPolicy: Always
+    baobob:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
+      tag: 1.0.2
+      imagePullPolicy: Always
+    brookesia:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/brookesia
+      tag: 1.0.1
+      imagePullPolicy: Always
+    coua:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
+      tag: 1.0.5
+      imagePullPolicy: Always
+    fossa:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
+      tag: 1.0.1
+      imagePullPolicy: Always
+    indri:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
+      tag: 1.0.1
+      imagePullPolicy: Always
+    mantella:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/mantella
+      tag: 1.0.0
+      imagePullPolicy: Always
+    marty:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/marty
+      tag: 1.0.0
+      imagePullPolicy: Always
+    tenrecs:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/tenrecs
+      tag: 1.0.1
+      imagePullPolicy: Always
+    vanga:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
+      tag: 1.0.0
+      imagePullPolicy: Always
+    settler:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/settler
+      tag: 1.0.0
+      imagePullPolicy: Always
+    reconsiliation:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/reconsiliation
+      tag: 1.0.0
+      imagePullPolicy: Always
 
 deploy:
-  enable_http: false
+  enable_http: true
   ssl:
-    cert_id: 1398284016177859_1720332b91b_1749325862_1022387165
+    cert_id: 1398284016177859_172b68dcaf5_-912083987_509863008
+  slb:
+    id: lb-2zefgb9ngv8jjig5oscyj

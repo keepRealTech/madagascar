@@ -449,8 +449,8 @@ public class IslandService {
     /**
      * Retrieves the default islands for posting new feeds.
      *
-     * @param userId User id.
-     * @param page Page index.
+     * @param userId   User id.
+     * @param page     Page index.
      * @param pageSize Page size.
      * @return {@link IslandsResponse}.
      */

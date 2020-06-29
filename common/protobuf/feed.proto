@@ -9,6 +9,8 @@ import "google/protobuf/wrappers.proto";
 message QueryFeedCondition {
     google.protobuf.StringValue islandId = 1;
     google.protobuf.BoolValue fromHost = 2;
+    google.protobuf.Int64Value timestampAfter = 3;
+    google.protobuf.Int64Value timestampBefore = 4;
 }
 
 message NewFeedsRequest {
@@ -17,6 +19,7 @@ message NewFeedsRequest {
     repeated string hostId = 3;
     repeated string imageUris = 4;
     google.protobuf.StringValue text = 5;
+    repeated string membershipIds = 6;
 }
 
 message NewFeedsResponse {
@@ -27,6 +30,11 @@ message RetrieveFeedByIdRequest {
     string id = 1;
     string userId = 2;
     bool includeDeleted = 3;
+}
+
+message RetrieveFeedsByIdsRequest {
+    repeated string ids = 1;
+    string userId = 2;
 }
 
 message RetrieveMultipleFeedsRequest {
@@ -55,10 +63,6 @@ message DeleteFeedResponse {
     CommonStatus status = 1;
 }
 
-message RetrieveLatestFeedByUserIdRequest {
-    string userId = 1;
-}
-
 message CreateDefaultFeedRequest {
     string userId = 1;
     string islandId = 2;
@@ -69,11 +73,23 @@ message CreateDefaultFeedResponse {
     CommonStatus status = 1;
 }
 
+message TimelineFeedMessage {
+    string id = 1;
+    string islandId = 2;
+    int64 createdAt = 3;
+}
+
+message TimelineFeedsResponse {
+    CommonStatus status = 1;
+    repeated TimelineFeedMessage message = 2;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
+    rpc RetrieveFeedsByIds (RetrieveFeedsByIdsRequest) returns (FeedsResponse) {};
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
-    rpc RetrieveLatestFeedByUserId (RetrieveLatestFeedByUserIdRequest) returns (FeedResponse) {}
     rpc CreateDefaultFeed (CreateDefaultFeedRequest) returns (CreateDefaultFeedResponse) {}
+    rpc RetrieveMultipleTimelineFeeds (RetrieveMultipleFeedsRequest) returns (TimelineFeedsResponse) {}
 }

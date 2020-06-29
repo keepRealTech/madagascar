@@ -14,6 +14,12 @@ grpc:
   tenrecs:
     host: 127.0.0.1
     port: 12004
+  mantella:
+    host: 127.0.0.1
+    port: 12005
+  vanga:
+    host: 127.0.0.1
+    port: 12006
 
 system-notification:
   name: test-user
@@ -37,7 +43,7 @@ security:
       client-id: lemur
       client-secret: secret
     resource:
-      token-info-uri: http://baobob:12001/oauth/check_token
+      token-info-uri: http://localhost:8080/oauth/check_token
     basic:
       enabled: false
 
@@ -47,13 +53,17 @@ server:
     max-threads: 200
   connection-timeout: 15s
 
+management:
+  server:
+    port: 8082
+
 rocketmq:
   stats-event:
     accessKey: 1
     secretKey: 2
     topic: stats-event
     tag: event
-    nameSrvAddr: 192.168.0.4:9876
+    nameSrvAddr: 127.0.0.1:9876
 
 opentracing:
   jaeger:
@@ -64,27 +74,52 @@ general:
   singleOfficialIslandId: "6668436831391973376"
   officialIslandIdList:
     - "6668436831391973376"
+  android-upgrade-strategy: Stochastic
+  android-upgrade-ratio: 100
   sensitive-words-file-path: /app/good-dictionary.txt
 
 client:
   android:
-    setup:
+    setupInfo:
       version: 1
       address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
-    androidChannelMap:
-      a360: true
-      oppo: true
-      vivo: false
-      xiaomi: true
-      huawei: true
-      baidu: true
-      wandoujia: true
-      yingyongbao: true
-      lianxiang: true
-      kr: true
-    updateInfo:
-      currentVersion: 1
-      nextVersion: 1
-      address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
-      message: first version
-      shouldForce: false
+    versionInfoMap:
+      1:
+        a360: false
+        oppo: false
+        vivo: false
+        xiaomi: false
+        huawei: false
+        baidu: false
+        wandoujia: false
+        yingyongbao: false
+        lianxiang: false
+        kr: false
+    updateInfoMap:
+      1:
+        currentVersion: 1
+        nextVersion: 1
+        address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
+        message: first version
+        shouldForce: false
+  ios:
+    versionInfoMap:
+      100:
+        island-feed-loop-interval: 10
+        myIslands-page-size: 100
+        message-loop-interval: 10
+        guest-page-size: 5
+        island-check-interval: 10
+        config-timeout: 1000
+        audit: false
+    updateInfoMap:
+      100:
+        currentVersion: 100
+        nextVersion: 100
+
+aliyun-oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  accessKey: 123
+  accessSecret: 123
+  bucketName: kr-thumbnail-staging-cn2-01
+  expireTimeInSeconds: 30

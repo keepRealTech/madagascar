@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: indri
-  namespace: {{ .Values.common_configs.namespace }}
+  namespace: {{ .Values.global.common_configs.namespace }}
 spec:
   replicas: {{ .Values.common_configs.replicas }}
   selector:
@@ -37,8 +37,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: indri
-          image: {{ .Values.images.indri.name }}:{{ .Values.images.indri.tag }}
-          imagePullPolicy: {{ .Values.images.indri.imagePullPolicy }}
+          image: {{ .Values.global.images.indri.name }}:{{ .Values.global.images.indri.tag }}
+          imagePullPolicy: {{ .Values.global.images.indri.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: indri

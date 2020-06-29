@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: lemur
-  namespace: {{ .Values.common_configs.namespace }}
+  namespace: {{ .Values.global.common_configs.namespace }}
 spec:
   replicas: {{ .Values.common_configs.replicas }}
   selector:
@@ -37,8 +37,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: lemur
-          image: {{ .Values.images.lemur.name }}:{{ .Values.images.lemur.tag }}
-          imagePullPolicy: {{ .Values.images.lemur.imagePullPolicy }}
+          image: {{ .Values.global.images.lemur.name }}:{{ .Values.global.images.lemur.tag }}
+          imagePullPolicy: {{ .Values.global.images.lemur.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: lemur
@@ -53,6 +53,25 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: access-secret
+            - name: ROCKETMQ_STATSEVENT_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
+            - name: ALIYUNOSS_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-oss
+                  key: access-key
+            - name: ALIYUNOSS_ACCESSSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-oss
+                  key: access-secret
+          volumeMounts:
+            - name: lemur-dictionary
+              mountPath: "/app/good-dictionary.txt"
+              subPath: "good-dictionary.txt"
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}
@@ -86,6 +105,10 @@ spec:
             - --reporter.tchannel.host-port=simplest-collector-headless.keepreal-prod.svc:14267
             - --reporter.type=tchannel
         {{ end }}
+      volumes:
+        - name: lemur-dictionary
+          configMap:
+            name: lemur-dictionary
 ---
 apiVersion: v1
 kind: Service

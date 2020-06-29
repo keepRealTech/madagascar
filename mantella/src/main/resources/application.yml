@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: mantella
+  data:
+    mongodb:
+      database: mantella
+      uri: mongodb://root:password@127.0.0.1:27017
+
+grpc:
+  port: 12005
+  coua:
+    host: 127.0.0.1
+    port: 12002
+  fossa:
+    host: 127.0.0.1
+    port: 12003
+
+rocketmq:
+  notification:
+    accessKey: 1
+    secretKey: 2
+    nameSrvAddr: localhost:9876
+    topic: notification-event
+    groupId: GID-mantella-default
+    tag: event
+  feed:
+    accessKey: 1
+    secretKey: 2
+    nameSrvAddr: localhost:9876
+    topic: feed-event
+    groupId: GID-mantella-default
+    tag: event
+
+snowflake:
+  nodeId: 0

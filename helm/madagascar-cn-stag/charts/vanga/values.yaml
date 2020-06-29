@@ -1,0 +1,27 @@
+# Default values for test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+common_configs:
+  replicas: 1
+  memory: 2.5Gi
+  cpu: 500m
+
+rocketmq:
+  notification:
+    topic: notification-event
+    tag: event
+
+wechat_pay:
+  callback_address: https://staging.keepreal.cn/api/v1/orders/wechat/callback
+  cert_path: /app/apiclient_cert.pem
+
+ios_pay:
+  verify_url: https://sandbox.itunes.apple.com/verifyReceipt
+
+redis:
+  port: 6379
+
+deploy:
+  opentracing:
+    enable_jaeger: false

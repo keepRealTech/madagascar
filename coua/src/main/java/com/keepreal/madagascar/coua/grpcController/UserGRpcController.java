@@ -1,15 +1,22 @@
 package com.keepreal.madagascar.coua.grpcController;
 
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.DeviceType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.coua.DeviceTokenRequest;
+import com.keepreal.madagascar.coua.DeviceTokenResponse;
 import com.keepreal.madagascar.coua.NewUserRequest;
 import com.keepreal.madagascar.coua.QueryUserCondition;
+import com.keepreal.madagascar.coua.RetrieveDeviceTokenRequest;
+import com.keepreal.madagascar.coua.RetrieveDeviceTokenResponse;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
+import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
 import com.keepreal.madagascar.coua.model.UserInfo;
+import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
 import com.keepreal.madagascar.coua.service.UserIdentityService;
 import com.keepreal.madagascar.coua.service.UserInfoService;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
@@ -19,6 +26,8 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.util.StringUtils;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents user GRpc controller.
@@ -28,17 +37,21 @@ import java.sql.Date;
 public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
 
     private final UserInfoService userInfoService;
+    private final UserDeviceInfoService userDeviceInfoService;
     private final UserIdentityService userIdentityService;
 
     /**
      * Constructs user grpc controller.
      *
      * @param userInfoService       {@link UserInfoService}.
+     * @param userDeviceInfoService {@link UserDeviceInfoService}.
      * @param userIdentityService   {@link UserIdentityService}.
      */
     public UserGRpcController(UserInfoService userInfoService,
+                              UserDeviceInfoService userDeviceInfoService,
                               UserIdentityService userIdentityService) {
         this.userInfoService = userInfoService;
+        this.userDeviceInfoService = userDeviceInfoService;
         this.userIdentityService = userIdentityService;
     }
 
@@ -158,6 +171,53 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         }
 
         basicResponse(responseObserver, userInfoService.updateUser(userInfo));
+    }
+
+    /**
+     * Implements update device token method.
+     *
+     * @param request           {@link DeviceTokenRequest}.
+     * @param responseObserver  {@link DeviceTokenResponse}.
+     */
+    @Override
+    public void updateDeviceToken(DeviceTokenRequest request, StreamObserver<DeviceTokenResponse> responseObserver) {
+        if (request.getIsBind()) {
+            userDeviceInfoService.bindDeviceToken(request.getUserId(), request.getDeviceToken(), request.getDeviceTypeValue());
+        } else {
+            userDeviceInfoService.unbindDeviceToken(request.getUserId(), request.getDeviceToken(), request.getDeviceTypeValue());
+        }
+
+        responseObserver.onNext(DeviceTokenResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the retrieve device token by user id method.
+     *
+     * @param request
+     * @param responseObserver
+     */
+    @Override
+    public void retrieveDeviceTokenByUserId(RetrieveDeviceTokenRequest request, StreamObserver<RetrieveDeviceTokenResponse> responseObserver) {
+        String userId = request.getUserId();
+        List<SimpleDeviceToken> userDeviceInfos = userDeviceInfoService.getDeviceTokenByUserId(userId);
+        List<String> androidTokenList = new ArrayList<>();
+        List<String> iosTokenList = new ArrayList<>();
+        userDeviceInfos.forEach(info -> {
+                    if (info.getDeviceType().equals(DeviceType.ANDROID_VALUE)) {
+                        androidTokenList.add(info.getDeviceToken());
+                    } else {
+                        iosTokenList.add(info.getDeviceToken());
+                    }
+                });
+        responseObserver.onNext(RetrieveDeviceTokenResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllAndroidTokens(androidTokenList)
+                .addAllIosTokens(iosTokenList)
+                .build());
+        responseObserver.onCompleted();
     }
 
     /**

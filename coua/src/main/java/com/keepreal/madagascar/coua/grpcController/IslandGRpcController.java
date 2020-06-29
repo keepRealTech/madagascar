@@ -3,6 +3,7 @@ package com.keepreal.madagascar.coua.grpcController;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.DeviceType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.UserMessage;
@@ -21,6 +22,8 @@ import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.coua.NewIslandRequest;
 import com.keepreal.madagascar.coua.QueryIslandCondition;
 import com.keepreal.madagascar.coua.RetrieveDefaultIslandsByUserIdRequest;
+import com.keepreal.madagascar.coua.RetrieveDeviceTokensRequest;
+import com.keepreal.madagascar.coua.RetrieveDeviceTokensResponse;
 import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandProfileByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
@@ -38,6 +41,7 @@ import com.keepreal.madagascar.coua.model.Subscription;
 import com.keepreal.madagascar.coua.service.FeedService;
 import com.keepreal.madagascar.coua.service.IslandInfoService;
 import com.keepreal.madagascar.coua.service.SubscriptionService;
+import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
 import com.keepreal.madagascar.coua.service.UserInfoService;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
 import com.keepreal.madagascar.coua.util.PageResponseUtil;
@@ -67,6 +71,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     private final SubscriptionService subscriptionService;
     private final FeedService feedService;
     private final UserInfoService userInfoService;
+    private final UserDeviceInfoService userDeviceInfoService;
 
     /**
      * Constructs the island grpc controller.
@@ -75,15 +80,18 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
      * @param subscriptionService   {@link SubscriptionService}.
      * @param feedService           {@link FeedService}.
      * @param userInfoService       {@link UserInfoService}.
+     * @param userDeviceInfoService {@link UserDeviceInfoService}.
      */
     public IslandGRpcController(IslandInfoService islandInfoService,
                                 SubscriptionService subscriptionService,
                                 FeedService feedService,
-                                UserInfoService userInfoService) {
+                                UserInfoService userInfoService,
+                                UserDeviceInfoService userDeviceInfoService) {
         this.islandInfoService = islandInfoService;
         this.subscriptionService = subscriptionService;
         this.feedService = feedService;
         this.userInfoService = userInfoService;
+        this.userDeviceInfoService = userDeviceInfoService;
     }
 
     /**
@@ -244,7 +252,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             } else if (hasSubscribedUserId) {
                 islandInfoList = islandInfoService.getIslandBySubscribed(requestCondition.getSubscribedUserId().getValue(), pageable, builder);
             } else if (hasName) {
-                islandInfoList = islandInfoService.getIslandByName(requestCondition.getName().getValue());
+                islandInfoList = islandInfoService.getIslandByName(requestCondition.getName().getValue(), pageable, builder);
             } else {
                 islandInfoList = islandInfoService.getIsland(pageable, builder);
             }
@@ -350,6 +358,13 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         String islandId = request.getId();
         String secret = request.getSecret();
         String userId = request.getUserId();
+        if (subscriptionService.isSubScribedIsland(islandId, userId)) {
+            responseObserver.onNext(SubscribeIslandResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.getSuccStatus())
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
         SubscribeIslandResponse.Builder responseBuilder = SubscribeIslandResponse.newBuilder();
         IslandInfo islandInfo = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
         if (islandInfo != null) {
@@ -496,6 +511,33 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         RetrieveUserSubscriptionStateResponse response = RetrieveUserSubscriptionStateResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .putAllStateMap(stateMap)
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveDeviceTokensById(RetrieveDeviceTokensRequest request, StreamObserver<RetrieveDeviceTokensResponse> responseObserver) {
+        String islandId = request.getIslandId();
+        Pageable pageable = PageResponseUtil.getPageable(request.getPageRequest());
+
+        Page<String> subscriberIdsPageable = subscriptionService.getSubscriberIdListByIslandId(islandId, pageable);
+
+        List<String> androidTokenList = new ArrayList<>();
+        List<String> iosTokenList = new ArrayList<>();
+        userDeviceInfoService.getDeviceTokenListByUserIdList(subscriberIdsPageable.getContent())
+                .forEach(info -> {
+                    if (info.getDeviceType().equals(DeviceType.ANDROID_VALUE)) {
+                        androidTokenList.add(info.getDeviceToken());
+                    } else {
+                        iosTokenList.add(info.getDeviceToken());
+                    }
+                });
+
+        RetrieveDeviceTokensResponse response = RetrieveDeviceTokensResponse.newBuilder()
+                .addAllAndroidTokens(androidTokenList)
+                .addAllIosTokens(iosTokenList)
+                .setPageResponse(PageResponseUtil.buildResponse(subscriberIdsPageable))
                 .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();

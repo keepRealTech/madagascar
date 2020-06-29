@@ -10,6 +10,7 @@ import swagger.model.NoticeDTO;
 import swagger.model.NoticeType;
 import swagger.model.NotificationDTO;
 import swagger.model.NotificationType;
+import swagger.model.SkuMembershipDTO;
 
 import java.util.Objects;
 
@@ -116,7 +117,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
 
         switch (noticeMessage.getType()) {
             case NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER:
-                noticeDTO.setNoticeType(NoticeType.ISLAND_NOTICE_NEW_SUBSCRIBER);
+                noticeDTO.setNoticeType(NoticeType.SUBSCRIBER);
 
                 if (Objects.isNull(noticeMessage.getSubscribeNotice())) {
                     return noticeDTO;
@@ -131,6 +132,30 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                                 this.userService.retrieveUserById(
                                         noticeMessage.getSubscribeNotice().getSubscriberId())));
                 return noticeDTO;
+            case NOTICE_TYPE_ISLAND_NEW_MEMBER:
+                noticeDTO.setNoticeType(NoticeType.MEMBER);
+
+                if (Objects.isNull(noticeMessage.getMemberNotice())) {
+                    return noticeDTO;
+                }
+
+                noticeDTO.setIsland(
+                        this.islandDTOFactory.briefValueOf(
+                                this.islandService.retrieveIslandById(
+                                        noticeMessage.getMemberNotice().getIslandId())));
+                noticeDTO.setMember(
+                        this.userDTOFactory.briefValueOf(
+                                this.userService.retrieveUserById(
+                                        noticeMessage.getMemberNotice().getMemberId())));
+                
+                SkuMembershipDTO skuMembershipDTO = new SkuMembershipDTO();
+                skuMembershipDTO.setId(noticeMessage.getMemberNotice().getMembershipId());
+                skuMembershipDTO.setMembershipName(noticeMessage.getMemberNotice().getMembershipName());
+                skuMembershipDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
+                skuMembershipDTO.setTimeInMonths(noticeMessage.getMemberNotice().getTimeInMonths());
+                noticeDTO.setMembership(skuMembershipDTO);
+                return noticeDTO;
+
             default:
         }
 

@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.0.0"
+  version: "1.1.0"
   title: Keep Real API
 
 security:
@@ -17,6 +17,8 @@ tags:
     description: Feed stream controllers
   - name: Comment
     description: Comments controllers
+  - name: Upload
+    description: Upload file controllers
   - name: Reaction
     description: Reactions controllers such as likes
   - name: Notification
@@ -27,7 +29,16 @@ tags:
     description: Configs controllers
   - name: Healthcheck
     description: SLB health check controllers
-
+  - name: Order
+    description: Orders controllers
+  - name: Payment
+    description: Payments controller
+  - name: Billing
+    description: Billings controller
+  - name: Sku
+    description: SKU controller
+  - name: Membership
+    description: Membership controller
 paths:
   /api/healthcheck:
     head:
@@ -78,6 +89,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RefreshTokenResponse'
+  /api/v1/deviceTokens:
+    post:
+      tags:
+        - Login
+      summary: update device token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceTokenRequest'
+      responses:
+        '200':
+          description: response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/userInfo:
     get:
       tags:
@@ -103,7 +132,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/FullUserResponse'
     put:
       tags:
         - User
@@ -202,7 +231,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BriefIslandsResponse'
+                $ref: '#/components/schemas/IslandsResponse'
   /api/v1/islands/officialIslands:
     get:
       tags:
@@ -276,6 +305,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FeedsResponse'
+  /api/v1.1/islands/{id}/feeds:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/fromHostInQuery'
+        - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Island
+      summary: retrieves a list of feeds with pagination
+      responses:
+        '200':
+          description: feeds response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinesResponse'
+  /api/v1/islands/{id}/feeds/top:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Island
+      summary: make a feed to top
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopFeedRequest'
+      responses:
+        '200':
+          description: feed response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponse'
+
   /api/v1/islands/{id}/poster:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -413,9 +482,8 @@ paths:
   /api/v1/feeds:
     get:
       parameters:
-        - $ref: '#/components/parameters/islandidInPath'
-        - $ref: '#/components/parameters/fromHostInQuery'
-        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
         - $ref: '#/components/parameters/pageSize'
       tags:
         - Feed
@@ -426,7 +494,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeedsResponse'
+                $ref: '#/components/schemas/TimelinesResponse'
     post:
       tags:
         - Feed
@@ -444,6 +512,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1.1/feeds:
+    post:
+      tags:
+        - Feed
+      summary: creates a new feed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostFeedRequestV2'
+      responses:
+        '200':
+          description: brief feed response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponse'
   /api/v1/feeds/check:
     post:
       tags:
@@ -605,10 +691,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/upload/mediaUrls:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MediaUrlsRequest'
+      tags:
+        - Upload
+      summary: retrieves upload image url
+      responses:
+        '200':
+          description: retrieve image url
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlListResponse'
   /api/v1/notifications:
     get:
       parameters:
         - $ref: '#/components/parameters/notificationTypeInQuery'
+        - $ref: '#/components/parameters/noticeTypeInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -633,6 +738,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotificationsCountResponse'
+  /api/v1.1/notifications/count:
+    get:
+      tags:
+        - Notification
+      summary: retrieves the count of unread notifications
+      responses:
+        '200':
+          description: notifications count response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationsCountResponseV2'
   /api/v1/configs:
     get:
       parameters:
@@ -690,6 +807,279 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AndroidSetupInfoResponse'
+  /api/v1/orders/wechat/{id}/check:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Order
+      summary: get the wechat order
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/orders/ios:
+    post:
+      tags:
+        - Order
+      summary: create a new ios shell order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostIOSOrderRequest'
+      responses:
+        '200':
+          description: ios scallop order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/islands/{id}/memberSubscription/wechatPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: purchase with wechat pay
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeMemberRequest'
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/shellPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: purchase with shell
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeMemberRequest'
+      responses:
+        '200':
+          description: dummy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/balances/myWallet:
+    get:
+      tags:
+        - Billing
+      summary: get user's wallet
+      responses:
+        '200':
+          description: wallet info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/balances/withdraw:
+    post:
+      tags:
+        - Billing
+      summary: submit a withdraw request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWithdrawRequest'
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/billingInfo:
+    get:
+      tags:
+        - Billing
+      summary: get current user's billing info
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingInfoResponse'
+    put:
+      tags:
+        - Billing
+      summary: post current user's billing info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutBillingInfoRequest'
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingInfoResponse'
+  /api/v1/balances/skus:
+    get:
+      tags:
+        - Sku
+      summary: get all active skus
+      responses:
+        '200':
+          description: skus info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShellSkusResponse'
+  /api/v1/membership/{id}/skus:
+    parameters:
+      - $ref: "#/components/parameters/idInPath"
+    get:
+      tags:
+        - Sku
+      summary: get all active membership skus
+      responses:
+        '200':
+          description: skus info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipSkusResponse'
+  /api/v1/islands/{id}/memberships:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Membership
+      summary: Create a new membership for given island
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostMembershipRequest'
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipResponse'
+    get:
+      tags:
+        - Membership
+      summary: Get memberships for island
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipsResponse'
+  /api/v1/islands/{id}/feedMemberships:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Membership
+      summary: Get memberships for island
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedMembershipsResponse'
+  /api/v1/memberships/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Membership
+      summary: Retrieve a membership
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipResponse'
+    put:
+      tags:
+        - Membership
+      summary: Update a membership
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutMembershipRequest'
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipResponse'
+    delete:
+      tags:
+        - Membership
+      summary: Remove a membership
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/memberships/{id}/deactivate:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Membership
+      summary: deletes a membership by id
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/memberships/{id}/top:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+      - $ref: '#/components/parameters/isRevokeInQuery'
+    post:
+      tags:
+        - Membership
+      summary: deletes a membership by id
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -704,6 +1094,22 @@ components:
       required: true
       schema:
         type: string
+    timestampAfter:
+      in: query
+      name: minTimestamp
+      description: timestamp after
+      required: false
+      schema:
+        type: integer
+        format: int64
+    timestampBefore:
+      in: query
+      name: maxTimestamp
+      description: timestamp before
+      required: false
+      schema:
+        type: integer
+        format: int64
     page:
       in: query
       name: page
@@ -764,12 +1170,25 @@ components:
       required: false
       schema:
         type: boolean
+    fileNameInQuery:
+      in: query
+      name: fileName
+      description: fileName
+      required: true
+      schema:
+        type: string
     notificationTypeInQuery:
       in: query
       name: type
       required: false
       schema:
         $ref: '#/components/schemas/NotificationType'
+    noticeTypeInQuery:
+      in: query
+      name: noticeType
+      required: false
+      schema:
+        $ref: '#/components/schemas/NoticeType'
     isRevokeInQuery:
       in: query
       name: isRevoke
@@ -777,6 +1196,7 @@ components:
       required: false
       schema:
         type: boolean
+        default: false
     configTypeInQuery:
       in: query
       name: configType
@@ -849,10 +1269,27 @@ components:
         - IDENTITY_FASHION
         - IDENTITY_COMIC
         - IDENTITY_OTHERS
+    OrderState:
+      type: string
+      enum:
+        - STATE_NOTPAY
+        - STATE_USERPAYING
+        - STATE_SUCCESS
+        - STATE_CLOSED
+        - STATE_REFUND
+        - STATE_PAYERROR
+        - STATE_REVOKED
     NoticeType:
       type: string
       enum:
         - ISLAND_NOTICE_NEW_SUBSCRIBER
+        - ISLAND_NOTICE_NEW_MEMBER
+    MultiMediaType:
+      type: string
+      enum:
+        - MULTIMEDIA_TYPE_PIC
+        - MULTIMEDIA_TYPE_VLOG
+        - MULTIMEDIA_TYPE_MUSIC
     CommonResponse:
       type: object
       properties:
@@ -918,6 +1355,15 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/IdentityType'
+    FullUserDTO:
+      allOf:
+        - $ref: '#/components/schemas/UserDTO'
+        - type: object
+          properties:
+            createdIslands:
+              type: array
+              items:
+                $ref: '#/components/schemas/BriefIslandDTO'
     PutUserPayload:
       type: object
       properties:
@@ -951,6 +1397,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UserDTO'
+    FullUserResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FullUserDTO'
     UsersResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1073,6 +1526,15 @@ components:
           description: island secret
       required:
         - secret
+    MediaUrlsRequest:
+      type: object
+      properties:
+        fileNames:
+          type: array
+          items:
+            type: string
+      required:
+        - fileNames
     CheckIslandResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1148,6 +1610,10 @@ components:
           type: string
         feedId:
           type: string
+        islandId:
+          type: string
+        userId:
+          type: string
         reporterId:
           type: string
     PostReportRequest:
@@ -1159,13 +1625,14 @@ components:
         feedId:
           type: string
           description: feed id to report
-        reporterId:
+        islandId:
           type: string
-          description: user id
+          description: island id to report
+        userId:
+          type: string
+          description: user id to report
       required:
         - reportType
-        - feedId
-        - reporterId
     ReportResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1173,6 +1640,30 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ReportDTO'
+    VLogDTO:
+      type: object
+      properties:
+        uri:
+          type: string
+        length:
+          type: integer
+        type:
+          $ref: '#/components/schemas/MultiMediaType'
+    PictureDTO:
+      type: object
+      properties:
+        uri:
+          type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        type:
+          $ref: '#/components/schemas/MultiMediaType'
+    MultiMediaDTO:
+      oneOf:
+        - $ref: '#/components/schemas/VLogDTO'
+        - $ref: '#/components/schemas/PictureDTO'
     PosterFeedDTO:
       type: object
       properties:
@@ -1204,6 +1695,10 @@ components:
           type: array
           items:
             type: string
+        multimedia:
+          type: array
+          items:
+            $ref: '#/components/schemas/MultiMediaDTO'
         fromHost:
           type: boolean
           description: whether feed posted by the host of island
@@ -1211,6 +1706,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CommentDTO'
+        toppedAt:
+          type: integer
+          format: int64
         createdAt:
           type: integer
           format: int64
@@ -1223,6 +1721,18 @@ components:
               type: boolean
             isSubscribed:
               type: boolean
+    SimpleMembershipDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        membershipName:
+          type: string
+        colorType:
+          type: integer
+        pricePerMonthInCents:
+          type: integer
+          format: int64
     FeedDTO:
       allOf:
         - $ref: '#/components/schemas/BriefFeedDTO'
@@ -1236,10 +1746,20 @@ components:
               type: integer
             isLiked:
               type: boolean
+            isAccess:
+              type: boolean
+            isMembership:
+              type: boolean
+            membership:
+              $ref: '#/components/schemas/SimpleMembershipDTO'
     PostFeedPayload:
       type: object
       properties:
         islandIds:
+          type: array
+          items:
+            type: string
+        membershipIds:
           type: array
           items:
             type: string
@@ -1257,6 +1777,23 @@ components:
             format: binary
       required:
         - payload
+    PostFeedRequestV2:
+      type: object
+      properties:
+        islandId:
+          type: string
+        membershipIds:
+          type: array
+          items:
+            type: string
+        content:
+          type: string
+        multimedia:
+          type: array
+          items:
+            $ref: '#/components/schemas/MultiMediaDTO'
+      required:
+        - islandId
     CheckFeedsMessage:
       type: object
       properties:
@@ -1295,6 +1832,17 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/FeedDTO'
+    TimelinesResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeedDTO'
     FeedsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1404,6 +1952,7 @@ components:
     NoticeDTO:
       oneOf:
         - $ref: '#/components/schemas/SubscribeNoticeDTO'
+        - $ref: '#/components/schemas/MemberNoticeDTO'
     SystemNotificationDTO:
       type: object
       properties:
@@ -1429,6 +1978,27 @@ components:
           $ref: '#/components/schemas/BriefIslandDTO'
         subscriber:
           $ref: '#/components/schemas/BriefUserDTO'
+    MemberNoticeDTO:
+      type: object
+      properties:
+        noticeType:
+          $ref: '#/components/schemas/NoticeType'
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
+        member:
+          $ref: '#/components/schemas/BriefUserDTO'
+        membership:
+          $ref: '#/components/schemas/SkuMembershipDTO'
+    SkuMembershipDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefMembershipDTO'
+        - type: object
+          properties:
+            priceInCents:
+              type: integer
+              format: int64
+            timeInMonths:
+              type: integer
     ReactionNotificationDTO:
       type: object
       properties:
@@ -1475,6 +2045,13 @@ components:
         createdAt:
           type: integer
           format: int64
+    UnreadIslandNoticesCountDTO:
+      type: object
+      properties:
+        UnreadNewSubscriberNoticeCount:
+          type: integer
+        UnreadNewMemberNoticeCount:
+          type: integer
     UnreadNotificationCountDTO:
       type: object
       properties:
@@ -1486,6 +2063,33 @@ components:
           type: integer
         UnreadIslandNoticesCount:
           type: integer
+    UnreadNotificationCountDTOV2:
+      type: object
+      properties:
+        hasUnread:
+          type: boolean
+        UnreadCommentsCount:
+          type: integer
+        UnreadReactionsCount:
+          type: integer
+        UnreadIslandNoticesCountDTO:
+          $ref: '#/components/schemas/UnreadIslandNoticesCountDTO'
+    UploadUrlDTO:
+      type: object
+      properties:
+        objectName:
+          type: string
+        url:
+          type: string
+    UploadUrlListResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UploadUrlDTO'
     NotificationsCountResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1493,6 +2097,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UnreadNotificationCountDTO'
+    NotificationsCountResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UnreadNotificationCountDTOV2'
     NotificationsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -1677,7 +2288,7 @@ components:
     SetupInfoDTO:
       type: object
       properties:
-        verion:
+        version:
           type: integer
         address:
           type: string
@@ -1688,3 +2299,281 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SetupInfoDTO'
+    TopFeedRequest:
+      type: object
+      properties:
+        feedId:
+          type: string
+        isRevoke:
+          type: boolean
+    PostIOSOrderRequest:
+      type: object
+      properties:
+        shellSkuId:
+          type: string
+        receipt:
+          type: string
+    WechatOrderDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        nonceStr:
+          type: string
+        appId:
+          type: string
+        partnerId:
+          type: string
+        prepayId:
+          type: string
+        signature:
+          type: string
+        userId:
+          type: string
+        feeInCents:
+          type: integer
+          format: int64
+        timestamp:
+          type: integer
+          format: int64
+        state:
+          $ref: '#/components/schemas/OrderState'
+    WechatOrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/WechatOrderDTO'
+    SubscribeMemberRequest:
+      type: object
+      properties:
+        membershipSkuId:
+          type: string
+    BalanceDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        balanceInCents:
+          type: integer
+          format: int64
+        balanceEligibleInCents:
+          type: integer
+          format: int64
+        balanceInShells:
+          type: integer
+          format: int64
+    BalanceResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BalanceDTO'
+    BillingInfoDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        mobile:
+          type: string
+        identityNumber:
+          type: string
+        account:
+          type: string
+        verified:
+          type: boolean
+    PutBillingInfoRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        mobile:
+          type: string
+        identityNumber:
+          type: string
+        accountNumber:
+          type: string
+      required:
+        - name
+        - mobile
+        - identityNumber
+        - accountNumber
+    BillingInfoResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BillingInfoDTO'
+    ShellSkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        appleSkuId:
+          type: string
+        description:
+          type: string
+        shells:
+          type: integer
+          format: int64
+        priceInCents:
+          type: integer
+          format: int64
+        isDefault:
+          type: boolean
+    ShellSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ShellSkuDTO'
+    MembershipSkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        membershipId:
+          type: string
+        isDefault:
+          type: boolean
+        timeInMonths:
+          type: integer
+        priceInCents:
+          type: integer
+          format: int64
+        priceInShells:
+          type: integer
+          format: int64
+    MembershipSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/MembershipSkuDTO'
+    PostWithdrawRequest:
+      type: object
+      properties:
+        amountInCents:
+          type: integer
+          format: int64
+          minimum: 100
+    DeviceTokenRequest:
+      type: object
+      properties:
+        isBind:
+          type: boolean
+        deviceToken:
+          type: string
+        deviceType:
+          type: integer
+      required:
+        - isBind
+        - deviceToken
+        - deviceType
+    FeedMembershipDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        membershipName:
+          type: string
+        chargePerMonth:
+          type: integer
+        memberCount:
+          type: integer
+    BriefMembershipDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        hostId:
+          type: string
+        islandId:
+          type: string
+        membershipName:
+          type: string
+        description:
+          type: array
+          items:
+            type: string
+        chargePerMonth:
+          type: integer
+        colorType:
+          type: integer
+    MembershipDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefMembershipDTO'
+        - type: object
+          properties:
+            memberCount:
+              type: integer
+            isTop:
+              type: boolean
+    PostMembershipRequest:
+      type: object
+      properties:
+        description:
+          type: array
+          items:
+            type: string
+        chargePerMonth:
+          type: integer
+          minimum: 100
+          maximum: 1000000000
+        name:
+          type: string
+    PutMembershipRequest:
+      type: object
+      properties:
+        description:
+          type: array
+          items:
+            type: string
+        chargePerMonth:
+          type: integer
+          minimum: 100
+          description: can only increase
+        name:
+          type: string
+    MembershipResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BriefMembershipDTO'
+    MembershipsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/MembershipDTO'
+    FeedMembershipsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeedMembershipDTO'

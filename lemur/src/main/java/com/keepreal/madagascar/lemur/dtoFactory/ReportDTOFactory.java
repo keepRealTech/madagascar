@@ -27,9 +27,16 @@ public class ReportDTOFactory {
 
         ReportDTO reportDTO = new ReportDTO();
         reportDTO.setId(report.getId());
-        reportDTO.setFeedId(report.getFeedId());
         reportDTO.setReporterId(report.getReporterId());
         reportDTO.setType(report.getType().name());
+
+        if (report.hasFeedId()) {
+            reportDTO.setFeedId(report.getFeedId().getValue());
+        }
+
+        if (report.hasIslandId()) {
+            reportDTO.setIslandId(report.getIslandId().getValue());
+        }
 
         return reportDTO;
     }

@@ -21,4 +21,14 @@ public class GrpcConfigurationFactory {
         return new GrpcConfiguration();
     }
 
+    /**
+     * Represents configurations for vanga.
+     *
+     * @return Grpc configuration.
+     */
+    @Bean(name = "vangaConfiguration")
+    @ConfigurationProperties(prefix = "grpc.vanga", ignoreUnknownFields = false)
+    public GrpcConfiguration vangaConfiguration() {
+        return new GrpcConfiguration();
+    }
 }

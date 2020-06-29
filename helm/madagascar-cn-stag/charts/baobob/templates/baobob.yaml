@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: baobob
-  namespace: {{ .Values.common_configs.namespace }}
+  namespace: {{ .Values.global.common_configs.namespace }}
 spec:
   replicas: {{ .Values.common_configs.replicas }}
   selector:
@@ -37,8 +37,8 @@ spec:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
         - name: baobob
-          image: {{ .Values.images.baobob.name }}:{{ .Values.images.baobob.tag }}
-          imagePullPolicy: {{ .Values.images.baobob.imagePullPolicy }}
+          image: {{ .Values.global.images.baobob.name }}:{{ .Values.global.images.baobob.tag }}
+          imagePullPolicy: {{ .Values.global.images.baobob.imagePullPolicy }}
           envFrom:
             - configMapRef:
                 name: baobob

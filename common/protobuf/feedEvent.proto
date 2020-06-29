@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.mantella";
+
+enum FeedEventType {
+    FEED_EVENT_NONE = 0;
+    FEED_EVENT_CREATE= 1;
+    FEED_EVENT_DELETE = 2;
+}
+
+message FeedCreateEvent {
+    string feedId = 1;
+    string islandId = 2;
+    string authorId = 3;
+    uint64 createdAt = 4;
+}
+
+message FeedDeleteEvent {
+   string feedId = 1;
+}
+
+message FeedEventMessage {
+    FeedEventType type = 1;
+    uint64 timestamp = 2;
+    string eventId = 3;
+    oneof event {
+      FeedCreateEvent feedCreateEvent = 4;
+      FeedDeleteEvent feedDeleteEvent = 5;
+    }
+}

@@ -19,17 +19,21 @@ import org.springframework.context.annotation.Configuration;
 public class GrpcChannelFactory {
 
     private final GrpcConfiguration fossaConfiguration;
+    private final GrpcConfiguration vangaConfiguration;
     private final Tracer tracer;
 
     /**
      * Constructs the grpc channels factory.
      *
      * @param fossaConfiguration Fossa grpc configuration.
+     * @param vangaConfiguration Vanga grpc configuration.
      * @param tracer             {@link Tracer}.
      */
     public GrpcChannelFactory(@Qualifier("fossaConfiguration") GrpcConfiguration fossaConfiguration,
+                              @Qualifier("vangaConfiguration") GrpcConfiguration vangaConfiguration,
                               Tracer tracer) {
         this.fossaConfiguration = fossaConfiguration;
+        this.vangaConfiguration = vangaConfiguration;
         this.tracer = tracer;
     }
 
@@ -46,6 +50,23 @@ public class GrpcChannelFactory {
                 .build()
                 .intercept(ManagedChannelBuilder
                         .forAddress(this.fossaConfiguration.getHost(), this.fossaConfiguration.getPort())
+                        .usePlaintext()
+                        .build());
+    }
+
+    /**
+     * Represents the vanga grpc channel.
+     *
+     * @return Vanga grpc channel.
+     */
+    @Bean(name = "vangaChannel")
+    public Channel getVangaChannel() {
+        return TracingClientInterceptor
+                .newBuilder()
+                .withTracer(this.tracer)
+                .build()
+                .intercept(ManagedChannelBuilder
+                        .forAddress(this.vangaConfiguration.getHost(), this.vangaConfiguration.getPort())
                         .usePlaintext()
                         .build());
     }

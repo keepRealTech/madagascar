@@ -10,6 +10,10 @@ jar {
     enabled = true
 }
 
+bootJar {
+    enabled = false
+}
+
 sourceSets {
     main {
         proto {

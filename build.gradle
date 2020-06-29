@@ -16,12 +16,19 @@ allprojects {
 }
 
 ext['baobob.version'] = '1.0.2'
-ext['indri.version'] = '1.0.0'
-ext['coua.version'] = '1.0.4'
-ext['fossa.version'] = '1.0.0'
-ext['lemur.version'] = '1.0.6'
-ext['tenrecs.version'] = '1.0.0'
-ext['brookesia.version'] = '1.0.0'
+ext['indri.version'] = '1.0.1'
+ext['coua.version'] = '1.0.5'
+ext['fossa.version'] = '1.0.1'
+ext['lemur.version'] = '1.0.7'
+ext['tenrecs.version'] = '1.0.1'
+ext['brookesia.version'] = '1.0.1'
+ext['marty.version'] = '1.0.0'
+ext['mantella.version'] = '1.0.0'
+ext['vanga.version'] = '1.0.0'
+ext['marty.version'] = '1.0.0'
+
+ext['settler.version'] = '1.0.0'
+ext['reconciliation.version'] = '1.0.0'
 
 subprojects {
     apply plugin: 'io.spring.dependency-management'
@@ -45,6 +52,7 @@ subprojects {
     ext['reactive-grpc.version'] = '0.10.0'
     ext['ehcache.version'] = '3.8.1'
     ext['openservices.version'] = '1.8.4.Final'
+    ext['oss.version'] = '3.9.0'
 
     project.version = rootProject.findProperty("${project.name}.version") ?: 'latest'
 
@@ -74,7 +82,7 @@ subprojects {
         docker {
             name "registry.cn-beijing.aliyuncs.com/keepreal/${project.name.replace('_','-')}:$project.version"
             dockerfile file("$projectDir/dockerfile")
-            files "$projectDir/start.sh", "$projectDir/healthcheck.sh"
+            files "$projectDir/start.sh", "$projectDir/healthcheck.sh", "$projectDir/apiclient_cert.pem"
             copySpec.from(tasks.unpack.outputs).into("dependency")
             buildArgs(['DEPENDENCY': "dependency"])
             pull true
@@ -153,6 +161,7 @@ subprojects {
             dependency "org.openapitools:jackson-databind-nullable:0.2.1"
             dependency "org.ehcache:ehcache:${ext['ehcache.version']}"
             dependency "com.aliyun.openservices:ons-client:${ext['openservices.version']}"
+            dependency "com.aliyun.oss:aliyun-sdk-oss:${ext['oss.version']}"
             dependency "io.opentracing.contrib:opentracing-spring-jaeger-web-starter:3.1.1"
             dependency "io.opentracing.contrib:opentracing-grpc:0.2.1"
         }

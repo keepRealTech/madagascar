@@ -17,9 +17,11 @@ import com.keepreal.madagascar.fossa.NewFeedsRequest;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
-import com.keepreal.madagascar.fossa.RetrieveLatestFeedByUserIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
+import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
+import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.IslandService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
@@ -33,6 +35,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -53,30 +56,34 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     private final IslandService islandService;
     private final FeedInfoService feedInfoService;
     private final MongoTemplate mongoTemplate;
+    private final FeedEventProducerService feedEventProducerService;
 
     /**
      * Constructs the feed grpc controller
      *
-     * @param idGenerator       {@link LongIdGenerator}
-     * @param islandService     {@link IslandService}
-     * @param feedInfoService   {@link FeedInfoService}
-     * @param mongoTemplate     {@link MongoTemplate}
+     * @param idGenerator              {@link LongIdGenerator}
+     * @param islandService            {@link IslandService}
+     * @param feedInfoService          {@link FeedInfoService}
+     * @param mongoTemplate            {@link MongoTemplate}
+     * @param feedEventProducerService {@link FeedEventProducerService}.
      */
     public FeedGRpcController(LongIdGenerator idGenerator,
                               IslandService islandService,
                               FeedInfoService feedInfoService,
-                              MongoTemplate mongoTemplate) {
+                              MongoTemplate mongoTemplate,
+                              FeedEventProducerService feedEventProducerService) {
         this.idGenerator = idGenerator;
         this.islandService = islandService;
         this.feedInfoService = feedInfoService;
         this.mongoTemplate = mongoTemplate;
+        this.feedEventProducerService = feedEventProducerService;
     }
 
     /**
      * implements the create feeds method
      *
-     * @param request           {@link NewFeedsRequest}.
-     * @param responseObserver  {@link NewFeedsResponse} Callback.
+     * @param request          {@link NewFeedsRequest}.
+     * @param responseObserver {@link NewFeedsResponse} Callback.
      */
     @Override
     public void createFeeds(NewFeedsRequest request, StreamObserver<NewFeedsResponse> responseObserver) {
@@ -84,8 +91,10 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         ProtocolStringList islandIdList = request.getIslandIdList();
         ProtocolStringList hostIdList = request.getHostIdList();
         String text = request.hasText() ? request.getText().getValue() : "";
+        ProtocolStringList membershipIdsList = request.getMembershipIdsList();
 
         List<FeedInfo> feedInfoList = new ArrayList<>();
+        long timestamp = Instant.now().toEpochMilli();
         IntStream.range(0, islandIdList.size()).forEach(i -> {
             FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
             builder.id(String.valueOf(idGenerator.nextId()));
@@ -95,12 +104,16 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.fromHost(userId.equals(hostIdList.get(i)));
             builder.imageUrls(request.getImageUrisList());
             builder.text(text);
-            builder.createdTime(System.currentTimeMillis());
+            builder.membershipIds(membershipIdsList);
+            builder.createdTime(timestamp);
+            builder.toppedTime(timestamp);
             feedInfoList.add(builder.build());
         });
 
-        feedInfoService.saveAll(feedInfoList);
-        islandService.callCouaUpdateIslandLastFeedAt(islandIdList);
+        List<FeedInfo> feedInfos = feedInfoService.saveAll(feedInfoList);
+        islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp);
+
+        feedInfos.forEach(this.feedEventProducerService::produceNewFeedEventAsync);
 
         NewFeedsResponse newFeedsResponse = NewFeedsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -112,14 +125,16 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * implements the delete feed by id method
      *
-     * @param request           {@link DeleteFeedByIdRequest}.
-     * @param responseObserver  {@link DeleteFeedResponse} Callback.
+     * @param request          {@link DeleteFeedByIdRequest}.
+     * @param responseObserver {@link DeleteFeedResponse} Callback.
      */
     @Override
     public void deleteFeedById(DeleteFeedByIdRequest request, StreamObserver<DeleteFeedResponse> responseObserver) {
         String feedId = request.getId();
 
         feedInfoService.deleteFeedById(feedId);
+
+        this.feedEventProducerService.produceDeleteFeedEventAsync(feedId);
 
         DeleteFeedResponse deleteFeedResponse = DeleteFeedResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -131,8 +146,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * implements the get feed by id method
      *
-     * @param request           {@link RetrieveFeedByIdRequest}.
-     * @param responseObserver  {@link FeedResponse} Callback.
+     * @param request          {@link RetrieveFeedByIdRequest}.
+     * @param responseObserver {@link FeedResponse} Callback.
      */
     @Override
     public void retrieveFeedById(RetrieveFeedByIdRequest request, StreamObserver<FeedResponse> responseObserver) {
@@ -159,36 +174,22 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * implements the get feeds by condition method
      *
-     * @param request           {@link RetrieveMultipleFeedsRequest}.
-     * @param responseObserver  {@link FeedsResponse} Callback.
+     * @param request          {@link RetrieveMultipleFeedsRequest}.
+     * @param responseObserver {@link FeedsResponse} Callback.
      */
     @Override
     public void retrieveMultipleFeeds(RetrieveMultipleFeedsRequest request, StreamObserver<FeedsResponse> responseObserver) {
         int page = request.getPageRequest().getPage();
         int pageSize = request.getPageRequest().getPageSize();
-        QueryFeedCondition condition = request.getCondition();
-        boolean fromHost = condition.hasFromHost();
-        boolean hasIslandId = condition.hasIslandId();
         String userId = request.getUserId();
-
-        Query query = new Query();
-        query.addCriteria(Criteria.where("deleted").is(false));
-        if (fromHost && hasIslandId) {
-            Criteria criteria = Criteria
-                    .where("islandId").is(condition.getIslandId().getValue())
-                    .and("fromHost").is(true);
-            query.addCriteria(criteria);
-        } else if (fromHost || hasIslandId) {
-            Criteria criteria = fromHost ? Criteria.where("fromHost").is(true)
-                    : Criteria.where("islandId").is(condition.getIslandId().getValue());
-            query.addCriteria(criteria);
-        }
-
-        // 没有条件
-        query.with(Sort.by(Sort.Order.desc("createdTime")));
+        Query query = generatorQueryByRequest(request);
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
-        List<FeedMessage> feedMessageList = feedInfoList.stream().map(info -> feedInfoService.getFeedMessage(info, userId)).filter(Objects::nonNull).collect(Collectors.toList());
+
+        List<FeedMessage> feedMessageList = feedInfoList.stream()
+                .map(info -> feedInfoService.getFeedMessage(info, userId))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
         PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(page, pageSize, totalCount);
         FeedsResponse feedsResponse = FeedsResponse.newBuilder()
@@ -201,39 +202,10 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     }
 
     /**
-     * implements the get latest feed by userId method
-     *
-     * @param request           {@link RetrieveLatestFeedByUserIdRequest}.
-     * @param responseObserver  {@link FeedResponse} Callback.
-     */
-    @Override
-    public void retrieveLatestFeedByUserId(RetrieveLatestFeedByUserIdRequest request, StreamObserver<FeedResponse> responseObserver) {
-        String userId = request.getUserId();
-
-        FeedInfo feedInfo = feedInfoService.findTopByUserIdAndDeletedIsFalseOrderByCreatedTimeDesc(userId);
-        if (feedInfo == null) {
-            log.error("[retrieveLatestFeedByUserId] feed not found error! user id is [{}]", userId);
-            responseObserver.onNext(FeedResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR))
-                    .build());
-            responseObserver.onCompleted();
-            return;
-        }
-
-        FeedResponse feedResponse = FeedResponse.newBuilder()
-                .setUserId(userId)
-                .setFeed(feedInfoService.getFeedMessage(feedInfo, userId))
-                .setStatus(CommonStatusUtils.getSuccStatus())
-                .build();
-        responseObserver.onNext(feedResponse);
-        responseObserver.onCompleted();
-    }
-
-    /**
      * implements the create default feed method
      *
-     * @param request           {@link CreateDefaultFeedRequest}.
-     * @param responseObserver  {@link CreateDefaultFeedResponse} Callback.
+     * @param request          {@link CreateDefaultFeedRequest}.
+     * @param responseObserver {@link CreateDefaultFeedResponse} Callback.
      */
     @Override
     public void createDefaultFeed(CreateDefaultFeedRequest request, StreamObserver<CreateDefaultFeedResponse> responseObserver) {
@@ -255,5 +227,84 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the feeds retrieve by ids method.
+     *
+     * @param request          {@link RetrieveFeedsByIdsRequest}.
+     * @param responseObserver {@link RetrieveFeedsByIdsRequest} Callback.
+     */
+    @Override
+    public void retrieveFeedsByIds(RetrieveFeedsByIdsRequest request, StreamObserver<FeedsResponse> responseObserver) {
+        List<FeedInfo> feedInfoList = this.feedInfoService.findByIds(request.getIdsList());
+        List<FeedMessage> feedMessageList = feedInfoList.stream()
+                .map(info -> this.feedInfoService.getFeedMessage(info, request.getUserId()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        FeedsResponse feedsResponse = FeedsResponse.newBuilder()
+                .addAllFeed(feedMessageList)
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(feedsResponse);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the retrieves multiple timeline feeds method.
+     *
+     * @param request
+     * @param responseObserver
+     */
+    @Override
+    public void retrieveMultipleTimelineFeeds(RetrieveMultipleFeedsRequest request, StreamObserver<TimelineFeedsResponse> responseObserver) {
+        int page = request.getPageRequest().getPage();
+        int pageSize = request.getPageRequest().getPageSize();
+        Query query = generatorQueryByRequest(request);
+        List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
+
+        responseObserver.onNext(TimelineFeedsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllMessage(feedInfoList.stream()
+                        .map(this.feedInfoService::getTimelineFeedMessage)
+                        .collect(Collectors.toList()))
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    private Query generatorQueryByRequest(RetrieveMultipleFeedsRequest request) {
+        QueryFeedCondition condition = request.getCondition();
+        boolean fromHost = condition.hasFromHost();
+        boolean hasIslandId = condition.hasIslandId();
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("deleted").is(false));
+        if (fromHost && hasIslandId) {
+            Criteria criteria = Criteria
+                    .where("islandId").is(condition.getIslandId().getValue())
+                    .and("fromHost").is(true);
+            query.addCriteria(criteria);
+        } else if (fromHost || hasIslandId) {
+            Criteria criteria = fromHost ? Criteria.where("fromHost").is(true)
+                    : Criteria.where("islandId").is(condition.getIslandId().getValue());
+            query.addCriteria(criteria);
+        }
+
+        if (condition.hasTimestampBefore() && condition.hasTimestampAfter()) {
+            Criteria timeCriteria = Criteria.where("createdTime")
+                    .gt(condition.getTimestampAfter().getValue())
+                    .andOperator(Criteria.where("createdTime")
+                            .lt(condition.getTimestampBefore().getValue()));
+            query.addCriteria(timeCriteria);
+        } else if (condition.hasTimestampBefore() || condition.hasTimestampAfter()) {
+            Criteria timeCriteria = condition.hasTimestampBefore() ?
+                    Criteria.where("createdTime").lt(condition.getTimestampBefore().getValue()) :
+                    Criteria.where("createdTime").gt(condition.getTimestampAfter().getValue());
+            query.addCriteria(timeCriteria);
+        }
+
+        // 没有条件
+        return query.with(Sort.by(Sort.Order.desc("toppedTime"), Sort.Order.desc("createdTime")));
     }
 }

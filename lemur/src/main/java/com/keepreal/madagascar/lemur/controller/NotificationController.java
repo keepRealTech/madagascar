@@ -1,8 +1,8 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.NoticeType;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.lemur.config.SystemNotificationConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.NotificationDTOFactory;
 import com.keepreal.madagascar.lemur.service.NotificationService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.NotificationApi;
 import swagger.model.NotificationsCountResponse;
+import swagger.model.NotificationsCountResponseV2;
 import swagger.model.NotificationsResponse;
 
 import java.util.Objects;
@@ -32,8 +33,8 @@ public class NotificationController implements NotificationApi {
     /**
      * Constructs the notification controller.
      *
-     * @param notificationService             {@link NotificationService}.
-     * @param notificationDTOFactory          {@link NotificationDTOFactory}.
+     * @param notificationService    {@link NotificationService}.
+     * @param notificationDTOFactory {@link NotificationDTOFactory}.
      */
     public NotificationController(NotificationService notificationService,
                                   NotificationDTOFactory notificationDTOFactory) {
@@ -60,6 +61,24 @@ public class NotificationController implements NotificationApi {
     }
 
     /**
+     * Implements the notification count api.
+     *
+     * @return {@link NotificationsCountResponseV2}.
+     */
+    @Override
+    public ResponseEntity<NotificationsCountResponseV2> apiV11NotificationsCountGet() {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        UnreadNotificationsCountMessage unreadNotificationsCountMessage = this.notificationService.countUnreadNotifications(userId);
+
+        NotificationsCountResponseV2 response = new NotificationsCountResponseV2();
+        response.setData(this.notificationDTOFactory.valueOfV2(unreadNotificationsCountMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Implements the notification get api.
      *
      * @param type     {@link NotificationType}.
@@ -70,6 +89,7 @@ public class NotificationController implements NotificationApi {
     @Cacheable(value = "default-system-notice-response", condition = "T(swagger.model.NotificationType).SYSTEM_NOTICE.equals(#type)")
     @Override
     public ResponseEntity<NotificationsResponse> apiV1NotificationsGet(swagger.model.NotificationType type,
+                                                                       swagger.model.NoticeType noticeType,
                                                                        Integer page,
                                                                        Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -81,7 +101,8 @@ public class NotificationController implements NotificationApi {
                     .build();
         } else {
             notificationsResponse =
-                    this.notificationService.retrieveNotifications(userId, this.convertType(type), page, pageSize);
+                    this.notificationService.retrieveNotifications(userId, this.convertType(type),
+                            this.convertNoticeType(noticeType), page, pageSize);
         }
 
         NotificationsResponse response = new NotificationsResponse();
@@ -118,6 +139,27 @@ public class NotificationController implements NotificationApi {
                 return NotificationType.NOTIFICATION_ISLAND_NOTICE;
             default:
                 return NotificationType.UNRECOGNIZED;
+        }
+    }
+
+    /**
+     * Converts {@link swagger.model.NoticeType} to {@link NoticeType}.
+     *
+     * @param noticeType {@link swagger.model.NoticeType}.
+     * @return {@link NoticeType}.
+     */
+    private NoticeType convertNoticeType(swagger.model.NoticeType noticeType) {
+        if (Objects.isNull(noticeType)) {
+            return null;
+        }
+
+        switch (noticeType) {
+            case SUBSCRIBER:
+                return NoticeType.NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER;
+            case MEMBER:
+                return NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER;
+            default:
+                return NoticeType.UNRECOGNIZED;
         }
     }
 

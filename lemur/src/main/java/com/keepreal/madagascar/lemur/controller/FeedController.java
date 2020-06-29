@@ -9,9 +9,10 @@ import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
+import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.FeedRepostsResponse;
-import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
+import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.lemur.dtoFactory.CommentDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.ReactionDTOFactory;
@@ -39,7 +40,6 @@ import swagger.model.CommentResponse;
 import swagger.model.CommentsResponse;
 import swagger.model.DummyResponse;
 import swagger.model.FeedResponse;
-import swagger.model.FeedsResponse;
 import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
 import swagger.model.PostCommentRequest;
@@ -50,8 +50,10 @@ import swagger.model.ReactionResponse;
 import swagger.model.ReactionsResponse;
 import swagger.model.RepostResponse;
 import swagger.model.RepostsResponse;
+import swagger.model.TimelinesResponse;
 
 import javax.validation.Valid;
+import java.util.AbstractMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -150,7 +152,7 @@ public class FeedController implements FeedApi {
                 .map(this.imageService::uploadSingleImage)
                 .collect(Collectors.toList());
 
-        this.feedService.createFeed(payload.getIslandIds(), userId, payload.getContent(), imageUris);
+        this.feedService.createFeed(payload.getIslandIds(), payload.getMembershipIds(), userId, payload.getContent(), imageUris);
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -201,29 +203,26 @@ public class FeedController implements FeedApi {
     /**
      * Implements the get feeds api.
      *
-     * @param islandId island id (optional) Island id.
-     * @param fromHost (optional) Whether from host.
-     * @param page     page number (optional, default to 0).
-     * @param pageSize size of a page (optional, default to 10).
-     * @return {@link FeedsResponse}.
+     * @param minTimestamp (optional, default to 0) minimal feed created timestamp.
+     * @param maxTimestamp (optional, default to 0) maximal feed created timestamp.
+     * @param pageSize     (optional, default to 10) size of a page .
+     * @return {@link TimelinesResponse}.
      */
     @Override
-    public ResponseEntity<FeedsResponse> apiV1FeedsGet(String islandId,
-                                                       Boolean fromHost,
-                                                       Integer page,
-                                                       Integer pageSize) {
+    public ResponseEntity<TimelinesResponse> apiV1FeedsGet(Long minTimestamp,
+                                                           Long maxTimestamp,
+                                                           Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveFeeds(islandId, fromHost, userId, page, pageSize);
+        AbstractMap.SimpleEntry<Boolean, FeedsResponse> entry =
+                this.feedService.retrieveUserFeeds(userId, minTimestamp, maxTimestamp, pageSize);
 
-        FeedsResponse response = new FeedsResponse();
-        response.setData(feedsResponse.getFeedList()
+        TimelinesResponse response = new TimelinesResponse();
+        response.setData(entry.getValue().getFeedList()
                 .stream()
                 .map(this.feedDTOFactory::valueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
-        response.setCurrentTime(System.currentTimeMillis());
-        response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
+        response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().getFeedCount() > 0, entry.getKey(), pageSize));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

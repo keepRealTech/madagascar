@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: reconciliation
+  datasource:
+    url: jdbc:mysql://root:123456@localhost:3306/vanga?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
+  data:
+    mongodb:
+      database: workflow
+      uri: mongodb://root:pass@host:port
+
+wechat-pay:
+  app-id: xxx
+  merchant-id: xxx
+  merchant-key: xxx
+  callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
+  cert-path: /app/apiclient_cert.pem
+  host-ip: 127.0.0.1

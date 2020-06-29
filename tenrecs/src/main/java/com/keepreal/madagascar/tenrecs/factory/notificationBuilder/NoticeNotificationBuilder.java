@@ -3,8 +3,10 @@ package com.keepreal.madagascar.tenrecs.factory.notificationBuilder;
 import com.keepreal.madagascar.common.NoticeType;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
+import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import com.keepreal.madagascar.tenrecs.model.Notice;
 import com.keepreal.madagascar.tenrecs.model.Notification;
+import com.keepreal.madagascar.tenrecs.model.notice.MemberNotice;
 import com.keepreal.madagascar.tenrecs.model.notice.SubscribeNotice;
 import com.keepreal.madagascar.tenrecs.service.NotificationService;
 
@@ -56,13 +58,15 @@ public class NoticeNotificationBuilder implements NotificationBuilder {
             return null;
         }
 
-        Optional<Notification> lastNotification = this.notificationService.retrieveLastSubscribeNoticeByIslandIdAndSubscriberId(
-                this.event.getSubscribeEvent().getIslandId(), this.event.getSubscribeEvent().getSubscriberId());
-        if (lastNotification.isPresent()
-                && lastNotification.get().getTimestamp() > LocalDateTime.now().minusDays(1).atZone(ZoneId.of("Asia/Shanghai")).toInstant().toEpochMilli()) {
-            Notification ln = lastNotification.get();
-            ln.setTimestamp(this.event.getTimestamp());
-            return ln;
+        if (!NotificationEventType.NOTIFICATION_EVENT_NEW_MEMBER.equals(this.event.getType())) {
+            Optional<Notification> lastNotification = this.notificationService.retrieveLastSubscribeNoticeByIslandIdAndSubscriberId(
+                    this.event.getSubscribeEvent().getIslandId(), this.event.getSubscribeEvent().getSubscriberId());
+            if (lastNotification.isPresent()
+                    && lastNotification.get().getTimestamp() > LocalDateTime.now().minusDays(1).atZone(ZoneId.of("Asia/Shanghai")).toInstant().toEpochMilli()) {
+                Notification ln = lastNotification.get();
+                ln.setTimestamp(this.event.getTimestamp());
+                return ln;
+            }
         }
 
         return Notification.builder()
@@ -95,6 +99,24 @@ public class NoticeNotificationBuilder implements NotificationBuilder {
                         .subscriberId(this.event.getSubscribeEvent().getSubscriberId())
                         .build();
                 noticeBuilder.subscribeNotice(subscribeNotice);
+
+                return noticeBuilder.build();
+            case NOTIFICATION_EVENT_NEW_MEMBER:
+                noticeBuilder.type(NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER);
+
+                if (Objects.isNull(this.event.getMemberEvent())) {
+                    return noticeBuilder.build();
+                }
+
+                MemberNotice memberNotice = MemberNotice.builder()
+                        .islandId(this.event.getMemberEvent().getIslandId())
+                        .memberId(this.event.getMemberEvent().getMemberId())
+                        .membershipId(this.event.getMemberEvent().getMembershipId())
+                        .membershipName(this.event.getMemberEvent().getMembershipName())
+                        .priceInCents(this.event.getMemberEvent().getPriceInCents())
+                        .timeInMonths(this.event.getMemberEvent().getTimeInMonths())
+                        .build();
+                noticeBuilder.memberNotice(memberNotice);
 
                 return noticeBuilder.build();
             default:

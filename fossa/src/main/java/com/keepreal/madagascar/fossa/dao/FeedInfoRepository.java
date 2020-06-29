@@ -4,6 +4,8 @@ import com.keepreal.madagascar.fossa.model.FeedInfo;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @program: madagascar
  * @author: zhangxidong
@@ -18,4 +20,7 @@ public interface FeedInfoRepository extends MongoRepository<FeedInfo, String> {
     FeedInfo findFeedInfoById(String id);
 
     FeedInfo findTopByUserIdAndDeletedIsFalseOrderByCreatedTimeDesc(String userId);
+
+    List<FeedInfo> findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(Iterable<String> ids);
+
 }

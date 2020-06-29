@@ -3,16 +3,9 @@
 # Declare variables to be passed into your templates.
 
 common_configs:
-  namespace: keepreal-prod
   replicas: 2
   memory: 2.5Gi
   cpu: 500m
-
-images:
-  lemur:
-    name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-    tag: 1.0.6
-    imagePullPolicy: Always
 
 coua:
   host: coua
@@ -34,6 +27,14 @@ tenrecs:
   host: tenrecs
   port: 6565
 
+vanga:
+  host: vanga
+  port: 6565
+
+mantella:
+  host: mantella
+  port: 6565
+
 file:
   max_file_size: 10MB
   max_request_size: 20MB
@@ -44,7 +45,6 @@ system_notification:
   portrait_image_uri: keepreal-helper.jpg
 
 rocketmq:
-  name_server_address: http://MQ_INST_1398284016177859_BcaZSx5M.cn-beijing.mq-internal.aliyuncs.com:8080
   topic: stats-event
   tag: event
 
@@ -52,30 +52,22 @@ deploy:
   opentracing:
     enable_jaeger: false
 
+release:
+  strategy: Stochastic
+  ratio: 100
+
 client:
   android:
-    setup:
-      version: 1
-      address: https://images.keepreal.cn/tiaodao_v100_kr.apk
-    androidChannelMap:
-      a360: false
-      oppo: false
-      vivo: false
-      xiaomi: false
-      huawei: false
-      baidu: false
-      wandoujia: true
-      yingyongbao: true
-      lianxiang: false
-      kr: false
-    updateInfo:
-      currentVersion: 1
-      nextVersion: 1
-      address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
-      message: first version
-      shouldForce: false
+    setup_info:
+      version: 110
+      address: https://images.keepreal.cn/tiaodao_v110_kr.apk
 
 security:
   oauth2:
     resource:
       token_info_uri: http://baobob:8080/oauth/check_token
+
+aliyun_oss:
+  endpoint: oss-cn-beijing-internal.aliyuncs.com
+  bucket_name: kr-thumbnail-prod-cn2-01
+  expire_time_in_seconds: 30

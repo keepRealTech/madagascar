@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.vanga";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message BillingInfoMessage {
+  string id = 1;
+  string userId = 2;
+  string name = 3;
+  string mobile = 4;
+  string idNumber = 5;
+  string accountNumber = 6;
+  bool isVerified = 7;
+}
+
+message RetrieveBillingInfoByUserIdRequest {
+  string userId = 1;
+}
+
+message BillingInfoResponse {
+  CommonStatus status = 1;
+  BillingInfoMessage billingInfo = 2;
+}
+
+message UpdateBillingInfoByUserIdRequest {
+  string userId = 1;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue mobile = 3;
+  google.protobuf.StringValue idNumber = 4;
+  google.protobuf.StringValue accountNumber = 5;
+}
+
+service BillingInfoService {
+  rpc RetrieveBillingInfoByUserId (RetrieveBillingInfoByUserIdRequest) returns (BillingInfoResponse) {};
+  rpc UpdateBillingInfoByUserId (UpdateBillingInfoByUserIdRequest) returns (BillingInfoResponse) {};
+}
