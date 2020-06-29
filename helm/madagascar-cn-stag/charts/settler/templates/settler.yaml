@@ -22,7 +22,7 @@ spec:
             - name: {{ .Values.global.acr.acr_secret_name }}
           restartPolicy: Never
           containers:
-            - name: tenrecs
+            - name: settler
               image: {{ .Values.global.images.settler.name }}:{{ .Values.global.images.settler.tag }}
               imagePullPolicy: {{ .Values.global.images.settler.imagePullPolicy }}
               envFrom:

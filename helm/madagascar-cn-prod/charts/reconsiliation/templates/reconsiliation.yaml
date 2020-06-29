@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: settler
+  name: reconsiliation
   namespace: {{ .Values.global.common_configs.namespace }}
 spec:
   schedule: "0 1 */1 * *"
@@ -14,7 +14,7 @@ spec:
         config.linkerd.io/proxy-image-version: stable-2.7.1
         linkerd.io/inject: disabled
       labels:
-        app: settler
+        app: reconsiliation
     spec:
       template:
         spec:
@@ -22,12 +22,12 @@ spec:
             - name: {{ .Values.global.acr.acr_secret_name }}
           restartPolicy: Never
           containers:
-            - name: settler
-              image: {{ .Values.global.images.settler.name }}:{{ .Values.global.images.settler.tag }}
-              imagePullPolicy: {{ .Values.global.images.settler.imagePullPolicy }}
+            - name: reconsiliation
+              image: {{ .Values.global.images.reconsiliation.name }}:{{ .Values.global.images.reconsiliation.tag }}
+              imagePullPolicy: {{ .Values.global.images.reconsiliation.imagePullPolicy }}
               envFrom:
                 - configMapRef:
-                    name: settler
+                    name: reconsiliation
               env:
                 - name: SPRING_DATA_MONGODB_URI
                   valueFrom:
@@ -39,16 +39,21 @@ spec:
                     secretKeyRef:
                       name: aliyun-rdb
                       key: vanga-connection-string
-                - name: SPRING_REDIS_HOST
+                - name: WECHATPAY_APPID
                   valueFrom:
                     secretKeyRef:
-                      name: aliyun-redis
-                      key: host
-                - name: SPRING_REDIS_PASSWORD
+                      name: wechat-pay
+                      key: app-id
+                - name: WECHATPAY_MERCHANTID
                   valueFrom:
                     secretKeyRef:
-                      name: aliyun-redis
-                      key: password
+                      name: wechat-pay
+                      key: mch-id
+                - name: WECHATPAY_MERCHANTKEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: wechat-pay
+                      key: mch-key
               resources:
                 limits:
                   memory: {{ .Values.common_configs.memory }}

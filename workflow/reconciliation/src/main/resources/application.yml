@@ -11,6 +11,7 @@ spring:
     mongodb:
       database: workflow
       uri: mongodb://root:pass@host:port
+
 wechat-pay:
   app-id: xxx
   merchant-id: xxx
