@@ -66,12 +66,7 @@ public class PaymentService {
      */
     private Long calculateAmount(Long amount, int ratio) {
         assert amount > 0;
-
-        if (amount < 100L) {
-            return amount * ratio / 100L;
-        } else {
-            return amount / 100L * ratio;
-        }
+        return amount * ratio / 100L;
     }
 
 }

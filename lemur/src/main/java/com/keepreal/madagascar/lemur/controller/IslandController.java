@@ -576,6 +576,7 @@ public class IslandController implements IslandApi {
                 .map(this.feedDTOFactory::valueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
+        response.setCurrentTime(System.currentTimeMillis());
         response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
