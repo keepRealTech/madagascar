@@ -52,7 +52,7 @@ global:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/settler
       tag: 1.0.1
       imagePullPolicy: Always
-    reconsiliation:
+    reconciliation:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/reconciliation
       tag: 1.0.0
       imagePullPolicy: Always

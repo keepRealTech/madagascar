@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: reconsiliation
+  name: reconciliation
   namespace: {{ .Values.global.common_configs.namespace }}
 spec:
   schedule: "0 1 */1 * *"
@@ -14,7 +14,7 @@ spec:
         config.linkerd.io/proxy-image-version: stable-2.7.1
         linkerd.io/inject: disabled
       labels:
-        app: reconsiliation
+        app: reconciliation
     spec:
       template:
         spec:
@@ -22,12 +22,12 @@ spec:
             - name: {{ .Values.global.acr.acr_secret_name }}
           restartPolicy: Never
           containers:
-            - name: reconsiliation
-              image: {{ .Values.global.images.reconsiliation.name }}:{{ .Values.global.images.reconsiliation.tag }}
-              imagePullPolicy: {{ .Values.global.images.reconsiliation.imagePullPolicy }}
+            - name: reconciliation
+              image: {{ .Values.global.images.reconciliation.name }}:{{ .Values.global.images.reconciliation.tag }}
+              imagePullPolicy: {{ .Values.global.images.reconciliation.imagePullPolicy }}
               envFrom:
                 - configMapRef:
-                    name: reconsiliation
+                    name: reconciliation
               env:
                 - name: SPRING_DATA_MONGODB_URI
                   valueFrom:
