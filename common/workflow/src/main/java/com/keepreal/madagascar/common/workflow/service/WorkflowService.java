@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.common.workflow.service;
 
+import com.keepreal.madagascar.common.workflow.config.WorkflowConfiguration;
 import com.keepreal.madagascar.common.workflow.model.WorkflowLog;
 import com.keepreal.madagascar.common.workflow.repository.WorkflowRepository;
 import org.springframework.stereotype.Service;
@@ -12,15 +13,18 @@ import java.time.Instant;
 @Service
 public class WorkflowService {
 
-    private static final String WORKFLOW_TYPE = "settler-daily";
+    private final WorkflowConfiguration workflowConfiguration;
     private final WorkflowRepository workflowRepository;
 
     /**
      * Constructs the workflow service.
      *
-     * @param workflowRepository {@link WorkflowRepository}.
+     * @param workflowConfiguration {@link WorkflowConfiguration}.
+     * @param workflowRepository    {@link WorkflowRepository}.
      */
-    public WorkflowService(WorkflowRepository workflowRepository) {
+    public WorkflowService(WorkflowConfiguration workflowConfiguration,
+                           WorkflowRepository workflowRepository) {
+        this.workflowConfiguration = workflowConfiguration;
         this.workflowRepository = workflowRepository;
     }
 
@@ -31,7 +35,7 @@ public class WorkflowService {
      */
     public WorkflowLog initialize() {
         WorkflowLog workflowLog = WorkflowLog.builder()
-                .type(WorkflowService.WORKFLOW_TYPE)
+                .type(this.workflowConfiguration.getType())
                 .startTimestamp(Instant.now().toEpochMilli())
                 .state("In progress")
                 .build();
