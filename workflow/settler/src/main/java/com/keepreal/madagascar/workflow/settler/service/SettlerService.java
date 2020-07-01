@@ -69,6 +69,7 @@ public class SettlerService {
 
     /**
      * The entry point for the workflow.
+     *
      * @param args Args.
      */
     public void run(String... args) {

@@ -19,7 +19,7 @@ public class WechatBillService {
 
     public Map<String, String> downloadBill() throws Exception {
         Map<String, String> reqData = new HashMap<>();
-        reqData.put("bill_date",  LocalDate.now().plusDays(-1L).format(DateTimeFormatter.ofPattern("yyyyMMdd")));
+        reqData.put("bill_date", LocalDate.now().plusDays(-1L).format(DateTimeFormatter.ofPattern("yyyyMMdd")));
         reqData.put("bill_type", "SUCCESS");
         return client.downloadBill(reqData);
     }
