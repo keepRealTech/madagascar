@@ -1,7 +1,7 @@
-package com.keepreal.madagascar.workflow.settler.service;
+package com.keepreal.madagascar.common.workflow.service;
 
-import com.keepreal.madagascar.workflow.settler.model.WorkflowLog;
-import com.keepreal.madagascar.workflow.settler.repository.WorkflowRepository;
+import com.keepreal.madagascar.common.workflow.model.WorkflowLog;
+import com.keepreal.madagascar.common.workflow.repository.WorkflowRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -56,6 +56,18 @@ public class WorkflowService {
      */
     public void failed(WorkflowLog workflowLog, Throwable throwable) {
         workflowLog.setDescription(throwable.getMessage());
+        workflowLog.setState("Failed");
+        workflowLog.setFinishTimestamp(Instant.now().toEpochMilli());
+        this.workflowRepository.save(workflowLog);
+    }
+
+    /**
+     * Finishes the workflow with failed state.
+     *
+     * @param workflowLog {@link WorkflowLog}.
+     */
+    public void failed(WorkflowLog workflowLog, String message) {
+        workflowLog.setDescription(message);
         workflowLog.setState("Failed");
         workflowLog.setFinishTimestamp(Instant.now().toEpochMilli());
         this.workflowRepository.save(workflowLog);
