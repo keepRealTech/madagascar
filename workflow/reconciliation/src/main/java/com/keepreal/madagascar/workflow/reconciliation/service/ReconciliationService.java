@@ -1,10 +1,11 @@
 package com.keepreal.madagascar.workflow.reconciliation.service;
 
+import com.keepreal.madagascar.common.workflow.model.WorkflowLog;
+import com.keepreal.madagascar.common.workflow.service.WorkflowService;
 import com.keepreal.madagascar.workflow.reconciliation.model.ReconciliationInfo;
 import com.keepreal.madagascar.workflow.reconciliation.model.WeChatBill;
 import com.keepreal.madagascar.workflow.reconciliation.model.WechatOrder;
 import com.keepreal.madagascar.workflow.reconciliation.model.WechatOrderState;
-import com.keepreal.madagascar.workflow.reconciliation.model.WorkflowLog;
 import com.keepreal.madagascar.workflow.reconciliation.repository.WechatOrderRepository;
 import com.keepreal.madagascar.workflow.reconciliation.util.BillConvert;
 import lombok.extern.slf4j.Slf4j;
@@ -61,24 +62,27 @@ public class ReconciliationService {
                         workflowLog.getReconciliationInfos().add(ReconciliationInfo.builder()
                                 .tradeNumber(bill.getMchOrderNo())
                                 .type(ORDER_NOT_EXIST)
-                                .build());
+                                .build().toString());
                         log.error("local wechat order not exist! trade number is {}", bill.getMchOrderNo());
                     } else if (!Long.valueOf(billStr).equals(Long.valueOf(wechatOrder.getFeeInCents()))) {
                         workflowLog.getReconciliationInfos().add(ReconciliationInfo.builder()
                                 .tradeNumber(bill.getMchOrderNo())
                                 .type(AMOUNT_NOT_MATCH)
                                 .fullInformation("wechat_amount is " + billStr + "local fee in cents is " + wechatOrder.getFeeInCents())
-                                .build());
+                                .build().toString());
                         log.error("amount not match! wechat_amount is {}, local fee in cents is {}, trade number is {}", billStr, wechatOrder.getFeeInCents(), bill.getMchOrderNo());
                     } else if (!wechatOrder.getState().equals(WechatOrderState.SUCCESS.getValue())) {
                         workflowLog.getReconciliationInfos().add(ReconciliationInfo.builder()
                                 .tradeNumber(bill.getMchOrderNo())
                                 .type(STATE_NOT_MATCH)
                                 .fullInformation("local state is " + wechatOrder.getState())
-                                .build());
+                                .build().toString());
                         log.error("state not match! local order state is {}, trade number is {}", wechatOrder.getState(), bill.getMchOrderNo());
                     }
                 });
+                this.workflowService.succeed(workflowLog);
+            } else if ("NO Bill Exist".equals(map.get("return_msg"))) {
+                workflowLog.setDescription("No bills available.");
                 this.workflowService.succeed(workflowLog);
             } else {
                 this.workflowService.failed(workflowLog, map.get("return_msg"));

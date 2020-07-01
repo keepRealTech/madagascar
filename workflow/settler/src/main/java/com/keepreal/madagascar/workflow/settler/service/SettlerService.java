@@ -1,9 +1,10 @@
 package com.keepreal.madagascar.workflow.settler.service;
 
+import com.keepreal.madagascar.common.workflow.model.WorkflowLog;
+import com.keepreal.madagascar.common.workflow.service.WorkflowService;
 import com.keepreal.madagascar.workflow.settler.config.ExecutorConfiguration;
 import com.keepreal.madagascar.workflow.settler.model.Balance;
 import com.keepreal.madagascar.workflow.settler.model.Payment;
-import com.keepreal.madagascar.workflow.settler.model.WorkflowLog;
 import com.keepreal.madagascar.workflow.settler.util.AutoRedisLock;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
@@ -19,7 +20,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +69,7 @@ public class SettlerService {
 
     /**
      * The entry point for the workflow.
+     *
      * @param args Args.
      */
     public void run(String... args) {
