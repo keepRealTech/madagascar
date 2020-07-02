@@ -40,7 +40,8 @@ public class TimelineService {
     public TimelineService(TimelineRepository timelineRepository,
                            TimelineStorage timelineStorage,
                            FeedDistributor feedDistributor,
-                           LongIdGenerator idGenerator, ReactiveMongoTemplate reactiveMongoTemplate) {
+                           LongIdGenerator idGenerator,
+                           ReactiveMongoTemplate reactiveMongoTemplate) {
         this.timelineRepository = timelineRepository;
         this.timelineStorage = timelineStorage;
         this.feedDistributor = feedDistributor;
