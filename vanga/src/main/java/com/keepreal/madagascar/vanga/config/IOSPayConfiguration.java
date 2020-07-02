@@ -34,7 +34,7 @@ public class IOSPayConfiguration {
     public RestTemplate restTemplate() throws KeyManagementException, NoSuchAlgorithmException {
         SSLContext sslContext = SSLContexts.custom().build();
         SSLConnectionSocketFactory sslConnectionSocketFactory = new SSLConnectionSocketFactory(sslContext,
-                new String[]{"TLSv1.2", "TLSv1.1", "TLSv1.0"}, null, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+                new String[]{"TLSv1.2", "TLSv1.1", "TLSv1"}, null, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setSSLSocketFactory(sslConnectionSocketFactory)
                 .build();
