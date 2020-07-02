@@ -48,10 +48,11 @@ public class SkuService {
     /**
      * Retrieves all active shell skus.
      *
+     * @param isWechatPay Whether is wechat pay.
      * @return {@link ShellSku}.
      */
-    public List<ShellSku> retrieveShellSkusByActiveIsTrue() {
-        return this.shellSkuRepository.findAllByActiveIsTrueAndDeletedIsFalse();
+    public List<ShellSku> retrieveShellSkusByActiveIsTrue(Boolean isWechatPay) {
+        return this.shellSkuRepository.findAllByActiveIsTrueAndIsWechatPayAndDeletedIsFalse(isWechatPay);
     }
 
     /**

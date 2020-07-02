@@ -16,6 +16,7 @@ message ShellSkuMessage {
 }
 
 message RetrieveShellSkusRequest {
+  bool isWechatPay = 1;
 }
 
 message ShellSkusResponse {

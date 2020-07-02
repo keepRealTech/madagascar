@@ -860,6 +860,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/orders/wechat:
+    post:
+      tags:
+        - Order
+      summary: create a new wechat shell order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWechatOrderRequest'
+      responses:
+        '200':
+          description: wechat scallop order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
   /api/v1/islands/{id}/memberSubscription/wechatPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -970,7 +988,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ShellSkusResponse'
+                $ref: '#/components/schemas/IOSShellSkusResponse'
+  /api/v1/balances/wechatSkus:
+    get:
+      tags:
+        - Sku
+      summary: get all active wechat skus
+      responses:
+        '200':
+          description: skus info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatShellSkusResponse'
   /api/v1/membership/{id}/skus:
     parameters:
       - $ref: "#/components/parameters/idInPath"
@@ -2408,6 +2438,11 @@ components:
           type: string
         receipt:
           type: string
+    PostWechatOrderRequest:
+      type: object
+      properties:
+        shellSkuId:
+          type: string
     WechatOrderDTO:
       type: object
       properties:
@@ -2508,7 +2543,7 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BillingInfoDTO'
-    ShellSkuDTO:
+    IOSShellSkuDTO:
       type: object
       properties:
         id:
@@ -2525,7 +2560,22 @@ components:
           format: int64
         isDefault:
           type: boolean
-    ShellSkusResponse:
+    WechatShellSkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        shells:
+          type: integer
+          format: int64
+        priceInCents:
+          type: integer
+          format: int64
+        isDefault:
+          type: boolean
+    IOSShellSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -2533,7 +2583,16 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/ShellSkuDTO'
+                $ref: '#/components/schemas/IOSShellSkuDTO'
+    WechatShellSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/WechatShellSkuDTO'
     MembershipSkuDTO:
       type: object
       properties:

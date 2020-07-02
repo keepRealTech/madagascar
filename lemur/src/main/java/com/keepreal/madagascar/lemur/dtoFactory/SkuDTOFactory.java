@@ -5,6 +5,7 @@ import com.keepreal.madagascar.vanga.ShellSkuMessage;
 import org.springframework.stereotype.Service;
 import swagger.model.IOSShellSkuDTO;
 import swagger.model.MembershipSkuDTO;
+import swagger.model.WechatShellSkuDTO;
 
 import java.util.Objects;
 
@@ -28,6 +29,27 @@ public class SkuDTOFactory {
         IOSShellSkuDTO shellSkuDTO = new IOSShellSkuDTO();
         shellSkuDTO.setId(shellSku.getId());
         shellSkuDTO.setAppleSkuId(shellSku.getAppleSkuId());
+        shellSkuDTO.setDescription(shellSku.getDescription());
+        shellSkuDTO.setIsDefault(shellSku.getIsDefault());
+        shellSkuDTO.setShells(shellSku.getShells());
+        shellSkuDTO.setPriceInCents(shellSku.getPriceInCents());
+
+        return shellSkuDTO;
+    }
+
+    /**
+     * Converts {@link ShellSkuMessage} into {@link WechatShellSkuDTO}.
+     *
+     * @param shellSku {@link ShellSkuMessage}.
+     * @return {@link WechatShellSkuDTO}.
+     */
+    public WechatShellSkuDTO wechatValueOf(ShellSkuMessage shellSku) {
+        if (Objects.isNull(shellSku)) {
+            return null;
+        }
+
+        WechatShellSkuDTO shellSkuDTO = new WechatShellSkuDTO();
+        shellSkuDTO.setId(shellSku.getId());
         shellSkuDTO.setDescription(shellSku.getDescription());
         shellSkuDTO.setIsDefault(shellSku.getIsDefault());
         shellSkuDTO.setShells(shellSku.getShells());
