@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.SkuApi;
+import swagger.model.IOSShellSkusResponse;
 import swagger.model.MembershipSkusResponse;
-import swagger.model.ShellSkusResponse;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,15 +40,15 @@ public class SkuController implements SkuApi {
     /**
      * Implements the shell skus get api.
      *
-     * @return {@link ShellSkusResponse}.
+     * @return {@link IOSShellSkusResponse}.
      */
     @Override
-    public ResponseEntity<ShellSkusResponse> apiV1BalancesSkusGet() {
+    public ResponseEntity<IOSShellSkusResponse> apiV1BalancesSkusGet() {
         List<ShellSkuMessage> shellSkuMessageList = this.skuService.retrieveShellSkus();
 
-        ShellSkusResponse response = new ShellSkusResponse();
+        IOSShellSkusResponse response = new IOSShellSkusResponse();
         response.setData(shellSkuMessageList.stream()
-                .map(this.skuDTOFactory::valueOf)
+                .map(this.skuDTOFactory::iosValueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
@@ -67,7 +67,7 @@ public class SkuController implements SkuApi {
 
         MembershipSkusResponse response = new MembershipSkusResponse();
         response.setData(shellSkuMessageList.stream()
-                .map(this.skuDTOFactory::valueOf)
+                .map(this.skuDTOFactory::iosValueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());

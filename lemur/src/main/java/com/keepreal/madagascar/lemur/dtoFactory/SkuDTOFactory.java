@@ -3,8 +3,8 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.ShellSkuMessage;
 import org.springframework.stereotype.Service;
+import swagger.model.IOSShellSkuDTO;
 import swagger.model.MembershipSkuDTO;
-import swagger.model.ShellSkuDTO;
 
 import java.util.Objects;
 
@@ -15,17 +15,17 @@ import java.util.Objects;
 public class SkuDTOFactory {
 
     /**
-     * Converts {@link ShellSkuMessage} into {@link ShellSkuDTO}.
+     * Converts {@link ShellSkuMessage} into {@link IOSShellSkuDTO}.
      *
      * @param shellSku {@link ShellSkuMessage}.
-     * @return {@link ShellSkuDTO}.
+     * @return {@link IOSShellSkuDTO}.
      */
-    public ShellSkuDTO valueOf(ShellSkuMessage shellSku) {
+    public IOSShellSkuDTO iosValueOf(ShellSkuMessage shellSku) {
         if (Objects.isNull(shellSku)) {
             return null;
         }
 
-        ShellSkuDTO shellSkuDTO = new ShellSkuDTO();
+        IOSShellSkuDTO shellSkuDTO = new IOSShellSkuDTO();
         shellSkuDTO.setId(shellSku.getId());
         shellSkuDTO.setAppleSkuId(shellSku.getAppleSkuId());
         shellSkuDTO.setDescription(shellSku.getDescription());
@@ -42,7 +42,7 @@ public class SkuDTOFactory {
      * @param membershipSku {@link MembershipSkuMessage}.
      * @return {@link MembershipSkuDTO}.
      */
-    public MembershipSkuDTO valueOf(MembershipSkuMessage membershipSku) {
+    public MembershipSkuDTO iosValueOf(MembershipSkuMessage membershipSku) {
         if (Objects.isNull(membershipSku)) {
             return null;
         }
