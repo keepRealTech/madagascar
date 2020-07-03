@@ -43,6 +43,7 @@ public class CommentService {
                 .setContent(commentInfo.getContent())
                 .setReplyToId(commentInfo.getReplyToId())
                 .setCreatedAt(commentInfo.getCreatedTime())
+                .setIsDeleted(commentInfo.getDeleted())
                 .build();
     }
 
