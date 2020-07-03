@@ -17,7 +17,8 @@ wechat_pay:
   cert_path: /app/apiclient_cert.pem
 
 ios_pay:
-  verify_url: https://sandbox.itunes.apple.com/verifyReceipt
+  verify_url: https://buy.itunes.apple.com/verifyReceipt
+  verify_url_sandbox: https://sandbox.itunes.apple.com/verifyReceipt
 
 redis:
   port: 6379
