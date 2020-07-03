@@ -9,8 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.SkuApi;
+import swagger.model.IOSShellSkusResponse;
 import swagger.model.MembershipSkusResponse;
-import swagger.model.ShellSkusResponse;
+import swagger.model.WechatShellSkusResponse;
 
 import java.util.List;
 import java.util.Objects;
@@ -38,17 +39,36 @@ public class SkuController implements SkuApi {
     }
 
     /**
-     * Implements the shell skus get api.
+     * Implements the ios shell skus get api.
      *
-     * @return {@link ShellSkusResponse}.
+     * @return {@link IOSShellSkusResponse}.
      */
     @Override
-    public ResponseEntity<ShellSkusResponse> apiV1BalancesSkusGet() {
-        List<ShellSkuMessage> shellSkuMessageList = this.skuService.retrieveShellSkus();
+    public ResponseEntity<IOSShellSkusResponse> apiV1BalancesSkusGet() {
+        List<ShellSkuMessage> shellSkuMessageList = this.skuService.retrieveShellSkus(false);
 
-        ShellSkusResponse response = new ShellSkusResponse();
+        IOSShellSkusResponse response = new IOSShellSkusResponse();
         response.setData(shellSkuMessageList.stream()
-                .map(this.skuDTOFactory::valueOf)
+                .map(this.skuDTOFactory::iosValueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the wechat shell skus get api.
+     *
+     * @return {@link WechatShellSkusResponse}.
+     */
+    @Override
+    public ResponseEntity<WechatShellSkusResponse> apiV1BalancesWechatSkusGet() {
+        List<ShellSkuMessage> shellSkuMessageList = this.skuService.retrieveShellSkus(true);
+
+        WechatShellSkusResponse response = new WechatShellSkusResponse();
+        response.setData(shellSkuMessageList.stream()
+                .map(this.skuDTOFactory::wechatValueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());

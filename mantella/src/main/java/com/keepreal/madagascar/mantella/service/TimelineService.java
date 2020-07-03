@@ -69,7 +69,6 @@ public class TimelineService {
      * @return {@link Mono}.
      */
     public Flux<Timeline> insertAll(Flux<Timeline> timelines) {
-
         return timelines
                 .publishOn(Schedulers.elastic())
                 .flatMap(timeline -> {
@@ -77,7 +76,8 @@ public class TimelineService {
                     timeline.setCreatedAt(timeline.getFeedCreatedAt());
                     return Mono.just(timeline);
                 })
-                .compose(this.timelineRepository::insert);
+                .collectList()
+                .flatMapMany(this.timelineRepository::insert);
     }
 
     /**

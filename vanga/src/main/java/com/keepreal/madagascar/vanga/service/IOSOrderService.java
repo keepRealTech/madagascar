@@ -63,6 +63,17 @@ public class IOSOrderService {
 
         JSONObject responseData = JSONObject.parseObject(response.getBody());
         String status = responseData.getString("status");
+
+        if (status.equals("21007")) {
+            response = this.restTemplate.postForEntity(this.iosPayConfiguration.getVerifyUrlSandbox(),
+                    request, String.class);
+            if (response.getStatusCode().isError()) {
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_IOS_RECEIPT_VERIFY_ERROR, response.getStatusCode().name());
+            }
+            responseData = JSONObject.parseObject(response.getBody());
+            status = responseData.getString("status");
+        }
+
         if (!status.equals("0")) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_IOS_RECEIPT_VERIFY_ERROR, status);
         }
