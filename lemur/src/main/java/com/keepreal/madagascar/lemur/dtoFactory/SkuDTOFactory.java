@@ -64,7 +64,7 @@ public class SkuDTOFactory {
      * @param membershipSku {@link MembershipSkuMessage}.
      * @return {@link MembershipSkuDTO}.
      */
-    public MembershipSkuDTO iosValueOf(MembershipSkuMessage membershipSku) {
+    public MembershipSkuDTO valueOf(MembershipSkuMessage membershipSku) {
         if (Objects.isNull(membershipSku)) {
             return null;
         }

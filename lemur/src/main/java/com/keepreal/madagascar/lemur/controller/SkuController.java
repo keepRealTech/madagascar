@@ -6,10 +6,8 @@ import com.keepreal.madagascar.lemur.service.SkuService;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.ShellSkuMessage;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
-import swagger.api.ApiUtil;
 import swagger.api.SkuApi;
 import swagger.model.IOSShellSkusResponse;
 import swagger.model.MembershipSkusResponse;
@@ -89,7 +87,7 @@ public class SkuController implements SkuApi {
 
         MembershipSkusResponse response = new MembershipSkusResponse();
         response.setData(shellSkuMessageList.stream()
-                .map(this.skuDTOFactory::iosValueOf)
+                .map(this.skuDTOFactory::valueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
