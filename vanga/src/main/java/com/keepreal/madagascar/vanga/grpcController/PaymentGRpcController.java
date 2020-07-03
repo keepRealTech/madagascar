@@ -9,6 +9,7 @@ import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
+import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
 import com.keepreal.madagascar.vanga.factory.BalanceMessageFactory;
@@ -27,6 +28,7 @@ import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -123,7 +125,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
 
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
-                sku.getId());
+                sku.getId(),
+                "");
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -162,7 +165,11 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onNext(response);
         responseObserver.onCompleted();
 
-        this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
+        if (StringUtils.isEmpty(wechatOrder.getShellSkuId())) {
+            this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
+        } else {
+            this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getShellSkuId()));
+        }
     }
 
     /**
@@ -176,7 +183,11 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                   StreamObserver<CommonStatus> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
 
-        this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
+        if (StringUtils.isEmpty(wechatOrder.getShellSkuId())) {
+            this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
+        } else {
+            this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getShellSkuId()));
+        }
     }
 
     /**
@@ -238,6 +249,47 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setStatus(CommonStatusUtils.buildCommonStatus(exception.getErrorCode()))
                     .build();
         }
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the wechat buy shell api.
+     *
+     * @param request           {@link WechatOrderBuyShellRequest}.
+     * @param responseObserver  {@link StreamObserver}.
+     */
+    @Override
+    public void wechatBuyShell(WechatOrderBuyShellRequest request,
+                               StreamObserver<WechatOrderResponse> responseObserver) {
+        ShellSku sku = this.skuService.retrieveShellSkuById(request.getShellSkuId());
+        WechatOrderResponse response ;
+        if (Objects.isNull(sku)) {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
+                String.valueOf(sku.getPriceInCents()),
+                "",
+                sku.getId());
+
+        if (Objects.nonNull(wechatOrder)) {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .build();
+            this.paymentService.createWechatBuyShellPayments(wechatOrder, sku);
+        } else {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
