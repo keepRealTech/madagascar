@@ -24,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 public class IOSPayConfiguration {
 
     private String verifyUrl;
+    private String verifyUrlSandbox;
 
     /**
      * TODO: config connection pool, timeout
