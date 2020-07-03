@@ -41,6 +41,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -93,6 +94,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         String text = request.hasText() ? request.getText().getValue() : "";
         ProtocolStringList membershipIdsList = request.getMembershipIdsList();
 
+        String duplicateTag = UUID.randomUUID().toString();
+
         List<FeedInfo> feedInfoList = new ArrayList<>();
         long timestamp = Instant.now().toEpochMilli();
         IntStream.range(0, islandIdList.size()).forEach(i -> {
@@ -104,6 +107,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.fromHost(userId.equals(hostIdList.get(i)));
             builder.imageUrls(request.getImageUrisList());
             builder.text(text);
+            builder.duplicateTag(duplicateTag);
             builder.membershipIds(membershipIdsList);
             builder.createdTime(timestamp);
             builder.toppedTime(timestamp);

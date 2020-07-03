@@ -22,6 +22,7 @@ public class Timeline {
     private Long feedCreatedAt;
     private String userId;
     private String eventId;
+    private String duplicateTag;
     @Builder.Default
     private Boolean isDeleted = false;
     @CreatedDate

@@ -110,6 +110,7 @@ public class FeedEventProducerService {
                 .setAuthorId(feedInfo.getUserId())
                 .setCreatedAt(feedInfo.getCreatedTime())
                 .setIslandId(feedInfo.getIslandId())
+                .setDuplicateTag(feedInfo.getDuplicateTag())
                 .build();
         String uuid = UUID.randomUUID().toString();
         FeedEventMessage event = FeedEventMessage.newBuilder()
