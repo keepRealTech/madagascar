@@ -2,14 +2,20 @@ package com.keepreal.madagascar.vanga.service;
 
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.Payment;
+import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
+import com.keepreal.madagascar.vanga.util.AutoRedisLock;
+import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisClient;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Represents the shell service.
@@ -20,7 +26,7 @@ public class ShellService {
     private final BalanceService balanceService;
     private final PaymentService paymentService;
     private final IOSOrderService iosOrderService;
-    private final RedisClient redisClient;
+    private final RedissonClient redissonClient;
 
     /**
      * Constructs the shell service.
@@ -28,16 +34,16 @@ public class ShellService {
      * @param balanceService  {@link BalanceService}.
      * @param paymentService  {@link PaymentService}.
      * @param iosOrderService {@link IOSOrderService}.
-     * @param redisClient     {@link RedisClient}.
+     * @param redissonClient  {@link RedissonClient}.
      */
     public ShellService(BalanceService balanceService,
                         PaymentService paymentService,
                         IOSOrderService iosOrderService,
-                        RedisClient redisClient) {
+                        RedissonClient redissonClient) {
         this.balanceService = balanceService;
         this.paymentService = paymentService;
         this.iosOrderService = iosOrderService;
-        this.redisClient = redisClient;
+        this.redissonClient = redissonClient;
     }
 
     /**
@@ -69,56 +75,30 @@ public class ShellService {
             return;
         }
 
-        Payment payment = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
+        List<Payment> paymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
 
-        Balance userBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(userId);
+        if (!paymentList.isEmpty()
+                && paymentList.stream().allMatch(payment -> PaymentState.CLOSED.getValue() == payment.getState())) {
+            return;
+        }
 
-        String transactionId = this.iosOrderService.verify(receipt, sku);
-        this.paymentService.createIOSBuyShellPayments(userId, sku, transactionId);
-        return this.balanceService.addOnShells(userBalance, sku.getShells());
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("shell-wechat-%s", wechatOrder.getUserId()))) {
+            List<Payment> innerPaymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
+
+            if (innerPaymentList.isEmpty()) {
+                innerPaymentList = Collections.singletonList(this.paymentService.createWechatBuyShellPayments(wechatOrder, sku));
+            } else if (paymentList.stream().allMatch(payment -> PaymentState.CLOSED.getValue() == payment.getState())) {
+                return;
+            }
+
+            Balance userBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(wechatOrder.getUserId());
+            innerPaymentList = innerPaymentList.stream()
+                    .peek(payment -> payment.setState(PaymentState.CLOSED.getValue()))
+                    .collect(Collectors.toList());
+
+            this.balanceService.addOnShells(userBalance, sku.getShells());
+            this.paymentService.updateAll(innerPaymentList);
+        }
     }
 
 }
-
-
-
-         List<Payment> paymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
-
-        if (paymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
-        return;
-        }
-
-        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-wechat-%s", wechatOrder.getUserId()))) {
-        List<Payment> innerPaymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
-
-        MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getMemberShipSkuId());
-
-        if (innerPaymentList.isEmpty()) {
-        innerPaymentList = this.paymentService.createNewWechatPayments(wechatOrder, sku);
-        } else if (innerPaymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
-        return;
-        }
-
-        Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
-
-        SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
-        wechatOrder.getUserId(), sku.getMembershipId());
-
-        Instant instant = Objects.isNull(currentSubscribeMembership) ?
-        Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
-        ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
-
-        List<Payment> finalInnerPaymentList = innerPaymentList;
-        IntStream.range(0, innerPaymentList.size())
-        .forEach(i -> {
-        finalInnerPaymentList.get(i).setWithdrawPercent(hostBalance.getWithdrawPercent());
-        finalInnerPaymentList.get(i).setState(PaymentState.OPEN.getValue());
-        finalInnerPaymentList.get(i).setValidAfter(currentExpireTime
-        .plusMonths((i + 1) * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
-        .toInstant().toEpochMilli());
-        });
-
-        this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
-        this.paymentService.updateAll(innerPaymentList);
-        this.createOrRenewSubscriptionMember(wechatOrder.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
-        }
