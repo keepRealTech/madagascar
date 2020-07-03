@@ -1876,6 +1876,13 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedDTO'
+    SnapshotCommentDTO:
+      allOf:
+        - $ref: '#/components/schemas/CommentDTO'
+        - type: object
+          properties:
+            isDeleted:
+              type: boolean
     CommentDTO:
       type: object
       properties:
@@ -2044,7 +2051,7 @@ components:
         feed:
           $ref: '#/components/schemas/SnapshotFeedDTO'
         comment:
-          $ref: '#/components/schemas/CommentDTO'
+          $ref: '#/components/schemas/SnapshotCommentDTO'
         hasRead:
           type: boolean
         createdAt:
