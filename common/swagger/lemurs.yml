@@ -25,6 +25,8 @@ tags:
     description: Notifications controllers
   - name: Report
     description: Reports controllers
+  - name: Repost
+    description: Reposts controllers
   - name: Config
     description: Configs controllers
   - name: Healthcheck
@@ -39,6 +41,9 @@ tags:
     description: SKU controller
   - name: Membership
     description: Membership controller
+  - name: Chat
+    description: Chat controller
+
 paths:
   /api/healthcheck:
     head:
@@ -296,7 +301,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Island
+        - Feed
       summary: retrieves a list of feeds with pagination
       responses:
         '200':
@@ -315,7 +320,7 @@ paths:
         - $ref: '#/components/parameters/timestampBefore'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Island
+        - Feed
       summary: retrieves a list of feeds with pagination
       responses:
         '200':
@@ -435,7 +440,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Island
+        - Repost
       summary: retrieves a list of reposts with pagination
       responses:
         '200':
@@ -446,7 +451,7 @@ paths:
                 $ref: '#/components/schemas/RepostsResponse'
     post:
       tags:
-        - Island
+        - Repost
       summary: creates a new repost
       requestBody:
         required: true
@@ -456,7 +461,7 @@ paths:
               $ref: '#/components/schemas/PostRepostRequest'
       responses:
         '200':
-          description: reaction response
+          description: reposts response
           content:
             application/json:
               schema:
@@ -597,7 +602,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Feed
+        - Comment
       summary: retrieves a list of comments with pagination
       responses:
         '200':
@@ -608,7 +613,7 @@ paths:
                 $ref: '#/components/schemas/CommentsResponse'
     post:
       tags:
-        - Feed
+        - Comment
       summary: creates a new comment
       requestBody:
         required: true
@@ -631,7 +636,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Feed
+        - Reaction
       summary: retrieves a list of reactions with pagination
       responses:
         '200':
@@ -644,7 +649,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/isRevokeInQuery'
       tags:
-        - Feed
+        - Reaction
       summary: creates a new reaction
       requestBody:
         required: true
@@ -667,7 +672,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Feed
+        - Repost
       summary: retrieves a list of reposts with pagination
       responses:
         '200':
@@ -678,7 +683,7 @@ paths:
                 $ref: '#/components/schemas/RepostsResponse'
     post:
       tags:
-        - Feed
+        - Repost
       summary: creates a new repost
       requestBody:
         required: true
@@ -1092,6 +1097,77 @@ paths:
       responses:
         '200':
           description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/chats/token:
+    get:
+      tags:
+        - Chat
+      summary: get the chat token
+      responses:
+        '200':
+          description: chat token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatTokenResponse'
+  /api/v1/users/{id}/chats:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Chat
+      summary: check if has access with given user
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatAccessResponse'
+  /api/v1/islands/{id}/chatgroups:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Chat
+      summary: retrieve all chat groups for the given island
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatGroupsResponse'
+    post:
+      tags:
+        - Chat
+      summary: create a new chat groups for the given island
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostChatGroupRequest'
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatGroupResponse'
+  /api/v1/chatgroups/{id}/chatgroups:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    delete:
+      tags:
+        - Chat
+      summary: removes an existing chat group
+      responses:
+        '200':
+          description: dummy response
           content:
             application/json:
               schema:
@@ -2596,3 +2672,69 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedMembershipDTO'
+    ChatTokenDTO:
+      type: object
+      properties:
+        token:
+          type: string
+    ChatTokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ChatTokenDTO'
+    ChatAccessDTO:
+      type: object
+      properties:
+        hasAccess:
+          type: boolean
+    ChatAccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ChatAccessDTO'
+    ChatGroupDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        islandId:
+          type: string
+        membershipIds:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+    PostChatGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        membershipIds:
+          type: array
+          items:
+            type: string
+    ChatGroupResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ChatGroupDTO'
+    ChatGroupsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChatGroupDTO'
