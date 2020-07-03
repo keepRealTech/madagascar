@@ -1,7 +1,8 @@
-package com.keepreal.madagascar.workflow.settler.service;
+package com.keepreal.madagascar.common.workflow.service;
 
-import com.keepreal.madagascar.workflow.settler.model.WorkflowLog;
-import com.keepreal.madagascar.workflow.settler.repository.WorkflowRepository;
+import com.keepreal.madagascar.common.workflow.config.WorkflowConfiguration;
+import com.keepreal.madagascar.common.workflow.model.WorkflowLog;
+import com.keepreal.madagascar.common.workflow.repository.WorkflowRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -12,15 +13,18 @@ import java.time.Instant;
 @Service
 public class WorkflowService {
 
-    private static final String WORKFLOW_TYPE = "settler-daily";
+    private final WorkflowConfiguration workflowConfiguration;
     private final WorkflowRepository workflowRepository;
 
     /**
      * Constructs the workflow service.
      *
-     * @param workflowRepository {@link WorkflowRepository}.
+     * @param workflowConfiguration {@link WorkflowConfiguration}.
+     * @param workflowRepository    {@link WorkflowRepository}.
      */
-    public WorkflowService(WorkflowRepository workflowRepository) {
+    public WorkflowService(WorkflowConfiguration workflowConfiguration,
+                           WorkflowRepository workflowRepository) {
+        this.workflowConfiguration = workflowConfiguration;
         this.workflowRepository = workflowRepository;
     }
 
@@ -31,7 +35,7 @@ public class WorkflowService {
      */
     public WorkflowLog initialize() {
         WorkflowLog workflowLog = WorkflowLog.builder()
-                .type(WorkflowService.WORKFLOW_TYPE)
+                .type(this.workflowConfiguration.getType())
                 .startTimestamp(Instant.now().toEpochMilli())
                 .state("In progress")
                 .build();
@@ -56,6 +60,18 @@ public class WorkflowService {
      */
     public void failed(WorkflowLog workflowLog, Throwable throwable) {
         workflowLog.setDescription(throwable.getMessage());
+        workflowLog.setState("Failed");
+        workflowLog.setFinishTimestamp(Instant.now().toEpochMilli());
+        this.workflowRepository.save(workflowLog);
+    }
+
+    /**
+     * Finishes the workflow with failed state.
+     *
+     * @param workflowLog {@link WorkflowLog}.
+     */
+    public void failed(WorkflowLog workflowLog, String message) {
+        workflowLog.setDescription(message);
         workflowLog.setState("Failed");
         workflowLog.setFinishTimestamp(Instant.now().toEpochMilli());
         this.workflowRepository.save(workflowLog);

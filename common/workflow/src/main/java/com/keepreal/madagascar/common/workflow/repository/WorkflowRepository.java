@@ -1,6 +1,6 @@
-package com.keepreal.madagascar.workflow.settler.repository;
+package com.keepreal.madagascar.common.workflow.repository;
 
-import com.keepreal.madagascar.workflow.settler.model.WorkflowLog;
+import com.keepreal.madagascar.common.workflow.model.WorkflowLog;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
