@@ -40,17 +40,22 @@ public class WechatPayService {
      * @param userId          User id.
      * @param feeInCents      Cost in cents.
      * @param membershipSkuId Membership sku id.
+     * @param shellSkuId      Shell sku id.
      * @return {@link WechatOrder}.
      */
-    public WechatOrder tryPlaceOrder(String userId, String feeInCents, String membershipSkuId) {
+    public WechatOrder tryPlaceOrder(String userId, String feeInCents, String membershipSkuId, String shellSkuId) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
-        String description = String.format("购买会员%s", membershipSkuId);
+
+        String skuId = StringUtils.isEmpty(membershipSkuId) ? shellSkuId : membershipSkuId;
+
+        String description = String.format("购买会员%s", skuId);
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
                 .userId(userId)
                 .tradeNumber(tradeNum)
-                .memberShipSkuId(membershipSkuId)
+                .memberShipSkuId(skuId)
+                .shellSkuId(shellSkuId)
                 .description(description)
                 .feeInCents(feeInCents)
                 .build();
