@@ -26,6 +26,7 @@ ext['marty.version'] = '1.0.0'
 ext['mantella.version'] = '1.0.1'
 ext['vanga.version'] = '1.0.3'
 ext['marty.version'] = '1.0.0'
+ext['asity.version'] = '1.0.0'
 
 ext['settler.version'] = '1.0.2'
 ext['reconciliation.version'] = '1.0.1'
@@ -164,6 +165,7 @@ subprojects {
             dependency "com.aliyun.oss:aliyun-sdk-oss:${ext['oss.version']}"
             dependency "io.opentracing.contrib:opentracing-spring-jaeger-web-starter:3.1.1"
             dependency "io.opentracing.contrib:opentracing-grpc:0.2.1"
+            dependency "cn.rongcloud.im:server-sdk-java:3.1.8"
         }
     }
 }

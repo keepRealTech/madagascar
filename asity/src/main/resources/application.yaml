@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: asity
+
+grpc:
+  port: 12007
+
+opentracing:
+  jaeger:
+    grpc-server-interceptor: false
+    const-sampler:
+      decision: false
