@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.service.ChatService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +42,7 @@ public class ChatController implements ChatApi {
      *
      * @return {@link ChatTokenResponse}.
      */
+    @Cacheable(value = "posterFeedDTO", keyGenerator = "UserIdKeyGenerator")
     public ResponseEntity<ChatTokenResponse> apiV1ChatsTokenGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
 
