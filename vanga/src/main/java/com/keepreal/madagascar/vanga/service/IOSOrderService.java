@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.config.IOSPayConfiguration;
 import com.keepreal.madagascar.vanga.model.ShellSku;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
  * Represents the ios order service.
  */
 @Service
+@Slf4j
 public class IOSOrderService {
 
     private final RestTemplate restTemplate;
@@ -64,6 +66,8 @@ public class IOSOrderService {
         JSONObject responseData = JSONObject.parseObject(response.getBody());
         String status = responseData.getString("status");
 
+        log.info("verify url: {}, status: {}", this.iosPayConfiguration.getVerifyUrl(), status);
+
         if (status.equals("21007")) {
             response = this.restTemplate.postForEntity(this.iosPayConfiguration.getVerifyUrlSandbox(),
                     request, String.class);
@@ -73,6 +77,8 @@ public class IOSOrderService {
             responseData = JSONObject.parseObject(response.getBody());
             status = responseData.getString("status");
         }
+
+        log.info("verify url: {}, status: {}", this.iosPayConfiguration.getVerifyUrlSandbox(), status);
 
         if (!status.equals("0")) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_IOS_RECEIPT_VERIFY_ERROR, status);
