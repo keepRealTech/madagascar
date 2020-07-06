@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.2.0"
+  version: "1.1.0"
   title: Keep Real API
 
 security:
@@ -328,13 +328,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TimelinesResponse'
+                $ref: '#/components/schemas/FeedsResponseV2'
   /api/v1/islands/{id}/feeds/top:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
       tags:
-        - Island
+        - Feed
       summary: make a feed to top
       requestBody:
         required: true
@@ -1982,6 +1982,29 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedDTO'
+    ToppedFeedsDTO:
+      type: object
+      properties:
+        feeds:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedDTO'
+        toppedFeeds:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedDTO'
+    FeedsResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            currentTime:
+              type: integer
+              format: int64
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              $ref: '#/components/schemas/ToppedFeedsDTO'
     CommentDTO:
       type: object
       properties:
