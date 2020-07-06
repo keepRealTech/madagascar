@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class GrpcChannelFactory {
 
+    private final GrpcConfiguration asityConfiguration;
     private final GrpcConfiguration couaConfiguration;
     private final GrpcConfiguration fossaConfiguration;
     private final GrpcConfiguration baobobConfiguration;
@@ -26,6 +27,7 @@ public class GrpcChannelFactory {
     /**
      * Constructs the grpc channels factory.
      *
+     * @param asityConfiguration    Asity grpc configuration.
      * @param couaConfiguration     Coua grpc configuration.
      * @param fossaConfiguration    Fossa grpc configuration.
      * @param baobobConfiguration   Baobob grpc configuration.
@@ -35,14 +37,16 @@ public class GrpcChannelFactory {
      * @param vangaConfiguration    Vanga grpc configuration.
      * @param tracer                {@link Tracer}.
      */
-    public GrpcChannelFactory(@Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration,
+    public GrpcChannelFactory(@Qualifier("asityConfiguration") GrpcConfiguration asityConfiguration,
+                              @Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration,
                               @Qualifier("fossaConfiguration") GrpcConfiguration fossaConfiguration,
                               @Qualifier("baobobConfiguration") GrpcConfiguration baobobConfiguration,
                               @Qualifier("indriConfiguration") GrpcConfiguration indriConfiguration,
                               @Qualifier("tenrecsConfiguration") GrpcConfiguration tenrecsConfiguration,
                               @Qualifier("mantellaConfiguration") GrpcConfiguration mantellaConfiguration,
-                              @Qualifier("vangaConfiguration")GrpcConfiguration vangaConfiguration,
+                              @Qualifier("vangaConfiguration") GrpcConfiguration vangaConfiguration,
                               Tracer tracer) {
+        this.asityConfiguration = asityConfiguration;
         this.couaConfiguration = couaConfiguration;
         this.fossaConfiguration = fossaConfiguration;
         this.baobobConfiguration = baobobConfiguration;
@@ -126,7 +130,7 @@ public class GrpcChannelFactory {
     /**
      * Represents the mantella grpc channel.
      *
-     * @return Tenrecs grpc channel.
+     * @return Mantella grpc channel.
      */
     @Bean(name = "mantellaChannel")
     public Channel getMantellaChannel() {
@@ -139,12 +143,25 @@ public class GrpcChannelFactory {
     /**
      * Represents the vanga grpc channel.
      *
-     * @return Tenrecs grpc channel.
+     * @return Vanga grpc channel.
      */
     @Bean(name = "vangaChannel")
     public Channel getVangaChannel() {
         return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.vangaConfiguration.getHost(), this.vangaConfiguration.getPort())
+                .usePlaintext()
+                .build());
+    }
+
+    /**
+     * Represents the asity grpc channel.
+     *
+     * @return Asity grpc channel.
+     */
+    @Bean(name = "asityChannel")
+    public Channel getAsityChannel() {
+        return this.interceptor.intercept(ManagedChannelBuilder
+                .forAddress(this.asityConfiguration.getHost(), this.asityConfiguration.getPort())
                 .usePlaintext()
                 .build());
     }

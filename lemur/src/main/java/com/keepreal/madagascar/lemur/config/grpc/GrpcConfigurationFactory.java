@@ -87,4 +87,15 @@ public class GrpcConfigurationFactory {
         return new GrpcConfiguration();
     }
 
+    /**
+     * Represents configurations for asity.
+     *
+     * @return Grpc configuration.
+     */
+    @Bean(name = "asityConfiguration")
+    @ConfigurationProperties(prefix = "grpc.asity", ignoreUnknownFields = false)
+    public GrpcConfiguration asityConfiguration() {
+        return new GrpcConfiguration();
+    }
+
 }
