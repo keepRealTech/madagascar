@@ -15,8 +15,11 @@ sourceSets {
 
 dependencies {
     implementation project(":common:exceptions")
+    implementation project(":common:id-generator-starter")
 
     implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    runtimeOnly 'mysql:mysql-connector-java'
     implementation 'cn.rongcloud.im:server-sdk-java'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
     implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'

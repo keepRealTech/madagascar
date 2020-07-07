@@ -6,6 +6,7 @@ import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.service.RongCloudService;
 import com.keepreal.madagascar.asity.util.CommonStatusUtils;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 
@@ -41,6 +42,10 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
             response = RegisterResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setToken(token)
+                    .build();
+        } catch (KeepRealBusinessException e) {
+            response = RegisterResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(e.getErrorCode()))
                     .build();
         } catch (Exception e) {
             response = RegisterResponse.newBuilder()

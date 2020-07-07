@@ -16,6 +16,12 @@ message RegisterResponse {
   string token = 2;
 }
 
+message QuitChatsByIslandIdRequest {
+  string userId = 1;
+  string islandId = 2;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
+  rpc QuitChatsByIslandId(QuitChatsByIslandIdRequest) returns (CommonResponse) {};
 }
