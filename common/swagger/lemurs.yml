@@ -1157,6 +1157,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatAccessResponse'
+  /api/v1/users/{id}/chatgroups:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Chat
+      summary: retrieve all chat groups for the given island
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserChatGroupsResponse'
   /api/v1/islands/{id}/chatgroups:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1170,7 +1184,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatGroupsResponse'
+                $ref: '#/components/schemas/IslandChatGroupsResponse'
     post:
       tags:
         - Chat
@@ -1188,7 +1202,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatGroupResponse'
-  /api/v1/chatgroups/{id}/chatgroups:
+  /api/v1/chatgroups/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     delete:
@@ -1202,6 +1216,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/chatgroups/{id}/join:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Chat
+      summary: joins an existing chat group
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/chataccess/grant:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Chat
+      summary: grant access to the islands chats
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/chataccess:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Chat
+      summary: grant access to the islands chats
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandChatAccessDTO'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -2769,6 +2826,8 @@ components:
     ChatAccessDTO:
       type: object
       properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
         hasAccess:
           type: boolean
     ChatAccessResponse:
@@ -2787,10 +2846,10 @@ components:
           type: string
         islandId:
           type: string
-        membershipIds:
+        memberships:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/SimpleMembershipDTO'
         description:
           type: string
     PostChatGroupRequest:
@@ -2811,7 +2870,23 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ChatGroupDTO'
-    ChatGroupsResponse:
+    IslandGroupedChatGroupDTO:
+      type: object
+      properties:
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
+        chatgroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserChatGroupDTO'
+    UserChatGroupDTO:
+      allOf:
+        - $ref: '#/components/schemas/ChatGroupDTO'
+        - type: object
+          properties:
+            hasAccess:
+              type: boolean
+    UserChatGroupsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -2819,4 +2894,30 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/ChatGroupDTO'
+                $ref: '#/components/schemas/IslandGroupedChatGroupDTO'
+    IslandChatGroupsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserChatGroupDTO'
+    IslandChatAccessDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        islandId:
+          type: string
+        groupchatCount:
+          type: integer
+        memberCount:
+          type: integer
+        recentMembers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BriefUserDTO'
+        hasAccess:
+          type: boolean
