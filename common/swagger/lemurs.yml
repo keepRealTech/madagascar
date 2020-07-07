@@ -1211,7 +1211,7 @@ paths:
     put:
       tags:
         - Chat
-      summary: updates the chat group metadata
+      summary: updates the chatg
       requestBody:
         required: true
         content:
@@ -1277,8 +1277,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IslandChatAccessDTO'
-
+                $ref: '#/components/schemas/IslandChatAccessResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2873,6 +2872,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SimpleMembershipDTO'
+        memberCount:
+          type: integer
         bulletin:
           type: string
     PostChatGroupRequest:
@@ -2914,7 +2915,7 @@ components:
           items:
             $ref: '#/components/schemas/UserChatGroupDTO'
     UserChatGroupDTO:
-      allOf:
+        allOf:
         - $ref: '#/components/schemas/ChatGroupDTO'
         - type: object
           properties:
@@ -2957,3 +2958,10 @@ components:
             $ref: '#/components/schemas/BriefUserDTO'
         hasAccess:
           type: boolean
+    IslandChatAccessResponse:
+      allOf:
+      - $ref: '#/components/schemas/CommonResponse'
+      - type: object
+        properties:
+          data:
+              $ref: '#/components/schemas/IslandChatAccessDTO'
