@@ -5,6 +5,13 @@ option java_package = "com.keepreal.madagascar.asity";
 
 import "common.proto";
 
+message ChatAccessMessage {
+  string id = 1;
+  string islandId = 2;
+  string userId = 3;
+  bool hasAccess = 4;
+}
+
 message RegisterRequest {
   string userId = 1;
   string userName = 2;
@@ -21,7 +28,27 @@ message QuitChatsByIslandIdRequest {
   string islandId = 2;
 }
 
+message EnableChatAccessRequest {
+  string islandId = 1;
+  string userId = 2;
+}
+
+message RetrieveChatAccessByIslandIdAndUserIdRequest {
+  string islandId = 1;
+  string userId = 2;
+}
+
+message IslandChatAccessResponse {
+  CommonStatus status = 1;
+  ChatAccessMessage chatAccess = 2;
+  int32 islandChatGroupCount = 3;
+  int32 enabledMemberCount = 4;
+  repeated string recentEnabledUserIds = 5;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc QuitChatsByIslandId(QuitChatsByIslandIdRequest) returns (CommonStatus) {};
+  rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
+  rpc RetrieveChatAccessByIslandIdAndUserId(RetrieveChatAccessByIslandIdAndUserIdRequest) returns (IslandChatAccessResponse) {};
 }

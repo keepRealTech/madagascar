@@ -10,6 +10,7 @@ import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.ChatService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
@@ -18,9 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ChatApi;
 import swagger.model.ChatAccessResponse;
 import swagger.model.ChatTokenResponse;
+import swagger.model.DummyResponse;
+import swagger.model.IslandChatAccessResponse;
 
 import java.util.Collections;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the chat controller.
@@ -38,9 +42,9 @@ public class ChatController implements ChatApi {
     /**
      * Constructs the chat controller.
      *
-     * @param islandService {@link IslandService}.
-     * @param userService   {@link UserService}.
-     * @param chatService   {@link ChatService}.
+     * @param islandService  {@link IslandService}.
+     * @param userService    {@link UserService}.
+     * @param chatService    {@link ChatService}.
      * @param chatDTOFactory {@link ChatDTOFactory}.
      * @param userDTOFactory {@link UserDTOFactory}.
      */
@@ -111,6 +115,56 @@ public class ChatController implements ChatApi {
 
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the island chat access get api.
+     *
+     * @param id Island id.
+     * @return {@link IslandChatAccessResponse}.
+     */
+    @Override
+    public ResponseEntity<IslandChatAccessResponse> apiV1IslandsIdChataccessGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        com.keepreal.madagascar.asity.IslandChatAccessResponse islandChatAccessResponse =
+                this.chatService.retrieveChatAccessByIslandIdAndUserId(id, userId);
+
+        IslandChatAccessResponse response = new IslandChatAccessResponse();
+        response.data(this.chatDTOFactory.buildIslandAccess(islandChatAccessResponse.getChatAccess(),
+                islandChatAccessResponse.getEnabledMemberCount(),
+                islandChatAccessResponse.getIslandChatGroupCount(),
+                islandChatAccessResponse.getRecentEnabledUserIdsList().stream()
+                        .map(memberId -> {
+                            UserMessage userMessage = this.userService.retrieveUserById(memberId);
+                            return this.userDTOFactory.briefValueOf(userMessage);
+                        }).collect(Collectors.toList())));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the enable chat access post api.
+     *
+     * @param id id (required) Island id.
+     * @return {@link DummyResponse}.
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1IslandsIdChataccessGrantPost(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        boolean subscribed = this.islandService.retrieveIslandSubscribeStateByUserId(userId, Collections.singletonList(id)).get(id);
+
+        if (!subscribed) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_NOT_SUBSCRIBED_ERROR);
+        }
+
+        this.chatService.enableChatAccess(id, userId);
+
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

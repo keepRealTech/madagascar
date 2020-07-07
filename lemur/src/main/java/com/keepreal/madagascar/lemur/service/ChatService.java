@@ -1,8 +1,12 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
+import com.keepreal.madagascar.asity.EnableChatAccessRequest;
+import com.keepreal.madagascar.asity.IslandChatAccessResponse;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
+import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -22,7 +26,7 @@ import java.util.Objects;
 @Slf4j
 public class ChatService {
 
-    private Channel channel;
+    private final Channel channel;
 
     /**
      * Constructs the chat service.
@@ -69,6 +73,67 @@ public class ChatService {
         }
 
         return response.getToken();
+    }
+
+    /**
+     * Enables the chat access.
+     *
+     * @param islandId Island id.
+     * @param userId   User id.
+     */
+    public void enableChatAccess(String islandId, String userId) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        EnableChatAccessRequest request = EnableChatAccessRequest.newBuilder()
+                .setIslandId(islandId)
+                .setUserId(userId)
+                .build();
+
+        CommonStatus commonStatus;
+        try {
+            commonStatus = stub.enableChatAccess(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != commonStatus.getRtn()) {
+            throw new KeepRealBusinessException(commonStatus);
+        }
+    }
+
+    /**
+     * Retrieves chat access.
+     *
+     * @param islandId Island id.
+     * @param userId   User id.
+     * @return {@link IslandChatAccessResponse}.
+     */
+    public IslandChatAccessResponse retrieveChatAccessByIslandIdAndUserId(String islandId, String userId) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveChatAccessByIslandIdAndUserIdRequest request = RetrieveChatAccessByIslandIdAndUserIdRequest.newBuilder()
+                .setIslandId(islandId)
+                .setUserId(userId)
+                .build();
+
+        IslandChatAccessResponse response;
+        try {
+            response = stub.retrieveChatAccessByIslandIdAndUserId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve chat access returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
     }
 
 }

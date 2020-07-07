@@ -31,7 +31,7 @@ public class IslandChatAccess {
     private String islandId;
     private String userId;
     @Builder.Default
-    private Boolean enabled = true;
+    private Boolean enabled = false;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
