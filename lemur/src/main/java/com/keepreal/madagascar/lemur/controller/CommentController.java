@@ -14,10 +14,15 @@ import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
+import swagger.api.ApiUtil;
 import swagger.api.CommentApi;
+import swagger.model.ChatAccessResponse;
 import swagger.model.CommentResponse;
 import swagger.model.CommentsResponse;
 import swagger.model.DummyResponse;
@@ -129,6 +134,11 @@ public class CommentController implements CommentApi {
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    
+    public ResponseEntity<ChatAccessResponse> apiV1UsersIdChatsGet(String id) {
+
     }
 
 }

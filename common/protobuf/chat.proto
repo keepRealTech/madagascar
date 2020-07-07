@@ -23,5 +23,5 @@ message QuitChatsByIslandIdRequest {
 
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
-  rpc QuitChatsByIslandId(QuitChatsByIslandIdRequest) returns (CommonResponse) {};
+  rpc QuitChatsByIslandId(QuitChatsByIslandIdRequest) returns (CommonStatus) {};
 }
