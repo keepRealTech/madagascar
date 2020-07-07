@@ -1175,6 +1175,9 @@ paths:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
       tags:
         - Chat
       summary: retrieve all chat groups for the given island
@@ -1205,6 +1208,23 @@ paths:
   /api/v1/chatgroups/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Chat
+      summary: updates the chat group metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutChatGroupRequest'
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatGroupResponse'
     delete:
       tags:
         - Chat
@@ -1810,6 +1830,9 @@ components:
         userId:
           type: string
           description: user id to report
+        messageId:
+          type: string
+          description: rongyun message id
       required:
         - reportType
     ReportResponse:
@@ -2850,14 +2873,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SimpleMembershipDTO'
-        description:
+        bulletin:
           type: string
     PostChatGroupRequest:
       type: object
       properties:
         name:
           type: string
-        description:
+        bulletin:
+          type: string
+        membershipIds:
+          type: array
+          items:
+            type: string
+    PutChatGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        bulletin:
           type: string
         membershipIds:
           type: array
@@ -2900,6 +2934,8 @@ components:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
             data:
               type: array
               items:

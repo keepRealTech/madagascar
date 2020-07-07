@@ -26,10 +26,12 @@ import swagger.api.FeedApi;
 import swagger.model.CheckFeedsMessage;
 import swagger.model.DummyResponse;
 import swagger.model.FeedResponse;
+import swagger.model.FeedsResponseV2;
 import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
 import swagger.model.PostFeedPayload;
 import swagger.model.TimelinesResponse;
+import swagger.model.ToppedFeedsDTO;
 
 import javax.validation.Valid;
 import java.util.AbstractMap;
@@ -255,21 +257,23 @@ public class FeedController implements FeedApi {
      * @return {@link swagger.model.FeedsResponse}.
      */
     @Override
-    public ResponseEntity<TimelinesResponse> apiV11IslandsIdFeedsGet(String id,
-                                                                     Boolean fromHost,
-                                                                     Long minTimestamp,
-                                                                     Long maxTimestamp,
-                                                                     Integer pageSize) {
+    public ResponseEntity<FeedsResponseV2> apiV11IslandsIdFeedsGet(String id,
+                                                                   Boolean fromHost,
+                                                                   Long minTimestamp,
+                                                                   Long maxTimestamp,
+                                                                   Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
                 this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize);
 
-        TimelinesResponse response = new TimelinesResponse();
-        response.setData(feedsResponse.getFeedList()
+        FeedsResponseV2 response = new FeedsResponseV2();
+        ToppedFeedsDTO dto = new ToppedFeedsDTO();
+        dto.setFeeds(feedsResponse.getFeedList()
                 .stream()
                 .map(this.feedDTOFactory::valueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
+        response.setData(dto);
         response.setCurrentTime(System.currentTimeMillis());
         response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
