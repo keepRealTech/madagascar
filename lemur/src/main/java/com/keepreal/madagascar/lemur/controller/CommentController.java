@@ -136,9 +136,4 @@ public class CommentController implements CommentApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    
-    public ResponseEntity<ChatAccessResponse> apiV1UsersIdChatsGet(String id) {
-
-    }
-
 }
