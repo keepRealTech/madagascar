@@ -207,7 +207,7 @@ public class ChatController implements ChatApi {
 
         List<MembershipMessage> membershipMessageList = new ArrayList<>();
         if (!postChatGroupRequest.getMembershipIds().isEmpty()) {
-           membershipMessageList = this.membershipService.RetrieveMembershipsByIslandId(id).stream()
+            membershipMessageList = this.membershipService.RetrieveMembershipsByIslandId(id).stream()
                     .filter(membership -> postChatGroupRequest.getMembershipIds().contains(membership.getId()))
                     .collect(Collectors.toList());
             if (membershipMessageList.size() != postChatGroupRequest.getMembershipIds().size()) {

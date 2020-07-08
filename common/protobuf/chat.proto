@@ -4,6 +4,7 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.asity";
 
 import "common.proto";
+import "google/protobuf/wrappers.proto";
 
 message ChatAccessMessage {
   string id = 1;
@@ -55,6 +56,7 @@ message ChatgroupMessage {
   repeated string membershipIds = 6;
   string bulletin = 7;
   bool muted = 8;
+  bool dismissed = 9;
 }
 
 message ChatgroupResponse {
@@ -70,10 +72,26 @@ message CreateChatgroupRequest {
   string bulletin = 5;
 }
 
+message DismissChatgroupRequest {
+  string id = 1;
+  string userId = 2;
+}
+
+message UpdateChatgroupRequest {
+  string id = 1;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue userId = 3;
+  google.protobuf.BoolValue muted = 4;
+  repeated string membershipIds = 5;
+  google.protobuf.StringValue bulletin = 6;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc QuitChatsByIslandId(QuitChatsByIslandIdRequest) returns (CommonStatus) {};
   rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
   rpc RetrieveChatAccessByIslandIdAndUserId(RetrieveChatAccessByIslandIdAndUserIdRequest) returns (IslandChatAccessResponse) {};
   rpc CreateChatgroup(CreateChatgroupRequest) returns (ChatgroupResponse) {};
+  rpc DismissChatgroup(DismissChatgroupRequest) returns (CommonStatus) {};
+  rpc UpdateChatgroup()
 }
