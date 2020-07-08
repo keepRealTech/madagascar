@@ -328,13 +328,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TimelinesResponse'
+                $ref: '#/components/schemas/FeedsResponseV2'
   /api/v1/islands/{id}/feeds/top:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
       tags:
-        - Island
+        - Feed
       summary: make a feed to top
       requestBody:
         required: true
@@ -1157,7 +1157,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatAccessResponse'
-  /api/v1/islands/{id}/chatgroups:
+  /api/v1/users/{id}/chatgroups:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
@@ -1170,7 +1170,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatGroupsResponse'
+                $ref: '#/components/schemas/UserChatGroupsResponse'
+  /api/v1/islands/{id}/chatgroups:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Chat
+      summary: retrieve all chat groups for the given island
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandChatGroupsResponse'
     post:
       tags:
         - Chat
@@ -1188,9 +1205,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatGroupResponse'
-  /api/v1/chatgroups/{id}/chatgroups:
+  /api/v1/chatgroups/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Chat
+      summary: updates the chatg
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutChatGroupRequest'
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatGroupResponse'
     delete:
       tags:
         - Chat
@@ -1202,6 +1236,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/chatgroups/{id}/join:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Chat
+      summary: joins an existing chat group
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/chataccess/grant:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Chat
+      summary: grant access to the islands chats
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/chataccess:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Chat
+      summary: grant access to the islands chats
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandChatAccessResponse'
+  /api/v1/users/avatars:
+    post:
+      tags:
+        - User
+      summary: retrieves users avatar urls in batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostBatchGetAvatarsRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvatarsResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1753,6 +1847,9 @@ components:
         userId:
           type: string
           description: user id to report
+        messageId:
+          type: string
+          description: rongyun message id
       required:
         - reportType
     ReportResponse:
@@ -1982,6 +2079,29 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedDTO'
+    ToppedFeedsDTO:
+      type: object
+      properties:
+        feeds:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedDTO'
+        toppedFeeds:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedDTO'
+    FeedsResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            currentTime:
+              type: integer
+              format: int64
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              $ref: '#/components/schemas/ToppedFeedsDTO'
     CommentDTO:
       type: object
       properties:
@@ -2746,6 +2866,8 @@ components:
     ChatAccessDTO:
       type: object
       properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
         hasAccess:
           type: boolean
     ChatAccessResponse:
@@ -2764,18 +2886,31 @@ components:
           type: string
         islandId:
           type: string
-        membershipIds:
+        memberships:
           type: array
           items:
-            type: string
-        description:
+            $ref: '#/components/schemas/SimpleMembershipDTO'
+        memberCount:
+          type: integer
+        bulletin:
           type: string
     PostChatGroupRequest:
       type: object
       properties:
         name:
           type: string
-        description:
+        bulletin:
+          type: string
+        membershipIds:
+          type: array
+          items:
+            type: string
+    PutChatGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        bulletin:
           type: string
         membershipIds:
           type: array
@@ -2788,7 +2923,23 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ChatGroupDTO'
-    ChatGroupsResponse:
+    IslandGroupedChatGroupDTO:
+      type: object
+      properties:
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
+        chatgroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserChatGroupDTO'
+    UserChatGroupDTO:
+      allOf:
+        - $ref: '#/components/schemas/ChatGroupDTO'
+        - type: object
+          properties:
+            hasAccess:
+              type: boolean
+    UserChatGroupsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -2796,4 +2947,62 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/ChatGroupDTO'
+                $ref: '#/components/schemas/IslandGroupedChatGroupDTO'
+    IslandChatGroupsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserChatGroupDTO'
+    IslandChatAccessDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        islandId:
+          type: string
+        groupchatCount:
+          type: integer
+        memberCount:
+          type: integer
+        recentMembers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BriefUserDTO'
+        hasAccess:
+          type: boolean
+    IslandChatAccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IslandChatAccessDTO'
+    AvatarDTO:
+      type: object
+      properties:
+        userId:
+          type: string
+        portraitUrl:
+          type: string
+    PostBatchGetAvatarsRequest:
+      type: object
+      properties:
+        userIds:
+          type: array
+          items:
+            type: string
+    AvatarsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/AvatarDTO'
