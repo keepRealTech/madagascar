@@ -484,6 +484,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/islandidInPath'
         - $ref: '#/components/parameters/fromHostInQuery'
+        - $ref: '#/components/parameters/vInQuery'
+        - $ref: '#/components/parameters/osnInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -1108,6 +1110,20 @@ components:
       name: id
       description: id
       required: true
+      schema:
+        type: string
+    vInQuery:
+      in: query
+      name: v
+      description: v
+      required: false
+      schema:
+        type: string
+    osnInQuery:
+      in: query
+      name: osn
+      description: osn
+      required: false
       schema:
         type: string
     timestampAfter:
