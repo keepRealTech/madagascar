@@ -46,6 +46,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "已经有用户订阅的会员不能删除哦";
             case REQUEST_USER_SHELL_INSUFFICIENT_ERROR:
                 return "当前贝壳余额不足，请充值后再试";
+            case REQUEST_LOW_VERSION_ERROR:
+                return "岛民你好，我们发布了重大更新，请去App Store下载最新版本";
             default:
                 return errorCode.getValueDescriptor().getName();
         }
