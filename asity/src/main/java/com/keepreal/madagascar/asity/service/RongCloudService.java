@@ -9,6 +9,7 @@ import io.rong.models.group.GroupMember;
 import io.rong.models.group.GroupModel;
 import io.rong.models.response.TokenResult;
 import io.rong.models.user.UserModel;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 
 /**
@@ -36,7 +37,8 @@ public class RongCloudService {
      * @param portraitUrl User portrait url.
      * @return User token.
      */
-    public String register(String userId, String userName, String portraitUrl) throws Exception {
+    @SneakyThrows
+    public String register(String userId, String userName, String portraitUrl) {
         UserModel userModel = new UserModel()
                 .setId(userId)
                 .setName(userName)
@@ -56,9 +58,9 @@ public class RongCloudService {
      * @param id     Group id.
      * @param name   Group name.
      * @param hostId Group host id.
-     * @throws Exception Exception.
      */
-    public void createGroup(String id, String name, String hostId) throws Exception {
+    @SneakyThrows
+    public void createGroup(String id, String name, String hostId) {
         GroupMember[] members = {new GroupMember().setId(hostId)};
         GroupModel groupModel = new GroupModel()
                 .setId(id)
@@ -76,9 +78,9 @@ public class RongCloudService {
      *
      * @param id     Group id.
      * @param hostId User who dismisses the group.
-     * @throws Exception Exception.
      */
-    public void dismissGroup(String id, String hostId) throws Exception {
+    @SneakyThrows
+    public void dismissGroup(String id, String hostId) {
         GroupMember[] members = {new GroupMember().setId(hostId)};
         GroupModel groupModel = new GroupModel()
                 .setId(id)
@@ -95,9 +97,9 @@ public class RongCloudService {
      *
      * @param id       Group id.
      * @param memberId Member user id.
-     * @throws Exception Exception.
      */
-    public void joinGroup(String id, String memberId) throws Exception {
+    @SneakyThrows
+    public void joinGroup(String id, String memberId) {
         GroupMember[] members = {new GroupMember().setId(memberId)};
         GroupModel groupModel = new GroupModel()
                 .setId(id)
@@ -114,9 +116,9 @@ public class RongCloudService {
      *
      * @param id       Group id.
      * @param memberId Member user id.
-     * @throws Exception Exception.
      */
-    public void quitGroup(String id, String memberId) throws Exception {
+    @SneakyThrows
+    public void quitGroup(String id, String memberId) {
         GroupMember[] members = {new GroupMember().setId(memberId)};
         GroupModel groupModel = new GroupModel()
                 .setId(id)

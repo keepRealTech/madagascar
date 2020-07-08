@@ -1,12 +1,18 @@
 package com.keepreal.madagascar.asity.grpcController;
 
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
+import com.keepreal.madagascar.asity.ChatgroupResponse;
+import com.keepreal.madagascar.asity.CreateChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
+import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
+import com.keepreal.madagascar.asity.model.Chatgroup;
+import com.keepreal.madagascar.asity.model.ChatgroupMember;
 import com.keepreal.madagascar.asity.model.IslandChatAccess;
+import com.keepreal.madagascar.asity.service.ChatgroupService;
 import com.keepreal.madagascar.asity.service.IslandChatAccessService;
 import com.keepreal.madagascar.asity.service.RongCloudService;
 import com.keepreal.madagascar.asity.util.CommonStatusUtils;
@@ -16,25 +22,36 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 
+import javax.transaction.Transactional;
+
 /**
  * Represents the chat grpc service.
  */
 @GRpcService
 public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
 
+    private final ChatgroupService chatgroupService;
     private final RongCloudService rongCloudService;
     private final IslandChatAccessService islandChatAccessService;
+
+    private final ChatgroupMessageFactory chatgroupMessageFactory;
 
     /**
      * Constructs the chat controller.
      *
+     * @param chatgroupService
      * @param rongCloudService        {@link RongCloudService}.
      * @param islandChatAccessService {@link IslandChatAccessService}.
+     * @param chatgroupMessageFactory
      */
-    public ChatController(RongCloudService rongCloudService,
-                          IslandChatAccessService islandChatAccessService) {
+    public ChatController(ChatgroupService chatgroupService,
+                          RongCloudService rongCloudService,
+                          IslandChatAccessService islandChatAccessService,
+                          ChatgroupMessageFactory chatgroupMessageFactory) {
+        this.chatgroupService = chatgroupService;
         this.rongCloudService = rongCloudService;
         this.islandChatAccessService = islandChatAccessService;
+        this.chatgroupMessageFactory = chatgroupMessageFactory;
     }
 
     /**
@@ -96,6 +113,29 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         // TODO: FILL THE RESPONSE
         IslandChatAccessResponse response = IslandChatAccessResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Creates a chat group.
+     *
+     * @param request {@link CreateChatgroupRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Transactional
+    public void createChatgroup(CreateChatgroupRequest request,
+                                StreamObserver<ChatgroupResponse> responseObserver) {
+        Chatgroup chatgroup = this.chatgroupService.createChatgroup(request.getIslandId(), request.getName(), request.getHostId(),
+                request.getMembershipIdsList(), request.getBulletin());
+
+        ChatgroupMember chatgroupMember = this.chatgroupService.joinChatgroup(request.getHostId(), chatgroup.getId());
+
+        ChatgroupResponse response = ChatgroupResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setChatgroup(this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMember))
                 .build();
 
         responseObserver.onNext(response);

@@ -24,11 +24,11 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatGroupMember {
+public class ChatgroupMember {
 
     @Id
     private String id;
-    private String islandId;
+    private String groupId;
     private String userId;
     @Column(name = "is_muted")
     @Builder.Default

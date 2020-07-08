@@ -3,7 +3,6 @@ package com.keepreal.madagascar.asity.model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -16,25 +15,21 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * Represents the chat group entity.
+ * Represents the chat group membership entity.
  */
 @Data
-@Table(name = "chat_group")
+@Table(name = "chat_group_membership")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatGroup {
+public class ChatgroupMembership {
 
     @Id
     private String id;
-    private String hostId;
-    private String islandId;
-    @Builder.Default
-    private String portraitImageUri = "";
-    @Builder.Default
-    private String bulletin = "";
+    private String groupId;
+    private String membershipId;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

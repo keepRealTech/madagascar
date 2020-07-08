@@ -11,25 +11,38 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * Represents the chat group membership entity.
+ * Represents the chat group entity.
  */
 @Data
-@Table(name = "chat_group_membership")
+@Table(name = "chat_group")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatGroupMembership {
+public class Chatgroup {
 
     @Id
     private String id;
+    private String hostId;
+    private String name;
     private String islandId;
-    private String membershipId;
+    @Builder.Default
+    private Integer memberCount = 0;
+    @Builder.Default
+    private String portraitImageUri = "";
+    @Builder.Default
+    private String bulletin = "";
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
@@ -37,5 +50,9 @@ public class ChatGroupMembership {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id", referencedColumnName = "groupId")
+    private Set<ChatgroupMembership> chatgroupMemberships = new HashSet<>();
 
 }

@@ -193,7 +193,17 @@ public class ChatController implements ChatApi {
      * @return {@link ChatGroupResponse}.
      */
     public ResponseEntity<ChatGroupResponse> apiV1IslandsIdChatgroupsPost(String id, PostChatGroupRequest postChatGroupRequest) {
+        IslandMessage island = this.islandService.retrieveIslandById(id);
+
+        if (Objects.isNull(island)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
+        }
+
         String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (!island.getHostId().equals(userId)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
 
         List<MembershipMessage> membershipMessageList = new ArrayList<>();
         if (!postChatGroupRequest.getMembershipIds().isEmpty()) {
