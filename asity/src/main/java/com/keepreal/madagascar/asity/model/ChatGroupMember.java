@@ -18,7 +18,7 @@ import javax.persistence.Table;
  * Represents the chat group member entity.
  */
 @Data
-@Table(name = "chat_group_membership")
+@Table(name = "chat_group_member")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Builder
@@ -30,6 +30,9 @@ public class ChatGroupMember {
     private String id;
     private String islandId;
     private String userId;
+    @Column(name = "is_muted")
+    @Builder.Default
+    private Boolean muted = false;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

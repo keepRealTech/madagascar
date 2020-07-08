@@ -1,6 +1,9 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
+import com.keepreal.madagascar.asity.ChatgroupMessage;
+import com.keepreal.madagascar.asity.ChatgroupResponse;
+import com.keepreal.madagascar.asity.CreateChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
 import com.keepreal.madagascar.asity.RegisterRequest;
@@ -17,7 +20,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Objects;
+import java.util.List;
 
 /**
  * Represents the chat service.
@@ -134,6 +139,46 @@ public class ChatService {
         }
 
         return response;
+    }
+
+    /**
+     * Creates chat group.
+     *
+     * @param islandId          Island id.
+     * @param userId            User id.
+     * @param name              Group name.
+     * @param membershipIds     Membership ids.
+     * @param bulletin          Bulletin.
+     * @return {@link ChatgroupMessage}.
+     */
+    public ChatgroupMessage createChatgroup(String islandId, String userId, String name, List<String> membershipIds, String bulletin) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        CreateChatgroupRequest request = CreateChatgroupRequest.newBuilder()
+                .setBulletin(StringUtils.isEmpty(bulletin) ? "" : bulletin)
+                .setIslandId(islandId)
+                .setHostId(userId)
+                .addAllMembershipIds(Objects.isNull(membershipIds) ? new ArrayList<>() : membershipIds)
+                .build();
+
+        ChatgroupResponse response;
+        try {
+            response = stub.createChatgroup(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create chat group returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getChatgroup();
     }
 
 }

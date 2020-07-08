@@ -1,13 +1,19 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.asity.ChatAccessMessage;
+import com.keepreal.madagascar.asity.ChatgroupMessage;
+import com.keepreal.madagascar.coua.Membership;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefUserDTO;
 import swagger.model.ChatAccessDTO;
+import swagger.model.ChatGroupDTO;
 import swagger.model.ChatTokenDTO;
 import swagger.model.IslandChatAccessDTO;
+import swagger.model.MembershipDTO;
+import swagger.model.SimpleMembershipDTO;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents the chat dto factory.
@@ -52,6 +58,10 @@ public class ChatDTOFactory {
      */
     public IslandChatAccessDTO buildIslandAccess(ChatAccessMessage chatAccessMessage, Integer memberCount,
                                                  Integer chatGroupCount, List<BriefUserDTO> recentMembers) {
+        if (Objects.isNull(chatAccessMessage)) {
+            return null;
+        }
+
         IslandChatAccessDTO islandChatAccessDTO = new IslandChatAccessDTO();
         islandChatAccessDTO.setId(chatAccessMessage.getId());
         islandChatAccessDTO.setIslandId(chatAccessMessage.getIslandId());
@@ -59,6 +69,23 @@ public class ChatDTOFactory {
         islandChatAccessDTO.setGroupchatCount(chatGroupCount);
         islandChatAccessDTO.setRecentMembers(recentMembers);
         return islandChatAccessDTO;
+    }
+
+
+    public ChatGroupDTO valueOf(ChatgroupMessage chatgroup, List<SimpleMembershipDTO> membershipDTOS) {
+        if (Objects.isNull(chatgroup)) {
+            return null;
+        }
+
+        ChatGroupDTO chatGroupDTO = new ChatGroupDTO();
+        chatGroupDTO.setId(chatgroup.getId());
+        chatGroupDTO.setIslandId(chatgroup.getIslandId());
+        chatGroupDTO.setName(chatgroup.getName());
+        chatGroupDTO.setBulletin(chatgroup.getBulletin());
+        chatGroupDTO.setMemberCount(chatgroup.getMemberCount());
+        chatGroupDTO.setMemberships(membershipDTOS);
+
+        return chatGroupDTO;
     }
 
 }

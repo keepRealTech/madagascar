@@ -46,9 +46,34 @@ message IslandChatAccessResponse {
   repeated string recentEnabledUserIds = 5;
 }
 
+message ChatgroupMessage {
+  string id = 1;
+  string hostId = 2;
+  string name = 3;
+  string islandId = 4;
+  int32 memberCount = 5;
+  repeated string membershipIds = 6;
+  string bulletin = 7;
+  bool muted = 8;
+}
+
+message ChatgroupResponse {
+  CommonStatus status = 1;
+  ChatgroupMessage chatgroup = 2;
+}
+
+message CreateChatgroupRequest {
+  string hostId = 1;
+  string islandId = 2;
+  string name = 3;
+  repeated string membershipIds = 4;
+  string bulletin = 5;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc QuitChatsByIslandId(QuitChatsByIslandIdRequest) returns (CommonStatus) {};
   rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
   rpc RetrieveChatAccessByIslandIdAndUserId(RetrieveChatAccessByIslandIdAndUserIdRequest) returns (IslandChatAccessResponse) {};
+  rpc CreateChatgroup(CreateChatgroupRequest) returns (ChatgroupResponse) {};
 }
