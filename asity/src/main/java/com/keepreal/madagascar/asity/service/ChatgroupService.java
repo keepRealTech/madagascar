@@ -91,4 +91,28 @@ public class ChatgroupService {
         return chatgroupMember;
     }
 
+    /**
+     * Retrieves chat group by id.
+     *
+     * @param id                Id.
+     * @param includeDeleted    Whether includes the deleted chat groups.
+     * @return {@link Chatgroup}.
+     */
+    public Chatgroup retrieveById(String id, Boolean includeDeleted) {
+        if (includeDeleted) {
+            return this.chatgroupRepository.findById(id).orElse(null);
+        }
+        return this.chatgroupRepository.findByIdAndDeletedIsFalse(id);
+    }
+
+    /**
+     * Dismisses chat group by id.
+     * @param chatgroup {@link Chatgroup}.
+     */
+    public void dismiss(Chatgroup chatgroup) {
+        this.rongCloudService.dismissGroup(chatgroup.getId(), chatgroup.getHostId());
+        chatgroup.setDeleted(true);
+        this.chatgroupRepository.save(chatgroup);
+    }
+
 }

@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChatgroupRepository extends JpaRepository<Chatgroup, String> {
 
+    Chatgroup findByIdAndDeletedIsFalse(String id);
+
 }

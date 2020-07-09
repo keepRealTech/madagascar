@@ -229,4 +229,20 @@ public class ChatController implements ChatApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the dismiss chat group api.
+     *
+     * @param id id (required) Chat group id.
+     * @return {@link DummyResponse}.
+     */
+    public ResponseEntity<DummyResponse> apiV1ChatgroupsIdDelete(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        this.chatService.dismissChatgroup(id, userId);
+
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

@@ -4,6 +4,7 @@ import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
+import com.keepreal.madagascar.asity.DismissChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
 import com.keepreal.madagascar.asity.RegisterRequest;
@@ -50,7 +51,6 @@ public class ChatService {
      */
     public String registerUser(UserMessage user) {
         assert Objects.nonNull(user);
-        assert !StringUtils.isEmpty(user.getId());
 
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
 
@@ -157,6 +157,7 @@ public class ChatService {
         CreateChatgroupRequest request = CreateChatgroupRequest.newBuilder()
                 .setBulletin(StringUtils.isEmpty(bulletin) ? "" : bulletin)
                 .setIslandId(islandId)
+                .setName(name)
                 .setHostId(userId)
                 .addAllMembershipIds(Objects.isNull(membershipIds) ? new ArrayList<>() : membershipIds)
                 .build();
@@ -179,6 +180,32 @@ public class ChatService {
         }
 
         return response.getChatgroup();
+    }
+
+    /**
+     * Dismisses a chat group.
+     *
+     * @param id       Chat group id.
+     * @param userId   User id.
+     */
+    public void dismissChatgroup(String id, String userId) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        DismissChatgroupRequest request = DismissChatgroupRequest.newBuilder()
+                .setId(id)
+                .setUserId(userId)
+                .build();
+
+        CommonStatus commonStatus;
+        try {
+            commonStatus = stub.dismissChatgroup(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != commonStatus.getRtn()) {
+            throw new KeepRealBusinessException(commonStatus);
+        }
     }
 
 }

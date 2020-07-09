@@ -3,6 +3,7 @@ package com.keepreal.madagascar.asity.grpcController;
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
+import com.keepreal.madagascar.asity.DismissChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
 import com.keepreal.madagascar.asity.RegisterRequest;
@@ -23,6 +24,8 @@ import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 
 import javax.transaction.Transactional;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the chat grpc service.
@@ -90,6 +93,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
      * @param request          {@link EnableChatAccessRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
+    @Override
     public void enableChatAccess(EnableChatAccessRequest request,
                                  StreamObserver<CommonStatus> responseObserver) {
         this.islandChatAccessService.enable(request.getIslandId(), request.getUserId());
@@ -106,6 +110,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
      * @param request            {@link RetrieveChatAccessByIslandIdAndUserIdRequest}.
      * @param responseObserver   {@link StreamObserver}.
      */
+    @Override
     public void retrieveChatAccessByIslandIdAndUserId(RetrieveChatAccessByIslandIdAndUserIdRequest request,
                                                       StreamObserver<IslandChatAccessResponse> responseObserver) {
         IslandChatAccess islandChatAccess = this.islandChatAccessService.createIslandChatAccess(request.getIslandId(), request.getUserId());
@@ -126,6 +131,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
      * @param responseObserver {@link StreamObserver}.
      */
     @Transactional
+    @Override
     public void createChatgroup(CreateChatgroupRequest request,
                                 StreamObserver<ChatgroupResponse> responseObserver) {
         Chatgroup chatgroup = this.chatgroupService.createChatgroup(request.getIslandId(), request.getName(), request.getHostId(),
@@ -137,6 +143,29 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .setChatgroup(this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMember))
                 .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Dismisses a chat group.
+     *
+     * @param request {@link DismissChatgroupRequest}.
+     * @param responseObserver {@link CommonStatus}.
+     */
+    @Override
+    public void dismissChatgroup(DismissChatgroupRequest request,
+                                 StreamObserver<CommonStatus> responseObserver) {
+        Chatgroup chatgroup = this.chatgroupService.retrieveById(request.getId(), false);
+
+        CommonStatus response;
+        if (!chatgroup.getHostId().equals(request.getUserId())) {
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN);
+        } else {
+            this.chatgroupService.dismiss(chatgroup);
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
+        }
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
