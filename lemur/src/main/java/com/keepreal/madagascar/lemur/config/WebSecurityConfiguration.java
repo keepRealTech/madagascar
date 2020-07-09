@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.config;
 
+import com.sun.tools.javac.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -52,16 +53,21 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
 
     /**
      * Configures the default cors behavior.
+     *
      * @return {@link CorsConfigurationSource}.
      */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Collections.singletonList("*"));
-        configuration.setAllowedMethods(Collections.singletonList("GET"));
+        configuration.setAllowedMethods(List.of("GET", "POST"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/v1/setupInfo/android**", configuration);
         source.registerCorsConfiguration("/api/v1/islands/{\\d+}/poster**", configuration);
+        source.registerCorsConfiguration("/api/v1/login**", configuration);
+        source.registerCorsConfiguration("/api/v1/balances/wechatSkus**", configuration);
+        source.registerCorsConfiguration("/api/v1/orders/wechat**", configuration);
+        source.registerCorsConfiguration("/api/v1/orders/wechat/{\\d+}/check**", configuration);
         return source;
     }
 
