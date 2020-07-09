@@ -83,6 +83,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
      * @return {@link UserMessage}.
      */
     private Mono<UserMessage> retrieveOrCreateUserByUnionId(WechatLoginInfo wechatLoginInfo) {
+        assert !StringUtils.isEmpty(wechatLoginInfo.getUnionId());
         return this.userService.retrieveUserByUnionIdMono(wechatLoginInfo.getUnionId())
                 .map(userMessage -> {
                     if (userMessage.getLocked()) {
