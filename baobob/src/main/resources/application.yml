@@ -7,6 +7,10 @@ wechat:
     host: https://api.weixin.qq.com
     app-id:
     app-secret:
+  mp:
+    host: https://api.weixin.qq.com
+    app-id:
+    app-secret:
 
 grpc:
   port: 12001

@@ -88,6 +88,17 @@ public class LoginController implements LoginApi {
                         .setLoginType(LoginType.LOGIN_OAUTH_WECHAT)
                         .build();
                 break;
+            case OAUTH_MP_WECHAT:
+                if (StringUtils.isEmpty(body.getData().getCode())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
+                loginRequest = LoginRequest.newBuilder()
+                        .setOauthWechatPayload(OAuthWechatLoginPayload.newBuilder()
+                                .setCode(body.getData().getCode()))
+                        .setLoginType(LoginType.LOGIN_OAUTH_MP_WECHAT)
+                        .build();
+                break;
             case PASSWORD:
                 if (StringUtils.isEmpty(body.getData().getUsername())
                         || StringUtils.isEmpty(body.getData().getPassword())) {
