@@ -63,10 +63,10 @@ public class ChatController implements ChatApi {
      * @param islandService  {@link IslandService}.
      * @param userService    {@link UserService}.
      * @param chatService    {@link ChatService}.
-     * @param membershipService
+     * @param membershipService {@link MembershipService}.
      * @param chatDTOFactory {@link ChatDTOFactory}.
      * @param userDTOFactory {@link UserDTOFactory}.
-     * @param membershipDTOFactory
+     * @param membershipDTOFactory {@link MembershipDTOFactory}.
      */
     public ChatController(IslandService islandService,
                           UserService userService,
@@ -288,6 +288,23 @@ public class ChatController implements ChatApi {
         response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the join chat group api.
+     *
+     * @param id id (required) Groupchat id.
+     * @return {@link DummyResponse}.
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1ChatgroupsIdJoinPost(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        this.chatService.joinChatgroup(id, userId);
+        
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

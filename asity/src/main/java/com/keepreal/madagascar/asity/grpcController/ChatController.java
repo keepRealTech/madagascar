@@ -103,7 +103,6 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         responseObserver.onCompleted();
     }
 
-
     /**
      * Retrieves the chat access for an island and user.
      *
@@ -243,6 +242,5 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
-
 
 }

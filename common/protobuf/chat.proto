@@ -86,6 +86,11 @@ message UpdateChatgroupRequest {
   google.protobuf.StringValue bulletin = 6;
 }
 
+message JoinChatgroupRequest {
+  string userId = 1;
+  string chatgroupId = 2;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc QuitChatsByIslandId(QuitChatsByIslandIdRequest) returns (CommonStatus) {};
@@ -94,4 +99,5 @@ service ChatService {
   rpc CreateChatgroup(CreateChatgroupRequest) returns (ChatgroupResponse) {};
   rpc UpdateChatgroup(UpdateChatgroupRequest) returns (ChatgroupResponse) {};
   rpc DismissChatgroup(DismissChatgroupRequest) returns (CommonStatus) {};
+  rpc JoinChatgroup(JoinChatgroupRequest) returns (CommonStatus) {};
 }

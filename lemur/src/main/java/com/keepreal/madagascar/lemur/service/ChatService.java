@@ -9,6 +9,7 @@ import com.keepreal.madagascar.asity.CreateChatgroupRequest;
 import com.keepreal.madagascar.asity.DismissChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
+import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
@@ -270,6 +271,32 @@ public class ChatService {
         }
 
         return response.getChatgroup();
+    }
+
+    /**
+     * Joins the chatgroup.
+     *
+     * @param groupId  Group id.
+     * @param userId   User id.
+     */
+    public void joinChatgroup(String groupId, String userId) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        JoinChatgroupRequest request = JoinChatgroupRequest.newBuilder()
+                .setChatgroupId(groupId)
+                .setUserId(userId)
+                .build();
+
+        CommonStatus commonStatus;
+        try {
+            commonStatus = stub.joinChatgroup(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != commonStatus.getRtn()) {
+            throw new KeepRealBusinessException(commonStatus);
+        }
     }
 
     /**
