@@ -26,6 +26,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import swagger.api.FeedApi;
 import swagger.model.*;
+import swagger.model.CheckFeedsMessage;
+import swagger.model.DummyResponse;
+import swagger.model.FeedResponse;
+import swagger.model.FeedsResponseV2;
+import swagger.model.PostCheckFeedsRequest;
+import swagger.model.PostCheckFeedsResponse;
+import swagger.model.PostFeedPayload;
+import swagger.model.TimelinesResponse;
+import swagger.model.ToppedFeedsDTO;
 
 import javax.validation.Valid;
 import java.util.AbstractMap;

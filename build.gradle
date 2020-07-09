@@ -15,7 +15,7 @@ allprojects {
     }
 }
 
-ext['baobob.version'] = '1.0.2'
+ext['baobob.version'] = '1.0.3'
 ext['indri.version'] = '1.0.1'
 ext['coua.version'] = '1.0.5'
 ext['fossa.version'] = '1.0.1'

@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.1.0"
+  version: "1.2.0"
   title: Keep Real API
 
 security:
@@ -1211,7 +1211,7 @@ paths:
     put:
       tags:
         - Chat
-      summary: updates the chat group metadata
+      summary: updates the chatg
       requestBody:
         required: true
         content:
@@ -1277,8 +1277,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IslandChatAccessDTO'
-
+                $ref: '#/components/schemas/IslandChatAccessResponse'
+  /api/v1/users/avatars:
+    post:
+      tags:
+        - User
+      summary: retrieves users avatar urls in batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostBatchGetAvatarsRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvatarsResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1425,6 +1442,7 @@ components:
       type: string
       enum:
         - LOGIN_OAUTH_WECHAT
+        - LOGIN_OAUTH_MP_WECHAT
         - LOGIN_PASSWORD
         - LOGIN_JWT_IOS
     ConfigType:
@@ -2873,6 +2891,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SimpleMembershipDTO'
+        memberCount:
+          type: integer
         bulletin:
           type: string
     PostChatGroupRequest:
@@ -2957,3 +2977,33 @@ components:
             $ref: '#/components/schemas/BriefUserDTO'
         hasAccess:
           type: boolean
+    IslandChatAccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IslandChatAccessDTO'
+    AvatarDTO:
+      type: object
+      properties:
+        userId:
+          type: string
+        portraitUrl:
+          type: string
+    PostBatchGetAvatarsRequest:
+      type: object
+      properties:
+        userIds:
+          type: array
+          items:
+            type: string
+    AvatarsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/AvatarDTO'
