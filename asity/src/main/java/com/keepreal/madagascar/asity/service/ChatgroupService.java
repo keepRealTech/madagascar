@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -64,7 +65,7 @@ public class ChatgroupService {
                 .chatgroupMemberships(membershipSet)
                 .bulletin(bulletin)
                 .build();
-        chatgroup = this.chatgroupRepository.save(chatgroup);
+        chatgroup = this.upsert(chatgroup);
 
         this.rongCloudService.createGroup(chatgroup.getId(), chatgroup.getName(), chatgroup.getHostId());
         return chatgroup;
@@ -74,19 +75,22 @@ public class ChatgroupService {
      * Joins the user to the group.
      *
      * @param userId  User id.
-     * @param groupId Group id.
+     * @param chatgroup Chat group.
      * @return {@link ChatgroupMember}.
      */
     @Transactional
-    public ChatgroupMember joinChatgroup(String userId, String groupId) {
+    public ChatgroupMember joinChatgroup(String userId, Chatgroup chatgroup) {
         ChatgroupMember chatgroupMember = ChatgroupMember.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .userId(userId)
-                .groupId(groupId)
+                .groupId(chatgroup.getId())
                 .build();
         this.chatgroupMemberRepository.save(chatgroupMember);
 
-        this.rongCloudService.joinGroup(groupId, userId);
+        this.rongCloudService.joinGroup(chatgroup.getId(), userId);
+
+        chatgroup.setMemberCount(chatgroup.getMemberCount() + 1);
+        chatgroup = this.upsert(chatgroup);
 
         return chatgroupMember;
     }
@@ -112,7 +116,64 @@ public class ChatgroupService {
     public void dismiss(Chatgroup chatgroup) {
         this.rongCloudService.dismissGroup(chatgroup.getId(), chatgroup.getHostId());
         chatgroup.setDeleted(true);
-        this.chatgroupRepository.save(chatgroup);
+        this.upsert(chatgroup);
+    }
+
+    /**
+     * Updates chat group.
+     * @param chatgroup {@link Chatgroup}.
+     * @return {@link Chatgroup}.
+     */
+    public Chatgroup upsert(Chatgroup chatgroup) {
+        return this.chatgroupRepository.save(chatgroup);
+    }
+
+    /**
+     * Updates chat group member muted.
+     *
+     * @param chatgroupMember {@link ChatgroupMember}.
+     * @param muted   Muted.
+     * @return {@link ChatgroupMember}.
+     */
+    public ChatgroupMember updateMutedByGroupIdAndUserId(ChatgroupMember chatgroupMember, boolean muted) {
+        if (Objects.isNull(chatgroupMember)) {
+            return null;
+        }
+
+        chatgroupMember.setMuted(muted);
+
+        return this.chatgroupMemberRepository.save(chatgroupMember);
+    }
+
+    /**
+     * Retrieves the chat group member.
+     *
+     * @param groupId Group id.
+     * @param userId  User id.
+     * @return {@link ChatgroupMember}.
+     */
+    public ChatgroupMember retrieveChatgroupMemberByGroupIdAndUserId(String groupId, String userId) {
+        return this.chatgroupMemberRepository.findByGroupIdAndUserIdAndDeletedIsFalse(groupId, userId);
+    }
+
+    /**
+     * Resets the chatgroup memberships.
+     *
+     * @param chatgroup {@link Chatgroup}.
+     * @param membershipIds Membership ids.
+     * @return {@link Chatgroup}.
+     */
+    public Chatgroup updateChatgroupMembershipInMem(Chatgroup chatgroup, List<String> membershipIds) {
+        Set<ChatgroupMembership> membershipSet = membershipIds.stream()
+                .map(id -> ChatgroupMembership.builder()
+                        .id(String.valueOf(this.idGenerator.nextId()))
+                        .groupId(chatgroup.getId())
+                        .membershipId(id)
+                        .build())
+                .collect(Collectors.toSet());
+
+        chatgroup.setChatgroupMemberships(membershipSet);
+        return chatgroup;
     }
 
 }

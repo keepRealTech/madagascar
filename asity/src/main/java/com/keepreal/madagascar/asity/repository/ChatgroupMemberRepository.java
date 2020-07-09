@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ChatgroupMemberRepository extends JpaRepository<ChatgroupMember, String> {
 
+    ChatgroupMember findByGroupIdAndUserIdAndDeletedIsFalse(String groupId, String userId);
+
 }

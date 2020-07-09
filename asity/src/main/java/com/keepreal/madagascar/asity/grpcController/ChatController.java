@@ -23,7 +23,6 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
-import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.transaction.Transactional;
 import java.util.Objects;
@@ -138,7 +137,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         Chatgroup chatgroup = this.chatgroupService.createChatgroup(request.getIslandId(), request.getName(), request.getHostId(),
                 request.getMembershipIdsList(), request.getBulletin());
 
-        ChatgroupMember chatgroupMember = this.chatgroupService.joinChatgroup(request.getHostId(), chatgroup.getId());
+        ChatgroupMember chatgroupMember = this.chatgroupService.joinChatgroup(request.getHostId(), chatgroup);
 
         ChatgroupResponse response = ChatgroupResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
@@ -158,7 +157,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     @Override
     public void dismissChatgroup(DismissChatgroupRequest request,
                                  StreamObserver<CommonStatus> responseObserver) {
-        Chatgroup chatgroup = this.chatgroupService.retrieveById(request.getId(), false);
+        Chatgroup chatgroup= this.chatgroupService.retrieveById(request.getId(), false);
 
         CommonStatus response;
         if (Objects.isNull(chatgroup)) {
@@ -190,9 +189,56 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
             response = ChatgroupResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_CHATGROUP_NOT_FOUND_ERROR))
                     .build();
-        } else {
 
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
         }
+
+        ChatgroupMember chatgroupMember = this.chatgroupService.retrieveChatgroupMemberByGroupIdAndUserId(chatgroup.getId(), request.getUserId());
+        if (Objects.isNull(chatgroupMember)) {
+            response = ChatgroupResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_CHATGROUP_NOT_MEMBER_ERROR))
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        if ((request.hasName() || request.hasBulletin() || Objects.nonNull(request.getMembershipIdsList()))
+                && !chatgroup.getHostId().equals(request.getUserId())) {
+            response = ChatgroupResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        if (request.hasMuted()) {
+            chatgroupMember = this.chatgroupService.updateMutedByGroupIdAndUserId(chatgroupMember, request.getMuted().getValue());
+        }
+
+        if (request.hasName()) {
+            chatgroup.setName(request.getName().getValue());
+        }
+
+        if (request.hasBulletin()) {
+            chatgroup.setBulletin(request.getBulletin().getValue());
+        }
+
+        if (Objects.nonNull(request.getMembershipIdsList())) {
+            chatgroup = this.chatgroupService.updateChatgroupMembershipInMem(chatgroup, request.getMembershipIdsList());
+        }
+
+        chatgroup = this.chatgroupService.upsert(chatgroup);
+
+        response = ChatgroupResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_CHATGROUP_NOT_FOUND_ERROR))
+                .setChatgroup(this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMember))
+                .build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
