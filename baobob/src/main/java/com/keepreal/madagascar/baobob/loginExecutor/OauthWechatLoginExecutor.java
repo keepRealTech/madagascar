@@ -3,7 +3,7 @@ package com.keepreal.madagascar.baobob.loginExecutor;
 import com.google.gson.Gson;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.LoginResponse;
-import com.keepreal.madagascar.baobob.config.OauthWechatLoginConfiguration;
+import com.keepreal.madagascar.baobob.config.wechat.OauthWechatLoginConfiguration;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatLoginInfo;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
 import com.keepreal.madagascar.baobob.service.ImageService;
@@ -83,6 +83,7 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
      * @return {@link UserMessage}.
      */
     private Mono<UserMessage> retrieveOrCreateUserByUnionId(WechatLoginInfo wechatLoginInfo) {
+        assert !StringUtils.isEmpty(wechatLoginInfo.getUnionId());
         return this.userService.retrieveUserByUnionIdMono(wechatLoginInfo.getUnionId())
                 .map(userMessage -> {
                     if (userMessage.getLocked()) {
