@@ -2639,9 +2639,9 @@ components:
           type: string
         account:
           type: string
-        frontUrl:
+        idFrontUrl:
           type: string
-        backUrl:
+        idBackUrl:
           type: string
         verified:
           type: boolean
@@ -2656,9 +2656,9 @@ components:
           type: string
         accountNumber:
           type: string
-        frontUrl:
+        idFrontUrl:
           type: string
-        backUrl:
+        idBackUrl:
           type: string
       required:
         - name
@@ -2903,6 +2903,8 @@ components:
           type: integer
         bulletin:
           type: string
+        isMuted:
+          type: boolean
     PostChatGroupRequest:
       type: object
       properties:
@@ -2925,6 +2927,8 @@ components:
           type: array
           items:
             type: string
+        isMuted:
+          type: boolean
     ChatGroupResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

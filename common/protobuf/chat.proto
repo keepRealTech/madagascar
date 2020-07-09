@@ -80,7 +80,7 @@ message DismissChatgroupRequest {
 message UpdateChatgroupRequest {
   string id = 1;
   google.protobuf.StringValue name = 2;
-  google.protobuf.StringValue userId = 3;
+  string userId = 3;
   google.protobuf.BoolValue muted = 4;
   repeated string membershipIds = 5;
   google.protobuf.StringValue bulletin = 6;

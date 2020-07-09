@@ -9,6 +9,7 @@ import com.keepreal.madagascar.asity.IslandChatAccessResponse;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
+import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
 import com.keepreal.madagascar.asity.model.Chatgroup;
 import com.keepreal.madagascar.asity.model.ChatgroupMember;
@@ -22,10 +23,10 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import javax.transaction.Transactional;
-
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
+import java.util.Objects;
 
 /**
  * Represents the chat grpc service.
@@ -107,8 +108,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Retrieves the chat access for an island and user.
      *
-     * @param request            {@link RetrieveChatAccessByIslandIdAndUserIdRequest}.
-     * @param responseObserver   {@link StreamObserver}.
+     * @param request          {@link RetrieveChatAccessByIslandIdAndUserIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
      */
     @Override
     public void retrieveChatAccessByIslandIdAndUserId(RetrieveChatAccessByIslandIdAndUserIdRequest request,
@@ -127,7 +128,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Creates a chat group.
      *
-     * @param request {@link CreateChatgroupRequest}.
+     * @param request          {@link CreateChatgroupRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
     @Transactional
@@ -151,7 +152,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Dismisses a chat group.
      *
-     * @param request {@link DismissChatgroupRequest}.
+     * @param request          {@link DismissChatgroupRequest}.
      * @param responseObserver {@link CommonStatus}.
      */
     @Override
@@ -160,7 +161,9 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         Chatgroup chatgroup = this.chatgroupService.retrieveById(request.getId(), false);
 
         CommonStatus response;
-        if (!chatgroup.getHostId().equals(request.getUserId())) {
+        if (Objects.isNull(chatgroup)) {
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_CHATGROUP_NOT_FOUND_ERROR);
+        } else if (!chatgroup.getHostId().equals(request.getUserId())) {
             response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN);
         } else {
             this.chatgroupService.dismiss(chatgroup);
@@ -170,5 +173,30 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    /**
+     * Updates chat group.
+     *
+     * @param request          {@link UpdateChatgroupRequest}.
+     * @param responseObserver {@link ChatgroupResponse}.
+     */
+    @Override
+    public void updateChatgroup(UpdateChatgroupRequest request,
+                                StreamObserver<ChatgroupResponse> responseObserver) {
+        Chatgroup chatgroup = this.chatgroupService.retrieveById(request.getId(), false);
+
+        ChatgroupResponse response;
+        if (Objects.isNull(chatgroup)) {
+            response = ChatgroupResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_CHATGROUP_NOT_FOUND_ERROR))
+                    .build();
+        } else {
+
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
 
 }

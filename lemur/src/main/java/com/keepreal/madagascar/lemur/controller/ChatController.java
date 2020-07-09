@@ -16,10 +16,15 @@ import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
+import io.swagger.annotations.ApiParam;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import swagger.api.ApiUtil;
 import swagger.api.ChatApi;
 import swagger.model.ChatAccessResponse;
 import swagger.model.ChatGroupResponse;
@@ -27,8 +32,10 @@ import swagger.model.ChatTokenResponse;
 import swagger.model.DummyResponse;
 import swagger.model.IslandChatAccessResponse;
 import swagger.model.PostChatGroupRequest;
+import swagger.model.PutChatGroupRequest;
 import swagger.model.SimpleMembershipDTO;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Objects;
@@ -192,6 +199,7 @@ public class ChatController implements ChatApi {
      * @param postChatGroupRequest (required) {@link PostChatGroupRequest}.
      * @return {@link ChatGroupResponse}.
      */
+    @Override
     public ResponseEntity<ChatGroupResponse> apiV1IslandsIdChatgroupsPost(String id, PostChatGroupRequest postChatGroupRequest) {
         IslandMessage island = this.islandService.retrieveIslandById(id);
 
@@ -206,7 +214,8 @@ public class ChatController implements ChatApi {
         }
 
         List<MembershipMessage> membershipMessageList = new ArrayList<>();
-        if (!postChatGroupRequest.getMembershipIds().isEmpty()) {
+        if (Objects.nonNull(postChatGroupRequest.getMembershipIds())
+                && !postChatGroupRequest.getMembershipIds().isEmpty()) {
             membershipMessageList = this.membershipService.RetrieveMembershipsByIslandId(id).stream()
                     .filter(membership -> postChatGroupRequest.getMembershipIds().contains(membership.getId()))
                     .collect(Collectors.toList());
@@ -235,6 +244,7 @@ public class ChatController implements ChatApi {
      * @param id id (required) Chat group id.
      * @return {@link DummyResponse}.
      */
+    @Override
     public ResponseEntity<DummyResponse> apiV1ChatgroupsIdDelete(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
@@ -242,6 +252,42 @@ public class ChatController implements ChatApi {
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the chat group update api.
+     *
+     * @param id id (required) Chat group id.
+     * @param putChatGroupRequest  (required) {@link PutChatGroupRequest}.
+     * @return {@link ChatGroupResponse}.
+     */
+    @Override
+    public ResponseEntity<ChatGroupResponse> apiV1ChatgroupsIdPut(String id, PutChatGroupRequest putChatGroupRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        List<MembershipMessage> membershipMessageList = new ArrayList<>();
+        if (Objects.nonNull(putChatGroupRequest.getMembershipIds())
+                && !putChatGroupRequest.getMembershipIds().isEmpty()) {
+            membershipMessageList = this.membershipService.RetrieveMembershipsByIslandId(id).stream()
+                    .filter(membership -> putChatGroupRequest.getMembershipIds().contains(membership.getId()))
+                    .collect(Collectors.toList());
+            if (membershipMessageList.size() != putChatGroupRequest.getMembershipIds().size()) {
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUNT_ERROR);
+            }
+        }
+
+        ChatgroupMessage chatgroupMessage = this.chatService.updateChatgroup(id, userId, putChatGroupRequest.getName(),
+                putChatGroupRequest.getMembershipIds(), putChatGroupRequest.getBulletin(), putChatGroupRequest.getIsMuted());
+
+        List<SimpleMembershipDTO> membershipDTOList = membershipMessageList.stream()
+                .map(this.membershipDTOFactory::simpleValueOf)
+                .collect(Collectors.toList());
+
+        ChatGroupResponse response = new ChatGroupResponse();
+        response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
