@@ -2638,6 +2638,10 @@ components:
           type: string
         account:
           type: string
+        frontUrl:
+          type: string
+        backUrl:
+          type: string
         verified:
           type: boolean
     PutBillingInfoRequest:
@@ -2650,6 +2654,10 @@ components:
         identityNumber:
           type: string
         accountNumber:
+          type: string
+        frontUrl:
+          type: string
+        backUrl:
           type: string
       required:
         - name
