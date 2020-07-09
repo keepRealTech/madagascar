@@ -53,6 +53,16 @@ spec:
                 secretKeyRef:
                   name: wechat-app
                   key: app-secret
+            - name: WECHAT_MP_APPID
+              valueFrom:
+                secretKeyRef:
+                  name: wechat-mp
+                  key: app-id
+            - name: WECHAT_MP_APPSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: wechat-mp
+                  key: app-secret
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}

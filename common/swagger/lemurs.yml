@@ -1442,6 +1442,7 @@ components:
       type: string
       enum:
         - LOGIN_OAUTH_WECHAT
+        - LOGIN_OAUTH_MP_WECHAT
         - LOGIN_PASSWORD
         - LOGIN_JWT_IOS
     ConfigType:
