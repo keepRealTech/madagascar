@@ -3,6 +3,7 @@ package com.keepreal.madagascar.fossa.service;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.ReactionType;
+import com.keepreal.madagascar.fossa.Feed;
 import com.keepreal.madagascar.fossa.TimelineFeedMessage;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
@@ -150,7 +151,8 @@ public class FeedInfoService {
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
                 .setIsDeleted(feedInfo.getDeleted())
-                .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost());
+                .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost())
+                .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
@@ -225,4 +227,50 @@ public class FeedInfoService {
         return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
     }
 
+    /**
+     * top feed by feed id
+     *
+     * @param feedId feed id
+     */
+    public void topFeedById(String feedId) {
+        mongoTemplate.updateFirst(
+                Query.query(Criteria.where("id").is(feedId)),
+                Update.update("isTop", true),
+                FeedInfo.class);
+    }
+
+    /**
+     * cancel topped feed by feed id
+     *
+     * @param feedId feed id
+     */
+    public void cancelTopFeedById(String feedId) {
+        mongoTemplate.updateFirst(
+                Query.query(Criteria.where("id").is(feedId)),
+                Update.update("isTop", false),
+                FeedInfo.class);
+    }
+
+    /**
+     * find this island topped feed and cancel it
+     *
+     * @param islandId island id
+     */
+    public void cancelToppedFeedByIslandId(String islandId) {
+        FeedInfo feedInfo = this.feedInfoRepository.findFeedInfoByIslandIdAndIsTopIsTrue(islandId);
+        if (Objects.nonNull(feedInfo)){
+            cancelTopFeedById(feedInfo.getId());
+        }
+    }
+
+    /**
+     * find topped feed (only one in this version (v1.2))
+     *
+     * @return feed information
+     */
+    public FeedInfo findToppedFeedByIslandId(String islandId) {
+        return mongoTemplate.findOne(
+                Query.query(Criteria.where("isTop").is(true).and("islandId").is(islandId)),
+                FeedInfo.class);
+    }
 }

@@ -170,6 +170,7 @@ message FeedMessage {
     string membershipId = 14;
     bool isMembership = 15;
     bool fromHost = 16;
+    bool isTop = 17;
 }
 
 message CommentMessage {
