@@ -2,18 +2,20 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.asity.ChatAccessMessage;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
-import com.keepreal.madagascar.coua.Membership;
+import com.keepreal.madagascar.coua.MembershipMessage;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefUserDTO;
 import swagger.model.ChatAccessDTO;
 import swagger.model.ChatGroupDTO;
 import swagger.model.ChatTokenDTO;
 import swagger.model.IslandChatAccessDTO;
-import swagger.model.MembershipDTO;
 import swagger.model.SimpleMembershipDTO;
+import swagger.model.UserChatGroupDTO;
 
+import java.util.Set;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the chat dto factory.
@@ -86,6 +88,28 @@ public class ChatDTOFactory {
         chatGroupDTO.setMemberships(membershipDTOS);
 
         return chatGroupDTO;
+    }
+
+    public UserChatGroupDTO valueOf(ChatgroupMessage chatgroup, List<SimpleMembershipDTO> membershipDTOS, List<String> userMemberIds) {
+        if (Objects.isNull(chatgroup)) {
+            return null;
+        }
+
+        UserChatGroupDTO userChatGroupDTO = new UserChatGroupDTO();
+        userChatGroupDTO.setId(chatgroup.getId());
+        userChatGroupDTO.setIslandId(chatgroup.getIslandId());
+        userChatGroupDTO.setName(chatgroup.getName());
+        userChatGroupDTO.setBulletin(chatgroup.getBulletin());
+        userChatGroupDTO.setMemberCount(chatgroup.getMemberCount());
+        userChatGroupDTO.setMemberships(membershipDTOS);
+
+        Set<String> groupMembershipIds = membershipDTOS.stream()
+                .map(SimpleMembershipDTO::getId)
+                .collect(Collectors.toSet());
+
+        userChatGroupDTO.hasAccess(userMemberIds.stream().anyMatch(groupMembershipIds::contains));
+
+        return userChatGroupDTO;
     }
 
 }

@@ -93,8 +93,14 @@ message RetrieveChatgroupsByIslandIdRequest {
 }
 
 message IslandChatgroupsResponse {
-  PageResponse pageResponse = 1;
-  repeated ChatgroupMessage chatgroups = 2;
+  CommonStatus status = 1;
+  PageResponse pageResponse = 2;
+  repeated ChatgroupMessage chatgroups = 3;
+}
+
+message RetrieveChatgroupByIdRequest {
+  string id = 1;
+  string userId = 2;
 }
 
 service ChatService {
@@ -105,4 +111,6 @@ service ChatService {
   rpc UpdateChatgroup(UpdateChatgroupRequest) returns (ChatgroupResponse) {};
   rpc DismissChatgroup(DismissChatgroupRequest) returns (CommonStatus) {};
   rpc JoinChatgroup(JoinChatgroupRequest) returns (CommonStatus) {};
+  rpc RetrieveChatgroupsByIslandId(RetrieveChatgroupsByIslandIdRequest) returns (IslandChatgroupsResponse) {};
+  rpc RetrieveChatgroupById(RetrieveChatgroupByIdRequest) returns (ChatgroupResponse) {};
 }

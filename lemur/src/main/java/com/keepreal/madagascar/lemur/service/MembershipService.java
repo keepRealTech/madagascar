@@ -178,7 +178,7 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
-    public List<MembershipMessage> RetrieveMembershipsByIslandId(String islandId) {
+    public List<MembershipMessage> retrieveMembershipsByIslandId(String islandId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveMembershipsRequest request = RetrieveMembershipsRequest.newBuilder().setIslandId(islandId).build();
@@ -197,7 +197,7 @@ public class MembershipService {
         return membershipsResponse.getMessageList();
     }
 
-    public List<FeedMembershipMessage> RetrieveFeedMembershipsByIslandId(String islandId) {
+    public List<FeedMembershipMessage> retrieveFeedMembershipsByIslandId(String islandId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveMembershipsRequest request = RetrieveMembershipsRequest.newBuilder().setIslandId(islandId).build();

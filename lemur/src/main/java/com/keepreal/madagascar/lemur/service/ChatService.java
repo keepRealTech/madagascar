@@ -9,15 +9,19 @@ import com.keepreal.madagascar.asity.CreateChatgroupRequest;
 import com.keepreal.madagascar.asity.DismissChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
+import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
 import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -276,8 +280,8 @@ public class ChatService {
     /**
      * Joins the chatgroup.
      *
-     * @param groupId  Group id.
-     * @param userId   User id.
+     * @param groupId Group id.
+     * @param userId  User id.
      */
     public void joinChatgroup(String groupId, String userId) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
@@ -297,6 +301,79 @@ public class ChatService {
         if (ErrorCode.REQUEST_SUCC_VALUE != commonStatus.getRtn()) {
             throw new KeepRealBusinessException(commonStatus);
         }
+    }
+
+    /**
+     * Retrieves chatgroup by id.
+     *
+     * @param id Chatgroup id.
+     * @param userId User id.
+     * @return {@link ChatgroupMessage}.
+     */
+    public ChatgroupMessage retrieveChatgroupById(String id, String userId) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveChatgroupByIdRequest request = RetrieveChatgroupByIdRequest.newBuilder()
+                .setId(id)
+                .setUserId(userId)
+                .build();
+
+        ChatgroupResponse response;
+        try {
+            response = stub.retrieveChatgroupById(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve chat group by id returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getChatgroup();
+    }
+
+    /**
+     * Retrieves chatgroups by island id.
+     *
+     * @param islandId Island id.
+     * @param userId   User id.
+     * @param page     Page index.
+     * @param pageSize Page size.
+     * @return {@link IslandChatgroupsResponse}.
+     */
+    public IslandChatgroupsResponse retrieveChatgroupsByIslandId(String islandId, String userId, Integer page, Integer pageSize) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveChatgroupsByIslandIdRequest request = RetrieveChatgroupsByIslandIdRequest.newBuilder()
+                .setIslandId(islandId)
+                .setUserId(userId)
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                .build();
+
+        IslandChatgroupsResponse response;
+        try {
+            response = stub.retrieveChatgroupsByIslandId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve chat groups returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
     }
 
     /**

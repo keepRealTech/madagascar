@@ -35,9 +35,9 @@ public class ChatgroupMessageFactory {
                 .setBulletin(chatgroup.getBulletin())
                 .setMemberCount(chatgroup.getMemberCount())
                 .addAllMembershipIds(chatgroup.getChatgroupMemberships().stream()
-                        .map(ChatgroupMembership::getId)
+                        .map(ChatgroupMembership::getMembershipId)
                         .collect(Collectors.toList()))
-                .setMuted(chatgroupMember.getMuted())
+                .setMuted(Objects.isNull(chatgroupMember) ? false : chatgroupMember.getMuted())
                 .build();
     }
 

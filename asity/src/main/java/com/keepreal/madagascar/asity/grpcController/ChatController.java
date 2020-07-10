@@ -10,6 +10,7 @@ import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
 import com.keepreal.madagascar.asity.factory.IslandChatAccessMessageFactory;
@@ -47,11 +48,11 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Constructs the chat controller.
      *
-     * @param chatgroupService                  {@link ChatgroupService}.
-     * @param rongCloudService                  {@link RongCloudService}.
-     * @param islandChatAccessService           {@link IslandChatAccessService}.
-     * @param chatgroupMessageFactory           {@link IslandChatAccessService}.
-     * @param islandChatAccessMessageFactory    {@link IslandChatAccessMessageFactory}.
+     * @param chatgroupService               {@link ChatgroupService}.
+     * @param rongCloudService               {@link RongCloudService}.
+     * @param islandChatAccessService        {@link IslandChatAccessService}.
+     * @param chatgroupMessageFactory        {@link IslandChatAccessService}.
+     * @param islandChatAccessMessageFactory {@link IslandChatAccessMessageFactory}.
      */
     public ChatController(ChatgroupService chatgroupService,
                           RongCloudService rongCloudService,
@@ -268,7 +269,6 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         CommonStatus response;
         if (chatgroup.getMemberCount() >= ChatController.GROUP_MAX_MEMBER_LIMIT) {
             response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_CHATGROUP_MAX_MEMBER_REACHED_ERROR);
-
             responseObserver.onNext(response);
             responseObserver.onCompleted();
             return;
@@ -283,6 +283,38 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
             this.chatgroupService.joinChatgroup(request.getUserId(), chatgroup);
             response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the get chatgroup by id.
+     *
+     * @param request          {@link RetrieveChatgroupByIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void retrieveChatgroupById(RetrieveChatgroupByIdRequest request,
+                                      StreamObserver<ChatgroupResponse> responseObserver) {
+        Chatgroup chatgroup = this.chatgroupService.retrieveById(request.getId(), false);
+
+        ChatgroupResponse response;
+        if (Objects.isNull(chatgroup)) {
+            response = ChatgroupResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_CHATGROUP_NOT_FOUND_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        ChatgroupMember chatgroupMember = this.chatgroupService.retrieveChatgroupMemberByGroupIdAndUserId(chatgroup.getId(), request.getUserId());
+
+        response = ChatgroupResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setChatgroup(this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMember))
+                .build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
