@@ -2460,6 +2460,8 @@ components:
           type: string
         refreshToken:
           type: string
+        openId:
+          type: string
     LoginTokenInfo:
       allOf:
         - $ref: '#/components/schemas/BriefTokenInfo'

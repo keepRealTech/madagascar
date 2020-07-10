@@ -209,6 +209,7 @@ public class LoginController implements LoginApi {
         loginTokenInfo.setToken(loginResponse.getToken());
         loginTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
         loginTokenInfo.setUser(this.userDTOFactory.valueOf(userMessage));
+        loginTokenInfo.setOpenId(loginResponse.getOpenId());
         return loginTokenInfo;
     }
 

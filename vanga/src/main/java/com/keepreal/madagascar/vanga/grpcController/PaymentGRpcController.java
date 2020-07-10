@@ -126,7 +126,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId(),
-                "");
+                "",
+                "APP");
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -276,7 +277,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 "",
-                sku.getId());
+                sku.getId(),
+                "JSAPI");
 
         if (Objects.nonNull(wechatOrder)) {
             response = WechatOrderResponse.newBuilder()

@@ -34,6 +34,7 @@ message LoginResponse {
     string token = 2;
     string refreshToken = 3;
     string userId = 4;
+    string openId = 5;
 }
 
 message TokenRefreshPayload {

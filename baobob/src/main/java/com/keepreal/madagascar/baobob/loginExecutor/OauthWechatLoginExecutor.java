@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.util.HashMap;
 
@@ -67,8 +68,8 @@ public class OauthWechatLoginExecutor implements LoginExecutor {
         }
 
         return this.loginWechat(loginRequest.getOauthWechatPayload().getCode())
-                .flatMap(this::retrieveOrCreateUserByUnionId)
-                .map(this.tokenGranter::grant)
+                .zipWhen(this::retrieveOrCreateUserByUnionId)
+                .map(tuple -> this.tokenGranter.grant(tuple.getT2(), tuple.getT1().getOpenId()))
                 .doOnError(error -> log.error(error.toString()))
                 .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
                                 && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_GRPC_LOGIN_FROZEN,

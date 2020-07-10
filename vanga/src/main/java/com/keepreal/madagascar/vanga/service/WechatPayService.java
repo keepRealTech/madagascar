@@ -41,9 +41,10 @@ public class WechatPayService {
      * @param feeInCents      Cost in cents.
      * @param membershipSkuId Membership sku id.
      * @param shellSkuId      Shell sku id.
+     * @param tradeType       Trade type.
      * @return {@link WechatOrder}.
      */
-    public WechatOrder tryPlaceOrder(String userId, String feeInCents, String membershipSkuId, String shellSkuId) {
+    public WechatOrder tryPlaceOrder(String userId, String feeInCents, String membershipSkuId, String shellSkuId, String tradeType) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
 
         String skuId = StringUtils.isEmpty(membershipSkuId) ? shellSkuId : membershipSkuId;
@@ -63,13 +64,17 @@ public class WechatPayService {
         Map<String, String> response;
         try {
             Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("trade_type", "APP");
+            requestBody.put("trade_type", tradeType);
             requestBody.put("out_trade_no", tradeNum);
             requestBody.put("total_fee", feeInCents);
             requestBody.put("body", description);
             requestBody.put("spbill_create_ip", this.wechatPayConfiguration.getHostIp());
 
+            log.info(requestBody.toString());
+
             response = this.client.unifiedOrder(requestBody);
+
+            log.info(response.toString());
 
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
@@ -82,7 +87,6 @@ public class WechatPayService {
                 this.wechatOrderService.insert(wechatOrder);
                 return null;
             }
-
 
             Map<String, String> request = new HashMap<>();
             request.put("noncestr", response.get("nonce_str"));
