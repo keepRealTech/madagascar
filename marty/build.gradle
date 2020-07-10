@@ -18,7 +18,9 @@ dependencies {
 
     implementation 'com.aliyun.openservices:ons-client'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.redisson:redisson-spring-boot-starter'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
+    implementation 'cn.jpush.api:jpush-client:3.4.3'
     implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'
     implementation 'io.opentracing.contrib:opentracing-grpc'
     implementation 'org.projectlombok:lombok'

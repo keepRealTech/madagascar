@@ -81,7 +81,7 @@ enum DeviceType {
     IOS = 2;
 }
 
-enum PushType {
+enum PushPriority {
     NEW_FEED = 0;
     NEW_SUBSCRIBE = 1;
     NEW_MEMBERSHIP = 2;

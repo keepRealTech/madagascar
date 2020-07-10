@@ -6,6 +6,9 @@ import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.MessageListener;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.keepreal.madagascar.mantella.FeedEventMessage;
+import com.keepreal.madagascar.marty.model.PushType;
+import com.keepreal.madagascar.marty.service.PushService;
+import com.keepreal.madagascar.marty.service.RedissonService;
 import com.keepreal.madagascar.marty.service.UmengPushService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,10 +24,13 @@ import static com.keepreal.madagascar.mantella.FeedEventType.FEED_EVENT_CREATE;
 @Slf4j
 public class FeedEventListener implements MessageListener {
 
-    private final UmengPushService umengPushService;
+    private final PushService pushService;
+    private final RedissonService redissonService;
 
-    public FeedEventListener(UmengPushService umengPushService) {
-        this.umengPushService = umengPushService;
+    public FeedEventListener(PushService pushService,
+                             RedissonService redissonService) {
+        this.pushService = pushService;
+        this.redissonService = redissonService;
     }
 
     /**
@@ -43,7 +49,7 @@ public class FeedEventListener implements MessageListener {
             FeedEventMessage feedEventMessage = FeedEventMessage.parseFrom(message.getBody());
             if (feedEventMessage.getType().equals(FEED_EVENT_CREATE)) {
                 String islandId = feedEventMessage.getFeedCreateEvent().getIslandId();
-                umengPushService.pushFeed(islandId);
+                pushService.pushNewFeed(islandId, PushType.PUSH_FEED);
             }
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {

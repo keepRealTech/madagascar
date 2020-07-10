@@ -24,7 +24,6 @@ import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.IslandService;
-import com.keepreal.madagascar.fossa.service.RedissonService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
@@ -59,7 +58,6 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     private final FeedInfoService feedInfoService;
     private final MongoTemplate mongoTemplate;
     private final FeedEventProducerService feedEventProducerService;
-    private final RedissonService redissonService;
 
     /**
      * Constructs the feed grpc controller
@@ -69,20 +67,17 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      * @param feedInfoService          {@link FeedInfoService}
      * @param mongoTemplate            {@link MongoTemplate}
      * @param feedEventProducerService {@link FeedEventProducerService}.
-     * @param redissonService          {@link RedissonService}.
      */
     public FeedGRpcController(LongIdGenerator idGenerator,
                               IslandService islandService,
                               FeedInfoService feedInfoService,
                               MongoTemplate mongoTemplate,
-                              FeedEventProducerService feedEventProducerService,
-                              RedissonService redissonService) {
+                              FeedEventProducerService feedEventProducerService) {
         this.idGenerator = idGenerator;
         this.islandService = islandService;
         this.feedInfoService = feedInfoService;
         this.mongoTemplate = mongoTemplate;
         this.feedEventProducerService = feedEventProducerService;
-        this.redissonService = redissonService;
     }
 
     /**

@@ -3,8 +3,6 @@ package com.keepreal.madagascar.fossa.grpcController;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
-import com.keepreal.madagascar.common.PushType;
-import com.keepreal.madagascar.common.PushTypePriority;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
@@ -20,7 +18,6 @@ import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.ReactionInfo;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.NotificationEventProducerService;
-import com.keepreal.madagascar.fossa.service.RedissonService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
@@ -47,7 +44,6 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
     private final NotificationEventProducerConfiguration notificationEventProducerConfiguration;
     private final NotificationEventProducerService notificationEventProducerService;
     private final ProducerBean producerBean;
-    private final RedissonService redissonService;
 
     /**
      * Construct the reaction grpc controller
@@ -58,22 +54,19 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
      * @param notificationEventProducerConfiguration {@link NotificationEventProducerConfiguration}.
      * @param notificationEventProducerService       {@link NotificationEventProducerService}.
      * @param producerBean                           {@link ProducerBean}.
-     * @param redissonService                        {@link RedissonService}.
      */
     public ReactionGRpcController(ReactionRepository reactionRepository,
                                   LongIdGenerator idGenerator,
                                   FeedInfoService feedInfoService,
                                   NotificationEventProducerConfiguration notificationEventProducerConfiguration,
                                   NotificationEventProducerService notificationEventProducerService,
-                                  ProducerBean producerBean,
-                                  RedissonService redissonService) {
+                                  ProducerBean producerBean) {
         this.reactionRepository = reactionRepository;
         this.idGenerator = idGenerator;
         this.feedInfoService = feedInfoService;
         this.notificationEventProducerConfiguration = notificationEventProducerConfiguration;
         this.notificationEventProducerService = notificationEventProducerService;
         this.producerBean = producerBean;
-        this.redissonService = redissonService;
     }
 
     /**
@@ -115,7 +108,6 @@ public class ReactionGRpcController extends ReactionServiceGrpc.ReactionServiceI
         FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
 
         this.notificationEventProducerService.produceNewReactionsNotificationEventAsync(reactionMessage, feedMessage);
-        this.redissonService.putPushInfo(feedMessage.getUserId(), PushType.NEW_LIKE, userId);
 
         basicReactionResponse(responseObserver, reactionMessage);
     }

@@ -32,3 +32,10 @@ spring:
     name: marty
   main:
     web-application-type: NONE
+  redis:
+    redisson:
+      config: classpath:redisson.yml
+
+jpush:
+  key: xxx
+  secret: xxx

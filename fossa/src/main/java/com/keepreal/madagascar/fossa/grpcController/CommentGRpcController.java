@@ -4,7 +4,6 @@ import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
-import com.keepreal.madagascar.common.PushType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.CommentResponse;
 import com.keepreal.madagascar.fossa.CommentServiceGrpc;
@@ -20,7 +19,6 @@ import com.keepreal.madagascar.fossa.model.CommentInfo;
 import com.keepreal.madagascar.fossa.service.CommentService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.NotificationEventProducerService;
-import com.keepreal.madagascar.fossa.service.RedissonService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
@@ -42,7 +40,6 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
     private final FeedInfoService feedInfoService;
     private final CommentService commentService;
     private final NotificationEventProducerService notificationEventProducerService;
-    private final RedissonService redissonService;
 
     /**
      * Constructs comment grpc controller
@@ -50,16 +47,13 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
      * @param feedInfoService                  {@link FeedInfoService}.
      * @param commentService                   {@link CommentService}.
      * @param notificationEventProducerService {@link NotificationEventProducerConfiguration}.
-     * @param redissonService                  {@link RedissonService}.
      */
     public CommentGRpcController(FeedInfoService feedInfoService,
                                  CommentService commentService,
-                                 NotificationEventProducerService notificationEventProducerService,
-                                 RedissonService redissonService) {
+                                 NotificationEventProducerService notificationEventProducerService) {
         this.feedInfoService = feedInfoService;
         this.commentService = commentService;
         this.notificationEventProducerService = notificationEventProducerService;
-        this.redissonService = redissonService;
     }
 
     /**
@@ -93,8 +87,6 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
 
         this.notificationEventProducerService.produceNewCommentsNotificationEventAsync(
                 commentMessage, feedMessage, replyToId);
-
-        this.redissonService.putPushInfo(feedMessage.getUserId(), PushType.NEW_COMMENT, content);
 
         responseObserver.onNext(commentResponse);
         responseObserver.onCompleted();
