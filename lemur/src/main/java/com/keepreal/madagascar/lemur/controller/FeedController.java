@@ -332,9 +332,9 @@ public class FeedController implements FeedApi {
         String hostId = islandMessage.getHostId();
         FeedMessage feedMessage = this.feedService.retrieveFeedById(topFeedRequest.getFeedId(), userId);
 
-        /*if (!userId.equals(hostId) || !islandMessage.getId().equals(feedMessage.getIslandId())){
+        if (!userId.equals(hostId) || !islandMessage.getId().equals(feedMessage.getIslandId())){
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }*/
+        }
 
         this.feedService.topFeedByRequest(topFeedRequest, id);
 

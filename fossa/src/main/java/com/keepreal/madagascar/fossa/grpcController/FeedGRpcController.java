@@ -177,7 +177,6 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         query.addCriteria(Criteria.where("isTop").is(false));
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
-
         List<FeedMessage> feedMessageList = feedInfoList.stream()
                 .map(info -> feedInfoService.getFeedMessage(info, userId))
                 .filter(Objects::nonNull)
