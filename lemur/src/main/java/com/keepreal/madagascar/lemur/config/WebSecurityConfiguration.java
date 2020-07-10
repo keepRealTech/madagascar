@@ -63,10 +63,6 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/v1/setupInfo/android**", configuration);
         source.registerCorsConfiguration("/api/v1/islands/{\\d+}/poster**", configuration);
-        source.registerCorsConfiguration("/api/v1/login**", configuration);
-        source.registerCorsConfiguration("/api/v1/balances/wechatSkus**", configuration);
-        source.registerCorsConfiguration("/api/v1/orders/wechat**", configuration);
-        source.registerCorsConfiguration("/api/v1/orders/wechat/{\\d+}/check**", configuration);
         return source;
     }
 

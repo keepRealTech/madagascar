@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.LoginApi;
 import swagger.model.BriefTokenInfo;
@@ -74,6 +75,7 @@ public class LoginController implements LoginApi {
             label = "user id",
             value = "body.data.user.id"
     )
+    @CrossOrigin
     public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest body) {
         LoginRequest loginRequest;
         switch (body.getLoginType()) {
