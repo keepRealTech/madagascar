@@ -160,7 +160,11 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                         StreamObserver<WechatOrderResponse> responseObserver) {
         WechatOrder wechatOrder = this.wechatOrderService.retrieveById(request.getId());
 
-        wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+        if (StringUtils.isEmpty(wechatOrder.getShellSkuId())) {
+            wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+        } else {
+            wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
+        }
 
         WechatOrderResponse response = WechatOrderResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))

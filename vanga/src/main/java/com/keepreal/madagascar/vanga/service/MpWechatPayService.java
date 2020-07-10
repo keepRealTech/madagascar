@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -116,6 +117,40 @@ public class MpWechatPayService {
             this.wechatOrderService.insert(wechatOrder);
             return null;
         }
+    }
+
+    /**
+     * Queries the state of an order and update the database.
+     *
+     * @param wechatOrder {@link WechatOrder}.
+     * @return {@link WechatOrder}.
+     */
+    public WechatOrder tryUpdateOrder(WechatOrder wechatOrder) {
+        if (Objects.isNull(wechatOrder)
+                || (WechatOrderState.NOTPAY.getValue() != wechatOrder.getState()
+                && WechatOrderState.USERPAYING.getValue() != wechatOrder.getState())) {
+            return wechatOrder;
+        }
+
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("out_trade_no", wechatOrder.getTradeNumber());
+
+        try {
+            Map<String, String> response = this.client.orderQuery(requestBody);
+
+            if (response.get("return_code").equals(WXPayConstants.FAIL)) {
+                wechatOrder.setErrorMessage(response.get("return_msg"));
+            } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
+                wechatOrder.setErrorMessage(response.get("err_code_des"));
+            } else {
+                wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
+                wechatOrder.setTransactionId(response.get("transaction_id"));
+            }
+            return this.wechatOrderService.update(wechatOrder);
+        } catch (Exception ignored) {
+        }
+
+        return null;
     }
 
 }
