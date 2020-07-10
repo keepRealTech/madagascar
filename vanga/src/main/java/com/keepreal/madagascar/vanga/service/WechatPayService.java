@@ -44,7 +44,12 @@ public class WechatPayService {
      * @param tradeType       Trade type.
      * @return {@link WechatOrder}.
      */
-    public WechatOrder tryPlaceOrder(String userId, String feeInCents, String membershipSkuId, String shellSkuId, String tradeType) {
+    public WechatOrder tryPlaceOrder(String userId,
+                                     String feeInCents,
+                                     String membershipSkuId,
+                                     String shellSkuId,
+                                     String tradeType,
+                                     String openId) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
 
         String skuId = StringUtils.isEmpty(membershipSkuId) ? shellSkuId : membershipSkuId;
@@ -69,6 +74,10 @@ public class WechatPayService {
             requestBody.put("total_fee", feeInCents);
             requestBody.put("body", description);
             requestBody.put("spbill_create_ip", this.wechatPayConfiguration.getHostIp());
+
+            if (!StringUtils.isEmpty(openId)) {
+                requestBody.put("openid", openId);
+            }
 
             log.info(requestBody.toString());
 

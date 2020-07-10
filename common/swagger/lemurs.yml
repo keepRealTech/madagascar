@@ -2566,6 +2566,8 @@ components:
       properties:
         shellSkuId:
           type: string
+        openId:
+          type: string
     WechatOrderDTO:
       type: object
       properties:

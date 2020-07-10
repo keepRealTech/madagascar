@@ -126,14 +126,16 @@ public class OrderService {
      * Buys shell with wechat.
      *
      * @param userId     User id.
+     * @param openId     Open id.
      * @param shellSkuId Shell sku id.
      * @return {@link WechatOrderMessage}.
      */
-    public WechatOrderMessage wechatBuyShell(String userId, String shellSkuId) {
+    public WechatOrderMessage wechatBuyShell(String userId, String openId, String shellSkuId) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         WechatOrderBuyShellRequest request = WechatOrderBuyShellRequest.newBuilder()
                 .setUserId(userId)
+                .setOpenId(openId)
                 .setShellSkuId(shellSkuId)
                 .build();
 

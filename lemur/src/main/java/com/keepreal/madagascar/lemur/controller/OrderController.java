@@ -71,7 +71,8 @@ public class OrderController implements OrderApi {
     @Override
     public ResponseEntity<WechatOrderResponse> apiV1OrdersWechatPost(PostWechatOrderRequest postWechatOrderRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        WechatOrderMessage wechatOrderMessage = this.orderService.wechatBuyShell(userId, postWechatOrderRequest.getShellSkuId());
+        WechatOrderMessage wechatOrderMessage = this.orderService.wechatBuyShell(userId,
+                postWechatOrderRequest.getOpenId(), postWechatOrderRequest.getShellSkuId());
 
         WechatOrderResponse response = new WechatOrderResponse();
         response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
