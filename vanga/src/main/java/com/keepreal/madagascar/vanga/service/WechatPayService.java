@@ -7,6 +7,7 @@ import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -26,7 +27,14 @@ public class WechatPayService {
     private final WechatPayConfiguration wechatPayConfiguration;
     private final WechatOrderService wechatOrderService;
 
-    public WechatPayService(WXPay client,
+    /**
+     * Constructs the wechat pay service.
+     *
+     * @param client                 {@link WXPay}.
+     * @param wechatPayConfiguration {@link WechatPayConfiguration}.
+     * @param wechatOrderService     {@link WechatOrderService}.
+     */
+    public WechatPayService(@Qualifier("wechatpay") WXPay client,
                             WechatPayConfiguration wechatPayConfiguration,
                             WechatOrderService wechatOrderService) {
         this.client = client;
@@ -40,28 +48,20 @@ public class WechatPayService {
      * @param userId          User id.
      * @param feeInCents      Cost in cents.
      * @param membershipSkuId Membership sku id.
-     * @param shellSkuId      Shell sku id.
-     * @param tradeType       Trade type.
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryPlaceOrder(String userId,
                                      String feeInCents,
-                                     String membershipSkuId,
-                                     String shellSkuId,
-                                     String tradeType,
-                                     String openId) {
+                                     String membershipSkuId) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
 
-        String skuId = StringUtils.isEmpty(membershipSkuId) ? shellSkuId : membershipSkuId;
-
-        String description = String.format("购买会员%s", skuId);
+        String description = String.format("购买会员%s", membershipSkuId);
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
                 .userId(userId)
                 .tradeNumber(tradeNum)
-                .memberShipSkuId(skuId)
-                .shellSkuId(shellSkuId)
+                .memberShipSkuId(membershipSkuId)
                 .description(description)
                 .feeInCents(feeInCents)
                 .build();
@@ -69,15 +69,11 @@ public class WechatPayService {
         Map<String, String> response;
         try {
             Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("trade_type", tradeType);
+            requestBody.put("trade_type", "APP");
             requestBody.put("out_trade_no", tradeNum);
             requestBody.put("total_fee", feeInCents);
             requestBody.put("body", description);
             requestBody.put("spbill_create_ip", this.wechatPayConfiguration.getHostIp());
-
-            if (!StringUtils.isEmpty(openId)) {
-                requestBody.put("openid", openId);
-            }
 
             log.info(requestBody.toString());
 
