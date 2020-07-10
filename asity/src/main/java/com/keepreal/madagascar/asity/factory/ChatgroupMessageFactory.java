@@ -15,6 +15,13 @@ import java.util.stream.Collectors;
 @Component
 public class ChatgroupMessageFactory {
 
+    /**
+     * Generates the chatgroup message.
+     *
+     * @param chatgroup       {@link Chatgroup}.
+     * @param chatgroupMember {@link ChatgroupMember}.
+     * @return {@link ChatgroupMessage}.
+     */
     public ChatgroupMessage valueOf(Chatgroup chatgroup, ChatgroupMember chatgroupMember) {
         if (Objects.isNull(chatgroup)) {
             return null;

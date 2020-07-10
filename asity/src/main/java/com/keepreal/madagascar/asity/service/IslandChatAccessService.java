@@ -5,7 +5,9 @@ import com.keepreal.madagascar.asity.repository.IslandChatAccessRepository;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the islance chat access service.
@@ -16,6 +18,12 @@ public class IslandChatAccessService {
     private final IslandChatAccessRepository islandChatAccessRepository;
     private final LongIdGenerator idGenerator;
 
+    /**
+     * Constructs the island chat access service.
+     *
+     * @param islandChatAccessRepository    {@link IslandChatAccessRepository}.
+     * @param idGenerator                   {@link LongIdGenerator}.
+     */
     public IslandChatAccessService(IslandChatAccessRepository islandChatAccessRepository,
                                    LongIdGenerator idGenerator) {
         this.islandChatAccessRepository = islandChatAccessRepository;
@@ -66,6 +74,28 @@ public class IslandChatAccessService {
         IslandChatAccess islandChatAccess = this.retrieveOrCreateIslandChatAccessIfNotExistsByIslandIdAndUserId(islandId, userId);
         islandChatAccess.setEnabled(true);
         return this.islandChatAccessRepository.save(islandChatAccess);
+    }
+
+    /**
+     * Counts the enabled member count.
+     *
+     * @param islandId  Island id.
+     * @return Count.
+     */
+    public Integer countEnabledMember(String islandId) {
+        return Math.toIntExact(this.islandChatAccessRepository.countByIslandIdAndEnabledIsTrueAndDeletedIsFalse(islandId));
+    }
+
+    /**
+     * Retrieves last enabled users.
+     *
+     * @param islandId Island id.
+     * @return User ids.
+     */
+    public List<String> retrieveLastEnabledUserIds(String islandId) {
+        return this.islandChatAccessRepository.findTop4ByIslandIdAndEnabledIsTrueAndDeletedIsFalseOrderByCreatedTimeDesc(islandId).stream()
+                .map(IslandChatAccess::getUserId)
+                .collect(Collectors.toList());
     }
 
 }

@@ -302,7 +302,7 @@ public class ChatController implements ChatApi {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         this.chatService.joinChatgroup(id, userId);
-        
+
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);

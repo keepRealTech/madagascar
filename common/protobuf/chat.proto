@@ -24,11 +24,6 @@ message RegisterResponse {
   string token = 2;
 }
 
-message QuitChatsByIslandIdRequest {
-  string userId = 1;
-  string islandId = 2;
-}
-
 message EnableChatAccessRequest {
   string islandId = 1;
   string userId = 2;
@@ -91,9 +86,19 @@ message JoinChatgroupRequest {
   string chatgroupId = 2;
 }
 
+message RetrieveChatgroupsByIslandIdRequest {
+  string islandId = 1;
+  string userId = 2;
+  PageRequest pageRequest = 3;
+}
+
+message IslandChatgroupsResponse {
+  PageResponse pageResponse = 1;
+  repeated ChatgroupMessage chatgroups = 2;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
-  rpc QuitChatsByIslandId(QuitChatsByIslandIdRequest) returns (CommonStatus) {};
   rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
   rpc RetrieveChatAccessByIslandIdAndUserId(RetrieveChatAccessByIslandIdAndUserIdRequest) returns (IslandChatAccessResponse) {};
   rpc CreateChatgroup(CreateChatgroupRequest) returns (ChatgroupResponse) {};

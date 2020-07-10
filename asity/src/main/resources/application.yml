@@ -9,6 +9,15 @@ rongcloud:
   app-key: 123
   app-secret: 567
 
+rocketmq:
+  notification:
+    accessKey: 1
+    secretKey: 2
+    nameSrvAddr: localhost:9876
+    topic: notification-event
+    groupId: GID-asity-default
+    tag: event
+
 opentracing:
   jaeger:
     grpc-server-interceptor: false

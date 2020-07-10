@@ -6,11 +6,13 @@ import com.keepreal.madagascar.asity.CreateChatgroupRequest;
 import com.keepreal.madagascar.asity.DismissChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
+import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
+import com.keepreal.madagascar.asity.factory.IslandChatAccessMessageFactory;
 import com.keepreal.madagascar.asity.model.Chatgroup;
 import com.keepreal.madagascar.asity.model.ChatgroupMember;
 import com.keepreal.madagascar.asity.model.IslandChatAccess;
@@ -33,28 +35,34 @@ import java.util.Objects;
 @GRpcService
 public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
 
+    private static final int GROUP_MAX_MEMBER_LIMIT = 3000;
+
     private final ChatgroupService chatgroupService;
     private final RongCloudService rongCloudService;
     private final IslandChatAccessService islandChatAccessService;
 
     private final ChatgroupMessageFactory chatgroupMessageFactory;
+    private final IslandChatAccessMessageFactory islandChatAccessMessageFactory;
 
     /**
      * Constructs the chat controller.
      *
-     * @param chatgroupService
-     * @param rongCloudService        {@link RongCloudService}.
-     * @param islandChatAccessService {@link IslandChatAccessService}.
-     * @param chatgroupMessageFactory
+     * @param chatgroupService                  {@link ChatgroupService}.
+     * @param rongCloudService                  {@link RongCloudService}.
+     * @param islandChatAccessService           {@link IslandChatAccessService}.
+     * @param chatgroupMessageFactory           {@link IslandChatAccessService}.
+     * @param islandChatAccessMessageFactory    {@link IslandChatAccessMessageFactory}.
      */
     public ChatController(ChatgroupService chatgroupService,
                           RongCloudService rongCloudService,
                           IslandChatAccessService islandChatAccessService,
-                          ChatgroupMessageFactory chatgroupMessageFactory) {
+                          ChatgroupMessageFactory chatgroupMessageFactory,
+                          IslandChatAccessMessageFactory islandChatAccessMessageFactory) {
         this.chatgroupService = chatgroupService;
         this.rongCloudService = rongCloudService;
         this.islandChatAccessService = islandChatAccessService;
         this.chatgroupMessageFactory = chatgroupMessageFactory;
+        this.islandChatAccessMessageFactory = islandChatAccessMessageFactory;
     }
 
     /**
@@ -114,9 +122,12 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                                                       StreamObserver<IslandChatAccessResponse> responseObserver) {
         IslandChatAccess islandChatAccess = this.islandChatAccessService.createIslandChatAccess(request.getIslandId(), request.getUserId());
 
-        // TODO: FILL THE RESPONSE
         IslandChatAccessResponse response = IslandChatAccessResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setChatAccess(this.islandChatAccessMessageFactory.valueOf(islandChatAccess))
+                .setEnabledMemberCount(this.islandChatAccessService.countEnabledMember(request.getIslandId()))
+                .setIslandChatGroupCount(this.chatgroupService.countChatgroupsByIslandId(request.getIslandId()))
+                .addAllRecentEnabledUserIds(this.islandChatAccessService.retrieveLastEnabledUserIds(request.getIslandId()))
                 .build();
 
         responseObserver.onNext(response);
@@ -156,7 +167,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     @Override
     public void dismissChatgroup(DismissChatgroupRequest request,
                                  StreamObserver<CommonStatus> responseObserver) {
-        Chatgroup chatgroup= this.chatgroupService.retrieveById(request.getId(), false);
+        Chatgroup chatgroup = this.chatgroupService.retrieveById(request.getId(), false);
 
         CommonStatus response;
         if (Objects.isNull(chatgroup)) {
@@ -238,6 +249,40 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_CHATGROUP_NOT_FOUND_ERROR))
                 .setChatgroup(this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMember))
                 .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the join group.
+     *
+     * @param request          {@link JoinChatgroupRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void joinChatgroup(JoinChatgroupRequest request,
+                              StreamObserver<CommonStatus> responseObserver) {
+        Chatgroup chatgroup = this.chatgroupService.retrieveById(request.getChatgroupId(), false);
+
+        CommonStatus response;
+        if (chatgroup.getMemberCount() >= ChatController.GROUP_MAX_MEMBER_LIMIT) {
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_CHATGROUP_MAX_MEMBER_REACHED_ERROR);
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        IslandChatAccess islandChatAccess
+                = this.islandChatAccessService.retrieveOrCreateIslandChatAccessIfNotExistsByIslandIdAndUserId(chatgroup.getIslandId(), request.getUserId());
+
+        if (Objects.isNull(islandChatAccess) || !islandChatAccess.getEnabled()) {
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN);
+        } else {
+            this.chatgroupService.joinChatgroup(request.getUserId(), chatgroup);
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
+        }
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

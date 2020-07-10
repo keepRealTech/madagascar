@@ -74,13 +74,19 @@ public class ChatgroupService {
     /**
      * Joins the user to the group.
      *
-     * @param userId  User id.
+     * @param userId    User id.
      * @param chatgroup Chat group.
      * @return {@link ChatgroupMember}.
      */
     @Transactional
     public ChatgroupMember joinChatgroup(String userId, Chatgroup chatgroup) {
-        ChatgroupMember chatgroupMember = ChatgroupMember.builder()
+        ChatgroupMember chatgroupMember = this.chatgroupMemberRepository.findByGroupIdAndUserIdAndDeletedIsFalse(chatgroup.getId(), userId);
+
+        if (Objects.nonNull(chatgroupMember)) {
+            return chatgroupMember;
+        }
+
+        chatgroupMember = ChatgroupMember.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .userId(userId)
                 .groupId(chatgroup.getId())
@@ -98,8 +104,8 @@ public class ChatgroupService {
     /**
      * Retrieves chat group by id.
      *
-     * @param id                Id.
-     * @param includeDeleted    Whether includes the deleted chat groups.
+     * @param id             Id.
+     * @param includeDeleted Whether includes the deleted chat groups.
      * @return {@link Chatgroup}.
      */
     public Chatgroup retrieveById(String id, Boolean includeDeleted) {
@@ -111,6 +117,7 @@ public class ChatgroupService {
 
     /**
      * Dismisses chat group by id.
+     *
      * @param chatgroup {@link Chatgroup}.
      */
     public void dismiss(Chatgroup chatgroup) {
@@ -121,6 +128,7 @@ public class ChatgroupService {
 
     /**
      * Updates chat group.
+     *
      * @param chatgroup {@link Chatgroup}.
      * @return {@link Chatgroup}.
      */
@@ -132,7 +140,7 @@ public class ChatgroupService {
      * Updates chat group member muted.
      *
      * @param chatgroupMember {@link ChatgroupMember}.
-     * @param muted   Muted.
+     * @param muted           Muted.
      * @return {@link ChatgroupMember}.
      */
     public ChatgroupMember updateMutedByGroupIdAndUserId(ChatgroupMember chatgroupMember, boolean muted) {
@@ -159,7 +167,7 @@ public class ChatgroupService {
     /**
      * Resets the chatgroup memberships.
      *
-     * @param chatgroup {@link Chatgroup}.
+     * @param chatgroup     {@link Chatgroup}.
      * @param membershipIds Membership ids.
      * @return {@link Chatgroup}.
      */
@@ -174,6 +182,37 @@ public class ChatgroupService {
 
         chatgroup.setChatgroupMemberships(membershipSet);
         return chatgroup;
+    }
+
+    /**
+     * Counts the chatgroups by island.
+     *
+     * @param islandId Island id.
+     * @return Counts.
+     */
+    public Integer countChatgroupsByIslandId(String islandId) {
+        return Math.toIntExact(this.chatgroupRepository.countByIslandIdAndDeletedIsFalse(islandId));
+    }
+
+    /**
+     * Quits all chatgroups by island.
+     *
+     * @param islandId Island id.
+     * @param userId   User id.
+     */
+    public void quitChatgroupsByIslandId(String islandId, String userId) {
+        List<ChatgroupMember> chatgroupMembers =
+                this.chatgroupMemberRepository.findAllByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
+
+        if (chatgroupMembers.isEmpty()) {
+            return;
+        }
+
+        chatgroupMembers = chatgroupMembers.stream()
+                .peek(chatgroupMember -> chatgroupMember.setDeleted(true))
+                .collect(Collectors.toList());
+
+        this.chatgroupMemberRepository.saveAll(chatgroupMembers);
     }
 
 }

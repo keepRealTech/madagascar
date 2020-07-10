@@ -12,4 +12,6 @@ public interface ChatgroupRepository extends JpaRepository<Chatgroup, String> {
 
     Chatgroup findByIdAndDeletedIsFalse(String id);
 
+    Long countByIslandIdAndDeletedIsFalse(String islandId);
+
 }
