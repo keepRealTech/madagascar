@@ -60,6 +60,8 @@ public class MpWechatPayService {
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
+                .appId(this.mpWechatPayConfiguration.getAppId())
+                .mchId(this.mpWechatPayConfiguration.getMchId())
                 .userId(userId)
                 .tradeNumber(tradeNum)
                 .memberShipSkuId(shellSkuId)
