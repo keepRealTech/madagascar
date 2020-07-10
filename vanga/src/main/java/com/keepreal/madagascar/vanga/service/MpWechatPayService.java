@@ -99,18 +99,21 @@ public class MpWechatPayService {
             }
 
             Map<String, String> request = new HashMap<>();
-            request.put("noncestr", response.get("nonce_str"));
-            request.put("prepayid", response.get("prepay_id"));
-            request.put("package", "Sign=WXPay");
-            request.put("timestamp", String.valueOf(WXPayUtil.getCurrentTimestamp()));
-            request = this.client.fillPayRequestData(request);
+            request.put("nonceStr", response.get("nonce_str"));
+            request.put("package", String.format("prepay_id=%s", response.get("prepay_id")));
+            request.put("timeStamp", String.valueOf(WXPayUtil.getCurrentTimestamp()));
+            request = this.client.fillMPPayRequestData(request);
 
-            wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
+            log.info(request.toString());
+
+            wechatOrder.setCreatedTime(Integer.parseInt(request.get("timeStamp")) * 1000L);
             wechatOrder = this.wechatOrderService.insert(wechatOrder);
 
             wechatOrder.setPrepayId(response.get("prepay_id"));
             wechatOrder.setSignature(request.get("sign"));
-            wechatOrder.setNonceStr(request.get("noncestr"));
+            wechatOrder.setNonceStr(request.get("nonceStr"));
+
+            log.info(wechatOrder.toString());
 
             return wechatOrder;
         } catch (Exception e) {

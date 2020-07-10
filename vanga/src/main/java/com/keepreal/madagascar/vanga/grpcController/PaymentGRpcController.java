@@ -271,7 +271,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     public void wechatBuyShell(WechatOrderBuyShellRequest request,
                                StreamObserver<WechatOrderResponse> responseObserver) {
         ShellSku sku = this.skuService.retrieveShellSkuById(request.getShellSkuId());
-        WechatOrderResponse response ;
+        WechatOrderResponse response;
         if (Objects.isNull(sku)) {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
