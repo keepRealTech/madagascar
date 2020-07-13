@@ -116,7 +116,6 @@ public class TimelineService {
                 criteria.and("feedCreatedAt").lt(timestampBefore.getValue());
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(criteria),
-//                Aggregation.limit(pageSize * 5), TODO 待优化
                 Aggregation.group("duplicateTag").first("feedId").as("feedId").first("feedCreatedAt").as("feedCreatedAt"),
                 Aggregation.sort(Sort.Direction.DESC, "feedCreatedAt"),
                 Aggregation.limit(pageSize)
