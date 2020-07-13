@@ -2,8 +2,9 @@ package com.keepreal.madagascar.lemur.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurer;
@@ -22,7 +23,7 @@ import java.util.Collections;
  */
 @Configuration
 @EnableResourceServer
-@EnableGlobalMethodSecurity(prePostEnabled = true, proxyTargetClass = true)
+@EnableWebSecurity
 public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
 
     /**
@@ -45,6 +46,7 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                         "/api/v1/setupInfo/**",
                         "/api/v1/orders/wechat/callback**",
                         "/api/v1/islands/{\\d+}/poster**").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated();
 
         httpSecurity.headers().cacheControl();
@@ -52,13 +54,14 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
 
     /**
      * Configures the default cors behavior.
+     *
      * @return {@link CorsConfigurationSource}.
      */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Collections.singletonList("*"));
-        configuration.setAllowedMethods(Collections.singletonList("GET"));
+        configuration.setAllowedMethods(Collections.singletonList("*"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/v1/setupInfo/android**", configuration);
         source.registerCorsConfiguration("/api/v1/islands/{\\d+}/poster**", configuration);

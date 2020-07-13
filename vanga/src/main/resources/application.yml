@@ -23,6 +23,14 @@ wechat-pay:
   cert-path: /app/apiclient_cert.pem
   host-ip: 127.0.0.1
 
+wechat-mp:
+  app-id: xxx
+  merchant-id: xxx
+  merchant-key: xxx
+  callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
+  cert-path: /app/apiclient_cert.pem
+  host-ip: 127.0.0.1
+
 ios-pay:
   verify-url: https://buy.itunes.apple.com/verifyReceipt
   verify-url-sandbox: https://sandbox.itunes.apple.com/verifyReceipt
