@@ -7,6 +7,7 @@ import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.ShellSkuMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.SkuApi;
 import swagger.model.IOSShellSkusResponse;
@@ -62,6 +63,7 @@ public class SkuController implements SkuApi {
      *
      * @return {@link WechatShellSkusResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<WechatShellSkusResponse> apiV1BalancesWechatSkusGet() {
         List<ShellSkuMessage> shellSkuMessageList = this.skuService.retrieveShellSkus(true);

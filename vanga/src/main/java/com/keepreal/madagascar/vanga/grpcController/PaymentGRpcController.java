@@ -18,6 +18,7 @@ import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
+import com.keepreal.madagascar.vanga.service.MpWechatPayService;
 import com.keepreal.madagascar.vanga.service.PaymentService;
 import com.keepreal.madagascar.vanga.service.ShellService;
 import com.keepreal.madagascar.vanga.service.SkuService;
@@ -42,6 +43,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final PaymentService paymentService;
     private final WechatOrderService wechatOrderService;
     private final WechatPayService wechatPayService;
+    private final MpWechatPayService mpWechatPayService;
     private final BalanceMessageFactory balanceMessageFactory;
     private final SkuService skuService;
     private final ShellService shellService;
@@ -54,6 +56,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param paymentService             {@link PaymentService}.
      * @param wechatOrderService         {@link WechatOrderService}.
      * @param wechatPayService           {@link WechatPayService}.
+     * @param mpWechatPayService         {@link MpWechatPayService}.
      * @param balanceMessageFactory      {@link BalanceMessageFactory}.
      * @param skuService                 {@link SkuService}.
      * @param shellService               {@link ShellService}.
@@ -63,6 +66,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     public PaymentGRpcController(PaymentService paymentService,
                                  WechatOrderService wechatOrderService,
                                  WechatPayService wechatPayService,
+                                 MpWechatPayService mpWechatPayService,
                                  BalanceMessageFactory balanceMessageFactory,
                                  SkuService skuService,
                                  ShellService shellService,
@@ -71,6 +75,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         this.paymentService = paymentService;
         this.wechatOrderService = wechatOrderService;
         this.wechatPayService = wechatPayService;
+        this.mpWechatPayService = mpWechatPayService;
         this.balanceMessageFactory = balanceMessageFactory;
         this.skuService = skuService;
         this.shellService = shellService;
@@ -125,8 +130,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
 
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
-                sku.getId(),
-                "");
+                sku.getId());
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -156,7 +160,11 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                         StreamObserver<WechatOrderResponse> responseObserver) {
         WechatOrder wechatOrder = this.wechatOrderService.retrieveById(request.getId());
 
-        wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+        if (StringUtils.isEmpty(wechatOrder.getShellSkuId())) {
+            wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+        } else {
+            wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
+        }
 
         WechatOrderResponse response = WechatOrderResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
@@ -263,7 +271,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     public void wechatBuyShell(WechatOrderBuyShellRequest request,
                                StreamObserver<WechatOrderResponse> responseObserver) {
         ShellSku sku = this.skuService.retrieveShellSkuById(request.getShellSkuId());
-        WechatOrderResponse response ;
+        WechatOrderResponse response;
         if (Objects.isNull(sku)) {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
@@ -273,10 +281,10 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             return;
         }
 
-        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
+        WechatOrder wechatOrder = this.mpWechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
-                "",
-                sku.getId());
+                sku.getId(),
+                request.getOpenId());
 
         if (Objects.nonNull(wechatOrder)) {
             response = WechatOrderResponse.newBuilder()

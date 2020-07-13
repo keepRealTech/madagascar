@@ -64,6 +64,7 @@ message IOSOrderBuyShellRequest {
 message WechatOrderBuyShellRequest {
   string userId = 1;
   string shellSkuId = 2;
+  string openId = 3;
 }
 
 service PaymentService {
