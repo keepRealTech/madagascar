@@ -3,7 +3,7 @@ plugins {
     id 'org.springframework.boot' version '2.1.4.RELEASE' apply false
     id 'org.hidetake.swagger.generator' version '2.18.2' apply false
     id 'com.google.protobuf' version '0.8.12' apply false
-    id 'com.palantir.docker' version '0.22.1' apply false
+    id 'com.palantir.docker' version '0.25.0' apply false
 }
 
 allprojects {
@@ -83,6 +83,7 @@ subprojects {
 
         docker {
             name "registry.cn-beijing.aliyuncs.com/keepreal/${project.name.replace('_','-')}:$project.version"
+            tag 'staging', "registry.cn-beijing.aliyuncs.com/keepreal/${project.name.replace('_','-')}:$project.version-staging"
             dockerfile file("$projectDir/dockerfile")
             files "$projectDir/start.sh", "$projectDir/healthcheck.sh", "$projectDir/apiclient_cert.pem"
             copySpec.from(tasks.unpack.outputs).into("dependency")
