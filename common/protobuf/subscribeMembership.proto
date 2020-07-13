@@ -4,6 +4,7 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.vanga";
 
 import "common.proto";
+import "google/protobuf/wrappers.proto";
 
 message RetrieveMemberCountByIslandIdRequest {
     string islandId = 1;
@@ -20,7 +21,7 @@ message RetrieveMemberCountResponse {
 
 message RetrieveMembershipIdsRequest {
     string userId = 1;
-    string islandId = 2;
+    google.protobuf.StringValue islandId = 2;
 }
 
 message RetrieveMembershipIdsResponse {

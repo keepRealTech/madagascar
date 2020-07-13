@@ -103,6 +103,15 @@ message RetrieveChatgroupByIdRequest {
   string userId = 2;
 }
 
+message RetreiveChatgroupsByUserIdRequest {
+  string userId = 1;
+}
+
+message UserChatgroupsResponse {
+  CommonStatus status = 1;
+  repeated ChatgroupMessage chatgroups = 2;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
@@ -113,4 +122,5 @@ service ChatService {
   rpc JoinChatgroup(JoinChatgroupRequest) returns (CommonStatus) {};
   rpc RetrieveChatgroupsByIslandId(RetrieveChatgroupsByIslandIdRequest) returns (IslandChatgroupsResponse) {};
   rpc RetrieveChatgroupById(RetrieveChatgroupByIdRequest) returns (ChatgroupResponse) {};
+  rpc RetrieveChatgroupsByUserId(RetreiveChatgroupsByUserIdRequest) returns (UserChatgroupsResponse) {};
 }

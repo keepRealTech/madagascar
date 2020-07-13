@@ -13,10 +13,12 @@ import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
 import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
+import com.keepreal.madagascar.asity.RetreiveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
+import com.keepreal.madagascar.asity.UserChatgroupsResponse;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -359,6 +361,39 @@ public class ChatService {
         IslandChatgroupsResponse response;
         try {
             response = stub.retrieveChatgroupsByIslandId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve chat groups returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
+    }
+
+    /**
+     * Retrieves chatgroups by user id.
+     *
+     * @param userId User id.
+     * @return {@link UserChatgroupsResponse}.
+     */
+    public UserChatgroupsResponse retrieveChatgroupsByUserId(String userId) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        RetreiveChatgroupsByUserIdRequest request = RetreiveChatgroupsByUserIdRequest.newBuilder()
+                .setUserId(userId)
+                .build();
+
+        UserChatgroupsResponse response;
+        try {
+            response = stub.retrieveChatgroupsByUserId(request);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

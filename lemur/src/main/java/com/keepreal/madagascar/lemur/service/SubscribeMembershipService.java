@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.MembershipMessage;
@@ -11,6 +12,7 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 import java.util.List;
@@ -43,14 +45,16 @@ public class SubscribeMembershipService {
     public List<String> retrieveSubscribedMembershipsByIslandIdAndUserId(String islandId, String userId) {
         SubscribeMembershipServiceGrpc.SubscribeMembershipServiceBlockingStub stub = SubscribeMembershipServiceGrpc.newBlockingStub(this.channel);
 
-        RetrieveMembershipIdsRequest request = RetrieveMembershipIdsRequest.newBuilder()
-                .setIslandId(islandId)
-                .setUserId(userId)
-                .build();
+        RetrieveMembershipIdsRequest.Builder requestBuilder = RetrieveMembershipIdsRequest.newBuilder()
+                .setUserId(userId);
+
+        if (!StringUtils.isEmpty(islandId)) {
+            requestBuilder.setIslandId(StringValue.of(islandId));
+        }
 
         RetrieveMembershipIdsResponse response;
         try {
-            response = stub.retrieveMembershipIdsByUserIdAndIslandId(request);
+            response = stub.retrieveMembershipIdsByUserIdAndIslandId(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

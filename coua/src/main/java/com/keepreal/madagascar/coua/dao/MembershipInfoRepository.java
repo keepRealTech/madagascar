@@ -14,6 +14,8 @@ public interface MembershipInfoRepository extends JpaRepository<MembershipInfo, 
 
     List<MembershipInfo> findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(String islandId);
 
+    List<MembershipInfo> findMembershipInfosByIslandIdInAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(List<String> islandIds);
+
     @Query(value = "SELECT color_type FROM membership WHERE island_id = ?1 AND is_active = TRUE AND is_deleted = FALSE", nativeQuery = true)
     List<Integer> getColorTypeListByIslandId(String islandId);
 

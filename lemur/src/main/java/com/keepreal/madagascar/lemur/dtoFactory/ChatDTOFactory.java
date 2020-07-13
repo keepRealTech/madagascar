@@ -2,16 +2,19 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.asity.ChatAccessMessage;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
-import com.keepreal.madagascar.coua.MembershipMessage;
+import com.keepreal.madagascar.common.IslandMessage;
 import org.springframework.stereotype.Component;
+import swagger.model.BriefIslandDTO;
 import swagger.model.BriefUserDTO;
 import swagger.model.ChatAccessDTO;
 import swagger.model.ChatGroupDTO;
 import swagger.model.ChatTokenDTO;
 import swagger.model.IslandChatAccessDTO;
+import swagger.model.IslandGroupedChatGroupDTO;
 import swagger.model.SimpleMembershipDTO;
 import swagger.model.UserChatGroupDTO;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.List;
 import java.util.Objects;
@@ -88,6 +91,21 @@ public class ChatDTOFactory {
         chatGroupDTO.setMemberships(membershipDTOS);
 
         return chatGroupDTO;
+    }
+
+    public IslandGroupedChatGroupDTO valueOf(BriefIslandDTO briefIslandDTO,
+                                             Map<ChatgroupMessage, List<SimpleMembershipDTO>> chatgroupMessageListMap,
+                                             List<String> userMemberIds) {
+        if (Objects.isNull(briefIslandDTO)) {
+            return null;
+        }
+
+        IslandGroupedChatGroupDTO islandGroupedChatGroupDTO = new IslandGroupedChatGroupDTO();
+        islandGroupedChatGroupDTO.setIsland(briefIslandDTO);
+        islandGroupedChatGroupDTO.setChatgroups(chatgroupMessageListMap.entrySet().stream().map(
+                entry -> this.valueOf(entry.getKey(), entry.getValue(), userMemberIds)).collect(Collectors.toList()));
+
+        return islandGroupedChatGroupDTO;
     }
 
     public UserChatGroupDTO valueOf(ChatgroupMessage chatgroup, List<SimpleMembershipDTO> membershipDTOS, List<String> userMemberIds) {

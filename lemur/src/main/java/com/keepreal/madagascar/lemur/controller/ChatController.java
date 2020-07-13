@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.asity.ChatgroupMessage;
 import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
+import com.keepreal.madagascar.asity.UserChatgroupsResponse;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -9,6 +10,7 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.ChatDTOFactory;
+import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.MembershipDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.ChatService;
@@ -33,6 +35,7 @@ import swagger.model.IslandChatGroupsResponse;
 import swagger.model.PostChatGroupRequest;
 import swagger.model.PutChatGroupRequest;
 import swagger.model.SimpleMembershipDTO;
+import swagger.model.UserChatGroupsResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,6 +61,7 @@ public class ChatController implements ChatApi {
     private final ChatDTOFactory chatDTOFactory;
     private final UserDTOFactory userDTOFactory;
     private final MembershipDTOFactory membershipDTOFactory;
+    private final IslandDTOFactory islandDTOFactory;
 
     /**
      * Constructs the chat controller.
@@ -70,6 +74,7 @@ public class ChatController implements ChatApi {
      * @param chatDTOFactory             {@link ChatDTOFactory}.
      * @param userDTOFactory             {@link UserDTOFactory}.
      * @param membershipDTOFactory       {@link MembershipDTOFactory}.
+     * @param islandDTOFactory           {@link IslandDTOFactory}.
      */
     public ChatController(IslandService islandService,
                           UserService userService,
@@ -78,7 +83,8 @@ public class ChatController implements ChatApi {
                           SubscribeMembershipService subscribeMembershipService,
                           ChatDTOFactory chatDTOFactory,
                           UserDTOFactory userDTOFactory,
-                          MembershipDTOFactory membershipDTOFactory) {
+                          MembershipDTOFactory membershipDTOFactory,
+                          IslandDTOFactory islandDTOFactory) {
         this.islandService = islandService;
         this.userService = userService;
         this.chatService = chatService;
@@ -87,6 +93,7 @@ public class ChatController implements ChatApi {
         this.chatDTOFactory = chatDTOFactory;
         this.userDTOFactory = userDTOFactory;
         this.membershipDTOFactory = membershipDTOFactory;
+        this.islandDTOFactory = islandDTOFactory;
     }
 
     /**
@@ -329,6 +336,7 @@ public class ChatController implements ChatApi {
      * @param pageSize size of a page (optional, default to 10) Page size.
      * @return {@link IslandChatGroupsResponse}.
      */
+    @Override
     public ResponseEntity<IslandChatGroupsResponse> apiV1IslandsIdChatgroupsGet(String id,
                                                                                 Integer page,
                                                                                 Integer pageSize) {
@@ -366,6 +374,7 @@ public class ChatController implements ChatApi {
      * @param id id (required) Chatgroup id.
      * @return {@link ChatGroupResponse}.
      */
+    @Override
     public ResponseEntity<ChatGroupResponse> apiV1ChatgroupsIdGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
@@ -385,6 +394,51 @@ public class ChatController implements ChatApi {
 
         ChatGroupResponse response = new ChatGroupResponse();
         response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the get user chat groups.
+     *
+     * @param id id (required) User id.
+     * @return {@link UserChatGroupsResponse}.
+     */
+    @Override
+    public ResponseEntity<UserChatGroupsResponse> apiV1UsersIdChatgroupsGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (!userId.equals(id)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        UserChatgroupsResponse userChatgroupsResponse = this.chatService.retrieveChatgroupsByUserId(userId);
+        Map<String, List<ChatgroupMessage>> chatgroupMap = userChatgroupsResponse.getChatgroupsList()
+                .stream()
+                .collect(Collectors.groupingBy(ChatgroupMessage::getIslandId, HashMap::new, Collectors.toList()));
+        Map<String, MembershipMessage> membershipMap = this.membershipService.retrieveMembershipsByIslandIds(chatgroupMap.keySet())
+                .stream()
+                .collect(Collectors.toMap(MembershipMessage::getId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
+        List<String> userMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(null, userId);
+
+        Map<String, Map<ChatgroupMessage, List<SimpleMembershipDTO>>> islandMembershipMap =
+                chatgroupMap.entrySet().stream()
+                        .collect(Collectors.toMap(Map.Entry::getKey,
+                                entry -> entry.getValue().stream().collect(Collectors.toMap(
+                                        Function.identity(),
+                                        chatgroup -> chatgroup.getMembershipIdsList()
+                                                .stream()
+                                                .map(membershipId -> this.membershipDTOFactory.simpleValueOf(membershipMap.getOrDefault(membershipId, null)))
+                                                .collect(Collectors.toList())
+                                ))));
+
+        UserChatGroupsResponse response = new UserChatGroupsResponse();
+        response.setData(islandMembershipMap.entrySet().stream().map(entry ->
+                this.chatDTOFactory.valueOf(
+                        this.islandDTOFactory.briefValueOf(this.islandService.retrieveIslandById(entry.getKey())),
+                        entry.getValue(),
+                        userMembershipIds)).collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
