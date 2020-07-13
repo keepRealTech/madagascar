@@ -542,6 +542,4 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
-
-
 }

@@ -6,7 +6,23 @@ import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.fossa.*;
+import com.keepreal.madagascar.fossa.CreateDefaultFeedRequest;
+import com.keepreal.madagascar.fossa.CreateDefaultFeedResponse;
+import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
+import com.keepreal.madagascar.fossa.DeleteFeedResponse;
+import com.keepreal.madagascar.fossa.FeedResponse;
+import com.keepreal.madagascar.fossa.FeedServiceGrpc;
+import com.keepreal.madagascar.fossa.FeedsResponse;
+import com.keepreal.madagascar.fossa.NewFeedsRequest;
+import com.keepreal.madagascar.fossa.NewFeedsResponse;
+import com.keepreal.madagascar.fossa.QueryFeedCondition;
+import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
+import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
+import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
+import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
+import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
+import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
@@ -316,7 +332,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
             this.feedInfoService.topFeedById(feedId);
         }else {
-            this.feedInfoService.cancelTopFeedById(feedId);
+            this.feedInfoService.cancelToppedFeedById(feedId);
         }
 
         TopFeedByIdResponse topFeedByIdResponse = TopFeedByIdResponse.newBuilder()

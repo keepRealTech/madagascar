@@ -25,15 +25,16 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import swagger.api.FeedApi;
-import swagger.model.*;
 import swagger.model.CheckFeedsMessage;
 import swagger.model.DummyResponse;
+import swagger.model.FeedDTO;
 import swagger.model.FeedResponse;
 import swagger.model.FeedsResponseV2;
 import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
 import swagger.model.PostFeedPayload;
 import swagger.model.TimelinesResponse;
+import swagger.model.TopFeedRequest;
 import swagger.model.ToppedFeedsDTO;
 
 import javax.validation.Valid;
@@ -282,7 +283,9 @@ public class FeedController implements FeedApi {
 
         FeedDTO feedDTO = this.feedDTOFactory.valueOf(toppedFeedResponse.getFeed());
         List<FeedDTO> topFeeds = new ArrayList<>();
-        topFeeds.add(feedDTO);
+        if (Objects.nonNull(feedDTO)){
+            topFeeds.add(feedDTO);
+        }
         dto.setToppedFeeds(topFeeds);
 
         response.setData(dto);
@@ -344,5 +347,4 @@ public class FeedController implements FeedApi {
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 }

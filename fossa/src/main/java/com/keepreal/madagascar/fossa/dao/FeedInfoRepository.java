@@ -23,6 +23,6 @@ public interface FeedInfoRepository extends MongoRepository<FeedInfo, String> {
 
     List<FeedInfo> findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(Iterable<String> ids);
 
-    FeedInfo findFeedInfoByIslandIdAndIsTopIsTrue(String id);
+    FeedInfo findTopByIslandIdAndIsTopIsTrueAndDeletedIsFalse(String id);
 
 }

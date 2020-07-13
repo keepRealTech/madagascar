@@ -3,7 +3,6 @@ package com.keepreal.madagascar.fossa.service;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.ReactionType;
-import com.keepreal.madagascar.fossa.Feed;
 import com.keepreal.madagascar.fossa.TimelineFeedMessage;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
@@ -235,7 +234,7 @@ public class FeedInfoService {
     public void topFeedById(String feedId) {
         mongoTemplate.updateFirst(
                 Query.query(Criteria.where("id").is(feedId)),
-                Update.update("isTop", true),
+                Update.update("isTop", true).set("toppedTime", System.currentTimeMillis()),
                 FeedInfo.class);
     }
 
@@ -244,7 +243,7 @@ public class FeedInfoService {
      *
      * @param feedId feed id
      */
-    public void cancelTopFeedById(String feedId) {
+    public void cancelToppedFeedById(String feedId) {
         mongoTemplate.updateFirst(
                 Query.query(Criteria.where("id").is(feedId)),
                 Update.update("isTop", false),
@@ -257,9 +256,9 @@ public class FeedInfoService {
      * @param islandId island id
      */
     public void cancelToppedFeedByIslandId(String islandId) {
-        FeedInfo feedInfo = this.feedInfoRepository.findFeedInfoByIslandIdAndIsTopIsTrue(islandId);
+        FeedInfo feedInfo = findToppedFeedByIslandId(islandId);
         if (Objects.nonNull(feedInfo)){
-            cancelTopFeedById(feedInfo.getId());
+            cancelToppedFeedById(feedInfo.getId());
         }
     }
 
@@ -269,8 +268,6 @@ public class FeedInfoService {
      * @return feed information
      */
     public FeedInfo findToppedFeedByIslandId(String islandId) {
-        return mongoTemplate.findOne(
-                Query.query(Criteria.where("isTop").is(true).and("islandId").is(islandId)),
-                FeedInfo.class);
+        return this.feedInfoRepository.findTopByIslandIdAndIsTopIsTrueAndDeletedIsFalse(islandId);
     }
 }
