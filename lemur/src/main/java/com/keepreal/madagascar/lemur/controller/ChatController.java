@@ -414,14 +414,18 @@ public class ChatController implements ChatApi {
         }
 
         UserChatgroupsResponse userChatgroupsResponse = this.chatService.retrieveChatgroupsByUserId(userId);
+        // Island id:chatgroup map
         Map<String, List<ChatgroupMessage>> chatgroupMap = userChatgroupsResponse.getChatgroupsList()
                 .stream()
                 .collect(Collectors.groupingBy(ChatgroupMessage::getIslandId, HashMap::new, Collectors.toList()));
+        // Membership id:membership map
         Map<String, MembershipMessage> membershipMap = this.membershipService.retrieveMembershipsByIslandIds(chatgroupMap.keySet())
                 .stream()
                 .collect(Collectors.toMap(MembershipMessage::getId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
+        // User membership id list
         List<String> userMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(null, userId);
 
+        // Island id:(chatgroup:chatgroup required membershipDTO list) map
         Map<String, Map<ChatgroupMessage, List<SimpleMembershipDTO>>> islandMembershipMap =
                 chatgroupMap.entrySet().stream()
                         .collect(Collectors.toMap(Map.Entry::getKey,
