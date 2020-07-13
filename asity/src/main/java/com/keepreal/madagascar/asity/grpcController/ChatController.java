@@ -1,16 +1,19 @@
 package com.keepreal.madagascar.asity.grpcController;
 
+import com.google.common.base.Functions;
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
 import com.keepreal.madagascar.asity.DismissChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
+import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
 import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
 import com.keepreal.madagascar.asity.factory.IslandChatAccessMessageFactory;
@@ -21,14 +24,22 @@ import com.keepreal.madagascar.asity.service.ChatgroupService;
 import com.keepreal.madagascar.asity.service.IslandChatAccessService;
 import com.keepreal.madagascar.asity.service.RongCloudService;
 import com.keepreal.madagascar.asity.util.CommonStatusUtils;
+import com.keepreal.madagascar.asity.util.PaginationUtils;
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
+import org.springframework.data.domain.Page;
 
 import javax.transaction.Transactional;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Represents the chat grpc service.
@@ -314,6 +325,36 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         response = ChatgroupResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .setChatgroup(this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMember))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the get chatgroups by island.
+     *
+     * @param request  {@link RetrieveChatgroupsByIslandIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void retrieveChatgroupsByIslandId(RetrieveChatgroupsByIslandIdRequest request,
+                                             StreamObserver<IslandChatgroupsResponse> responseObserver) {
+        PageRequest pageRequest =
+                request.hasPageRequest() ? request.getPageRequest() : PaginationUtils.defaultPageRequest();
+
+        Page<Chatgroup> chatgroups = this.chatgroupService.retrieveChatgroupsByIslandId(request.getIslandId(), pageRequest);
+
+        Map<String, ChatgroupMember> chatgroupMembers =
+                this.chatgroupService.retrieveChatgroupMemberByGroupIdsAndUserId(chatgroups.get().map(Chatgroup::getId).collect(Collectors.toList()), request.getUserId())
+                        .stream().collect(Collectors.toMap(ChatgroupMember::getGroupId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
+
+        IslandChatgroupsResponse response = IslandChatgroupsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .addAllChatgroups(chatgroups.get()
+                        .map(chatgroup -> this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMembers.getOrDefault(chatgroup.getId(), null)))
+                        .collect(Collectors.toList()))
+                .setPageResponse(PaginationUtils.valueOf(chatgroups, pageRequest))
                 .build();
 
         responseObserver.onNext(response);

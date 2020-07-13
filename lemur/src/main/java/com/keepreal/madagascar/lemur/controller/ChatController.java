@@ -360,4 +360,34 @@ public class ChatController implements ChatApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a chatgroup by id.
+     *
+     * @param id id (required) Chatgroup id.
+     * @return {@link ChatGroupResponse}.
+     */
+    public ResponseEntity<ChatGroupResponse> apiV1ChatgroupsIdGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        ChatgroupMessage chatgroupMessage = this.chatService.retrieveChatgroupById(id, userId);
+
+        List<MembershipMessage> membershipMessageList = new ArrayList<>();
+
+        if (!chatgroupMessage.getMembershipIdsList().isEmpty()) {
+            membershipMessageList = this.membershipService.retrieveMembershipsByIslandId(id).stream()
+                    .filter(membership -> chatgroupMessage.getMembershipIdsList().contains(membership.getId()))
+                    .collect(Collectors.toList());
+        }
+
+        List<SimpleMembershipDTO> membershipDTOList = membershipMessageList.stream()
+                .map(this.membershipDTOFactory::simpleValueOf)
+                .collect(Collectors.toList());
+
+        ChatGroupResponse response = new ChatGroupResponse();
+        response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

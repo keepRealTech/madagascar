@@ -5,7 +5,10 @@ import com.keepreal.madagascar.asity.model.ChatgroupMember;
 import com.keepreal.madagascar.asity.model.ChatgroupMembership;
 import com.keepreal.madagascar.asity.repository.ChatgroupMemberRepository;
 import com.keepreal.madagascar.asity.repository.ChatgroupRepository;
+import com.keepreal.madagascar.asity.util.PaginationUtils;
+import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -213,6 +216,28 @@ public class ChatgroupService {
                 .collect(Collectors.toList());
 
         this.chatgroupMemberRepository.saveAll(chatgroupMembers);
+    }
+
+    /**
+     * Retrieves all chatgroups for an island.
+     *
+     * @param islandId    Island id.
+     * @param pageRequest {@link PageRequest}.
+     * @return {@link Chatgroup}.
+     */
+    public Page<Chatgroup> retrieveChatgroupsByIslandId(String islandId, PageRequest pageRequest) {
+        return this.chatgroupRepository.findAllByIslandIdAndDeletedIsFalse(islandId, PaginationUtils.valueOf(pageRequest));
+    }
+
+    /**
+     * Retrieves all chatgroup member state for given groups and user.
+     *
+     * @param groupIds  Group ids.
+     * @param userId    User id.
+     * @return {@link ChatgroupMember}.
+     */
+    public List<ChatgroupMember> retrieveChatgroupMemberByGroupIdsAndUserId(List<String> groupIds, String userId) {
+        return this.chatgroupMemberRepository.findAllByGroupIdInAndUserIdAndDeletedIsFalse(groupIds, userId);
     }
 
 }

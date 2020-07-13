@@ -1208,10 +1208,21 @@ paths:
   /api/v1/chatgroups/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Chat
+      summary: get the chatgroup
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatGroupResponse'
     put:
       tags:
         - Chat
-      summary: updates the chatg
+      summary: updates the chatgroup
       requestBody:
         required: true
         content:

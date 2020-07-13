@@ -16,4 +16,6 @@ public interface ChatgroupMemberRepository extends JpaRepository<ChatgroupMember
 
     List<ChatgroupMember> findAllByIslandIdAndUserIdAndDeletedIsFalse(String islandId, String userId);
 
+    List<ChatgroupMember> findAllByGroupIdInAndUserIdAndDeletedIsFalse(List<String> groupIds, String userId);
+
 }
