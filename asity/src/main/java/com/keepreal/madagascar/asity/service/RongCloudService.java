@@ -95,14 +95,16 @@ public class RongCloudService {
     /**
      * Joins a group chat.
      *
-     * @param id       Group id.
-     * @param memberId Member user id.
+     * @param id        Group id.
+     * @param groupName Group name.
+     * @param memberId  Member user id.
      */
     @SneakyThrows
-    public void joinGroup(String id, String memberId) {
+    public void joinGroup(String id, String groupName, String memberId) {
         GroupMember[] members = {new GroupMember().setId(memberId)};
         GroupModel groupModel = new GroupModel()
                 .setId(id)
+                .setName(groupName)
                 .setMembers(members);
         Result result = this.client.group.join(groupModel);
 

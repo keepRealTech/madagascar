@@ -14,6 +14,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.util.ArrayList;
@@ -51,8 +52,9 @@ public class Chatgroup {
     @LastModifiedDate
     private Long updatedTime;
 
+    @Builder.Default
     @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id", referencedColumnName = "groupId")
+    @JoinColumn(name = "groupId", referencedColumnName = "id")
     private Set<ChatgroupMembership> chatgroupMemberships = new HashSet<>();
 
 }

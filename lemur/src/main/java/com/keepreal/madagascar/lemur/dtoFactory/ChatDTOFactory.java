@@ -2,7 +2,6 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.asity.ChatAccessMessage;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
-import com.keepreal.madagascar.common.IslandMessage;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefIslandDTO;
 import swagger.model.BriefUserDTO;
@@ -14,10 +13,10 @@ import swagger.model.IslandGroupedChatGroupDTO;
 import swagger.model.SimpleMembershipDTO;
 import swagger.model.UserChatGroupDTO;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -76,7 +75,13 @@ public class ChatDTOFactory {
         return islandChatAccessDTO;
     }
 
-
+    /**
+     * Creates {@link ChatGroupDTO}.
+     *
+     * @param chatgroup      {@link ChatgroupMessage}.
+     * @param membershipDTOS {@link SimpleMembershipDTO}.
+     * @return {@link ChatGroupDTO}.
+     */
     public ChatGroupDTO valueOf(ChatgroupMessage chatgroup, List<SimpleMembershipDTO> membershipDTOS) {
         if (Objects.isNull(chatgroup)) {
             return null;
@@ -89,13 +94,22 @@ public class ChatDTOFactory {
         chatGroupDTO.setBulletin(chatgroup.getBulletin());
         chatGroupDTO.setMemberCount(chatgroup.getMemberCount());
         chatGroupDTO.setMemberships(membershipDTOS);
+        chatGroupDTO.setIsMuted(chatgroup.getMuted());
 
         return chatGroupDTO;
     }
 
+    /**
+     * Creates the {@link IslandGroupedChatGroupDTO}.
+     *
+     * @param briefIslandDTO          {@link BriefIslandDTO}.
+     * @param chatgroupMessageListMap {@link ChatgroupMessage} as key, {@link SimpleMembershipDTO} as value.
+     * @param userMembershipIds       User membership ids.
+     * @return {@link IslandGroupedChatGroupDTO}.
+     */
     public IslandGroupedChatGroupDTO valueOf(BriefIslandDTO briefIslandDTO,
                                              Map<ChatgroupMessage, List<SimpleMembershipDTO>> chatgroupMessageListMap,
-                                             List<String> userMemberIds) {
+                                             List<String> userMembershipIds) {
         if (Objects.isNull(briefIslandDTO)) {
             return null;
         }
@@ -103,12 +117,20 @@ public class ChatDTOFactory {
         IslandGroupedChatGroupDTO islandGroupedChatGroupDTO = new IslandGroupedChatGroupDTO();
         islandGroupedChatGroupDTO.setIsland(briefIslandDTO);
         islandGroupedChatGroupDTO.setChatgroups(chatgroupMessageListMap.entrySet().stream().map(
-                entry -> this.valueOf(entry.getKey(), entry.getValue(), userMemberIds)).collect(Collectors.toList()));
+                entry -> this.valueOf(entry.getKey(), entry.getValue(), userMembershipIds)).collect(Collectors.toList()));
 
         return islandGroupedChatGroupDTO;
     }
 
-    public UserChatGroupDTO valueOf(ChatgroupMessage chatgroup, List<SimpleMembershipDTO> membershipDTOS, List<String> userMemberIds) {
+    /**
+     * Creates the {@link UserChatGroupDTO}.
+     *
+     * @param chatgroup         {@link ChatgroupMessage}.
+     * @param membershipDTOS    {@link SimpleMembershipDTO}.
+     * @param userMembershipIds User membership ids.
+     * @return {@link UserChatGroupDTO}.
+     */
+    public UserChatGroupDTO valueOf(ChatgroupMessage chatgroup, List<SimpleMembershipDTO> membershipDTOS, List<String> userMembershipIds) {
         if (Objects.isNull(chatgroup)) {
             return null;
         }
@@ -120,12 +142,13 @@ public class ChatDTOFactory {
         userChatGroupDTO.setBulletin(chatgroup.getBulletin());
         userChatGroupDTO.setMemberCount(chatgroup.getMemberCount());
         userChatGroupDTO.setMemberships(membershipDTOS);
+        userChatGroupDTO.setIsMuted(chatgroup.getMuted());
 
         Set<String> groupMembershipIds = membershipDTOS.stream()
                 .map(SimpleMembershipDTO::getId)
                 .collect(Collectors.toSet());
 
-        userChatGroupDTO.hasAccess(userMemberIds.stream().anyMatch(groupMembershipIds::contains));
+        userChatGroupDTO.hasAccess(userMembershipIds.stream().anyMatch(groupMembershipIds::contains));
 
         return userChatGroupDTO;
     }

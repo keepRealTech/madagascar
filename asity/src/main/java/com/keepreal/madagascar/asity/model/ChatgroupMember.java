@@ -29,6 +29,7 @@ public class ChatgroupMember {
     @Id
     private String id;
     private String groupId;
+    private String islandId;
     private String userId;
     @Column(name = "is_muted")
     @Builder.Default

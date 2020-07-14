@@ -93,10 +93,11 @@ public class ChatgroupService {
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .userId(userId)
                 .groupId(chatgroup.getId())
+                .islandId(chatgroup.getIslandId())
                 .build();
         this.chatgroupMemberRepository.save(chatgroupMember);
 
-        this.rongCloudService.joinGroup(chatgroup.getId(), userId);
+        this.rongCloudService.joinGroup(chatgroup.getId(), chatgroup.getName(), userId);
 
         chatgroup.setMemberCount(chatgroup.getMemberCount() + 1);
         chatgroup = this.upsert(chatgroup);
@@ -215,6 +216,13 @@ public class ChatgroupService {
                 .peek(chatgroupMember -> chatgroupMember.setDeleted(true))
                 .collect(Collectors.toList());
 
+        List<Chatgroup> chatgroups = this.chatgroupRepository.findAllById(chatgroupMembers.stream().map(ChatgroupMember::getGroupId).collect(Collectors.toList()));
+        chatgroups.forEach(chatgroup -> {
+            this.rongCloudService.quitGroup(chatgroup.getId(), userId);
+            chatgroup.setMemberCount(chatgroup.getMemberCount() - 1);
+        });
+
+        this.chatgroupRepository.saveAll(chatgroups);
         this.chatgroupMemberRepository.saveAll(chatgroupMembers);
     }
 
