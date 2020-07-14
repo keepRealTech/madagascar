@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.workflow.settler.model;
+package com.keepreal.madagascar.common.workflow.model;
 
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +27,8 @@ public class WorkflowLog {
 
     @Builder.Default
     private List<String> paymentIds = new ArrayList<>();
+    @Builder.Default
+    private List<String> reconciliationInfos = new ArrayList<>();
 
     private Long startTimestamp;
     private Long finishTimestamp;

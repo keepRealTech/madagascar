@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: asity
+
+grpc:
+  port: 12007
+
+rongcloud:
+  app-key: 123
+  app-secret: 567
+
+opentracing:
+  jaeger:
+    grpc-server-interceptor: false
+    const-sampler:
+      decision: false

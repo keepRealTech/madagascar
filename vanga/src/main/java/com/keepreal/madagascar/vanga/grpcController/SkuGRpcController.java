@@ -55,7 +55,7 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
     @Override
     public void retrieveActiveShellSkus(RetrieveShellSkusRequest request,
                                         StreamObserver<ShellSkusResponse> responseObserver) {
-        List<ShellSku> shellSkus = this.skuService.retrieveShellSkusByActiveIsTrue();
+        List<ShellSku> shellSkus = this.skuService.retrieveShellSkusByActiveIsTrue(request.getIsWechatPay());
 
         ShellSkusResponse response = ShellSkusResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))

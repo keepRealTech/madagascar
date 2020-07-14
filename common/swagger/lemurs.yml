@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.1.0"
+  version: "1.2.0"
   title: Keep Real API
 
 security:
@@ -25,6 +25,8 @@ tags:
     description: Notifications controllers
   - name: Report
     description: Reports controllers
+  - name: Repost
+    description: Reposts controllers
   - name: Config
     description: Configs controllers
   - name: Healthcheck
@@ -39,6 +41,9 @@ tags:
     description: SKU controller
   - name: Membership
     description: Membership controller
+  - name: Chat
+    description: Chat controller
+
 paths:
   /api/healthcheck:
     head:
@@ -296,7 +301,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Island
+        - Feed
       summary: retrieves a list of feeds with pagination
       responses:
         '200':
@@ -315,7 +320,7 @@ paths:
         - $ref: '#/components/parameters/timestampBefore'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Island
+        - Feed
       summary: retrieves a list of feeds with pagination
       responses:
         '200':
@@ -323,13 +328,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TimelinesResponse'
+                $ref: '#/components/schemas/FeedsResponseV2'
   /api/v1/islands/{id}/feeds/top:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
       tags:
-        - Island
+        - Feed
       summary: make a feed to top
       requestBody:
         required: true
@@ -435,7 +440,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Island
+        - Repost
       summary: retrieves a list of reposts with pagination
       responses:
         '200':
@@ -446,7 +451,7 @@ paths:
                 $ref: '#/components/schemas/RepostsResponse'
     post:
       tags:
-        - Island
+        - Repost
       summary: creates a new repost
       requestBody:
         required: true
@@ -456,7 +461,7 @@ paths:
               $ref: '#/components/schemas/PostRepostRequest'
       responses:
         '200':
-          description: reaction response
+          description: reposts response
           content:
             application/json:
               schema:
@@ -599,7 +604,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Feed
+        - Comment
       summary: retrieves a list of comments with pagination
       responses:
         '200':
@@ -610,7 +615,7 @@ paths:
                 $ref: '#/components/schemas/CommentsResponse'
     post:
       tags:
-        - Feed
+        - Comment
       summary: creates a new comment
       requestBody:
         required: true
@@ -633,7 +638,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Feed
+        - Reaction
       summary: retrieves a list of reactions with pagination
       responses:
         '200':
@@ -646,7 +651,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/isRevokeInQuery'
       tags:
-        - Feed
+        - Reaction
       summary: creates a new reaction
       requestBody:
         required: true
@@ -669,7 +674,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Feed
+        - Repost
       summary: retrieves a list of reposts with pagination
       responses:
         '200':
@@ -680,7 +685,7 @@ paths:
                 $ref: '#/components/schemas/RepostsResponse'
     post:
       tags:
-        - Feed
+        - Repost
       summary: creates a new repost
       requestBody:
         required: true
@@ -857,6 +862,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/orders/wechat:
+    post:
+      tags:
+        - Order
+      summary: create a new wechat shell order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostWechatOrderRequest'
+      responses:
+        '200':
+          description: wechat scallop order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
   /api/v1/islands/{id}/memberSubscription/wechatPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -967,7 +990,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ShellSkusResponse'
+                $ref: '#/components/schemas/IOSShellSkusResponse'
+  /api/v1/balances/wechatSkus:
+    get:
+      tags:
+        - Sku
+      summary: get all active wechat skus
+      responses:
+        '200':
+          description: skus info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatShellSkusResponse'
   /api/v1/membership/{id}/skus:
     parameters:
       - $ref: "#/components/parameters/idInPath"
@@ -1098,6 +1133,171 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/chats/token:
+    get:
+      tags:
+        - Chat
+      summary: get the chat token
+      responses:
+        '200':
+          description: chat token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatTokenResponse'
+  /api/v1/users/{id}/chats:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Chat
+      summary: check if has access with given user
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatAccessResponse'
+  /api/v1/users/{id}/chatgroups:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Chat
+      summary: retrieve all chat groups for the given island
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserChatGroupsResponse'
+  /api/v1/islands/{id}/chatgroups:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Chat
+      summary: retrieve all chat groups for the given island
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandChatGroupsResponse'
+    post:
+      tags:
+        - Chat
+      summary: create a new chat groups for the given island
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostChatGroupRequest'
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatGroupResponse'
+  /api/v1/chatgroups/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Chat
+      summary: updates the chatg
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutChatGroupRequest'
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatGroupResponse'
+    delete:
+      tags:
+        - Chat
+      summary: removes an existing chat group
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/chatgroups/{id}/join:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Chat
+      summary: joins an existing chat group
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/chataccess/grant:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Chat
+      summary: grant access to the islands chats
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/chataccess:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Chat
+      summary: grant access to the islands chats
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandChatAccessResponse'
+  /api/v1/users/avatars:
+    post:
+      tags:
+        - User
+      summary: retrieves users avatar urls in batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostBatchGetAvatarsRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvatarsResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1258,6 +1458,7 @@ components:
       type: string
       enum:
         - LOGIN_OAUTH_WECHAT
+        - LOGIN_OAUTH_MP_WECHAT
         - LOGIN_PASSWORD
         - LOGIN_JWT_IOS
     ConfigType:
@@ -1663,6 +1864,9 @@ components:
         userId:
           type: string
           description: user id to report
+        messageId:
+          type: string
+          description: rongyun message id
       required:
         - reportType
     ReportResponse:
@@ -1892,6 +2096,29 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedDTO'
+    ToppedFeedsDTO:
+      type: object
+      properties:
+        feeds:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedDTO'
+        toppedFeeds:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedDTO'
+    FeedsResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            currentTime:
+              type: integer
+              format: int64
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              $ref: '#/components/schemas/ToppedFeedsDTO'
     SnapshotCommentDTO:
       allOf:
         - $ref: '#/components/schemas/CommentDTO'
@@ -2256,6 +2483,8 @@ components:
           type: string
         refreshToken:
           type: string
+        openId:
+          type: string
     LoginTokenInfo:
       allOf:
         - $ref: '#/components/schemas/BriefTokenInfo'
@@ -2354,6 +2583,13 @@ components:
         shellSkuId:
           type: string
         receipt:
+          type: string
+    PostWechatOrderRequest:
+      type: object
+      properties:
+        shellSkuId:
+          type: string
+        openId:
           type: string
     WechatOrderDTO:
       type: object
@@ -2455,7 +2691,7 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BillingInfoDTO'
-    ShellSkuDTO:
+    IOSShellSkuDTO:
       type: object
       properties:
         id:
@@ -2472,7 +2708,22 @@ components:
           format: int64
         isDefault:
           type: boolean
-    ShellSkusResponse:
+    WechatShellSkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        shells:
+          type: integer
+          format: int64
+        priceInCents:
+          type: integer
+          format: int64
+        isDefault:
+          type: boolean
+    IOSShellSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -2480,7 +2731,16 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/ShellSkuDTO'
+                $ref: '#/components/schemas/IOSShellSkuDTO'
+    WechatShellSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/WechatShellSkuDTO'
     MembershipSkuDTO:
       type: object
       properties:
@@ -2619,3 +2879,158 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedMembershipDTO'
+    ChatTokenDTO:
+      type: object
+      properties:
+        token:
+          type: string
+    ChatTokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ChatTokenDTO'
+    ChatAccessDTO:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        hasAccess:
+          type: boolean
+    ChatAccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ChatAccessDTO'
+    ChatGroupDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        islandId:
+          type: string
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleMembershipDTO'
+        memberCount:
+          type: integer
+        bulletin:
+          type: string
+    PostChatGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        bulletin:
+          type: string
+        membershipIds:
+          type: array
+          items:
+            type: string
+    PutChatGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        bulletin:
+          type: string
+        membershipIds:
+          type: array
+          items:
+            type: string
+    ChatGroupResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ChatGroupDTO'
+    IslandGroupedChatGroupDTO:
+      type: object
+      properties:
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
+        chatgroups:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserChatGroupDTO'
+    UserChatGroupDTO:
+      allOf:
+        - $ref: '#/components/schemas/ChatGroupDTO'
+        - type: object
+          properties:
+            hasAccess:
+              type: boolean
+    UserChatGroupsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/IslandGroupedChatGroupDTO'
+    IslandChatGroupsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserChatGroupDTO'
+    IslandChatAccessDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        islandId:
+          type: string
+        groupchatCount:
+          type: integer
+        memberCount:
+          type: integer
+        recentMembers:
+          type: array
+          items:
+            $ref: '#/components/schemas/BriefUserDTO'
+        hasAccess:
+          type: boolean
+    IslandChatAccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IslandChatAccessDTO'
+    AvatarDTO:
+      type: object
+      properties:
+        userId:
+          type: string
+        portraitUrl:
+          type: string
+    PostBatchGetAvatarsRequest:
+      type: object
+      properties:
+        userIds:
+          type: array
+          items:
+            type: string
+    AvatarsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/AvatarDTO'

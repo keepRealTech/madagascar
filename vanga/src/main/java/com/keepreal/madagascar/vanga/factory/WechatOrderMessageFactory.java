@@ -51,8 +51,8 @@ public class WechatOrderMessageFactory {
 
         return  WechatOrderMessage.newBuilder()
                 .setId(wechatOrder.getId())
-                .setAppId(this.wechatPayConfiguration.getAppId())
-                .setPartnerId(this.wechatPayConfiguration.getMchId())
+                .setAppId(wechatOrder.getAppId())
+                .setPartnerId(wechatOrder.getMchId())
                 .setTimestamp(wechatOrder.getCreatedTime())
                 .setNonceStr(wechatOrder.getNonceStr())
                 .setPrepayId(wechatOrder.getPrepayId())

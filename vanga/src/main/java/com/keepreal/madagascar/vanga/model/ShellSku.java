@@ -30,6 +30,8 @@ public class ShellSku {
 
     @Id
     private String id;
+    @Builder.Default
+    private Boolean isWechatPay = false;
     private String appleSkuId;
     @Builder.Default
     private String description = "";

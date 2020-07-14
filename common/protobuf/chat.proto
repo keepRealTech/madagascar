@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.asity";
+
+import "common.proto";
+
+message RegisterRequest {
+  string userId = 1;
+  string userName = 2;
+  string portraitUrl = 3;
+}
+
+message RegisterResponse {
+  CommonStatus status = 1;
+  string token = 2;
+}
+
+service ChatService {
+  rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
+}

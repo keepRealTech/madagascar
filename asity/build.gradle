@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'com.google.protobuf'
+    id 'com.palantir.docker'
+}
+
+sourceSets {
+    main {
+        proto {
+            srcDirs 'src/main/madagascar-grpc-proto'
+        }
+    }
+}
+
+dependencies {
+    implementation project(":common:exceptions")
+
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'cn.rongcloud.im:server-sdk-java'
+    implementation 'io.github.lognet:grpc-spring-boot-starter'
+    implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'
+    implementation 'io.opentracing.contrib:opentracing-grpc'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+}
