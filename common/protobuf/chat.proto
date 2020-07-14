@@ -26,12 +26,10 @@ message RegisterResponse {
 
 message EnableChatAccessRequest {
   string islandId = 1;
-  string userId = 2;
 }
 
-message RetrieveChatAccessByIslandIdAndUserIdRequest {
+message RetrieveChatAccessByIslandIdRequest {
   string islandId = 1;
-  string userId = 2;
 }
 
 message IslandChatAccessResponse {
@@ -115,7 +113,7 @@ message UserChatgroupsResponse {
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
-  rpc RetrieveChatAccessByIslandIdAndUserId(RetrieveChatAccessByIslandIdAndUserIdRequest) returns (IslandChatAccessResponse) {};
+  rpc RetrieveChatAccessByIslandId(RetrieveChatAccessByIslandIdRequest) returns (IslandChatAccessResponse) {};
   rpc CreateChatgroup(CreateChatgroupRequest) returns (ChatgroupResponse) {};
   rpc UpdateChatgroup(UpdateChatgroupRequest) returns (ChatgroupResponse) {};
   rpc DismissChatgroup(DismissChatgroupRequest) returns (CommonStatus) {};

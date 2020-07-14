@@ -164,8 +164,14 @@ public class ChatController implements ChatApi {
     public ResponseEntity<IslandChatAccessResponse> apiV1IslandsIdChataccessGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
+        boolean subscribed = this.islandService.retrieveIslandSubscribeStateByUserId(userId, Collections.singletonList(id)).get(id);
+
+        if (!subscribed) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_NOT_SUBSCRIBED_ERROR);
+        }
+
         com.keepreal.madagascar.asity.IslandChatAccessResponse islandChatAccessResponse =
-                this.chatService.retrieveChatAccessByIslandIdAndUserId(id, userId);
+                this.chatService.retrieveChatAccessByIslandId(id);
 
         IslandChatAccessResponse response = new IslandChatAccessResponse();
         response.data(this.chatDTOFactory.buildIslandAccess(islandChatAccessResponse.getChatAccess(),
@@ -191,13 +197,13 @@ public class ChatController implements ChatApi {
     public ResponseEntity<DummyResponse> apiV1IslandsIdChataccessGrantPost(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        boolean subscribed = this.islandService.retrieveIslandSubscribeStateByUserId(userId, Collections.singletonList(id)).get(id);
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
 
-        if (!subscribed) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_NOT_SUBSCRIBED_ERROR);
+        if (!islandMessage.getHostId().equals(userId)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FORBIDDEN);
         }
 
-        this.chatService.enableChatAccess(id, userId);
+        this.chatService.enableChatAccess(id);
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);

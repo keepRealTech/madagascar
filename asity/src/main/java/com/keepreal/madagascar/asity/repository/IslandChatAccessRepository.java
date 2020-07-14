@@ -12,10 +12,6 @@ import java.util.List;
 @Repository
 public interface IslandChatAccessRepository extends JpaRepository<IslandChatAccess, String> {
 
-    IslandChatAccess findByIslandIdAndUserIdAndDeletedIsFalse(String islandId, String userId);
-
-    Long countByIslandIdAndEnabledIsTrueAndDeletedIsFalse(String islandId);
-
-    List<IslandChatAccess> findTop4ByIslandIdAndEnabledIsTrueAndDeletedIsFalseOrderByCreatedTimeDesc(String islandId);
+    IslandChatAccess findByIslandIdAndDeletedIsFalse(String islandId);
 
 }

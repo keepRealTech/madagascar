@@ -11,7 +11,7 @@ import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetreiveChatgroupsByUserIdRequest;
-import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
@@ -117,7 +117,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     @Override
     public void enableChatAccess(EnableChatAccessRequest request,
                                  StreamObserver<CommonStatus> responseObserver) {
-        this.islandChatAccessService.enable(request.getIslandId(), request.getUserId());
+        this.islandChatAccessService.enable(request.getIslandId());
 
         CommonStatus response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         responseObserver.onNext(response);
@@ -127,14 +127,14 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Retrieves the chat access for an island and user.
      *
-     * @param request          {@link RetrieveChatAccessByIslandIdAndUserIdRequest}.
+     * @param request          {@link RetrieveChatAccessByIslandIdRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
     @Override
-    public void retrieveChatAccessByIslandIdAndUserId(RetrieveChatAccessByIslandIdAndUserIdRequest request,
-                                                      StreamObserver<IslandChatAccessResponse> responseObserver) {
+    public void retrieveChatAccessByIslandId(RetrieveChatAccessByIslandIdRequest request,
+                                             StreamObserver<IslandChatAccessResponse> responseObserver) {
         IslandChatAccess islandChatAccess = this.islandChatAccessService.
-                retrieveOrCreateIslandChatAccessIfNotExistsByIslandIdAndUserId(request.getIslandId(), request.getUserId());
+                retrieveOrCreateIslandChatAccessIfNotExistsByIslandId(request.getIslandId());
 
         IslandChatAccessResponse response = IslandChatAccessResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
@@ -287,15 +287,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
             return;
         }
 
-        IslandChatAccess islandChatAccess
-                = this.islandChatAccessService.retrieveOrCreateIslandChatAccessIfNotExistsByIslandIdAndUserId(chatgroup.getIslandId(), request.getUserId());
-
-        if (Objects.isNull(islandChatAccess) || !islandChatAccess.getEnabled()) {
-            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN);
-        } else {
-            this.chatgroupService.joinChatgroup(request.getUserId(), chatgroup);
-            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
-        }
+        this.chatgroupService.joinChatgroup(request.getUserId(), chatgroup);
+        response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

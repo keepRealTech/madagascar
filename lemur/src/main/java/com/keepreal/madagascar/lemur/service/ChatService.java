@@ -14,7 +14,7 @@ import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetreiveChatgroupsByUserIdRequest;
-import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
@@ -99,14 +99,12 @@ public class ChatService {
      * Enables the chat access.
      *
      * @param islandId Island id.
-     * @param userId   User id.
      */
-    public void enableChatAccess(String islandId, String userId) {
+    public void enableChatAccess(String islandId) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
 
         EnableChatAccessRequest request = EnableChatAccessRequest.newBuilder()
                 .setIslandId(islandId)
-                .setUserId(userId)
                 .build();
 
         CommonStatus commonStatus;
@@ -125,20 +123,18 @@ public class ChatService {
      * Retrieves chat access.
      *
      * @param islandId Island id.
-     * @param userId   User id.
      * @return {@link IslandChatAccessResponse}.
      */
-    public IslandChatAccessResponse retrieveChatAccessByIslandIdAndUserId(String islandId, String userId) {
+    public IslandChatAccessResponse retrieveChatAccessByIslandId(String islandId) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
 
-        RetrieveChatAccessByIslandIdAndUserIdRequest request = RetrieveChatAccessByIslandIdAndUserIdRequest.newBuilder()
+        RetrieveChatAccessByIslandIdRequest request = RetrieveChatAccessByIslandIdRequest.newBuilder()
                 .setIslandId(islandId)
-                .setUserId(userId)
                 .build();
 
         IslandChatAccessResponse response;
         try {
-            response = stub.retrieveChatAccessByIslandIdAndUserId(request);
+            response = stub.retrieveChatAccessByIslandId(request);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

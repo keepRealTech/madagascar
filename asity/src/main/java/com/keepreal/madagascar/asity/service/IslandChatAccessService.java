@@ -17,61 +17,46 @@ public class IslandChatAccessService {
 
     private final IslandChatAccessRepository islandChatAccessRepository;
     private final LongIdGenerator idGenerator;
+    private final ChatgroupService chatgroupService;
 
     /**
      * Constructs the island chat access service.
      *
      * @param islandChatAccessRepository    {@link IslandChatAccessRepository}.
      * @param idGenerator                   {@link LongIdGenerator}.
+     * @param chatgroupService              {@link ChatgroupService}.
      */
     public IslandChatAccessService(IslandChatAccessRepository islandChatAccessRepository,
-                                   LongIdGenerator idGenerator) {
+                                   LongIdGenerator idGenerator,
+                                   ChatgroupService chatgroupService) {
         this.islandChatAccessRepository = islandChatAccessRepository;
         this.idGenerator = idGenerator;
+        this.chatgroupService = chatgroupService;
     }
 
     /**
      * Retrieves or creates if not exists for given island and user.
      *
      * @param islandId   Island id.
-     * @param userId     User id.
      * @return {@link IslandChatAccess}.
      */
-    public IslandChatAccess retrieveOrCreateIslandChatAccessIfNotExistsByIslandIdAndUserId(String islandId, String userId) {
-        IslandChatAccess islandChatAccess = this.islandChatAccessRepository.findByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
+    public IslandChatAccess retrieveOrCreateIslandChatAccessIfNotExistsByIslandId(String islandId) {
+        IslandChatAccess islandChatAccess = this.islandChatAccessRepository.findByIslandIdAndDeletedIsFalse(islandId);
         if (Objects.nonNull(islandChatAccess)) {
             return islandChatAccess;
         }
 
-        return this.createIslandChatAccess(islandId, userId);
-    }
-
-    /**
-     * Creates a new entity for given island and user.
-     *
-     * @param islandId  Island id.
-     * @param userId    User id.
-     * @return {@link IslandChatAccess}.
-     */
-    public IslandChatAccess createIslandChatAccess(String islandId, String userId) {
-        IslandChatAccess islandChatAccess = IslandChatAccess.builder()
-                .id(String.valueOf(idGenerator.nextId()))
-                .islandId(islandId)
-                .userId(userId)
-                .build();
-
-        return this.islandChatAccessRepository.save(islandChatAccess);
+        return this.createIslandChatAccess(islandId);
     }
 
     /**
      * Enables chat access for the given island and user.
      *
      * @param islandId  Island id.
-     * @param userId    User id.
      * @return {@link IslandChatAccess}.
      */
-    public IslandChatAccess enable(String islandId, String userId) {
-        IslandChatAccess islandChatAccess = this.retrieveOrCreateIslandChatAccessIfNotExistsByIslandIdAndUserId(islandId, userId);
+    public IslandChatAccess enable(String islandId) {
+        IslandChatAccess islandChatAccess = this.retrieveOrCreateIslandChatAccessIfNotExistsByIslandId(islandId);
         islandChatAccess.setEnabled(true);
         return this.islandChatAccessRepository.save(islandChatAccess);
     }
@@ -83,7 +68,7 @@ public class IslandChatAccessService {
      * @return Count.
      */
     public Integer countEnabledMember(String islandId) {
-        return Math.toIntExact(this.islandChatAccessRepository.countByIslandIdAndEnabledIsTrueAndDeletedIsFalse(islandId));
+        return Math.toIntExact(this.chatgroupService.countChatgroupMembersByIslandId(islandId));
     }
 
     /**
@@ -96,6 +81,21 @@ public class IslandChatAccessService {
         return this.islandChatAccessRepository.findTop4ByIslandIdAndEnabledIsTrueAndDeletedIsFalseOrderByCreatedTimeDesc(islandId).stream()
                 .map(IslandChatAccess::getUserId)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Creates a new entity for given island and user.
+     *
+     * @param islandId  Island id.
+     * @return {@link IslandChatAccess}.
+     */
+    private IslandChatAccess createIslandChatAccess(String islandId) {
+        IslandChatAccess islandChatAccess = IslandChatAccess.builder()
+                .id(String.valueOf(idGenerator.nextId()))
+                .islandId(islandId)
+                .build();
+
+        return this.islandChatAccessRepository.save(islandChatAccess);
     }
 
 }

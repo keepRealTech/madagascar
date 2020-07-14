@@ -268,4 +268,14 @@ public class ChatgroupService {
         return this.chatgroupRepository.findAllByIdInAndDeletedIsFalse(ids);
     }
 
+    /**
+     * Counts distinct users as chatgroup members by island id.
+     *
+     * @param islandId Island id.
+     * @return Count.
+     */
+    public Long countChatgroupMembersByIslandId(String islandId) {
+        return this.chatgroupMemberRepository.countDistinctUserIdByIslandIdAndDeletedIsFalse(islandId);
+    }
+
 }
