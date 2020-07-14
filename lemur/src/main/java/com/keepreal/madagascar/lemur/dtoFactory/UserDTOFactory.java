@@ -142,7 +142,15 @@ public class UserDTOFactory {
      * @return {@link AvatarDTO}.
      */
     public AvatarDTO avatorValueOf(UserMessage user) {
-        return null;
+        if (Objects.isNull(user)) {
+            return null;
+        }
+
+        AvatarDTO avatarDTO = new AvatarDTO();
+        avatarDTO.setUserId(user.getId());
+        avatarDTO.setPortraitUrl(user.getPortraitImageUri());
+
+        return avatarDTO;
     }
 
     /**
