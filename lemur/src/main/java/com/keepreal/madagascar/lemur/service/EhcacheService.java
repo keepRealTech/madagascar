@@ -12,16 +12,23 @@ public class EhcacheService {
 
     private final FeedService feedService;
     private final Cache feedExistenceCache;
+    private final CommentService commentService;
+    private final Cache commentExistenceCache;
 
     /**
      * Constructs the service.
      *
-     * @param feedService  {@link FeedService}.
-     * @param cacheManager {@link CacheManager}.
+     * @param feedService           {@link FeedService}.
+     * @param cacheManager          {@link CacheManager}.
+     * @param commentService        {@link CommentService}.
      */
-    public EhcacheService(FeedService feedService, CacheManager cacheManager) {
+    public EhcacheService(FeedService feedService,
+                          CacheManager cacheManager,
+                          CommentService commentService) {
         this.feedService = feedService;
         this.feedExistenceCache = cacheManager.getCache("feed-existence");
+        this.commentService = commentService;
+        this.commentExistenceCache = cacheManager.getCache("comment-existence");
     }
 
     /**
@@ -40,6 +47,20 @@ public class EhcacheService {
         }
 
         this.feedExistenceCache.put(feedId, true);
+
+        return true;
+    }
+
+    public boolean checkCommentDeleted(String commentId) {
+        if (Boolean.TRUE.equals(this.commentExistenceCache.get(commentId, Boolean.class))) {
+            return true;
+        }
+
+        if (!this.commentService.retrieveCommentById(commentId).getIsDeleted()) {
+            return false;
+        }
+
+        this.feedExistenceCache.put(commentId, true);
 
         return true;
     }

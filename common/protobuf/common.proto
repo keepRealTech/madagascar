@@ -182,6 +182,7 @@ message CommentMessage {
     string userId = 4;
     string replyToId = 5;
     uint64 createdAt = 6;
+    bool isDeleted = 7;
 }
 
 message ReactionMessage {
