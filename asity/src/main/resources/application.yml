@@ -1,13 +1,19 @@
 spring:
   application:
     name: asity
+  datasource:
+    url: jdbc:mysql://root:password@localhost:3306/asity
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQLDialect
 
 grpc:
   port: 12007
 
 rongcloud:
   app-key: 123
-  app-secret: 567
+  app-secret: 456
 
 rocketmq:
   notification:
