@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.marty.schedule;
 
+import com.aliyun.openservices.shade.com.alibaba.fastjson.JSONObject;
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokenResponse;
@@ -12,6 +13,7 @@ import org.redisson.api.RBucket;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -49,30 +51,40 @@ public class PushScheduler {
                     RMap<Object, Object> map = redissonClient.getMap(userId);
                     Integer type = (Integer) map.get("type");
                     Integer count = (Integer) map.get("count");
-                    String name = (String) map.get("text");
+                    String latestUserId = (String) map.get("latestUserId");
 
                     Map<String, List<String>> token = getToken(userId);
 
-                    String nickname = getNickname(name);
+                    String nickname = getNickname(latestUserId);
 
                     this.processAndJPushIosNotification(nickname, count, type, token.get("ios"));
-                    this.processAndUmengPushNotification();
+                    this.processAndUmengPushNotification(nickname, count, type, token.get("android"));
                 });
     }
 
     private void processAndJPushIosNotification(String name, Integer count, Integer type, List<String> tokenList) {
         PushPriorityInfo pushPriorityInfo = PushPriorityConverter.convertTo(type);
-        String notificationType = pushPriorityInfo.getName();
-        String url = pushPriorityInfo.getIosUrl();
-        String alert = name + "等" + count + "人给你" + notificationType;
-        Map<String, String> urlMap = new HashMap<>();
-        urlMap.put("url", url);
 
-        jpushService.pushIosNotification(alert, urlMap, (String[]) tokenList.toArray());
+        String alert = getTitle(name, count);
+
+        alert += "\n" + pushPriorityInfo.getNotificationNoticeType();
+
+        Map<String, String> extrasMap = getExtrasMap(pushPriorityInfo);
+
+        jpushService.pushIosNotification(alert, extrasMap, (String[]) tokenList.toArray());
     }
 
-    private void processAndUmengPushNotification() {
+    private void processAndUmengPushNotification(String name, Integer count, Integer type, List<String> tokenList) {
+        String title = getTitle(name, count);
 
+        PushPriorityInfo pushPriorityInfo = PushPriorityConverter.convertTo(type);
+        String text = pushPriorityInfo.getText();
+
+        String tokenString = tokenList.toString();
+
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.putAll(getExtrasMap(pushPriorityInfo));
+        umengPushService.pushNotification(tokenString.substring(1, tokenString.length() -1), title, text, jsonObject);
     }
 
     private Map<String, List<String>> getToken(String userId) {
@@ -98,5 +110,24 @@ public class PushScheduler {
             return userMessage.getName();
         }
         return (String) nickname.get();
+    }
+
+    private String getTitle(String name, Integer count) {
+        String title = name;
+        if (count > 1) {
+            title += "等"+count+"人";
+        }
+        return title;
+    }
+
+    private Map<String, String> getExtrasMap(PushPriorityInfo pushPriorityInfo) {
+        Map<String, String> map = new HashMap<>();
+        map.put("notification_type", pushPriorityInfo.getNotificationType());
+        String notificationNoticeType = pushPriorityInfo.getNotificationNoticeType();
+        if (!StringUtils.isEmpty(notificationNoticeType)) {
+            map.put("notification_notice_type", notificationNoticeType);
+        }
+
+        return map;
     }
 }

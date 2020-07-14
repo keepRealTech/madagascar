@@ -16,27 +16,25 @@ public class PushPriorityConverter {
 
         switch (priorityType) {
             case PushPriority.NEW_COMMENT_VALUE:
-                pushPriorityInfo.setName("评论");
-                pushPriorityInfo.setAndroidUrl("");
-                pushPriorityInfo.setIosUrl("");
+                pushPriorityInfo.setText("评论了你的动态");
+                pushPriorityInfo.setNotificationType("type：NOTIFICATION_COMMENTS");
                 break;
             case PushPriority.NEW_LIKE_VALUE:
-                pushPriorityInfo.setName("点赞");
-                pushPriorityInfo.setAndroidUrl("");
-                pushPriorityInfo.setIosUrl("");
+                pushPriorityInfo.setText("赞了你的动态");
+                pushPriorityInfo.setNotificationType("NOTIFICATION_REACTIONS");
                 break;
             case PushPriority.NEW_MEMBERSHIP_VALUE:
-                pushPriorityInfo.setName("新岛民");
-                pushPriorityInfo.setAndroidUrl("");
-                pushPriorityInfo.setIosUrl("");
+                pushPriorityInfo.setText("加入了你的岛");
+                pushPriorityInfo.setNotificationType("NOTIFICATION_ISLAND_NOTICE");
+                pushPriorityInfo.setNotificationNoticeType("SUBSCRIBER");
                 break;
             case PushPriority.NEW_SUBSCRIBE_VALUE:
-                pushPriorityInfo.setName("新会员");
-                pushPriorityInfo.setAndroidUrl("");
-                pushPriorityInfo.setIosUrl("");
+                pushPriorityInfo.setText("订阅了你的会员");
+                pushPriorityInfo.setNotificationType("NOTIFICATION_ISLAND_NOTICE");
+                pushPriorityInfo.setNotificationNoticeType("MEMBER");
                 break;
             default:
-                System.out.println("");
+                return pushPriorityInfo;
         }
 
         return pushPriorityInfo;

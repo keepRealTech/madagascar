@@ -11,8 +11,10 @@ import lombok.Data;
 @Data
 public class PushPriorityInfo {
 
-    private String name;
-    private String androidUrl;
-    private String iosUrl;
+    private String text;
+    private String androidUrl = "/noti/comment";
+    private Integer iosUrl = 0;
+    private String notificationType;
+    private String notificationNoticeType;
 
 }

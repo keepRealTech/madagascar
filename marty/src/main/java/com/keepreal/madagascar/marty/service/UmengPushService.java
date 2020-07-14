@@ -50,9 +50,12 @@ public class UmengPushService {
         umengPushClient.push(androidListCast.toString());
     }
 
-    public void pushNotification(String tokens, String title, String text) {
+    public void pushNotification(String tokens, String title, String text, JSONObject jsonObject) {
         AndroidListCast androidListCast = new AndroidListCast(umengConfiguration.getAndroidAppKey());
+        androidListCast.setCustom(jsonObject);
         androidListCast.setDeviceToken(tokens);
+        androidListCast.setDisplayType("notification");
+        androidListCast.setAfterOpen("go_custom");
         androidListCast.setTitle(title);
         androidListCast.setText(text);
 

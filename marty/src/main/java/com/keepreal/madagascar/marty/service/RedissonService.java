@@ -15,12 +15,12 @@ public class RedissonService {
         this.redissonClient = redissonClient;
     }
 
-    public void putPushInfo(String userId, PushPriority pushPriority, String text) {
+    public void putPushInfo(String userId, PushPriority pushPriority, String latestUserId) {
         RMap<Object, Object> redisPushMap = redissonClient.getMap(userId);
         if (redisPushMap == null || redisPushMap.size() == 0) {
             redisPushMap.put("type", pushPriority.getNumber());
             redisPushMap.put("count", 1);
-            redisPushMap.put("text", text);
+            redisPushMap.put("latestUserId", latestUserId);
             return;
         }
 
@@ -35,6 +35,6 @@ public class RedissonService {
             redisPushMap.put("count", 1);
         }
 
-        redisPushMap.put("text", text);
+        redisPushMap.put("text", latestUserId);
     }
 }
