@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Represents the chat group repository.
  */
@@ -17,5 +19,7 @@ public interface ChatgroupRepository extends JpaRepository<Chatgroup, String> {
     Long countByIslandIdAndDeletedIsFalse(String islandId);
 
     Page<Chatgroup> findAllByIslandIdAndDeletedIsFalse(String islandId, Pageable pageable);
+
+    List<Chatgroup> findAllByIdInAndDeletedIsFalse(Iterable<String> ids);
 
 }

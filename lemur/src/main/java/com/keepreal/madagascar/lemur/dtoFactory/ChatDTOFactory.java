@@ -72,6 +72,7 @@ public class ChatDTOFactory {
         islandChatAccessDTO.setMemberCount(memberCount);
         islandChatAccessDTO.setGroupchatCount(chatGroupCount);
         islandChatAccessDTO.setRecentMembers(recentMembers);
+        islandChatAccessDTO.setHasAccess(chatAccessMessage.getHasAccess());
         return islandChatAccessDTO;
     }
 

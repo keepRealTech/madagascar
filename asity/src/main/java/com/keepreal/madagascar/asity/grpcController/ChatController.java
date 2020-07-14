@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.asity.grpcController;
 
-import com.google.common.base.Functions;
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
@@ -11,10 +10,12 @@ import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
 import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
+import com.keepreal.madagascar.asity.RetreiveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdAndUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
+import com.keepreal.madagascar.asity.UserChatgroupsResponse;
 import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
 import com.keepreal.madagascar.asity.factory.IslandChatAccessMessageFactory;
 import com.keepreal.madagascar.asity.model.Chatgroup;
@@ -132,7 +133,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     @Override
     public void retrieveChatAccessByIslandIdAndUserId(RetrieveChatAccessByIslandIdAndUserIdRequest request,
                                                       StreamObserver<IslandChatAccessResponse> responseObserver) {
-        IslandChatAccess islandChatAccess = this.islandChatAccessService.createIslandChatAccess(request.getIslandId(), request.getUserId());
+        IslandChatAccess islandChatAccess = this.islandChatAccessService.
+                retrieveOrCreateIslandChatAccessIfNotExistsByIslandIdAndUserId(request.getIslandId(), request.getUserId());
 
         IslandChatAccessResponse response = IslandChatAccessResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
@@ -334,7 +336,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Implements the get chatgroups by island.
      *
-     * @param request  {@link RetrieveChatgroupsByIslandIdRequest}.
+     * @param request          {@link RetrieveChatgroupsByIslandIdRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
     @Override
@@ -355,6 +357,33 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                         .map(chatgroup -> this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMembers.getOrDefault(chatgroup.getId(), null)))
                         .collect(Collectors.toList()))
                 .setPageResponse(PaginationUtils.valueOf(chatgroups, pageRequest))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the retrieve chatgroups by user.
+     *
+     * @param request          {@link RetreiveChatgroupsByUserIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void retrieveChatgroupsByUserId(RetreiveChatgroupsByUserIdRequest request,
+                                           StreamObserver<UserChatgroupsResponse> responseObserver) {
+        List<ChatgroupMember> chatgroupMembers = this.chatgroupService.retrieveChatgroupMembersByUserId(request.getUserId());
+
+        Map<String, ChatgroupMember> chatgroupMap = chatgroupMembers.stream()
+                .collect(Collectors.toMap(ChatgroupMember::getGroupId, Function.identity()));
+
+        List<Chatgroup> chatgroups = this.chatgroupService.retrieveChatgroupsByIds(chatgroupMap.keySet());
+
+        UserChatgroupsResponse response = UserChatgroupsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .addAllChatgroups(chatgroups.stream()
+                        .map(chatgroup -> this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMap.get(chatgroup.getId())))
+                        .collect(Collectors.toList()))
                 .build();
 
         responseObserver.onNext(response);

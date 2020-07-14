@@ -248,4 +248,24 @@ public class ChatgroupService {
         return this.chatgroupMemberRepository.findAllByGroupIdInAndUserIdAndDeletedIsFalse(groupIds, userId);
     }
 
+    /**
+     * Retrieves all chatgroup members by user id.
+     *
+     * @param userId User id.
+     * @return {@link ChatgroupMember}.
+     */
+    public List<ChatgroupMember> retrieveChatgroupMembersByUserId(String userId) {
+        return this.chatgroupMemberRepository.findAllByUserIdAndDeletedIsFalse(userId);
+    }
+
+    /**
+     * Retrieves all chatgroups by ids.
+     *
+     * @param ids Ids.
+     * @return {@link Chatgroup}.
+     */
+    public List<Chatgroup> retrieveChatgroupsByIds(Iterable<String> ids) {
+        return this.chatgroupRepository.findAllByIdInAndDeletedIsFalse(ids);
+    }
+
 }
