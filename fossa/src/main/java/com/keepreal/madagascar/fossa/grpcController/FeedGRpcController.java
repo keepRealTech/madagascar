@@ -312,7 +312,11 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
 
         if (condition.hasExcludeTopped()) {
-            Criteria criteria = Criteria.where("isTop").is(false);
+            boolean value = condition.getExcludeTopped().getValue();
+            Criteria criteria = new Criteria();
+            if (value) {
+                criteria = Criteria.where("isTop").is(false);
+            }
             query.addCriteria(criteria);
         }
 

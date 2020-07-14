@@ -178,7 +178,7 @@ public class FeedController implements FeedApi {
                                                                      Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(islandId, fromHost, userId, null, null, page, pageSize, null);
+                this.feedService.retrieveIslandFeeds(islandId, fromHost, userId, null, null, page, pageSize, false);
 
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedsResponse.getFeedList()
@@ -237,7 +237,7 @@ public class FeedController implements FeedApi {
                                                                               Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, null, page, pageSize, null);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, null, page, pageSize, false);
 
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedsResponse.getFeedList()

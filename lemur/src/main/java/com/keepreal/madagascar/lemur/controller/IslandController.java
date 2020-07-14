@@ -491,7 +491,7 @@ public class IslandController implements IslandApi {
      */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
     public List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
-        return feedService.retrieveIslandFeeds(islandId, null, userId, 0L, null, 0, 5, null)
+        return feedService.retrieveIslandFeeds(islandId, null, userId, 0L, null, 0, 5, false)
                 .getFeedList()
                 .stream()
                 .map(feedDTOFactory::posterValueOf)
