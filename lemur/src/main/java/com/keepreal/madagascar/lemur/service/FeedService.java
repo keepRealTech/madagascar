@@ -222,7 +222,8 @@ public class FeedService {
      * @param pageSize       Page size.
      * @return {@link FeedsResponse}.
      */
-    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, Long timestampAfter, Long timestampBefore, int page, int pageSize) {
+    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, Long timestampAfter,
+                                             Long timestampBefore, int page, int pageSize, Boolean includeTopped) {
         Assert.hasText(islandId, "Island id is null.");
 
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
@@ -238,6 +239,10 @@ public class FeedService {
             conditionBuilder.setTimestampBefore(Int64Value.of(timestampBefore));
         } else {
             conditionBuilder.setTimestampAfter(Int64Value.of(timestampAfter == null ? 0L : timestampAfter));
+        }
+
+        if (Objects.nonNull(includeTopped)) {
+            conditionBuilder.setIncludeTopped(BoolValue.of(includeTopped));
         }
 
         RetrieveMultipleFeedsRequest request = RetrieveMultipleFeedsRequest.newBuilder()

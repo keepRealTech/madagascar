@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
@@ -190,7 +191,6 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         int pageSize = request.getPageRequest().getPageSize();
         String userId = request.getUserId();
         Query query = generatorQueryByRequest(request);
-        query.addCriteria(Criteria.where("isTop").is(false));
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
         List<FeedMessage> feedMessageList = feedInfoList.stream()
@@ -309,6 +309,11 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                     Criteria.where("createdTime").lt(condition.getTimestampBefore().getValue()) :
                     Criteria.where("createdTime").gt(condition.getTimestampAfter().getValue());
             query.addCriteria(timeCriteria);
+        }
+
+        if (condition.hasIncludeTopped()) {
+            Criteria criteria = Criteria.where("isTop").is(false);
+            query.addCriteria(criteria);
         }
 
         // 没有条件

@@ -178,7 +178,7 @@ public class FeedController implements FeedApi {
                                                                      Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(islandId, fromHost, userId, null, null, page, pageSize);
+                this.feedService.retrieveIslandFeeds(islandId, fromHost, userId, null, null, page, pageSize, null);
 
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedsResponse.getFeedList()
@@ -237,7 +237,7 @@ public class FeedController implements FeedApi {
                                                                               Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, null, page, pageSize);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, null, page, pageSize, null);
 
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedsResponse.getFeedList()
@@ -269,7 +269,7 @@ public class FeedController implements FeedApi {
                                                                    Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse normalFeedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize, false);
 
         com.keepreal.madagascar.fossa.FeedResponse toppedFeedResponse = this.feedService.retrieveIslandToppedFeeds(id, userId);
         FeedsResponseV2 response = new FeedsResponseV2();

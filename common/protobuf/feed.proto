@@ -11,6 +11,7 @@ message QueryFeedCondition {
     google.protobuf.BoolValue fromHost = 2;
     google.protobuf.Int64Value timestampAfter = 3;
     google.protobuf.Int64Value timestampBefore = 4;
+    google.protobuf.BoolValue includeTopped = 5;
 }
 
 message NewFeedsRequest {
