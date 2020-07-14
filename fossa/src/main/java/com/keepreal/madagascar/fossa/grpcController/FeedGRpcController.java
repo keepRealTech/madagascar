@@ -311,7 +311,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             query.addCriteria(timeCriteria);
         }
 
-        if (condition.hasIncludeTopped()) {
+        if (condition.hasExcludeTopped()) {
             Criteria criteria = Criteria.where("isTop").is(false);
             query.addCriteria(criteria);
         }
