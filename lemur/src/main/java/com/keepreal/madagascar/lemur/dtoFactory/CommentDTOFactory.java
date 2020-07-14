@@ -73,9 +73,12 @@ public class CommentDTOFactory {
         commentDTO.setFeedId(comment.getFeedId());
         commentDTO.setContent(comment.getContent());
         commentDTO.setCreatedAt(comment.getCreatedAt());
-        commentDTO.setIsDeleted(this.ehcacheService.checkCommentDeleted(comment.getId()));
+        boolean deleted = this.ehcacheService.checkCommentDeleted(comment.getId());
+        if (deleted) {
+            commentDTO.setContent("该评论已被删除！");
+        }
 
-        if (!StringUtils.isEmpty(comment.getReplyToId())) {
+        if (!StringUtils.isEmpty(comment.getReplyToId()) && !deleted) {
             commentDTO.setReplyTo(this.userDTOFactory.briefValueOf(
                     this.userService.retrieveUserById(comment.getReplyToId())));
         }
