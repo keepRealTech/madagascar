@@ -52,7 +52,7 @@ public class SkuService {
      * @return {@link ShellSku}.
      */
     public List<ShellSku> retrieveShellSkusByActiveIsTrue(Boolean isWechatPay) {
-        return this.shellSkuRepository.findAllByActiveIsTrueAndIsWechatPayAndDeletedIsFalse(isWechatPay);
+        return this.shellSkuRepository.findAllByActiveIsTrueAndIsWechatPayAndDeletedIsFalseOrderByShellsAsc(isWechatPay);
     }
 
     /**

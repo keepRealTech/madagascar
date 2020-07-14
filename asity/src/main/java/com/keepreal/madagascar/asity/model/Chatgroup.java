@@ -8,6 +8,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -53,7 +54,7 @@ public class Chatgroup {
     private Long updatedTime;
 
     @Builder.Default
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "groupId", referencedColumnName = "id")
     private Set<ChatgroupMembership> chatgroupMemberships = new HashSet<>();
 

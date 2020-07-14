@@ -30,9 +30,6 @@ public class ChatgroupMembership {
     private String id;
     private String groupId;
     private String membershipId;
-    @Column(name = "is_deleted")
-    @Builder.Default
-    private Boolean deleted = false;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate

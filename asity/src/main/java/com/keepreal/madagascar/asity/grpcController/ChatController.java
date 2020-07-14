@@ -258,7 +258,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         chatgroup = this.chatgroupService.upsert(chatgroup);
 
         response = ChatgroupResponse.newBuilder()
-                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_CHATGROUP_NOT_FOUND_ERROR))
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .setChatgroup(this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMember))
                 .build();
 

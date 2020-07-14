@@ -19,7 +19,6 @@ import java.util.Arrays;
 @Slf4j
 public class MembershipDTOFactory {
 
-    @Cacheable
     public SimpleMembershipDTO simpleValueOf(MembershipMessage membershipMessage) {
         SimpleMembershipDTO dto = new SimpleMembershipDTO();
         dto.id(membershipMessage.getId());

@@ -278,10 +278,19 @@ public class ChatController implements ChatApi {
     public ResponseEntity<ChatGroupResponse> apiV1ChatgroupsIdPut(String id, PutChatGroupRequest putChatGroupRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
+        ChatgroupMessage chatgroupMessage = this.chatService.retrieveChatgroupById(id, userId);
+        if (Objects.isNull(chatgroupMessage)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_CHATGROUP_NOT_FOUND_ERROR);
+        }
+
         List<MembershipMessage> membershipMessageList = new ArrayList<>();
-        if (Objects.nonNull(putChatGroupRequest.getMembershipIds())
-                && !putChatGroupRequest.getMembershipIds().isEmpty()) {
-            membershipMessageList = this.membershipService.retrieveMembershipsByIslandId(id).stream()
+        if (Objects.isNull(putChatGroupRequest.getMembershipIds())) {
+            ChatgroupMessage finalChatgroupMessage = chatgroupMessage;
+            membershipMessageList = this.membershipService.retrieveMembershipsByIslandId(chatgroupMessage.getIslandId()).stream()
+                    .filter(membership -> finalChatgroupMessage.getMembershipIdsList().contains(membership.getId()))
+                    .collect(Collectors.toList());
+        } else if (!putChatGroupRequest.getMembershipIds().isEmpty()) {
+            membershipMessageList = this.membershipService.retrieveMembershipsByIslandId(chatgroupMessage.getIslandId()).stream()
                     .filter(membership -> putChatGroupRequest.getMembershipIds().contains(membership.getId()))
                     .collect(Collectors.toList());
             if (membershipMessageList.size() != putChatGroupRequest.getMembershipIds().size()) {
@@ -289,8 +298,12 @@ public class ChatController implements ChatApi {
             }
         }
 
-        ChatgroupMessage chatgroupMessage = this.chatService.updateChatgroup(id, userId, putChatGroupRequest.getName(),
-                putChatGroupRequest.getMembershipIds(), putChatGroupRequest.getBulletin(), putChatGroupRequest.getIsMuted());
+        chatgroupMessage = this.chatService.updateChatgroup(id,
+                userId,
+                putChatGroupRequest.getName(),
+                Objects.nonNull(putChatGroupRequest.getMembershipIds()) ? putChatGroupRequest.getMembershipIds() : chatgroupMessage.getMembershipIdsList(),
+                putChatGroupRequest.getBulletin(),
+                putChatGroupRequest.getIsMuted());
 
         List<SimpleMembershipDTO> membershipDTOList = membershipMessageList.stream()
                 .map(this.membershipDTOFactory::simpleValueOf)
@@ -380,10 +393,14 @@ public class ChatController implements ChatApi {
 
         ChatgroupMessage chatgroupMessage = this.chatService.retrieveChatgroupById(id, userId);
 
+        if (Objects.isNull(chatgroupMessage)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_CHATGROUP_NOT_FOUND_ERROR);
+        }
+
         List<MembershipMessage> membershipMessageList = new ArrayList<>();
 
         if (!chatgroupMessage.getMembershipIdsList().isEmpty()) {
-            membershipMessageList = this.membershipService.retrieveMembershipsByIslandId(id).stream()
+            membershipMessageList = this.membershipService.retrieveMembershipsByIslandId(chatgroupMessage.getIslandId()).stream()
                     .filter(membership -> chatgroupMessage.getMembershipIdsList().contains(membership.getId()))
                     .collect(Collectors.toList());
         }

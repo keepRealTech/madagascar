@@ -255,9 +255,7 @@ public class ChatService {
             requestBuilder.setMuted(BoolValue.of(muted));
         }
 
-        if (Objects.nonNull(membershipIds)) {
-            requestBuilder.addAllMembershipIds(membershipIds);
-        }
+        requestBuilder.addAllMembershipIds(membershipIds);
 
         ChatgroupResponse response;
         try {
