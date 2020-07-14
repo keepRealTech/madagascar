@@ -11,10 +11,12 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
 import com.keepreal.madagascar.coua.DeviceTokenResponse;
 import com.keepreal.madagascar.coua.QueryUserCondition;
+import com.keepreal.madagascar.coua.RetreiveMultipleUsersByIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
+import com.keepreal.madagascar.coua.UsersReponse;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -159,6 +161,39 @@ public class UserService {
         return userResponse.getUser();
     }
 
+    /**
+     * Retrieves all users by ids.
+     *
+     * @param userIds User ids.
+     * @return {@link UserMessage}.
+     */
+    public List<UserMessage> retrieveUsersByIds(Iterable<String> userIds) {
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
+
+        RetreiveMultipleUsersByIdsRequest request = RetreiveMultipleUsersByIdsRequest.newBuilder()
+                .addAllUserIds(userIds)
+                .build();
+
+        UsersReponse reponse;
+        try {
+            reponse = stub.retrieveUsersByIds(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(reponse)
+                || !reponse.hasStatus()) {
+            log.error(Objects.isNull(reponse) ? "Retrieve users returned null." : reponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != reponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(reponse.getStatus());
+        }
+
+        return reponse.getUsersList();
+    }
+
     public void updateDeviceToken(String userId, String deviceToken, boolean isBind, Integer deviceType) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
@@ -187,6 +222,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Trims and checks the string length validity.
+     *
+     * @param str       String.
+     * @param threshold Max length.
+     * @return Trimmed string.
+     */
     private String checkLength(String str, int threshold) {
         String trimmed = str.trim();
 

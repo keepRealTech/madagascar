@@ -1292,7 +1292,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandChatAccessResponse'
-  /api/v1/users/avatars:
+  /api/v1/users/getBatchAvatars:
     post:
       tags:
         - User
@@ -3037,6 +3037,8 @@ components:
           type: array
           items:
             type: string
+      required:
+        - userIds
     AvatarsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
