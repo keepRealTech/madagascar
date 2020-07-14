@@ -1,5 +1,7 @@
 package com.keepreal.madagascar.vanga.service;
 
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
@@ -155,6 +157,10 @@ public class SubscribeMembershipService {
 
             Balance userBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(userId);
             Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
+
+            if (userBalance.getFrozen()) {
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_BALANCE_HAD_BEEN_FROZEN);
+            }
 
             this.balanceService.consumeShells(userBalance, sku.getPriceInShells());
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
