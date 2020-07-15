@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import org.springframework.stereotype.Component;
+import swagger.model.AvatarDTO;
 import swagger.model.BriefIslandDTO;
 import swagger.model.BriefUserDTO;
 import swagger.model.FullUserDTO;
@@ -132,6 +133,24 @@ public class UserDTOFactory {
         briefUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
 
         return briefUserDTO;
+    }
+
+    /**
+     * Converts {@link UserMessage} into {@link AvatarDTO}.
+     *
+     * @param user {@link UserMessage}.
+     * @return {@link AvatarDTO}.
+     */
+    public AvatarDTO avatorValueOf(UserMessage user) {
+        if (Objects.isNull(user)) {
+            return null;
+        }
+
+        AvatarDTO avatarDTO = new AvatarDTO();
+        avatarDTO.setUserId(user.getId());
+        avatarDTO.setPortraitUrl(user.getPortraitImageUri());
+
+        return avatarDTO;
     }
 
     /**
