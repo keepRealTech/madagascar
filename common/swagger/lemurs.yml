@@ -1861,6 +1861,8 @@ components:
           type: string
         reporterId:
           type: string
+        messageId:
+          type: string
     PostReportRequest:
       type: object
       properties:

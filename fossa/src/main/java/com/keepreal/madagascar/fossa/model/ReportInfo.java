@@ -43,5 +43,5 @@ public class ReportInfo {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
-
+    private String messageId;
 }

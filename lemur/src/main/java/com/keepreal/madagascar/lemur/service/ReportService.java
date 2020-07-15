@@ -45,7 +45,7 @@ public class ReportService {
      * @param type       {@link ReportType}.
      * @return {@link ReportMessage}.
      */
-    public ReportMessage createReport(String feedId, String islandId, String userId, String reporterId, ReportType type) {
+    public ReportMessage createReport(String feedId, String islandId, String userId, String reporterId, ReportType type, String messageId) {
         ReportServiceGrpc.ReportServiceBlockingStub stub = ReportServiceGrpc.newBlockingStub(this.channel);
 
         NewReportRequest.Builder requestBuilder = NewReportRequest.newBuilder()
@@ -56,6 +56,8 @@ public class ReportService {
             requestBuilder.setFeedId(StringValue.of(feedId));
         } else if (!StringUtils.isEmpty(islandId)) {
             requestBuilder.setFeedId(StringValue.of(islandId));
+        } else if (!StringUtils.isEmpty(messageId)) {
+            requestBuilder.setMessageId(StringValue.of(messageId));
         } else {
             requestBuilder.setUserId(StringValue.of(userId));
         }
