@@ -46,15 +46,6 @@ public class ReportController implements ReportApi {
      */
     @Override
     public ResponseEntity<ReportResponse> apiV1ReportsPost(@Valid PostReportRequest postReportRequest) {
-        List<String> params = new ArrayList<>();
-        params.add(postReportRequest.getFeedId());
-        params.add(postReportRequest.getIslandId());
-        params.add(postReportRequest.getUserId());
-        params.add(postReportRequest.getMessageId());
-        if (3 != params.stream().filter(StringUtils::isEmpty).count()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
         String userId = HttpContextUtils.getUserIdFromContext();
 
         ReportMessage reportMessage = this.reportService.createReport(postReportRequest.getFeedId(),
