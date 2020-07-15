@@ -36,6 +36,8 @@ public class WechatOrder {
     private String feeInCents;
     private String memberShipSkuId;
     private String shellSkuId;
+    private String appId;
+    private String mchId;
     @Transient
     private String nonceStr;
     @Transient

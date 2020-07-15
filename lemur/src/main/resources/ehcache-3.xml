@@ -44,4 +44,14 @@
         </eh:resources>
     </eh:cache>
 
+    <eh:cache alias="comment-existence" uses-template="default">
+        <eh:expiry>
+            <eh:ttl unit="hours">24</eh:ttl>
+        </eh:expiry>
+        <eh:resources>
+            <eh:heap unit="entries">500000</eh:heap>
+            <eh:offheap unit="MB">10</eh:offheap>
+        </eh:resources>
+    </eh:cache>
+
 </eh:config>

@@ -124,6 +124,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+  /api/v1/ossToken:
+    get:
+      tags:
+        - Login
+      summary: retrieves the oss token
+      responses:
+        '200':
+          description: oss token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OssTokenResponse'
   /api/v1/users/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -489,6 +501,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/islandidInPath'
         - $ref: '#/components/parameters/fromHostInQuery'
+        - $ref: '#/components/parameters/vInQuery'
+        - $ref: '#/components/parameters/osnInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -1278,7 +1292,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandChatAccessResponse'
-  /api/v1/users/avatars:
+  /api/v1/users/getBatchAvatars:
     post:
       tags:
         - User
@@ -1308,6 +1322,20 @@ components:
       name: id
       description: id
       required: true
+      schema:
+        type: string
+    vInQuery:
+      in: query
+      name: v
+      description: v
+      required: false
+      schema:
+        type: string
+    osnInQuery:
+      in: query
+      name: osn
+      description: osn
+      required: false
       schema:
         type: string
     timestampAfter:
@@ -2103,6 +2131,13 @@ components:
               $ref: '#/components/schemas/PageInfo'
             data:
               $ref: '#/components/schemas/ToppedFeedsDTO'
+    SnapshotCommentDTO:
+      allOf:
+        - $ref: '#/components/schemas/CommentDTO'
+        - type: object
+          properties:
+            isDeleted:
+              type: boolean
     CommentDTO:
       type: object
       properties:
@@ -2271,7 +2306,7 @@ components:
         feed:
           $ref: '#/components/schemas/SnapshotFeedDTO'
         comment:
-          $ref: '#/components/schemas/CommentDTO'
+          $ref: '#/components/schemas/SnapshotCommentDTO'
         hasRead:
           type: boolean
         createdAt:
@@ -2460,6 +2495,8 @@ components:
           type: string
         refreshToken:
           type: string
+        openId:
+          type: string
     LoginTokenInfo:
       allOf:
         - $ref: '#/components/schemas/BriefTokenInfo'
@@ -2563,6 +2600,8 @@ components:
       type: object
       properties:
         shellSkuId:
+          type: string
+        openId:
           type: string
     WechatOrderDTO:
       type: object
@@ -2998,6 +3037,8 @@ components:
           type: array
           items:
             type: string
+      required:
+        - userIds
     AvatarsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -3007,3 +3048,22 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/AvatarDTO'
+    OssTokenDTO:
+      type: object
+      properties:
+        securityToken:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+        expiration:
+          type: integer
+          format: int64
+    OssTokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/OssTokenDTO'
