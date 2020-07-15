@@ -7,7 +7,10 @@ import com.keepreal.madagascar.mantella.model.Timeline;
 import com.keepreal.madagascar.mantella.repository.TimelineRepository;
 import com.keepreal.madagascar.mantella.service.distributor.FeedDistributor;
 import com.keepreal.madagascar.mantella.storage.TimelineStorage;
-import com.keepreal.madagascar.mantella.utils.PaginationUtils;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,23 +26,27 @@ public class TimelineService {
     private final TimelineStorage timelineStorage;
     private final FeedDistributor feedDistributor;
     private final LongIdGenerator idGenerator;
+    private final ReactiveMongoTemplate reactiveMongoTemplate;
 
     /**
      * Constructs the timeline service.
      *
-     * @param timelineRepository {@link TimelineRepository}.
-     * @param timelineStorage    {@link TimelineStorage}.
-     * @param feedDistributor    {@link FeedDistributor}.
-     * @param idGenerator        {@link LongIdGenerator}.
+     * @param timelineRepository    {@link TimelineRepository}.
+     * @param timelineStorage       {@link TimelineStorage}.
+     * @param feedDistributor       {@link FeedDistributor}.
+     * @param idGenerator           {@link LongIdGenerator}.
+     * @param reactiveMongoTemplate {@link ReactiveMongoTemplate}.
      */
     public TimelineService(TimelineRepository timelineRepository,
                            TimelineStorage timelineStorage,
                            FeedDistributor feedDistributor,
-                           LongIdGenerator idGenerator) {
+                           LongIdGenerator idGenerator,
+                           ReactiveMongoTemplate reactiveMongoTemplate) {
         this.timelineRepository = timelineRepository;
         this.timelineStorage = timelineStorage;
         this.feedDistributor = feedDistributor;
         this.idGenerator = idGenerator;
+        this.reactiveMongoTemplate = reactiveMongoTemplate;
     }
 
     /**
@@ -62,7 +69,6 @@ public class TimelineService {
      * @return {@link Mono}.
      */
     public Flux<Timeline> insertAll(Flux<Timeline> timelines) {
-
         return timelines
                 .publishOn(Schedulers.elastic())
                 .flatMap(timeline -> {
@@ -70,7 +76,8 @@ public class TimelineService {
                     timeline.setCreatedAt(timeline.getFeedCreatedAt());
                     return Mono.just(timeline);
                 })
-                .compose(this.timelineRepository::insert);
+                .collectList()
+                .flatMapMany(this.timelineRepository::insert);
     }
 
     /**
@@ -103,15 +110,19 @@ public class TimelineService {
      * @return A flux of {@link Timeline}.
      */
     public Flux<Timeline> retrieveByUserIdAndCreatedTimestamp(String userId, UInt64Value timestampAfter, int pageSize, UInt64Value timestampBefore) {
-        if (timestampBefore != null) {
-            return this.timelineRepository
-                    .findTopByUserIdAndFeedCreatedAtBeforeAndIsDeletedIsFalse(
-                            userId, timestampBefore.getValue(), PaginationUtils.defaultTimelinePageRequest(pageSize));
-        } else {
-            return this.timelineRepository
-                    .findTopByUserIdAndFeedCreatedAtAfterAndIsDeletedIsFalse(
-                            userId, timestampAfter.getValue(), PaginationUtils.defaultTimelinePageRequest(pageSize));
-        }
+        Criteria criteria = Criteria.where("userId").is(userId);
+        criteria = timestampAfter != null ?
+                criteria.and("createdAt").gt(timestampAfter.getValue()) :
+                criteria.and("createdAt").lt(timestampBefore.getValue());
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(criteria),
+                Aggregation.limit(pageSize * 5),
+                Aggregation.group("duplicateTag").first("feedId").as("feedId").first("createdAt").as("createdAt"),
+                Aggregation.sort(Sort.Direction.DESC, "createdAt"),
+                Aggregation.limit(pageSize)
+        );
+
+        return reactiveMongoTemplate.aggregate(aggregation, "timeline", Timeline.class);
     }
 
     /**

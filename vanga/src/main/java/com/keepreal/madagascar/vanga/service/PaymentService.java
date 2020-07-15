@@ -146,7 +146,7 @@ public class PaymentService {
      * @return {@link Payment}.
      */
     @Transactional
-    public Payment createBuyShellPayments(String userId, ShellSku sku, String transactionId) {
+    public Payment createIOSBuyShellPayments(String userId, ShellSku sku, String transactionId) {
         Payment payment = this.paymentRepository.findTopByTradeNumAndTypeAndDeletedIsFalse(transactionId, PaymentType.SHELLBUY.getValue());
 
         if (Objects.nonNull(payment)) {
@@ -161,6 +161,35 @@ public class PaymentService {
                 .userId(userId)
                 .state(PaymentState.CLOSED.getValue())
                 .tradeNum(transactionId)
+                .build();
+        return this.paymentRepository.save(payment);
+    }
+
+    /**
+     * Creates new buy shell payments.
+     *
+     * @param wechatOrder   {@link WechatOrder}.
+     * @param sku           {@link ShellSku}.
+     * @return {@link Payment}.
+     */
+    @Transactional
+    public Payment createWechatBuyShellPayments(WechatOrder wechatOrder, ShellSku sku) {
+        Payment payment = this.paymentRepository.findTopByTradeNumAndTypeAndDeletedIsFalse(wechatOrder.getTradeNumber(),
+                PaymentType.SHELLBUY.getValue());
+
+        if (Objects.nonNull(payment)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_SHELL_IOS_RECEIPT_DUPLICATE_ERROR);
+        }
+
+        payment = Payment.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .type(PaymentType.SHELLBUY.getValue())
+                .amountInShells(sku.getShells())
+                .amountInCents(sku.getPriceInCents())
+                .userId(wechatOrder.getUserId())
+                .state(PaymentState.DRAFTED.getValue())
+                .tradeNum(wechatOrder.getTradeNumber())
+                .orderId(wechatOrder.getId())
                 .build();
         return this.paymentRepository.save(payment);
     }

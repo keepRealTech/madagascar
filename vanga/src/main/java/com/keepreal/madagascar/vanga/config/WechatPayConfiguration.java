@@ -105,7 +105,7 @@ public class WechatPayConfiguration extends WXPayConfig {
      *
      * @return {@link WXPay}.
      */
-    @Bean
+    @Bean(name = "wechatpay")
     @SneakyThrows
     public WXPay getWechatPayClient() {
         return new WXPay(this, this.callbackAddress, false);

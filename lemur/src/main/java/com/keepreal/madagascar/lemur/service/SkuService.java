@@ -39,12 +39,14 @@ public class SkuService {
     /**
      * Retrieves the active shell skus.
      *
+     * @param isWechatPay Whether is wechat pay.
      * @return {@link ShellSkusResponse}.
      */
-    public List<ShellSkuMessage> retrieveShellSkus() {
+    public List<ShellSkuMessage> retrieveShellSkus(Boolean isWechatPay) {
         SkuServiceGrpc.SkuServiceBlockingStub stub = SkuServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveShellSkusRequest request = RetrieveShellSkusRequest.newBuilder()
+                .setIsWechatPay(isWechatPay)
                 .build();
 
         ShellSkusResponse shellSkusResponse;

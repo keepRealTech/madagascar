@@ -47,6 +47,23 @@ public class LocalTokenGranter extends AbstractTokenGranter {
      * @param userMessage {@link UserMessage}.
      * @return {@link LoginResponse}.
      */
+    public LoginResponse grant(UserMessage userMessage, String openId) {
+        OAuth2AccessToken token = this.grant(LocalTokenGranter.GRANT_TYPE, this.buildTokenRequest(userMessage));
+        return LoginResponse.newBuilder()
+                .setStatus(this.grpcResponseUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setToken(token.getValue())
+                .setRefreshToken(token.getRefreshToken().getValue())
+                .setUserId(userMessage.getId())
+                .setOpenId(openId)
+                .build();
+    }
+
+    /**
+     * Grants a token for given user message.
+     *
+     * @param userMessage {@link UserMessage}.
+     * @return {@link LoginResponse}.
+     */
     public LoginResponse grant(UserMessage userMessage) {
         OAuth2AccessToken token = this.grant(LocalTokenGranter.GRANT_TYPE, this.buildTokenRequest(userMessage));
         return LoginResponse.newBuilder()
