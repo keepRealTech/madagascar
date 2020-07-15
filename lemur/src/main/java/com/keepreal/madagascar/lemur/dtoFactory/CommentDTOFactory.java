@@ -6,7 +6,6 @@ import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import swagger.model.CommentDTO;
-import swagger.model.SnapshotCommentDTO;
 
 import java.util.Objects;
 
@@ -52,27 +51,6 @@ public class CommentDTOFactory {
         commentDTO.setContent(comment.getContent());
         commentDTO.setCreatedAt(comment.getCreatedAt());
 
-        if (!StringUtils.isEmpty(comment.getReplyToId())) {
-            commentDTO.setReplyTo(this.userDTOFactory.briefValueOf(
-                    this.userService.retrieveUserById(comment.getReplyToId())));
-        }
-
-        commentDTO.setUser(this.userDTOFactory.briefValueOf(
-                this.userService.retrieveUserById(comment.getUserId())));
-
-        return commentDTO;
-    }
-
-    public SnapshotCommentDTO snapshotValueOf(CommentMessage comment) {
-        if (Objects.isNull(comment)) {
-            return null;
-        }
-
-        SnapshotCommentDTO commentDTO = new SnapshotCommentDTO();
-        commentDTO.setId(comment.getId());
-        commentDTO.setFeedId(comment.getFeedId());
-        commentDTO.setContent(comment.getContent());
-        commentDTO.setCreatedAt(comment.getCreatedAt());
         boolean deleted = this.ehcacheService.checkCommentDeleted(comment.getId());
         if (deleted) {
             commentDTO.setContent("该评论已被删除！");
@@ -88,5 +66,4 @@ public class CommentDTOFactory {
 
         return commentDTO;
     }
-
 }
