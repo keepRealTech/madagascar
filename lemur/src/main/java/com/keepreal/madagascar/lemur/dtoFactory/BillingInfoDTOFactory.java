@@ -31,6 +31,8 @@ public class BillingInfoDTOFactory {
         billingInfoDTO.setName(billingInfo.getName());
         billingInfoDTO.setVerified(billingInfo.getIsVerified());
         billingInfoDTO.setUserId(billingInfo.getUserId());
+        billingInfoDTO.setIdFrontUrl(billingInfo.getIdFrontUrl());
+        billingInfoDTO.setIdBackUrl(billingInfo.getIdBackUrl());
 
         return billingInfoDTO;
     }
