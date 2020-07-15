@@ -18,6 +18,9 @@ import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
+import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
+import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
+import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.mantella.RetrieveMultipleTimelinesRequest;
 import com.keepreal.madagascar.mantella.TimelineMessage;
@@ -29,6 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import swagger.model.TopFeedRequest;
+import swagger.model.ToppedFeedsDTO;
 
 import java.util.AbstractMap;
 import java.util.Collections;
@@ -217,7 +222,8 @@ public class FeedService {
      * @param pageSize       Page size.
      * @return {@link FeedsResponse}.
      */
-    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, Long timestampAfter, Long timestampBefore, int page, int pageSize) {
+    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, Long timestampAfter,
+                                             Long timestampBefore, int page, int pageSize, Boolean excludeTopped) {
         Assert.hasText(islandId, "Island id is null.");
 
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
@@ -233,6 +239,10 @@ public class FeedService {
             conditionBuilder.setTimestampBefore(Int64Value.of(timestampBefore));
         } else {
             conditionBuilder.setTimestampAfter(Int64Value.of(timestampAfter == null ? 0L : timestampAfter));
+        }
+
+        if (Objects.nonNull(excludeTopped)) {
+            conditionBuilder.setExcludeTopped(BoolValue.of(excludeTopped));
         }
 
         RetrieveMultipleFeedsRequest request = RetrieveMultipleFeedsRequest.newBuilder()
@@ -358,4 +368,65 @@ public class FeedService {
         return feedsResponse;
     }
 
+    /**
+     * top or cancel top feed by request
+     *
+     * @param topFeedRequest    request
+     * @param id    island id
+     */
+    public void topFeedByRequest(TopFeedRequest topFeedRequest, String id) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub =  FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        TopFeedByIdRequest request = TopFeedByIdRequest.newBuilder()
+                .setId(topFeedRequest.getFeedId())
+                .setIsRevoke(topFeedRequest.getIsRevoke())
+                .setIslandId(id)
+                .build();
+        TopFeedByIdResponse response;
+        try {
+            response = stub.topFeedById(request);
+        } catch (StatusRuntimeException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, e.getMessage());
+        }
+
+        if (Objects.isNull(response) || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "top feed returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+    }
+
+
+    /**
+     * retrieve topped feed (only one in this version) of the island by island id
+     *
+     * @param islandId island id
+     * @return feed response
+     */
+    public FeedResponse retrieveIslandToppedFeeds(String islandId, String userId) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        RetrieveToppedFeedByIdRequest request = RetrieveToppedFeedByIdRequest.newBuilder()
+                .setIslandId(islandId)
+                .setUserId(userId)
+                .build();
+
+        FeedResponse response;
+        try {
+            response = stub.retrieveToppedFeedById(request);
+        } catch (StatusRuntimeException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, e.getMessage());
+        }
+
+        if (Objects.isNull(response) || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "retrieve topped feed returns null" : response.toString());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
+    }
 }
