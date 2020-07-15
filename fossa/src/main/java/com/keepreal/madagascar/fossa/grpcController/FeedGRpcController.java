@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
@@ -19,7 +20,10 @@ import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
+import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
+import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
+import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
@@ -189,7 +193,6 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         Query query = generatorQueryByRequest(request);
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
-
         List<FeedMessage> feedMessageList = feedInfoList.stream()
                 .map(info -> feedInfoService.getFeedMessage(info, userId))
                 .filter(Objects::nonNull)
@@ -308,7 +311,59 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             query.addCriteria(timeCriteria);
         }
 
+        if (condition.hasExcludeTopped()) {
+            boolean value = condition.getExcludeTopped().getValue();
+            Criteria criteria = new Criteria();
+            if (value) {
+                criteria = Criteria.where("isTop").is(false);
+            }
+            query.addCriteria(criteria);
+        }
+
         // 没有条件
         return query.with(Sort.by(Sort.Order.desc("toppedTime"), Sort.Order.desc("createdTime")));
+    }
+
+    /**
+     * top feed or cancel topped feed
+     *
+     * @param request
+     * @param responseObserver
+     */
+    @Override
+    public void topFeedById(TopFeedByIdRequest request, StreamObserver<TopFeedByIdResponse> responseObserver) {
+        String feedId = request.getId();
+        String islandId = request.getIslandId();
+        boolean isRevoke = request.getIsRevoke();
+        if (!isRevoke) {
+            //cancel topped feed of this island  this version (v1.2) can only top one feed
+            this.feedInfoService.cancelToppedFeedByIslandId(islandId);
+
+            this.feedInfoService.topFeedById(feedId);
+        }else {
+            this.feedInfoService.cancelToppedFeedById(feedId);
+        }
+
+        TopFeedByIdResponse topFeedByIdResponse = TopFeedByIdResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(topFeedByIdResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveToppedFeedById(RetrieveToppedFeedByIdRequest request, StreamObserver<FeedResponse> responseObserver) {
+        String islandId = request.getIslandId();
+        String userId = request.getUserId();
+        FeedInfo feedInfo = this.feedInfoService.findToppedFeedByIslandId(islandId);
+        FeedMessage feedMessage = this.feedInfoService.getFeedMessage(feedInfo, userId);
+        FeedResponse feedResponse = FeedResponse.newBuilder()
+                .setFeed(feedMessage)
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setUserId(userId)
+                .build();
+
+        responseObserver.onNext(feedResponse);
+        responseObserver.onCompleted();
     }
 }

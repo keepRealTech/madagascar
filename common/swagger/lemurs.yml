@@ -1872,6 +1872,8 @@ components:
           type: string
         reporterId:
           type: string
+        messageId:
+          type: string
     PostReportRequest:
       type: object
       properties:
@@ -2142,13 +2144,6 @@ components:
               $ref: '#/components/schemas/PageInfo'
             data:
               $ref: '#/components/schemas/ToppedFeedsDTO'
-    SnapshotCommentDTO:
-      allOf:
-        - $ref: '#/components/schemas/CommentDTO'
-        - type: object
-          properties:
-            isDeleted:
-              type: boolean
     CommentDTO:
       type: object
       properties:
@@ -2317,7 +2312,7 @@ components:
         feed:
           $ref: '#/components/schemas/SnapshotFeedDTO'
         comment:
-          $ref: '#/components/schemas/SnapshotCommentDTO'
+          $ref: '#/components/schemas/CommentDTO'
         hasRead:
           type: boolean
         createdAt:
@@ -2715,6 +2710,8 @@ components:
         - mobile
         - identityNumber
         - accountNumber
+        - idFrontUrl
+        - idBackUrl
     BillingInfoResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

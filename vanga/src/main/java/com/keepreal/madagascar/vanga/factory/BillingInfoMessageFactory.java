@@ -31,6 +31,8 @@ public class BillingInfoMessageFactory {
                 .setMobile(billingInfo.getMobile())
                 .setName(billingInfo.getName())
                 .setIsVerified(billingInfo.getVerified())
+                .setIdFrontUrl(billingInfo.getIdFrontUrl())
+                .setIdBackUrl(billingInfo.getIdBackUrl())
                 .build();
     }
 
