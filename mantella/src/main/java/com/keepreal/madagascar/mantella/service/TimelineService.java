@@ -112,13 +112,12 @@ public class TimelineService {
     public Flux<Timeline> retrieveByUserIdAndCreatedTimestamp(String userId, UInt64Value timestampAfter, int pageSize, UInt64Value timestampBefore) {
         Criteria criteria = Criteria.where("userId").is(userId);
         criteria = timestampAfter != null ?
-                criteria.and("createdAt").gt(timestampAfter.getValue()) :
-                criteria.and("createdAt").lt(timestampBefore.getValue());
+                criteria.and("feedCreatedAt").gt(timestampAfter.getValue()) :
+                criteria.and("feedCreatedAt").lt(timestampBefore.getValue());
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(criteria),
-                Aggregation.limit(pageSize * 5),
-                Aggregation.group("duplicateTag").first("feedId").as("feedId").first("createdAt").as("createdAt"),
-                Aggregation.sort(Sort.Direction.DESC, "createdAt"),
+                Aggregation.group("duplicateTag").first("feedId").as("feedId").first("feedCreatedAt").as("feedCreatedAt"),
+                Aggregation.sort(Sort.Direction.DESC, "feedCreatedAt"),
                 Aggregation.limit(pageSize)
         );
 
