@@ -20,7 +20,6 @@ public class IslandChatAccessMessageFactory {
         return ChatAccessMessage.newBuilder()
                 .setId(islandChatAccess.getId())
                 .setIslandId(islandChatAccess.getIslandId())
-                .setUserId(islandChatAccess.getUserId())
                 .setHasAccess(islandChatAccess.getEnabled())
                 .build();
     }

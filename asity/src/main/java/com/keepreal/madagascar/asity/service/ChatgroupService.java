@@ -293,7 +293,7 @@ public class ChatgroupService {
      * @return User ids.
      */
     public List<String> retrieveLastChatgroupMemberUserIdsByIslandId(String islandId) {
-        return this.chatgroupMemberRepository.selectTop5DistinctUserIdByIslandIdAndDeletedIsFalseOrderByCreatedTime(islandId);
+        return this.chatgroupMemberRepository.selectTop4DistinctUserIdByIslandIdAndDeletedIsFalseOrderByCreatedTime(islandId);
     }
 
 }
