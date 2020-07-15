@@ -8,12 +8,14 @@ import com.keepreal.madagascar.coua.DeviceTokenRequest;
 import com.keepreal.madagascar.coua.DeviceTokenResponse;
 import com.keepreal.madagascar.coua.NewUserRequest;
 import com.keepreal.madagascar.coua.QueryUserCondition;
+import com.keepreal.madagascar.coua.RetreiveMultipleUsersByIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokenRequest;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokenResponse;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
+import com.keepreal.madagascar.coua.UsersReponse;
 import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
@@ -28,6 +30,8 @@ import org.springframework.util.StringUtils;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents user GRpc controller.
@@ -58,8 +62,8 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     /**
      * Implements create user method.
      *
-     * @param request           {@link NewUserRequest}.
-     * @param responseObserver  {@link UserResponse}.
+     * @param request          {@link NewUserRequest}.
+     * @param responseObserver {@link UserResponse}.
      */
     @Override
     public void createUser(NewUserRequest request, StreamObserver<UserResponse> responseObserver) {
@@ -84,8 +88,8 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     /**
      * Implements retrieve single user method.
      *
-     * @param request           {@link RetrieveSingleUserRequest}. (userId, unionId, displayId)
-     * @param responseObserver  {@link UserResponse}.
+     * @param request          {@link RetrieveSingleUserRequest}. (userId, unionId, displayId)
+     * @param responseObserver {@link UserResponse}.
      */
     @Override
     public void retrieveSingleUser(RetrieveSingleUserRequest request, StreamObserver<UserResponse> responseObserver) {
@@ -128,8 +132,8 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     /**
      * Implements update user by id method.
      *
-     * @param request           {@link UpdateUserByIdRequest}.
-     * @param responseObserver  {@link UserResponse}.
+     * @param request          {@link UpdateUserByIdRequest}.
+     * @param responseObserver {@link UserResponse}.
      */
     @Override
     public void updateUserById(UpdateUserByIdRequest request, StreamObserver<UserResponse> responseObserver) {
@@ -176,8 +180,8 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     /**
      * Implements update device token method.
      *
-     * @param request           {@link DeviceTokenRequest}.
-     * @param responseObserver  {@link DeviceTokenResponse}.
+     * @param request          {@link DeviceTokenRequest}.
+     * @param responseObserver {@link DeviceTokenResponse}.
      */
     @Override
     public void updateDeviceToken(DeviceTokenRequest request, StreamObserver<DeviceTokenResponse> responseObserver) {
@@ -206,17 +210,40 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         List<String> androidTokenList = new ArrayList<>();
         List<String> iosTokenList = new ArrayList<>();
         userDeviceInfos.forEach(info -> {
-                    if (info.getDeviceType().equals(DeviceType.ANDROID_VALUE)) {
-                        androidTokenList.add(info.getDeviceToken());
-                    } else {
-                        iosTokenList.add(info.getDeviceToken());
-                    }
-                });
+            if (info.getDeviceType().equals(DeviceType.ANDROID_VALUE)) {
+                androidTokenList.add(info.getDeviceToken());
+            } else {
+                iosTokenList.add(info.getDeviceToken());
+            }
+        });
         responseObserver.onNext(RetrieveDeviceTokenResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .addAllAndroidTokens(androidTokenList)
                 .addAllIosTokens(iosTokenList)
                 .build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the retrieve users by ids.
+     *
+     * @param request {@link RetreiveMultipleUsersByIdsRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void retrieveUsersByIds(RetreiveMultipleUsersByIdsRequest request,
+                                   StreamObserver<UsersReponse> responseObserver) {
+        List<UserInfo> userInfos = this.userInfoService.findUserInfosByIds(request.getUserIdsList());
+
+        UsersReponse response = UsersReponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .addAllUsers(userInfos.stream()
+                        .map(this.userInfoService::getUserMessage)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .build();
+
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 
