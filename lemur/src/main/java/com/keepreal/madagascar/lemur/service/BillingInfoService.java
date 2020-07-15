@@ -79,7 +79,7 @@ public class BillingInfoService {
      * @return {@link BillingInfoMessage}.
      */
     public BillingInfoMessage updateBillingInfoByUserId(String userId, String name, String accountNumber,
-                                                        String idNumber, String mobile) {
+                                                        String idNumber, String mobile, String idFrontUrl, String idBackUrl) {
         BillingInfoServiceGrpc.BillingInfoServiceBlockingStub stub = BillingInfoServiceGrpc.newBlockingStub(this.channel);
 
         UpdateBillingInfoByUserIdRequest.Builder requestBuilder = UpdateBillingInfoByUserIdRequest.newBuilder()
@@ -99,6 +99,14 @@ public class BillingInfoService {
 
         if (!StringUtils.isEmpty(mobile)) {
             requestBuilder.setMobile(StringValue.of(mobile));
+        }
+
+        if (!StringUtils.isEmpty(idFrontUrl)) {
+            requestBuilder.setIdFrontUrl(StringValue.of(idFrontUrl));
+        }
+
+        if (!StringUtils.isEmpty(idBackUrl)) {
+            requestBuilder.setIdBackUrl(StringValue.of(idBackUrl));
         }
 
         BillingInfoResponse billingInfoResponse;

@@ -96,7 +96,8 @@ public class BillingController implements BillingApi {
 
         BillingInfoMessage billingInfoMessage = this.billingInfoService.updateBillingInfoByUserId(
                 userId, putBillingInfoRequest.getName(), putBillingInfoRequest.getAccountNumber(),
-                putBillingInfoRequest.getIdentityNumber(), putBillingInfoRequest.getMobile());
+                putBillingInfoRequest.getIdentityNumber(), putBillingInfoRequest.getMobile(),
+                putBillingInfoRequest.getIdFrontUrl(), putBillingInfoRequest.getIdBackUrl());
 
         BillingInfoResponse response = new BillingInfoResponse();
         response.setData(this.billingInfoDTOFactory.valueOf(billingInfoMessage));

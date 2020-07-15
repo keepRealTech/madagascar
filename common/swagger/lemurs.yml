@@ -2668,6 +2668,10 @@ components:
           type: string
         verified:
           type: boolean
+        idFrontUrl:
+          type: string
+        idBackUrl:
+          type: string
     PutBillingInfoRequest:
       type: object
       properties:
@@ -2679,11 +2683,17 @@ components:
           type: string
         accountNumber:
           type: string
+        idFrontUrl:
+          type: string
+        idBackUrl:
+          type: string
       required:
         - name
         - mobile
         - identityNumber
         - accountNumber
+        - idFrontUrl
+        - idBackUrl
     BillingInfoResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

@@ -74,7 +74,9 @@ public class BillingInfoGRpcController extends BillingInfoServiceGrpc.BillingInf
                 request.hasName() ? request.getName().getValue() : null,
                 request.hasMobile() ? request.getMobile().getValue() : null,
                 request.hasAccountNumber() ? request.getAccountNumber().getValue() : null,
-                request.hasIdNumber() ? request.getIdNumber().getValue() : null);
+                request.hasIdNumber() ? request.getIdNumber().getValue() : null,
+                request.hasIdFrontUrl() ? request.getIdFrontUrl().getValue() : null,
+                request.hasIdBackUrl() ? request.getIdBackUrl().getValue() : null);
 
         BillingInfoResponse response;
         if (Objects.nonNull(billingInfo)) {
