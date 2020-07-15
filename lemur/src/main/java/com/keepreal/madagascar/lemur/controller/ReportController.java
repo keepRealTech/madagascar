@@ -50,7 +50,8 @@ public class ReportController implements ReportApi {
         params.add(postReportRequest.getFeedId());
         params.add(postReportRequest.getIslandId());
         params.add(postReportRequest.getUserId());
-        if (2 != params.stream().filter(StringUtils::isEmpty).count()) {
+        params.add(postReportRequest.getMessageId());
+        if (3 != params.stream().filter(StringUtils::isEmpty).count()) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -60,7 +61,8 @@ public class ReportController implements ReportApi {
                 postReportRequest.getIslandId(),
                 postReportRequest.getUserId(),
                 userId,
-                this.convertReportType(postReportRequest.getReportType()));
+                this.convertReportType(postReportRequest.getReportType()),
+                postReportRequest.getMessageId());
 
         ReportResponse response = new ReportResponse();
         response.setData(this.reportDTOFactory.valueOf(reportMessage));
