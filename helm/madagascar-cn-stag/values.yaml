@@ -10,11 +10,7 @@ global:
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-<<<<<<< HEAD
       tag: 1.1.0-staging
-=======
-      tag: 1.0.99
->>>>>>> master
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
@@ -30,11 +26,7 @@ global:
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-<<<<<<< HEAD
-      tag: 1.0.99-staging
-=======
-      tag: 1.0.2
->>>>>>> master
+      tag: 1.0.2-staging
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
