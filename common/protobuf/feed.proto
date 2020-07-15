@@ -11,6 +11,7 @@ message QueryFeedCondition {
     google.protobuf.BoolValue fromHost = 2;
     google.protobuf.Int64Value timestampAfter = 3;
     google.protobuf.Int64Value timestampBefore = 4;
+    google.protobuf.BoolValue excludeTopped = 5;
 }
 
 message NewFeedsRequest {
@@ -77,11 +78,32 @@ message TimelineFeedMessage {
     string id = 1;
     string islandId = 2;
     int64 createdAt = 3;
+    string duplicateTag = 4;
 }
 
 message TimelineFeedsResponse {
     CommonStatus status = 1;
     repeated TimelineFeedMessage message = 2;
+}
+
+message TopFeedByIdRequest {
+    string id = 1;
+    bool isRevoke = 2;
+    string islandId = 3;
+}
+
+message TopFeedByIdResponse {
+    CommonStatus status = 1;
+}
+
+message RetrieveToppedFeedByIdRequest {
+    string islandId = 1;
+    string userId = 2;
+}
+
+message RetrieveToppedFeedByIdResponse {
+    CommonStatus status = 1;
+    FeedMessage feed = 2;
 }
 
 service FeedService {
@@ -92,4 +114,6 @@ service FeedService {
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
     rpc CreateDefaultFeed (CreateDefaultFeedRequest) returns (CreateDefaultFeedResponse) {}
     rpc RetrieveMultipleTimelineFeeds (RetrieveMultipleFeedsRequest) returns (TimelineFeedsResponse) {}
+    rpc TopFeedById (TopFeedByIdRequest) returns (TopFeedByIdResponse) {}
+    rpc RetrieveToppedFeedById (RetrieveToppedFeedByIdRequest) returns (FeedResponse) {}
 }

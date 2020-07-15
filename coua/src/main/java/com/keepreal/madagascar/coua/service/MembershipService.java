@@ -68,6 +68,10 @@ public class MembershipService {
         return repository.findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandId);
     }
 
+    public List<MembershipInfo> getMembershipListByIslandIds(List<String> islandIds) {
+        return repository.findMembershipInfosByIslandIdInAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandIds);
+    }
+
     public MembershipInfo updateMembership(MembershipInfo membershipInfo) {
         return repository.save(membershipInfo);
     }

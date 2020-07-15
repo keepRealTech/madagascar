@@ -3,7 +3,7 @@ plugins {
     id 'org.springframework.boot' version '2.1.4.RELEASE' apply false
     id 'org.hidetake.swagger.generator' version '2.18.2' apply false
     id 'com.google.protobuf' version '0.8.12' apply false
-    id 'com.palantir.docker' version '0.22.1' apply false
+    id 'com.palantir.docker' version '0.25.0' apply false
 }
 
 allprojects {
@@ -15,17 +15,17 @@ allprojects {
     }
 }
 
-ext['baobob.version'] = '1.0.2'
+ext['baobob.version'] = '1.0.3'
 ext['indri.version'] = '1.0.1'
 ext['coua.version'] = '1.0.5'
-ext['fossa.version'] = '1.0.1'
-ext['lemur.version'] = '1.0.9'
+ext['fossa.version'] = '1.0.2'
+ext['lemur.version'] = '1.1.0'
 ext['tenrecs.version'] = '1.0.1'
 ext['brookesia.version'] = '1.0.1'
 ext['marty.version'] = '1.0.0'
 ext['mantella.version'] = '1.0.1'
-ext['vanga.version'] = '1.0.3'
-ext['marty.version'] = '1.0.0'
+ext['vanga.version'] = '1.0.4'
+ext['asity.version'] = '1.0.0'
 
 ext['settler.version'] = '1.0.2'
 ext['reconciliation.version'] = '1.0.1'
@@ -53,6 +53,7 @@ subprojects {
     ext['ehcache.version'] = '3.8.1'
     ext['openservices.version'] = '1.8.4.Final'
     ext['oss.version'] = '3.9.0'
+    ext['rongcloud.version'] = '3.1.8'
 
     project.version = rootProject.findProperty("${project.name}.version") ?: 'latest'
 
@@ -81,6 +82,7 @@ subprojects {
 
         docker {
             name "registry.cn-beijing.aliyuncs.com/keepreal/${project.name.replace('_','-')}:$project.version"
+            tag 'staging', "registry.cn-beijing.aliyuncs.com/keepreal/${project.name.replace('_','-')}:$project.version-staging"
             dockerfile file("$projectDir/dockerfile")
             files "$projectDir/start.sh", "$projectDir/healthcheck.sh", "$projectDir/apiclient_cert.pem"
             copySpec.from(tasks.unpack.outputs).into("dependency")
@@ -164,6 +166,7 @@ subprojects {
             dependency "com.aliyun.oss:aliyun-sdk-oss:${ext['oss.version']}"
             dependency "io.opentracing.contrib:opentracing-spring-jaeger-web-starter:3.1.1"
             dependency "io.opentracing.contrib:opentracing-grpc:0.2.1"
+            dependency "cn.rongcloud.im:server-sdk-java:${ext['rongcloud.version']}"
         }
     }
 }

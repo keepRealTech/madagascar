@@ -13,6 +13,7 @@ import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.coua.MembershipResponse;
 import com.keepreal.madagascar.coua.MembershipServiceGrpc;
 import com.keepreal.madagascar.coua.MembershipsResponse;
+import com.keepreal.madagascar.coua.RetrieveMembershipsByIslandIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveMembershipsRequest;
 import com.keepreal.madagascar.coua.TopMembershipRequest;
 import com.keepreal.madagascar.coua.UpdateMembershipRequest;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -178,7 +180,7 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
-    public List<MembershipMessage> RetrieveMembershipsByIslandId(String islandId) {
+    public List<MembershipMessage> retrieveMembershipsByIslandId(String islandId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveMembershipsRequest request = RetrieveMembershipsRequest.newBuilder().setIslandId(islandId).build();
@@ -197,7 +199,7 @@ public class MembershipService {
         return membershipsResponse.getMessageList();
     }
 
-    public List<FeedMembershipMessage> RetrieveFeedMembershipsByIslandId(String islandId) {
+    public List<FeedMembershipMessage> retrieveFeedMembershipsByIslandId(String islandId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveMembershipsRequest request = RetrieveMembershipsRequest.newBuilder().setIslandId(islandId).build();
@@ -215,4 +217,24 @@ public class MembershipService {
 
         return feedMembershipResponse.getMessageList();
     }
+
+    public List<MembershipMessage> retrieveMembershipsByIslandIds(Collection<String> islandIds) {
+        MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveMembershipsByIslandIdsRequest request = RetrieveMembershipsByIslandIdsRequest.newBuilder().addAllIslandIds(islandIds).build();
+
+        MembershipsResponse membershipsResponse;
+        try {
+            membershipsResponse = stub.retrieveMembershipsByIslandIds(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != membershipsResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(membershipsResponse.getStatus());
+        }
+
+        return membershipsResponse.getMessageList();
+    }
+
 }

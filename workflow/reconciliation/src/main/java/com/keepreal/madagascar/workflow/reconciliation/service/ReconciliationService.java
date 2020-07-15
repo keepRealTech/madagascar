@@ -81,7 +81,7 @@ public class ReconciliationService {
                     }
                 });
                 this.workflowService.succeed(workflowLog);
-            } else if ("NO Bill Exist".equals(map.get("return_msg"))) {
+            } else if ("No Bill Exist".equals(map.get("return_msg"))) {
                 workflowLog.setDescription("No bills available.");
                 this.workflowService.succeed(workflowLog);
             } else {

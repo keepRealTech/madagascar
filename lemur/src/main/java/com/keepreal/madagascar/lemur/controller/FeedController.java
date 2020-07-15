@@ -5,9 +5,12 @@ import com.keepreal.madagascar.brookesia.StatsEventCategory;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.fossa.FeedsResponse;
+import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
+import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
@@ -25,14 +28,19 @@ import org.springframework.web.multipart.MultipartFile;
 import swagger.api.FeedApi;
 import swagger.model.CheckFeedsMessage;
 import swagger.model.DummyResponse;
+import swagger.model.FeedDTO;
 import swagger.model.FeedResponse;
+import swagger.model.FeedsResponseV2;
 import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
 import swagger.model.PostFeedPayload;
 import swagger.model.TimelinesResponse;
+import swagger.model.TopFeedRequest;
+import swagger.model.ToppedFeedsDTO;
 
 import javax.validation.Valid;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -166,14 +174,22 @@ public class FeedController implements FeedApi {
      */
     @Override
     public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedsGet(String islandId,
-                                                                     Boolean fromHost,
-                                                                     Integer page,
-                                                                     Integer pageSize) {
+                                                       Boolean fromHost,
+                                                       String v,
+                                                       String osn,
+                                                       Integer page,
+                                                       Integer pageSize) {
+        swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
+        if ("1.0.0".equals(v) && "iOS".equals(osn)) {
+            response.setRtn(ErrorCode.REQUEST_LOW_VERSION_ERROR_VALUE);
+            response.setMsg(new DefaultErrorMessageTranslater().translate(ErrorCode.REQUEST_LOW_VERSION_ERROR));
+            return new ResponseEntity<>(response, HttpStatus.NOT_ACCEPTABLE);
+        }
+
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(islandId, fromHost, userId, null, null, page, pageSize);
+                this.feedService.retrieveIslandFeeds(islandId, fromHost, userId, null, null, page, pageSize, false);
 
-        swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedsResponse.getFeedList()
                 .stream()
                 .map(this.feedDTOFactory::valueOf)
@@ -230,7 +246,7 @@ public class FeedController implements FeedApi {
                                                                               Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, null, page, pageSize);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, null, page, pageSize, false);
 
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedsResponse.getFeedList()
@@ -255,25 +271,38 @@ public class FeedController implements FeedApi {
      * @return {@link swagger.model.FeedsResponse}.
      */
     @Override
-    public ResponseEntity<TimelinesResponse> apiV11IslandsIdFeedsGet(String id,
-                                                                     Boolean fromHost,
-                                                                     Long minTimestamp,
-                                                                     Long maxTimestamp,
-                                                                     Integer pageSize) {
+    public ResponseEntity<FeedsResponseV2> apiV11IslandsIdFeedsGet(String id,
+                                                                   Boolean fromHost,
+                                                                   Long minTimestamp,
+                                                                   Long maxTimestamp,
+                                                                   Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize);
+        com.keepreal.madagascar.fossa.FeedsResponse normalFeedsResponse =
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize, true);
 
-        TimelinesResponse response = new TimelinesResponse();
-        response.setData(feedsResponse.getFeedList()
+        com.keepreal.madagascar.fossa.FeedResponse toppedFeedResponse = this.feedService.retrieveIslandToppedFeeds(id, userId);
+        FeedsResponseV2 response = new FeedsResponseV2();
+        ToppedFeedsDTO dto = new ToppedFeedsDTO();
+
+        dto.setFeeds(normalFeedsResponse.getFeedList()
                 .stream()
                 .map(this.feedDTOFactory::valueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
+
+        FeedDTO feedDTO = this.feedDTOFactory.valueOf(toppedFeedResponse.getFeed());
+        List<FeedDTO> topFeeds = new ArrayList<>();
+        if (Objects.nonNull(feedDTO)){
+            topFeeds.add(feedDTO);
+        }
+        dto.setToppedFeeds(topFeeds);
+
+        response.setData(dto);
         response.setCurrentTime(System.currentTimeMillis());
-        response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
+        response.setPageInfo(PaginationUtils.getPageInfo(normalFeedsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -300,4 +329,31 @@ public class FeedController implements FeedApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+
+    /**
+     * Implement the island top feed api v1 api
+     *
+     * @param id id (required)  island id
+     * @param topFeedRequest  (required)
+     * @return
+     */
+    @Override
+    public ResponseEntity<FeedResponse> apiV1IslandsIdFeedsTopPost(String id, @Valid TopFeedRequest topFeedRequest) {
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+        String userId = HttpContextUtils.getUserIdFromContext();
+        String hostId = islandMessage.getHostId();
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(topFeedRequest.getFeedId(), userId);
+
+        if (!userId.equals(hostId) || !islandMessage.getId().equals(feedMessage.getIslandId())){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        this.feedService.topFeedByRequest(topFeedRequest, id);
+
+        FeedResponse response = new FeedResponse();
+        response.setData(this.feedDTOFactory.valueOf(feedMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

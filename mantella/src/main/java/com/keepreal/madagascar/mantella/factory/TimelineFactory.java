@@ -52,13 +52,14 @@ public class TimelineFactory {
      * @param eventId       Event id.
      * @return {@link Timeline}.
      */
-    public Timeline valueOf(String feedId, String islandId, String userId, Long feedCreatedAt, String eventId) {
+    public Timeline valueOf(String feedId, String islandId, String userId, Long feedCreatedAt, String eventId, String duplicateTag) {
         return Timeline.builder()
                 .feedId(feedId)
                 .islandId(islandId)
                 .feedCreatedAt(feedCreatedAt)
                 .userId(userId)
                 .eventId(eventId)
+                .duplicateTag(duplicateTag)
                 .build();
     }
 

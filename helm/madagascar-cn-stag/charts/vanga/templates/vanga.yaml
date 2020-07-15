@@ -74,6 +74,21 @@ spec:
                 secretKeyRef:
                   name: wechat-pay
                   key: mch-key
+            - name: WECHATMP_APPID
+              valueFrom:
+                secretKeyRef:
+                  name: wechat-mp
+                  key: app-id
+            - name: WECHATMP_MERCHANTID
+              valueFrom:
+                secretKeyRef:
+                  name: wechat-pay
+                  key: mch-id
+            - name: WECHATMP_MERCHANTKEY
+              valueFrom:
+                secretKeyRef:
+                  name: wechat-pay
+                  key: mch-key
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:

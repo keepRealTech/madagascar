@@ -1,5 +1,7 @@
 package com.keepreal.madagascar.vanga.service;
 
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
@@ -154,8 +156,12 @@ public class SubscribeMembershipService {
             ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
 
             Balance userBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(userId);
-            Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
 
+            if (userBalance.getFrozen()) {
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_BALANCE_HAS_BEEN_FROZEN);
+            }
+
+            Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
             this.balanceService.consumeShells(userBalance, sku.getPriceInShells());
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.createPayShellPayments(userId, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
@@ -203,8 +209,17 @@ public class SubscribeMembershipService {
      * @return membership id list.
      */
     public List<String> getMembershipIdListByUserIdAndIslandId(String userId, String islandId) {
-        List<String> membershipIdList = subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getStartOfDayTime());
-        return membershipIdList == null ? Collections.emptyList() : membershipIdList;
+        return this.subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getStartOfDayTime());
+    }
+
+    /**
+     * Retrieves the membership ids by valid user subscriptions.
+     *
+     * @param userId  User id.
+     * @return Membership id list.
+     */
+    public List<String> getMembershipIdListByUserId(String userId) {
+        return this.subscriptionMemberRepository.getMembershipIdListByUserId(userId, this.getStartOfDayTime());
     }
 
     /**

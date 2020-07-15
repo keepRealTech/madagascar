@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.CommentMessage;
+import com.keepreal.madagascar.lemur.service.EhcacheService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -16,17 +17,21 @@ public class CommentDTOFactory {
 
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final EhcacheService ehcacheService;
 
     /**
      * Constructs the comment dto factory.
      *
      * @param userService    {@link UserService}.
      * @param userDTOFactory {@link UserDTOFactory}.
+     * @param ehcacheService {@link EhcacheService}.
      */
     public CommentDTOFactory(UserService userService,
-                             UserDTOFactory userDTOFactory) {
+                             UserDTOFactory userDTOFactory,
+                             EhcacheService ehcacheService) {
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.ehcacheService = ehcacheService;
     }
 
     /**
@@ -46,7 +51,12 @@ public class CommentDTOFactory {
         commentDTO.setContent(comment.getContent());
         commentDTO.setCreatedAt(comment.getCreatedAt());
 
-        if (!StringUtils.isEmpty(comment.getReplyToId())) {
+        boolean deleted = this.ehcacheService.checkCommentDeleted(comment.getId());
+        if (deleted) {
+            commentDTO.setContent("该评论已被删除！");
+        }
+
+        if (!StringUtils.isEmpty(comment.getReplyToId()) && !deleted) {
             commentDTO.setReplyTo(this.userDTOFactory.briefValueOf(
                     this.userService.retrieveUserById(comment.getReplyToId())));
         }
@@ -56,5 +66,4 @@ public class CommentDTOFactory {
 
         return commentDTO;
     }
-
 }
