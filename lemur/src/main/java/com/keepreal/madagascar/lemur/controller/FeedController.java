@@ -10,6 +10,7 @@ import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrig
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
+import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
@@ -173,14 +174,22 @@ public class FeedController implements FeedApi {
      */
     @Override
     public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedsGet(String islandId,
-                                                                     Boolean fromHost,
-                                                                     Integer page,
-                                                                     Integer pageSize) {
+                                                       Boolean fromHost,
+                                                       String v,
+                                                       String osn,
+                                                       Integer page,
+                                                       Integer pageSize) {
+        swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
+        if ("1.0.0".equals(v) && "iOS".equals(osn)) {
+            response.setRtn(ErrorCode.REQUEST_LOW_VERSION_ERROR_VALUE);
+            response.setMsg(new DefaultErrorMessageTranslater().translate(ErrorCode.REQUEST_LOW_VERSION_ERROR));
+            return new ResponseEntity<>(response, HttpStatus.NOT_ACCEPTABLE);
+        }
+
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
                 this.feedService.retrieveIslandFeeds(islandId, fromHost, userId, null, null, page, pageSize, false);
 
-        swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedsResponse.getFeedList()
                 .stream()
                 .map(this.feedDTOFactory::valueOf)

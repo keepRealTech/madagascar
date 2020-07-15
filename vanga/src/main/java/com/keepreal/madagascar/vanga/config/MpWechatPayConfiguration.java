@@ -3,7 +3,6 @@ package com.keepreal.madagascar.vanga.config;
 import com.keepreal.madagascar.vanga.wechatPay.IWXPayDomain;
 import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConfig;
-
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,11 +22,11 @@ import java.nio.file.StandardOpenOption;
  * Represents the configurations for wechat pay.
  */
 @Configuration
-@ConfigurationProperties(prefix = "wechat-pay", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "wechat-mp", ignoreUnknownFields = false)
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Slf4j
-public class WechatPayConfiguration extends WXPayConfig {
+public class MpWechatPayConfiguration extends WXPayConfig {
 
     private String appId;
     private String merchantId;
@@ -96,7 +95,7 @@ public class WechatPayConfiguration extends WXPayConfig {
 
         @Override
         public DomainInfo getDomain(WXPayConfig config) {
-            return new IWXPayDomain.DomainInfo(WXPayConstants.DOMAIN_API, true);
+            return new DomainInfo(WXPayConstants.DOMAIN_API, true);
         }
     }
 
@@ -105,7 +104,7 @@ public class WechatPayConfiguration extends WXPayConfig {
      *
      * @return {@link WXPay}.
      */
-    @Bean(name = "wechatpay")
+    @Bean(name = "mpwechatpay")
     @SneakyThrows
     public WXPay getWechatPayClient() {
         return new WXPay(this, this.callbackAddress, false);
