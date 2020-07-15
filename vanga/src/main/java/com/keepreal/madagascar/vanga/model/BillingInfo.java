@@ -48,5 +48,9 @@ public class BillingInfo {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+    @Builder.Default
+    private String idFrontUrl = "";
+    @Builder.Default
+    private String idBackUrl = "";
 
 }

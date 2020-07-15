@@ -13,11 +13,13 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Represents the feed service
@@ -119,9 +121,13 @@ public class FeedInfoService {
     public TimelineFeedMessage getTimelineFeedMessage(FeedInfo feedInfo) {
         if (feedInfo == null)
             return null;
+        String duplicateTag = StringUtils.isEmpty(feedInfo.getDuplicateTag()) ?
+                UUID.randomUUID().toString() :
+                feedInfo.getDuplicateTag();
         return TimelineFeedMessage.newBuilder().setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
-                .setCreatedAt(feedInfo.getCreatedTime()).build();
+                .setCreatedAt(feedInfo.getCreatedTime())
+                .setDuplicateTag(duplicateTag).build();
     }
 
     /**

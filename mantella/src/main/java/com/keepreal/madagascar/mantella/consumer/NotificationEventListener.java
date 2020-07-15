@@ -72,7 +72,7 @@ public class NotificationEventListener implements MessageListener {
                     this.feedService.retrieveFeedsByIslandIdAndTimestampBefore(event.getSubscribeEvent().getIslandId(),
                                     System.currentTimeMillis(), NotificationEventListener.TIMELINE_PULL_PAGESIZE)
                             .map(feed -> this.timelineFactory.valueOf(feed.getId(), feed.getIslandId(),
-                                    event.getSubscribeEvent().getSubscriberId(), feed.getCreatedAt(), event.getEventId()))
+                                    event.getSubscribeEvent().getSubscriberId(), feed.getCreatedAt(), event.getEventId(), feed.getDuplicateTag()))
                             .compose(this.timelineService::insertAll)
                             .blockLast();
                     break;
