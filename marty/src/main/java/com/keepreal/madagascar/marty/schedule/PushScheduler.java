@@ -2,12 +2,15 @@ package com.keepreal.madagascar.marty.schedule;
 
 import com.keepreal.madagascar.marty.service.PushNotificationService;
 import com.keepreal.madagascar.marty.service.RedissonService;
+import com.keepreal.madagascar.marty.util.AutoRedisLock;
 import org.redisson.api.RMap;
 import org.redisson.api.RedissonClient;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @program: madagascar
@@ -30,22 +33,25 @@ public class PushScheduler {
         this.pushNotificationService = pushNotificationService;
     }
 
+    @Scheduled(cron = "0 0/5 * * * *")
     public void push() {
-        redissonClient.getKeys()
-                .getKeysByPattern("push:*")
-                .forEach(pushKey -> {
-                    RMap<Object, Object> map = redissonClient.getMap(pushKey);
-                    Integer type = (Integer) map.get("type");
-                    Integer count = (Integer) map.get("count");
-                    String latestUserId = (String) map.get("latestUserId");
+       try(AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, "push-schedule")) {
+            redissonClient.getKeys()
+                    .getKeysByPattern("push:*")
+                    .forEach(pushKey -> {
+                        RMap<Object, Object> map = redissonClient.getMap(pushKey);
+                        Integer type = (Integer) map.get("type");
+                        Integer count = (Integer) map.get("count");
+                        String latestUserId = (String) map.get("latestUserId");
 
-                    Map<String, List<String>> token = redissonService.getToken(pushKey);
+                        Map<String, List<String>> token = redissonService.getToken(pushKey);
 
-                    String nickname = redissonService.getNickname(latestUserId);
+                        String nickname = redissonService.getNickname(latestUserId);
 
-                    this.pushNotificationService.jPushIosNotification(getTitle(nickname, count), type, token.get("ios"));
-                    this.pushNotificationService.umengPushAndroidNotification(getTitle(nickname, count), type, token.get("android"));
-                });
+                        this.pushNotificationService.jPushIosNotification(getTitle(nickname, count), type, token.get("ios"));
+                        this.pushNotificationService.umengPushAndroidNotification(getTitle(nickname, count), type, token.get("android"));
+                    });
+        }
     }
 
     private String getTitle(String name, Integer count) {
