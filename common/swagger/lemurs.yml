@@ -124,6 +124,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+  /api/v1/ossToken:
+    get:
+      tags:
+        - Login
+      summary: retrieves the oss token
+      responses:
+        '200':
+          description: oss token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OssTokenResponse'
   /api/v1/users/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -3034,3 +3046,22 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/AvatarDTO'
+    OssTokenDTO:
+      type: object
+      properties:
+        securityToken:
+          type: string
+        accessKey:
+          type: string
+        accessSecret:
+          type: string
+        expiration:
+          type: integer
+          format: int64
+    OssTokenResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/OssTokenDTO'
