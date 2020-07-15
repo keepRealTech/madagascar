@@ -28,6 +28,14 @@ public class ChatgroupService {
     private final RongCloudService rongCloudService;
     private final LongIdGenerator idGenerator;
 
+    /**
+     * Constructs the chatgroup service.
+     *
+     * @param chatgroupRepository       {@link ChatgroupRepository}.
+     * @param chatgroupMemberRepository {@link ChatgroupMemberRepository}.
+     * @param rongCloudService          {@link RongCloudService}.
+     * @param idGenerator               {@link LongIdGenerator}.
+     */
     public ChatgroupService(ChatgroupRepository chatgroupRepository,
                             ChatgroupMemberRepository chatgroupMemberRepository,
                             RongCloudService rongCloudService,
@@ -240,8 +248,8 @@ public class ChatgroupService {
     /**
      * Retrieves all chatgroup member state for given groups and user.
      *
-     * @param groupIds  Group ids.
-     * @param userId    User id.
+     * @param groupIds Group ids.
+     * @param userId   User id.
      * @return {@link ChatgroupMember}.
      */
     public List<ChatgroupMember> retrieveChatgroupMemberByGroupIdsAndUserId(List<String> groupIds, String userId) {
@@ -276,6 +284,16 @@ public class ChatgroupService {
      */
     public Long countChatgroupMembersByIslandId(String islandId) {
         return this.chatgroupMemberRepository.countDistinctUserIdByIslandIdAndDeletedIsFalse(islandId);
+    }
+
+    /**
+     * Retrieves the lastest chatgroup members for an island.
+     *
+     * @param islandId Island id.
+     * @return User ids.
+     */
+    public List<String> retrieveLastChatgroupMemberUserIdsByIslandId(String islandId) {
+        return this.chatgroupMemberRepository.selectTop5DistinctUserIdByIslandIdAndDeletedIsFalseOrderByCreatedTime(islandId);
     }
 
 }

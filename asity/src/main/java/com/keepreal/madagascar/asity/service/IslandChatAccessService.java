@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Represents the islance chat access service.
@@ -22,9 +21,9 @@ public class IslandChatAccessService {
     /**
      * Constructs the island chat access service.
      *
-     * @param islandChatAccessRepository    {@link IslandChatAccessRepository}.
-     * @param idGenerator                   {@link LongIdGenerator}.
-     * @param chatgroupService              {@link ChatgroupService}.
+     * @param islandChatAccessRepository {@link IslandChatAccessRepository}.
+     * @param idGenerator                {@link LongIdGenerator}.
+     * @param chatgroupService           {@link ChatgroupService}.
      */
     public IslandChatAccessService(IslandChatAccessRepository islandChatAccessRepository,
                                    LongIdGenerator idGenerator,
@@ -37,7 +36,7 @@ public class IslandChatAccessService {
     /**
      * Retrieves or creates if not exists for given island and user.
      *
-     * @param islandId   Island id.
+     * @param islandId Island id.
      * @return {@link IslandChatAccess}.
      */
     public IslandChatAccess retrieveOrCreateIslandChatAccessIfNotExistsByIslandId(String islandId) {
@@ -52,7 +51,7 @@ public class IslandChatAccessService {
     /**
      * Enables chat access for the given island and user.
      *
-     * @param islandId  Island id.
+     * @param islandId Island id.
      * @return {@link IslandChatAccess}.
      */
     public IslandChatAccess enable(String islandId) {
@@ -64,7 +63,7 @@ public class IslandChatAccessService {
     /**
      * Counts the enabled member count.
      *
-     * @param islandId  Island id.
+     * @param islandId Island id.
      * @return Count.
      */
     public Integer countEnabledMember(String islandId) {
@@ -78,15 +77,13 @@ public class IslandChatAccessService {
      * @return User ids.
      */
     public List<String> retrieveLastEnabledUserIds(String islandId) {
-        return this.islandChatAccessRepository.findTop4ByIslandIdAndEnabledIsTrueAndDeletedIsFalseOrderByCreatedTimeDesc(islandId).stream()
-                .map(IslandChatAccess::getUserId)
-                .collect(Collectors.toList());
+        return this.chatgroupService.retrieveLastChatgroupMemberUserIdsByIslandId(islandId);
     }
 
     /**
      * Creates a new entity for given island and user.
      *
-     * @param islandId  Island id.
+     * @param islandId Island id.
      * @return {@link IslandChatAccess}.
      */
     private IslandChatAccess createIslandChatAccess(String islandId) {

@@ -2,6 +2,7 @@ package com.keepreal.madagascar.asity.repository;
 
 import com.keepreal.madagascar.asity.model.ChatgroupMember;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,5 +22,8 @@ public interface ChatgroupMemberRepository extends JpaRepository<ChatgroupMember
     List<ChatgroupMember> findAllByUserIdAndDeletedIsFalse(String userId);
 
     Long countDistinctUserIdByIslandIdAndDeletedIsFalse(String islandId);
+
+    @Query(value = "SELECT DISTINCT userId FROM chat_group_member WHERE islandId = ?1 AND is_deleted = FALSE ORDER BY created_time DESC LIMIT 4", nativeQuery = true)
+    List<String> selectTop4DistinctUserIdByIslandIdAndDeletedIsFalseOrderByCreatedTime(String islandId);
 
 }
