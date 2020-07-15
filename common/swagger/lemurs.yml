@@ -3055,12 +3055,13 @@ components:
           type: string
         accessSecret:
           type: string
+        expiration:
+          type: integer
+          format: int64
     OssTokenResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
             data:
-              type: array
-              items:
-                $ref: '#/components/schemas/OssTokenDTO'
+              $ref: '#/components/schemas/OssTokenDTO'

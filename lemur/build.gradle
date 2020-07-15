@@ -40,6 +40,8 @@ dependencies {
     implementation 'io.swagger.core.v3:swagger-annotations'
     implementation 'io.swagger:swagger-annotations'
     implementation 'com.aliyun.oss:aliyun-sdk-oss'
+    implementation 'com.aliyun:aliyun-java-sdk-core:4.5.3'
+    implementation 'com.aliyun:aliyun-java-sdk-sts:3.0.2'
     swaggerCodegen 'org.openapitools:openapi-generator-cli'
     implementation 'io.micrometer:micrometer-registry-prometheus'
     compileOnly 'org.projectlombok:lombok'
