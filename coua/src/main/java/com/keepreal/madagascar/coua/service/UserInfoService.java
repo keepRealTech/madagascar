@@ -159,4 +159,14 @@ public class UserInfoService {
         return userInfoRepository.findTopByUsernameAndDeletedIsFalse(username);
     }
 
+    /**
+     * Retrieve {@link UserInfo} by ids.
+     *
+     * @param ids User ids.
+     * @return {@link UserInfo}.
+     */
+    public List<UserInfo> findUserInfosByIds(Iterable<String> ids) {
+        return this.userInfoRepository.findAllByIdInAndDeletedIsFalse(ids);
+    }
+
 }
