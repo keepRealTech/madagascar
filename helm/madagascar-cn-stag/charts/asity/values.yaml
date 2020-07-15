@@ -7,6 +7,11 @@ common_configs:
   memory: 2Gi
   cpu: 500m
 
+rocketmq:
+  topic: notification-event
+  group_id: GID-asity-default
+  tag: event
+
 deploy:
   opentracing:
     enable_jaeger: false

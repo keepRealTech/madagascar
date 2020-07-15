@@ -12,6 +12,6 @@ import java.util.List;
 @Repository
 public interface ShellSkuRepository extends JpaRepository<ShellSku, String> {
 
-    List<ShellSku> findAllByActiveIsTrueAndIsWechatPayAndDeletedIsFalse(Boolean isWechatPay);
+    List<ShellSku> findAllByActiveIsTrueAndIsWechatPayAndDeletedIsFalseOrderByShellsAsc(Boolean isWechatPay);
 
 }

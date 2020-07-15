@@ -209,8 +209,17 @@ public class SubscribeMembershipService {
      * @return membership id list.
      */
     public List<String> getMembershipIdListByUserIdAndIslandId(String userId, String islandId) {
-        List<String> membershipIdList = subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getStartOfDayTime());
-        return membershipIdList == null ? Collections.emptyList() : membershipIdList;
+        return this.subscriptionMemberRepository.getMembershipIdListByUserIdAndIslandId(userId, islandId, getStartOfDayTime());
+    }
+
+    /**
+     * Retrieves the membership ids by valid user subscriptions.
+     *
+     * @param userId  User id.
+     * @return Membership id list.
+     */
+    public List<String> getMembershipIdListByUserId(String userId) {
+        return this.subscriptionMemberRepository.getMembershipIdListByUserId(userId, this.getStartOfDayTime());
     }
 
     /**

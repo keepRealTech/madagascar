@@ -1222,10 +1222,21 @@ paths:
   /api/v1/chatgroups/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Chat
+      summary: get the chatgroup
+      responses:
+        '200':
+          description: chat access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatGroupResponse'
     put:
       tags:
         - Chat
-      summary: updates the chatg
+      summary: updates the chatgroup
       requestBody:
         required: true
         content:
@@ -2673,12 +2684,12 @@ components:
           type: string
         account:
           type: string
-        verified:
-          type: boolean
         idFrontUrl:
           type: string
         idBackUrl:
           type: string
+        verified:
+          type: boolean
     PutBillingInfoRequest:
       type: object
       properties:
@@ -2939,6 +2950,8 @@ components:
           type: integer
         bulletin:
           type: string
+        isMuted:
+          type: boolean
     PostChatGroupRequest:
       type: object
       properties:
@@ -2961,6 +2974,8 @@ components:
           type: array
           items:
             type: string
+        isMuted:
+          type: boolean
     ChatGroupResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

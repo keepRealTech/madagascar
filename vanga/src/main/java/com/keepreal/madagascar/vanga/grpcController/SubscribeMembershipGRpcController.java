@@ -57,7 +57,12 @@ public class SubscribeMembershipGRpcController extends SubscribeMembershipServic
 
     @Override
     public void retrieveMembershipIdsByUserIdAndIslandId(RetrieveMembershipIdsRequest request, StreamObserver<RetrieveMembershipIdsResponse> responseObserver) {
-        List<String> membershipIdList = subscribeMembershipService.getMembershipIdListByUserIdAndIslandId(request.getUserId(), request.getIslandId());
+        List<String> membershipIdList;
+        if (request.hasIslandId()) {
+            membershipIdList = subscribeMembershipService.getMembershipIdListByUserIdAndIslandId(request.getUserId(), request.getIslandId().getValue());
+        } else {
+            membershipIdList = subscribeMembershipService.getMembershipIdListByUserId(request.getUserId());
+        }
 
         responseObserver.onNext(RetrieveMembershipIdsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
