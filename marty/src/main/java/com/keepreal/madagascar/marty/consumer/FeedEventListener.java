@@ -8,8 +8,6 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.keepreal.madagascar.mantella.FeedEventMessage;
 import com.keepreal.madagascar.marty.model.PushType;
 import com.keepreal.madagascar.marty.service.PushService;
-import com.keepreal.madagascar.marty.service.RedissonService;
-import com.keepreal.madagascar.marty.service.UmengPushService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -25,12 +23,9 @@ import static com.keepreal.madagascar.mantella.FeedEventType.FEED_EVENT_CREATE;
 public class FeedEventListener implements MessageListener {
 
     private final PushService pushService;
-    private final RedissonService redissonService;
 
-    public FeedEventListener(PushService pushService,
-                             RedissonService redissonService) {
+    public FeedEventListener(PushService pushService) {
         this.pushService = pushService;
-        this.redissonService = redissonService;
     }
 
     /**
@@ -48,8 +43,7 @@ public class FeedEventListener implements MessageListener {
             }
             FeedEventMessage feedEventMessage = FeedEventMessage.parseFrom(message.getBody());
             if (feedEventMessage.getType().equals(FEED_EVENT_CREATE)) {
-                String islandId = feedEventMessage.getFeedCreateEvent().getIslandId();
-                pushService.pushNewFeed(islandId, PushType.PUSH_FEED);
+                pushService.pushNewFeed(feedEventMessage.getFeedCreateEvent(), PushType.PUSH_FEED);
             }
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {

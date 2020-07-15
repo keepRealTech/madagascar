@@ -2,6 +2,8 @@ package com.keepreal.madagascar.marty.model;
 
 import lombok.Data;
 
+import java.util.Map;
+
 /**
  * @program: madagascar
  * @author: zhangxidong
@@ -16,5 +18,6 @@ public class PushPriorityInfo {
     private Integer iosUrl = 0;
     private String notificationType;
     private String notificationNoticeType;
+    private Map<String, String> extrasMap;
 
 }
