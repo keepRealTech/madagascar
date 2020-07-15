@@ -55,10 +55,10 @@ spec:
                   name: rongcloud
                   key: app-secret
             - name: SPRING_DATASOURCE_URL
-                valueFrom:
-                  secretKeyRef:
-                    key: asity-connection-string
-                    name: aliyun-rdb
+              valueFrom:
+                secretKeyRef:
+                  key: asity-connection-string
+                  name: aliyun-rdb
             - name: ROCKETMQ_ACCESSKEY
               valueFrom:
                 secretKeyRef:
