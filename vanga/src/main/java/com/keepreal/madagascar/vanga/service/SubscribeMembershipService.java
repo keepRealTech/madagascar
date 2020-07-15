@@ -156,12 +156,12 @@ public class SubscribeMembershipService {
             ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
 
             Balance userBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(userId);
-            Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
 
             if (userBalance.getFrozen()) {
                 throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_BALANCE_HAS_BEEN_FROZEN);
             }
 
+            Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
             this.balanceService.consumeShells(userBalance, sku.getPriceInShells());
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.createPayShellPayments(userId, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
