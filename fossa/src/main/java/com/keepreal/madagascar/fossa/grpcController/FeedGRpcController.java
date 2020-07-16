@@ -357,9 +357,9 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         String userId = request.getUserId();
         FeedInfo feedInfo = this.feedInfoService.findToppedFeedByIslandId(islandId);
         FeedMessage feedMessage = this.feedInfoService.getFeedMessage(feedInfo, userId);
-        FeedResponse.Builder builder = FeedResponse.newBuilder();
-        builder.setStatus(CommonStatusUtils.getSuccStatus())
-                .setUserId(userId);
+        FeedResponse.Builder builder = FeedResponse.newBuilder()
+                                        .setStatus(CommonStatusUtils.getSuccStatus())
+                                        .setUserId(userId);
         if (Objects.nonNull(feedMessage)) {
             builder.setFeed(feedMessage);
         }
