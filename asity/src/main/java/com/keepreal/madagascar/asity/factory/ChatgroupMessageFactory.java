@@ -34,6 +34,7 @@ public class ChatgroupMessageFactory {
                 .setName(chatgroup.getName())
                 .setBulletin(chatgroup.getBulletin())
                 .setMemberCount(chatgroup.getMemberCount())
+                .setJoined(!Objects.isNull(chatgroupMember))
                 .addAllMembershipIds(chatgroup.getChatgroupMemberships().stream()
                         .map(ChatgroupMembership::getMembershipId)
                         .collect(Collectors.toList()))
