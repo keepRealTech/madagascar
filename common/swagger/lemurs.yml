@@ -1496,11 +1496,12 @@ components:
     GenderType:
       type: integer
       minimum: 0
-      maximum: 2
+      maximum: 3
       enum:
         - 0
         - 1
         - 2
+        - 3
     NotificationType:
       type: string
       enum:
