@@ -367,15 +367,15 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                                            StreamObserver<UserChatgroupsResponse> responseObserver) {
         List<ChatgroupMember> chatgroupMembers = this.chatgroupService.retrieveChatgroupMembersByUserId(request.getUserId());
 
-        Map<String, ChatgroupMember> chatgroupMap = chatgroupMembers.stream()
+        Map<String, ChatgroupMember> chatgroupMemberMap = chatgroupMembers.stream()
                 .collect(Collectors.toMap(ChatgroupMember::getGroupId, Function.identity()));
 
-        List<Chatgroup> chatgroups = this.chatgroupService.retrieveChatgroupsByIds(chatgroupMap.keySet());
+        List<Chatgroup> chatgroups = this.chatgroupService.retrieveChatgroupsByIds(chatgroupMemberMap.keySet());
 
         UserChatgroupsResponse response = UserChatgroupsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .addAllChatgroups(chatgroups.stream()
-                        .map(chatgroup -> this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMap.get(chatgroup.getId())))
+                        .map(chatgroup -> this.chatgroupMessageFactory.valueOf(chatgroup, chatgroupMemberMap.getOrDefault(chatgroup.getId(), null)))
                         .collect(Collectors.toList()))
                 .build();
 

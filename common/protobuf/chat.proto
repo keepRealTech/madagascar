@@ -50,6 +50,7 @@ message ChatgroupMessage {
   string bulletin = 7;
   bool muted = 8;
   bool dismissed = 9;
+  bool joined = 10;
 }
 
 message ChatgroupResponse {
