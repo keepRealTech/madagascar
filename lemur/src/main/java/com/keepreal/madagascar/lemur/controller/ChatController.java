@@ -361,6 +361,12 @@ public class ChatController implements ChatApi {
                                                                                 Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
+        boolean subscribed = this.islandService.retrieveIslandSubscribeStateByUserId(userId, Collections.singletonList(id)).get(id);
+
+        if (!subscribed) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         IslandChatgroupsResponse chatgroupsResponse = this.chatService.retrieveChatgroupsByIslandId(id, userId, page, pageSize);
 
         Map<String, MembershipMessage> membershipMap = this.membershipService.retrieveMembershipsByIslandId(id).stream()
@@ -377,7 +383,7 @@ public class ChatController implements ChatApi {
                             .filter(Objects::nonNull)
                             .map(this.membershipDTOFactory::simpleValueOf)
                             .collect(Collectors.toList());
-                    return this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList, userMembershipIds);
+                    return this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList, userMembershipIds, userId);
                 })
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
@@ -465,7 +471,9 @@ public class ChatController implements ChatApi {
                 this.chatDTOFactory.valueOf(
                         this.islandDTOFactory.briefValueOf(this.islandService.retrieveIslandById(entry.getKey())),
                         entry.getValue(),
-                        userMembershipIds)).collect(Collectors.toList()));
+                        userMembershipIds,
+                        userId))
+                .collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
