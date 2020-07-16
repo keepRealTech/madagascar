@@ -357,13 +357,13 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         String userId = request.getUserId();
         FeedInfo feedInfo = this.feedInfoService.findToppedFeedByIslandId(islandId);
         FeedMessage feedMessage = this.feedInfoService.getFeedMessage(feedInfo, userId);
-        FeedResponse feedResponse = FeedResponse.newBuilder()
-                .setFeed(feedMessage)
-                .setStatus(CommonStatusUtils.getSuccStatus())
-                .setUserId(userId)
-                .build();
-
-        responseObserver.onNext(feedResponse);
+        FeedResponse.Builder builder = FeedResponse.newBuilder();
+        builder.setStatus(CommonStatusUtils.getSuccStatus())
+                .setUserId(userId);
+        if (Objects.nonNull(feedMessage)) {
+            builder.setFeed(feedMessage);
+        }
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
 }
