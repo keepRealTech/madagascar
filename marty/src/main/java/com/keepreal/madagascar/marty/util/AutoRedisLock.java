@@ -23,7 +23,7 @@ public class AutoRedisLock implements AutoCloseable {
      */
     @SneakyThrows
     public AutoRedisLock(RedissonClient client, String lockName) {
-        this(client, lockName, 5, 1000);
+        this(client, lockName, 5, 299 * 1000);
     }
 
     /**

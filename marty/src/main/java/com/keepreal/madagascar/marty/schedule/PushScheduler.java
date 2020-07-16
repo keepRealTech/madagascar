@@ -50,6 +50,7 @@ public class PushScheduler {
 
                         this.pushNotificationService.jPushIosNotification(getTitle(nickname, count), type, token.get("ios"));
                         this.pushNotificationService.umengPushAndroidNotification(getTitle(nickname, count), type, token.get("android"));
+                        map.delete();
                     });
         }
     }
