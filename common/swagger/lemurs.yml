@@ -2952,6 +2952,10 @@ components:
           type: string
         isMuted:
           type: boolean
+        hasJoined:
+          type: boolean
+        hasAccess:
+          type: boolean
     PostChatGroupRequest:
       type: object
       properties:
@@ -2991,14 +2995,7 @@ components:
         chatgroups:
           type: array
           items:
-            $ref: '#/components/schemas/UserChatGroupDTO'
-    UserChatGroupDTO:
-      allOf:
-        - $ref: '#/components/schemas/ChatGroupDTO'
-        - type: object
-          properties:
-            hasAccess:
-              type: boolean
+            $ref: '#/components/schemas/ChatGroupDTO'
     UserChatGroupsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -3018,7 +3015,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/UserChatGroupDTO'
+                $ref: '#/components/schemas/ChatGroupDTO'
     IslandChatAccessDTO:
       type: object
       properties:

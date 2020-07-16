@@ -250,7 +250,7 @@ public class ChatController implements ChatApi {
                 .collect(Collectors.toList());
 
         ChatGroupResponse response = new ChatGroupResponse();
-        response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList));
+        response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList, new ArrayList<>(), userId));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -315,8 +315,10 @@ public class ChatController implements ChatApi {
                 .map(this.membershipDTOFactory::simpleValueOf)
                 .collect(Collectors.toList());
 
+        List<String> userMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(id, userId);
+
         ChatGroupResponse response = new ChatGroupResponse();
-        response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList));
+        response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList, userMembershipIds, userId));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -421,8 +423,10 @@ public class ChatController implements ChatApi {
                 .map(this.membershipDTOFactory::simpleValueOf)
                 .collect(Collectors.toList());
 
+        List<String> userMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(id, userId);
+
         ChatGroupResponse response = new ChatGroupResponse();
-        response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList));
+        response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList, userMembershipIds, userId));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
