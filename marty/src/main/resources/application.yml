@@ -37,5 +37,5 @@ spring:
       config: classpath:redisson.yml
 
 jpush:
-  key: xxx
-  secret: xxx
+  appKey: xxx
+  appSecret: xxx

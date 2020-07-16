@@ -7,6 +7,7 @@ import cn.jpush.api.push.model.Message;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
+import com.keepreal.madagascar.marty.config.JPushConfig;
 import com.keepreal.madagascar.marty.model.PushType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,8 +20,8 @@ public class JpushService {
 
     private final JPushClient jPushClient;
 
-    public JpushService(JPushClient jPushClient) {
-        this.jPushClient = jPushClient;
+    public JpushService(JPushConfig jPushConfig) {
+        this.jPushClient = new JPushClient(jPushConfig.getAppSecret(), jPushConfig.getAppKey());
     }
 
     public void pushIOSMessageByType(PushType pushType, String... registrationIds) {
