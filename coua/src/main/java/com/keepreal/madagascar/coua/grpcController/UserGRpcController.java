@@ -2,6 +2,7 @@ package com.keepreal.madagascar.coua.grpcController;
 
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.DeviceType;
+import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
@@ -70,7 +71,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         UserInfo userInfo = UserInfo.builder()
                 .nickName(request.getName().getValue())
                 .portraitImageUri(request.getPortraitImageUri().getValue())
-                .gender(request.getGender().getValueValue())
+                .gender(request.hasGender() ? request.getGender().getValueValue() : Gender.UNSET_VALUE)
                 .city(request.getCity().getValue())
                 .description(request.getDescription().getValue())
                 .unionId(request.getUnionId())
