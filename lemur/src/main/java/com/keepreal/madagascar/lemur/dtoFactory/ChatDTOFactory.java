@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.asity.ChatAccessMessage;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
+import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefIslandDTO;
 import swagger.model.BriefUserDTO;
@@ -23,6 +24,21 @@ import java.util.stream.Collectors;
  */
 @Component
 public class ChatDTOFactory {
+
+    private final UserService userService;
+    private final UserDTOFactory userDTOFactory;
+
+    /**
+     * Constructs the chat dto factory.
+     *
+     * @param userService       {@link UserService}.
+     * @param userDTOFactory    {@link UserDTOFactory}.
+     */
+    public ChatDTOFactory(UserService userService,
+                          UserDTOFactory userDTOFactory) {
+        this.userService = userService;
+        this.userDTOFactory = userDTOFactory;
+    }
 
     /**
      * Builds the chat token dto.
@@ -123,6 +139,8 @@ public class ChatDTOFactory {
         userChatGroupDTO.setMemberships(membershipDTOS);
         userChatGroupDTO.setIsMuted(chatgroup.getMuted());
         userChatGroupDTO.setHasJoined(chatgroup.getJoined());
+
+        userChatGroupDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(chatgroup.getHostId())));
 
         Set<String> groupMembershipIds = membershipDTOS.stream()
                 .map(SimpleMembershipDTO::getId)

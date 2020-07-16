@@ -2942,6 +2942,8 @@ components:
           type: string
         islandId:
           type: string
+        host:
+          $ref: '#/components/schemas/BriefUserDTO'
         memberships:
           type: array
           items:
