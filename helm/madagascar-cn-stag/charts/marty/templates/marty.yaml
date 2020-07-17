@@ -89,10 +89,10 @@ spec:
                   name: jpush
                   key: app-key
             - name: JPUSH_APPSECRET
-                valueFrom:
-                  secretKeyRef:
-                    name: jpush
-                    key: app-secret
+              valueFrom:
+                secretKeyRef:
+                  name: jpush
+                  key: app-secret
             - name: RESTART
               value: "1"
           resources:
