@@ -6,6 +6,7 @@ import com.keepreal.madagascar.marty.converter.PushPriorityConverter;
 import com.keepreal.madagascar.marty.model.PushPriorityInfo;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,8 +34,8 @@ public class PushNotificationService {
 
             alert += "\n" + pushPriorityInfo.getText();
 
-            Map<String, String> extrasMap = pushPriorityInfo.getExtrasMap();
-            extrasMap.put("URL", pushPriorityInfo.getIosUrl().toString());
+            Map<String, String> extrasMap = new HashMap<>();
+            extrasMap.put("URL", pushPriorityInfo.getIosUrl());
 
             jpushService.pushIosNotification(alert, extrasMap, (String[]) tokenList.toArray());
         }
@@ -63,8 +64,8 @@ public class PushNotificationService {
 
         alert += "\n" + feedService.retrieveFeedTextById(feedId, userId);
 
-        Map<String, String> extrasMap = pushPriorityInfo.getExtrasMap();
-        extrasMap.put("feed_id", feedId);
+        Map<String, String> extrasMap = new HashMap<>();
+        extrasMap.put("URL", pushPriorityInfo.getIosUrl() + feedId);
 
         jpushService.pushIosNotification(alert, extrasMap, (String[]) tokenList.toArray());
     }
