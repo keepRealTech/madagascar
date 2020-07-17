@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.asity.ChatAccessMessage;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefIslandDTO;
@@ -27,17 +28,25 @@ public class ChatDTOFactory {
 
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final IslandService islandService;
+    private final IslandDTOFactory islandDTOFactory;
 
     /**
      * Constructs the chat dto factory.
      *
      * @param userService       {@link UserService}.
      * @param userDTOFactory    {@link UserDTOFactory}.
+     * @param islandService     {@link IslandService}.
+     * @param islandDTOFactory  {@link IslandDTOFactory}.
      */
     public ChatDTOFactory(UserService userService,
-                          UserDTOFactory userDTOFactory) {
+                          UserDTOFactory userDTOFactory,
+                          IslandService islandService,
+                          IslandDTOFactory islandDTOFactory) {
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.islandService = islandService;
+        this.islandDTOFactory = islandDTOFactory;
     }
 
     /**
@@ -132,7 +141,6 @@ public class ChatDTOFactory {
 
         ChatGroupDTO userChatGroupDTO = new ChatGroupDTO();
         userChatGroupDTO.setId(chatgroup.getId());
-        userChatGroupDTO.setIslandId(chatgroup.getIslandId());
         userChatGroupDTO.setName(chatgroup.getName());
         userChatGroupDTO.setBulletin(chatgroup.getBulletin());
         userChatGroupDTO.setMemberCount(chatgroup.getMemberCount());
@@ -141,6 +149,7 @@ public class ChatDTOFactory {
         userChatGroupDTO.setHasJoined(chatgroup.getJoined());
 
         userChatGroupDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(chatgroup.getHostId())));
+        userChatGroupDTO.setIsland(this.islandDTOFactory.briefValueOf(this.islandService.retrieveIslandById(chatgroup.getIslandId())));
 
         Set<String> groupMembershipIds = membershipDTOS.stream()
                 .map(SimpleMembershipDTO::getId)
