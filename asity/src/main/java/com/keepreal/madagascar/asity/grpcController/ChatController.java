@@ -20,6 +20,7 @@ import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
 import com.keepreal.madagascar.asity.factory.IslandChatAccessMessageFactory;
 import com.keepreal.madagascar.asity.model.Chatgroup;
 import com.keepreal.madagascar.asity.model.ChatgroupMember;
+import com.keepreal.madagascar.asity.model.ChatgroupMembership;
 import com.keepreal.madagascar.asity.model.IslandChatAccess;
 import com.keepreal.madagascar.asity.service.ChatgroupService;
 import com.keepreal.madagascar.asity.service.IslandChatAccessService;
@@ -36,8 +37,10 @@ import org.springframework.data.domain.Page;
 
 import javax.transaction.Transactional;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -230,7 +233,10 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
             return;
         }
 
-        if ((request.hasName() || request.hasBulletin() || Objects.nonNull(request.getMembershipIdsList()))
+        Set<String> newMembershipIds = new HashSet<>(request.getMembershipIdsList());
+        Set<String> currentMembershipIds = chatgroup.getChatgroupMemberships().stream().map(ChatgroupMembership::getMembershipId).collect(Collectors.toSet());
+
+        if ((request.hasName() || request.hasBulletin() || !newMembershipIds.equals(currentMembershipIds))
                 && !chatgroup.getHostId().equals(request.getUserId())) {
             response = ChatgroupResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
