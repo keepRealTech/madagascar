@@ -83,6 +83,16 @@ spec:
                 secretKeyRef:
                   name: umeng
                   key: app-secret
+            - name: JPUSH_APPKEY
+              valueFrom:
+                secretKeyRef:
+                  name: jpush
+                  key: app-key
+            - name: JPUSH_APPSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jpush
+                  key: app-secret
             - name: RESTART
               value: "1"
           resources:
