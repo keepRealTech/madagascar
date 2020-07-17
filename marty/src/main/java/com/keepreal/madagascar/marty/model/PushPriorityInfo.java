@@ -15,7 +15,7 @@ public class PushPriorityInfo {
 
     private String text;
     private String androidUrl = "/noti/comment";
-    private Integer iosUrl = 0;
+    private String iosUrl;
     private String notificationType;
     private String notificationNoticeType;
     private Map<String, String> extrasMap;
