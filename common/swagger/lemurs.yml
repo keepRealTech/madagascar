@@ -2012,6 +2012,8 @@ components:
               type: boolean
             isMembership:
               type: boolean
+            isTop:
+              type: boolean
             membership:
               $ref: '#/components/schemas/SimpleMembershipDTO'
     PostFeedPayload:

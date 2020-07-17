@@ -289,12 +289,13 @@ public class FeedController implements FeedApi {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
 
-        com.keepreal.madagascar.fossa.FeedResponse toppedFeedResponse = this.feedService.retrieveIslandToppedFeeds(id, userId);
-
         List<FeedDTO> topFeeds = new ArrayList<>();
-        if (toppedFeedResponse.hasFeed()){
-            FeedDTO feedDTO = this.feedDTOFactory.valueOf(toppedFeedResponse.getFeed());
-            topFeeds.add(feedDTO);
+        if (minTimestamp == null && maxTimestamp == null){
+            com.keepreal.madagascar.fossa.FeedResponse toppedFeedResponse = this.feedService.retrieveIslandToppedFeeds(id, userId);
+            if (toppedFeedResponse.hasFeed()){
+                FeedDTO feedDTO = this.feedDTOFactory.valueOf(toppedFeedResponse.getFeed());
+                topFeeds.add(feedDTO);
+            }
         }
 
         dto.setToppedFeeds(topFeeds);
