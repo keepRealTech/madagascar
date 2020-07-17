@@ -45,6 +45,7 @@ public class JpushService {
                     .setPlatform(Platform.ios())
                     .setAudience(Audience.registrationId(registrationIds))
                     .setMessage(Message.newBuilder()
+                            .setMsgContent("notification")
                             .addExtra("type", pushType.getValue())
                             .addExtra("islandId", islandId)
                             .build())
