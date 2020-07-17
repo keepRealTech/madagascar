@@ -15,6 +15,7 @@ message FeedCreateEvent {
     string authorId = 3;
     uint64 createdAt = 4;
     string duplicateTag = 5;
+    bool fromHost = 6;
 }
 
 message FeedDeleteEvent {
