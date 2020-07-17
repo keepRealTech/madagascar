@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.asity.ChatAccessMessage;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
+import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefIslandDTO;
 import swagger.model.BriefUserDTO;
@@ -11,7 +12,6 @@ import swagger.model.ChatTokenDTO;
 import swagger.model.IslandChatAccessDTO;
 import swagger.model.IslandGroupedChatGroupDTO;
 import swagger.model.SimpleMembershipDTO;
-import swagger.model.UserChatGroupDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,21 @@ import java.util.stream.Collectors;
  */
 @Component
 public class ChatDTOFactory {
+
+    private final UserService userService;
+    private final UserDTOFactory userDTOFactory;
+
+    /**
+     * Constructs the chat dto factory.
+     *
+     * @param userService       {@link UserService}.
+     * @param userDTOFactory    {@link UserDTOFactory}.
+     */
+    public ChatDTOFactory(UserService userService,
+                          UserDTOFactory userDTOFactory) {
+        this.userService = userService;
+        this.userDTOFactory = userDTOFactory;
+    }
 
     /**
      * Builds the chat token dto.
@@ -77,40 +92,18 @@ public class ChatDTOFactory {
     }
 
     /**
-     * Creates {@link ChatGroupDTO}.
-     *
-     * @param chatgroup      {@link ChatgroupMessage}.
-     * @param membershipDTOS {@link SimpleMembershipDTO}.
-     * @return {@link ChatGroupDTO}.
-     */
-    public ChatGroupDTO valueOf(ChatgroupMessage chatgroup, List<SimpleMembershipDTO> membershipDTOS) {
-        if (Objects.isNull(chatgroup)) {
-            return null;
-        }
-
-        ChatGroupDTO chatGroupDTO = new ChatGroupDTO();
-        chatGroupDTO.setId(chatgroup.getId());
-        chatGroupDTO.setIslandId(chatgroup.getIslandId());
-        chatGroupDTO.setName(chatgroup.getName());
-        chatGroupDTO.setBulletin(chatgroup.getBulletin());
-        chatGroupDTO.setMemberCount(chatgroup.getMemberCount());
-        chatGroupDTO.setMemberships(membershipDTOS);
-        chatGroupDTO.setIsMuted(chatgroup.getMuted());
-
-        return chatGroupDTO;
-    }
-
-    /**
      * Creates the {@link IslandGroupedChatGroupDTO}.
      *
      * @param briefIslandDTO          {@link BriefIslandDTO}.
      * @param chatgroupMessageListMap {@link ChatgroupMessage} as key, {@link SimpleMembershipDTO} as value.
      * @param userMembershipIds       User membership ids.
+     * @param userId                  User id.
      * @return {@link IslandGroupedChatGroupDTO}.
      */
     public IslandGroupedChatGroupDTO valueOf(BriefIslandDTO briefIslandDTO,
                                              Map<ChatgroupMessage, List<SimpleMembershipDTO>> chatgroupMessageListMap,
-                                             List<String> userMembershipIds) {
+                                             List<String> userMembershipIds,
+                                             String userId) {
         if (Objects.isNull(briefIslandDTO)) {
             return null;
         }
@@ -118,25 +111,26 @@ public class ChatDTOFactory {
         IslandGroupedChatGroupDTO islandGroupedChatGroupDTO = new IslandGroupedChatGroupDTO();
         islandGroupedChatGroupDTO.setIsland(briefIslandDTO);
         islandGroupedChatGroupDTO.setChatgroups(chatgroupMessageListMap.entrySet().stream().map(
-                entry -> this.valueOf(entry.getKey(), entry.getValue(), userMembershipIds)).collect(Collectors.toList()));
+                entry -> this.valueOf(entry.getKey(), entry.getValue(), userMembershipIds, userId)).collect(Collectors.toList()));
 
         return islandGroupedChatGroupDTO;
     }
 
     /**
-     * Creates the {@link UserChatGroupDTO}.
+     * Creates the {@link ChatGroupDTO}.
      *
      * @param chatgroup         {@link ChatgroupMessage}.
      * @param membershipDTOS    {@link SimpleMembershipDTO}.
      * @param userMembershipIds User membership ids.
-     * @return {@link UserChatGroupDTO}.
+     * @param userId            User id.
+     * @return {@link ChatGroupDTO}.
      */
-    public UserChatGroupDTO valueOf(ChatgroupMessage chatgroup, List<SimpleMembershipDTO> membershipDTOS, List<String> userMembershipIds) {
+    public ChatGroupDTO valueOf(ChatgroupMessage chatgroup, List<SimpleMembershipDTO> membershipDTOS, List<String> userMembershipIds, String userId) {
         if (Objects.isNull(chatgroup)) {
             return null;
         }
 
-        UserChatGroupDTO userChatGroupDTO = new UserChatGroupDTO();
+        ChatGroupDTO userChatGroupDTO = new ChatGroupDTO();
         userChatGroupDTO.setId(chatgroup.getId());
         userChatGroupDTO.setIslandId(chatgroup.getIslandId());
         userChatGroupDTO.setName(chatgroup.getName());
@@ -144,12 +138,17 @@ public class ChatDTOFactory {
         userChatGroupDTO.setMemberCount(chatgroup.getMemberCount());
         userChatGroupDTO.setMemberships(membershipDTOS);
         userChatGroupDTO.setIsMuted(chatgroup.getMuted());
+        userChatGroupDTO.setHasJoined(chatgroup.getJoined());
+
+        userChatGroupDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(chatgroup.getHostId())));
 
         Set<String> groupMembershipIds = membershipDTOS.stream()
                 .map(SimpleMembershipDTO::getId)
                 .collect(Collectors.toSet());
 
-        userChatGroupDTO.hasAccess(userMembershipIds.stream().anyMatch(groupMembershipIds::contains));
+        userChatGroupDTO.setHasAccess(chatgroup.getHostId().equals(userId)
+                || groupMembershipIds.isEmpty()
+                || groupMembershipIds.stream().anyMatch(userMembershipIds::contains));
 
         return userChatGroupDTO;
     }
