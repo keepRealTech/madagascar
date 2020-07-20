@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort;
  */
 public class PaginationUtils {
 
-    private static final String TIMESTAMP_PROPERTY_NAME = "created_time";
+    private static final String TIMESTAMP_PROPERTY_NAME = "createdTime";
 
     @Getter
     private final static int DEFAULT_PAGE = 0;
@@ -44,6 +44,21 @@ public class PaginationUtils {
                 pageRequest.getPageSize(),
                 PaginationUtils.DEFAULT_SORT);
     }
+
+    /**
+     * Converts the {@link PageRequest} into {@link org.springframework.data.domain.PageRequest}.
+     *
+     * @param pageRequest {@link PageRequest}.
+     * @param sort        Sort column string.
+     * @return {@link org.springframework.data.domain.PageRequest}.
+     */
+    public static org.springframework.data.domain.PageRequest valueOf(PageRequest pageRequest, String sort) {
+        return org.springframework.data.domain.PageRequest.of(
+                pageRequest.getPage(),
+                pageRequest.getPageSize(),
+                Sort.by(Sort.Order.desc(sort)));
+    }
+
 
     /**
      * Builds the {@link PageResponse}.

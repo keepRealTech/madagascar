@@ -415,7 +415,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         }
 
         Page<String> chatgroupMemberIdsPage = this.chatgroupService.retrieveChatgroupMemberUserIdsByGroupId(
-                request.getGroupId(), PaginationUtils.valueOf(request.getPageRequest()));
+                request.getGroupId(), PaginationUtils.valueOf(request.getPageRequest(), "created_time"));
 
         ChatgroupMembersResponse response = ChatgroupMembersResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
