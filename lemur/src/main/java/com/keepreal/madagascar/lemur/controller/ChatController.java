@@ -26,6 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ChatApi;
+import swagger.model.BriefUsersResponse;
 import swagger.model.ChatAccessResponse;
 import swagger.model.ChatGroupResponse;
 import swagger.model.ChatTokenResponse;
@@ -470,6 +471,29 @@ public class ChatController implements ChatApi {
                         userMembershipIds,
                         userId))
                 .collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the chatgroup members get.
+     *
+     * @param id id (required) Chatgroup id.
+     * @return {@link BriefUsersResponse}.
+     */
+    public ResponseEntity<BriefUsersResponse> apiV1ChatgroupsIdMembersGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        List<String> memberIds = this.chatService.retrieveChatgroupMembersByGroupId(id, userId);
+
+        List<UserMessage> userMessages = new ArrayList<>();
+        if (!memberIds.isEmpty()) {
+            userMessages = this.userService.retrieveUsersByIds(memberIds);
+        }
+
+        BriefUsersResponse response = new BriefUsersResponse();
+        response.setData(userMessages.stream().map(this.userDTOFactory::briefValueOf).collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
