@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
+import com.keepreal.madagascar.lemur.service.ChatService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
@@ -20,17 +21,21 @@ public class IslandDTOFactory {
 
     private static final int DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT = 99_999_999;
 
+    private final ChatService chatService;
     private final UserDTOFactory userDTOFactory;
     private final GeneralConfiguration generalConfiguration;
 
     /**
      * Constructs the island dto factory.
      *
+     * @param chatService          {@link ChatService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
      */
-    public IslandDTOFactory(UserDTOFactory userDTOFactory,
+    public IslandDTOFactory(ChatService chatService,
+                            UserDTOFactory userDTOFactory,
                             GeneralConfiguration generalConfiguration) {
+        this.chatService = chatService;
         this.userDTOFactory = userDTOFactory;
         this.generalConfiguration = generalConfiguration;
     }
@@ -130,6 +135,9 @@ public class IslandDTOFactory {
         islandProfileDTO.setUserIndex(islandProfileResponse.getUserIndex().getValue());
         islandProfileDTO.setSubscribed(!StringUtils.isEmpty(islandProfileDTO.getUserIndex()));
         islandProfileDTO.setSubscribedAt(islandProfileResponse.getSubscribedAt());
+        islandProfileDTO.setHasGroupchatAccess(this.chatService.retrieveChatAccessByIslandId(islandProfileResponse
+                .getIsland().getId()).getChatAccess().getHasAccess());
+
         return islandProfileDTO;
     }
 

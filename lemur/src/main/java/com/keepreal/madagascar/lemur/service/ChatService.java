@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.service;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
+import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
@@ -404,6 +405,42 @@ public class ChatService {
 
         return response;
     }
+
+    /**
+     * Retrieves chatgroup member ids.
+     *
+     * @param groupId Group id.
+     * @param userId  User id.
+     * @return User ids.
+     */
+    public List<String> retrieveChatgroupMembersByGroupId(String groupId, String userId) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveChatgroupByIdRequest request = RetrieveChatgroupByIdRequest.newBuilder()
+                .setUserId(userId)
+                .setId(groupId)
+                .build();
+
+        ChatgroupMembersResponse response;
+        try {
+            response = stub.retrieveChatgroupMembersById(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve chat group members returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getMemberIdsList();
+    }
+
 
     /**
      * Checks if a string field is too long.

@@ -293,7 +293,16 @@ public class ChatgroupService {
      * @return User ids.
      */
     public List<String> retrieveLastChatgroupMemberUserIdsByIslandId(String islandId) {
-        return this.chatgroupMemberRepository.selectTop4DistinctUserIdByIslandIdAndDeletedIsFalseOrderByCreatedTime(islandId);
+        return this.chatgroupMemberRepository.selectTop4DistinctUserIdsByIslandIdAndDeletedIsFalseOrderByCreatedTime(islandId);
+    }
+
+    /**
+     * Retrieves the members for a given chatgroup.
+     * @param groupId Group id.
+     * @return User ids.
+     */
+    public List<String> retrieveChatgroupMemberUserIdsByGroupId(String groupId) {
+        return this.chatgroupMemberRepository.selectUserIdsByGroupIdAndDeletedIsFalse(groupId);
     }
 
 }
