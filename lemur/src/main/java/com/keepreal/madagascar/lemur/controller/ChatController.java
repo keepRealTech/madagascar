@@ -491,7 +491,7 @@ public class ChatController implements ChatApi {
     @Override
     public ResponseEntity<BriefUsersResponse> apiV1ChatgroupsIdMembersGet(String id,
                                                                           Integer page,
-                                                                          @Min(1) @Max(3500) Integer pageSize) {
+                                                                          Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         ChatgroupMembersResponse chatgroupMembersResponse =

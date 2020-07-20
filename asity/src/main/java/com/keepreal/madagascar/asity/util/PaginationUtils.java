@@ -11,7 +11,7 @@ import org.springframework.data.domain.Sort;
  */
 public class PaginationUtils {
 
-    private static final String TIMESTAMP_PROPERTY_NAME = "createdTime";
+    private static final String TIMESTAMP_PROPERTY_NAME = "created_time";
 
     @Getter
     private final static int DEFAULT_PAGE = 0;

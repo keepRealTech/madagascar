@@ -1281,7 +1281,7 @@ paths:
     get:
       parameters:
         - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/largePageSize'
       tags:
         - Chat
       summary: 获取指定chatgroup内的用户列表
@@ -1400,6 +1400,16 @@ components:
         type: integer
         minimum: 1
         maximum: 100
+        default: 10
+    largePageSize:
+      in: query
+      name: pageSize
+      description: size of a page
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 3000
         default: 10
     islandidInPath:
       in: query
