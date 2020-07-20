@@ -162,14 +162,6 @@ public class ChatController implements ChatApi {
      */
     @Override
     public ResponseEntity<IslandChatAccessResponse> apiV1IslandsIdChataccessGet(String id) {
-        String userId = HttpContextUtils.getUserIdFromContext();
-
-        boolean subscribed = this.islandService.retrieveIslandSubscribeStateByUserId(userId, Collections.singletonList(id)).get(id);
-
-        if (!subscribed) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_NOT_SUBSCRIBED_ERROR);
-        }
-
         com.keepreal.madagascar.asity.IslandChatAccessResponse islandChatAccessResponse =
                 this.chatService.retrieveChatAccessByIslandId(id);
 
