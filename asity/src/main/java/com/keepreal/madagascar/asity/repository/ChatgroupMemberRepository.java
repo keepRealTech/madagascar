@@ -25,6 +25,9 @@ public interface ChatgroupMemberRepository extends JpaRepository<ChatgroupMember
     Long countDistinctUserIdByIslandIdAndDeletedIsFalse(String islandId);
 
     @Query(value = "SELECT DISTINCT user_id FROM chat_group_member WHERE island_id = ?1 AND is_deleted = FALSE ORDER BY created_time DESC LIMIT 4", nativeQuery = true)
-    List<String> selectTop4DistinctUserIdByIslandIdAndDeletedIsFalseOrderByCreatedTime(String islandId);
+    List<String> selectTop4DistinctUserIdsByIslandIdAndDeletedIsFalseOrderByCreatedTime(String islandId);
+
+    @Query(value = "SELECT user_id FROM chat_group_member WHERE island_id = ?1 AND is_deleted = FALSE", nativeQuery = true)
+    List<String> selectUserIdsByGroupIdAndDeletedIsFalse(String groupId);
 
 }

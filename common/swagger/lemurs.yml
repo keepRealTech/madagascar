@@ -1275,6 +1275,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/chatgroups/{id}/members:
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      get:
+        tags:
+          - Chat
+        summary: 获取指定chatgroup内的用户列表
+        responses:
+          '200':
+            description: users response
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/BriefUsersResponse'
   /api/v1/islands/{id}/chataccess/grant:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1672,6 +1686,17 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/UserDTO'
+    BriefUsersResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BriefUserDTO'
     BriefIslandDTO:
       type: object
       properties:
