@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
 import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
 import com.keepreal.madagascar.asity.UserChatgroupsResponse;
@@ -21,9 +22,11 @@ import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
+import io.swagger.annotations.ApiParam;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ChatApi;
 import swagger.model.BriefUsersResponse;
@@ -38,6 +41,9 @@ import swagger.model.PutChatGroupRequest;
 import swagger.model.SimpleMembershipDTO;
 import swagger.model.UserChatGroupsResponse;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -482,18 +488,23 @@ public class ChatController implements ChatApi {
      * @param id id (required) Chatgroup id.
      * @return {@link BriefUsersResponse}.
      */
-    public ResponseEntity<BriefUsersResponse> apiV1ChatgroupsIdMembersGet(String id) {
+    @Override
+    public ResponseEntity<BriefUsersResponse> apiV1ChatgroupsIdMembersGet(String id,
+                                                                          Integer page,
+                                                                          @Min(1) @Max(3500) Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        List<String> memberIds = this.chatService.retrieveChatgroupMembersByGroupId(id, userId);
+        ChatgroupMembersResponse chatgroupMembersResponse =
+                this.chatService.retrieveChatgroupMembersByGroupId(id, userId, page, pageSize);
 
         List<UserMessage> userMessages = new ArrayList<>();
-        if (!memberIds.isEmpty()) {
-            userMessages = this.userService.retrieveUsersByIds(memberIds);
+        if (!chatgroupMembersResponse.getMemberIdsList().isEmpty()) {
+            userMessages = this.userService.retrieveUsersByIds(chatgroupMembersResponse.getMemberIdsList());
         }
 
         BriefUsersResponse response = new BriefUsersResponse();
         response.setData(userMessages.stream().map(this.userDTOFactory::briefValueOf).collect(Collectors.toList()));
+        response.setPageInfo(PaginationUtils.getPageInfo(chatgroupMembersResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -14,6 +14,7 @@ import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetreiveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.UserChatgroupsResponse;
@@ -395,13 +396,14 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Implements the retrieve chatgroup members.
      *
-     * @param request           {@link RetrieveChatgroupByIdRequest}.
+     * @param request           {@link RetrieveChatgroupMembersByGroupIdRequest}.
      * @param responseObserver  {@link StreamObserver}.
      */
     @Override
-    public void retrieveChatgroupMembersById(RetrieveChatgroupByIdRequest request,
+    public void retrieveChatgroupMembersById(RetrieveChatgroupMembersByGroupIdRequest request,
                                              StreamObserver<ChatgroupMembersResponse> responseObserver) {
-        ChatgroupMember chatgroupMember = this.chatgroupService.retrieveChatgroupMemberByGroupIdAndUserId(request.getId(), request.getUserId());
+        ChatgroupMember chatgroupMember = this.chatgroupService.retrieveChatgroupMemberByGroupIdAndUserId(
+                request.getGroupId(), request.getUserId());
 
         if (Objects.isNull(chatgroupMember)) {
             ChatgroupMembersResponse response = ChatgroupMembersResponse.newBuilder()
@@ -412,11 +414,13 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
             return;
         }
 
-        List<String> chatgroupMemberIds = this.chatgroupService.retrieveChatgroupMemberUserIdsByGroupId(request.getId());
+        Page<String> chatgroupMemberIdsPage = this.chatgroupService.retrieveChatgroupMemberUserIdsByGroupId(
+                request.getGroupId(), PaginationUtils.valueOf(request.getPageRequest()));
 
         ChatgroupMembersResponse response = ChatgroupMembersResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                .addAllMemberIds(chatgroupMemberIds)
+                .addAllMemberIds(chatgroupMemberIdsPage.getContent())
+                .setPageResponse(PaginationUtils.valueOf(chatgroupMemberIdsPage, request.getPageRequest()))
                 .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
