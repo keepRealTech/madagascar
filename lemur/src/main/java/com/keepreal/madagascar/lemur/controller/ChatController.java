@@ -151,9 +151,13 @@ public class ChatController implements ChatApi {
         if (Objects.isNull(targetIsland)
                 || this.islandService.retrieveIslandSubscribeStateByUserId(userId,
                 Collections.singletonList(targetIsland.getId())).get(targetIsland.getId())) {
-            response.setData(this.chatDTOFactory.buildAccess(this.userDTOFactory.briefValueOf(userMessage), true));
+            response.setData(this.chatDTOFactory.buildAccess(this.userDTOFactory.valueOf(userMessage),
+                    targetIslandResponse.getIslandsList().stream().map(IslandMessage::getId).collect(Collectors.toList()),
+                    true));
         } else {
-            response.setData(this.chatDTOFactory.buildAccess(this.userDTOFactory.briefValueOf(userMessage), false));
+            response.setData(this.chatDTOFactory.buildAccess(this.userDTOFactory.valueOf(userMessage),
+                    new ArrayList<>(),
+                    false));
         }
 
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());

@@ -2966,7 +2966,11 @@ components:
       type: object
       properties:
         user:
-          $ref: '#/components/schemas/BriefUserDTO'
+          $ref: '#/components/schemas/UserDTO'
+        createdIslandIds:
+          type: array
+          items:
+            type: string
         hasAccess:
           type: boolean
     ChatAccessResponse:
