@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.asity.grpcController;
 
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
+import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
 import com.keepreal.madagascar.asity.DismissChatgroupRequest;
@@ -44,6 +45,8 @@ import java.util.Set;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the chat grpc service.
@@ -385,6 +388,36 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                         .collect(Collectors.toList()))
                 .build();
 
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the retrieve chatgroup members.
+     *
+     * @param request           {@link RetrieveChatgroupByIdRequest}.
+     * @param responseObserver  {@link StreamObserver}.
+     */
+    @Override
+    public void retrieveChatgroupMembersById(RetrieveChatgroupByIdRequest request,
+                                             StreamObserver<ChatgroupMembersResponse> responseObserver) {
+        ChatgroupMember chatgroupMember = this.chatgroupService.retrieveChatgroupMemberByGroupIdAndUserId(request.getId(), request.getUserId());
+
+        if (Objects.isNull(chatgroupMember)) {
+            ChatgroupMembersResponse response = ChatgroupMembersResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        List<String> chatgroupMemberIds = this.chatgroupService.retrieveChatgroupMemberUserIdsByGroupId(request.getId());
+
+        ChatgroupMembersResponse response = ChatgroupMembersResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .addAllMemberIds(chatgroupMemberIds)
+                .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
