@@ -2943,8 +2943,8 @@ components:
           type: string
         name:
           type: string
-        islandId:
-          type: string
+        island:
+          $ref: '#/components/schemas/BriefIslandDTO'
         host:
           $ref: '#/components/schemas/BriefUserDTO'
         memberships:
