@@ -483,7 +483,20 @@ public class ChatController implements ChatApi {
      * @return {@link BriefUsersResponse}.
      */
     public ResponseEntity<BriefUsersResponse> apiV1ChatgroupsIdMembersGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
 
+        List<String> memberIds = this.chatService.retrieveChatgroupMembersByGroupId(id, userId);
+
+        List<UserMessage> userMessages = new ArrayList<>();
+        if (!memberIds.isEmpty()) {
+            userMessages = this.userService.retrieveUsersByIds(memberIds);
+        }
+
+        BriefUsersResponse response = new BriefUsersResponse();
+        response.setData(userMessages.stream().map(this.userDTOFactory::briefValueOf).collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }
