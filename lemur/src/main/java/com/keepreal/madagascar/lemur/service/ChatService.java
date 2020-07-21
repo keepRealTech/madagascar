@@ -17,6 +17,7 @@ import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetreiveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.UserChatgroupsResponse;
@@ -25,6 +26,7 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
+import com.keepreal.madagascar.vanga.RetrieveMembershipIdsRequest;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -411,14 +413,15 @@ public class ChatService {
      *
      * @param groupId Group id.
      * @param userId  User id.
-     * @return User ids.
+     * @return {@link ChatgroupMembersResponse}.
      */
-    public List<String> retrieveChatgroupMembersByGroupId(String groupId, String userId) {
+    public ChatgroupMembersResponse retrieveChatgroupMembersByGroupId(String groupId, String userId, Integer page, Integer pageSize) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
 
-        RetrieveChatgroupByIdRequest request = RetrieveChatgroupByIdRequest.newBuilder()
+        RetrieveChatgroupMembersByGroupIdRequest request = RetrieveChatgroupMembersByGroupIdRequest.newBuilder()
                 .setUserId(userId)
-                .setId(groupId)
+                .setGroupId(groupId)
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
                 .build();
 
         ChatgroupMembersResponse response;
@@ -438,7 +441,7 @@ public class ChatService {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
-        return response.getMemberIdsList();
+        return response;
     }
 
 
