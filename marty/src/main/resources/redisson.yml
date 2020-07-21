@@ -1,7 +1,0 @@
-singleServerConfig:
-  address: redis://localhost:6379
-  database: 0
-# 编码
-codec: !<org.redisson.codec.JsonJacksonCodec> {}
-# 传输模式
-transportMode : "NIO"
