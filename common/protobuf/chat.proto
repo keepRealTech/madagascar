@@ -111,9 +111,16 @@ message UserChatgroupsResponse {
   repeated ChatgroupMessage chatgroups = 2;
 }
 
+message RetrieveChatgroupMembersByGroupIdRequest {
+  string groupId = 1;
+  string userId = 2;
+  PageRequest pageRequest = 3;
+}
+
 message ChatgroupMembersResponse {
   CommonStatus status = 1;
   repeated string memberIds = 2;
+  PageResponse pageResponse = 3;
 }
 
 service ChatService {
@@ -127,5 +134,5 @@ service ChatService {
   rpc RetrieveChatgroupsByIslandId(RetrieveChatgroupsByIslandIdRequest) returns (IslandChatgroupsResponse) {};
   rpc RetrieveChatgroupById(RetrieveChatgroupByIdRequest) returns (ChatgroupResponse) {};
   rpc RetrieveChatgroupsByUserId(RetreiveChatgroupsByUserIdRequest) returns (UserChatgroupsResponse) {};
-  rpc RetrieveChatgroupMembersById(RetrieveChatgroupByIdRequest) returns (ChatgroupMembersResponse) {};
+  rpc RetrieveChatgroupMembersById(RetrieveChatgroupMembersByGroupIdRequest) returns (ChatgroupMembersResponse) {};
 }

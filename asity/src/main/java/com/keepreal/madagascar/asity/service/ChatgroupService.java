@@ -9,6 +9,7 @@ import com.keepreal.madagascar.asity.util.PaginationUtils;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -298,11 +299,13 @@ public class ChatgroupService {
 
     /**
      * Retrieves the members for a given chatgroup.
-     * @param groupId Group id.
+     *
+     * @param groupId   Group id.
+     * @param pageable  {@link Pageable}.
      * @return User ids.
      */
-    public List<String> retrieveChatgroupMemberUserIdsByGroupId(String groupId) {
-        return this.chatgroupMemberRepository.selectUserIdsByGroupIdAndDeletedIsFalse(groupId);
+    public Page<String> retrieveChatgroupMemberUserIdsByGroupId(String groupId, Pageable pageable) {
+        return this.chatgroupMemberRepository.selectUserIdsByGroupIdAndDeletedIsFalse(groupId, pageable);
     }
 
 }

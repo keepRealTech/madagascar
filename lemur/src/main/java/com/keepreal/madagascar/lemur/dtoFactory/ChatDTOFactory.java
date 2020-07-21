@@ -13,6 +13,7 @@ import swagger.model.ChatTokenDTO;
 import swagger.model.IslandChatAccessDTO;
 import swagger.model.IslandGroupedChatGroupDTO;
 import swagger.model.SimpleMembershipDTO;
+import swagger.model.UserDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -34,10 +35,10 @@ public class ChatDTOFactory {
     /**
      * Constructs the chat dto factory.
      *
-     * @param userService       {@link UserService}.
-     * @param userDTOFactory    {@link UserDTOFactory}.
-     * @param islandService     {@link IslandService}.
-     * @param islandDTOFactory  {@link IslandDTOFactory}.
+     * @param userService      {@link UserService}.
+     * @param userDTOFactory   {@link UserDTOFactory}.
+     * @param islandService    {@link IslandService}.
+     * @param islandDTOFactory {@link IslandDTOFactory}.
      */
     public ChatDTOFactory(UserService userService,
                           UserDTOFactory userDTOFactory,
@@ -64,13 +65,15 @@ public class ChatDTOFactory {
     /**
      * Builds the private chat access dto.
      *
-     * @param userDTO   {@link BriefUserDTO}.
-     * @param hasAccess Whether has access.
+     * @param userDTO          {@link UserDTO}.
+     * @param createdIslandIds Created island ids.
+     * @param hasAccess        Whether has access.
      * @return {@link ChatAccessDTO}.
      */
-    public ChatAccessDTO buildAccess(BriefUserDTO userDTO, Boolean hasAccess) {
+    public ChatAccessDTO buildAccess(UserDTO userDTO, List<String> createdIslandIds, Boolean hasAccess) {
         ChatAccessDTO chatAccessDTO = new ChatAccessDTO();
         chatAccessDTO.setUser(userDTO);
+        chatAccessDTO.setCreatedIslandIds(createdIslandIds);
         chatAccessDTO.setHasAccess(hasAccess);
         return chatAccessDTO;
     }
