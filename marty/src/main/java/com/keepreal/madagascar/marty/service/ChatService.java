@@ -2,7 +2,7 @@ package com.keepreal.madagascar.marty.service;
 
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
-import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.Channel;
@@ -28,8 +28,8 @@ public class ChatService {
 
         ChatgroupMembersResponse response = null;
         try {
-            response = stub.retrieveChatgroupMembersById(RetrieveChatgroupByIdRequest.newBuilder()
-                    .setId(chatGroupId)
+            response = stub.retrieveChatgroupMembersById(RetrieveChatgroupMembersByGroupIdRequest.newBuilder()
+                    .setGroupId(chatGroupId)
                     .setUserId(userId)
                     .build());
         } catch (StatusRuntimeException exception) {
