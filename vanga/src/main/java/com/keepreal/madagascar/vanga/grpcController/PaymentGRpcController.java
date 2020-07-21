@@ -326,7 +326,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     @Override
     public void retrieveUserPayments(RetrieveUserPaymentsRequest request,
                                      StreamObserver<UserPaymentsResponse> responseObserver) {
-        Page<Payment> paymentPage = this.paymentService.retrievePaymentsByUserId(request.getUserId(), PaginationUtils.valueOf(request.getPageRequest()));
+        Page<Payment> paymentPage = this.paymentService.retrievePaymentsByUserId(request.getUserId(), PaginationUtils.valueOf(request.getPageRequest(), "created_time"));
 
         List<String> membershipSkuIds = paymentPage.getContent().stream().map(Payment::getMembershipSkuId).collect(Collectors.toList());
 
