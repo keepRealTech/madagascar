@@ -66,6 +66,16 @@ message RetrieveDeviceTokenResponse {
     repeated string iosTokens = 3;
 }
 
+message RetrieveDeviceTokensByUserIdListRequest {
+    repeated string userIds = 1;
+}
+
+message RetrieveDeviceTokensByUserIdListResponse {
+    CommonStatus status = 1;
+    repeated string androidTokens = 2;
+    repeated string iosTokens = 3;
+}
+
 message RetreiveMultipleUsersByIdsRequest {
     repeated string userIds = 1;
 }
@@ -81,5 +91,6 @@ service UserService {
     rpc UpdateUserById(UpdateUserByIdRequest) returns (UserResponse) {};
     rpc UpdateDeviceToken(DeviceTokenRequest) returns (DeviceTokenResponse) {};
     rpc RetrieveDeviceTokenByUserId(RetrieveDeviceTokenRequest) returns (RetrieveDeviceTokenResponse) {};
+    rpc RetrieveDeviceTokensByUserIdList(RetrieveDeviceTokensByUserIdListRequest) returns (RetrieveDeviceTokensByUserIdListResponse) {};
     rpc RetrieveUsersByIds(RetreiveMultipleUsersByIdsRequest) returns (UsersReponse) {};
 }

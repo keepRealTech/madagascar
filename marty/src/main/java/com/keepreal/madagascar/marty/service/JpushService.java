@@ -55,26 +55,26 @@ public class JpushService {
         }
     }
 
-    public void pushIosNotification(String alert, Map<String, String> extras, String... registrationIds) {
+    public void pushIOSUpdateBulletinMessage(String chatGroupId, String bulletin, PushType pushType, String... registrationIds) {
         try {
-            jPushClient.sendIosNotificationWithRegistrationID(alert, extras, registrationIds);
+            jPushClient.sendPush(PushPayload.newBuilder()
+                    .setPlatform(Platform.ios())
+                    .setAudience(Audience.registrationId(registrationIds))
+                    .setMessage(Message.newBuilder()
+                            .setMsgContent("notification")
+                            .addExtra("type", pushType.getValue())
+                            .addExtra("chatGroupId", chatGroupId)
+                            .addExtra("bulletin", bulletin)
+                            .build())
+                    .build());
         } catch (APIConnectionException | APIRequestException e) {
             e.printStackTrace();
         }
     }
 
-    public void push(String title, String msgContent, String... registrationID) {
-        PushPayload.Builder builder = PushPayload.newBuilder();
-        builder.setPlatform(Platform.ios());
-        builder.setAudience(Audience.registrationId(registrationID));
-        builder.setMessage(Message.newBuilder()
-                .setTitle(title)
-                .setMsgContent(msgContent)
-                .addExtra("type", PushType.PUSH_COMMENT.getValue())
-                .build());
-        PushPayload payload = builder.build();
+    public void pushIosNotification(String alert, Map<String, String> extras, String... registrationIds) {
         try {
-            jPushClient.sendPush(payload);
+            jPushClient.sendIosNotificationWithRegistrationID(alert, extras, registrationIds);
         } catch (APIConnectionException | APIRequestException e) {
             e.printStackTrace();
         }

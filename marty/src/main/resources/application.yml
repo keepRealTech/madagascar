@@ -5,6 +5,9 @@ grpc:
   fossa:
     host: 127.0.0.1
     port: 12003
+  asity:
+    host: 127.0.0.1
+    port: 12007
 
 rocketmq:
   notification:
@@ -20,6 +23,13 @@ rocketmq:
     nameSrvAddr: localhost:9876
     topic: feed-event
     groupId: GID-brookesia-default
+    tag: event
+  chat:
+    accessKey: 1
+    secretKey: 2
+    nameSrvAddr: localhost:9876
+    topic: chat-event
+    groupId: GID-marty-chat-default
     tag: event
 
 umeng:

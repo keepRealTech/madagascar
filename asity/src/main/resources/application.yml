@@ -23,6 +23,12 @@ rocketmq:
     topic: notification-event
     groupId: GID-asity-default
     tag: event
+  chat:
+    accessKey: 1
+    secretKey: 2
+    nameSrvAddr: localhost:9876
+    topic: chat-event
+    tag: event
 
 opentracing:
   jaeger:

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.asity";
+
+enum ChatEventType {
+    CHAT_EVENT_NONE = 0;
+    CHAT_EVENT_UPDATE_BULLETIN = 1;
+}
+
+message UpdateBulletinEvent {
+    string chatGroupId = 1;
+    string userId = 2;
+    string bulletin = 3;
+}
+
+message ChatEvent {
+    ChatEventType type = 1;
+    uint64 timestamp = 2;
+    string eventId = 3;
+    oneof event {
+        UpdateBulletinEvent updateBulletinEvent = 4;
+    }
+}

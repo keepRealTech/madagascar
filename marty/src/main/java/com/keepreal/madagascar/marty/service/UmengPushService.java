@@ -1,9 +1,6 @@
 package com.keepreal.madagascar.marty.service;
 
 import com.aliyun.openservices.shade.com.alibaba.fastjson.JSONObject;
-import com.keepreal.madagascar.common.PageRequest;
-import com.keepreal.madagascar.coua.RetrieveDeviceTokenResponse;
-import com.keepreal.madagascar.coua.RetrieveDeviceTokensResponse;
 import com.keepreal.madagascar.marty.model.PushType;
 import com.keepreal.madagascar.marty.umengPush.UmengPushClient;
 import com.keepreal.madagascar.marty.umengPush.android.AndroidListCast;
@@ -40,7 +37,15 @@ public class UmengPushService {
         this.pushMessage(tokens, jsonObject);
     }
 
-    public void pushMessage(String tokens, JSONObject jsonObject) {
+    public void pushUpdateBulletin(String tokens, String chatGroupId, String bulletin, PushType pushType) {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("type", pushType.getValue());
+        jsonObject.put("chatGroupId", chatGroupId);
+        jsonObject.put("bulletin", bulletin);
+        this.pushMessage(tokens, jsonObject);
+    }
+
+    private void pushMessage(String tokens, JSONObject jsonObject) {
         // build android
         AndroidListCast androidListCast = new AndroidListCast(umengConfiguration.getAndroidAppKey());
         androidListCast.setDeviceToken(tokens);
