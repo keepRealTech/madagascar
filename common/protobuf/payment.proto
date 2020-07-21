@@ -80,10 +80,12 @@ message UserPaymentMessage {
 message UserPaymentsResponse {
   CommonStatus status = 1;
   repeated UserPaymentMessage userPayments = 2;
+  PageResponse pageResponse = 3;
 }
 
 message RetrieveUserPaymentsRequest {
   string userId = 1;
+  PageRequest pageRequest = 2;
 }
 
 service PaymentService {

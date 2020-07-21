@@ -75,6 +75,10 @@ message RetrieveMembershipsByIslandIdsRequest {
     repeated string islandIds = 1;
 }
 
+message RetrieveMembershipsByIdsRequest {
+    repeated string ids = 1;
+}
+
 service MembershipService {
     rpc TopMembershipById (TopMembershipRequest) returns (CommonStatus) {};
     rpc RetrieveMembershipById (MembershipIdRequest) returns (MembershipResponse) {};
@@ -85,4 +89,5 @@ service MembershipService {
     rpc RetrieveMembershipsByIslandId (RetrieveMembershipsRequest) returns (MembershipsResponse) {};
     rpc RetrieveFeedMembershipsByIslandId (RetrieveMembershipsRequest) returns (FeedMembershipResponse) {};
     rpc RetrieveMembershipsByIslandIds (RetrieveMembershipsByIslandIdsRequest) returns (MembershipsResponse) {};
+    rpc RetrieveMembershipsByIds (RetrieveMembershipsByIdsRequest) returns (MembershipsResponse) {};
 }
