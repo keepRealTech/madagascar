@@ -25,6 +25,7 @@ import swagger.model.WechatOrderResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.Set;
 import java.util.Map;
 import java.util.function.Function;
@@ -146,6 +147,7 @@ public class PaymentController implements PaymentApi {
                         userPaymentMessage.getMembershipSku(),
                         membershipMessageMap.getOrDefault(userPaymentMessage.getMembershipSku().getMembershipId(), null)
                 ))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(userPaymentsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());

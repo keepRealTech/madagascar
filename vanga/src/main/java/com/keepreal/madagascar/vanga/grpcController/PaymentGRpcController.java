@@ -7,15 +7,19 @@ import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
+import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
+import com.keepreal.madagascar.vanga.UserPaymentsResponse;
 import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
 import com.keepreal.madagascar.vanga.factory.BalanceMessageFactory;
+import com.keepreal.madagascar.vanga.factory.PaymentMessageFactory;
 import com.keepreal.madagascar.vanga.factory.WechatOrderMessageFactory;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
+import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.service.MpWechatPayService;
@@ -26,12 +30,19 @@ import com.keepreal.madagascar.vanga.service.SubscribeMembershipService;
 import com.keepreal.madagascar.vanga.service.WechatOrderService;
 import com.keepreal.madagascar.vanga.service.WechatPayService;
 import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
+import com.keepreal.madagascar.vanga.util.PaginationUtils;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
+import org.springframework.data.domain.Page;
 import org.springframework.util.StringUtils;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Represents the payment grpc controller.
@@ -44,11 +55,12 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final WechatOrderService wechatOrderService;
     private final WechatPayService wechatPayService;
     private final MpWechatPayService mpWechatPayService;
-    private final BalanceMessageFactory balanceMessageFactory;
     private final SkuService skuService;
     private final ShellService shellService;
-    private final WechatOrderMessageFactory wechatOrderMessageFactory;
     private final SubscribeMembershipService subscribeMembershipService;
+    private final WechatOrderMessageFactory wechatOrderMessageFactory;
+    private final BalanceMessageFactory balanceMessageFactory;
+    private final PaymentMessageFactory paymentMessageFactory;
 
     /**
      * Constructs the payment grpc controller.
@@ -62,6 +74,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param shellService               {@link ShellService}.
      * @param wechatOrderMessageFactory  {@link WechatOrderMessageFactory}.
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
+     * @param paymentMessageFactory      {@link PaymentMessageFactory}.
      */
     public PaymentGRpcController(PaymentService paymentService,
                                  WechatOrderService wechatOrderService,
@@ -71,7 +84,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                  SkuService skuService,
                                  ShellService shellService,
                                  WechatOrderMessageFactory wechatOrderMessageFactory,
-                                 SubscribeMembershipService subscribeMembershipService) {
+                                 SubscribeMembershipService subscribeMembershipService,
+                                 PaymentMessageFactory paymentMessageFactory) {
         this.paymentService = paymentService;
         this.wechatOrderService = wechatOrderService;
         this.wechatPayService = wechatPayService;
@@ -81,6 +95,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         this.shellService = shellService;
         this.wechatOrderMessageFactory = wechatOrderMessageFactory;
         this.subscribeMembershipService = subscribeMembershipService;
+        this.paymentMessageFactory = paymentMessageFactory;
     }
 
     /**
@@ -264,8 +279,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     /**
      * Implements the wechat buy shell api.
      *
-     * @param request           {@link WechatOrderBuyShellRequest}.
-     * @param responseObserver  {@link StreamObserver}.
+     * @param request          {@link WechatOrderBuyShellRequest}.
+     * @param responseObserver {@link StreamObserver}.
      */
     @Override
     public void wechatBuyShell(WechatOrderBuyShellRequest request,
@@ -297,6 +312,34 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
                     .build();
         }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the retrieve user payments rpc.
+     *
+     * @param request          {@link RetrieveUserPaymentsRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void retrieveUserPayments(RetrieveUserPaymentsRequest request,
+                                     StreamObserver<UserPaymentsResponse> responseObserver) {
+        Page<Payment> paymentPage = this.paymentService.retrievePaymentsByUserId(request.getUserId(), PaginationUtils.valueOf(request.getPageRequest()));
+
+        List<String> membershipSkuIds = paymentPage.getContent().stream().map(Payment::getMembershipSkuId).collect(Collectors.toList());
+
+        Map<String, MembershipSku> membershipSkuMap = this.skuService.retrieveMembershipSkusByIds(membershipSkuIds).stream()
+                .collect(Collectors.toMap(MembershipSku::getId, Function.identity(), (m1, m2) -> m1, HashMap::new));
+
+        UserPaymentsResponse response = UserPaymentsResponse.newBuilder()
+                .addAllUserPayments(paymentPage.getContent().stream()
+                        .map(payment -> this.paymentMessageFactory.valueOf(payment, membershipSkuMap.getOrDefault(payment.getMembershipSkuId(), null)))
+                        .collect(Collectors.toList()))
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setPageResponse(PaginationUtils.valueOf(paymentPage, request.getPageRequest()))
+                .build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
