@@ -42,6 +42,8 @@ public class Payment {
     @Builder.Default
     private Integer withdrawPercent = 88;
     @Builder.Default
+    private String membershipSkuId = "";
+    @Builder.Default
     private String orderId = "";
     private Integer type;
     @Builder.Default

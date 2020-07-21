@@ -932,6 +932,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/payments:
+    get:
+      tags:
+        - Payment
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      summary: 获得用户订单信息
+      responses:
+        '200':
+          description: payments response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPaymentsResponse'
   /api/v1/balances/myWallet:
     get:
       tags:
@@ -3133,3 +3148,28 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/OssTokenDTO'
+    UserPaymentDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        host:
+          $ref: '#/components/schemas/BriefUserDTO'
+        membership:
+          $ref: '#/components/schemas/BriefMembershipDTO'
+        membershipSku:
+          $ref: '#/components/schemas/MembershipSkuDTO'
+        expiration:
+          type: integer
+          format: int64
+    UserPaymentsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserPaymentDTO'

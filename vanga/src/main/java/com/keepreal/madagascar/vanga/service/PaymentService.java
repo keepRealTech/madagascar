@@ -101,6 +101,7 @@ public class PaymentService {
                                 .payeeId(sku.getHostId())
                                 .orderId(wechatOrder.getId())
                                 .tradeNum(wechatOrder.getTradeNumber())
+                                .membershipSkuId(wechatOrder.getMemberShipSkuId())
                                 .build())
                         .collect(Collectors.toList());
 
@@ -131,6 +132,7 @@ public class PaymentService {
                                 .validAfter(currentExpireTime
                                         .plusMonths((i + 1) * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
                                         .toInstant().toEpochMilli())
+                                .membershipSkuId(sku.getId())
                                 .build())
                         .collect(Collectors.toList());
 
