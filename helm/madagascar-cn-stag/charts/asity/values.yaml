@@ -8,9 +8,13 @@ common_configs:
   cpu: 500m
 
 rocketmq:
-  topic: notification-event
-  group_id: GID-asity-default
-  tag: event
+  notification:
+    topic: notification-event
+    group_id: GID-asity-default
+    tag: event
+  chat:
+    topic: chat-event
+    tag: event
 
 deploy:
   opentracing:
