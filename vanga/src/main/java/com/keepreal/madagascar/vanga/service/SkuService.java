@@ -162,6 +162,16 @@ public class SkuService {
     }
 
     /**
+     * Retrieves the membership skus by ids including deleted ones.
+     *
+     * @param ids Ids.
+     * @return {@link MembershipSku}.
+     */
+    public List<MembershipSku> retrieveMembershipSkusByIds(Iterable<String> ids) {
+        return this.membershipSkuRepository.findAllById(ids);
+    }
+
+    /**
      * Retrieves the shell sku by id.
      *
      * @param shellSkuId Shell sku id,

@@ -3,11 +3,14 @@ package com.keepreal.madagascar.lemur.service;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
+import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
+import com.keepreal.madagascar.vanga.UserPaymentsResponse;
 import com.keepreal.madagascar.vanga.WechatOrderMessage;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
 import io.grpc.Channel;
@@ -131,6 +134,42 @@ public class PaymentService {
         }
 
         return response.getWechatOrder();
+    }
+
+    /**
+     * Retrieves the user payment history.
+     *
+     * @param userId   User id.
+     * @param page     Page index.
+     * @param pageSize Page size.
+     * @return {@link UserPaymentsResponse}.
+     */
+    public UserPaymentsResponse retrieveUserPayments(String userId, Integer page, Integer pageSize) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveUserPaymentsRequest request = RetrieveUserPaymentsRequest.newBuilder()
+                .setUserId(userId)
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                .build();
+
+        UserPaymentsResponse response;
+        try {
+            response = stub.retrieveUserPayments(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve user payment history returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
     }
 
 }

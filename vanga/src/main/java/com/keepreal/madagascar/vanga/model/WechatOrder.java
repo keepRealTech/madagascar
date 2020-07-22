@@ -34,8 +34,10 @@ public class WechatOrder {
     private String description;
     private String tradeNumber;
     private String feeInCents;
-    private String memberShipSkuId;
-    private String shellSkuId;
+    @Builder.Default
+    private String memberShipSkuId = "";
+    @Builder.Default
+    private String shellSkuId = "";
     private String appId;
     private String mchId;
     @Transient

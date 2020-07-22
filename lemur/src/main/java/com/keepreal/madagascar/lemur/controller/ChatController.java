@@ -137,29 +137,37 @@ public class ChatController implements ChatApi {
     @Override
     public ResponseEntity<ChatAccessResponse> apiV1UsersIdChatsGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
+        boolean hasAccess = false;
         UserMessage userMessage = this.userService.retrieveUserById(id);
 
         if (Objects.isNull(userMessage)) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
         }
 
-        IslandsResponse targetIslandResponse = this.islandService.retrieveIslands(null, id, null, 0, 1);
-        IslandMessage targetIsland = targetIslandResponse.getIslandsList().isEmpty() ?
-                null : targetIslandResponse.getIslandsList().get(0);
+        IslandsResponse targetCreatedIslandResponse = this.islandService.retrieveIslands(null, id, null, 0, 1);
+        IslandMessage targetIsland = targetCreatedIslandResponse.getIslandsList().isEmpty() ?
+                null : targetCreatedIslandResponse.getIslandsList().get(0);
 
-        ChatAccessResponse response = new ChatAccessResponse();
-        if (Objects.isNull(targetIsland)
-                || this.islandService.retrieveIslandSubscribeStateByUserId(userId,
-                Collections.singletonList(targetIsland.getId())).get(targetIsland.getId())) {
-            response.setData(this.chatDTOFactory.buildAccess(this.userDTOFactory.valueOf(userMessage),
-                    targetIslandResponse.getIslandsList().stream().map(IslandMessage::getId).collect(Collectors.toList()),
-                    true));
-        } else {
-            response.setData(this.chatDTOFactory.buildAccess(this.userDTOFactory.valueOf(userMessage),
-                    new ArrayList<>(),
-                    false));
+        IslandsResponse myCreatedIslandResponse = this.islandService.retrieveIslands(null, userId, null, 0, 1);
+        IslandMessage myIsland = myCreatedIslandResponse.getIslandsList().isEmpty() ?
+                null : myCreatedIslandResponse.getIslandsList().get(0);
+
+        if (Objects.isNull(targetIsland) && Objects.isNull(myIsland)) {
+            hasAccess = true;
         }
 
+        if (Objects.nonNull(targetIsland) && this.islandService.retrieveIslandSubscribeStateByUserId(userId,
+                    Collections.singletonList(targetIsland.getId())).get(targetIsland.getId())) {
+            hasAccess = true;
+        } else if (Objects.nonNull(myIsland) && this.islandService.retrieveIslandSubscribeStateByUserId(id,
+                Collections.singletonList(myIsland.getId())).get(myIsland.getId())) {
+            hasAccess = true;
+        }
+
+        ChatAccessResponse response = new ChatAccessResponse();
+        response.setData(this.chatDTOFactory.buildAccess(this.userDTOFactory.valueOf(userMessage),
+                targetCreatedIslandResponse.getIslandsList().stream().map(IslandMessage::getId).collect(Collectors.toList()),
+                hasAccess));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

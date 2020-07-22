@@ -10,6 +10,7 @@ import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.coua.MembershipResponse;
 import com.keepreal.madagascar.coua.MembershipServiceGrpc;
 import com.keepreal.madagascar.coua.MembershipsResponse;
+import com.keepreal.madagascar.coua.RetrieveMembershipsByIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveMembershipsByIslandIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveMembershipsRequest;
 import com.keepreal.madagascar.coua.TopMembershipRequest;
@@ -257,6 +258,27 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
     public void retrieveMembershipsByIslandIds(RetrieveMembershipsByIslandIdsRequest request,
                                                StreamObserver<MembershipsResponse> responseObserver) {
         List<MembershipMessage> membershipMessages = this.membershipService.getMembershipListByIslandIds(request.getIslandIdsList())
+                .stream()
+                .map(membershipService::getMembershipMessage)
+                .collect(Collectors.toList());
+
+        responseObserver.onNext(MembershipsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllMessage(membershipMessages)
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the retrieve memberships by ids.
+     *
+     * @param request           {@link RetrieveMembershipsByIdsRequest}.
+     * @param responseObserver  {@link StreamObserver}.
+     */
+    @Override
+    public void retrieveMembershipsByIds(RetrieveMembershipsByIdsRequest request,
+                                         StreamObserver< MembershipsResponse> responseObserver) {
+        List<MembershipMessage> membershipMessages = this.membershipService.getMembershipListByIds(request.getIdsList())
                 .stream()
                 .map(membershipService::getMembershipMessage)
                 .collect(Collectors.toList());

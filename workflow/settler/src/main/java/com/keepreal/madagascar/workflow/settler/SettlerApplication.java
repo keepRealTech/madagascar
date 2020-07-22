@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.workflow.settler;
 
+import com.keepreal.madagascar.common.workflow.annotation.EnableWorkflowService;
 import com.keepreal.madagascar.workflow.settler.service.SettlerService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableTransactionManagement(mode = AdviceMode.ASPECTJ)
+@EnableWorkflowService
 public class SettlerApplication implements CommandLineRunner {
 
     private final SettlerService settlerService;

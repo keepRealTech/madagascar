@@ -13,6 +13,7 @@ import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.coua.MembershipResponse;
 import com.keepreal.madagascar.coua.MembershipServiceGrpc;
 import com.keepreal.madagascar.coua.MembershipsResponse;
+import com.keepreal.madagascar.coua.RetrieveMembershipsByIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveMembershipsByIslandIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveMembershipsRequest;
 import com.keepreal.madagascar.coua.TopMembershipRequest;
@@ -226,6 +227,28 @@ public class MembershipService {
         MembershipsResponse membershipsResponse;
         try {
             membershipsResponse = stub.retrieveMembershipsByIslandIds(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != membershipsResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(membershipsResponse.getStatus());
+        }
+
+        return membershipsResponse.getMessageList();
+    }
+
+    public List<MembershipMessage> retrieveMembershipsByIds(Iterable<String> ids) {
+        MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveMembershipsByIdsRequest request = RetrieveMembershipsByIdsRequest
+                .newBuilder()
+                .addAllIds(ids)
+                .build();
+
+        MembershipsResponse membershipsResponse;
+        try {
+            membershipsResponse = stub.retrieveMembershipsByIds(request);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

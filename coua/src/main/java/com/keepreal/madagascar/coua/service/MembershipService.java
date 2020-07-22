@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents the membership service.
@@ -72,6 +73,10 @@ public class MembershipService {
         return repository.findMembershipInfosByIslandIdInAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandIds);
     }
 
+    public List<MembershipInfo> getMembershipListByIds(Iterable<String> ids) {
+        return this.repository.findAllById(ids);
+    }
+
     public MembershipInfo updateMembership(MembershipInfo membershipInfo) {
         return repository.save(membershipInfo);
     }
@@ -109,6 +114,10 @@ public class MembershipService {
     }
 
     public MembershipMessage getMembershipMessage(MembershipInfo membershipInfo) {
+        if (Objects.isNull(membershipInfo)) {
+            return null;
+        }
+
         return MembershipMessage.newBuilder()
                 .setId(membershipInfo.getId())
                 .setHostId(membershipInfo.getHostId())
