@@ -33,15 +33,21 @@ public class UmengPushService {
     public void pushNewFeedByType(String tokens, String islandId, PushType pushType) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("type", pushType.getValue());
-        jsonObject.put("islandId", islandId);
+
+        JSONObject dataObject = new JSONObject();
+        dataObject.put("islandId", islandId);
+        jsonObject.put("data", dataObject);
         this.pushMessage(tokens, jsonObject);
     }
 
     public void pushUpdateBulletin(String tokens, String chatGroupId, String bulletin, PushType pushType) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("type", pushType.getValue());
-        jsonObject.put("chatGroupId", chatGroupId);
-        jsonObject.put("bulletin", bulletin);
+
+        JSONObject dataObject = new JSONObject();
+        dataObject.put("chatGroupId", chatGroupId);
+        dataObject.put("bulletin", bulletin);
+        jsonObject.put("data", dataObject);
         this.pushMessage(tokens, jsonObject);
     }
 

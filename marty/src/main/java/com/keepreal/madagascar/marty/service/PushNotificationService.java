@@ -49,11 +49,10 @@ public class PushNotificationService {
 
             String tokenString = tokenList.toString();
 
-            Map<String, String> extrasMap = pushPriorityInfo.getExtrasMap();
-            extrasMap.put("URL", pushPriorityInfo.getAndroidUrl());
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.putAll(extrasMap);
-            umengPushService.pushNotification(tokenString.substring(1, tokenString.length() - 1), title, text, jsonObject);
+            JSONObject dataObject = new JSONObject();
+            dataObject.putAll(pushPriorityInfo.getExtrasMap());
+
+            umengPushService.pushNotification(tokenString.substring(1, tokenString.length() - 1), title, text, generatorCustom(pushPriorityInfo.getAndroidUrl(), dataObject));
         }
     }
 
@@ -79,10 +78,18 @@ public class PushNotificationService {
 
         String tokenString = tokenList.toString();
 
-        Map<String, String> extrasMap = pushPriorityInfo.getExtrasMap();
-        extrasMap.put("feed_id", feedId);
+        JSONObject dataObject = new JSONObject();
+        dataObject.put("feed_id", feedId);
+
+        generatorCustom(pushPriorityInfo.getAndroidUrl(), dataObject);
+
+        umengPushService.pushNotification(tokenString.substring(1, tokenString.length() - 1), title, text, generatorCustom(pushPriorityInfo.getAndroidUrl(), dataObject));
+    }
+
+    private JSONObject generatorCustom(String url, JSONObject dataObject) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.putAll(extrasMap);
-        umengPushService.pushNotification(tokenString.substring(1, tokenString.length() - 1), title, text, jsonObject);
+        jsonObject.put("url", url);
+        jsonObject.put("data", dataObject);
+        return jsonObject;
     }
 }
