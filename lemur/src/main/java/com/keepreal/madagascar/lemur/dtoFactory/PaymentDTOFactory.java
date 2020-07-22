@@ -62,7 +62,7 @@ public class PaymentDTOFactory {
         userPaymentDTO.setMembershipSku(this.skuDTOFactory.valueOf(membershipSkuMessage));
 
         ZonedDateTime expiration = ZonedDateTime.ofInstant(Instant.ofEpochMilli(userPaymentMessage.getExpiresAt()), ZoneId.systemDefault());
-        userPaymentDTO.setExpiration(expiration.with(ChronoField.SECOND_OF_DAY, 0).toInstant().getEpochSecond());
+        userPaymentDTO.setExpiration(expiration.with(ChronoField.SECOND_OF_DAY, 0).toInstant().toEpochMilli());
 
         return userPaymentDTO;
     }
