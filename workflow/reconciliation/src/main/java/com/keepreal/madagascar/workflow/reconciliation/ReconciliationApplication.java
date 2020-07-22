@@ -1,10 +1,12 @@
 package com.keepreal.madagascar.workflow.reconciliation;
 
+import com.keepreal.madagascar.common.workflow.annotation.EnableWorkflowService;
 import com.keepreal.madagascar.workflow.reconciliation.service.ReconciliationService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@EnableWorkflowService
 @SpringBootApplication
 public class ReconciliationApplication implements CommandLineRunner {
 
