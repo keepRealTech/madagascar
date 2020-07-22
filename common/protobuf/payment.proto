@@ -74,7 +74,7 @@ message UserPaymentMessage {
   string payeeId = 3;
   string islandId = 4;
   MembershipSkuMessage membershipSku = 5;
-  uint64 createdAt = 6;
+  uint64 expiresAt = 6;
 }
 
 message UserPaymentsResponse {
