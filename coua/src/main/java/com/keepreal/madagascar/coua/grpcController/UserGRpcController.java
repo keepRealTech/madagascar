@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.coua.grpcController;
 
+import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.DeviceType;
 import com.keepreal.madagascar.common.Gender;
@@ -12,6 +13,8 @@ import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.RetreiveMultipleUsersByIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokenRequest;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokenResponse;
+import com.keepreal.madagascar.coua.RetrieveDeviceTokensByUserIdListRequest;
+import com.keepreal.madagascar.coua.RetrieveDeviceTokensByUserIdListResponse;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
@@ -222,6 +225,31 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                 .addAllAndroidTokens(androidTokenList)
                 .addAllIosTokens(iosTokenList)
                 .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveDeviceTokensByUserIdList(RetrieveDeviceTokensByUserIdListRequest request, StreamObserver<RetrieveDeviceTokensByUserIdListResponse> responseObserver) {
+        ProtocolStringList userIdsList = request.getUserIdsList();
+
+        List<SimpleDeviceToken> tokenList= userDeviceInfoService.getDeviceTokenListByUserIdList(userIdsList);
+
+        List<String> androidTokenList = new ArrayList<>();
+        List<String> iosTokenList = new ArrayList<>();
+
+        tokenList.forEach(info -> {
+            if (info.getDeviceType().equals(DeviceType.ANDROID_VALUE)) {
+                androidTokenList.add(info.getDeviceToken());
+            } else {
+                iosTokenList.add(info.getDeviceToken());
+            }
+        });
+
+        RetrieveDeviceTokensByUserIdListResponse response = RetrieveDeviceTokensByUserIdListResponse.newBuilder()
+                .addAllAndroidTokens(androidTokenList)
+                .addAllIosTokens(iosTokenList)
+                .build();
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 

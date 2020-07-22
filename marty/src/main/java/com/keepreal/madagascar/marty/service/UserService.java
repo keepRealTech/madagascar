@@ -7,6 +7,8 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokenRequest;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokenResponse;
+import com.keepreal.madagascar.coua.RetrieveDeviceTokensByUserIdListRequest;
+import com.keepreal.madagascar.coua.RetrieveDeviceTokensByUserIdListResponse;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
@@ -16,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -50,6 +53,23 @@ public class UserService {
         RetrieveDeviceTokenResponse response;
         try {
             response = stub.retrieveDeviceTokenByUserId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        return response;
+    }
+
+    public RetrieveDeviceTokensByUserIdListResponse retrieveDeviceTokensByUserIdList(List<String> userIdList) {
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveDeviceTokensByUserIdListRequest request = RetrieveDeviceTokensByUserIdListRequest.newBuilder()
+                .addAllUserIds(userIdList)
+                .build();
+
+        RetrieveDeviceTokensByUserIdListResponse response;
+        try {
+            response = stub.retrieveDeviceTokensByUserIdList(request);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

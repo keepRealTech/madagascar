@@ -32,4 +32,9 @@ public class GrpcConfigurationFactory {
         return new GrpcConfiguration();
     }
 
+    @Bean(name = "asityConfiguration")
+    @ConfigurationProperties(prefix = "grpc.asity", ignoreUnknownFields = false)
+    public GrpcConfiguration asityManagerConfiguration() {
+        return new GrpcConfiguration();
+    }
 }

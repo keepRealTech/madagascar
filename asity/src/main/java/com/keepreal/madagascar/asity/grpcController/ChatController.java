@@ -24,6 +24,7 @@ import com.keepreal.madagascar.asity.model.Chatgroup;
 import com.keepreal.madagascar.asity.model.ChatgroupMember;
 import com.keepreal.madagascar.asity.model.ChatgroupMembership;
 import com.keepreal.madagascar.asity.model.IslandChatAccess;
+import com.keepreal.madagascar.asity.service.ChatEventProducerService;
 import com.keepreal.madagascar.asity.service.ChatgroupService;
 import com.keepreal.madagascar.asity.service.IslandChatAccessService;
 import com.keepreal.madagascar.asity.service.RongCloudService;
@@ -47,8 +48,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
-
 /**
  * Represents the chat grpc service.
  */
@@ -60,6 +59,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     private final ChatgroupService chatgroupService;
     private final RongCloudService rongCloudService;
     private final IslandChatAccessService islandChatAccessService;
+    private final ChatEventProducerService chatEventProducerService;
 
     private final ChatgroupMessageFactory chatgroupMessageFactory;
     private final IslandChatAccessMessageFactory islandChatAccessMessageFactory;
@@ -70,17 +70,20 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
      * @param chatgroupService               {@link ChatgroupService}.
      * @param rongCloudService               {@link RongCloudService}.
      * @param islandChatAccessService        {@link IslandChatAccessService}.
+     * @param chatEventProducerService       {@link ChatEventProducerService}.
      * @param chatgroupMessageFactory        {@link IslandChatAccessService}.
      * @param islandChatAccessMessageFactory {@link IslandChatAccessMessageFactory}.
      */
     public ChatController(ChatgroupService chatgroupService,
                           RongCloudService rongCloudService,
                           IslandChatAccessService islandChatAccessService,
+                          ChatEventProducerService chatEventProducerService,
                           ChatgroupMessageFactory chatgroupMessageFactory,
                           IslandChatAccessMessageFactory islandChatAccessMessageFactory) {
         this.chatgroupService = chatgroupService;
         this.rongCloudService = rongCloudService;
         this.islandChatAccessService = islandChatAccessService;
+        this.chatEventProducerService = chatEventProducerService;
         this.chatgroupMessageFactory = chatgroupMessageFactory;
         this.islandChatAccessMessageFactory = islandChatAccessMessageFactory;
     }
@@ -260,7 +263,9 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         }
 
         if (request.hasBulletin()) {
-            chatgroup.setBulletin(request.getBulletin().getValue());
+            String bulletin = request.getBulletin().getValue();
+            chatgroup.setBulletin(bulletin);
+            chatEventProducerService.produceUpdateBulletinChatEventAsync(chatgroup.getId(), request.getUserId(), bulletin);
         }
 
         if (Objects.nonNull(request.getMembershipIdsList())) {

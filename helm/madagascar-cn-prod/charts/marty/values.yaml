@@ -16,6 +16,10 @@ rocketmq:
     topic: feed-event
     group_id: GID-marty-feed-default
     tag: event
+  chat:
+    topic: chat-event
+    group_id: GID-marty-chat-default
+    tag: event
 
 coua:
   host: coua
@@ -23,6 +27,10 @@ coua:
 
 fossa:
   host: fossa
+  port: 6565
+
+asity:
+  host: asity
   port: 6565
 
 umeng:

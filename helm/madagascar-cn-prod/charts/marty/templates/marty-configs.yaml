@@ -9,12 +9,17 @@ data:
   GRPC_COUA_PORT: '{{ .Values.coua.port }}'
   GRPC_FOSSA_HOST: {{ .Values.fossa.host }}
   GRPC_FOSSA_PORT: '{{ .Values.fossa.port }}'
+  GRPC_ASITY_HOST: {{ .Values.asity.host }}
+  GRPC_ASITY_PORT: '{{ .Values.asity.port }}'
   ROCKETMQ_NOTIFICATION_TOPIC: {{ .Values.rocketmq.notification.topic }}
   ROCKETMQ_NOTIFICATION_GROUPID: {{ .Values.rocketmq.notification.group_id }}
   ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
   ROCKETMQ_FEED_TOPIC: {{ .Values.rocketmq.feed.topic }}
   ROCKETMQ_FEED_GROUPID: {{ .Values.rocketmq.feed.group_id }}
   ROCKETMQ_FEED_TAG: {{ .Values.rocketmq.feed.tag }}
+  ROCKETMQ_CHAT_TOPIC: {{ .Values.rocketmq.chat.topic }}
+  ROCKETMQ_CHAT_GROUPID: {{ .Values.rocketmq.chat.group_id }}
+  ROCKETMQ_CHAT_TAG: {{ .Values.rocketmq.chat.tag }}
   UMENG_URL: {{ .Values.umeng.url }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
