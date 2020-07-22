@@ -93,6 +93,16 @@ spec:
                 secretKeyRef:
                   name: jpush
                   key: app-secret
+            - name: SPRING_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  key: host
+                  name: aliyun-redis
+            - name: SPRING_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: aliyun-redis
             - name: RESTART
               value: "1"
           resources:

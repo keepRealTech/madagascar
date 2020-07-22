@@ -321,7 +321,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
 
         // 没有条件
-        return query.with(Sort.by(Sort.Order.desc("toppedTime"), Sort.Order.desc("createdTime")));
+        return query.with(Sort.by(Sort.Order.desc("createdTime"), Sort.Order.desc("toppedTime")));
     }
 
     /**
