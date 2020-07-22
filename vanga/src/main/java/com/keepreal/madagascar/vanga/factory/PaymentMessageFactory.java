@@ -42,7 +42,7 @@ public class PaymentMessageFactory {
                 .setUserId(payment.getUserId())
                 .setPayeeId(payment.getPayeeId())
                 .setMembershipSku(this.skuMessageFactory.valueOf(membershipSku))
-                .setCreatedAt(payment.getCreatedTime())
+                .setExpiresAt(payment.getValidAfter())
                 .build();
     }
 
