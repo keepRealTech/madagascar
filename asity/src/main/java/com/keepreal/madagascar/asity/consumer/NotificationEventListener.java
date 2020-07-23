@@ -6,6 +6,7 @@ import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.MessageListener;
 import com.aliyun.openservices.ons.api.order.ConsumeOrderContext;
 import com.keepreal.madagascar.asity.service.ChatgroupService;
+import com.keepreal.madagascar.asity.service.RongCloudService;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,14 +22,18 @@ import java.util.Objects;
 public class NotificationEventListener implements MessageListener {
 
     private final ChatgroupService chatgroupService;
+    private final RongCloudService rongCloudService;
 
     /**
      * Constructs the notification event listener.
      *
-     * @param chatgroupService {@link ChatgroupService}.
+     * @param chatgroupService  {@link ChatgroupService}.
+     * @param rongCloudService  {@link RongCloudService}.
      */
-    public NotificationEventListener(ChatgroupService chatgroupService) {
+    public NotificationEventListener(ChatgroupService chatgroupService,
+                                     RongCloudService rongCloudService) {
         this.chatgroupService = chatgroupService;
+        this.rongCloudService = rongCloudService;
     }
 
     /**
@@ -57,6 +62,15 @@ public class NotificationEventListener implements MessageListener {
                     }
                     this.chatgroupService.quitChatgroupsByIslandId(event.getUnsubscribeEvent().getIslandId(),
                             event.getUnsubscribeEvent().getSubscriberId());
+                    break;
+                case NOTIFICATION_EVENT_NEW_MEMBER:
+                    log.info("dealing with new membership subscription.");
+                    if (Objects.isNull(event.getMemberEvent())
+                            || StringUtils.isEmpty(event.getMemberEvent().getMemberId())
+                            || StringUtils.isEmpty(event.getUserId())) {
+                        break;
+                    }
+                    this.rongCloudService.sendThanks(event.getUserId(), event.getMemberEvent().getMemberId());
                     break;
                 case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
                 default:
