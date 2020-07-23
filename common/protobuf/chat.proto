@@ -102,7 +102,7 @@ message RetrieveChatgroupByIdRequest {
   string userId = 2;
 }
 
-message RetreiveChatgroupsByUserIdRequest {
+message RetrieveChatgroupsByUserIdRequest {
   string userId = 1;
 }
 
@@ -133,6 +133,6 @@ service ChatService {
   rpc JoinChatgroup(JoinChatgroupRequest) returns (CommonStatus) {};
   rpc RetrieveChatgroupsByIslandId(RetrieveChatgroupsByIslandIdRequest) returns (IslandChatgroupsResponse) {};
   rpc RetrieveChatgroupById(RetrieveChatgroupByIdRequest) returns (ChatgroupResponse) {};
-  rpc RetrieveChatgroupsByUserId(RetreiveChatgroupsByUserIdRequest) returns (UserChatgroupsResponse) {};
+  rpc RetrieveChatgroupsByUserId(RetrieveChatgroupsByUserIdRequest) returns (UserChatgroupsResponse) {};
   rpc RetrieveChatgroupMembersById(RetrieveChatgroupMembersByGroupIdRequest) returns (ChatgroupMembersResponse) {};
 }

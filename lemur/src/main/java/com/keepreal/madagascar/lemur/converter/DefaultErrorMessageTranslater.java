@@ -50,6 +50,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "群内人数已达上限，太拥挤啦，去别的群看看吧";
             case REQUEST_LOW_VERSION_ERROR:
                 return "岛民你好，我们发布了重大更新，请去App Store下载最新版本";
+            case REQUEST_CHATGROUP_NOT_FOUND_ERROR:
+                return "该群已被群主解散了";
             default:
                 return errorCode.getValueDescriptor().getName();
         }

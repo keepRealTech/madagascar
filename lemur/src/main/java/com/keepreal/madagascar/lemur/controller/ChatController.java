@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.google.common.base.Functions;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
 import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
@@ -513,9 +514,13 @@ public class ChatController implements ChatApi {
         if (!chatgroupMembersResponse.getMemberIdsList().isEmpty()) {
             userMessages = this.userService.retrieveUsersByIds(chatgroupMembersResponse.getMemberIdsList());
         }
+        Map<String, UserMessage> userMessageMap = userMessages.stream()
+                .collect(Collectors.toMap(UserMessage::getId, Function.identity()));
 
         BriefUsersResponse response = new BriefUsersResponse();
-        response.setData(userMessages.stream().map(this.userDTOFactory::briefValueOf).collect(Collectors.toList()));
+        response.setData(chatgroupMembersResponse.getMemberIdsList().stream()
+                .map(mid -> userMessageMap.getOrDefault(mid, null))
+                .map(this.userDTOFactory::briefValueOf).collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(chatgroupMembersResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
