@@ -479,6 +479,7 @@ public class ChatController implements ChatApi {
                                         chatgroup -> chatgroup.getMembershipIdsList()
                                                 .stream()
                                                 .map(membershipId -> this.membershipDTOFactory.simpleValueOf(membershipMap.getOrDefault(membershipId, null)))
+                                                .filter(Objects::nonNull)
                                                 .collect(Collectors.toList())
                                 ))));
 
