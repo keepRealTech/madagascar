@@ -11,7 +11,7 @@ import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
 import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
-import com.keepreal.madagascar.asity.RetreiveChatgroupsByUserIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
@@ -374,11 +374,11 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Implements the retrieve chatgroups by user.
      *
-     * @param request          {@link RetreiveChatgroupsByUserIdRequest}.
+     * @param request          {@link RetrieveChatgroupsByUserIdRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
     @Override
-    public void retrieveChatgroupsByUserId(RetreiveChatgroupsByUserIdRequest request,
+    public void retrieveChatgroupsByUserId(RetrieveChatgroupsByUserIdRequest request,
                                            StreamObserver<UserChatgroupsResponse> responseObserver) {
         List<ChatgroupMember> chatgroupMembers = this.chatgroupService.retrieveChatgroupMembersByUserId(request.getUserId());
 

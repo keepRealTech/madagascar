@@ -14,11 +14,11 @@ import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
 import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
-import com.keepreal.madagascar.asity.RetreiveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.UserChatgroupsResponse;
 import com.keepreal.madagascar.common.CommonStatus;
@@ -26,7 +26,6 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import com.keepreal.madagascar.vanga.RetrieveMembershipIdsRequest;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -305,7 +304,7 @@ public class ChatService {
     /**
      * Retrieves chatgroup by id.
      *
-     * @param id Chatgroup id.
+     * @param id     Chatgroup id.
      * @param userId User id.
      * @return {@link ChatgroupMessage}.
      */
@@ -340,13 +339,16 @@ public class ChatService {
     /**
      * Retrieves chatgroups by island id.
      *
-     * @param islandId Island id.
-     * @param userId   User id.
-     * @param page     Page index.
-     * @param pageSize Page size.
+     * @param islandId          Island id.
+     * @param userId            User id.
+     * @param page              Page index.
+     * @param pageSize          Page size.
      * @return {@link IslandChatgroupsResponse}.
      */
-    public IslandChatgroupsResponse retrieveChatgroupsByIslandId(String islandId, String userId, Integer page, Integer pageSize) {
+    public IslandChatgroupsResponse retrieveChatgroupsByIslandId(String islandId,
+                                                                 String userId,
+                                                                 Integer page,
+                                                                 Integer pageSize) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveChatgroupsByIslandIdRequest request = RetrieveChatgroupsByIslandIdRequest.newBuilder()
@@ -384,7 +386,7 @@ public class ChatService {
     public UserChatgroupsResponse retrieveChatgroupsByUserId(String userId) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
 
-        RetreiveChatgroupsByUserIdRequest request = RetreiveChatgroupsByUserIdRequest.newBuilder()
+        RetrieveChatgroupsByUserIdRequest request = RetrieveChatgroupsByUserIdRequest.newBuilder()
                 .setUserId(userId)
                 .build();
 
