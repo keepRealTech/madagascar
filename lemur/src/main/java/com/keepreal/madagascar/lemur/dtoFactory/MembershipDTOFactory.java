@@ -11,6 +11,7 @@ import swagger.model.MembershipDTO;
 import swagger.model.SimpleMembershipDTO;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Represents the membership dto factory.
@@ -20,6 +21,9 @@ import java.util.Arrays;
 public class MembershipDTOFactory {
 
     public SimpleMembershipDTO simpleValueOf(MembershipMessage membershipMessage) {
+        if (Objects.isNull(membershipMessage)) {
+            return null;
+        }
         SimpleMembershipDTO dto = new SimpleMembershipDTO();
         dto.id(membershipMessage.getId());
         dto.setMembershipName(membershipMessage.getName());
