@@ -744,6 +744,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UploadUrlListResponse'
+  /api/v2/upload/mediaUrls:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MediaUrlsRequestV2'
+      tags:
+        - Upload
+      summary: retrieves upload image url
+      responses:
+        '200':
+          description: retrieve image url
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlListResponseV2'
   /api/v1/notifications:
     get:
       parameters:
@@ -1847,6 +1865,21 @@ components:
             type: string
       required:
         - fileNames
+    MediaUrlsRequestV2:
+      type: object
+      properties:
+        mediaType:
+          $ref: '#/components/schemas/MultiMediaType'
+        fileNames:
+          type: array
+          items:
+            type: string
+        mediaTitle:
+          type: string
+        mediaFilename:
+          type: string
+      required:
+        - mediaType
     CheckIslandResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -2435,6 +2468,31 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/UploadUrlDTO'
+    UploadUrlListResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UploadUrlDTOV2'
+    UploadUrlDTOV2:
+      type: object
+      properties:
+        urlList:
+          type: array
+          items:
+            $ref: '#/components/schemas/UploadUrlDTO'
+        mediaInfo:
+          $ref: '#/components/schemas/UploadMediaDTO'
+    UploadMediaDTO:
+      type: object
+      properties:
+        vedioId:
+          type: string
+        uploadAddress:
+          type: string
+        uploadAuth:
+          type: string
     NotificationsCountResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
