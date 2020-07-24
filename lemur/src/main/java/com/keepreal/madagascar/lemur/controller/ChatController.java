@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ChatApi;
 import swagger.model.BriefUsersResponse;
 import swagger.model.ChatAccessResponse;
+import swagger.model.ChatGroupDTO;
 import swagger.model.ChatGroupResponse;
 import swagger.model.ChatTokenResponse;
 import swagger.model.DummyResponse;
@@ -47,6 +48,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -400,6 +402,7 @@ public class ChatController implements ChatApi {
                     return this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList, userMembershipIds, userId);
                 })
                 .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(ChatGroupDTO::getHasAccess, Comparator.reverseOrder()))
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(chatgroupsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
