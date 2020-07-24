@@ -25,6 +25,8 @@ public class JpushService {
     }
 
     public void pushIOSMessageByType(PushType pushType, String... registrationIds) {
+        if (registrationIds.length == 0)
+            return;
         try {
             jPushClient.sendPush(PushPayload.newBuilder()
                     .setPlatform(Platform.ios())
@@ -40,6 +42,8 @@ public class JpushService {
     }
 
     public void pushIOSNewFeedMessage(String islandId, PushType pushType, String... registrationIds) {
+        if (registrationIds.length == 0)
+            return;
         try {
             jPushClient.sendPush(PushPayload.newBuilder()
                     .setPlatform(Platform.ios())
@@ -51,11 +55,13 @@ public class JpushService {
                             .build())
                     .build());
         } catch (APIConnectionException | APIRequestException e) {
-            e.printStackTrace();
+            log.error("error is {}", e.getMessage());
         }
     }
 
     public void pushIOSUpdateBulletinMessage(String chatGroupId, String bulletin, PushType pushType, String... registrationIds) {
+        if (registrationIds.length == 0)
+            return;
         try {
             jPushClient.sendPush(PushPayload.newBuilder()
                     .setPlatform(Platform.ios())
@@ -73,6 +79,8 @@ public class JpushService {
     }
 
     public void pushIosNotification(String alert, Map<String, String> extras, String... registrationIds) {
+        if (registrationIds.length == 0)
+            return;
         try {
             jPushClient.sendIosNotificationWithRegistrationID(alert, extras, registrationIds);
         } catch (APIConnectionException | APIRequestException e) {

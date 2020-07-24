@@ -52,6 +52,8 @@ public class UmengPushService {
     }
 
     private void pushMessage(String tokens, JSONObject jsonObject) {
+        if (tokens.length() == 0)
+            return;
         // build android
         AndroidListCast androidListCast = new AndroidListCast(umengConfiguration.getAndroidAppKey());
         androidListCast.setDeviceToken(tokens);
@@ -62,6 +64,8 @@ public class UmengPushService {
     }
 
     public void pushNotification(String tokens, String title, String text, JSONObject jsonObject) {
+        if (tokens.length() == 0)
+            return;
         AndroidListCast androidListCast = new AndroidListCast(umengConfiguration.getAndroidAppKey());
         androidListCast.setCustom(jsonObject);
         androidListCast.setDeviceToken(tokens);
@@ -69,7 +73,7 @@ public class UmengPushService {
         androidListCast.setAfterOpen("go_custom");
         androidListCast.setTitle(title);
         androidListCast.setText(text);
-
+        log.error("new feed message is {}", androidListCast.toString());
         umengPushClient.push(androidListCast.toString());
     }
 
