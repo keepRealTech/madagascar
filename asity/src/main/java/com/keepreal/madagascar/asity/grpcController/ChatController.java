@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
 
     private static final int GROUP_MAX_MEMBER_LIMIT = 3000;
+    private static final int ISLAND_CHATGROUP_LIMIT = 100;
 
     private final ChatgroupService chatgroupService;
     private final RongCloudService rongCloudService;
@@ -168,6 +169,18 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     @Override
     public void createChatgroup(CreateChatgroupRequest request,
                                 StreamObserver<ChatgroupResponse> responseObserver) {
+        Integer groupCount = this.chatgroupService.countChatgroupsByIslandId(request.getIslandId());
+
+        if (groupCount.compareTo(ChatController.ISLAND_CHATGROUP_LIMIT) >= 0) {
+            ChatgroupResponse response = ChatgroupResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_CHATGROUP_LIMIT_ERROR))
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
         Chatgroup chatgroup = this.chatgroupService.createChatgroup(request.getIslandId(), request.getName(), request.getHostId(),
                 request.getMembershipIdsList(), request.getBulletin());
 

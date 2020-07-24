@@ -139,7 +139,7 @@ public class PaymentService {
                                         .plusMonths((i + 1) * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
                                         .toInstant().toEpochMilli())
                                 .membershipSkuId(sku.getId())
-                                .tradeNum(UUID.randomUUID().toString())
+                                .tradeNum(UUID.randomUUID().toString().replace("-", ""))
                                 .build())
                         .collect(Collectors.toList());
 
