@@ -52,6 +52,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "岛民你好，我们发布了重大更新，请去App Store下载最新版本";
             case REQUEST_CHATGROUP_NOT_FOUND_ERROR:
                 return "该群已被群主解散了";
+            case REQUEST_ISLAND_CHATGROUP_LIMIT_ERROR:
+                return "你都创建100个群了！你克制点！";
             default:
                 return errorCode.getValueDescriptor().getName();
         }
