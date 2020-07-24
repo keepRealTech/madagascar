@@ -73,7 +73,6 @@ public class UmengPushService {
         androidListCast.setAfterOpen("go_custom");
         androidListCast.setTitle(title);
         androidListCast.setText(text);
-        log.error("new feed message is {}", androidListCast.toString());
         umengPushClient.push(androidListCast.toString());
     }
 
