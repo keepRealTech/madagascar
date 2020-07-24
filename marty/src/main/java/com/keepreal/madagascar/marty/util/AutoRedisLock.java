@@ -5,6 +5,7 @@ import lombok.SneakyThrows;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 
+import java.util.ConcurrentModificationException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -21,7 +22,6 @@ public class AutoRedisLock implements AutoCloseable {
      * @param client   {@link RedissonClient}.
      * @param lockName Lock name.
      */
-    @SneakyThrows
     public AutoRedisLock(RedissonClient client, String lockName) {
         this(client, lockName, 5, 299 * 1000);
     }
@@ -37,7 +37,9 @@ public class AutoRedisLock implements AutoCloseable {
     @SneakyThrows
     public AutoRedisLock(RedissonClient client, String lockName, long waitTimeInMS, long leaseTimeInMS) {
         this.lock = client.getLock(lockName);
-        assert this.lock.tryLock(waitTimeInMS, leaseTimeInMS, TimeUnit.MILLISECONDS);
+        if (!this.lock.tryLock(waitTimeInMS, leaseTimeInMS, TimeUnit.MILLISECONDS)) {
+            throw new ConcurrentModificationException("Failed to acquire redis lock: " + lockName);
+        }
     }
 
     /**
