@@ -9,7 +9,6 @@ import io.rong.models.Result;
 import io.rong.models.group.GroupMember;
 import io.rong.models.group.GroupModel;
 import io.rong.models.message.PrivateMessage;
-import io.rong.models.response.ResponseResult;
 import io.rong.models.response.TokenResult;
 import io.rong.models.user.UserModel;
 import lombok.SneakyThrows;
@@ -141,8 +140,8 @@ public class RongCloudService {
     /**
      * Sends a private thank you message.
      *
-     * @param userId    User id.
-     * @param targetId  Target id.
+     * @param userId   User id.
+     * @param targetId Target id.
      */
     @SneakyThrows
     public void sendThanks(String userId, String targetId) {
