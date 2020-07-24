@@ -1,0 +1,21 @@
+# Default values for test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+common_configs:
+  replicas: 2
+  memory: 2Gi
+  cpu: 500m
+
+rocketmq:
+  notification:
+    topic: notification-event
+    group_id: GID-asity-default
+    tag: event
+  chat:
+    topic: chat-event
+    tag: event
+
+deploy:
+  opentracing:
+    enable_jaeger: false
