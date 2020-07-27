@@ -44,6 +44,9 @@ public class DefaultContentFilter implements TextContentFilter {
      */
     @Override
     public boolean isDisallowed(String content) {
+        content = content.replace((char) 12288, ' ');
+        content = content.trim();
+
         if (StringUtils.isEmpty(content)) {
             return false;
         }

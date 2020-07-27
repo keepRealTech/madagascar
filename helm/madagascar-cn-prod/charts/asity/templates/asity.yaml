@@ -1,13 +1,14 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: baobob
+  name: asity
   namespace: {{ .Values.global.common_configs.namespace }}
 spec:
   replicas: {{ .Values.common_configs.replicas }}
   selector:
     matchLabels:
-      app: baobob
+      app: asity
+  serviceName: asity
   template:
     metadata:
       annotations:
@@ -17,7 +18,7 @@ spec:
         config.linkerd.io/proxy-image-version: stable-2.7.1
         linkerd.io/inject: enabled
       labels:
-        app: baobob
+        app: asity
     spec:
       initContainers:
         - name: sysctl
@@ -36,33 +37,58 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.global.acr.acr_secret_name }}
       containers:
-        - name: baobob
-          image: {{ .Values.global.images.baobob.name }}:{{ .Values.global.images.baobob.tag }}
-          imagePullPolicy: {{ .Values.global.images.baobob.imagePullPolicy }}
+        - name: asity
+          image: {{ .Values.global.images.asity.name }}:{{ .Values.global.images.asity.tag }}
+          imagePullPolicy: {{ .Values.global.images.asity.imagePullPolicy }}
           envFrom:
             - configMapRef:
-                name: baobob
+                name: asity
           env:
-            - name: WECHAT_OAUTH_APPID
+            - name: RONGCLOUD_APPKEY
               valueFrom:
                 secretKeyRef:
-                  name: wechat-app
-                  key: app-id
-            - name: WECHAT_OAUTH_APPSECRET
+                  name: rongcloud
+                  key: app-key
+            - name: RONGCLOUD_APPSECRET
               valueFrom:
                 secretKeyRef:
-                  name: wechat-app
+                  name: rongcloud
                   key: app-secret
-            - name: WECHAT_MP_APPID
+            - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
-                  name: wechat-mp
-                  key: app-id
-            - name: WECHAT_MP_APPSECRET
+                  key: asity-connection-string
+                  name: aliyun-rdb
+            - name: ROCKETMQ_NOTIFICATION_ACCESSKEY
               valueFrom:
                 secretKeyRef:
-                  name: wechat-mp
-                  key: app-secret
+                  name: aliyun-rmq
+                  key: access-key
+            - name: ROCKETMQ_NOTIFICATION_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-secret
+            - name: ROCKETMQ_NOTIFICATION_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
+            - name: ROCKETMQ_CHAT_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-key
+            - name: ROCKETMQ_CHAT_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-secret
+            - name: ROCKETMQ_CHAT_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}
@@ -70,8 +96,8 @@ spec:
               cpu: {{ .Values.common_configs.cpu }}
               memory: {{ .Values.common_configs.memory }}
           ports:
-            - containerPort: 12001
-              name: baobob-grpc
+            - containerPort: 12007
+              name: asity-grpc
         {{ if .Values.deploy.opentracing.enable_jaeger }}
         - name: jaeger-agent
           image: jaegertracing/jaeger-agent:1.17.1
@@ -100,11 +126,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: baobob
+  name: asity
 spec:
   type: ClusterIP
   ports:
     - port: 6565
-      targetPort: baobob-grpc
+      targetPort: asity-grpc
   selector:
-    app: baobob
+    app: asity

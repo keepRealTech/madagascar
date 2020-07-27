@@ -5,7 +5,7 @@ spring:
     url: jdbc:mysql://kr_admin:gYvi89kGKJoqZbzk@rm-2ze0p9v29ef1p05us6o.mysql.rds.aliyuncs.com:3306/asity?autoReconnect=true&useUnicode=true&characterEncoding=utf8&character_set_server=utf8mb4&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
   jpa:
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
 
 grpc:

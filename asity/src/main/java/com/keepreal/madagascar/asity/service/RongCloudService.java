@@ -14,6 +14,7 @@ import io.rong.models.user.UserModel;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents the rong cloud service.
@@ -44,6 +45,10 @@ public class RongCloudService {
      */
     @SneakyThrows
     public String register(String userId, String userName, String portraitUrl) {
+        userName = userName.replace((char) 12288, ' ');
+        if (StringUtils.isEmpty(userName.trim())) {
+            userName = "user " + userId;
+        }
         UserModel userModel = new UserModel()
                 .setId(userId)
                 .setName(userName)
