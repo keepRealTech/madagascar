@@ -521,7 +521,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         String islandId = request.getIslandId();
         Pageable pageable = PageResponseUtil.getPageable(request.getPageRequest());
 
-        Page<String> subscriberIdsPageable = subscriptionService.getSubscriberIdListByIslandId(islandId, pageable);
+        Page<String> subscriberIdsPageable = subscriptionService.getIslanderIdListByIslandId(islandId, pageable);
 
         List<String> androidTokenList = new ArrayList<>();
         List<String> iosTokenList = new ArrayList<>();

@@ -3,6 +3,8 @@ syntax = "proto3";
 option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.common";
 
+import "google/protobuf/wrappers.proto";
+
 message PageRequest {
     int32 page = 1;
     int32 pageSize = 2;
@@ -22,6 +24,7 @@ enum LoginType {
     LOGIN_PASSWORD = 2;
     LOGIN_REFRESH_TOKEN = 3;
     LOGIN_JWT_IOS = 4;
+    LOGIN_OAUTH_MP_WECHAT = 5;
 }
 
 enum NotificationType {
@@ -73,12 +76,21 @@ enum Gender {
     UNKNOWN = 0;
     MALE = 1;
     FEMALE = 2;
+    UNSET = 3;
 }
 
 enum DeviceType {
     UNKNOWN_TYPE = 0;
     ANDROID = 1;
     IOS = 2;
+}
+
+enum PushPriority {
+    NEW_FEED = 0;
+    NEW_SUBSCRIBE = 1;
+    NEW_MEMBERSHIP = 2;
+    NEW_LIKE = 3;
+    NEW_COMMENT = 4;
 }
 
 message GenderValue {
@@ -170,6 +182,7 @@ message FeedMessage {
     string membershipId = 14;
     bool isMembership = 15;
     bool fromHost = 16;
+    bool isTop = 17;
 }
 
 message CommentMessage {

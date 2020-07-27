@@ -1,5 +1,10 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.auth.sts.AssumeRoleRequest;
+import com.aliyuncs.auth.sts.AssumeRoleResponse;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.http.MethodType;
 import com.keepreal.madagascar.baobob.JWTISOLoginPayload;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.OAuthWechatLoginPayload;
@@ -12,6 +17,7 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
+import com.keepreal.madagascar.lemur.config.OssClientConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.LoginService;
 import com.keepreal.madagascar.lemur.service.UserService;
@@ -21,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.LoginApi;
 import swagger.model.BriefTokenInfo;
@@ -28,12 +35,15 @@ import swagger.model.DeviceTokenRequest;
 import swagger.model.DummyResponse;
 import swagger.model.LoginResponse;
 import swagger.model.LoginTokenInfo;
+import swagger.model.OssTokenDTO;
+import swagger.model.OssTokenResponse;
 import swagger.model.PostLoginRequest;
 import swagger.model.PostRefreshTokenRequest;
 import swagger.model.RefreshTokenResponse;
 import swagger.model.UserResponse;
 
 import javax.validation.Valid;
+import java.time.ZonedDateTime;
 
 /**
  * Represents the login controllers.
@@ -45,20 +55,28 @@ public class LoginController implements LoginApi {
     private final LoginService loginService;
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final OssClientConfiguration ossClientConfiguration;
+    private final DefaultAcsClient acsClient;
 
     /**
      * Constructs the login controller.
      *
-     * @param loginService   {@link LoginService}.
-     * @param userService    {@link UserService}.
-     * @param userDTOFactory {@link UserDTOFactory}.
+     * @param loginService           {@link LoginService}.
+     * @param userService            {@link UserService}.
+     * @param userDTOFactory         {@link UserDTOFactory}.
+     * @param ossClientConfiguration {@link OssClientConfiguration}.
+     * @param acsClient              {@link DefaultAcsClient}.
      */
     public LoginController(LoginService loginService,
                            UserService userService,
-                           UserDTOFactory userDTOFactory) {
+                           UserDTOFactory userDTOFactory,
+                           OssClientConfiguration ossClientConfiguration,
+                           DefaultAcsClient acsClient) {
         this.loginService = loginService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.ossClientConfiguration = ossClientConfiguration;
+        this.acsClient = acsClient;
     }
 
     /**
@@ -74,6 +92,7 @@ public class LoginController implements LoginApi {
             label = "user id",
             value = "body.data.user.id"
     )
+    @CrossOrigin
     public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest body) {
         LoginRequest loginRequest;
         switch (body.getLoginType()) {
@@ -86,6 +105,17 @@ public class LoginController implements LoginApi {
                         .setOauthWechatPayload(OAuthWechatLoginPayload.newBuilder()
                                 .setCode(body.getData().getCode()))
                         .setLoginType(LoginType.LOGIN_OAUTH_WECHAT)
+                        .build();
+                break;
+            case OAUTH_MP_WECHAT:
+                if (StringUtils.isEmpty(body.getData().getCode())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
+                loginRequest = LoginRequest.newBuilder()
+                        .setOauthWechatPayload(OAuthWechatLoginPayload.newBuilder()
+                                .setCode(body.getData().getCode()))
+                        .setLoginType(LoginType.LOGIN_OAUTH_MP_WECHAT)
                         .build();
                 break;
             case PASSWORD:
@@ -184,6 +214,51 @@ public class LoginController implements LoginApi {
     }
 
     /**
+     * Implements the oss token get api.
+     *
+     * @return {@link OssTokenResponse}.
+     */
+    @Override
+    public ResponseEntity<OssTokenResponse> apiV1OssTokenGet() {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        final AssumeRoleRequest request = new AssumeRoleRequest();
+        request.setSysEndpoint(this.ossClientConfiguration.getStsEndpoint());
+        request.setSysMethod(MethodType.POST);
+        request.setRoleArn(this.ossClientConfiguration.getRoleArn());
+        request.setRoleSessionName(userId);
+        request.setDurationSeconds(3600L);
+        try {
+            AssumeRoleResponse roleResponse = this.acsClient.getAcsResponse(request);
+
+            OssTokenResponse response = new OssTokenResponse();
+            response.setData(this.buildOssTokenDTO(roleResponse));
+            response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+            response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (ClientException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+    }
+
+    /**
+     * Builds the {@link OssTokenDTO}.
+     *
+     * @param response {@link AssumeRoleResponse}.
+     * @return {@link OssTokenDTO}.
+     */
+    private OssTokenDTO buildOssTokenDTO(AssumeRoleResponse response) {
+        OssTokenDTO ossTokenDTO = new OssTokenDTO();
+        ossTokenDTO.setAccessKey(response.getCredentials().getAccessKeyId());
+        ossTokenDTO.setAccessSecret(response.getCredentials().getAccessKeySecret());
+        ossTokenDTO.setSecurityToken(response.getCredentials().getSecurityToken());
+        ZonedDateTime datetime = ZonedDateTime.parse(response.getCredentials().getExpiration());
+        ossTokenDTO.setExpiration(datetime.toInstant().getEpochSecond());
+
+        return ossTokenDTO;
+    }
+
+    /**
      * Builds the {@link LoginTokenInfo} from a {@link com.keepreal.madagascar.baobob.LoginResponse}.
      *
      * @param loginResponse {@link com.keepreal.madagascar.baobob.LoginResponse}.
@@ -196,6 +271,7 @@ public class LoginController implements LoginApi {
         loginTokenInfo.setToken(loginResponse.getToken());
         loginTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
         loginTokenInfo.setUser(this.userDTOFactory.valueOf(userMessage));
+        loginTokenInfo.setOpenId(loginResponse.getOpenId());
         return loginTokenInfo;
     }
 

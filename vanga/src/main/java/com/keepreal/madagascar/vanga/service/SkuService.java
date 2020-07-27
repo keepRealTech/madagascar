@@ -48,10 +48,11 @@ public class SkuService {
     /**
      * Retrieves all active shell skus.
      *
+     * @param isWechatPay Whether is wechat pay.
      * @return {@link ShellSku}.
      */
-    public List<ShellSku> retrieveShellSkusByActiveIsTrue() {
-        return this.shellSkuRepository.findAllByActiveIsTrueAndDeletedIsFalse();
+    public List<ShellSku> retrieveShellSkusByActiveIsTrue(Boolean isWechatPay) {
+        return this.shellSkuRepository.findAllByActiveIsTrueAndIsWechatPayAndDeletedIsFalseOrderByShellsAsc(isWechatPay);
     }
 
     /**
@@ -158,6 +159,16 @@ public class SkuService {
      */
     public MembershipSku retrieveMembershipSkuById(String membershipSkuId) {
         return this.membershipSkuRepository.findById(membershipSkuId).orElse(null);
+    }
+
+    /**
+     * Retrieves the membership skus by ids including deleted ones.
+     *
+     * @param ids Ids.
+     * @return {@link MembershipSku}.
+     */
+    public List<MembershipSku> retrieveMembershipSkusByIds(Iterable<String> ids) {
+        return this.membershipSkuRepository.findAllById(ids);
     }
 
     /**

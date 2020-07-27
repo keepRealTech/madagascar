@@ -13,11 +13,13 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Represents the feed service
@@ -119,9 +121,13 @@ public class FeedInfoService {
     public TimelineFeedMessage getTimelineFeedMessage(FeedInfo feedInfo) {
         if (feedInfo == null)
             return null;
+        String duplicateTag = StringUtils.isEmpty(feedInfo.getDuplicateTag()) ?
+                UUID.randomUUID().toString() :
+                feedInfo.getDuplicateTag();
         return TimelineFeedMessage.newBuilder().setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
-                .setCreatedAt(feedInfo.getCreatedTime()).build();
+                .setCreatedAt(feedInfo.getCreatedTime())
+                .setDuplicateTag(duplicateTag).build();
     }
 
     /**
@@ -150,7 +156,8 @@ public class FeedInfoService {
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
                 .setIsDeleted(feedInfo.getDeleted())
-                .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost());
+                .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost())
+                .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
@@ -225,4 +232,48 @@ public class FeedInfoService {
         return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
     }
 
+    /**
+     * top feed by feed id
+     *
+     * @param feedId feed id
+     */
+    public void topFeedById(String feedId) {
+        mongoTemplate.updateFirst(
+                Query.query(Criteria.where("id").is(feedId)),
+                Update.update("isTop", true).set("toppedTime", System.currentTimeMillis()),
+                FeedInfo.class);
+    }
+
+    /**
+     * cancel topped feed by feed id
+     *
+     * @param feedId feed id
+     */
+    public void cancelToppedFeedById(String feedId) {
+        mongoTemplate.updateFirst(
+                Query.query(Criteria.where("id").is(feedId)),
+                Update.update("isTop", false),
+                FeedInfo.class);
+    }
+
+    /**
+     * find this island topped feed and cancel it
+     *
+     * @param islandId island id
+     */
+    public void cancelToppedFeedByIslandId(String islandId) {
+        FeedInfo feedInfo = findToppedFeedByIslandId(islandId);
+        if (Objects.nonNull(feedInfo)){
+            cancelToppedFeedById(feedInfo.getId());
+        }
+    }
+
+    /**
+     * find topped feed (only one in this version (v1.2))
+     *
+     * @return feed information
+     */
+    public FeedInfo findToppedFeedByIslandId(String islandId) {
+        return this.feedInfoRepository.findTopByIslandIdAndIsTopIsTrueAndDeletedIsFalse(islandId);
+    }
 }

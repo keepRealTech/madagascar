@@ -5,7 +5,11 @@ import com.aliyun.openservices.ons.api.ConsumeContext;
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.MessageListener;
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.keepreal.madagascar.marty.service.UmengPushService;
+
+import com.keepreal.madagascar.common.PushPriority;
+import com.keepreal.madagascar.marty.model.PushType;
+import com.keepreal.madagascar.marty.service.PushService;
+import com.keepreal.madagascar.marty.service.RedissonService;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +24,13 @@ import java.util.Objects;
 @Slf4j
 public class NotificationEventListener implements MessageListener {
 
-    private final UmengPushService umengPushService;
+    private final PushService pushService;
+    private final RedissonService redissonService;
 
-    public NotificationEventListener(UmengPushService umengPushService) {
-        this.umengPushService = umengPushService;
+    public NotificationEventListener(PushService pushService,
+                                     RedissonService redissonService) {
+        this.pushService = pushService;
+        this.redissonService = redissonService;
     }
 
     /**
@@ -43,22 +50,30 @@ public class NotificationEventListener implements MessageListener {
             NotificationEvent notificationEvent = NotificationEvent.parseFrom(message.getBody());
             if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_COMMENT)) {
                 String userId = notificationEvent.getUserId();
-                umengPushService.pushComment(userId);
+                pushService.pushMessageByType(userId, PushType.PUSH_COMMENT);
+                if (!userId.equals(notificationEvent.getCommentEvent().getComment().getUserId())) {
+                    this.redissonService.putPushInfo(userId, PushPriority.NEW_COMMENT, notificationEvent.getCommentEvent().getComment().getUserId());
+                }
             }
 
             if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_REACTION)) {
                 String userId = notificationEvent.getUserId();
-                umengPushService.pushReaction(userId);
+                pushService.pushMessageByType(userId, PushType.PUSH_REACTION);
+                if (!userId.equals(notificationEvent.getReactionEvent().getReaction().getUserId())) {
+                    this.redissonService.putPushInfo(userId, PushPriority.NEW_LIKE, notificationEvent.getReactionEvent().getReaction().getUserId());
+                }
             }
 
             if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_SUBSCRIBE)) {
                 String userId = notificationEvent.getUserId();
-                umengPushService.pushSubscribe(userId);
+                pushService.pushMessageByType(userId, PushType.PUSH_SUBSCRIBE);
+                this.redissonService.putPushInfo(userId, PushPriority.NEW_SUBSCRIBE, notificationEvent.getSubscribeEvent().getSubscriberId());
             }
 
             if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_MEMBER)) {
                 String userId = notificationEvent.getUserId();
-                umengPushService.pushMember(userId);
+                pushService.pushMessageByType(userId, PushType.PUSH_MEMBER);
+                this.redissonService.putPushInfo(userId, PushPriority.NEW_MEMBERSHIP, notificationEvent.getMemberEvent().getMemberId());
             }
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {

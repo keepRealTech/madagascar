@@ -14,6 +14,8 @@ message BillingInfoMessage {
   string idNumber = 5;
   string accountNumber = 6;
   bool isVerified = 7;
+  string idFrontUrl = 8;
+  string idBackUrl = 9;
 }
 
 message RetrieveBillingInfoByUserIdRequest {
@@ -31,6 +33,8 @@ message UpdateBillingInfoByUserIdRequest {
   google.protobuf.StringValue mobile = 3;
   google.protobuf.StringValue idNumber = 4;
   google.protobuf.StringValue accountNumber = 5;
+  google.protobuf.StringValue idFrontUrl = 6;
+  google.protobuf.StringValue idBackUrl = 7;
 }
 
 service BillingInfoService {

@@ -45,7 +45,6 @@ public class UmengPushClient {
             String sign = "?sign="+generatorSign(pushMessage);
             restTemplate.postForObject(url + sign, pushMessage, JSONObject.class);
         } catch (RestClientException e) {
-            e.printStackTrace();
             log.error("exception: {}", e);
         }
     }

@@ -32,6 +32,7 @@ public class FeedInfo {
     private Boolean fromHost;
     private List<String> imageUrls;
     private List<String> membershipIds;
+    private String duplicateTag;
     @Builder.Default
     private Integer likesCount = 0;
     @Builder.Default
@@ -41,6 +42,8 @@ public class FeedInfo {
     private Integer state;
     @Builder.Default
     private Boolean deleted = false;
+    @Builder.Default
+    private Boolean isTop = false;
     @CreatedDate
     private Long createdTime;
     @CreatedDate

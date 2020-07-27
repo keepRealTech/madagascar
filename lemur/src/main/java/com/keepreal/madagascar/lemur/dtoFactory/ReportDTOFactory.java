@@ -38,6 +38,10 @@ public class ReportDTOFactory {
             reportDTO.setIslandId(report.getIslandId().getValue());
         }
 
+        if (report.hasMessageId()) {
+            reportDTO.setMessageId(report.getMessageId().getValue());
+        }
+
         return reportDTO;
     }
 

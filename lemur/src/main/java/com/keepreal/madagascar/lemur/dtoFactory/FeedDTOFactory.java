@@ -101,6 +101,8 @@ public class FeedDTOFactory {
             feedDTO.setIsLiked(feed.getIsLiked());
             feedDTO.setIsAccess(feed.getIsAccess());
             feedDTO.setIsMembership(feed.getIsMembership());
+            feedDTO.setIsTop(feed.getIsTop());
+
             if (feed.getIsMembership()) {
                 MembershipMessage membershipMessage = this.membershipService.retrieveMembershipById(feed.getMembershipId());
                 feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessage));

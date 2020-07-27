@@ -53,7 +53,8 @@ public class BillingInfoService {
      * @return {@link BillingInfo}.
      */
     @Transactional
-    public BillingInfo updateBillingInfoByUserId(String userId, String name, String mobile, String accountNumber, String idNumber) {
+    public BillingInfo updateBillingInfoByUserId(String userId, String name, String mobile, String accountNumber,
+                                                 String idNumber, String idFrontUrl, String idBackUrl) {
         BillingInfo billingInfo = this.retrieveOrCreateBillingInfoIfNotExistsByUserId(userId);
 
         if (!StringUtils.isEmpty(name)) {
@@ -72,10 +73,20 @@ public class BillingInfoService {
             billingInfo.setIdNumber(idNumber);
         }
 
+        if (!StringUtils.isEmpty(idFrontUrl)) {
+            billingInfo.setIdFrontUrl(idFrontUrl);
+        }
+
+        if (!StringUtils.isEmpty(idBackUrl)) {
+            billingInfo.setIdBackUrl(idBackUrl);
+        }
+
         billingInfo.setVerified(!StringUtils.isEmpty(name)
                 && !StringUtils.isEmpty(mobile)
                 && !StringUtils.isEmpty(accountNumber)
-                && !StringUtils.isEmpty(idNumber));
+                && !StringUtils.isEmpty(idNumber)
+                && !StringUtils.isEmpty(idFrontUrl)
+                && !StringUtils.isEmpty(idBackUrl));
 
         return this.billingInfoRepository.save(billingInfo);
     }

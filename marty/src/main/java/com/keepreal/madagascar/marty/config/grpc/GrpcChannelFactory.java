@@ -20,6 +20,7 @@ public class GrpcChannelFactory {
 
     private final GrpcConfiguration couaConfiguration;
     private final GrpcConfiguration fossaConfiguration;
+    private final GrpcConfiguration asityConfiguration;
     private final Tracer tracer;
 
     /**
@@ -27,13 +28,16 @@ public class GrpcChannelFactory {
      *
      * @param couaConfiguration  Coua grpc configuration.
      * @param fossaConfiguration Fossa grpc configuration.
+     * @param asityConfiguration Asity grpc configuration.
      * @param tracer             {@link Tracer}.
      */
     public GrpcChannelFactory(@Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration,
                               @Qualifier("fossaConfiguration") GrpcConfiguration fossaConfiguration,
+                              @Qualifier("asityConfiguration") GrpcConfiguration asityConfiguration,
                               Tracer tracer) {
         this.couaConfiguration = couaConfiguration;
         this.fossaConfiguration = fossaConfiguration;
+        this.asityConfiguration = asityConfiguration;
         this.tracer = tracer;
     }
 
@@ -67,6 +71,23 @@ public class GrpcChannelFactory {
                 .build()
                 .intercept(ManagedChannelBuilder
                         .forAddress(this.fossaConfiguration.getHost(), this.fossaConfiguration.getPort())
+                        .usePlaintext()
+                        .build());
+    }
+
+    /**
+     * Represents the asity grpc channel.
+     *
+     * @return Asity grpc channel.
+     */
+    @Bean(name = "asityChannel")
+    public Channel getAsityChannel() {
+        return TracingClientInterceptor
+                .newBuilder()
+                .withTracer(this.tracer)
+                .build()
+                .intercept(ManagedChannelBuilder
+                        .forAddress(this.asityConfiguration.getHost(), this.asityConfiguration.getPort())
                         .usePlaintext()
                         .build());
     }

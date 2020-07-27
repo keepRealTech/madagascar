@@ -9,10 +9,12 @@ import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.WechatOrderMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.OrderApi;
 import swagger.model.BalanceResponse;
 import swagger.model.PostIOSOrderRequest;
+import swagger.model.PostWechatOrderRequest;
 import swagger.model.WechatOrderResponse;
 
 /**
@@ -60,11 +62,32 @@ public class OrderController implements OrderApi {
     }
 
     /**
+     * Implements the ios shell order post api.
+     *
+     * @param postWechatOrderRequest (required) {@link PostWechatOrderRequest}.
+     * @return {@link WechatOrderResponse}.
+     */
+    @CrossOrigin
+    @Override
+    public ResponseEntity<WechatOrderResponse> apiV1OrdersWechatPost(PostWechatOrderRequest postWechatOrderRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        WechatOrderMessage wechatOrderMessage = this.orderService.wechatBuyShell(userId,
+                postWechatOrderRequest.getOpenId(), postWechatOrderRequest.getShellSkuId());
+
+        WechatOrderResponse response = new WechatOrderResponse();
+        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Implements the wechat order check by order id api.
      *
      * @param id id (required) Order id.
      * @return {@link WechatOrderResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<WechatOrderResponse> apiV1OrdersWechatIdCheckPost(String id) {
         WechatOrderMessage wechatOrderMessage = this.orderService.retrieveWechatOrderById(id);

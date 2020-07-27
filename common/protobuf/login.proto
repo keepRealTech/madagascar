@@ -4,7 +4,6 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.baobob";
 
 import "common.proto";
-import "google/protobuf/wrappers.proto";
 
 message OAuthWechatLoginPayload {
     string code = 1;
@@ -34,6 +33,7 @@ message LoginResponse {
     string token = 2;
     string refreshToken = 3;
     string userId = 4;
+    string openId = 5;
 }
 
 message TokenRefreshPayload {

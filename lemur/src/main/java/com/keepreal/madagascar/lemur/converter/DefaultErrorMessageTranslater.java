@@ -46,8 +46,14 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "已经有用户订阅的会员不能删除哦";
             case REQUEST_USER_SHELL_INSUFFICIENT_ERROR:
                 return "当前贝壳余额不足，请充值后再试";
+            case REQUEST_CHATGROUP_MAX_MEMBER_REACHED_ERROR:
+                return "群内人数已达上限，太拥挤啦，去别的群看看吧";
             case REQUEST_LOW_VERSION_ERROR:
                 return "岛民你好，我们发布了重大更新，请去App Store下载最新版本";
+            case REQUEST_CHATGROUP_NOT_FOUND_ERROR:
+                return "该群已被群主解散了";
+            case REQUEST_ISLAND_CHATGROUP_LIMIT_ERROR:
+                return "你都创建100个群了！你克制点！";
             default:
                 return errorCode.getValueDescriptor().getName();
         }

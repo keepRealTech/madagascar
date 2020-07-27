@@ -7,6 +7,7 @@ import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
+import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
 import com.keepreal.madagascar.vanga.WechatOrderMessage;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
@@ -119,6 +120,43 @@ public class OrderService {
         }
 
         return response.getBalance();
+    }
+
+    /**
+     * Buys shell with wechat.
+     *
+     * @param userId     User id.
+     * @param openId     Open id.
+     * @param shellSkuId Shell sku id.
+     * @return {@link WechatOrderMessage}.
+     */
+    public WechatOrderMessage wechatBuyShell(String userId, String openId, String shellSkuId) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        WechatOrderBuyShellRequest request = WechatOrderBuyShellRequest.newBuilder()
+                .setUserId(userId)
+                .setOpenId(openId)
+                .setShellSkuId(shellSkuId)
+                .build();
+
+        WechatOrderResponse response;
+        try {
+            response = stub.wechatBuyShell(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Buy wechat shell returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getWechatOrder();
     }
 
 }

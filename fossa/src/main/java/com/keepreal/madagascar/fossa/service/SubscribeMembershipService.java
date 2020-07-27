@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.fossa.service;
 
+import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.RetrieveMembershipIdsRequest;
@@ -35,7 +36,7 @@ public class SubscribeMembershipService {
 
         RetrieveMembershipIdsRequest request = RetrieveMembershipIdsRequest.newBuilder()
                 .setUserId(userId)
-                .setIslandId(islandId)
+                .setIslandId(StringValue.of(islandId))
                 .build();
 
         RetrieveMembershipIdsResponse response;

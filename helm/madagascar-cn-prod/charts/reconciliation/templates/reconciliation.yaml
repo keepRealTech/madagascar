@@ -4,7 +4,7 @@ metadata:
   name: reconciliation
   namespace: {{ .Values.global.common_configs.namespace }}
 spec:
-  schedule: "0 1 */1 * *"
+  schedule: "30 10 */1 * *"
   jobTemplate:
     metadata:
       annotations:

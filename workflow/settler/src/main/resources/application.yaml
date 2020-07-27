@@ -19,3 +19,6 @@ spring:
 
 executor:
   threads: 20
+
+workflow:
+  type: settler-daily

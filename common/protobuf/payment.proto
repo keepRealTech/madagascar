@@ -5,6 +5,7 @@ option java_package = "com.keepreal.madagascar.vanga";
 
 import "common.proto";
 import "balance.proto";
+import "sku.proto";
 
 message CreateWithdrawRequest {
   string userId = 1;
@@ -61,6 +62,32 @@ message IOSOrderBuyShellRequest {
   string appleReceipt = 3;
 }
 
+message WechatOrderBuyShellRequest {
+  string userId = 1;
+  string shellSkuId = 2;
+  string openId = 3;
+}
+
+message UserPaymentMessage {
+  string id = 1;
+  string userId = 2;
+  string payeeId = 3;
+  string islandId = 4;
+  MembershipSkuMessage membershipSku = 5;
+  uint64 expiresAt = 6;
+}
+
+message UserPaymentsResponse {
+  CommonStatus status = 1;
+  repeated UserPaymentMessage userPayments = 2;
+  PageResponse pageResponse = 3;
+}
+
+message RetrieveUserPaymentsRequest {
+  string userId = 1;
+  PageRequest pageRequest = 2;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
@@ -68,4 +95,6 @@ service PaymentService {
   rpc RetrieveWechatOrderById (RetrieveWechatOrderByIdRequest) returns (WechatOrderResponse) {};
   rpc WechatPayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
   rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};
+  rpc WechatBuyShell (WechatOrderBuyShellRequest) returns (WechatOrderResponse) {};
+  rpc RetrieveUserPayments (RetrieveUserPaymentsRequest) returns (UserPaymentsResponse) {};
 }

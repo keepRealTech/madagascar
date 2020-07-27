@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: asity
+  namespace: {{ .Values.global.common_configs.namespace }}
+data:
+  aliyun_logs_madagascar-prod: stdout
+  OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
+  OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
+  ROCKETMQ_NOTIFICATION_TOPIC: {{ .Values.rocketmq.notification.topic }}
+  ROCKETMQ_NOTIFICATION_GROUPID: {{ .Values.rocketmq.notification.group_id }}
+  ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
+  ROCKETMQ_CHAT_TOPIC: {{ .Values.rocketmq.chat.topic }}
+  ROCKETMQ_CHAT_TAG: {{ .Values.rocketmq.chat.tag }}

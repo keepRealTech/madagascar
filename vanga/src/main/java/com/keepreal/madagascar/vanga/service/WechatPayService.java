@@ -7,6 +7,7 @@ import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -26,7 +27,14 @@ public class WechatPayService {
     private final WechatPayConfiguration wechatPayConfiguration;
     private final WechatOrderService wechatOrderService;
 
-    public WechatPayService(WXPay client,
+    /**
+     * Constructs the wechat pay service.
+     *
+     * @param client                 {@link WXPay}.
+     * @param wechatPayConfiguration {@link WechatPayConfiguration}.
+     * @param wechatOrderService     {@link WechatOrderService}.
+     */
+    public WechatPayService(@Qualifier("wechatpay") WXPay client,
                             WechatPayConfiguration wechatPayConfiguration,
                             WechatOrderService wechatOrderService) {
         this.client = client;
@@ -42,13 +50,18 @@ public class WechatPayService {
      * @param membershipSkuId Membership sku id.
      * @return {@link WechatOrder}.
      */
-    public WechatOrder tryPlaceOrder(String userId, String feeInCents, String membershipSkuId) {
+    public WechatOrder tryPlaceOrder(String userId,
+                                     String feeInCents,
+                                     String membershipSkuId) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
+
         String description = String.format("购买会员%s", membershipSkuId);
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
                 .userId(userId)
+                .appId(this.wechatPayConfiguration.getAppId())
+                .mchId(this.wechatPayConfiguration.getMchId())
                 .tradeNumber(tradeNum)
                 .memberShipSkuId(membershipSkuId)
                 .description(description)
@@ -64,7 +77,11 @@ public class WechatPayService {
             requestBody.put("body", description);
             requestBody.put("spbill_create_ip", this.wechatPayConfiguration.getHostIp());
 
+            log.info(requestBody.toString());
+
             response = this.client.unifiedOrder(requestBody);
+
+            log.info(response.toString());
 
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
@@ -77,7 +94,6 @@ public class WechatPayService {
                 this.wechatOrderService.insert(wechatOrder);
                 return null;
             }
-
 
             Map<String, String> request = new HashMap<>();
             request.put("noncestr", response.get("nonce_str"));

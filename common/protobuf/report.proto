@@ -13,6 +13,7 @@ message ReportMessage {
     string reporterId = 4;
     google.protobuf.StringValue islandId = 5;
     google.protobuf.StringValue userId = 6;
+    google.protobuf.StringValue messageId = 7;
 }
 
 message NewReportRequest {
@@ -21,6 +22,7 @@ message NewReportRequest {
     string reporterId = 3;
     google.protobuf.StringValue islandId = 4;
     google.protobuf.StringValue userId = 5;
+    google.protobuf.StringValue messageId = 6;
 }
 
 message ReportResponse {

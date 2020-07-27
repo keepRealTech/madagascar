@@ -5,6 +5,7 @@ import com.keepreal.madagascar.mantella.model.Timeline;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Represents the timeline factory.
@@ -25,11 +26,18 @@ public class TimelineFactory {
             return null;
         }
 
+        // feed去重逻辑 根据duplicateTag分组只取一条 但是发送feed本人要都显示
+        String duplicateTag = feedCreateEvent.getDuplicateTag();
+        if (userId.equals(feedCreateEvent.getAuthorId())) {
+            duplicateTag = UUID.randomUUID().toString();
+        }
+
         return Timeline.builder()
                 .feedId(feedCreateEvent.getFeedId())
                 .islandId(feedCreateEvent.getIslandId())
                 .feedCreatedAt(feedCreateEvent.getCreatedAt())
                 .userId(userId)
+                .duplicateTag(duplicateTag)
                 .eventId(eventId)
                 .build();
     }
@@ -44,13 +52,14 @@ public class TimelineFactory {
      * @param eventId       Event id.
      * @return {@link Timeline}.
      */
-    public Timeline valueOf(String feedId, String islandId, String userId, Long feedCreatedAt, String eventId) {
+    public Timeline valueOf(String feedId, String islandId, String userId, Long feedCreatedAt, String eventId, String duplicateTag) {
         return Timeline.builder()
                 .feedId(feedId)
                 .islandId(islandId)
                 .feedCreatedAt(feedCreatedAt)
                 .userId(userId)
                 .eventId(eventId)
+                .duplicateTag(duplicateTag)
                 .build();
     }
 

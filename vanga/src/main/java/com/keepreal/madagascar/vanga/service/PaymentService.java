@@ -11,13 +11,19 @@ import com.keepreal.madagascar.vanga.model.PaymentType;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.repository.PaymentRepository;
+import com.keepreal.madagascar.vanga.util.PaginationUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -101,6 +107,7 @@ public class PaymentService {
                                 .payeeId(sku.getHostId())
                                 .orderId(wechatOrder.getId())
                                 .tradeNum(wechatOrder.getTradeNumber())
+                                .membershipSkuId(wechatOrder.getMemberShipSkuId())
                                 .build())
                         .collect(Collectors.toList());
 
@@ -131,6 +138,8 @@ public class PaymentService {
                                 .validAfter(currentExpireTime
                                         .plusMonths((i + 1) * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
                                         .toInstant().toEpochMilli())
+                                .membershipSkuId(sku.getId())
+                                .tradeNum(UUID.randomUUID().toString().replace("-", ""))
                                 .build())
                         .collect(Collectors.toList());
 
@@ -146,7 +155,7 @@ public class PaymentService {
      * @return {@link Payment}.
      */
     @Transactional
-    public Payment createBuyShellPayments(String userId, ShellSku sku, String transactionId) {
+    public Payment createIOSBuyShellPayments(String userId, ShellSku sku, String transactionId) {
         Payment payment = this.paymentRepository.findTopByTradeNumAndTypeAndDeletedIsFalse(transactionId, PaymentType.SHELLBUY.getValue());
 
         if (Objects.nonNull(payment)) {
@@ -161,6 +170,35 @@ public class PaymentService {
                 .userId(userId)
                 .state(PaymentState.CLOSED.getValue())
                 .tradeNum(transactionId)
+                .build();
+        return this.paymentRepository.save(payment);
+    }
+
+    /**
+     * Creates new buy shell payments.
+     *
+     * @param wechatOrder   {@link WechatOrder}.
+     * @param sku           {@link ShellSku}.
+     * @return {@link Payment}.
+     */
+    @Transactional
+    public Payment createWechatBuyShellPayments(WechatOrder wechatOrder, ShellSku sku) {
+        Payment payment = this.paymentRepository.findTopByTradeNumAndTypeAndDeletedIsFalse(wechatOrder.getTradeNumber(),
+                PaymentType.SHELLBUY.getValue());
+
+        if (Objects.nonNull(payment)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_SHELL_IOS_RECEIPT_DUPLICATE_ERROR);
+        }
+
+        payment = Payment.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .type(PaymentType.SHELLBUY.getValue())
+                .amountInShells(sku.getShells())
+                .amountInCents(sku.getPriceInCents())
+                .userId(wechatOrder.getUserId())
+                .state(PaymentState.DRAFTED.getValue())
+                .tradeNum(wechatOrder.getTradeNumber())
+                .orderId(wechatOrder.getId())
                 .build();
         return this.paymentRepository.save(payment);
     }
@@ -184,6 +222,17 @@ public class PaymentService {
     @Transactional
     public void updateAll(Iterable<Payment> payments) {
         this.paymentRepository.saveAll(payments);
+    }
+
+    /**
+     * Retrieves valid user payments.
+     *
+     * @param userId    User id.
+     * @param pageable  {@link Pageable}.
+     * @return {@link Payment}.
+     */
+    public Page<Payment> retrievePaymentsByUserId(String userId, Pageable pageable) {
+        return this.paymentRepository.findAllValidPaymentsByUserId(userId, pageable);
     }
 
 }

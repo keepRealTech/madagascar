@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 import com.keepreal.madagascar.coua.FeedMembershipMessage;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import swagger.model.BriefMembershipDTO;
 import swagger.model.FeedMembershipDTO;
@@ -10,6 +11,7 @@ import swagger.model.MembershipDTO;
 import swagger.model.SimpleMembershipDTO;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Represents the membership dto factory.
@@ -19,6 +21,10 @@ import java.util.Arrays;
 public class MembershipDTOFactory {
 
     public SimpleMembershipDTO simpleValueOf(MembershipMessage membershipMessage) {
+        if (Objects.isNull(membershipMessage)) {
+            return null;
+        }
+
         SimpleMembershipDTO dto = new SimpleMembershipDTO();
         dto.id(membershipMessage.getId());
         dto.setMembershipName(membershipMessage.getName());

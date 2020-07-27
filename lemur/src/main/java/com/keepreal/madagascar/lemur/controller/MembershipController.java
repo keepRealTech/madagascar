@@ -51,7 +51,7 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<FeedMembershipsResponse> apiV1IslandsIdFeedMembershipsGet(String id) {
-        List<FeedMembershipMessage> feedMembershipMessages = membershipService.RetrieveFeedMembershipsByIslandId(id);
+        List<FeedMembershipMessage> feedMembershipMessages = membershipService.retrieveFeedMembershipsByIslandId(id);
 
         FeedMembershipsResponse response = new FeedMembershipsResponse();
         response.data(feedMembershipMessages.stream().map(membershipDTOFactory::feedValueOf).collect(Collectors.toList()));
@@ -68,7 +68,7 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<MembershipsResponse> apiV1IslandsIdMembershipsGet(String id) {
-        List<MembershipMessage> membershipMessages = membershipService.RetrieveMembershipsByIslandId(id);
+        List<MembershipMessage> membershipMessages = membershipService.retrieveMembershipsByIslandId(id);
 
         MembershipsResponse response = new MembershipsResponse();
         response.data(membershipMessages.stream().map(membershipDTOFactory::valueOf).collect(Collectors.toList()));
