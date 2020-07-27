@@ -10,7 +10,7 @@ common_configs:
 rocketmq:
   notification:
     topic: notification-event
-    group_id: GID-asity-default
+    group_id: GID-asity-notification-default
     tag: event
   chat:
     topic: chat-event
