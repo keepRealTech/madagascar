@@ -744,6 +744,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UploadUrlListResponse'
+  /api/v1/upload/refreshVideo:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/videoIdInQuery'
+      tags:
+        - Upload
+      summary: refresh by videoId
+      response:
+        '200':
+          description: refresh
+          content:
+            application/json:
+              schema:
+                $ref: ''
   /api/v2/upload/mediaUrls:
     post:
       requestBody:
@@ -1533,6 +1547,12 @@ components:
     refererIdInQuery:
       in: query
       name: refererId
+      required: true
+      schema:
+        type: string
+    videoIdInQuery:
+      in: query
+      name: vedioId
       required: true
       schema:
         type: string

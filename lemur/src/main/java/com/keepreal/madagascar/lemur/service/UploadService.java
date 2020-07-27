@@ -7,6 +7,8 @@ import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.vod.model.v20170321.CreateUploadVideoRequest;
 import com.aliyuncs.vod.model.v20170321.CreateUploadVideoResponse;
+import com.aliyuncs.vod.model.v20170321.RefreshUploadVideoRequest;
+import com.aliyuncs.vod.model.v20170321.RefreshUploadVideoResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.OssClientConfiguration;
@@ -61,6 +63,13 @@ public class UploadService {
         return ossClient.generatePresignedUrl(request).toString();
     }
 
+    /**
+     * retrieve videoId, uploadAddress, uploadAuth
+     *
+     * @param title    title.
+     * @param filename filename.
+     * @return {@link UploadMediaDTO}.
+     */
     public UploadMediaDTO createUploadVideo(String title, String filename) {
         try {
             CreateUploadVideoRequest request = new CreateUploadVideoRequest();
@@ -72,6 +81,31 @@ public class UploadService {
             dto.setVedioId(acsResponse.getVideoId());
             dto.setUploadAddress(acsResponse.getUploadAddress());
             dto.setUploadAuth(acsResponse.getUploadAuth());
+
+            return dto;
+        } catch (ClientException e) {
+            log.error(e.getLocalizedMessage());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+    }
+
+    /**
+     * refresh uploadAddress, uploadAuth by videoId.
+     *
+     * @param videoId   videoId.
+     * @return {@link UploadMediaDTO}.
+     */
+    public UploadMediaDTO refreshUploadVideo(String videoId) {
+        try {
+            RefreshUploadVideoRequest request = new RefreshUploadVideoRequest();
+            request.setVideoId("VideoId");
+
+            RefreshUploadVideoResponse response = client.getAcsResponse(request);
+
+            UploadMediaDTO dto = new UploadMediaDTO();
+            dto.setVedioId(videoId);
+            dto.setUploadAddress(response.getUploadAddress());
+            dto.setUploadAuth(response.getUploadAuth());
 
             return dto;
         } catch (ClientException e) {
