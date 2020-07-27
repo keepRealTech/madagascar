@@ -44,11 +44,14 @@ public class DefaultContentFilter implements TextContentFilter {
      */
     @Override
     public boolean isDisallowed(String content) {
+        if (content == null) {
+            return false;
+        }
         content = content.replace((char) 12288, ' ');
         content = content.trim();
 
         if (StringUtils.isEmpty(content)) {
-            return false;
+            return true;
         }
 
         content = content.toUpperCase();

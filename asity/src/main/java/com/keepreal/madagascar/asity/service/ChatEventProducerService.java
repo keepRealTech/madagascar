@@ -2,6 +2,8 @@ package com.keepreal.madagascar.asity.service;
 
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
+import com.keepreal.madagascar.asity.ChatEvent;
+import com.keepreal.madagascar.asity.ChatEventType;
 import com.keepreal.madagascar.asity.UpdateBulletinEvent;
 import com.keepreal.madagascar.asity.config.ChatEventProducerConfiguration;
 import lombok.extern.slf4j.Slf4j;
@@ -52,8 +54,15 @@ public class ChatEventProducerService {
                 .setBulletin(bulletin)
                 .build();
 
+        ChatEvent chatEvent = ChatEvent.newBuilder()
+                .setType(ChatEventType.CHAT_EVENT_UPDATE_BULLETIN)
+                .setTimestamp(System.currentTimeMillis())
+                .setEventId(uuid)
+                .setUpdateBulletinEvent(event)
+                .build();
+
         return new Message(this.chatEventProducerConfiguration.getTopic(),
-                this.chatEventProducerConfiguration.getTag(), uuid, event.toByteArray());
+                this.chatEventProducerConfiguration.getTag(), uuid, chatEvent.toByteArray());
     }
 
     /**
