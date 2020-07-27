@@ -4,6 +4,7 @@ import com.keepreal.madagascar.asity.model.Chatgroup;
 import com.keepreal.madagascar.asity.model.ChatgroupMember;
 import com.keepreal.madagascar.asity.model.ChatgroupMembership;
 import com.keepreal.madagascar.asity.repository.ChatgroupMemberRepository;
+import com.keepreal.madagascar.asity.repository.ChatgroupMembershipRepository;
 import com.keepreal.madagascar.asity.repository.ChatgroupRepository;
 import com.keepreal.madagascar.asity.util.PaginationUtils;
 import com.keepreal.madagascar.common.PageRequest;
@@ -26,23 +27,26 @@ public class ChatgroupService {
 
     private final ChatgroupRepository chatgroupRepository;
     private final ChatgroupMemberRepository chatgroupMemberRepository;
+    private final ChatgroupMembershipRepository chatgroupMembershipRepository;
     private final RongCloudService rongCloudService;
     private final LongIdGenerator idGenerator;
 
     /**
      * Constructs the chatgroup service.
      *
-     * @param chatgroupRepository       {@link ChatgroupRepository}.
-     * @param chatgroupMemberRepository {@link ChatgroupMemberRepository}.
-     * @param rongCloudService          {@link RongCloudService}.
-     * @param idGenerator               {@link LongIdGenerator}.
+     * @param chatgroupRepository           {@link ChatgroupRepository}.
+     * @param chatgroupMemberRepository     {@link ChatgroupMemberRepository}.
+     * @param chatgroupMembershipRepository {@link ChatgroupMembership}.
+     * @param rongCloudService              {@link RongCloudService}.
+     * @param idGenerator                   {@link LongIdGenerator}.
      */
     public ChatgroupService(ChatgroupRepository chatgroupRepository,
                             ChatgroupMemberRepository chatgroupMemberRepository,
-                            RongCloudService rongCloudService,
+                            ChatgroupMembershipRepository chatgroupMembershipRepository, RongCloudService rongCloudService,
                             LongIdGenerator idGenerator) {
         this.chatgroupRepository = chatgroupRepository;
         this.chatgroupMemberRepository = chatgroupMemberRepository;
+        this.chatgroupMembershipRepository = chatgroupMembershipRepository;
         this.rongCloudService = rongCloudService;
         this.idGenerator = idGenerator;
     }
@@ -300,12 +304,21 @@ public class ChatgroupService {
     /**
      * Retrieves the members for a given chatgroup.
      *
-     * @param groupId   Group id.
-     * @param pageable  {@link Pageable}.
+     * @param groupId  Group id.
+     * @param pageable {@link Pageable}.
      * @return User ids.
      */
     public Page<String> retrieveChatgroupMemberUserIdsByGroupId(String groupId, Pageable pageable) {
         return this.chatgroupMemberRepository.selectUserIdsByGroupIdAndDeletedIsFalse(groupId, pageable);
+    }
+
+    /**
+     * Deletes the chatgroup membership restrict by membership id.
+     *
+     * @param membershipId Membership id.
+     */
+    public void deleteChatgroupMembershipsByMembershipId(String membershipId) {
+        this.chatgroupMembershipRepository.deleteAllByMembershipId(membershipId);
     }
 
 }

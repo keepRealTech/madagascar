@@ -20,6 +20,9 @@ grpc:
   vanga:
     host: 127.0.0.1
     port: 12006
+  asity:
+    host: 127.0.0.1
+    port: 12007
   port: 12002
 
 snowflake:

@@ -4,6 +4,7 @@ import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
+import com.keepreal.madagascar.asity.DeleteChatgroupMembershipByMembershipIdRequest;
 import com.keepreal.madagascar.asity.DismissChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
@@ -47,6 +48,8 @@ import java.util.Set;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the chat grpc service.
@@ -440,6 +443,22 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                 .addAllMemberIds(chatgroupMemberIdsPage.getContent())
                 .setPageResponse(PaginationUtils.valueOf(chatgroupMemberIdsPage, request.getPageRequest()))
                 .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Deletes all chatgroup memberships by membership id.
+     *
+     * @param request {@link DeleteChatgroupMembershipByMembershipIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void deleteChatgroupMembershipByMembershipId(DeleteChatgroupMembershipByMembershipIdRequest request,
+                                                        StreamObserver<CommonStatus> responseObserver) {
+        this.chatgroupService.deleteChatgroupMembershipsByMembershipId(request.getMemberhsipId());
+
+        CommonStatus response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
