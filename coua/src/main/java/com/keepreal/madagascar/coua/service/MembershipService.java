@@ -143,6 +143,7 @@ public class MembershipService {
         membership.setDeleted(true);
         this.skuService.deleteMembershipSkusByMembershipId(membership.getId());
         this.updateMembership(membership);
+        this.chatgroupService.deleteChatgroupMembershipByMembershipId(membership.getId());
     }
 
     /**
@@ -154,7 +155,6 @@ public class MembershipService {
         membership.setActive(false);
         this.skuService.updateMembershipSkusByMembershipId(membership.getId(), null, null, true);
         this.updateMembership(membership);
-        this.chatgroupService.deleteChatgroupMembershipByMembershipId(membership.getId());
     }
 
     /**
