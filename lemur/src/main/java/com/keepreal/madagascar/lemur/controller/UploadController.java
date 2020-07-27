@@ -10,6 +10,8 @@ import swagger.api.UploadApi;
 import swagger.model.MediaUrlsRequest;
 import swagger.model.MediaUrlsRequestV2;
 import swagger.model.MultiMediaType;
+import swagger.model.RefreshVideoResponse;
+import swagger.model.UploadMediaDTO;
 import swagger.model.UploadUrlDTO;
 import swagger.model.UploadUrlDTOV2;
 import swagger.model.UploadUrlListResponse;
@@ -95,6 +97,17 @@ public class UploadController implements UploadApi {
         }
 
         response.setData(data);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<RefreshVideoResponse> apiV1UploadRefreshVideoGet(@NotNull @Valid String videoId) {
+        UploadMediaDTO dto = uploadService.refreshUploadVideo(videoId);
+
+        RefreshVideoResponse response = new RefreshVideoResponse();
+        response.setData(dto);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

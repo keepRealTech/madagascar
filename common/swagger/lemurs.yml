@@ -751,13 +751,13 @@ paths:
       tags:
         - Upload
       summary: refresh by videoId
-      response:
+      responses:
         '200':
           description: refresh
           content:
             application/json:
               schema:
-                $ref: ''
+                $ref: '#/components/schemas/RefreshVideoResponse'
   /api/v2/upload/mediaUrls:
     post:
       requestBody:
@@ -1552,7 +1552,7 @@ components:
         type: string
     videoIdInQuery:
       in: query
-      name: vedioId
+      name: videoId
       required: true
       schema:
         type: string
@@ -2495,6 +2495,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UploadUrlDTOV2'
+    RefreshVideoResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UploadMediaDTO'
     UploadUrlDTOV2:
       type: object
       properties:
