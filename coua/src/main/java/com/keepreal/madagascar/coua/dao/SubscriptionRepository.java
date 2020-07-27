@@ -30,6 +30,9 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Stri
     @Query(value = "SELECT user_id FROM subscription WHERE island_id = ?1 AND state > 0 AND is_deleted = FALSE ORDER BY state ASC, created_time ASC", nativeQuery = true)
     Page<String> getSubscriberIdListByIslandId(String islandId, Pageable pageable);
 
+    @Query(value = "SELECT user_id FROM subscription WHERE island_id = ?1 AND state > 1 AND is_deleted = FALSE ORDER BY state ASC, created_time ASC", nativeQuery = true)
+    Page<String> getIslanderIdListByIslandId(String islandId, Pageable pageable);
+
     @Query(value = "SELECT COUNT(*) FROM subscription WHERE island_id = ?1 AND state > 0 AND is_deleted = FALSE", nativeQuery = true)
     Integer getCountByIslandId(String islandId);
 

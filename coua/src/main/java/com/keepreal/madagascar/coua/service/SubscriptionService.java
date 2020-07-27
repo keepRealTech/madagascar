@@ -122,7 +122,7 @@ public class SubscriptionService {
     }
 
     /**
-     * Retrieve pageable userIdList by subscribe the island.
+     * Retrieve pageable userIdList by subscribe the island (with island host).
      *
      * @param islandId  islandId.
      * @param pageable  {@link Pageable}.
@@ -130,6 +130,17 @@ public class SubscriptionService {
      */
     public Page<String> getSubscriberIdListByIslandId(String islandId, Pageable pageable) {
         return subscriptionRepository.getSubscriberIdListByIslandId(islandId, pageable);
+    }
+
+    /**
+     * Retrieve pageable userIdList by subscribe the island (without island host).
+     *
+     * @param islandId  islandId.
+     * @param pageable  {@link Pageable}.
+     * @return  userIdList.
+     */
+    public Page<String> getIslanderIdListByIslandId(String islandId, Pageable pageable) {
+        return subscriptionRepository.getIslanderIdListByIslandId(islandId, pageable);
     }
 
     /**
