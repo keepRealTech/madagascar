@@ -268,10 +268,42 @@ public class FeedController implements FeedApi {
      * @param fromHost     (optional) Whether from host.
      * @param minTimestamp timestamp after (optional, default to 0).
      * @param pageSize     size of a page (optional, default to 10).
+     * @return {@link FeedsResponse}.
+     */
+    @Override
+    public ResponseEntity<TimelinesResponse> apiV11IslandsIdFeedsGet(String id,
+                                                                     Boolean fromHost,
+                                                                     Long minTimestamp,
+                                                                     Long maxTimestamp,
+                                                                     Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize, false);
+
+        TimelinesResponse response = new TimelinesResponse();
+        response.setData(feedsResponse.getFeedList()
+                .stream()
+                .map(this.feedDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setCurrentTime(System.currentTimeMillis());
+        response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the island feeds get v1.1 api.
+     *
+     * @param id           id (required) Island id.
+     * @param fromHost     (optional) Whether from host.
+     * @param minTimestamp timestamp after (optional, default to 0).
+     * @param pageSize     size of a page (optional, default to 10).
      * @return {@link swagger.model.FeedsResponse}.
      */
     @Override
-    public ResponseEntity<FeedsResponseV2> apiV11IslandsIdFeedsGet(String id,
+    public ResponseEntity<FeedsResponseV2> apiV12IslandsIdFeedsGet(String id,
                                                                    Boolean fromHost,
                                                                    Long minTimestamp,
                                                                    Long maxTimestamp,
