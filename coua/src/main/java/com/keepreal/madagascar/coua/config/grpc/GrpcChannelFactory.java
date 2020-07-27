@@ -87,7 +87,7 @@ public class GrpcChannelFactory {
                 .withTracer(this.tracer)
                 .build()
                 .intercept(ManagedChannelBuilder
-                        .forAddress(this.vangaConfiguration.getHost(), this.vangaConfiguration.getPort())
+                        .forAddress(this.asityConfiguration.getHost(), this.asityConfiguration.getPort())
                         .usePlaintext()
                         .build());
     }
