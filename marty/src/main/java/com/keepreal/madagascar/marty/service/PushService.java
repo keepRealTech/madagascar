@@ -8,11 +8,13 @@ import com.keepreal.madagascar.coua.RetrieveDeviceTokensByUserIdListResponse;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokensResponse;
 import com.keepreal.madagascar.mantella.FeedCreateEvent;
 import com.keepreal.madagascar.marty.model.PushType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Slf4j
 public class PushService {
 
     private final UserService userService;
@@ -48,10 +50,9 @@ public class PushService {
         ProtocolStringList androidTokensList = response.getAndroidTokensList();
         ProtocolStringList iosTokensList = response.getIosTokensList();
 
-        String androidTokens = androidTokensList.toString().substring(1, androidTokensList.toString().length() - 1);
-        umengPushService.pushMessageByType(androidTokens, pushType);
+        umengPushService.pushMessageByType(String.join(",", androidTokensList), pushType);
 
-        jpushService.pushIOSMessageByType(pushType, (String[]) iosTokensList.toArray());
+        jpushService.pushIOSMessageByType(pushType, iosTokensList.toArray(new String[0]));
     }
 
     public void pushNewFeed(FeedCreateEvent event, PushType pushType) {
@@ -69,9 +70,8 @@ public class PushService {
             ProtocolStringList androidTokensList = response.getAndroidTokensList();
             ProtocolStringList iosTokensList = response.getIosTokensList();
 
-            String androidTokens = androidTokensList.toString().substring(1, androidTokensList.toString().length() - 1);
-            umengPushService.pushNewFeedByType(androidTokens, islandId, pushType);
-            jpushService.pushIOSNewFeedMessage(islandId, pushType, (String[]) iosTokensList.toArray());
+            umengPushService.pushNewFeedByType(String.join(",", androidTokensList), islandId, pushType);
+            jpushService.pushIOSNewFeedMessage(islandId, pushType, iosTokensList.toArray(new String[0]));
             if (event.getFromHost()) {
                 pushNotificationService.jPushIosNewFeedNotification(event.getAuthorId(), event.getFeedId(), iosTokensList);
                 pushNotificationService.umengPushAndroidNewFeedNotification(event.getAuthorId(), event.getFeedId(), androidTokensList);
@@ -88,9 +88,9 @@ public class PushService {
         ProtocolStringList iosTokensList = response.getIosTokensList();
 
         List<List<String>> androidPartition = Lists.partition(androidTokensList, 500);
-        androidPartition.forEach(list -> umengPushService.pushUpdateBulletin(list.toString().substring(1, list.toString().length() - 1), chatGroupId, bulletin, pushType));
+        androidPartition.forEach(list -> umengPushService.pushUpdateBulletin(String.join(",", list), chatGroupId, bulletin, pushType));
 
         List<List<String>> iOSPartition = Lists.partition(iosTokensList, 800);
-        iOSPartition.forEach(list -> jpushService.pushIOSUpdateBulletinMessage(chatGroupId, bulletin, pushType, (String[]) list.toArray()));
+        iOSPartition.forEach(list -> jpushService.pushIOSUpdateBulletinMessage(chatGroupId, bulletin, pushType, list.toArray(new String[0])));
     }
 }
