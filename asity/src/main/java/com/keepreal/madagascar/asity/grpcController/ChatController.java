@@ -101,7 +101,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                              StreamObserver<RegisterResponse> responseObserver) {
         RegisterResponse response;
         try {
-            String token = this.rongCloudService.register(request.getUserId(), request.getUserName(), request.getPortraitUrl());
+            String token = this.rongCloudService.register(request.getUserId(), request.getUserName(),
+                    String.format("https://images.keepreal.cn/%s", request.getPortraitUrl()));
             response = RegisterResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setToken(token)
