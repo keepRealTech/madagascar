@@ -37,7 +37,7 @@ public class PushNotificationService {
             Map<String, String> extrasMap = new HashMap<>();
             extrasMap.put("URL", pushPriorityInfo.getIosUrl());
 
-            jpushService.pushIosNotification(alert, extrasMap, (String[]) tokenList.toArray());
+            jpushService.pushIosNotification(alert, extrasMap, tokenList.toArray(new String[0]));
         }
     }
 
@@ -47,12 +47,10 @@ public class PushNotificationService {
             PushPriorityInfo pushPriorityInfo = PushPriorityConverter.convertTo(type);
             String text = pushPriorityInfo.getText();
 
-            String tokenString = tokenList.toString();
-
             JSONObject dataObject = new JSONObject();
             dataObject.putAll(pushPriorityInfo.getExtrasMap());
 
-            umengPushService.pushNotification(tokenString.substring(1, tokenString.length() - 1), title, text, generatorCustom(pushPriorityInfo.getAndroidUrl(), dataObject));
+            umengPushService.pushNotification(String.join(",", tokenList), title, text, generatorCustom(pushPriorityInfo.getAndroidUrl(), dataObject));
         }
     }
 
@@ -66,7 +64,7 @@ public class PushNotificationService {
         Map<String, String> extrasMap = new HashMap<>();
         extrasMap.put("URL", pushPriorityInfo.getIosUrl() + feedId);
 
-        jpushService.pushIosNotification(alert, extrasMap, (String[]) tokenList.toArray());
+        jpushService.pushIosNotification(alert, extrasMap, tokenList.toArray(new String[0]));
     }
 
     public void umengPushAndroidNewFeedNotification(String userId, String feedId, List<String> tokenList) {
@@ -76,14 +74,12 @@ public class PushNotificationService {
 
         String text = feedService.retrieveFeedTextById(feedId, userId);
 
-        String tokenString = tokenList.toString();
-
         JSONObject dataObject = new JSONObject();
         dataObject.put("feed_id", feedId);
 
         generatorCustom(pushPriorityInfo.getAndroidUrl(), dataObject);
 
-        umengPushService.pushNotification(tokenString.substring(1, tokenString.length() - 1), title, text, generatorCustom(pushPriorityInfo.getAndroidUrl(), dataObject));
+        umengPushService.pushNotification(String.join(",", tokenList), title, text, generatorCustom(pushPriorityInfo.getAndroidUrl(), dataObject));
     }
 
     private JSONObject generatorCustom(String url, JSONObject dataObject) {

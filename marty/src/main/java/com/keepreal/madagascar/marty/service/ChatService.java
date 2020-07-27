@@ -3,6 +3,7 @@ package com.keepreal.madagascar.marty.service;
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
+import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.Channel;
@@ -29,6 +30,7 @@ public class ChatService {
         ChatgroupMembersResponse response = null;
         try {
             response = stub.retrieveChatgroupMembersById(RetrieveChatgroupMembersByGroupIdRequest.newBuilder()
+                    .setPageRequest(PageRequest.newBuilder().setPage(0).setPageSize(3000).build())
                     .setGroupId(chatGroupId)
                     .setUserId(userId)
                     .build());
