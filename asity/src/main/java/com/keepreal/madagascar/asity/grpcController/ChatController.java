@@ -4,6 +4,7 @@ import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
+import com.keepreal.madagascar.asity.DeleteChatgroupMembershipByMembershipIdRequest;
 import com.keepreal.madagascar.asity.DismissChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
@@ -11,11 +12,11 @@ import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
 import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
-import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.UserChatgroupsResponse;
 import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
@@ -43,8 +44,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -414,8 +415,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Implements the retrieve chatgroup members.
      *
-     * @param request           {@link RetrieveChatgroupMembersByGroupIdRequest}.
-     * @param responseObserver  {@link StreamObserver}.
+     * @param request          {@link RetrieveChatgroupMembersByGroupIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
      */
     @Override
     public void retrieveChatgroupMembersById(RetrieveChatgroupMembersByGroupIdRequest request,
@@ -440,6 +441,22 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                 .addAllMemberIds(chatgroupMemberIdsPage.getContent())
                 .setPageResponse(PaginationUtils.valueOf(chatgroupMemberIdsPage, request.getPageRequest()))
                 .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Deletes all chatgroup memberships by membership id.
+     *
+     * @param request          {@link DeleteChatgroupMembershipByMembershipIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void deleteChatgroupMembershipByMembershipId(DeleteChatgroupMembershipByMembershipIdRequest request,
+                                                        StreamObserver<CommonStatus> responseObserver) {
+        this.chatgroupService.deleteChatgroupMembershipsByMembershipId(request.getMemberhsipId());
+
+        CommonStatus response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

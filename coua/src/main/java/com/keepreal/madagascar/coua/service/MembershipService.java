@@ -26,6 +26,7 @@ public class MembershipService {
     private final SubscribeMembershipService subscribeMembershipService;
     private final SubscriptionService subscriptionService;
     private final SkuService skuService;
+    private final ChatgroupService chatgroupService;
 
     /**
      * Constructor the membership service.
@@ -35,17 +36,19 @@ public class MembershipService {
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param subscriptionService        {@link SubscriptionService}.
      * @param skuService                 {@link SkuService}.
+     * @param chatgroupService           {@link ChatgroupService}.
      */
     public MembershipService(MembershipInfoRepository repository,
                              LongIdGenerator idGenerator,
                              SubscribeMembershipService subscribeMembershipService,
                              SubscriptionService subscriptionService,
-                             SkuService skuService) {
+                             SkuService skuService, ChatgroupService chatgroupService) {
         this.repository = repository;
         this.idGenerator = idGenerator;
         this.subscribeMembershipService = subscribeMembershipService;
         this.subscriptionService = subscriptionService;
         this.skuService = skuService;
+        this.chatgroupService = chatgroupService;
     }
 
     public MembershipInfo createMembership(MembershipInfo membershipInfo) {
@@ -140,6 +143,7 @@ public class MembershipService {
         membership.setDeleted(true);
         this.skuService.deleteMembershipSkusByMembershipId(membership.getId());
         this.updateMembership(membership);
+        this.chatgroupService.deleteChatgroupMembershipByMembershipId(membership.getId());
     }
 
     /**
