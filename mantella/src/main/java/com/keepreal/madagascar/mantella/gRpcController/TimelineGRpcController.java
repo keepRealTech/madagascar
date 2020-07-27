@@ -50,7 +50,7 @@ public class TimelineGRpcController extends ReactorTimelineServiceGrpc.TimelineS
                 retrieveMultipleTimelinesRequest.hasTimestampBefore() ?
                     this.timelineService.retrieveByUserIdAndCreatedTimestamp(
                             retrieveMultipleTimelinesRequest.getUserId(),
-                            retrieveMultipleTimelinesRequest.getTimestampAfter(),
+                            null,
                             retrieveMultipleTimelinesRequest.getPageRequest().getPageSize() + 1,
                             retrieveMultipleTimelinesRequest.getTimestampBefore()) :
                     this.timelineService.retrieveByUserIdAndCreatedTimestamp(
