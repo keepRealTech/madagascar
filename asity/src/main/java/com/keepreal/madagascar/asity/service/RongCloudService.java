@@ -12,12 +12,14 @@ import io.rong.models.message.PrivateMessage;
 import io.rong.models.response.TokenResult;
 import io.rong.models.user.UserModel;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
  * Represents the rong cloud service.
  */
 @Service
+@Slf4j
 public class RongCloudService {
 
     private static final TxtMessage txtMessage = new TxtMessage("感谢你的支持～", "");
@@ -138,19 +140,20 @@ public class RongCloudService {
     /**
      * Sends a private thank you message.
      *
-     * @param userId    User id.
-     * @param targetId  Target id.
+     * @param userId   User id.
+     * @param targetId Target id.
      */
     @SneakyThrows
     public void sendThanks(String userId, String targetId) {
         PrivateMessage privateMessage = new PrivateMessage()
                 .setSenderId(userId)
                 .setTargetId(new String[]{targetId})
+                .setObjectName(RongCloudService.txtMessage.getType())
                 .setContent(RongCloudService.txtMessage)
                 .setVerifyBlacklist(0)
                 .setIsPersisted(0)
                 .setIsCounted(0)
-                .setIsIncludeSender(0);
+                .setIsIncludeSender(1);
         this.client.message.msgPrivate.send(privateMessage);
     }
 
