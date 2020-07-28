@@ -65,7 +65,8 @@ public class IOSOrderService {
 
         IosOrder.IosOrderBuilder builder = IosOrder.builder().userId(userId).receiptHashcode(String.valueOf(receipt.hashCode()))
                 .description(String.format("购买%s", sku.getDescription())).shellSkuId(sku.getId());
-        IosOrder iosOrder;
+
+        IosOrder iosOrder = this.createIosOrder(builder);
 
         ResponseEntity<String> response = this.restTemplate.postForEntity(this.iosPayConfiguration.getVerifyUrl(),
                 request, String.class);
@@ -87,7 +88,7 @@ public class IOSOrderService {
             status = responseData.getString("status");
         }
 
-        iosOrder = this.buildIosOrderErrorMsgByStatus(builder, status);
+        iosOrder = this.updateIosOrderErrorMsgByStatus(iosOrder, status);
 
         if (!status.equals("0")) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_IOS_RECEIPT_VERIFY_ERROR, status);
@@ -113,21 +114,21 @@ public class IOSOrderService {
         return iosOrderRepository.save(iosOrder);
     }
 
-    private IosOrder buildIosOrderErrorMsgByStatus(IosOrder.IosOrderBuilder builder, String status) {
+    private IosOrder updateIosOrderErrorMsgByStatus(IosOrder iosOrder, String status) {
         switch (status) {
-            case "21000" : builder.state(IosOrderState.PAYERROR.getValue()).errorMessage("App Store不能读取你提供的JSON对象"); break;
-            case "21002" : builder.state(IosOrderState.PAYERROR.getValue()).errorMessage("receipt-data属性中的数据格式错误或丢失"); break;
-            case "21003" : builder.state(IosOrderState.PAYERROR.getValue()).errorMessage("receipt无法通过验证"); break;
-            case "21004" : builder.state(IosOrderState.PAYERROR.getValue()).errorMessage("提供的共享密码与帐户的文件共享密码不匹配"); break;
-            case "21005" : builder.state(IosOrderState.PAYERROR.getValue()).errorMessage("receipt服务器当前不可用"); break;
-            case "21006" : builder.state(IosOrderState.PAYERROR.getValue()).errorMessage("该收据有效，但订阅已过期，当此状态代码返回到您的服务器时，收据数据也会被解码并作为响应的一部分返回，仅针对自动续订的iOS 6样式交易收据返回"); break;
-            case "21007" : builder.state(IosOrderState.PAYERROR.getValue()).errorMessage("receipt是Sandbox receipt，但却发送至生产系统的验证服务"); break;
-            case "21008" : builder.state(IosOrderState.PAYERROR.getValue()).errorMessage("receipt是生产receipt，但却发送至Sandbox环境的验证服务"); break;
-            case "21010" : builder.state(IosOrderState.NOTPAY.getValue()).errorMessage("此收据无法授权，就像从未进行过购买一样对待"); break;
-            case "0"     : builder.state(IosOrderState.SUCCESS.getValue()); break;
-            default      : builder.state(IosOrderState.UNKNOWN.getValue());
+            case "21000" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("App Store不能读取你提供的JSON对象"); break;
+            case "21002" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("receipt-data属性中的数据格式错误或丢失"); break;
+            case "21003" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("receipt无法通过验证"); break;
+            case "21004" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("提供的共享密码与帐户的文件共享密码不匹配"); break;
+            case "21005" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("receipt服务器当前不可用"); break;
+            case "21006" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("该收据有效，但订阅已过期，当此状态代码返回到您的服务器时，收据数据也会被解码并作为响应的一部分返回，仅针对自动续订的iOS 6样式交易收据返回"); break;
+            case "21007" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("receipt是Sandbox receipt，但却发送至生产系统的验证服务"); break;
+            case "21008" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("receipt是生产receipt，但却发送至Sandbox环境的验证服务"); break;
+            case "21010" : iosOrder.setState(IosOrderState.NOTPAY.getValue()); iosOrder.setErrorMessage("此收据无法授权，就像从未进行过购买一样对待"); break;
+            case "0"     : iosOrder.setState(IosOrderState.SUCCESS.getValue()); break;
+            default      : iosOrder.setState(IosOrderState.UNKNOWN.getValue());
         }
-        return this.createIosOrder(builder);
+        return this.iosOrderRepository.save(iosOrder);
     }
 
 }
