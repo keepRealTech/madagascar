@@ -13,6 +13,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Data
 @Entity
@@ -40,4 +41,6 @@ public class IosOrder {
     @Builder.Default
     private String errorMessage = "";
     private String receiptHashcode;
+    @Transient
+    private String transactionId;
 }
