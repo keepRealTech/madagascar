@@ -3,8 +3,13 @@ package com.keepreal.madagascar.vanga.service;
 import com.aliyun.openservices.shade.com.alibaba.fastjson.JSONObject;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.config.IOSPayConfiguration;
+import com.keepreal.madagascar.vanga.model.IosOrder;
+import com.keepreal.madagascar.vanga.model.IosOrderState;
 import com.keepreal.madagascar.vanga.model.ShellSku;
+import com.keepreal.madagascar.vanga.repository.IosOrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -24,6 +29,8 @@ import java.util.stream.Collectors;
 @Service
 public class IOSOrderService {
 
+    private final IosOrderRepository iosOrderRepository;
+    private final LongIdGenerator idGenerator;
     private final RestTemplate restTemplate;
     private final IOSPayConfiguration iosPayConfiguration;
 
@@ -34,9 +41,13 @@ public class IOSOrderService {
      * @param iosPayConfiguration {@link IOSPayConfiguration}.
      */
     public IOSOrderService(RestTemplate restTemplate,
-                           IOSPayConfiguration iosPayConfiguration) {
+                           IOSPayConfiguration iosPayConfiguration,
+                           LongIdGenerator idGenerator,
+                           IosOrderRepository iosOrderRepository) {
         this.restTemplate = restTemplate;
         this.iosPayConfiguration = iosPayConfiguration;
+        this.idGenerator = idGenerator;
+        this.iosOrderRepository = iosOrderRepository;
     }
 
     /**
@@ -46,13 +57,18 @@ public class IOSOrderService {
      * @param sku     {@link ShellSku}.
      * @return Transaction id.
      */
-    public String verify(String receipt, ShellSku sku) {
+    public IosOrder verify(String userId, String receipt, ShellSku sku) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         JSONObject requestBody = new JSONObject();
         requestBody.put("receipt-data", receipt);
         HttpEntity<String> request = new HttpEntity<>(requestBody.toString(), headers);
+
+        IosOrder.IosOrderBuilder builder = IosOrder.builder().userId(userId).receiptHashcode(String.valueOf(receipt.hashCode()))
+                .description(String.format("购买%s", sku.getDescription())).shellSkuId(sku.getId());
+
+        IosOrder iosOrder = this.createIosOrder(builder);
 
         ResponseEntity<String> response = this.restTemplate.postForEntity(this.iosPayConfiguration.getVerifyUrl(),
                 request, String.class);
@@ -64,7 +80,7 @@ public class IOSOrderService {
         JSONObject responseData = JSONObject.parseObject(response.getBody());
         String status = responseData.getString("status");
 
-        if (status.equals("21007")) {
+        if (status.equals("21007") && this.iosPayConfiguration.getEnableSandbox()) {
             response = this.restTemplate.postForEntity(this.iosPayConfiguration.getVerifyUrlSandbox(),
                     request, String.class);
             if (response.getStatusCode().isError()) {
@@ -73,6 +89,8 @@ public class IOSOrderService {
             responseData = JSONObject.parseObject(response.getBody());
             status = responseData.getString("status");
         }
+
+        iosOrder = this.updateIosOrderErrorMsgByStatus(iosOrder, status);
 
         if (!status.equals("0")) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_IOS_RECEIPT_VERIFY_ERROR, status);
@@ -85,10 +103,33 @@ public class IOSOrderService {
                 .collect(Collectors.toMap(app -> app.get("product_id").toString(), Function.identity()));
 
         if (dictionary.containsKey(sku.getAppleSkuId())) {
-            return dictionary.get(sku.getAppleSkuId()).get("transaction_id").toString();
+            iosOrder.setTransactionId(dictionary.get(sku.getAppleSkuId()).get("transaction_id").toString());
+            return iosOrder;
         }
 
         throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_SHELL_IOS_RECEIPT_INVALID_ERROR);
+    }
+
+    private IosOrder createIosOrder(IosOrder.IosOrderBuilder builder) {
+        IosOrder iosOrder = builder.id(String.valueOf(idGenerator.nextId())).build();
+        return iosOrderRepository.save(iosOrder);
+    }
+
+    private IosOrder updateIosOrderErrorMsgByStatus(IosOrder iosOrder, String status) {
+        switch (status) {
+            case "21000" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("App Store不能读取你提供的JSON对象"); break;
+            case "21002" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("receipt-data属性中的数据格式错误或丢失"); break;
+            case "21003" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("receipt无法通过验证"); break;
+            case "21004" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("提供的共享密码与帐户的文件共享密码不匹配"); break;
+            case "21005" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("receipt服务器当前不可用"); break;
+            case "21006" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("该收据有效，但订阅已过期，当此状态代码返回到您的服务器时，收据数据也会被解码并作为响应的一部分返回，仅针对自动续订的iOS 6样式交易收据返回"); break;
+            case "21007" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("receipt是Sandbox receipt，但却发送至生产系统的验证服务"); break;
+            case "21008" : iosOrder.setState(IosOrderState.PAYERROR.getValue()); iosOrder.setErrorMessage("receipt是生产receipt，但却发送至Sandbox环境的验证服务"); break;
+            case "21010" : iosOrder.setState(IosOrderState.NOTPAY.getValue()); iosOrder.setErrorMessage("此收据无法授权，就像从未进行过购买一样对待"); break;
+            case "0"     : iosOrder.setState(IosOrderState.SUCCESS.getValue()); break;
+            default      : iosOrder.setState(IosOrderState.UNKNOWN.getValue());
+        }
+        return this.iosOrderRepository.save(iosOrder);
     }
 
 }
