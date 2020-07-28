@@ -3,14 +3,15 @@ package com.keepreal.madagascar.marty.schedule;
 import com.keepreal.madagascar.marty.service.PushNotificationService;
 import com.keepreal.madagascar.marty.service.RedissonService;
 import com.keepreal.madagascar.marty.util.AutoRedisLock;
-import org.redisson.api.RMap;
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RSet;
 import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @program: madagascar
@@ -19,6 +20,7 @@ import java.util.concurrent.TimeUnit;
  **/
 
 @Service
+@Slf4j
 public class PushScheduler {
 
     private final RedissonClient redissonClient;
@@ -35,22 +37,23 @@ public class PushScheduler {
 
     @Scheduled(cron = "0 0/5 * * * *")
     public void push() {
-       try(AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, "push-schedule")) {
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, "push-schedule")) {
             redissonClient.getKeys()
                     .getKeysByPattern("push:*")
                     .forEach(pushKey -> {
-                        RMap<Object, Object> map = redissonClient.getMap(pushKey);
-                        Integer type = (Integer) map.get("type");
-                        Integer count = (Integer) map.get("count");
-                        String latestUserId = (String) map.get("latestUserId");
+                        RBucket<Object> pushType = redissonClient.getBucket(pushKey);
+                        Integer type = (Integer) pushType.get();
+                        RSet<Object> userSet = redissonClient.getSet("userSet:" + pushKey.split(":")[1]);
+                        Integer count = userSet.size();
+                        String latestUserId = (String) userSet.random();
 
+                        pushType.delete();
+                        userSet.delete();
                         Map<String, List<String>> token = redissonService.getToken(pushKey);
-
                         String nickname = redissonService.getNickname(latestUserId);
 
                         this.pushNotificationService.jPushIosNotification(getTitle(nickname, count), type, token.get("ios"));
                         this.pushNotificationService.umengPushAndroidNotification(getTitle(nickname, count), type, token.get("android"));
-                        map.delete();
                     });
         }
     }
