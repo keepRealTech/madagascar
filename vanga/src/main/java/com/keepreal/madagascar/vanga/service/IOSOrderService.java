@@ -41,7 +41,9 @@ public class IOSOrderService {
      * @param iosPayConfiguration {@link IOSPayConfiguration}.
      */
     public IOSOrderService(RestTemplate restTemplate,
-                           IOSPayConfiguration iosPayConfiguration, LongIdGenerator idGenerator, IosOrderRepository iosOrderRepository) {
+                           IOSPayConfiguration iosPayConfiguration,
+                           LongIdGenerator idGenerator,
+                           IosOrderRepository iosOrderRepository) {
         this.restTemplate = restTemplate;
         this.iosPayConfiguration = iosPayConfiguration;
         this.idGenerator = idGenerator;
@@ -77,7 +79,7 @@ public class IOSOrderService {
         JSONObject responseData = JSONObject.parseObject(response.getBody());
         String status = responseData.getString("status");
 
-        if (status.equals("21007")) {
+        if (this.iosPayConfiguration.getEnableSandbox() && status.equals("21007")) {
             response = this.restTemplate.postForEntity(this.iosPayConfiguration.getVerifyUrlSandbox(),
                     request, String.class);
             if (response.getStatusCode().isError()) {
