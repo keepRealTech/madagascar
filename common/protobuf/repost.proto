@@ -61,9 +61,32 @@ message IslandRepostsResponse {
     repeated IslandRepostMessage islandReposts = 3;
 }
 
+message GenerateRepostCodeRequest {
+    string islandId = 1;
+}
+
+message GenerateRepostCodeResponse {
+    CommonStatus status = 1;
+    string code = 2;
+}
+
+message ResolveRepostCodeRequest {
+    string code = 1;
+    DeviceType deviceType = 2;
+}
+
+message ResolveRepostCodeResponse {
+    CommonStatus status = 1;
+    string redirectUrl = 2;
+    string islandId = 3;
+    string secret = 4;
+}
+
 service RepostService {
     rpc CreateFeedRepost(NewFeedRepostRequest) returns (FeedRepostResponse) {};
     rpc RetrieveFeedRepostsByFeedId(RetrieveFeedRepostsByFeedIdRequest) returns (FeedRepostsResponse) {};
     rpc CreateIslandRepost(NewIslandRepostRequest) returns (IslandRepostResponse) {};
     rpc RetrieveIslandRepostsByIslandId(RetrieveIslandRepostsByIslandIdRequest) returns (IslandRepostsResponse) {};
+    rpc GenerateRepostCodeByIslandId(GenerateRepostCodeRequest) returns (GenerateRepostCodeResponse) {};
+    rpc ResolveRepostCode(ResolveRepostCodeRequest) returns (ResolveRepostCodeResponse) {};
 }

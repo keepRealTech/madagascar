@@ -13,10 +13,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.RepostApi;
+import swagger.model.DeviceType;
+import swagger.model.IslandRepostCodeResponse;
 import swagger.model.PostRepostRequest;
 import swagger.model.RepostResponse;
 import swagger.model.RepostsResponse;
+import swagger.model.ResolveIslandRepostCodeResponse;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -136,4 +141,28 @@ public class RepostController implements RepostApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     *
+     *
+     * @param id id (required)
+     * @return  {@link IslandRepostCodeResponse}.
+     */
+    @Override
+    public ResponseEntity<IslandRepostCodeResponse> apiV1IslandsIdRepostsGenerateCodeGet(String id) {
+        repostService.generateRepostCode(id);
+        return null;
+    }
+
+    /**
+     *
+     *
+     * @param code code (required)
+     * @param deviceType  (required)
+     * @return  {@link ResolveIslandRepostCodeResponse}.
+     */
+    @Override
+    public ResponseEntity<ResolveIslandRepostCodeResponse> apiV1RepostsResolveCodeGet(@NotNull @Valid String code, @NotNull @Valid DeviceType deviceType) {
+        repostService.resolveRepostCode(code, deviceType);
+        return null;
+    }
 }
