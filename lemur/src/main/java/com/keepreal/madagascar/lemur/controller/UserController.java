@@ -140,16 +140,16 @@ public class UserController implements UserApi {
     /**
      * Implements the get batch user avatars api.
      *
-     * @param postBatchGetAvatarsRequest  (required) {@link PostBatchGetUsersRequest}.
+     * @param postBatchGetUsersRequest  (required) {@link PostBatchGetUsersRequest}.
      * @return {@link AvatarsResponse}.
      */
     @Override
-    public ResponseEntity<AvatarsResponse> apiV1UsersGetBatchAvatarsPost(PostBatchGetUsersRequest postBatchGetAvatarsRequest) {
+    public ResponseEntity<AvatarsResponse> apiV1UsersGetBatchAvatarsPost(PostBatchGetUsersRequest postBatchGetUsersRequest) {
         List<UserMessage> userMessages;
-        if (Objects.isNull(postBatchGetAvatarsRequest.getUserIds()) || postBatchGetAvatarsRequest.getUserIds().isEmpty()) {
+        if (Objects.isNull(postBatchGetUsersRequest.getUserIds()) || postBatchGetUsersRequest.getUserIds().isEmpty()) {
             userMessages = new ArrayList<>();
         } else {
-            userMessages = this.userService.retrieveUsersByIds(postBatchGetAvatarsRequest.getUserIds());
+            userMessages = this.userService.retrieveUsersByIds(postBatchGetUsersRequest.getUserIds());
 
         }
 
