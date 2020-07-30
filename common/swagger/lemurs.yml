@@ -1845,6 +1845,8 @@ components:
             birthday:
               type: string
               format: date
+            isIslandHost:
+              type: boolean
             identityTypes:
               type: array
               items:
