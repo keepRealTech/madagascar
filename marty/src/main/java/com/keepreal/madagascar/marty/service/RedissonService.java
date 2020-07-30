@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
@@ -56,6 +57,7 @@ public class RedissonService {
         RMap<Object, Object> tokenMap = redissonClient.getMap("token:" + userId);
 
         if (tokenMap == null || tokenMap.size() == 0) {
+            tokenMap.expire(30L, TimeUnit.MINUTES);
             RetrieveDeviceTokenResponse response = userService.retrieveUserDeviceToken(userId);
 
             Object[] androidTokensList = response.getAndroidTokensList().toArray();
@@ -77,6 +79,7 @@ public class RedissonService {
         if (!nickname.isExists()) {
             UserMessage userMessage = userService.retrieveUserInfoById(userId);
             nickname.set(userMessage.getName());
+            nickname.expire(30L, TimeUnit.MINUTES);
             return userMessage.getName();
         }
         return (String) nickname.get();

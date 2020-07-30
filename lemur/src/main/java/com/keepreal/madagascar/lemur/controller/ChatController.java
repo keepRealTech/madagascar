@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.google.common.base.Functions;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
 import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
@@ -23,6 +24,7 @@ import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ChatApi;
 import swagger.model.BriefUsersResponse;
 import swagger.model.ChatAccessResponse;
+import swagger.model.ChatGroupDTO;
 import swagger.model.ChatGroupResponse;
 import swagger.model.ChatTokenResponse;
 import swagger.model.DummyResponse;
@@ -46,6 +49,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +61,7 @@ import java.util.stream.Collectors;
  * Represents the chat controller.
  */
 @RestController
+@Slf4j
 public class ChatController implements ChatApi {
 
     private final IslandService islandService;
@@ -326,7 +331,8 @@ public class ChatController implements ChatApi {
                 .map(this.membershipDTOFactory::simpleValueOf)
                 .collect(Collectors.toList());
 
-        List<String> userMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(id, userId);
+        List<String> userMembershipIds = this.subscribeMembershipService
+                .retrieveSubscribedMembershipsByIslandIdAndUserId(chatgroupMessage.getIslandId(), userId);
 
         ChatGroupResponse response = new ChatGroupResponse();
         response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList, userMembershipIds, userId));
@@ -346,7 +352,8 @@ public class ChatController implements ChatApi {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         ChatgroupMessage chatgroupMessage = this.chatService.retrieveChatgroupById(id, userId);
-        List<String> userMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(id, userId);
+        List<String> userMembershipIds = this.subscribeMembershipService
+                .retrieveSubscribedMembershipsByIslandIdAndUserId(chatgroupMessage.getIslandId(), userId);
 
         if (!chatgroupMessage.getMembershipIdsList().isEmpty()
                 && chatgroupMessage.getMembershipIdsList().stream().noneMatch(userMembershipIds::contains)) {
@@ -399,6 +406,7 @@ public class ChatController implements ChatApi {
                     return this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList, userMembershipIds, userId);
                 })
                 .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(ChatGroupDTO::getHasAccess, Comparator.reverseOrder()))
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(chatgroupsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
@@ -434,7 +442,8 @@ public class ChatController implements ChatApi {
                 .map(this.membershipDTOFactory::simpleValueOf)
                 .collect(Collectors.toList());
 
-        List<String> userMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(id, userId);
+        List<String> userMembershipIds = this.subscribeMembershipService
+                .retrieveSubscribedMembershipsByIslandIdAndUserId(chatgroupMessage.getIslandId(), userId);
 
         ChatGroupResponse response = new ChatGroupResponse();
         response.setData(this.chatDTOFactory.valueOf(chatgroupMessage, membershipDTOList, userMembershipIds, userId));
@@ -514,9 +523,13 @@ public class ChatController implements ChatApi {
         if (!chatgroupMembersResponse.getMemberIdsList().isEmpty()) {
             userMessages = this.userService.retrieveUsersByIds(chatgroupMembersResponse.getMemberIdsList());
         }
+        Map<String, UserMessage> userMessageMap = userMessages.stream()
+                .collect(Collectors.toMap(UserMessage::getId, Function.identity()));
 
         BriefUsersResponse response = new BriefUsersResponse();
-        response.setData(userMessages.stream().map(this.userDTOFactory::briefValueOf).collect(Collectors.toList()));
+        response.setData(chatgroupMembersResponse.getMemberIdsList().stream()
+                .map(mid -> userMessageMap.getOrDefault(mid, null))
+                .map(this.userDTOFactory::briefValueOf).collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(chatgroupMembersResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());

@@ -163,8 +163,7 @@ public class MembershipService {
             builder.setPricePerMonth(Int32Value.of(pricePerMonth));
         }
         if (descriptions != null && descriptions.size() > 0) {
-            String descriptionStr = descriptions.toString();
-            builder.setDescription(StringValue.of(descriptionStr.substring(1, descriptionStr.length() - 1)));
+            builder.setDescription(StringValue.of(String.join(",", descriptions)));
         }
 
         MembershipResponse membershipResponse;

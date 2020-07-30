@@ -13,3 +13,5 @@ data:
   GRPC_FOSSA_PORT: '{{ .Values.fossa.port }}'
   GRPC_VANGA_HOST: {{ .Values.vanga.host }}
   GRPC_VANGA_PORT: '{{ .Values.vanga.port }}'
+  GRPC_ASITY_HOST: {{ .Values.asity.host }}
+  GRPC_ASITY_PORT: '{{ .Values.asity.port }}'

@@ -4,20 +4,26 @@ import com.keepreal.madagascar.asity.config.RongCloudConfiguration;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.rong.RongCloud;
+import io.rong.messages.TxtMessage;
 import io.rong.models.Result;
 import io.rong.models.group.GroupMember;
 import io.rong.models.group.GroupModel;
+import io.rong.models.message.PrivateMessage;
 import io.rong.models.response.TokenResult;
 import io.rong.models.user.UserModel;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 /**
  * Represents the rong cloud service.
  */
 @Service
+@Slf4j
 public class RongCloudService {
 
+    private static final TxtMessage txtMessage = new TxtMessage("感谢你的支持～", "");
     private final RongCloud client;
 
     /**
@@ -39,6 +45,10 @@ public class RongCloudService {
      */
     @SneakyThrows
     public String register(String userId, String userName, String portraitUrl) {
+        userName = userName.replace((char) 12288, ' ');
+        if (StringUtils.isEmpty(userName.trim())) {
+            userName = "user " + userId;
+        }
         UserModel userModel = new UserModel()
                 .setId(userId)
                 .setName(userName)
@@ -130,6 +140,26 @@ public class RongCloudService {
         if (!result.getCode().equals(200)) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_RONGCLOUD_RPC_ERROR);
         }
+    }
+
+    /**
+     * Sends a private thank you message.
+     *
+     * @param userId   User id.
+     * @param targetId Target id.
+     */
+    @SneakyThrows
+    public void sendThanks(String userId, String targetId) {
+        PrivateMessage privateMessage = new PrivateMessage()
+                .setSenderId(userId)
+                .setTargetId(new String[]{targetId})
+                .setObjectName(RongCloudService.txtMessage.getType())
+                .setContent(RongCloudService.txtMessage)
+                .setVerifyBlacklist(0)
+                .setIsPersisted(0)
+                .setIsCounted(0)
+                .setIsIncludeSender(1);
+        this.client.message.msgPrivate.send(privateMessage);
     }
 
 }

@@ -51,13 +51,17 @@ public class NotificationEventListener implements MessageListener {
             if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_COMMENT)) {
                 String userId = notificationEvent.getUserId();
                 pushService.pushMessageByType(userId, PushType.PUSH_COMMENT);
-                this.redissonService.putPushInfo(userId, PushPriority.NEW_COMMENT, notificationEvent.getCommentEvent().getComment().getUserId());
+                if (!userId.equals(notificationEvent.getCommentEvent().getComment().getUserId())) {
+                    this.redissonService.putPushInfo(userId, PushPriority.NEW_COMMENT, notificationEvent.getCommentEvent().getComment().getUserId());
+                }
             }
 
             if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_REACTION)) {
                 String userId = notificationEvent.getUserId();
                 pushService.pushMessageByType(userId, PushType.PUSH_REACTION);
-                this.redissonService.putPushInfo(userId, PushPriority.NEW_LIKE, notificationEvent.getReactionEvent().getReaction().getUserId());
+                if (!userId.equals(notificationEvent.getReactionEvent().getReaction().getUserId())) {
+                    this.redissonService.putPushInfo(userId, PushPriority.NEW_LIKE, notificationEvent.getReactionEvent().getReaction().getUserId());
+                }
             }
 
             if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_SUBSCRIBE)) {

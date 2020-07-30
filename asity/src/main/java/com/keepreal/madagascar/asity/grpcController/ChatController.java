@@ -4,6 +4,7 @@ import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
+import com.keepreal.madagascar.asity.DeleteChatgroupMembershipByMembershipIdRequest;
 import com.keepreal.madagascar.asity.DismissChatgroupRequest;
 import com.keepreal.madagascar.asity.EnableChatAccessRequest;
 import com.keepreal.madagascar.asity.IslandChatAccessResponse;
@@ -11,11 +12,11 @@ import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
 import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
-import com.keepreal.madagascar.asity.RetreiveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.UserChatgroupsResponse;
 import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
@@ -43,8 +44,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,6 +56,7 @@ import java.util.stream.Collectors;
 public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
 
     private static final int GROUP_MAX_MEMBER_LIMIT = 3000;
+    private static final int ISLAND_CHATGROUP_LIMIT = 100;
 
     private final ChatgroupService chatgroupService;
     private final RongCloudService rongCloudService;
@@ -99,7 +101,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                              StreamObserver<RegisterResponse> responseObserver) {
         RegisterResponse response;
         try {
-            String token = this.rongCloudService.register(request.getUserId(), request.getUserName(), request.getPortraitUrl());
+            String token = this.rongCloudService.register(request.getUserId(), request.getUserName(),
+                    String.format("https://images.keepreal.cn/%s", request.getPortraitUrl()));
             response = RegisterResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setToken(token)
@@ -168,6 +171,18 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     @Override
     public void createChatgroup(CreateChatgroupRequest request,
                                 StreamObserver<ChatgroupResponse> responseObserver) {
+        Integer groupCount = this.chatgroupService.countChatgroupsByIslandId(request.getIslandId());
+
+        if (groupCount.compareTo(ChatController.ISLAND_CHATGROUP_LIMIT) >= 0) {
+            ChatgroupResponse response = ChatgroupResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_CHATGROUP_LIMIT_ERROR))
+                    .build();
+
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
         Chatgroup chatgroup = this.chatgroupService.createChatgroup(request.getIslandId(), request.getName(), request.getHostId(),
                 request.getMembershipIdsList(), request.getBulletin());
 
@@ -374,11 +389,11 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Implements the retrieve chatgroups by user.
      *
-     * @param request          {@link RetreiveChatgroupsByUserIdRequest}.
+     * @param request          {@link RetrieveChatgroupsByUserIdRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
     @Override
-    public void retrieveChatgroupsByUserId(RetreiveChatgroupsByUserIdRequest request,
+    public void retrieveChatgroupsByUserId(RetrieveChatgroupsByUserIdRequest request,
                                            StreamObserver<UserChatgroupsResponse> responseObserver) {
         List<ChatgroupMember> chatgroupMembers = this.chatgroupService.retrieveChatgroupMembersByUserId(request.getUserId());
 
@@ -401,8 +416,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Implements the retrieve chatgroup members.
      *
-     * @param request           {@link RetrieveChatgroupMembersByGroupIdRequest}.
-     * @param responseObserver  {@link StreamObserver}.
+     * @param request          {@link RetrieveChatgroupMembersByGroupIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
      */
     @Override
     public void retrieveChatgroupMembersById(RetrieveChatgroupMembersByGroupIdRequest request,
@@ -427,6 +442,22 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                 .addAllMemberIds(chatgroupMemberIdsPage.getContent())
                 .setPageResponse(PaginationUtils.valueOf(chatgroupMemberIdsPage, request.getPageRequest()))
                 .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Deletes all chatgroup memberships by membership id.
+     *
+     * @param request          {@link DeleteChatgroupMembershipByMembershipIdRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void deleteChatgroupMembershipByMembershipId(DeleteChatgroupMembershipByMembershipIdRequest request,
+                                                        StreamObserver<CommonStatus> responseObserver) {
+        this.chatgroupService.deleteChatgroupMembershipsByMembershipId(request.getMemberhsipId());
+
+        CommonStatus response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

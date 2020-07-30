@@ -102,7 +102,7 @@ message RetrieveChatgroupByIdRequest {
   string userId = 2;
 }
 
-message RetreiveChatgroupsByUserIdRequest {
+message RetrieveChatgroupsByUserIdRequest {
   string userId = 1;
 }
 
@@ -123,6 +123,10 @@ message ChatgroupMembersResponse {
   PageResponse pageResponse = 3;
 }
 
+message DeleteChatgroupMembershipByMembershipIdRequest {
+  string memberhsipId = 1;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
@@ -133,6 +137,7 @@ service ChatService {
   rpc JoinChatgroup(JoinChatgroupRequest) returns (CommonStatus) {};
   rpc RetrieveChatgroupsByIslandId(RetrieveChatgroupsByIslandIdRequest) returns (IslandChatgroupsResponse) {};
   rpc RetrieveChatgroupById(RetrieveChatgroupByIdRequest) returns (ChatgroupResponse) {};
-  rpc RetrieveChatgroupsByUserId(RetreiveChatgroupsByUserIdRequest) returns (UserChatgroupsResponse) {};
+  rpc RetrieveChatgroupsByUserId(RetrieveChatgroupsByUserIdRequest) returns (UserChatgroupsResponse) {};
   rpc RetrieveChatgroupMembersById(RetrieveChatgroupMembersByGroupIdRequest) returns (ChatgroupMembersResponse) {};
+  rpc DeleteChatgroupMembershipByMembershipId(DeleteChatgroupMembershipByMembershipIdRequest) returns (CommonStatus) {};
 }

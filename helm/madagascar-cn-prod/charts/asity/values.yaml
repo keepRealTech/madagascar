@@ -3,25 +3,18 @@
 # Declare variables to be passed into your templates.
 
 common_configs:
-  replicas: 1
-  memory: 2.5Gi
+  replicas: 2
+  memory: 2Gi
   cpu: 500m
 
-fossa:
-  host: fossa
-  port: 6565
-
-vanga:
-  host: vanga
-  port: 6565
-
-asity:
-  host: asity
-  port: 6565
-
 rocketmq:
-  topic: notification-event
-  tag: event
+  notification:
+    topic: notification-event
+    group_id: GID-asity-notification-default
+    tag: event
+  chat:
+    topic: chat-event
+    tag: event
 
 deploy:
   opentracing:

@@ -18,19 +18,19 @@ global:
       imagePullPolicy: Always
     brookesia:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/brookesia
-      tag: 1.0.1-staging
+      tag: 1.0.2-staging
       imagePullPolicy: Always
     coua:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-      tag: 1.0.5-staging
+      tag: 1.0.6-staging
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-      tag: 1.0.2-staging
+      tag: 1.0.3-staging
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
-      tag: 1.0.1-staging
+      tag: 1.0.2-staging
       imagePullPolicy: Always
     mantella:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/mantella
@@ -38,11 +38,11 @@ global:
       imagePullPolicy: Always
     marty:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/marty
-      tag: 1.0.0-staging
+      tag: 1.0.1-staging
       imagePullPolicy: Always
     tenrecs:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/tenrecs
-      tag: 1.0.1-staging
+      tag: 1.0.2-staging
       imagePullPolicy: Always
     vanga:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
