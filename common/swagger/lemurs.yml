@@ -3426,6 +3426,8 @@ components:
           type: string
         expirationInSec:
           type: integer
+        sceneId:
+          type: string
     QrTicketResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

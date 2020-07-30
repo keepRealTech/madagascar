@@ -24,7 +24,7 @@ import swagger.api.UserApi;
 import swagger.model.AvatarsResponse;
 import swagger.model.FullUserResponse;
 import swagger.model.GenderType;
-import swagger.model.PostBatchGetAvatarsRequest;
+import swagger.model.PostBatchGetUsersRequest;
 import swagger.model.PutUserPayload;
 import swagger.model.UserResponse;
 
@@ -140,11 +140,11 @@ public class UserController implements UserApi {
     /**
      * Implements the get batch user avatars api.
      *
-     * @param postBatchGetAvatarsRequest  (required) {@link PostBatchGetAvatarsRequest}.
+     * @param postBatchGetAvatarsRequest  (required) {@link PostBatchGetUsersRequest}.
      * @return {@link AvatarsResponse}.
      */
     @Override
-    public ResponseEntity<AvatarsResponse> apiV1UsersGetBatchAvatarsPost(PostBatchGetAvatarsRequest postBatchGetAvatarsRequest) {
+    public ResponseEntity<AvatarsResponse> apiV1UsersGetBatchAvatarsPost(PostBatchGetUsersRequest postBatchGetAvatarsRequest) {
         List<UserMessage> userMessages;
         if (Objects.isNull(postBatchGetAvatarsRequest.getUserIds()) || postBatchGetAvatarsRequest.getUserIds().isEmpty()) {
             userMessages = new ArrayList<>();
