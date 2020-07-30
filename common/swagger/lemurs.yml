@@ -1496,24 +1496,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RefreshVideoResponse'
-  /api/v2/upload/mediaUrls:
+  /api/v1/upload/mediaUrl:
     post:
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MediaUrlsRequestV2'
+              $ref: '#/components/schemas/MediaUrlRequest'
       tags:
         - Upload
-      summary: retrieves upload image url
+      summary: retrieves upload video/audio url
       responses:
         '200':
-          description: retrieve image url
+          description: retrieve video/audio url
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UploadUrlListResponseV2'
+                $ref: '#/components/schemas/UploadUrlResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -3544,28 +3544,22 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ResolveIslandRepostCodeDTO'
-    MediaUrlsRequestV2:
+    MediaUrlRequest:
       type: object
       properties:
-        mediaType:
-          $ref: '#/components/schemas/MultiMediaType'
-        fileNames:
-          type: array
-          items:
-            type: string
         mediaTitle:
           type: string
         mediaFilename:
           type: string
       required:
         - mediaType
-    UploadUrlListResponseV2:
+    UploadUrlResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/UploadUrlDTOV2'
+              $ref: '#/components/schemas/UploadMediaDTO'
     RefreshVideoResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -3573,15 +3567,6 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UploadMediaDTO'
-    UploadUrlDTOV2:
-      type: object
-      properties:
-        urlList:
-          type: array
-          items:
-            $ref: '#/components/schemas/UploadUrlDTO'
-        mediaInfo:
-          $ref: '#/components/schemas/UploadMediaDTO'
     UploadMediaDTO:
       type: object
       properties:

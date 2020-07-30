@@ -126,3 +126,8 @@ aliyun-oss:
   accessSecret: 123
   bucketName: kr-thumbnail-staging-cn2-01
   expireTimeInSeconds: 30
+
+aliyun-vod:
+  regionId: cn-shanghai
+  accessKeyId: xxx
+  accessKeySecret: xxx

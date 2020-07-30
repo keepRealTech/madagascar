@@ -3,8 +3,18 @@ package com.keepreal.madagascar.lemur.service;
 import com.aliyun.oss.HttpMethod;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.model.GeneratePresignedUrlRequest;
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.vod.model.v20170321.CreateUploadVideoRequest;
+import com.aliyuncs.vod.model.v20170321.CreateUploadVideoResponse;
+import com.aliyuncs.vod.model.v20170321.RefreshUploadVideoRequest;
+import com.aliyuncs.vod.model.v20170321.RefreshUploadVideoResponse;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.OssClientConfiguration;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import swagger.model.UploadMediaDTO;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,23 +24,28 @@ import java.util.Date;
  * Represents upload service.
  */
 @Service
+@Slf4j
 public class UploadService {
 
     private final OSS ossClient;
     private final String bucketName;
     private final Integer expireTimeInSeconds;
+    private final DefaultAcsClient client;
 
     /**
      * Constructs the upload service.
      *
      * @param ossClient     {@link OSS}.
      * @param configuration {@link OssClientConfiguration}.
+     * @param client        {@link DefaultAcsClient}.
      */
     public UploadService(OSS ossClient,
-                         OssClientConfiguration configuration) {
+                         OssClientConfiguration configuration,
+                         DefaultAcsClient client) {
         this.ossClient = ossClient;
         this.bucketName = configuration.getBucketName();
         this.expireTimeInSeconds = configuration.getExpireTimeInSeconds();
+        this.client = client;
     }
 
     /**
@@ -46,6 +61,57 @@ public class UploadService {
         request.setExpiration(date);
         request.setContentType("application/octet-stream");
         return ossClient.generatePresignedUrl(request).toString();
+    }
+
+    /**
+     * retrieve videoId, uploadAddress, uploadAuth
+     *
+     * @param title    title.
+     * @param filename filename.
+     * @return {@link UploadMediaDTO}.
+     */
+    public UploadMediaDTO createUploadVideo(String title, String filename) {
+        try {
+            CreateUploadVideoRequest request = new CreateUploadVideoRequest();
+            request.setTitle(title);
+            request.setFileName(filename);
+            CreateUploadVideoResponse acsResponse = client.getAcsResponse(request);
+
+            UploadMediaDTO dto = new UploadMediaDTO();
+            dto.setVedioId(acsResponse.getVideoId());
+            dto.setUploadAddress(acsResponse.getUploadAddress());
+            dto.setUploadAuth(acsResponse.getUploadAuth());
+
+            return dto;
+        } catch (ClientException e) {
+            log.error(e.getLocalizedMessage());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+    }
+
+    /**
+     * refresh uploadAddress, uploadAuth by videoId.
+     *
+     * @param videoId   videoId.
+     * @return {@link UploadMediaDTO}.
+     */
+    public UploadMediaDTO refreshUploadVideo(String videoId) {
+        try {
+            RefreshUploadVideoRequest request = new RefreshUploadVideoRequest();
+            request.setVideoId("VideoId");
+
+            RefreshUploadVideoResponse response = client.getAcsResponse(request);
+
+            UploadMediaDTO dto = new UploadMediaDTO();
+            dto.setVedioId(videoId);
+            dto.setUploadAddress(response.getUploadAddress());
+            dto.setUploadAuth(response.getUploadAuth());
+
+            return dto;
+        } catch (ClientException e) {
+            log.error(e.getLocalizedMessage());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
     }
 
 }
