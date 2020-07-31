@@ -167,11 +167,12 @@ public class FeedDTOFactory {
 
         SnapshotFeedDTO snapshotFeedDTO = new SnapshotFeedDTO();
         snapshotFeedDTO.setId(feed.getId());
-        snapshotFeedDTO.setText(feed.getText());
+        snapshotFeedDTO.setText(feed.getIsAccess() ? feed.getText() : "这是一条会员可见动态，请订阅解锁查看全文"); //TODO: 1.3版本上线后删除
         snapshotFeedDTO.setImagesUris(feed.getImageUrisList());
         snapshotFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
         snapshotFeedDTO.setCreatedAt(feed.getCreatedAt());
         snapshotFeedDTO.setIsDeleted(this.ehcacheService.checkFeedDeleted(feed.getId()));
+        snapshotFeedDTO.setIsAccess(feed.getIsAccess());
 
         snapshotFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
         snapshotFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
