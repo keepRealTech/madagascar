@@ -1845,8 +1845,6 @@ components:
             birthday:
               type: string
               format: date
-            isIslandHost:
-              type: boolean
             identityTypes:
               type: array
               items:
@@ -3436,9 +3434,7 @@ components:
         - type: object
           properties:
             data:
-              type: array
-              items:
-                $ref: '#/components/schemas/QrTicketDTO'
+              $ref: '#/components/schemas/QrTicketDTO'
     TutorialDTO:
       type: object
       properties:
