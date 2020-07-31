@@ -110,7 +110,7 @@ public class TimelineService {
      * @return A flux of {@link Timeline}.
      */
     public Flux<Timeline> retrieveByUserIdAndCreatedTimestamp(String userId, UInt64Value timestampAfter, int pageSize, UInt64Value timestampBefore) {
-        Criteria criteria = Criteria.where("userId").is(userId);
+        Criteria criteria = Criteria.where("userId").is(userId).and("isDeleted").is(false);
         criteria = timestampAfter != null ?
                 criteria.and("feedCreatedAt").gt(timestampAfter.getValue()) :
                 criteria.and("feedCreatedAt").lt(timestampBefore.getValue());
