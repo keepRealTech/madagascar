@@ -347,7 +347,7 @@ public class IslandController implements IslandApi {
         }
 
         IslandMessage islandMessage = this.islandService.createIsland(
-                payload.getName(), portraitImageUri, payload.getSecret(), userId);
+                payload.getName(), portraitImageUri, payload.getSecret(), payload.getIdentityId(), userId);
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));

@@ -17,6 +17,7 @@ message NewIslandRequest {
     string name = 2;
     google.protobuf.StringValue portraitImageUri = 3;
     google.protobuf.StringValue secret = 4;
+    google.protobuf.StringValue identityId = 5;
 }
 
 message IslandResponse {

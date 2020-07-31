@@ -223,15 +223,17 @@ public class IslandService {
      * @param name             Island name.
      * @param portraitImageUri Portrait image uri.
      * @param secret           Secret.
+     * @param identityId       Identity id.
      * @param userId           User id.
      * @return {@link IslandMessage}.
      */
-    public IslandMessage createIsland(String name, String portraitImageUri, String secret, String userId) {
+    public IslandMessage createIsland(String name, String portraitImageUri, String secret, String identityId, String userId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         NewIslandRequest.Builder requestBuilder = NewIslandRequest.newBuilder()
                 .setName(name)
                 .setSecret(StringValue.of(secret))
+                .setIdentityId(StringValue.of(identityId))
                 .setHostId(userId);
 
         if (!StringUtils.isEmpty(portraitImageUri)) {
