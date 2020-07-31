@@ -2,7 +2,6 @@ package com.keepreal.madagascar.fossa.grpcController;
 
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
-import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.CommentResponse;
@@ -84,7 +83,6 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
 
-//        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
         FeedInfo feedInfo = feedInfoService.findFeedInfoById(feedId, false);
 
         this.notificationEventProducerService.produceNewCommentsNotificationEventAsync(
