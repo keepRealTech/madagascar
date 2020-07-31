@@ -195,10 +195,11 @@ public class RepostService {
         return repostsResponse;
     }
 
-    public String generateRepostCode(String islandId) {
+    public String generateRepostCode(String islandId, String userId) {
         RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.channel);
 
         GenerateRepostCodeRequest request = GenerateRepostCodeRequest.newBuilder()
+                .setUserId(userId)
                 .setIslandId(islandId)
                 .build();
 
@@ -223,7 +224,7 @@ public class RepostService {
 
     }
 
-    public void resolveRepostCode(String code, DeviceType deviceType) {
+    public ResolveRepostCodeResponse resolveRepostCode(String code, DeviceType deviceType) {
         RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.channel);
 
         ResolveRepostCodeRequest request = ResolveRepostCodeRequest.newBuilder()
@@ -249,6 +250,8 @@ public class RepostService {
         if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
             throw new KeepRealBusinessException(response.getStatus());
         }
+
+        return response;
     }
 
 }
