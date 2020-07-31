@@ -172,6 +172,7 @@ public class FeedDTOFactory {
         snapshotFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
         snapshotFeedDTO.setCreatedAt(feed.getCreatedAt());
         snapshotFeedDTO.setIsDeleted(this.ehcacheService.checkFeedDeleted(feed.getId()));
+        snapshotFeedDTO.setIsAccess(feed.getIsAccess());
 
         snapshotFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
         snapshotFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));

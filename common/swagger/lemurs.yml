@@ -2056,6 +2056,8 @@ components:
               type: boolean
             isSubscribed:
               type: boolean
+            isAccess:
+              type: boolean
     SimpleMembershipDTO:
       type: object
       properties:

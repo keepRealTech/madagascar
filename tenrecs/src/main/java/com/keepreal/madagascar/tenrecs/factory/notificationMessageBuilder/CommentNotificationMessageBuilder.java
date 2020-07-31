@@ -90,6 +90,7 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
                 .setCommentsCount(0)
                 .setLikesCount(0)
                 .setRepostCount(0)
+                .setIsAccess(feed.getIsAccess())
                 .build();
     }
 

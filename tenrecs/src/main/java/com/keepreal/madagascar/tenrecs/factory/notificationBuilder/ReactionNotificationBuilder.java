@@ -103,6 +103,7 @@ public class ReactionNotificationBuilder implements NotificationBuilder {
                 .authorId(feedMessage.getUserId())
                 .text(feedMessage.getText())
                 .imageUris(feedMessage.getImageUrisList())
+                .isAccess(feedMessage.getIsAccess())
                 .createdAt(feedMessage.getCreatedAt())
                 .build();
     }

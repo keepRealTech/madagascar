@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.fossa.config.NotificationEventProducerConfiguration;
+import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.tenrecs.CommentEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
@@ -34,17 +35,20 @@ public class NotificationEventProducerService {
     private final ProducerBean producerBean;
     private final NotificationEventProducerConfiguration notificationEventProducerConfiguration;
     private final ExecutorService executorService;
+    private final FeedInfoService feedInfoService;
 
     /**
      * Constructs the notification event producer service.
      *
      * @param producerBean                           Notification event producer bean.
      * @param notificationEventProducerConfiguration {@link NotificationEventProducerConfiguration}.
+     * @param feedInfoService
      */
     public NotificationEventProducerService(@Qualifier("notification-event-producer") ProducerBean producerBean,
-                                            NotificationEventProducerConfiguration notificationEventProducerConfiguration) {
+                                            NotificationEventProducerConfiguration notificationEventProducerConfiguration, FeedInfoService feedInfoService) {
         this.producerBean = producerBean;
         this.notificationEventProducerConfiguration = notificationEventProducerConfiguration;
+        this.feedInfoService = feedInfoService;
         this.executorService = new ThreadPoolExecutor(
                 10,
                 20,
@@ -58,14 +62,14 @@ public class NotificationEventProducerService {
      * Produces new comment message event into message queue.
      *
      * @param commentMessage {@link CommentMessage}.
-     * @param feedMessage    {@link FeedMessage}.
+     * @param feedInfo    {@link FeedInfo}.
      * @param replyToId      String reply to user id.
      */
-    public void produceNewCommentsNotificationEventAsync(CommentMessage commentMessage, FeedMessage feedMessage, String replyToId) {
-        Message message = this.createNewCommentEventMessage(commentMessage, feedMessage, feedMessage.getUserId());
+    public void produceNewCommentsNotificationEventAsync(CommentMessage commentMessage, FeedInfo feedInfo, String replyToId) {
+        Message message = this.createNewCommentEventMessage(commentMessage, feedInfoService.getFeedMessage(feedInfo, feedInfo.getUserId()), feedInfo.getUserId());
         this.sendAsync(message);
-        if (!StringUtils.isEmpty(replyToId) && !replyToId.equals(feedMessage.getUserId())) {
-            message = this.createNewCommentEventMessage(commentMessage, feedMessage, replyToId);
+        if (!StringUtils.isEmpty(replyToId) && !replyToId.equals(feedInfo.getUserId())) {
+            message = this.createNewCommentEventMessage(commentMessage, feedInfoService.getFeedMessage(feedInfo, replyToId), replyToId);
             this.sendAsync(message);
         }
     }

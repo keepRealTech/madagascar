@@ -20,6 +20,7 @@ public class Feed {
     private String text = "";
     @Builder.Default
     private List<String> imageUris = new ArrayList<>();
+    private Boolean isAccess;
     private Long createdAt;
 
 }

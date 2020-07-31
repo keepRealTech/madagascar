@@ -16,6 +16,7 @@ import com.keepreal.madagascar.fossa.RetrieveCommentsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.common.FeedCountType;
 import com.keepreal.madagascar.fossa.config.NotificationEventProducerConfiguration;
 import com.keepreal.madagascar.fossa.model.CommentInfo;
+import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.service.CommentService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.NotificationEventProducerService;
@@ -83,10 +84,11 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
 
-        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
+//        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
+        FeedInfo feedInfo = feedInfoService.findFeedInfoById(feedId, false);
 
         this.notificationEventProducerService.produceNewCommentsNotificationEventAsync(
-                commentMessage, feedMessage, replyToId);
+                commentMessage, feedInfo, replyToId);
 
         responseObserver.onNext(commentResponse);
         responseObserver.onCompleted();
