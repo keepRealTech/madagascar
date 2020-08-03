@@ -54,7 +54,7 @@ public class IslandService {
         }
     }
 
-    public IslandMessage retrieveIslandById(String islandId) {
+    public IslandResponse retrieveIslandById(String islandId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         IslandResponse islandResponse;
@@ -72,10 +72,6 @@ public class IslandService {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
-        if (ErrorCode.REQUEST_SUCC_VALUE != islandResponse.getStatus().getRtn()) {
-            throw new KeepRealBusinessException(islandResponse.getStatus());
-        }
-
-        return islandResponse.getIsland();
+        return islandResponse;
     }
 }

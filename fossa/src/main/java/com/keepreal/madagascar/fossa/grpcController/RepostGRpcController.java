@@ -1,8 +1,12 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
+import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.DeviceType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.PageResponse;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.FeedRepostResponse;
 import com.keepreal.madagascar.fossa.FeedRepostsResponse;
@@ -48,9 +52,9 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
     /**
      * Constructs repost grpc controller.
      *
-     * @param repostService     {@link RepostService}.
-     * @param feedInfoService   {@link FeedInfoService}.
-     * @param islandService     {@link IslandService}.
+     * @param repostService   {@link RepostService}.
+     * @param feedInfoService {@link FeedInfoService}.
+     * @param islandService   {@link IslandService}.
      */
     public RepostGRpcController(RepostService repostService,
                                 FeedInfoService feedInfoService,
@@ -64,8 +68,8 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
     /**
      * Create the feed repost.
      *
-     * @param request           {@link NewFeedRepostRequest}.
-     * @param responseObserver  {@link FeedRepostResponse}.
+     * @param request          {@link NewFeedRepostRequest}.
+     * @param responseObserver {@link FeedRepostResponse}.
      */
     @Override
     public void createFeedRepost(NewFeedRepostRequest request, StreamObserver<FeedRepostResponse> responseObserver) {
@@ -86,8 +90,8 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
     /**
      * Implements feed reposts by feed id method.
      *
-     * @param request           {@link RetrieveFeedRepostsByFeedIdRequest}.
-     * @param responseObserver  {@link FeedRepostsResponse}.
+     * @param request          {@link RetrieveFeedRepostsByFeedIdRequest}.
+     * @param responseObserver {@link FeedRepostsResponse}.
      */
     @Override
     public void retrieveFeedRepostsByFeedId(RetrieveFeedRepostsByFeedIdRequest request, StreamObserver<FeedRepostsResponse> responseObserver) {
@@ -110,8 +114,8 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
     /**
      * Create the island repost.
      *
-     * @param request           {@link NewIslandRepostRequest}.
-     * @param responseObserver  {@link IslandRepostResponse}.
+     * @param request          {@link NewIslandRepostRequest}.
+     * @param responseObserver {@link IslandRepostResponse}.
      */
     @Override
     public void createIslandRepost(NewIslandRepostRequest request, StreamObserver<IslandRepostResponse> responseObserver) {
@@ -130,8 +134,8 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
     /**
      * Implements island reposts by island id method.
      *
-     * @param request           {@link RetrieveIslandRepostsByIslandIdRequest}.
-     * @param responseObserver  {@link IslandRepostsResponse}.
+     * @param request          {@link RetrieveIslandRepostsByIslandIdRequest}.
+     * @param responseObserver {@link IslandRepostsResponse}.
      */
     @Override
     public void retrieveIslandRepostsByIslandId(RetrieveIslandRepostsByIslandIdRequest request, StreamObserver<IslandRepostsResponse> responseObserver) {
@@ -155,12 +159,20 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
     public void generateRepostCodeByIslandId(GenerateRepostCodeRequest request, StreamObserver<GenerateRepostCodeResponse> responseObserver) {
         String userId = request.getUserId();
         String islandId = request.getIslandId();
-        IslandMessage islandMessage = islandService.retrieveIslandById(islandId);
-        String encode = RepostCodeUtils.encode(islandId);
+        IslandResponse response = islandService.retrieveIslandById(islandId);
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            responseObserver.onNext(GenerateRepostCodeResponse.newBuilder()
+                    .setStatus(response.getStatus())
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
+        String id = response.getIsland().getHostId().equals(userId) ? islandId + "1" : islandId + "0";
+        String encode = RepostCodeUtils.encode(id);
 
         responseObserver.onNext(GenerateRepostCodeResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
-                .setCode(repostService.generatorCode(islandMessage, userId, encode))
+                .setCode(repostService.generatorCode(response.getIsland(), userId, encode))
                 .build());
         responseObserver.onCompleted();
     }
@@ -170,15 +182,21 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
         String code = request.getCode();
         DeviceType deviceType = request.getDeviceType();
 
-        String islandId = RepostCodeUtils.decode(code);
-        IslandMessage islandMessage = islandService.retrieveIslandById(islandId);
+        String id = RepostCodeUtils.decode(code);
+        String islandId = id.substring(0, id.length() - 1);
+        boolean withSecret = id.substring(id.length() - 1).equals("1");
 
-        responseObserver.onNext(ResolveRepostCodeResponse.newBuilder()
+        ResolveRepostCodeResponse.Builder builder = ResolveRepostCodeResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .setIslandId(islandId)
-                .setRedirectUrl(repostService.getRedirectUrlByDeviceType(deviceType))
-                .setSecret(islandMessage.getSecret())
-                .build());
+                .setRedirectUrl(repostService.getRedirectUrlByDeviceType(deviceType));
+
+        if (withSecret) {
+            IslandMessage islandMessage = islandService.retrieveIslandById(islandId).getIsland();
+            builder.setSecret(StringValue.of(islandMessage.getSecret()));
+        }
+
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
 }

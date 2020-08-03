@@ -65,7 +65,9 @@ public class RepostDTOFactory {
 
         CodeItemDTO codeItemDTO = new CodeItemDTO();
         codeItemDTO.setIslandId(response.getIslandId());
-        codeItemDTO.setSecret(response.getSecret());
+        if (response.hasSecret()) {
+            codeItemDTO.setSecret(response.getSecret().getValue());
+        }
         dto.setParams(codeItemDTO);
         dto.setRedirectUrl(response.getRedirectUrl());
 

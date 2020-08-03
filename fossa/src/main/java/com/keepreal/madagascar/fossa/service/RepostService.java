@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class RepostService {
 
-    private static final String ANDROID_REDIRECT_URL = "";
+    private static final String ANDROID_REDIRECT_URL = "/island/home";
     private static final String IOS_REDIRECT_URL = "";
     private static final String LINKED_URL = "";
 
