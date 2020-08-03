@@ -7,6 +7,8 @@ import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.vod.model.v20170321.CreateUploadVideoRequest;
 import com.aliyuncs.vod.model.v20170321.CreateUploadVideoResponse;
+import com.aliyuncs.vod.model.v20170321.GetPlayInfoRequest;
+import com.aliyuncs.vod.model.v20170321.GetPlayInfoResponse;
 import com.aliyuncs.vod.model.v20170321.RefreshUploadVideoRequest;
 import com.aliyuncs.vod.model.v20170321.RefreshUploadVideoResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -19,6 +21,7 @@ import swagger.model.UploadMediaDTO;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Represents upload service.
@@ -98,7 +101,7 @@ public class UploadService {
     public UploadMediaDTO refreshUploadVideo(String videoId) {
         try {
             RefreshUploadVideoRequest request = new RefreshUploadVideoRequest();
-            request.setVideoId("VideoId");
+            request.setVideoId(videoId);
 
             RefreshUploadVideoResponse response = client.getAcsResponse(request);
 
@@ -111,6 +114,31 @@ public class UploadService {
         } catch (ClientException e) {
             log.error(e.getLocalizedMessage());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+    }
+
+    public void retrieveVedioInfo(String videoId) {
+        try {
+            GetPlayInfoRequest request = new GetPlayInfoRequest();
+            request.setVideoId(videoId);
+
+            GetPlayInfoResponse response = new GetPlayInfoResponse();
+            List<GetPlayInfoResponse.PlayInfo> playInfoList = response.getPlayInfoList();
+            if (playInfoList.size() == 0) {
+                log.error("aliyun error! playInfoList is empty! video id is {}", videoId);
+                return;
+            } else {
+                GetPlayInfoResponse.PlayInfo playInfo = playInfoList.get(0);
+                String playURL = playInfo.getPlayURL();
+                Long width = playInfo.getWidth();
+                Long height = playInfo.getHeight();
+                String duration = playInfo.getDuration();
+            }
+            String coverURL = response.getVideoBase().getCoverURL();
+
+        } catch (Exception e) {
+            log.error("aliyun error! videoId is {} message is {}", videoId, e.getLocalizedMessage());
+
         }
     }
 
