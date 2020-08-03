@@ -16,45 +16,38 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-04-26
- **/
-
+ * Represents the island identity entity.
+ */
 @Data
-@Table(name = "island")
+@Table(name = "island_identity")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode
-public class IslandInfo {
+public class IslandIdentity {
+
     @Id
     private String id;
-    private String hostId;
-    private String islandName;
+    private String name;
     @Builder.Default
-    private String identityId = "";
-    @Builder.Default
-    private String portraitImageUri = "";
+    private String iconImageUri = "";
     @Builder.Default
     private String description = "";
     @Builder.Default
-    private String secret = "";
+    @Column(name = "is_active")
+    private Boolean active = true;
     @Builder.Default
-    private Integer state = 0;
+    private String startColor = "";
     @Builder.Default
-    private Integer islanderNumber = 1;
-    @Builder.Default
-    private Long lastFeedAt = 0L; //用户客户端判断是否有未读feed消息（客户端轮询模式下使用）
+    private String endColor = "";
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
-    @Builder.Default
-    private Long lockedUntil = 0L;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }

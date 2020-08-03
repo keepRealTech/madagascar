@@ -10,25 +10,20 @@ import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.textFilter.TextContentFilter;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
-import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import swagger.api.ApiUtil;
 import swagger.api.UserApi;
 import swagger.model.AvatarsResponse;
 import swagger.model.FullUserResponse;
 import swagger.model.GenderType;
-import swagger.model.PostBatchGetAvatarsRequest;
+import swagger.model.PostBatchGetUsersRequest;
 import swagger.model.PutUserPayload;
 import swagger.model.UserResponse;
 
-import javax.validation.Valid;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,16 +135,16 @@ public class UserController implements UserApi {
     /**
      * Implements the get batch user avatars api.
      *
-     * @param postBatchGetAvatarsRequest  (required) {@link PostBatchGetAvatarsRequest}.
+     * @param postBatchGetUsersRequest  (required) {@link PostBatchGetUsersRequest}.
      * @return {@link AvatarsResponse}.
      */
     @Override
-    public ResponseEntity<AvatarsResponse> apiV1UsersGetBatchAvatarsPost(PostBatchGetAvatarsRequest postBatchGetAvatarsRequest) {
+    public ResponseEntity<AvatarsResponse> apiV1UsersGetBatchAvatarsPost(PostBatchGetUsersRequest postBatchGetUsersRequest) {
         List<UserMessage> userMessages;
-        if (Objects.isNull(postBatchGetAvatarsRequest.getUserIds()) || postBatchGetAvatarsRequest.getUserIds().isEmpty()) {
+        if (Objects.isNull(postBatchGetUsersRequest.getUserIds()) || postBatchGetUsersRequest.getUserIds().isEmpty()) {
             userMessages = new ArrayList<>();
         } else {
-            userMessages = this.userService.retrieveUsersByIds(postBatchGetAvatarsRequest.getUserIds());
+            userMessages = this.userService.retrieveUsersByIds(postBatchGetUsersRequest.getUserIds());
 
         }
 
