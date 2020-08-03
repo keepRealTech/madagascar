@@ -34,6 +34,10 @@ public class MembershipDTOFactory {
     }
 
     public BriefMembershipDTO briefValueOf(MembershipMessage membershipMessage) {
+        if (Objects.isNull(membershipMessage)) {
+            return null;
+        }
+
         BriefMembershipDTO dto = new BriefMembershipDTO();
         dto.setId(membershipMessage.getId());
         dto.setIslandId(membershipMessage.getIslandId());
@@ -46,6 +50,10 @@ public class MembershipDTOFactory {
     }
 
     public FeedMembershipDTO feedValueOf(FeedMembershipMessage feedMembershipMessage) {
+        if (Objects.isNull(feedMembershipMessage)) {
+            return null;
+        }
+
         FeedMembershipDTO dto = new FeedMembershipDTO();
         dto.setId(feedMembershipMessage.getId());
         dto.setMemberCount(feedMembershipMessage.getMemberCount());
@@ -55,6 +63,10 @@ public class MembershipDTOFactory {
     }
 
     public MembershipDTO valueOf(MembershipMessage membershipMessage) {
+        if (Objects.isNull(membershipMessage)) {
+            return null;
+        }
+
         MembershipDTO dto = new MembershipDTO();
         dto.setId(membershipMessage.getId());
         dto.setHostId(membershipMessage.getHostId());
