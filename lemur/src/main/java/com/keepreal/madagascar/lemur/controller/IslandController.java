@@ -222,8 +222,9 @@ public class IslandController implements IslandApi {
         IslandProfileResponse response = new IslandProfileResponse();
         IslandProfileDTO islandProfileDTO = this.islandDTOFactory.valueOf(islandProfileResponse, userId);
 
-        if (islandProfileResponse.getShouldIntroduce() &&
-                !islandProfileDTO.getHostIntroduction().getShouldPopup()) {
+        if (userId.equals(islandProfileResponse.getHost().getId())
+                && islandProfileResponse.getShouldIntroduce()
+                && !islandProfileDTO.getHostIntroduction().getShouldPopup()) {
             this.islandService.dismissIslandIntroduction(id, userId);
         }
 
