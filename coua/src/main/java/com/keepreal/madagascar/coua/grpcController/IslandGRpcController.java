@@ -136,6 +136,9 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         if (request.hasSecret()) {
             infoBuilder.secret(request.getSecret().getValue());
         }
+        if (request.hasIdentityId()) {
+            infoBuilder.identityId(request.getIdentityId().getValue());
+        }
 
         IslandInfo save = islandInfoService.createIsland(infoBuilder.build());
         try {
