@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: brookesia
+  namespace: {{ .Values.global.common_configs.namespace }}
+spec:
+  replicas: {{ .Values.global.common_configs.replicas.brookesia }}
+  selector:
+    matchLabels:
+      app: brookesia
+  template:
+    metadata:
+      labels:
+        app: brookesia
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.acr.acr_secret_name }}
+      containers:
+        - name: brookesia
+          image: {{ .Values.global.images.brookesia.name }}:{{ .Values.global.images.brookesia.tag }}
+          imagePullPolicy: {{ .Values.global.images.brookesia.imagePullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: brookesia
+          env:
+            - name: ROCKETMQ_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-key
+            - name: ROCKETMQ_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-secret
+            - name: ROCKETMQ_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
+            - name: SPRING_DATA_MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-mongo
+                  key: connection-string
+          resources:
+            limits:
+              memory: {{ .Values.common_configs.memory }}
+            requests:
+              cpu: {{ .Values.common_configs.cpu }}
+              memory: {{ .Values.common_configs.memory }}

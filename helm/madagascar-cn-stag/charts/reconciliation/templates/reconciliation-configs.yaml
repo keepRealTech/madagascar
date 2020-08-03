@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: reconciliation
-  namespace: {{ .Values.global.common_configs.namespace }}
-data:
-  aliyun_logs_madagascar-prod: stdout
-  SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
