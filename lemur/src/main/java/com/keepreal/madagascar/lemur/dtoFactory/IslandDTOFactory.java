@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
 import swagger.model.FullIslandDTO;
+import swagger.model.HostIntroductionDTO;
 import swagger.model.IslandDTO;
 import swagger.model.IslandIdentityDTO;
 import swagger.model.IslandProfileDTO;
+import swagger.model.SubscriberIntroductionDTO;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -23,6 +25,10 @@ import java.util.Objects;
 public class IslandDTOFactory {
 
     private static final int DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT = 99_999_999;
+    private static final String SUBSCRIBER_INTRODUCTION_CONTENT = "欢迎加入我的岛！在这里你可以：\r\n" +
+            "1.最快了解我的动态\r\n" +
+            "2.与岛民们畅聊和分享同好\r\n" +
+            "3.订阅会员支持我，并获得专属权益";
 
     private final ChatService chatService;
     private final UserDTOFactory userDTOFactory;
@@ -141,6 +147,14 @@ public class IslandDTOFactory {
         islandProfileDTO.setHasGroupchatAccess(this.chatService.retrieveChatAccessByIslandId(islandProfileResponse
                 .getIsland().getId()).getChatAccess().getHasAccess());
 
+        if (userId.equals(islandProfileDTO.getHost().getId())) {
+            islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(islandProfileResponse.getShouldIntroduce()));
+            islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(false));
+        } else {
+            islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(islandProfileResponse.getShouldIntroduce()));
+            islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(false));
+        }
+
         return islandProfileDTO;
     }
 
@@ -163,6 +177,30 @@ public class IslandDTOFactory {
 
         islandIdentityDTO.setColors(Arrays.asList(islandIdentityMessage.getStartColor(), islandIdentityMessage.getEndColor()));
         return islandIdentityDTO;
+    }
+
+    /**
+     * Builds the subscriber introduction dto.
+     *
+     * @param shouldIntroduce Whether should pop up the intro.
+     * @return {@link SubscriberIntroductionDTO}
+     */
+    private SubscriberIntroductionDTO buildSubscriberIntroduction(Boolean shouldIntroduce) {
+        SubscriberIntroductionDTO subscriberIntroductionDTO = new SubscriberIntroductionDTO();
+
+        if (Objects.isNull(shouldIntroduce) || !shouldIntroduce) {
+            subscriberIntroductionDTO.setShouldPopup(false);
+            return subscriberIntroductionDTO;
+        }
+
+        subscriberIntroductionDTO.setShouldPopup(true);
+        subscriberIntroductionDTO.setContent(IslandDTOFactory.SUBSCRIBER_INTRODUCTION_CONTENT);
+
+        return subscriberIntroductionDTO;
+    }
+
+    private HostIntroductionDTO buildHostIntroduction(Boolean shouldIntroduce) {
+        return null;
     }
 
 }
