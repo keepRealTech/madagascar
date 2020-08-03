@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.ImageService;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.textFilter.TextContentFilter;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import swagger.api.UserApi;
 import swagger.model.AvatarsResponse;
+import swagger.model.ChatUsersResponse;
 import swagger.model.FullUserResponse;
 import swagger.model.GenderType;
 import swagger.model.PostBatchGetUsersRequest;
@@ -39,23 +41,27 @@ public class UserController implements UserApi {
 
     private final ImageService imageService;
     private final UserService userService;
+    private final IslandService islandService;
     private final UserDTOFactory userDTOFactory;
     private final TextContentFilter textContentFilter;
 
     /**
      * Constructs the user controller.
      *
-     * @param imageService      {@link ImageService}.
+     * @param imageService     {@link ImageService}.
      * @param userService       {@link UserService}.
+     * @param islandService     {@link IslandService}.
      * @param userDTOFactory    {@link UserDTOFactory}.
      * @param textContentFilter {@link TextContentFilter}.
      */
     public UserController(ImageService imageService,
                           UserService userService,
+                          IslandService islandService,
                           UserDTOFactory userDTOFactory,
                           TextContentFilter textContentFilter) {
         this.imageService = imageService;
         this.userService = userService;
+        this.islandService = islandService;
         this.userDTOFactory = userDTOFactory;
         this.textContentFilter = textContentFilter;
     }
@@ -135,7 +141,7 @@ public class UserController implements UserApi {
     /**
      * Implements the get batch user avatars api.
      *
-     * @param postBatchGetUsersRequest  (required) {@link PostBatchGetUsersRequest}.
+     * @param postBatchGetUsersRequest (required) {@link PostBatchGetUsersRequest}.
      * @return {@link AvatarsResponse}.
      */
     @Override
@@ -156,6 +162,20 @@ public class UserController implements UserApi {
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the get user info in batch api for chat list.
+     *
+     * @param postBatchGetUsersRequest  (required) {@link PostBatchGetUsersRequest}.
+     * @return {@link ChatUsersResponse}.
+     */
+    @Override
+    public ResponseEntity<ChatUsersResponse> apiV1UsersGetChatUserInfosPost(PostBatchGetUsersRequest postBatchGetUsersRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        this.islandService.retrieveIslands()
+
     }
 
     /**
