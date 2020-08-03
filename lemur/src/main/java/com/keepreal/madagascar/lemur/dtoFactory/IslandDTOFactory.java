@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.service.ChatService;
@@ -9,8 +10,10 @@ import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
 import swagger.model.FullIslandDTO;
 import swagger.model.IslandDTO;
+import swagger.model.IslandIdentityDTO;
 import swagger.model.IslandProfileDTO;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -139,6 +142,27 @@ public class IslandDTOFactory {
                 .getIsland().getId()).getChatAccess().getHasAccess());
 
         return islandProfileDTO;
+    }
+
+    /**
+     * Converts the {@link IslandIdentityMessage} into {@link IslandIdentityDTO}.
+     *
+     * @param islandIdentityMessage {@link IslandIdentityMessage}.
+     * @return {@link IslandIdentityDTO}.
+     */
+    public IslandIdentityDTO valueOf(IslandIdentityMessage islandIdentityMessage) {
+        if (Objects.isNull(islandIdentityMessage)) {
+            return null;
+        }
+
+        IslandIdentityDTO islandIdentityDTO = new IslandIdentityDTO();
+        islandIdentityDTO.setId(islandIdentityMessage.getId());
+        islandIdentityDTO.setName(islandIdentityMessage.getName());
+        islandIdentityDTO.setDescription(islandIdentityMessage.getDescription());
+        islandIdentityDTO.setIconUri(islandIdentityMessage.getIconUri());
+
+        islandIdentityDTO.setColors(Arrays.asList(islandIdentityMessage.getStartColor(), islandIdentityMessage.getEndColor()));
+        return islandIdentityDTO;
     }
 
 }

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.coua";
+
+import "common.proto";
+import "google/protobuf/empty.proto";
+
+message IslandIdentityMessage {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string iconUri = 4;
+  string startColor = 5;
+  string endColor = 6;
+}
+
+message IslandIdentitiesResponse {
+  CommonStatus status = 1;
+  repeated IslandIdentityMessage islandIdentities = 2;
+}
+
+service IslandIdentityService {
+  rpc RetrieveActiveIslandIdentities(google.protobuf.Empty) returns (IslandIdentitiesResponse) {};
+}
