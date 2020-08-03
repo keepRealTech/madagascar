@@ -232,7 +232,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     public void retrieveDeviceTokensByUserIdList(RetrieveDeviceTokensByUserIdListRequest request, StreamObserver<RetrieveDeviceTokensByUserIdListResponse> responseObserver) {
         ProtocolStringList userIdsList = request.getUserIdsList();
 
-        List<SimpleDeviceToken> tokenList= userDeviceInfoService.getDeviceTokenListByUserIdList(userIdsList);
+        List<SimpleDeviceToken> tokenList = userDeviceInfoService.getDeviceTokenListByUserIdList(userIdsList);
 
         List<String> androidTokenList = new ArrayList<>();
         List<String> iosTokenList = new ArrayList<>();
@@ -256,7 +256,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     /**
      * Implements the retrieve users by ids.
      *
-     * @param request {@link RetreiveMultipleUsersByIdsRequest}.
+     * @param request          {@link RetreiveMultipleUsersByIdsRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
     @Override

@@ -61,8 +61,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
-
 /**
  * Represents the island GRpc controller.
  */
@@ -100,8 +98,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the check island name method.
      *
-     * @param request           {@link CheckNameRequest}.
-     * @param responseObserver  {@link CheckNameResponse}.
+     * @param request          {@link CheckNameRequest}.
+     * @param responseObserver {@link CheckNameResponse}.
      */
     @Override
     public void checkName(CheckNameRequest request, StreamObserver<CheckNameResponse> responseObserver) {
@@ -118,8 +116,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the create island method.
      *
-     * @param request           {@link NewIslandRequest}.
-     * @param responseObserver  {@link IslandResponse}.
+     * @param request          {@link NewIslandRequest}.
+     * @param responseObserver {@link IslandResponse}.
      */
     @Override
     public void createIsland(NewIslandRequest request, StreamObserver<IslandResponse> responseObserver) {
@@ -167,8 +165,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the retrieve island by id method.
      *
-     * @param request           {@link RetrieveIslandByIdRequest}.
-     * @param responseObserver  {@link IslandResponse}.
+     * @param request          {@link RetrieveIslandByIdRequest}.
+     * @param responseObserver {@link IslandResponse}.
      */
     @Override
     public void retrieveIslandById(RetrieveIslandByIdRequest request, StreamObserver<IslandResponse> responseObserver) {
@@ -193,8 +191,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the island profile by id method.
      *
-     * @param request           {@link RetrieveIslandProfileByIdRequest}.
-     * @param responseObserver  {@link IslandProfileResponse}.
+     * @param request          {@link RetrieveIslandProfileByIdRequest}.
+     * @param responseObserver {@link IslandProfileResponse}.
      */
     @Override
     public void retrieveIslandProfileById(RetrieveIslandProfileByIdRequest request, StreamObserver<IslandProfileResponse> responseObserver) {
@@ -239,8 +237,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the retrieve island by condition method.
      *
-     * @param request           {@link RetrieveMultipleIslandsRequest} (hostId, subscriberId, islandName)
-     * @param responseObserver  {@link IslandsResponse}.
+     * @param request          {@link RetrieveMultipleIslandsRequest} (hostId, subscriberId, islandName)
+     * @param responseObserver {@link IslandsResponse}.
      */
     @Override
     public void retrieveIslandsByCondition(RetrieveMultipleIslandsRequest request, StreamObserver<IslandsResponse> responseObserver) {
@@ -276,8 +274,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the update island by id method.
      *
-     * @param request           {@link UpdateIslandByIdRequest}.
-     * @param responseObserver  {@link IslandResponse}.
+     * @param request          {@link UpdateIslandByIdRequest}.
+     * @param responseObserver {@link IslandResponse}.
      */
     @Override
     public void updateIslandById(UpdateIslandByIdRequest request, StreamObserver<IslandResponse> responseObserver) {
@@ -322,8 +320,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the island's subscribers by island id method.
      *
-     * @param request           {@link RetrieveIslandSubscribersByIdRequest}.
-     * @param responseObserver  {@link IslandSubscribersResponse}.
+     * @param request          {@link RetrieveIslandSubscribersByIdRequest}.
+     * @param responseObserver {@link IslandSubscribersResponse}.
      */
     @Override
     public void retrieveIslandSubscribersById(RetrieveIslandSubscribersByIdRequest request, StreamObserver<IslandSubscribersResponse> responseObserver) {
@@ -356,8 +354,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements subscribe island by id method.
      *
-     * @param request           {@link SubscribeIslandByIdRequest}.
-     * @param responseObserver  {@link SubscribeIslandResponse}.
+     * @param request          {@link SubscribeIslandByIdRequest}.
+     * @param responseObserver {@link SubscribeIslandResponse}.
      */
     @Override
     @Transactional
@@ -410,8 +408,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the unsubscribe island by id method.
      *
-     * @param request           {@link UnsubscribeIslandByIdRequest}.
-     * @param responseObserver  {@link SubscribeIslandResponse}.
+     * @param request          {@link UnsubscribeIslandByIdRequest}.
+     * @param responseObserver {@link SubscribeIslandResponse}.
      */
     @Override
     public void unsubscribeIslandById(UnsubscribeIslandByIdRequest request, StreamObserver<SubscribeIslandResponse> responseObserver) {
@@ -428,8 +426,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the check new feeds method.
      *
-     * @param request           {@link CheckNewFeedsRequest}.
-     * @param responseObserver  {@link CheckNewFeedsResponse}.
+     * @param request          {@link CheckNewFeedsRequest}.
+     * @param responseObserver {@link CheckNewFeedsResponse}.
      */
     @Override
     public void checkNewFeeds(CheckNewFeedsRequest request, StreamObserver<CheckNewFeedsResponse> responseObserver) {
@@ -457,8 +455,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the update lastFeedAt by id method.
      *
-     * @param request           {@link UpdateLastFeedAtRequest}.
-     * @param responseObserver  {@link UpdateLastFeedAtResponse}.
+     * @param request          {@link UpdateLastFeedAtRequest}.
+     * @param responseObserver {@link UpdateLastFeedAtResponse}.
      */
     @Override
     public void updateLastFeedAtById(UpdateLastFeedAtRequest request, StreamObserver<UpdateLastFeedAtResponse> responseObserver) {
@@ -476,8 +474,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the default islands method.
      *
-     * @param request           {@link RetrieveDefaultIslandsByUserIdRequest}.
-     * @param responseObserver  {@link IslandsResponse}.
+     * @param request          {@link RetrieveDefaultIslandsByUserIdRequest}.
+     * @param responseObserver {@link IslandsResponse}.
      */
     @Override
     public void retrieveDefaultIslandsByUserId(RetrieveDefaultIslandsByUserIdRequest request, StreamObserver<IslandsResponse> responseObserver) {
@@ -553,7 +551,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Dismisses the introduction.
      *
-     * @param request {@link DismissIntroductionRequest}.
+     * @param request          {@link DismissIntroductionRequest}.
      * @param responseObserver {@link CommonStatus}.
      */
     @Override
