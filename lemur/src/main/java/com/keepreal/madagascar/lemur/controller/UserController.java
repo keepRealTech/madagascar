@@ -2,12 +2,17 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.IdentityType;
+import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.MembershipMessage;
+import com.keepreal.madagascar.lemur.dtoFactory.MembershipDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.IslandService;
+import com.keepreal.madagascar.lemur.service.MembershipService;
+import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.textFilter.TextContentFilter;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
@@ -19,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import swagger.api.UserApi;
 import swagger.model.AvatarsResponse;
+import swagger.model.BriefMembershipDTO;
 import swagger.model.ChatUsersResponse;
 import swagger.model.FullUserResponse;
 import swagger.model.GenderType;
@@ -28,8 +34,11 @@ import swagger.model.UserResponse;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -42,27 +51,39 @@ public class UserController implements UserApi {
     private final ImageService imageService;
     private final UserService userService;
     private final IslandService islandService;
+    private final MembershipService membershipService;
+    private final SubscribeMembershipService subscribeMembershipService;
     private final UserDTOFactory userDTOFactory;
+    private final MembershipDTOFactory membershipDTOFactory;
     private final TextContentFilter textContentFilter;
 
     /**
      * Constructs the user controller.
      *
-     * @param imageService     {@link ImageService}.
-     * @param userService       {@link UserService}.
-     * @param islandService     {@link IslandService}.
-     * @param userDTOFactory    {@link UserDTOFactory}.
-     * @param textContentFilter {@link TextContentFilter}.
+     * @param imageService               {@link ImageService}.
+     * @param userService                {@link UserService}.
+     * @param islandService              {@link IslandService}.
+     * @param membershipService          {@link MembershipService}.
+     * @param subscribeMembershipService {@link SubscribeMembershipService}.
+     * @param userDTOFactory             {@link UserDTOFactory}.
+     * @param membershipDTOFactory       {@link MembershipDTOFactory}.
+     * @param textContentFilter          {@link TextContentFilter}.
      */
     public UserController(ImageService imageService,
                           UserService userService,
                           IslandService islandService,
+                          MembershipService membershipService,
+                          SubscribeMembershipService subscribeMembershipService,
                           UserDTOFactory userDTOFactory,
+                          MembershipDTOFactory membershipDTOFactory,
                           TextContentFilter textContentFilter) {
         this.imageService = imageService;
         this.userService = userService;
         this.islandService = islandService;
+        this.membershipService = membershipService;
+        this.subscribeMembershipService = subscribeMembershipService;
         this.userDTOFactory = userDTOFactory;
+        this.membershipDTOFactory = membershipDTOFactory;
         this.textContentFilter = textContentFilter;
     }
 
@@ -151,7 +172,6 @@ public class UserController implements UserApi {
             userMessages = new ArrayList<>();
         } else {
             userMessages = this.userService.retrieveUsersByIds(postBatchGetUsersRequest.getUserIds());
-
         }
 
         AvatarsResponse response = new AvatarsResponse();
@@ -167,15 +187,57 @@ public class UserController implements UserApi {
     /**
      * Implements the get user info in batch api for chat list.
      *
-     * @param postBatchGetUsersRequest  (required) {@link PostBatchGetUsersRequest}.
+     * @param postBatchGetUsersRequest (required) {@link PostBatchGetUsersRequest}.
      * @return {@link ChatUsersResponse}.
      */
     @Override
     public ResponseEntity<ChatUsersResponse> apiV1UsersGetChatUserInfosPost(PostBatchGetUsersRequest postBatchGetUsersRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        this.islandService.retrieveIslands()
+        List<UserMessage> userMessages;
+        if (Objects.isNull(postBatchGetUsersRequest.getUserIds()) || postBatchGetUsersRequest.getUserIds().isEmpty()) {
+            ChatUsersResponse response = new ChatUsersResponse();
+            response.setData(new ArrayList<>());
+            response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+            response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } else {
+            userMessages = this.userService.retrieveUsersByIds(postBatchGetUsersRequest.getUserIds());
+        }
 
+        if (userMessages.isEmpty()) {
+            ChatUsersResponse response = new ChatUsersResponse();
+            response.setData(new ArrayList<>());
+            response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+            response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        List<IslandMessage> createdIslandList = this.islandService.retrieveIslands(null, userId, null, 0, 1).getIslandsList();
+
+        Map<String, List<BriefMembershipDTO>> membershipMap = new HashMap<>();
+        if (!createdIslandList.isEmpty()) {
+            String islandId = createdIslandList.get(0).getId();
+            Map<String, MembershipMessage> islandMembershipMap = this.membershipService.retrieveMembershipsByIslandId(islandId).stream()
+                    .collect(Collectors.toMap(MembershipMessage::getId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
+            userMessages.forEach(user -> {
+                List<String> membershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(islandId, user.getId());
+                List<BriefMembershipDTO> briefMembershipDTOList = membershipIds.stream()
+                        .map(membershipId -> islandMembershipMap.getOrDefault(membershipId, null))
+                        .map(this.membershipDTOFactory::briefValueOf)
+                        .collect(Collectors.toList());
+                membershipMap.put(user.getId(), briefMembershipDTOList);
+            });
+        }
+
+        ChatUsersResponse response = new ChatUsersResponse();
+        response.setData(userMessages.stream()
+                .map(user -> this.userDTOFactory.chatUserValueOf(user, membershipMap.getOrDefault(user.getId(), null)))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
