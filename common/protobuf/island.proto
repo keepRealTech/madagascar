@@ -79,6 +79,7 @@ message IslandProfileResponse {
     UserMessage host = 3;
     google.protobuf.StringValue userIndex = 4;
     int64 subscribedAt = 5;
+    bool shouldIntroduce = 6;
 }
 
 message SubscribeIslandByIdRequest {
@@ -148,6 +149,11 @@ message RetrieveDeviceTokensResponse {
     PageResponse pageResponse = 4;
 }
 
+message DismissIntroductionRequest {
+    string islandId = 1;
+    string userId = 2;
+}
+
 service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
@@ -159,8 +165,9 @@ service IslandService {
     rpc SubscribeIslandById (SubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
     rpc UnsubscribeIslandById (UnsubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
     rpc CheckNewFeeds (CheckNewFeedsRequest) returns (CheckNewFeedsResponse) {};
-    rpc UpdateLastFeedAtById (UpdateLastFeedAtRequest) returns (UpdateLastFeedAtResponse) {}
-    rpc RetrieveDefaultIslandsByUserId (RetrieveDefaultIslandsByUserIdRequest) returns (IslandsResponse) {}
-    rpc RetrieveUserSubscriptionState (RetrieveUserSubscriptionStateRequest) returns (RetrieveUserSubscriptionStateResponse) {}
-    rpc RetrieveDeviceTokensById (RetrieveDeviceTokensRequest) returns (RetrieveDeviceTokensResponse) {}
+    rpc UpdateLastFeedAtById (UpdateLastFeedAtRequest) returns (UpdateLastFeedAtResponse) {};
+    rpc RetrieveDefaultIslandsByUserId (RetrieveDefaultIslandsByUserIdRequest) returns (IslandsResponse) {};
+    rpc RetrieveUserSubscriptionState (RetrieveUserSubscriptionStateRequest) returns (RetrieveUserSubscriptionStateResponse) {};
+    rpc RetrieveDeviceTokensById (RetrieveDeviceTokensRequest) returns (RetrieveDeviceTokensResponse) {};
+    rpc DismissIntroduction(DismissIntroductionRequest) returns (CommonStatus) {};
 }

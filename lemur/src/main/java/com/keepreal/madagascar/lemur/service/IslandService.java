@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.service;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -10,6 +11,7 @@ import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
 import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
+import com.keepreal.madagascar.coua.DismissIntroductionRequest;
 import com.keepreal.madagascar.coua.IslandIdentitiesResponse;
 import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandIdentityServiceGrpc;
@@ -551,6 +553,37 @@ public class IslandService {
         }
 
         return response.getIslandIdentitiesList();
+    }
+
+    /**
+     * Dismisses the island introduction once and for all.
+     *
+     * @param islandId Island id.
+     * @param userId   User id.
+     */
+    public void dismissIslandIntroduction(String islandId, String userId) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        DismissIntroductionRequest request = DismissIntroductionRequest.newBuilder()
+                .setUserId(userId)
+                .setIslandId(islandId)
+                .build();
+
+        CommonStatus response;
+        try {
+            response = stub.dismissIntroduction(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)) {
+            log.error("Dismiss island introduction returned null.");
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getRtn()) {
+            throw new KeepRealBusinessException(response);
+        }
     }
 
     /**
