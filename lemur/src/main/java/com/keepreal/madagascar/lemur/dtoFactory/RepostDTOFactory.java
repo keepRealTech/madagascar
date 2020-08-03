@@ -2,8 +2,11 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.IslandRepostMessage;
+import com.keepreal.madagascar.fossa.ResolveRepostCodeResponse;
 import org.springframework.stereotype.Component;
+import swagger.model.CodeItemDTO;
 import swagger.model.RepostDTO;
+import swagger.model.ResolveIslandRepostCodeDTO;
 
 import java.util.Objects;
 
@@ -55,6 +58,18 @@ public class RepostDTOFactory {
         repostDTO.setCreatedAt(feedRepost.getFeedRepost().getCreatedAt());
 
         return repostDTO;
+    }
+
+    public ResolveIslandRepostCodeDTO codeValueOf(ResolveRepostCodeResponse response) {
+        ResolveIslandRepostCodeDTO dto = new ResolveIslandRepostCodeDTO();
+
+        CodeItemDTO codeItemDTO = new CodeItemDTO();
+        codeItemDTO.setIslandId(response.getIslandId());
+        codeItemDTO.setSecret(response.getSecret());
+        dto.setParams(codeItemDTO);
+        dto.setRedirectUrl(response.getRedirectUrl());
+
+        return dto;
     }
 
 }

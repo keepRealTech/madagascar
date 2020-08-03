@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -9,6 +10,9 @@ import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
 import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
+import com.keepreal.madagascar.coua.IslandIdentitiesResponse;
+import com.keepreal.madagascar.coua.IslandIdentityMessage;
+import com.keepreal.madagascar.coua.IslandIdentityServiceGrpc;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
@@ -219,15 +223,17 @@ public class IslandService {
      * @param name             Island name.
      * @param portraitImageUri Portrait image uri.
      * @param secret           Secret.
+     * @param identityId       Identity id.
      * @param userId           User id.
      * @return {@link IslandMessage}.
      */
-    public IslandMessage createIsland(String name, String portraitImageUri, String secret, String userId) {
+    public IslandMessage createIsland(String name, String portraitImageUri, String secret, String identityId, String userId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         NewIslandRequest.Builder requestBuilder = NewIslandRequest.newBuilder()
                 .setName(name)
                 .setSecret(StringValue.of(secret))
+                .setIdentityId(StringValue.of(identityId))
                 .setHostId(userId);
 
         if (!StringUtils.isEmpty(portraitImageUri)) {
@@ -484,6 +490,13 @@ public class IslandService {
         return islandsResponse;
     }
 
+    /**
+     * Retrieves the island subscribe state by user id.
+     *
+     * @param userId        User id.
+     * @param islandIdList  Island ids.
+     * @return True if subscribed.
+     */
     public Map<String, Boolean> retrieveIslandSubscribeStateByUserId(String userId, List<String> islandIdList) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
@@ -512,6 +525,41 @@ public class IslandService {
         return response.getStateMapMap();
     }
 
+    /**
+     * Retrieves all active island identities.
+     *
+     * @return {@link IslandIdentityMessage}.
+     */
+    public List<IslandIdentityMessage> retrieveActiveIslandIdentities() {
+        IslandIdentityServiceGrpc.IslandIdentityServiceBlockingStub stub = IslandIdentityServiceGrpc.newBlockingStub(this.channel);
+
+        IslandIdentitiesResponse response;
+        try {
+            response = stub.retrieveActiveIslandIdentities(Empty.getDefaultInstance());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve island subscribe state returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getIslandIdentitiesList();
+    }
+
+    /**
+     * Checks the string length.
+     *
+     * @param str        String.
+     * @param threshold  Max length.
+     * @return Trimmed string.
+     */
     private String checkLength(String str, int threshold) {
         String trimmed = str.trim();
         if (trimmed.length() > threshold)
