@@ -44,9 +44,9 @@ public class IslandDTOFactory {
     /**
      * Constructs the island dto factory.
      * @param chatService          {@link ChatService}.
-     * @param repostService
-     * @param feedService
-     * @param membershipService
+     * @param repostService        {@link RepostService}.
+     * @param feedService          {@link FeedService}.
+     * @param membershipService    {@link MembershipService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
      */
