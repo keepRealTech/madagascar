@@ -6,21 +6,16 @@ import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
-import com.keepreal.madagascar.coua.IslandIdentity;
 import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
-import com.keepreal.madagascar.fossa.IslandRepostMessage;
-import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
-import com.keepreal.madagascar.lemur.dtoFactory.RepostDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.IslandService;
-import com.keepreal.madagascar.lemur.service.RepostService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.textFilter.TextContentFilter;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
@@ -29,34 +24,27 @@ import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import swagger.api.ApiUtil;
 import swagger.api.IslandApi;
 import swagger.model.BriefIslandResponse;
 import swagger.model.BriefIslandsResponse;
 import swagger.model.CheckIslandDTO;
 import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
-import swagger.model.FeedsResponse;
 import swagger.model.IslandIdentityResponse;
 import swagger.model.IslandPosterResponse;
 import swagger.model.IslandProfileResponse;
 import swagger.model.IslandProfilesResponse;
 import swagger.model.IslandResponse;
 import swagger.model.PostIslandPayload;
-import swagger.model.PostRepostRequest;
 import swagger.model.PosterFeedDTO;
 import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
-import swagger.model.RepostResponse;
-import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
-import swagger.model.TimelinesResponse;
 import swagger.model.UsersResponse;
 
 import javax.validation.Valid;
@@ -481,6 +469,23 @@ public class IslandController implements IslandApi {
                 .collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the dismiss introduction api.
+     *
+     * @param id id (required) Island id.
+     * @return {@link DummyResponse}.
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1IslandsIdIntroductionDismissPost(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        this.islandService.dismissIslandIntroduction(id, userId);
+
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
