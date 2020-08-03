@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
 import com.keepreal.madagascar.lemur.dtoFactory.CommentDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
+import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import swagger.model.NotificationDTO;
 import swagger.model.NotificationType;
@@ -15,6 +16,7 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
 
     private NotificationMessage notificationMessage;
     private CommentDTOFactory commentDTOFactory;
+    private FeedService feedService;
     private FeedDTOFactory feedDTOFactory;
 
     /**
@@ -25,6 +27,17 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
      */
     public CommentNotificationDTOBuilder setCommentDTOFactory(CommentDTOFactory commentDTOFactory) {
         this.commentDTOFactory = commentDTOFactory;
+        return this;
+    }
+
+    /**
+     * Sets the {@link FeedService}.
+     *
+     * @param feedService {@link CommentDTOFactory}.
+     * @return {@link CommentNotificationDTOBuilder}.
+     */
+    public CommentNotificationDTOBuilder setFeedService(FeedService feedService) {
+        this.feedService = feedService;
         return this;
     }
 
@@ -72,7 +85,11 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
 
         if (Objects.nonNull(this.notificationMessage.getCommentNotification())) {
             notificationDTO.setFeed(
-                    this.feedDTOFactory.snapshotValueOf(this.notificationMessage.getCommentNotification().getFeed()));
+                    this.feedDTOFactory.snapshotValueOf(
+                            this.feedService.retrieveFeedById(
+                                    this.notificationMessage.getCommentNotification().getFeed().getId(),
+                                    this.notificationMessage.getUserId()
+                            )));
             notificationDTO.setComment(
                     this.commentDTOFactory.valueOf(this.notificationMessage.getCommentNotification().getComment()));
         }
