@@ -14,6 +14,7 @@ import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
 import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
+import com.keepreal.madagascar.coua.DismissIntroductionRequest;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
@@ -59,6 +60,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the island GRpc controller.
@@ -545,4 +548,20 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    /**
+     * Dismisses the introduction.
+     *
+     * @param request {@link DismissIntroductionRequest}.
+     * @param responseObserver {@link CommonStatus}.
+     */
+    @Override
+    public void dismissIntroduction(DismissIntroductionRequest request,
+                                    StreamObserver<CommonStatus> responseObserver) {
+        this.subscriptionService.dismissIntroduction(request.getUserId(), request.getIslandId());
+
+        responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+        responseObserver.onCompleted();
+    }
+
 }
