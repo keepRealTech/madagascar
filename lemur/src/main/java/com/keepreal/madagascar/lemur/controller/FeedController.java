@@ -5,11 +5,9 @@ import com.keepreal.madagascar.brookesia.StatsEventCategory;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.fossa.FeedsResponse;
-import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
 import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedService;
@@ -20,13 +18,11 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import swagger.api.ApiUtil;
 import swagger.api.FeedApi;
 import swagger.model.CheckFeedsMessage;
 import swagger.model.DummyResponse;
@@ -182,11 +178,11 @@ public class FeedController implements FeedApi {
      */
     @Override
     public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedsGet(String islandId,
-                                                       Boolean fromHost,
-                                                       String v,
-                                                       String osn,
-                                                       Integer page,
-                                                       Integer pageSize) {
+                                                                     Boolean fromHost,
+                                                                     String v,
+                                                                     String osn,
+                                                                     Integer page,
+                                                                     Integer pageSize) {
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         if ("1.0.0".equals(v) && "iOS".equals(osn)) {
             response.setRtn(ErrorCode.REQUEST_LOW_VERSION_ERROR_VALUE);
@@ -330,9 +326,9 @@ public class FeedController implements FeedApi {
                 .collect(Collectors.toList()));
 
         List<FeedDTO> topFeeds = new ArrayList<>();
-        if (minTimestamp == null && maxTimestamp == null){
+        if (minTimestamp == null && maxTimestamp == null) {
             com.keepreal.madagascar.fossa.FeedResponse toppedFeedResponse = this.feedService.retrieveIslandToppedFeeds(id, userId);
-            if (toppedFeedResponse.hasFeed()){
+            if (toppedFeedResponse.hasFeed()) {
                 FeedDTO feedDTO = this.feedDTOFactory.valueOf(toppedFeedResponse.getFeed());
                 topFeeds.add(feedDTO);
             }
@@ -376,8 +372,8 @@ public class FeedController implements FeedApi {
     /**
      * Implement the island top feed api v1 api
      *
-     * @param id id (required)  island id
-     * @param topFeedRequest  (required) {@link TopFeedRequest}.
+     * @param id             id (required)  island id
+     * @param topFeedRequest (required) {@link TopFeedRequest}.
      * @return {@link FeedResponse}.
      */
     @Override
@@ -387,7 +383,7 @@ public class FeedController implements FeedApi {
         String hostId = islandMessage.getHostId();
         FeedMessage feedMessage = this.feedService.retrieveFeedById(topFeedRequest.getFeedId(), userId);
 
-        if (!userId.equals(hostId) || !islandMessage.getId().equals(feedMessage.getIslandId())){
+        if (!userId.equals(hostId) || !islandMessage.getId().equals(feedMessage.getIslandId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
