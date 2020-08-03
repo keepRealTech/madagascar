@@ -224,7 +224,7 @@ public class WechatOffiAccountService {
                     this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
                     this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory());
 
-            this.retrieveOrCreateUserByUnionId(wechatUserInfo)
+            return this.retrieveOrCreateUserByUnionId(wechatUserInfo)
                     .map(usermessage -> tokenGranter.grant(usermessage, wechatUserInfo.getOpenId()))
                     .doOnError(error -> log.error(error.toString()))
                     .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
