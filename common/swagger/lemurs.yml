@@ -2208,6 +2208,10 @@ components:
           type: string
         length:
           type: integer
+        width:
+          type: integer
+        height:
+          type: integer
     PictureDTO:
       type: object
       properties:
