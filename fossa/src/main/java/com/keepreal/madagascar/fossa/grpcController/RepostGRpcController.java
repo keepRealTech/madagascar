@@ -167,9 +167,8 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
             responseObserver.onCompleted();
             return;
         }
-        String id = response.getIsland().getHostId().equals(userId) ? islandId + "1" : islandId + "0";
-        String encode = RepostCodeUtils.encode(id);
-
+        boolean isHost = response.getIsland().getHostId().equals(userId);
+        String encode = repostService.encode(islandId, isHost);
         responseObserver.onNext(GenerateRepostCodeResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .setCode(repostService.generatorCode(response.getIsland(), userId, encode))
@@ -182,9 +181,8 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
         String code = request.getCode();
         DeviceType deviceType = request.getDeviceType();
 
-        String id = RepostCodeUtils.decode(code);
-        String islandId = id.substring(0, id.length() - 1);
-        boolean withSecret = id.substring(id.length() - 1).equals("1");
+        String islandId = repostService.decode(code);
+        boolean withSecret = repostService.isHost(code);
 
         ResolveRepostCodeResponse.Builder builder = ResolveRepostCodeResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())

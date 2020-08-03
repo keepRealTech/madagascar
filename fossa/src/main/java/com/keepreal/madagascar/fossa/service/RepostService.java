@@ -8,6 +8,7 @@ import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.IslandRepostMessage;
 import com.keepreal.madagascar.fossa.dao.RepostRepository;
 import com.keepreal.madagascar.fossa.model.RepostInfo;
+import com.keepreal.madagascar.fossa.util.RepostCodeUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,8 @@ public class RepostService {
     private static final String ANDROID_REDIRECT_URL = "/island/home";
     private static final String IOS_REDIRECT_URL = "";
     private static final String LINKED_URL = "";
+    private static final String HOST_TAG = "1";
+    private static final String ISLANDER_TAG = "0";
 
     private final RepostRepository repostRepository;
     private final LongIdGenerator idGenerator;
@@ -127,5 +130,27 @@ public class RepostService {
 
     public String getRedirectUrlByDeviceType(DeviceType deviceType) {
         return deviceType.equals(DeviceType.ANDROID) ? ANDROID_REDIRECT_URL : IOS_REDIRECT_URL;
+    }
+
+    /**
+     * encode with island id and tag(host is 1, islander is 0)
+     *
+     * @param islandId  island id.
+     * @param isHost    is host.
+     * @return  code.
+     */
+    public String encode(String islandId, boolean isHost) {
+        String id = isHost ? islandId + HOST_TAG : islandId + ISLANDER_TAG;
+        return RepostCodeUtils.encode(id);
+    }
+
+    public String decode(String code) {
+        String decode = RepostCodeUtils.decode(code);
+        return decode.substring(0, decode.length() - 1);
+    }
+
+    public boolean isHost(String code) {
+        String decode = RepostCodeUtils.decode(code);
+        return decode.substring(decode.length() - 1).equals(HOST_TAG);
     }
 }
