@@ -37,6 +37,7 @@ import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
 import swagger.model.IslandIdentityResponse;
 import swagger.model.IslandPosterResponse;
+import swagger.model.IslandProfileDTO;
 import swagger.model.IslandProfileResponse;
 import swagger.model.IslandProfilesResponse;
 import swagger.model.IslandResponse;
@@ -219,7 +220,14 @@ public class IslandController implements IslandApi {
                 this.islandService.retrieveIslandProfileById(id, userId);
 
         IslandProfileResponse response = new IslandProfileResponse();
-        response.setData(this.islandDTOFactory.valueOf(islandProfileResponse, userId));
+        IslandProfileDTO islandProfileDTO = this.islandDTOFactory.valueOf(islandProfileResponse, userId);
+
+        if (islandProfileResponse.getShouldIntroduce() &&
+                !islandProfileDTO.getHostIntroduction().getShouldPopup()) {
+            this.islandService.dismissIslandIntroduction(id, userId);
+        }
+
+        response.setData(islandProfileDTO);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
