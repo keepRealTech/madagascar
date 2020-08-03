@@ -127,6 +127,15 @@ enum ReportType {
     OTHERS = 8;
 }
 
+enum MultiMediaType {
+    MEDIA_TEXT = 0;
+    MEDIA_PICS = 1;
+    MEDIA_ALBUM = 2;
+    MEDIA_VIDEO = 3;
+    MEDIA_AUDIO = 4;
+    MEDIA_HTML = 5;
+}
+
 message UserMessage {
     string id = 1;
     string unionId = 2;
