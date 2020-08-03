@@ -5,6 +5,8 @@ import com.aliyuncs.auth.sts.AssumeRoleRequest;
 import com.aliyuncs.auth.sts.AssumeRoleResponse;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.http.MethodType;
+import com.keepreal.madagascar.baobob.CheckSignatureRequest;
+import com.keepreal.madagascar.baobob.GenerateQrcodeResponse;
 import com.keepreal.madagascar.baobob.JWTISOLoginPayload;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.OAuthWechatLoginPayload;
@@ -28,6 +30,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.LoginApi;
 import swagger.model.BriefTokenInfo;
@@ -39,11 +43,18 @@ import swagger.model.OssTokenDTO;
 import swagger.model.OssTokenResponse;
 import swagger.model.PostLoginRequest;
 import swagger.model.PostRefreshTokenRequest;
+import swagger.model.QrTicketDTO;
+import swagger.model.QrTicketResponse;
 import swagger.model.RefreshTokenResponse;
+import swagger.model.UserDTO;
 import swagger.model.UserResponse;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents the login controllers.
@@ -288,4 +299,73 @@ public class LoginController implements LoginApi {
         return briefTokenInfo;
     }
 
+    /**
+     * initialize and verify wechat official accounts server
+     * @param signature wechat server signature
+     * @param timestamp wechat server timestamp
+     * @param nonce wechat server random number
+     * @param echostr wechat server random string
+     * @return check successful return echostr
+     */
+    @GetMapping("/wechatoffiaccount")
+    public String verifyWechatServer(String signature, String timestamp, String nonce, String echostr) {
+        if (Objects.nonNull(signature) && Objects.nonNull(timestamp) && Objects.nonNull(nonce) && Objects.nonNull(echostr)) {
+            CheckSignatureRequest request = CheckSignatureRequest.newBuilder().setSignature(signature).setTimestamp(timestamp).setNonce(nonce).build();
+            if (loginService.checkSignature(request)) {
+                return echostr;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * receive wechat server event
+     */
+    @PostMapping("/wechatoffiaccount")
+    public void receiveWechatServerEventPush(HttpServletRequest httpServletRequest) {
+        Map<String, String> request = this.loginService.parseXml(httpServletRequest);
+        String fromUserName = request.get("FromUserName");
+        String msgType = request.get("MsgType");
+        String event = request.get("Event");
+        String eventKey = request.get("EventKey");
+        if (Objects.nonNull(fromUserName) && Objects.nonNull(msgType) && Objects.nonNull(event) &&Objects.nonNull(eventKey)){
+            if ("event".equals(msgType)){
+                this.loginService.handleEvent(fromUserName, event, eventKey);
+            }
+        }
+    }
+
+
+    /**
+     * generate web login qrcode
+     * @return ticket and sceneId
+     */
+    @Override
+    public ResponseEntity<QrTicketResponse> apiV1LoginGeneratePost() {
+        GenerateQrcodeResponse generateQrcodeResponse = loginService.generateQrcode();
+        QrTicketResponse qrTicketResponse = new QrTicketResponse();
+        QrTicketDTO qrTicketDTO = new QrTicketDTO();
+
+        qrTicketDTO.setTicket(generateQrcodeResponse.getTicket());
+        qrTicketDTO.setExpirationInSec(generateQrcodeResponse.getExpirationInSec());
+        qrTicketDTO.setSceneId(generateQrcodeResponse.getSceneId());
+        qrTicketResponse.setData(qrTicketDTO);
+        qrTicketResponse.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        qrTicketResponse.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+
+        return new ResponseEntity<>(qrTicketResponse, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<LoginResponse> apiV1LoginPollingGet(@NotNull @Valid String sceneId) {
+        com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.checkOffiAccountLogin(sceneId);
+
+        UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
+
+        LoginResponse response = new LoginResponse();
+        response.setData(this.buildTokenInfo(loginResponse, user));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

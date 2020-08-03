@@ -30,6 +30,7 @@ dependencies {
     implementation project(":common:exceptions")
     implementation project(":common:stats-event-producer-starter")
 
+    compile group: 'org.dom4j', name: 'dom4j', version: '2.1.3'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure'

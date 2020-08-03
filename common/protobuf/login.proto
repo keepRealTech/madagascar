@@ -40,6 +40,43 @@ message TokenRefreshPayload {
     string refreshToken = 1;
 }
 
+message NullRequest {
+}
+
+message NullResponse {
+}
+
+message GenerateQrcodeResponse {
+    CommonStatus status = 1;
+    string ticket = 2;
+    string sceneId = 3;
+    int32 expirationInSec = 4;
+}
+
+message CheckSignatureRequest {
+    string signature = 1;
+    string timestamp = 2;
+    string nonce = 3;
+}
+
+message CheckSignatureResponse {
+    CommonStatus status = 1;
+}
+
+message HandleEventRequest {
+    string opedId = 1;
+    string eventKey = 2;
+    string event = 3;
+}
+
+message CheckOffiAccountLoginRequest {
+    string sceneId = 1;
+}
+
 service LoginService {
     rpc Login(LoginRequest) returns (LoginResponse) {};
+    rpc GenerateQrcode(NullRequest) returns (GenerateQrcodeResponse) {};
+    rpc CheckSignature(CheckSignatureRequest) returns (CheckSignatureResponse) {};
+    rpc HandleEvent(HandleEventRequest) returns (NullResponse) {};
+    rpc CheckOffiAccountLogin(CheckOffiAccountLoginRequest) returns (LoginResponse) {};
 }
