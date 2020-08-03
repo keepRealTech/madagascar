@@ -33,6 +33,11 @@ public class FeedInfo {
     private List<String> imageUrls;
     private List<String> membershipIds;
     private String duplicateTag;
+    private String multiMediaType;
+    private List<PictureInfo> pictureInfos;
+    private VideoInfo videoInfo;
+    private AudioInfo audioInfo;
+    private HtmlInfo htmlInfo;
     @Builder.Default
     private Integer likesCount = 0;
     @Builder.Default
