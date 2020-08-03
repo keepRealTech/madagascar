@@ -215,7 +215,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                             .setSubscribedAt(0L);
                 } else {
                     responseBuilder.setUserIndex(StringValue.of(subscription.getIslanderNumber().toString()))
-                            .setSubscribedAt(subscription.getCreatedTime());
+                            .setSubscribedAt(subscription.getCreatedTime())
+                            .setShouldIntroduce(subscription.getShouldIntroduce());
                 }
                 responseBuilder.setIsland(islandMessage)
                         .setHost(userMessage)
