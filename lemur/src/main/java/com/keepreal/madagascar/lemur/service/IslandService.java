@@ -232,6 +232,10 @@ public class IslandService {
     public IslandMessage createIsland(String name, String portraitImageUri, String secret, String identityId, String userId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
+        if (Objects.isNull(identityId)) {
+            identityId = "";
+        }
+
         NewIslandRequest.Builder requestBuilder = NewIslandRequest.newBuilder()
                 .setName(name)
                 .setSecret(StringValue.of(secret))
