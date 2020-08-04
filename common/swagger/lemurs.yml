@@ -1777,7 +1777,7 @@ components:
         - MULTIMEDIA_TYPE_ALBUM
         - MULTIMEDIA_TYPE_VIDEO
         - MULTIMEDIA_TYPE_AUDIO
-        - MULITMEDIA_TYPE_HTML
+        - MULTIMEDIA_TYPE_HTML
     DeviceType:
       type: string
       enum:
