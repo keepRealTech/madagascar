@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.baobob.service;
 
-import com.keepreal.madagascar.baobob.CheckOffiAccountLoginRequest;
 import com.keepreal.madagascar.baobob.CheckSignatureRequest;
 import com.keepreal.madagascar.baobob.CheckSignatureResponse;
 import com.keepreal.madagascar.baobob.GenerateQrcodeResponse;
@@ -13,6 +12,7 @@ import com.keepreal.madagascar.baobob.loginExecutor.LoginExecutorSelector;
 import com.keepreal.madagascar.common.EmptyMessage;
 import org.lognet.springboot.grpc.GRpcService;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 /**
  * Represents the login grpc service.
@@ -46,26 +46,38 @@ public class LoginService extends ReactorLoginServiceGrpc.LoginServiceImplBase {
                 this.loginExecutorSelector.select(request.getLoginType()).login(request));
     }
 
+    /**
+     * Generates the qrcode ticket.
+     *
+     * @param emptyRequest {@link EmptyMessage}.
+     * @return {@link GenerateQrcodeResponse}.
+     */
     @Override
-    public Mono<GenerateQrcodeResponse> generateQrcode(Mono<EmptyMessage> request) {
-        GenerateQrcodeResponse tempQrcode = this.mpWechatService.getTempQrcode();
-        return Mono.just(tempQrcode);
+    public Mono<GenerateQrcodeResponse> generateQrcode(Mono<EmptyMessage> emptyRequest) {
+        return emptyRequest.flatMap(request -> this.mpWechatService.getTempQrcode());
     }
 
+    /**
+     * Checks the signature.
+     *
+     * @param checkSignatureRequest {@link CheckSignatureRequest}.
+     * @return {@link CheckSignatureResponse}.
+     */
     @Override
     public Mono<CheckSignatureResponse> checkSignature(Mono<CheckSignatureRequest> checkSignatureRequest) {
-        return checkSignatureRequest.flatMap(request ->
-                Mono.just(this.mpWechatService.checkSignature(request)));
+        return checkSignatureRequest.map(this.mpWechatService::checkSignature);
     }
 
+    /**
+     * Handles the wechat MP events.
+     *
+     * @param handleEventRequest {@link HandleEventRequest}.
+     * @return {@link EmptyMessage}.
+     */
     @Override
     public Mono<EmptyMessage> handleEvent(Mono<HandleEventRequest> handleEventRequest) {
-        return handleEventRequest.flatMap(request ->
-                Mono.just(this.mpWechatService.handleEvent(request)));
+        return handleEventRequest.publishOn(Schedulers.elastic())
+                .flatMap(request -> Mono.just(this.mpWechatService.handleEvent(request)));
     }
 
-    @Override
-    public Mono<LoginResponse> checkOffiAccountLogin(Mono<CheckOffiAccountLoginRequest> checkOffiAccountLoginRequest) {
-        return checkOffiAccountLoginRequest.flatMap(this.mpWechatService::checkOffiAccountLogin);
-    }
 }

@@ -19,4 +19,5 @@ public class WechatUserInfo {
     private String portraitImageUri;
     private String unionId;
     private String openId;
+
 }

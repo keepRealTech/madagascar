@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.lemur.service;
 
-import com.keepreal.madagascar.baobob.CheckOffiAccountLoginRequest;
 import com.keepreal.madagascar.baobob.CheckSignatureRequest;
 import com.keepreal.madagascar.baobob.CheckSignatureResponse;
 import com.keepreal.madagascar.baobob.GenerateQrcodeResponse;
@@ -8,7 +7,9 @@ import com.keepreal.madagascar.baobob.HandleEventRequest;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.baobob.LoginServiceGrpc;
+import com.keepreal.madagascar.baobob.MpSceneLoginPayload;
 import com.keepreal.madagascar.common.EmptyMessage;
+import com.keepreal.madagascar.common.LoginType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.Channel;
@@ -151,11 +152,17 @@ public class LoginService {
      */
     public LoginResponse checkWechatMpAccountLogin(String sceneId) {
         LoginServiceGrpc.LoginServiceBlockingStub stub = LoginServiceGrpc.newBlockingStub(this.channel);
-        CheckOffiAccountLoginRequest request = CheckOffiAccountLoginRequest.newBuilder().setSceneId(sceneId).build();
-        LoginResponse loginResponse;
 
+        LoginRequest loginRequest = LoginRequest.newBuilder()
+                .setMpScenePayload(MpSceneLoginPayload.newBuilder()
+                        .setSceneId(sceneId)
+                        .build())
+                .setLoginType(LoginType.LOGIN_WEB_MP_WECHAT)
+                .build();
+
+        LoginResponse loginResponse;
         try {
-            loginResponse = stub.checkOffiAccountLogin(request);
+            loginResponse = stub.login(loginRequest);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

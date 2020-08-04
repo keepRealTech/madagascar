@@ -25,6 +25,7 @@ message LoginRequest {
         PasswordLoginPayload passwordPayload = 3;
         TokenRefreshPayload tokenRefreshPayload = 4;
         JWTISOLoginPayload jwtIsoLoginPayload = 5;
+        MpSceneLoginPayload mpScenePayload = 6;
     }
 }
 
@@ -63,7 +64,7 @@ message HandleEventRequest {
     string event = 3;
 }
 
-message CheckOffiAccountLoginRequest {
+message MpSceneLoginPayload {
     string sceneId = 1;
 }
 
@@ -72,5 +73,4 @@ service LoginService {
     rpc GenerateQrcode(EmptyMessage) returns (GenerateQrcodeResponse) {};
     rpc CheckSignature(CheckSignatureRequest) returns (CheckSignatureResponse) {};
     rpc HandleEvent(HandleEventRequest) returns (EmptyMessage) {};
-    rpc CheckOffiAccountLogin(CheckOffiAccountLoginRequest) returns (LoginResponse) {};
 }
