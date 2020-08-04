@@ -7,5 +7,5 @@ public class AudioInfo extends MediaInfo {
     private String url;
     private String thumbnailUrl;
     private String videoId;
-    private Integer duration;
+    private Long duration;
 }

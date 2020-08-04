@@ -27,13 +27,14 @@ message NewFeedsRequestV2 {
     string userId = 1;
     repeated string islandId = 2;
     repeated string hostId = 3;
-    MediaType type = 4;
-    google.protobuf.StringValue text = 5;
+    repeated string membershipIds = 4;
+    MediaType type = 5;
+    google.protobuf.StringValue text = 6;
     oneof message {
-        PicturesMessage pics = 6;
-        VideoMessage video = 7;
-        AudioMessage audio = 8;
-        HtmlMessage html = 9;
+        PicturesMessage pics = 7;
+        VideoMessage video = 8;
+        AudioMessage audio = 9;
+        HtmlMessage html = 10;
     }
 }
 

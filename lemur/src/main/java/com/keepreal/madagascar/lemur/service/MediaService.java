@@ -14,8 +14,15 @@ import java.util.stream.Collectors;
 @Service
 public class MediaService {
 
-    public VideoMessage videoMessage(MultiMediaDTO multiMediaDTO) {
+    private static long MILLISECONDS = 1000L;
 
+    private final UploadService uploadService;
+
+    public MediaService(UploadService uploadService) {
+        this.uploadService = uploadService;
+    }
+
+    public VideoMessage videoMessage(MultiMediaDTO multiMediaDTO) {
         String videoId = multiMediaDTO.getVideoId();
 
 
@@ -30,7 +37,6 @@ public class MediaService {
     }
 
     public AudioMessage audioMessage(MultiMediaDTO multiMediaDTO) {
-
         String videoId = multiMediaDTO.getVideoId();
 
         return AudioMessage.newBuilder()
@@ -59,5 +65,9 @@ public class MediaService {
         return HtmlMessage.newBuilder()
                 .setContent(multiMediaDTO.getContent())
                 .build();
+    }
+
+    private long toMilliseconds(String duration) {
+        return (long) (Float.valueOf(duration) * MILLISECONDS);
     }
 }
