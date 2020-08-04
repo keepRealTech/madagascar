@@ -4,6 +4,7 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.fossa";
 
 import "common.proto";
+import "google/protobuf/wrappers.proto";
 
 message FeedRepostMessage {
     RepostMessage feedRepost = 1;
@@ -80,7 +81,7 @@ message ResolveRepostCodeResponse {
     CommonStatus status = 1;
     string redirectUrl = 2;
     string islandId = 3;
-    string secret = 4;
+    google.protobuf.StringValue secret = 4;
 }
 
 service RepostService {

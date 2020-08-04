@@ -26,13 +26,13 @@ public class RepostCodeUtils {
         for (int i = mid.length() - 7; i > -7; i -= 7) {
             int offset1 = (i < 0) ? 0 : i;
             int offset2 = i + 7;
-            String num = intToEnode62(left(mid, offset1, offset2 - offset1));
+            String num = intToEncode62(left(mid, offset1, offset2 - offset1));
             result.insert(0, num);
         }
         return result.toString();
     }
 
-    private static String intToEnode62(String mid) {
+    private static String intToEncode62(String mid) {
         long int_mid = Long.parseLong(mid);
         StringBuilder result = new StringBuilder();
         do {
