@@ -33,6 +33,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.security.oauth.boot:spring-security-oauth2-autoconfigure'
+    implementation 'org.redisson:redisson-spring-boot-starter'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
     implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'
     implementation 'io.opentracing.contrib:opentracing-grpc'
