@@ -1,10 +1,10 @@
 package com.keepreal.madagascar.lemur.service;
 
-import com.keepreal.madagascar.fossa.AudioMessage;
-import com.keepreal.madagascar.fossa.HtmlMessage;
-import com.keepreal.madagascar.fossa.Picture;
-import com.keepreal.madagascar.fossa.PicturesMessage;
-import com.keepreal.madagascar.fossa.VideoMessage;
+import com.keepreal.madagascar.common.AudioMessage;
+import com.keepreal.madagascar.common.HtmlMessage;
+import com.keepreal.madagascar.common.Picture;
+import com.keepreal.madagascar.common.PicturesMessage;
+import com.keepreal.madagascar.common.VideoMessage;
 import org.springframework.stereotype.Service;
 import swagger.model.MultiMediaDTO;
 

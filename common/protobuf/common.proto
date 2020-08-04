@@ -194,6 +194,44 @@ message FeedMessage {
     bool isMembership = 15;
     bool fromHost = 16;
     bool isTop = 17;
+    MediaType type = 18;
+    oneof message {
+        PicturesMessage pics = 19;
+        VideoMessage video = 20;
+        AudioMessage audio = 21;
+        HtmlMessage html = 22;
+    }
+}
+
+message PicturesMessage {
+    repeated Picture picture = 1;
+}
+
+message Picture {
+    string imgUrl = 1;
+    int32 width = 2;
+    int32 height = 3;
+    int64 size = 4;
+}
+
+message VideoMessage {
+    string url = 1;
+    string videoId = 2;
+    string thumbnailUrl = 3;
+    int64 duration = 4;
+    int32 width = 5;
+    int32 height = 6;
+}
+
+message AudioMessage {
+    string url = 1;
+    string videoId = 2;
+    string thumbnailUrl = 3;
+    int64 duration = 4;
+}
+
+message HtmlMessage {
+    string content = 1;
 }
 
 message CommentMessage {
