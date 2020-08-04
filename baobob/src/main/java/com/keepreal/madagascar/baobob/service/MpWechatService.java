@@ -8,6 +8,7 @@ import com.keepreal.madagascar.baobob.GenerateQrcodeResponse;
 import com.keepreal.madagascar.baobob.HandleEventRequest;
 import com.keepreal.madagascar.baobob.config.wechat.OauthWechatLoginConfiguration;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
+import com.keepreal.madagascar.baobob.util.AutoRedisLock;
 import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -272,22 +273,21 @@ public class MpWechatService {
      * @return Access token.
      */
     private Mono<String> retrieveNewAccessToken(RBucket<String> bucket) {
-        String getTokenUrl = String.format(MpWechatService.GET_WECHAT_OFFICIAL_ACCOUNT_ACCESS_TOKEN_URL,
-                this.oauthWechatLoginConfiguration.getAppId(), this.oauthWechatLoginConfiguration.getAppSecret());
-        return WebClient.create(getTokenUrl)
-                .get()
-                .retrieve()
-                .bodyToMono(String.class)
-                .map(response -> this.gson.fromJson(response, HashMap.class))
-                .flatMap(hashMap -> {
-                    String accessToken = String.valueOf(hashMap.get("access_token"));
-                    String expiresInSec = String.valueOf(hashMap.get("expires_in"));
-                    log.info("token is {} expires_in is {}", accessToken, expiresInSec);
-                    bucket.trySet(accessToken, stringToLong(expiresInSec) - 200L, TimeUnit.SECONDS);
-                    String s = bucket.get();
-                    log.info("存的token为{}", s);
-                    return Mono.just(accessToken);
-                });
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, "try-get-mp-access-token")) {
+            String getTokenUrl = String.format(MpWechatService.GET_WECHAT_OFFICIAL_ACCOUNT_ACCESS_TOKEN_URL,
+                    this.oauthWechatLoginConfiguration.getAppId(), this.oauthWechatLoginConfiguration.getAppSecret());
+            return WebClient.create(getTokenUrl)
+                    .get()
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(response -> this.gson.fromJson(response, HashMap.class))
+                    .flatMap(hashMap -> {
+                        String accessToken = String.valueOf(hashMap.get("access_token"));
+                        String expiresInSec = String.valueOf(hashMap.get("expires_in"));
+                        bucket.trySet(accessToken, System.currentTimeMillis() + (Long.parseLong(expiresInSec) - 200) * 1000L, TimeUnit.MILLISECONDS);
+                        return Mono.just(accessToken);
+                    });
+        }
     }
 
     /**
