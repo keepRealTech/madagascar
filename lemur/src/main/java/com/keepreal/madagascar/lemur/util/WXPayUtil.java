@@ -15,6 +15,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -297,4 +298,12 @@ public class WXPayUtil {
         return System.currentTimeMillis();
     }
 
+    public static String inputStreamToString(InputStream inputStream) throws IOException {
+        StringBuffer out = new StringBuffer();
+        byte[] bytes = new byte[4096];
+        for (int n; (n = inputStream.read(bytes)) != -1;) {
+            out.append(new String(bytes, 0, n));
+        }
+        return out.toString();
+    }
 }
