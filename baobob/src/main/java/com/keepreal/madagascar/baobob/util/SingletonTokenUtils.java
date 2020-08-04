@@ -46,4 +46,5 @@ public class SingletonTokenUtils {
         singletonTokenUtils.expiredTimestamp = System.currentTimeMillis() + (Long.parseLong(expires_in) - 200) * 1000L;
         return access_token;
     }
+
 }
