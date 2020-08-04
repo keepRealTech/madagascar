@@ -77,7 +77,8 @@ public class LoginService extends ReactorLoginServiceGrpc.LoginServiceImplBase {
     @Override
     public Mono<EmptyMessage> handleEvent(Mono<HandleEventRequest> handleEventRequest) {
         return handleEventRequest.publishOn(Schedulers.elastic())
-                .flatMap(request -> Mono.just(this.mpWechatService.handleEvent(request)));
+                .flatMap(request -> this.mpWechatService.handleEvent(request)
+                        .then(Mono.just(EmptyMessage.newBuilder().build())));
     }
 
 }

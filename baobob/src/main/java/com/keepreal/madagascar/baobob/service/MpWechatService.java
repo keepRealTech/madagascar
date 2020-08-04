@@ -9,8 +9,6 @@ import com.keepreal.madagascar.baobob.HandleEventRequest;
 import com.keepreal.madagascar.baobob.config.wechat.OauthWechatLoginConfiguration;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
 import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
-import com.keepreal.madagascar.baobob.util.SingletonTokenUtils;
-import com.keepreal.madagascar.common.EmptyMessage;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -42,7 +40,8 @@ import java.util.concurrent.TimeUnit;
 public class MpWechatService {
 
     private final static String RETRIEVE_TEMP_QRCODE_URL = "https://api.weixin.qq.com/cgi-bin/qrcode/create?access_token=%s";
-    private final static String GET_WECHAT_USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info";
+    private final static String GET_WECHAT_USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN";
+    private static final String GET_WECHAT_OFFICIAL_ACCOUNT_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s";
     private final Gson gson;
     private final OauthWechatLoginConfiguration oauthWechatLoginConfiguration;
     private final RedissonClient redissonClient;
@@ -51,16 +50,14 @@ public class MpWechatService {
     /**
      * Constructs the mp wechat service.
      *
-     * @param oauthWechatLoginConfiguration
-     * @param redissonClient
-     * @param userService
+     * @param oauthWechatLoginConfiguration {@link OauthWechatLoginConfiguration}.
+     * @param redissonClient                {@link RedissonClient}.
      */
     public MpWechatService(@Qualifier("wechatMpConfiguration") OauthWechatLoginConfiguration oauthWechatLoginConfiguration,
-                           RedissonClient redissonClient,
-                           UserService userService) {
+                           RedissonClient redissonClient) {
         this.oauthWechatLoginConfiguration = oauthWechatLoginConfiguration;
-        this.gson = new Gson();
         this.redissonClient = redissonClient;
+        this.gson = new Gson();
         this.grpcResponseUtils = new GrpcResponseUtils();
     }
 
@@ -70,8 +67,6 @@ public class MpWechatService {
      * @return {@link GenerateQrcodeResponse}.
      */
     public Mono<GenerateQrcodeResponse> getTempQrcode() {
-        String accessToken = this.getAccessToken();
-
         JSONObject requestBody = new JSONObject();
         JSONObject actionInfoBody = new JSONObject();
         JSONObject sceneBody = new JSONObject();
@@ -82,27 +77,29 @@ public class MpWechatService {
         requestBody.put("action_name", "QR_STR_SCENE");
         requestBody.put("action_info", actionInfoBody);
 
-        String getQrcodeUrl = String.format(RETRIEVE_TEMP_QRCODE_URL, accessToken);
-        return WebClient.create(getQrcodeUrl)
-                .post()
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .syncBody(requestBody)
-                .retrieve()
-                .bodyToMono(String.class)
-                .map(response -> this.gson.fromJson(response, HashMap.class))
-                .map(hashMap -> {
-                    String ticket = String.valueOf(hashMap.get("ticket"));
-                    String[] expire_secondsTemp = String.valueOf(hashMap.get("expire_seconds")).split("\\.");
-                    int expire_seconds = Integer.parseInt(expire_secondsTemp[0]);
+        return this.getAccessToken()
+                .map(token -> String.format(MpWechatService.RETRIEVE_TEMP_QRCODE_URL, token))
+                .flatMap(url ->
+                        WebClient.create(url)
+                                .post()
+                                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                                .syncBody(requestBody)
+                                .retrieve()
+                                .bodyToMono(String.class)
+                                .map(response -> this.gson.fromJson(response, HashMap.class))
+                                .map(hashMap -> {
+                                    String ticket = String.valueOf(hashMap.get("ticket"));
+                                    String[] expire_secondsTemp = String.valueOf(hashMap.get("expire_seconds")).split("\\.");
+                                    int expire_seconds = Integer.parseInt(expire_secondsTemp[0]);
 
-                    return GenerateQrcodeResponse.newBuilder().setTicket(ticket)
-                            .setExpirationInSec(expire_seconds)
-                            .setSceneId(uuid)
-                            .setStatus(new GrpcResponseUtils().buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                            .build();
-                })
-                .doOnError(error -> log.error(error.toString()))
-                .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)));
+                                    return GenerateQrcodeResponse.newBuilder().setTicket(ticket)
+                                            .setExpirationInSec(expire_seconds)
+                                            .setSceneId(uuid)
+                                            .setStatus(new GrpcResponseUtils().buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                                            .build();
+                                })
+                                .doOnError(error -> log.error(error.toString()))
+                                .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID))));
     }
 
     /**
@@ -119,7 +116,7 @@ public class MpWechatService {
         String content = StringUtils.collectionToDelimitedString(paramList, "");
         MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
         byte[] digest = sha1.digest(content.getBytes());
-        String localSignature = byte2Str(digest);
+        String localSignature = this.byte2Str(digest);
 
         CheckSignatureResponse.Builder responseBuilder = CheckSignatureResponse.newBuilder();
         if (localSignature.equals(request.getSignature())) {
@@ -130,21 +127,27 @@ public class MpWechatService {
         return responseBuilder.build();
     }
 
-    public EmptyMessage handleEvent(HandleEventRequest request) {
+    /**
+     * Handles different MP wechat events.
+     *
+     * @param request {@link HandleEventRequest}.
+     * @return {link Em}
+     */
+    public Mono<Void> handleEvent(HandleEventRequest request) {
         String opedId = request.getOpedId();
         String event = request.getEvent();
         String eventKey = request.getEventKey();
         switch (event) {
             case "subscribe":
-                executeSubscribeEvent(opedId, eventKey);
+                this.executeSubscribeEvent(opedId, eventKey);
                 break;
             case "SCAN":
-                executeScanEvent(opedId, eventKey);
+                this.executeScanEvent(opedId, eventKey);
                 break;
             default:
                 log.info("unhandled event is {}", event);
         }
-        return EmptyMessage.newBuilder().build();
+        return Mono.empty();
     }
 
     /**
@@ -165,6 +168,12 @@ public class MpWechatService {
         }
     }
 
+    /**
+     * Convert a byte to hex string.
+     *
+     * @param mByte Byte.
+     * @return Hex string.
+     */
     private String byte2HexStr(byte mByte) {
         char[] Digit = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a',
                 'b', 'c', 'd', 'e', 'f'};
@@ -174,62 +183,108 @@ public class MpWechatService {
         return new String(tempArr);
     }
 
+    /**
+     * Converts a byte array into hex string.
+     *
+     * @param byteArray Byte array.
+     * @return Hex string.
+     */
     private String byte2Str(byte[] byteArray) {
         StringBuilder strDigest = new StringBuilder();
-        for (int i = 0; i < byteArray.length; i++) {
-            strDigest.append(byte2HexStr(byteArray[i]));
+        for (byte b : byteArray) {
+            strDigest.append(this.byte2HexStr(b));
         }
         return strDigest.toString();
     }
 
-    private String getAccessToken() {
-        String accessToken = SingletonTokenUtils.getInstance().getAccessToken(oauthWechatLoginConfiguration.getAppId(),
-                oauthWechatLoginConfiguration.getAppSecret());
-        if (Objects.isNull(accessToken)) {
-            return getAccessToken();
+    /**
+     * Gets the access token.
+     *
+     * @return Access token.
+     */
+    private Mono<String> getAccessToken() {
+        RBucket<String> bucket = this.redissonClient.getBucket("wechat-mp-access-token");
+
+        String accessToken = bucket.get();
+        if (Objects.nonNull(accessToken)) {
+            return Mono.just(accessToken);
         }
-        return accessToken;
+        return this.retrieveNewAccessToken(bucket);
     }
 
+    /**
+     * Handles the users first time subscribing.
+     *
+     * @param openId   User open id.
+     * @param eventKey Event key.
+     */
     private void executeSubscribeEvent(String openId, String eventKey) {
         String[] sceneStrs = StringUtils.delimitedListToStringArray(eventKey, "_");
         String sceneId = sceneStrs[0];
-        WechatUserInfo wechatUserInfo = retrieveUserInfoFromWechatByOpenId(openId);
+        WechatUserInfo wechatUserInfo = this.retrieveUserInfoFromWechatByOpenId(openId).block();
         RBucket<Object> bucket = this.redissonClient.getBucket(sceneId);
         bucket.trySet(wechatUserInfo, 1L, TimeUnit.MINUTES);
     }
 
+    /**
+     * Handles the users already subscribed.
+     *
+     * @param openId   User open id.
+     * @param eventKey Event key.
+     */
     private void executeScanEvent(String openId, String eventKey) {
-        WechatUserInfo wechatUserInfo = retrieveUserInfoFromWechatByOpenId(openId);
+        WechatUserInfo wechatUserInfo = this.retrieveUserInfoFromWechatByOpenId(openId).block();
         RBucket<WechatUserInfo> bucket = this.redissonClient.getBucket(eventKey);
         bucket.trySet(wechatUserInfo, 1L, TimeUnit.MINUTES);
     }
 
-    private WechatUserInfo retrieveUserInfoFromWechatByOpenId(String openId) {
-        String accessToken = this.getAccessToken();
-        String getUserInfoUrl = String.format(GET_WECHAT_USER_INFO_URL + "?access_token=%s&openid=%s&lang=zh_CN", accessToken, openId);
-        JSONObject responseBody = WebClient.create(getUserInfoUrl)
+    /**
+     * Retrieves wechat user info by open id.
+     *
+     * @param openId Open id.
+     * @return {@link WechatUserInfo}.
+     */
+    @SuppressWarnings("unchecked")
+    private Mono<WechatUserInfo> retrieveUserInfoFromWechatByOpenId(String openId) {
+        return this.getAccessToken()
+                .map(token -> String.format(MpWechatService.GET_WECHAT_USER_INFO_URL, token, openId))
+                .flatMap(url -> WebClient.create(url)
+                        .get()
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .map(response -> this.gson.fromJson(response, HashMap.class))
+                        .map(hashMap ->
+                                WechatUserInfo.builder()
+                                        .name(String.valueOf(hashMap.getOrDefault("nickname", "")))
+                                        .gender(this.convertGender(hashMap.getOrDefault("sex", 0)))
+                                        .province(String.valueOf(hashMap.getOrDefault("province", "")))
+                                        .city(String.valueOf(hashMap.getOrDefault("city", "")))
+                                        .country(String.valueOf(hashMap.getOrDefault("country", "")))
+                                        .portraitImageUri(String.valueOf(hashMap.getOrDefault("headimgurl", "")))
+                                        .unionId(String.valueOf(hashMap.get("unionid")))
+                                        .openId(openId)
+                                        .build()));
+    }
+
+    /**
+     * Retrieves a new access token.
+     *
+     * @return Access token.
+     */
+    private Mono<String> retrieveNewAccessToken(RBucket<String> bucket) {
+        String getTokenUrl = String.format(MpWechatService.GET_WECHAT_OFFICIAL_ACCOUNT_ACCESS_TOKEN_URL,
+                this.oauthWechatLoginConfiguration.getAppId(), this.oauthWechatLoginConfiguration.getAppSecret());
+        return WebClient.create(getTokenUrl)
                 .get()
                 .retrieve()
-                .bodyToMono(JSONObject.class)
-                .doOnError(error -> log.error(error.toString()))
-                .block();
-
-        if (Objects.isNull(responseBody)) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
-        }
-
-        HashMap hashMap = this.gson.fromJson(responseBody.toJSONString(), HashMap.class);
-        return WechatUserInfo.builder()
-                .name(String.valueOf(hashMap.getOrDefault("nickname", "")))
-                .gender(this.convertGender(hashMap.getOrDefault("sex", 0)))
-                .province(String.valueOf(hashMap.getOrDefault("province", "")))
-                .city(String.valueOf(hashMap.getOrDefault("city", "")))
-                .country(String.valueOf(hashMap.getOrDefault("country", "")))
-                .portraitImageUri(String.valueOf(hashMap.getOrDefault("headimgurl", "")))
-                .unionId(String.valueOf(hashMap.get("unionid")))
-                .openId(openId)
-                .build();
+                .bodyToMono(String.class)
+                .map(response -> this.gson.fromJson(response, HashMap.class))
+                .flatMap(hashMap -> {
+                    String accessToken = String.valueOf(hashMap.get("access_token"));
+                    String expiresInSec = String.valueOf(hashMap.get("expires_in"));
+                    bucket.trySet(accessToken, System.currentTimeMillis() + (Long.parseLong(expiresInSec) - 200) * 1000L, TimeUnit.MILLISECONDS);
+                    return Mono.just(accessToken);
+                });
     }
 
 }
