@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.baobob.service;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.keepreal.madagascar.baobob.CheckOffiAccountLoginRequest;
@@ -9,15 +8,12 @@ import com.keepreal.madagascar.baobob.CheckSignatureResponse;
 import com.keepreal.madagascar.baobob.GenerateQrcodeResponse;
 import com.keepreal.madagascar.baobob.HandleEventRequest;
 import com.keepreal.madagascar.baobob.LoginResponse;
-import com.keepreal.madagascar.baobob.NullResponse;
-import com.keepreal.madagascar.baobob.config.wechat.WechatOffiAccountConfiguration;
-import com.keepreal.madagascar.baobob.loginExecutor.model.WechatLoginInfo;
-import com.keepreal.madagascar.baobob.loginExecutor.model.WechatOffiAccountToken;
+import com.keepreal.madagascar.baobob.config.wechat.OauthWechatLoginConfiguration;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
 import com.keepreal.madagascar.baobob.tokenGranter.LocalTokenGranter;
-import com.keepreal.madagascar.baobob.util.CommonStatusUtils;
 import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
-import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.baobob.util.SingletonTokenUtils;
+import com.keepreal.madagascar.common.EmptyMessage;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -25,114 +21,92 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.Redisson;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-public class WechatOffiAccountService {
+public class MpWechatService {
 
     private final static String GET_WECHAT_OFFICIAL_ACCOUNT_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token";
     private final static String RETRIEVE_TEMP_QRCODE_URL = "https://api.weixin.qq.com/cgi-bin/qrcode/create";
     private final static String GET_WECHAT_USER_INFO_URL = "https://api.weixin.qq.com/cgi-bin/user/info";
     private final Gson gson;
-    private final WechatOffiAccountConfiguration wechatOffiAccountConfig;
-    private final RestTemplate restTemplate;
+    private final OauthWechatLoginConfiguration oauthWechatLoginConfiguration;
     private final RedissonClient redissonClient;
     private final UserService userService;
     private final ImageService imageService;
     private final AuthorizationServerEndpointsConfiguration endpoints;
     private final GrpcResponseUtils grpcResponseUtils;
 
-    public WechatOffiAccountService(WechatOffiAccountConfiguration wechatOffiAccountConfig,
-                                    RedissonClient redissonClient,
-                                    UserService userService,
-                                    ImageService imageService,
-                                    AuthorizationServerEndpointsConfiguration endpoints,
-                                    RestTemplate restTemplate) {
-        this.wechatOffiAccountConfig = wechatOffiAccountConfig;
+    public MpWechatService(@Qualifier("wechatMpConfiguration") OauthWechatLoginConfiguration oauthWechatLoginConfiguration,
+                           RedissonClient redissonClient,
+                           UserService userService,
+                           ImageService imageService,
+                           AuthorizationServerEndpointsConfiguration endpoints) {
+        this.oauthWechatLoginConfiguration = oauthWechatLoginConfiguration;
         this.gson = new Gson();
         this.redissonClient = redissonClient;
-        this.restTemplate = restTemplate;
         this.userService = userService;
         this.imageService = imageService;
         this.endpoints = endpoints;
         this.grpcResponseUtils = new GrpcResponseUtils();
     }
 
-    @Cacheable(value = "accessToken")
-    public String getAccessToken() {
-        return getAccessTokenLoop();
-    }
-
-    @CachePut(value = "accessToken")
-    public String getAccessTokenLoop() {
-        String appId = wechatOffiAccountConfig.getAppId();
-        String appSecret = wechatOffiAccountConfig.getAppSecret();
-        String getTokenUrl = String.format(GET_WECHAT_OFFICIAL_ACCOUNT_ACCESS_TOKEN_URL +
-                        "?grant_type=client_credential&appid=%s&secret=%s",
-                         appId,
-                         appSecret);
-        WechatOffiAccountToken token = this.restTemplate.getForObject(getTokenUrl, WechatOffiAccountToken.class);
-        if (Objects.isNull(token)){
-            return getAccessTokenLoop();
+    private String getAccessToken() {
+        String accessToken = SingletonTokenUtils.getInstance().getAccessToken(oauthWechatLoginConfiguration.getAppId(),
+                oauthWechatLoginConfiguration.getAppSecret());
+        if (Objects.isNull(accessToken)){
+            return SingletonTokenUtils.getInstance().getAccessToken(oauthWechatLoginConfiguration.getAppId(),
+                    oauthWechatLoginConfiguration.getAppSecret());
         }
-        log.info("token is {}", token.getAccess_token());
-        return token.getAccess_token();
-    }
-
-    @Scheduled(cron = "0 0 0/1 * * ? ")
-    public void updateAccessToken(){
-        log.info("更新公众号access_token");
-        getAccessTokenLoop();
+        return accessToken;
     }
 
     public GenerateQrcodeResponse getTempQrcode() {
         String accessToken = this.getAccessToken();
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
         JSONObject requestBody = new JSONObject();
         JSONObject actionInfoBody = new JSONObject();
         JSONObject sceneBody = new JSONObject();
         String uuid = UUID.randomUUID().toString().replace("-", "");
         sceneBody.put("scene_str", uuid);
         actionInfoBody.put("scene", sceneBody);
-        requestBody.put("expire_seconds", wechatOffiAccountConfig.getExpirationInSec());
+        requestBody.put("expire_seconds", oauthWechatLoginConfiguration.getExpirationInSec());
         requestBody.put("action_name", "QR_STR_SCENE");
         requestBody.put("action_info", actionInfoBody);
-        HttpEntity<String> request = new HttpEntity<>(requestBody.toString(), headers);
 
         String getQrcodeUrl = String.format(RETRIEVE_TEMP_QRCODE_URL + "?access_token=%s", accessToken);
-        ResponseEntity<String> response = this.restTemplate.postForEntity(getQrcodeUrl, request, String.class);
-        if (response.getStatusCodeValue() != 200){
+        JSONObject responseBody = WebClient.create(getQrcodeUrl)
+                .post()
+                .header("Content-Type", "application/json")
+                .syncBody(requestBody)
+                .retrieve()
+                .bodyToMono(JSONObject.class)
+                .doOnError(error -> log.error(error.toString()))
+                .block();
+
+        if (Objects.isNull(responseBody)){
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
-        HashMap responseBody = gson.fromJson(response.getBody(), HashMap.class);
         String ticket = String.valueOf(responseBody.get("ticket"));
         String[] expire_secondsTemp = String.valueOf(responseBody.get("expire_seconds")).split("\\.");
         Integer expire_seconds = Integer.parseInt(expire_secondsTemp[0]);
@@ -146,7 +120,7 @@ public class WechatOffiAccountService {
 
     @SneakyThrows
     public CheckSignatureResponse checkSignature(CheckSignatureRequest request) {
-        String token = wechatOffiAccountConfig.getServerToken();
+        String token = oauthWechatLoginConfiguration.getServerToken();
         String signature = request.getSignature();
         String timestamp = request.getTimestamp();
         String nonce = request.getNonce();
@@ -160,9 +134,9 @@ public class WechatOffiAccountService {
 
         CheckSignatureResponse.Builder responseBuilder = CheckSignatureResponse.newBuilder();
         if (localSignature.equals(signature)){
-            responseBuilder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+            responseBuilder.setStatus(grpcResponseUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
         }else {
-            responseBuilder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_UNEXPECTED_ERROR));
+            responseBuilder.setStatus(grpcResponseUtils.buildCommonStatus(ErrorCode.REQUEST_UNEXPECTED_ERROR));
         }
         return responseBuilder.build();
     }
@@ -184,7 +158,7 @@ public class WechatOffiAccountService {
         return strDigest.toString();
     }
 
-    public NullResponse handleEvent(HandleEventRequest request) {
+    public EmptyMessage handleEvent(HandleEventRequest request) {
         String opedId = request.getOpedId();
         String event = request.getEvent();
         String eventKey = request.getEventKey();
@@ -198,7 +172,7 @@ public class WechatOffiAccountService {
             default:
                 log.info("unhandled event is {}", event);
         }
-        return NullResponse.newBuilder().build();
+        return EmptyMessage.newBuilder().build();
     }
 
     private void executeSubscribeEvent(String openId, String eventKey) {
@@ -261,11 +235,20 @@ public class WechatOffiAccountService {
 
 
     private WechatUserInfo retrieveUserInfoFromWechatByOpenId(String openId) {
-        String accessToken = getAccessToken();
+        String accessToken = this.getAccessToken();
         String getUserInfoUrl = String.format(GET_WECHAT_USER_INFO_URL + "?access_token=%s&openid=%s&lang=zh_CN", accessToken, openId);
-        ResponseEntity<String> response = restTemplate.getForEntity(getUserInfoUrl, String.class);
-        String body = response.getBody();
-        HashMap hashMap = this.gson.fromJson(body, HashMap.class);
+        JSONObject responseBody = WebClient.create(getUserInfoUrl)
+                .get()
+                .retrieve()
+                .bodyToMono(JSONObject.class)
+                .doOnError(error -> log.error(error.toString()))
+                .block();
+
+        if (Objects.isNull(responseBody)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        HashMap hashMap = this.gson.fromJson(responseBody.toJSONString(), HashMap.class);
         return WechatUserInfo.builder()
                 .name(String.valueOf(hashMap.getOrDefault("nickname", "")))
                 .gender(this.convertGender(hashMap.getOrDefault("sex", 0)))

@@ -25,6 +25,7 @@ import com.keepreal.madagascar.lemur.service.LoginService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
+import com.keepreal.madagascar.lemur.util.WXPayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -253,6 +254,82 @@ public class LoginController implements LoginApi {
     }
 
     /**
+     * initialize and verify wechat official accounts server
+     * @param signature wechat server signature
+     * @param timestamp wechat server timestamp
+     * @param nonce wechat server random number
+     * @param echostr wechat server random string
+     * @return check successful return echostr
+     */
+    @GetMapping("/api/v1/events/wechatMp/callback")
+    public String verifyWechatServer(String signature, String timestamp, String nonce, String echostr) {
+        if (Objects.nonNull(signature) && Objects.nonNull(timestamp) && Objects.nonNull(nonce) && Objects.nonNull(echostr)) {
+            CheckSignatureRequest request = CheckSignatureRequest.newBuilder().setSignature(signature).setTimestamp(timestamp).setNonce(nonce).build();
+            if (loginService.checkSignature(request)) {
+                return echostr;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * receive wechat server event
+     */
+    @PostMapping("/api/v1/events/wechatMp/callback")
+    public String receiveWechatServerEventPush(HttpServletRequest httpServletRequest) throws Exception {
+        Map<String, String> request = WXPayUtil.xmlToMap(WXPayUtil.inputStreamToString(httpServletRequest.getInputStream()));
+        String fromUserName = request.get("FromUserName");
+        String msgType = request.get("MsgType");
+        String event = request.get("Event");
+        String eventKey = request.get("EventKey");
+        if (Objects.nonNull(fromUserName) && Objects.nonNull(msgType) && Objects.nonNull(event) && Objects.nonNull(eventKey)){
+            if ("event".equals(msgType)){
+                this.loginService.handleEvent(fromUserName, event, eventKey);
+            }
+        }
+        return "success";
+    }
+
+
+    /**
+     * generate web login qrcode
+     * @return ticket and sceneId
+     */
+    @Override
+    public ResponseEntity<QrTicketResponse> apiV1LoginGeneratePost() {
+        GenerateQrcodeResponse generateQrcodeResponse = loginService.generateQrcode();
+        QrTicketResponse qrTicketResponse = new QrTicketResponse();
+        QrTicketDTO qrTicketDTO = new QrTicketDTO();
+
+        qrTicketDTO.setTicket(generateQrcodeResponse.getTicket());
+        qrTicketDTO.setExpirationInSec(generateQrcodeResponse.getExpirationInSec());
+        qrTicketDTO.setSceneId(generateQrcodeResponse.getSceneId());
+        qrTicketResponse.setData(qrTicketDTO);
+        qrTicketResponse.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        qrTicketResponse.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+
+        return new ResponseEntity<>(qrTicketResponse, HttpStatus.OK);
+    }
+
+    /**
+     * retrieve web qrcode login information
+     * @param sceneId  (required) unique scene id
+     * @return login response
+     */
+    @Override
+    public ResponseEntity<LoginResponse> apiV1LoginPollingGet(@NotNull @Valid String sceneId) {
+        com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.checkOffiAccountLogin(sceneId);
+
+        UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
+
+        LoginResponse response = new LoginResponse();
+        response.setData(this.buildTokenInfo(loginResponse, user));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Builds the {@link OssTokenDTO}.
      *
      * @param response {@link AssumeRoleResponse}.
@@ -297,75 +374,5 @@ public class LoginController implements LoginApi {
         briefTokenInfo.setToken(loginResponse.getToken());
         briefTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
         return briefTokenInfo;
-    }
-
-    /**
-     * initialize and verify wechat official accounts server
-     * @param signature wechat server signature
-     * @param timestamp wechat server timestamp
-     * @param nonce wechat server random number
-     * @param echostr wechat server random string
-     * @return check successful return echostr
-     */
-    @GetMapping("/wechatoffiaccount")
-    public String verifyWechatServer(String signature, String timestamp, String nonce, String echostr) {
-        if (Objects.nonNull(signature) && Objects.nonNull(timestamp) && Objects.nonNull(nonce) && Objects.nonNull(echostr)) {
-            CheckSignatureRequest request = CheckSignatureRequest.newBuilder().setSignature(signature).setTimestamp(timestamp).setNonce(nonce).build();
-            if (loginService.checkSignature(request)) {
-                return echostr;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * receive wechat server event
-     */
-    @PostMapping("/wechatoffiaccount")
-    public void receiveWechatServerEventPush(HttpServletRequest httpServletRequest) {
-        Map<String, String> request = this.loginService.parseXml(httpServletRequest);
-        String fromUserName = request.get("FromUserName");
-        String msgType = request.get("MsgType");
-        String event = request.get("Event");
-        String eventKey = request.get("EventKey");
-        if (Objects.nonNull(fromUserName) && Objects.nonNull(msgType) && Objects.nonNull(event) &&Objects.nonNull(eventKey)){
-            if ("event".equals(msgType)){
-                this.loginService.handleEvent(fromUserName, event, eventKey);
-            }
-        }
-    }
-
-
-    /**
-     * generate web login qrcode
-     * @return ticket and sceneId
-     */
-    @Override
-    public ResponseEntity<QrTicketResponse> apiV1LoginGeneratePost() {
-        GenerateQrcodeResponse generateQrcodeResponse = loginService.generateQrcode();
-        QrTicketResponse qrTicketResponse = new QrTicketResponse();
-        QrTicketDTO qrTicketDTO = new QrTicketDTO();
-
-        qrTicketDTO.setTicket(generateQrcodeResponse.getTicket());
-        qrTicketDTO.setExpirationInSec(generateQrcodeResponse.getExpirationInSec());
-        qrTicketDTO.setSceneId(generateQrcodeResponse.getSceneId());
-        qrTicketResponse.setData(qrTicketDTO);
-        qrTicketResponse.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
-        qrTicketResponse.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
-
-        return new ResponseEntity<>(qrTicketResponse, HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<LoginResponse> apiV1LoginPollingGet(@NotNull @Valid String sceneId) {
-        com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.checkOffiAccountLogin(sceneId);
-
-        UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
-
-        LoginResponse response = new LoginResponse();
-        response.setData(this.buildTokenInfo(loginResponse, user));
-        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
-        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
-        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

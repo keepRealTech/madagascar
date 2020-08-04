@@ -8,17 +8,13 @@ import com.keepreal.madagascar.baobob.HandleEventRequest;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.LoginResponse;
 import com.keepreal.madagascar.baobob.LoginServiceGrpc;
-import com.keepreal.madagascar.baobob.NullRequest;
+import com.keepreal.madagascar.common.EmptyMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import io.opentracing.Tracer;
 import lombok.extern.slf4j.Slf4j;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -108,7 +104,7 @@ public class LoginService {
         GenerateQrcodeResponse generateQrcodeResponse;
 
         try {
-            generateQrcodeResponse = stub.generateQrcode(NullRequest.newBuilder().build());
+            generateQrcodeResponse = stub.generateQrcode(EmptyMessage.newBuilder().build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
@@ -123,37 +119,6 @@ public class LoginService {
             throw new KeepRealBusinessException(generateQrcodeResponse.getStatus());
         }
         return generateQrcodeResponse;
-    }
-
-    public Map<String, String> parseXml(HttpServletRequest request) {
-        Map<String, String> map = new HashMap<String, String>();
-        InputStream inputStream = null;
-
-        try {
-            inputStream = request.getInputStream();
-        } catch (IOException exception) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
-        }
-        SAXReader reader = new SAXReader();
-        Document document = null;
-        try {
-            document = reader.read(inputStream);
-        } catch (DocumentException exception) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
-        }
-
-        Element root = document.getRootElement();
-        List<Element> elementList = root.elements();
-        for (Element e : elementList){
-            map.put(e.getName(), e.getText());
-        }
-
-        try {
-            inputStream.close();
-        } catch (IOException e) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
-        }
-        return map;
     }
 
     public void handleEvent(String fromUserName, String event, String eventKey) {

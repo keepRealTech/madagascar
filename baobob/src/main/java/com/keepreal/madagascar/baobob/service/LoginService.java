@@ -7,13 +7,11 @@ import com.keepreal.madagascar.baobob.GenerateQrcodeResponse;
 import com.keepreal.madagascar.baobob.HandleEventRequest;
 import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.LoginResponse;
-import com.keepreal.madagascar.baobob.NullRequest;
-import com.keepreal.madagascar.baobob.NullResponse;
 import com.keepreal.madagascar.baobob.ReactorLoginServiceGrpc;
 import com.keepreal.madagascar.baobob.loginExecutor.DefaultLoginExecutorSelectorImpl;
 import com.keepreal.madagascar.baobob.loginExecutor.LoginExecutorSelector;
+import com.keepreal.madagascar.common.EmptyMessage;
 import org.lognet.springboot.grpc.GRpcService;
-import org.springframework.beans.factory.annotation.Autowired;
 import reactor.core.publisher.Mono;
 
 /**
@@ -22,7 +20,7 @@ import reactor.core.publisher.Mono;
 @GRpcService
 public class LoginService extends ReactorLoginServiceGrpc.LoginServiceImplBase {
 
-    private final WechatOffiAccountService wechatOffiAccountService;
+    private final MpWechatService mpWechatService;
     private final LoginExecutorSelector loginExecutorSelector;
 
     /**
@@ -31,9 +29,9 @@ public class LoginService extends ReactorLoginServiceGrpc.LoginServiceImplBase {
      * @param defaultLoginExecutorSelector {@link DefaultLoginExecutorSelectorImpl}.
      */
     public LoginService(DefaultLoginExecutorSelectorImpl defaultLoginExecutorSelector,
-                        WechatOffiAccountService wechatOffiAccountService) {
+                        MpWechatService mpWechatService) {
         this.loginExecutorSelector = defaultLoginExecutorSelector;
-        this.wechatOffiAccountService = wechatOffiAccountService;
+        this.mpWechatService = mpWechatService;
     }
 
     /**
@@ -49,25 +47,25 @@ public class LoginService extends ReactorLoginServiceGrpc.LoginServiceImplBase {
     }
 
     @Override
-    public Mono<GenerateQrcodeResponse> generateQrcode(Mono<NullRequest> request) {
-        GenerateQrcodeResponse tempQrcode = this.wechatOffiAccountService.getTempQrcode();
+    public Mono<GenerateQrcodeResponse> generateQrcode(Mono<EmptyMessage> request) {
+        GenerateQrcodeResponse tempQrcode = this.mpWechatService.getTempQrcode();
         return Mono.just(tempQrcode);
     }
 
     @Override
     public Mono<CheckSignatureResponse> checkSignature(Mono<CheckSignatureRequest> checkSignatureRequest) {
         return checkSignatureRequest.flatMap(request ->
-                Mono.just(this.wechatOffiAccountService.checkSignature(request)));
+                Mono.just(this.mpWechatService.checkSignature(request)));
     }
 
     @Override
-    public Mono<NullResponse> handleEvent(Mono<HandleEventRequest> handleEventRequest) {
+    public Mono<EmptyMessage> handleEvent(Mono<HandleEventRequest> handleEventRequest) {
         return handleEventRequest.flatMap(request ->
-                Mono.just(this.wechatOffiAccountService.handleEvent(request)));
+                Mono.just(this.mpWechatService.handleEvent(request)));
     }
 
     @Override
     public Mono<LoginResponse> checkOffiAccountLogin(Mono<CheckOffiAccountLoginRequest> checkOffiAccountLoginRequest) {
-        return checkOffiAccountLoginRequest.flatMap(this.wechatOffiAccountService::checkOffiAccountLogin);
+        return checkOffiAccountLoginRequest.flatMap(this.mpWechatService::checkOffiAccountLogin);
     }
 }

@@ -16,10 +16,7 @@ wechat:
     host: https://api.weixin.qq.com
     app-id:
     app-secret:
-  offiaccount:
-    appId: wxac777ca273939b9c
-    appSecret: b6a72fe6c9bf5aa77a649a4cf580bbe4
-    serverToken: keepreal
+    serverToken:
     expirationInSec: 60
 
 grpc:
