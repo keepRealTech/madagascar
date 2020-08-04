@@ -75,8 +75,7 @@ public class MpWechatService {
         String accessToken = SingletonTokenUtils.getInstance().getAccessToken(oauthWechatLoginConfiguration.getAppId(),
                 oauthWechatLoginConfiguration.getAppSecret());
         if (Objects.isNull(accessToken)){
-            return SingletonTokenUtils.getInstance().getAccessToken(oauthWechatLoginConfiguration.getAppId(),
-                    oauthWechatLoginConfiguration.getAppSecret());
+            return getAccessToken();
         }
         return accessToken;
     }
