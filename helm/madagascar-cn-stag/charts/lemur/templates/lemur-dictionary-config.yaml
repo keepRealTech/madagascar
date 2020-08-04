@@ -1,8 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: lemur-dictionary
-  namespace: {{ .Values.global.common_configs.namespace }}
-data:
-  good-dictionary.txt: |-
-    {{ .Files.Get "good-dictionary.txt" | b64enc }}
