@@ -26,6 +26,7 @@ import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.WXPayUtil;
+import io.micrometer.core.instrument.util.IOUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,7 @@ import swagger.model.UserResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Objects;
@@ -276,7 +278,8 @@ public class LoginController implements LoginApi {
      */
     @PostMapping("/api/v1/events/wechatMp/callback")
     public String receiveWechatServerEventPush(HttpServletRequest httpServletRequest) throws Exception {
-        Map<String, String> request = WXPayUtil.xmlToMap(WXPayUtil.inputStreamToString(httpServletRequest.getInputStream()));
+        String requestXml = IOUtils.toString(httpServletRequest.getInputStream(), Charset.forName(httpServletRequest.getCharacterEncoding()));
+        Map<String, String> request = WXPayUtil.xmlToMap(requestXml);
         String fromUserName = request.get("FromUserName");
         String msgType = request.get("MsgType");
         String event = request.get("Event");

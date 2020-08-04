@@ -298,12 +298,4 @@ public class WXPayUtil {
         return System.currentTimeMillis();
     }
 
-    public static String inputStreamToString(InputStream inputStream) throws IOException {
-        StringBuffer out = new StringBuffer();
-        byte[] bytes = new byte[4096];
-        for (int n; (n = inputStream.read(bytes)) != -1;) {
-            out.append(new String(bytes, 0, n));
-        }
-        return out.toString();
-    }
 }
