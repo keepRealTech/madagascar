@@ -128,12 +128,13 @@ enum ReportType {
 }
 
 enum MultiMediaType {
-    MEDIA_TEXT = 0;
-    MEDIA_PICS = 1;
-    MEDIA_ALBUM = 2;
-    MEDIA_VIDEO = 3;
-    MEDIA_AUDIO = 4;
-    MEDIA_HTML = 5;
+    MEDIA_NONE = 0;
+    MEDIA_TEXT = 1;
+    MEDIA_PICS = 2;
+    MEDIA_ALBUM = 3;
+    MEDIA_VIDEO = 4;
+    MEDIA_AUDIO = 5;
+    MEDIA_HTML = 6;
 }
 
 message UserMessage {
