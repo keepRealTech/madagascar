@@ -23,6 +23,51 @@ message NewFeedsRequest {
     repeated string membershipIds = 6;
 }
 
+message NewFeedsRequestV2 {
+    string userId = 1;
+    repeated string islandId = 2;
+    repeated string hostId = 3;
+    MultiMediaType type = 4;
+    google.protobuf.StringValue text = 5;
+    oneof message {
+        PicturesMessage pics = 6;
+        VideoMessage video = 7;
+        AudioMessage audio = 8;
+        HtmlMessage html = 9;
+    }
+}
+
+message PicturesMessage {
+    repeated Picture picture = 1;
+}
+
+message Picture {
+    string imgUrl = 1;
+    int32 width = 2;
+    int32 height = 3;
+    int32 size = 4;
+}
+
+message VideoMessage {
+    string url = 1;
+    string videoId = 2;
+    string thumbnailUrl = 3;
+    int64 duration = 4;
+    int32 width = 5;
+    int32 height = 6;
+}
+
+message AudioMessage {
+    string url = 1;
+    string videoId = 2;
+    string thumbnailUrl = 3;
+    int64 duration = 4;
+}
+
+message HtmlMessage {
+    string content = 1;
+}
+
 message NewFeedsResponse {
     CommonStatus status = 1;
 }
@@ -108,6 +153,7 @@ message RetrieveToppedFeedByIdResponse {
 
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
+    rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
     rpc RetrieveFeedsByIds (RetrieveFeedsByIdsRequest) returns (FeedsResponse) {};
