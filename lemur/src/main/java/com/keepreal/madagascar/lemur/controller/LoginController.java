@@ -323,10 +323,12 @@ public class LoginController implements LoginApi {
     public ResponseEntity<LoginResponse> apiV1LoginPollingGet(String sceneId) {
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.checkWechatMpAccountLogin(sceneId);
 
-        UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
-
         LoginResponse response = new LoginResponse();
-        response.setData(this.buildTokenInfo(loginResponse, user));
+        if (!"".equals(loginResponse.getUserId()) && Objects.nonNull(loginResponse.getUserId())) {
+            UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
+            response.setData(this.buildTokenInfo(loginResponse, user));
+        }
+
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
