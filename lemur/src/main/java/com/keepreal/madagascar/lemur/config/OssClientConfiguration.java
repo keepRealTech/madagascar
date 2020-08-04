@@ -27,11 +27,4 @@ public class OssClientConfiguration {
     public OSS ossClient() {
         return new OSSClientBuilder().build(this.endpoint, this.accessKey, this.accessSecret);
     }
-
-    @Bean
-    public DefaultAcsClient getAcsClient() {
-        IClientProfile profile = DefaultProfile.getProfile("", this.accessKey, this.accessSecret);
-        return new DefaultAcsClient(profile);
-    }
-
 }
