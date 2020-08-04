@@ -30,7 +30,6 @@ import swagger.model.DummyResponse;
 import swagger.model.FeedDTO;
 import swagger.model.FeedResponse;
 import swagger.model.FeedsResponseV2;
-import swagger.model.MultiMediaDTO;
 import swagger.model.MultiMediaType;
 import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
@@ -423,7 +422,7 @@ public class FeedController implements FeedApi {
         String userId = HttpContextUtils.getUserIdFromContext();
         MultiMediaType mediaType = postFeedRequestV2.getMediaType();
 
-        feedService.createFeedV2(postFeedRequestV2.getIslandId(), userId, MediaTypeConverter.convert(mediaType), postFeedRequestV2.getMultimedia(), postFeedRequestV2.getText());
+        feedService.createFeedV2(postFeedRequestV2.getIslandId(), userId, MediaTypeConverter.convertToMediaType(mediaType), postFeedRequestV2.getMultimedia(), postFeedRequestV2.getText());
 
         return null;
     }

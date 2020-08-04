@@ -5,7 +5,9 @@ import com.keepreal.madagascar.common.HtmlMessage;
 import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.PicturesMessage;
 import com.keepreal.madagascar.common.VideoMessage;
+import com.keepreal.madagascar.lemur.model.VideoInfo;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import swagger.model.MultiMediaDTO;
 
 import java.util.List;
@@ -25,13 +27,13 @@ public class MediaService {
     public VideoMessage videoMessage(MultiMediaDTO multiMediaDTO) {
         String videoId = multiMediaDTO.getVideoId();
 
-
+        VideoInfo videoInfo = uploadService.retrieveVideoInfo(videoId);
         return VideoMessage.newBuilder()
-//                .setUrl()
-//                .setThumbnailUrl()
-//                .setDuration()
-//                .setWidth()
-//                .setHeight()
+                .setUrl(videoInfo.getPlayURL())
+                .setThumbnailUrl(this.getThumbnailUrl(multiMediaDTO, videoInfo))
+                .setDuration(this.toMilliseconds(videoInfo.getDuration()))
+                .setWidth(videoInfo.getWidth())
+                .setHeight(videoInfo.getHeight())
                 .setVideoId(videoId)
                 .build();
     }
@@ -39,10 +41,12 @@ public class MediaService {
     public AudioMessage audioMessage(MultiMediaDTO multiMediaDTO) {
         String videoId = multiMediaDTO.getVideoId();
 
+        VideoInfo videoInfo = uploadService.retrieveVideoInfo(videoId);
+
         return AudioMessage.newBuilder()
-//                .setUrl()
-//                .setThumbnailUrl()
-//                .setDuration()
+                .setUrl(videoInfo.getPlayURL())
+                .setThumbnailUrl(this.getThumbnailUrl(multiMediaDTO, videoInfo))
+                .setDuration(this.toMilliseconds(videoInfo.getDuration()))
                 .setVideoId(videoId)
                 .build();
     }
@@ -69,5 +73,9 @@ public class MediaService {
 
     private long toMilliseconds(String duration) {
         return (long) (Float.valueOf(duration) * MILLISECONDS);
+    }
+
+    private String getThumbnailUrl(MultiMediaDTO multiMediaDTO, VideoInfo videoInfo) {
+        return StringUtils.isEmpty(multiMediaDTO.getThumbnailUrl()) ? videoInfo.getCoverURL() : multiMediaDTO.getThumbnailUrl();
     }
 }

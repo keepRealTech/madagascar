@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.MembershipMessage;
+import com.keepreal.madagascar.lemur.converter.MediaTypeConverter;
 import com.keepreal.madagascar.lemur.service.EhcacheService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
@@ -38,6 +39,7 @@ public class FeedDTOFactory {
     private final EhcacheService ehcacheService;
     private final MembershipService membershipService;
     private final MembershipDTOFactory membershipDTOFactory;
+    private final MultiMediaDTOFactory multiMediaDTOFactory;
 
     /**
      * Constructs the feed dto factory.
@@ -50,6 +52,7 @@ public class FeedDTOFactory {
      * @param ehcacheService       {@link EhcacheService}.
      * @param membershipService    {@link MembershipService}.
      * @param membershipDTOFactory {@link MembershipDTOFactory}.
+     * @param multiMediaDTOFactory {@link MultiMediaDTOFactory}.
      */
     public FeedDTOFactory(IslandService islandService,
                           IslandDTOFactory islandDTOFactory,
@@ -58,7 +61,8 @@ public class FeedDTOFactory {
                           CommentDTOFactory commentDTOFactory,
                           EhcacheService ehcacheService,
                           MembershipService membershipService,
-                          MembershipDTOFactory membershipDTOFactory) {
+                          MembershipDTOFactory membershipDTOFactory,
+                          MultiMediaDTOFactory multiMediaDTOFactory) {
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
         this.userService = userService;
@@ -67,6 +71,7 @@ public class FeedDTOFactory {
         this.ehcacheService = ehcacheService;
         this.membershipService = membershipService;
         this.membershipDTOFactory = membershipDTOFactory;
+        this.multiMediaDTOFactory = multiMediaDTOFactory;
     }
 
     /**
@@ -138,6 +143,8 @@ public class FeedDTOFactory {
             briefFeedDTO.setImagesUris(feed.getImageUrisList());
             briefFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
             briefFeedDTO.setCreatedAt(feed.getCreatedAt());
+            briefFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
+            briefFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
 
             briefFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
             briefFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));

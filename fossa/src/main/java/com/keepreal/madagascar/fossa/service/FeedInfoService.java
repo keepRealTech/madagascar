@@ -2,17 +2,20 @@ package com.keepreal.madagascar.fossa.service;
 
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.fossa.TimelineFeedMessage;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
+import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
@@ -175,6 +178,7 @@ public class FeedInfoService {
                 builder.setMembershipId(membershipIds.get(0));
             }
         }
+        processMeida(builder, feedInfo);
 
         return builder.build();
     }
@@ -275,5 +279,29 @@ public class FeedInfoService {
      */
     public FeedInfo findToppedFeedByIslandId(String islandId) {
         return this.feedInfoRepository.findTopByIslandIdAndIsTopIsTrueAndDeletedIsFalse(islandId);
+    }
+
+    private void processMeida(FeedMessage.Builder builder, FeedInfo feedInfo) {
+        if (feedInfo.getMultiMediaType() == null) {
+            builder.setType(CollectionUtils.isEmpty(feedInfo.getImageUrls()) ? MediaType.MEDIA_TEXT : MediaType.MEDIA_PICS);
+            return;
+        }
+        MediaType mediaType = MediaType.valueOf(feedInfo.getMultiMediaType());
+        builder.setType(mediaType);
+        switch (mediaType) {
+            case MEDIA_PICS:
+            case MEDIA_ALBUM:
+                builder.setPics(MediaMessageConvertUtils.toPicturesMessage(feedInfo.getMediaInfos()));
+                break;
+            case MEDIA_VIDEO:
+                builder.setVideo(MediaMessageConvertUtils.toVideoMessage(feedInfo.getMediaInfos().get(0)));
+                break;
+            case MEDIA_AUDIO:
+                builder.setAudio(MediaMessageConvertUtils.toAudioMessage(feedInfo.getMediaInfos().get(0)));
+                break;
+            case MEDIA_HTML:
+                builder.setHtml(MediaMessageConvertUtils.toHtmlMessage(feedInfo.getMediaInfos().get(0)));
+                break;
+        }
     }
 }

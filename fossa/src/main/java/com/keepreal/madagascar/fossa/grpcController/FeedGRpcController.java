@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
-import com.google.protobuf.BoolValue;
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
@@ -50,7 +49,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -420,16 +418,16 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         switch (request.getType()) {
             case MEDIA_PICS:
             case MEDIA_ALBUM:
-                mediaInfos.addAll(MediaMessageConvertUtils.pictureInfoList(request.getPics()));
+                mediaInfos.addAll(MediaMessageConvertUtils.toPictureInfoList(request.getPics()));
                 break;
             case MEDIA_VIDEO:
-                mediaInfos.add(MediaMessageConvertUtils.videoInfo(request.getVideo()));
+                mediaInfos.add(MediaMessageConvertUtils.toVideoInfo(request.getVideo()));
                 break;
             case MEDIA_AUDIO:
-                mediaInfos.add(MediaMessageConvertUtils.audioInfo(request.getAudio()));
+                mediaInfos.add(MediaMessageConvertUtils.toAudioInfo(request.getAudio()));
                 break;
             case MEDIA_HTML:
-                mediaInfos.add(MediaMessageConvertUtils.htmlInfo(request.getHtml()));
+                mediaInfos.add(MediaMessageConvertUtils.toHtmlInfo(request.getHtml()));
                 break;
         }
         return mediaInfos;

@@ -5,22 +5,41 @@ import swagger.model.MultiMediaType;
 
 public class MediaTypeConverter {
 
-    public static MediaType convert(MultiMediaType type) {
+    public static MediaType convertToMediaType(MultiMediaType type) {
         switch (type) {
-            case MULTIMEDIA_TYPE_TEXT:
+            case TEXT:
                 return MediaType.MEDIA_TEXT;
-            case MULTIMEDIA_TYPE_PICS:
+            case PICS:
                 return MediaType.MEDIA_PICS;
-            case MULTIMEDIA_TYPE_ALBUM:
+            case ALBUM:
                 return MediaType.MEDIA_ALBUM;
-            case MULTIMEDIA_TYPE_VIDEO:
+            case VIDEO:
                 return MediaType.MEDIA_VIDEO;
-            case MULTIMEDIA_TYPE_AUDIO:
+            case AUDIO:
                 return MediaType.MEDIA_AUDIO;
-            case MULITMEDIA_TYPE_HTML:
+            case HTML:
                 return MediaType.MEDIA_HTML;
             default:
                 return MediaType.MEDIA_NONE;
+        }
+    }
+
+    public static MultiMediaType converToMultiMediaType(MediaType type) {
+        switch (type) {
+            case MEDIA_TEXT:
+                return MultiMediaType.TEXT;
+            case MEDIA_PICS:
+                return MultiMediaType.PICS;
+            case MEDIA_ALBUM:
+                return MultiMediaType.ALBUM;
+            case MEDIA_VIDEO:
+                return MultiMediaType.VIDEO;
+            case MEDIA_AUDIO:
+                return MultiMediaType.AUDIO;
+            case MEDIA_HTML:
+                return MultiMediaType.HTML;
+            default:
+                return MultiMediaType.TEXT;
         }
     }
 }
