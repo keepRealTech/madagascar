@@ -14,6 +14,7 @@ import com.aliyuncs.vod.model.v20170321.RefreshUploadVideoResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.OssClientConfiguration;
+import com.keepreal.madagascar.lemur.model.VideoInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import swagger.model.UploadMediaDTO;
@@ -117,29 +118,30 @@ public class UploadService {
         }
     }
 
-    public void retrieveVedioInfo(String videoId) {
+    public VideoInfo retrieveVideoInfo(String videoId) {
+        VideoInfo videoInfo = new VideoInfo();
         try {
             GetPlayInfoRequest request = new GetPlayInfoRequest();
             request.setVideoId(videoId);
 
-            GetPlayInfoResponse response = new GetPlayInfoResponse();
+            GetPlayInfoResponse response = client.getAcsResponse(request);
             List<GetPlayInfoResponse.PlayInfo> playInfoList = response.getPlayInfoList();
             if (playInfoList.size() == 0) {
                 log.error("aliyun error! playInfoList is empty! video id is {}", videoId);
-                return;
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
             } else {
                 GetPlayInfoResponse.PlayInfo playInfo = playInfoList.get(0);
-                String playURL = playInfo.getPlayURL();
-                Long width = playInfo.getWidth();
-                Long height = playInfo.getHeight();
-                String duration = playInfo.getDuration();
+                videoInfo.setPlayURL(playInfo.getPlayURL());
+                videoInfo.setWidth(playInfo.getWidth());
+                videoInfo.setHeight(playInfo.getHeight());
+                videoInfo.setDuration(playInfo.getDuration());
             }
-            String coverURL = response.getVideoBase().getCoverURL();
+            videoInfo.setCoverURL(response.getVideoBase().getCoverURL());
 
-        } catch (Exception e) {
+        } catch (ClientException e) {
             log.error("aliyun error! videoId is {} message is {}", videoId, e.getLocalizedMessage());
-
         }
+        return videoInfo;
     }
 
 }
