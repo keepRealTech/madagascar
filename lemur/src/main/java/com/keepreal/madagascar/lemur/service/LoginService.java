@@ -18,12 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -41,8 +35,7 @@ public class LoginService {
      *
      * @param channel GRpc managed channel connection to service Baobob.
      */
-    public LoginService(@Qualifier("baobobChannel") Channel channel,
-                        Tracer tracer) {
+    public LoginService(@Qualifier("baobobChannel") Channel channel, Tracer tracer) {
         this.channel = channel;
     }
 
@@ -77,6 +70,12 @@ public class LoginService {
         return loginResponse;
     }
 
+    /**
+     * Checks wechat mp signature.
+     *
+     * @param request {@link CheckSignatureRequest}.
+     * @return True if valid.
+     */
     public Boolean checkSignature(CheckSignatureRequest request) {
         LoginServiceGrpc.LoginServiceBlockingStub stub = LoginServiceGrpc.newBlockingStub(this.channel);
         CheckSignatureResponse response;
@@ -99,6 +98,11 @@ public class LoginService {
         return true;
     }
 
+    /**
+     * Generates the wechat mp qr code ticket.
+     *
+     * @return {@link GenerateQrcodeResponse}.
+     */
     public GenerateQrcodeResponse generateQrcode() {
         LoginServiceGrpc.LoginServiceBlockingStub stub = LoginServiceGrpc.newBlockingStub(this.channel);
         GenerateQrcodeResponse generateQrcodeResponse;
@@ -121,6 +125,13 @@ public class LoginService {
         return generateQrcodeResponse;
     }
 
+    /**
+     * Handles the wechat media platform events.
+     *
+     * @param fromUserName User name.
+     * @param event        Event type.
+     * @param eventKey     Event key.
+     */
     public void handleEvent(String fromUserName, String event, String eventKey) {
         LoginServiceGrpc.LoginServiceBlockingStub stub = LoginServiceGrpc.newBlockingStub(this.channel);
         HandleEventRequest request = HandleEventRequest.newBuilder().setOpedId(fromUserName)
@@ -132,7 +143,13 @@ public class LoginService {
         }
     }
 
-    public LoginResponse checkOffiAccountLogin(String sceneId) {
+    /**
+     * Checks the wechat mp login status.
+     *
+     * @param sceneId Scene id.
+     * @return {@link LoginResponse}.
+     */
+    public LoginResponse checkWechatMpAccountLogin(String sceneId) {
         LoginServiceGrpc.LoginServiceBlockingStub stub = LoginServiceGrpc.newBlockingStub(this.channel);
         CheckOffiAccountLoginRequest request = CheckOffiAccountLoginRequest.newBuilder().setSceneId(sceneId).build();
         LoginResponse loginResponse;
@@ -149,4 +166,5 @@ public class LoginService {
 
         return loginResponse;
     }
+
 }
