@@ -282,9 +282,23 @@ public class MpWechatService {
                 .flatMap(hashMap -> {
                     String accessToken = String.valueOf(hashMap.get("access_token"));
                     String expiresInSec = String.valueOf(hashMap.get("expires_in"));
-                    bucket.trySet(accessToken, System.currentTimeMillis() + (Long.parseLong(expiresInSec) - 200) * 1000L, TimeUnit.MILLISECONDS);
+                    log.info("token is {} expires_in is {}", accessToken, expiresInSec);
+                    bucket.trySet(accessToken, stringToLong(expiresInSec) - 200L, TimeUnit.SECONDS);
+                    String s = bucket.get();
+                    log.info("存的token为{}", s);
                     return Mono.just(accessToken);
                 });
+    }
+
+    /**
+     * wechat server send expires_in like "7200.0"
+     *
+     * @param expiresInSec string expiresInSec like "7200.0"
+     * @return Long expiresInSec
+     */
+    private Long stringToLong(String expiresInSec) {
+        String[] strings = StringUtils.delimitedListToStringArray(expiresInSec, ".");
+        return Long.parseLong(strings[0]);
     }
 
 }
