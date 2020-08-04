@@ -2351,7 +2351,9 @@ components:
       type: object
       properties:
         islandId:
-          type: string
+          type: array
+          items:
+            type: string
         membershipIds:
           type: array
           items:

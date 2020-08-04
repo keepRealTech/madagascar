@@ -128,7 +128,7 @@ enum ReportType {
     OTHERS = 8;
 }
 
-enum MultiMediaType {
+enum MediaType {
     MEDIA_NONE = 0;
     MEDIA_TEXT = 1;
     MEDIA_PICS = 2;

@@ -9,6 +9,7 @@ import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrig
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
+import com.keepreal.madagascar.lemur.converter.MediaTypeConverter;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
@@ -29,9 +30,12 @@ import swagger.model.DummyResponse;
 import swagger.model.FeedDTO;
 import swagger.model.FeedResponse;
 import swagger.model.FeedsResponseV2;
+import swagger.model.MultiMediaDTO;
+import swagger.model.MultiMediaType;
 import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
 import swagger.model.PostFeedPayload;
+import swagger.model.PostFeedRequestV2;
 import swagger.model.TimelinesResponse;
 import swagger.model.TopFeedRequest;
 import swagger.model.ToppedFeedsDTO;
@@ -414,4 +418,13 @@ public class FeedController implements FeedApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<FeedResponse> apiV11FeedsPost(PostFeedRequestV2 postFeedRequestV2) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        MultiMediaType mediaType = postFeedRequestV2.getMediaType();
+
+        feedService.createFeedV2(postFeedRequestV2.getIslandId(), userId, MediaTypeConverter.convert(mediaType), postFeedRequestV2.getMultimedia(), postFeedRequestV2.getText());
+
+        return null;
+    }
 }
