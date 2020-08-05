@@ -40,7 +40,7 @@ public class MediaMessageConvertUtils {
         VideoInfo videoInfo = new VideoInfo();
         videoInfo.setUrl(videoMessage.getUrl());
         videoInfo.setThumbnailUrl(videoMessage.getThumbnailUrl());
-        videoInfo.setDuration(videoInfo.getDuration());
+        videoInfo.setDuration(videoMessage.getDuration());
         videoInfo.setWidth(videoMessage.getWidth());
         videoInfo.setHeight(videoMessage.getHeight());
         videoInfo.setVideoId(videoMessage.getVideoId());

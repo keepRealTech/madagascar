@@ -136,7 +136,22 @@ public class FeedService {
 
         buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
 
-        stub.createFeedsV2(builder.build());
+        NewFeedsResponse newFeedsResponse;
+        try {
+            newFeedsResponse = stub.createFeedsV2(builder.build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(newFeedsResponse)
+                || !newFeedsResponse.hasStatus()) {
+            log.error(Objects.isNull(newFeedsResponse) ? "Create feed returned null." : newFeedsResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != newFeedsResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(newFeedsResponse.getStatus());
+        }
     }
 
     /**

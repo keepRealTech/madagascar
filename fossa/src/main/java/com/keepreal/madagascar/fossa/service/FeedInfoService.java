@@ -178,7 +178,7 @@ public class FeedInfoService {
                 builder.setMembershipId(membershipIds.get(0));
             }
         }
-        processMeida(builder, feedInfo);
+        processMedia(builder, feedInfo);
 
         return builder.build();
     }
@@ -281,7 +281,7 @@ public class FeedInfoService {
         return this.feedInfoRepository.findTopByIslandIdAndIsTopIsTrueAndDeletedIsFalse(islandId);
     }
 
-    private void processMeida(FeedMessage.Builder builder, FeedInfo feedInfo) {
+    private void processMedia(FeedMessage.Builder builder, FeedInfo feedInfo) {
         if (feedInfo.getMultiMediaType() == null) {
             builder.setType(CollectionUtils.isEmpty(feedInfo.getImageUrls()) ? MediaType.MEDIA_TEXT : MediaType.MEDIA_PICS);
             return;

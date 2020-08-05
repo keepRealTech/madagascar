@@ -7,7 +7,7 @@ public class VideoInfo extends MediaInfo {
     private String url;
     private String thumbnailUrl;
     private String videoId;
-    private Integer width;
-    private Integer height;
+    private Long width;
+    private Long height;
     private Long duration;
 }

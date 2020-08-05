@@ -107,6 +107,8 @@ public class FeedDTOFactory {
             feedDTO.setIsAccess(feed.getIsAccess());
             feedDTO.setIsMembership(feed.getIsMembership());
             feedDTO.setIsTop(feed.getIsTop());
+            feedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
+            feedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
 
             if (feed.getIsMembership()) {
                 MembershipMessage membershipMessage = this.membershipService.retrieveMembershipById(feed.getMembershipId());

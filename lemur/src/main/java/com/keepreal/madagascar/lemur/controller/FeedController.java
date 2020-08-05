@@ -20,6 +20,7 @@ import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -418,12 +419,38 @@ public class FeedController implements FeedApi {
     }
 
     @Override
-    public ResponseEntity<FeedResponse> apiV11FeedsPost(PostFeedRequestV2 postFeedRequestV2) {
+    public ResponseEntity<DummyResponse> apiV11FeedsPost(PostFeedRequestV2 postFeedRequestV2) {
         String userId = HttpContextUtils.getUserIdFromContext();
         MultiMediaType mediaType = postFeedRequestV2.getMediaType();
+        DummyResponse response = new DummyResponse();
+        switch (mediaType) {
+            case PICS:
+                if (postFeedRequestV2.getMultimedia().size() > 9) {
+                    DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                }
+            case ALBUM:
+                if (postFeedRequestV2.getMultimedia().size() > 18) {
+                    DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                }
+            case VIDEO:
+            case AUDIO:
+                if (CollectionUtils.isEmpty(postFeedRequestV2.getMultimedia()) ||
+                        StringUtils.isEmpty(postFeedRequestV2.getMultimedia().get(0).getVideoId())) {
+                    DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_INVALID_ARGUMENT);
+                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                }
+            case HTML:
+                if (StringUtils.isEmpty(postFeedRequestV2.getText())) {
+                    DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_INVALID_ARGUMENT);
+                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                }
+        }
 
-        feedService.createFeedV2(postFeedRequestV2.getIslandId(), userId, MediaTypeConverter.convertToMediaType(mediaType), postFeedRequestV2.getMultimedia(), postFeedRequestV2.getText());
+        this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(), userId, MediaTypeConverter.convertToMediaType(mediaType), postFeedRequestV2.getMultimedia(), postFeedRequestV2.getText());
 
-        return null;
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
