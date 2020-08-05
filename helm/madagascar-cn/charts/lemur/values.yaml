@@ -74,3 +74,6 @@ aliyun_oss:
   endpoint: oss-cn-beijing-internal.aliyuncs.com
   bucket_name: kr-thumbnail-prod-cn2-01
   expire_time_in_seconds: 30
+
+aliyun_vod:
+  region_id: cn-shanghai
