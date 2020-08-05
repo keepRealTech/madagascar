@@ -221,7 +221,7 @@ public class MpWechatService {
      */
     private void executeSubscribeEvent(String openId, String eventKey) {
         String[] sceneStrs = StringUtils.delimitedListToStringArray(eventKey, "_");
-        String sceneId = sceneStrs[0];
+        String sceneId = sceneStrs[1];
         WechatUserInfo wechatUserInfo = this.retrieveUserInfoFromWechatByOpenId(openId).block();
         RBucket<Object> bucket = this.redissonClient.getBucket(sceneId);
         bucket.trySet(wechatUserInfo, 1L, TimeUnit.MINUTES);
