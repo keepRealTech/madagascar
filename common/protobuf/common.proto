@@ -216,18 +216,20 @@ message Picture {
 
 message VideoMessage {
     string url = 1;
-    string videoId = 2;
-    string thumbnailUrl = 3;
-    int64 duration = 4;
-    int64 width = 5;
-    int64 height = 6;
+    string title = 2;
+    string videoId = 3;
+    string thumbnailUrl = 4;
+    int64 duration = 5;
+    int64 width = 6;
+    int64 height = 7;
 }
 
 message AudioMessage {
     string url = 1;
-    string videoId = 2;
-    string thumbnailUrl = 3;
-    int64 duration = 4;
+    string title = 2;
+    string videoId = 3;
+    string thumbnailUrl = 4;
+    int64 duration = 5;
 }
 
 message HtmlMessage {
