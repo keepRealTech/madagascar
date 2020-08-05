@@ -608,7 +608,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeedResponse'
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/feeds/check:
     post:
       tags:
@@ -2350,8 +2350,10 @@ components:
     PostFeedRequestV2:
       type: object
       properties:
-        islandId:
-          type: string
+        islandIds:
+          type: array
+          items:
+            type: string
         membershipIds:
           type: array
           items:

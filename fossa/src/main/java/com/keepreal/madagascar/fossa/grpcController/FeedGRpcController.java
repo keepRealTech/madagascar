@@ -1,9 +1,9 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
-import com.google.protobuf.BoolValue;
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
@@ -15,6 +15,7 @@ import com.keepreal.madagascar.fossa.FeedResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.fossa.NewFeedsRequest;
+import com.keepreal.madagascar.fossa.NewFeedsRequestV2;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
@@ -25,10 +26,12 @@ import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
+import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.IslandService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
+import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
@@ -112,6 +115,49 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.imageUrls(request.getImageUrisList());
             builder.text(text);
             builder.duplicateTag(duplicateTag);
+            builder.membershipIds(membershipIdsList);
+            builder.createdTime(timestamp);
+            builder.toppedTime(timestamp);
+            feedInfoList.add(builder.build());
+        });
+
+        List<FeedInfo> feedInfos = feedInfoService.saveAll(feedInfoList);
+        islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp);
+
+        feedInfos.forEach(this.feedEventProducerService::produceNewFeedEventAsync);
+
+        NewFeedsResponse newFeedsResponse = NewFeedsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(newFeedsResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void createFeedsV2(NewFeedsRequestV2 request, StreamObserver<NewFeedsResponse> responseObserver) {
+
+        String userId = request.getUserId();
+        ProtocolStringList islandIdList = request.getIslandIdList();
+        ProtocolStringList hostIdList = request.getHostIdList();
+        String text = request.hasText() ? request.getText().getValue() : "";
+        ProtocolStringList membershipIdsList = request.getMembershipIdsList();
+        MediaType mediaType = request.getType();
+
+        String duplicateTag = UUID.randomUUID().toString();
+
+        List<FeedInfo> feedInfoList = new ArrayList<>();
+        long timestamp = Instant.now().toEpochMilli();
+        IntStream.range(0, islandIdList.size()).forEach(i -> {
+            FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
+            builder.id(String.valueOf(idGenerator.nextId()));
+            builder.islandId(islandIdList.get(i));
+            builder.userId(userId);
+            builder.hostId(hostIdList.get(i));
+            builder.fromHost(userId.equals(hostIdList.get(i)));
+            builder.text(text);
+            builder.duplicateTag(duplicateTag);
+            builder.multiMediaType(mediaType.name());
+            builder.mediaInfos(this.buildMediaInfos(request));
             builder.membershipIds(membershipIdsList);
             builder.createdTime(timestamp);
             builder.toppedTime(timestamp);
@@ -365,5 +411,25 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
+    }
+
+    private List<MediaInfo> buildMediaInfos(NewFeedsRequestV2 request) {
+        List<MediaInfo> mediaInfos = new ArrayList<>();
+        switch (request.getType()) {
+            case MEDIA_PICS:
+            case MEDIA_ALBUM:
+                mediaInfos.addAll(MediaMessageConvertUtils.toPictureInfoList(request.getPics()));
+                break;
+            case MEDIA_VIDEO:
+                mediaInfos.add(MediaMessageConvertUtils.toVideoInfo(request.getVideo()));
+                break;
+            case MEDIA_AUDIO:
+                mediaInfos.add(MediaMessageConvertUtils.toAudioInfo(request.getAudio()));
+                break;
+            case MEDIA_HTML:
+                mediaInfos.add(MediaMessageConvertUtils.toHtmlInfo(request.getHtml()));
+                break;
+        }
+        return mediaInfos;
     }
 }

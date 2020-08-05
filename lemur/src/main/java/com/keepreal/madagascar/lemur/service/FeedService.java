@@ -5,6 +5,7 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
@@ -13,6 +14,7 @@ import com.keepreal.madagascar.fossa.FeedResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.fossa.NewFeedsRequest;
+import com.keepreal.madagascar.fossa.NewFeedsRequestV2;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
@@ -32,8 +34,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import org.springframework.util.StringUtils;
+import swagger.model.MultiMediaDTO;
 import swagger.model.TopFeedRequest;
-import swagger.model.ToppedFeedsDTO;
 
 import java.util.AbstractMap;
 import java.util.Collections;
@@ -51,21 +55,24 @@ public class FeedService {
     private final Channel fossaChannel;
     private final Channel mantellaChannel;
     private final IslandService islandService;
+    private final MediaService mediaService;
 
     /**
      * Constructs the feed service.
-     *
-     * @param fossaChannel    GRpc managed channel connection to service Fossa.
+     *  @param fossaChannel    GRpc managed channel connection to service Fossa.
      * @param mantellaChannel
      * @param islandService   {@link IslandService}
+     * @param mediaService
      */
 
     public FeedService(@Qualifier("fossaChannel") Channel fossaChannel,
                        @Qualifier("mantellaChannel") Channel mantellaChannel,
-                       IslandService islandService) {
+                       IslandService islandService,
+                       MediaService mediaService) {
         this.fossaChannel = fossaChannel;
         this.mantellaChannel = mantellaChannel;
         this.islandService = islandService;
+        this.mediaService = mediaService;
     }
 
     /**
@@ -97,6 +104,41 @@ public class FeedService {
         NewFeedsResponse newFeedsResponse;
         try {
             newFeedsResponse = stub.createFeeds(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(newFeedsResponse)
+                || !newFeedsResponse.hasStatus()) {
+            log.error(Objects.isNull(newFeedsResponse) ? "Create feed returned null." : newFeedsResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != newFeedsResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(newFeedsResponse.getStatus());
+        }
+    }
+
+    public void createFeedV2(List<String> islandIds, String userId, MediaType mediaType, List<MultiMediaDTO> multiMediaDTOList, String text) {
+        if (Objects.isNull(islandIds) || islandIds.size() == 0) {
+            log.error("param islandIds is invalid");
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        List<String> hostIdList = islandIds.stream().map(id -> islandService.retrieveIslandById(id).getHostId()).collect(Collectors.toList());
+
+        NewFeedsRequestV2.Builder builder = NewFeedsRequestV2.newBuilder()
+                .addAllIslandId(islandIds)
+                .addAllHostId(hostIdList)
+                .setUserId(userId)
+                .setType(mediaType);
+
+        buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
+
+        NewFeedsResponse newFeedsResponse;
+        try {
+            newFeedsResponse = stub.createFeedsV2(builder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
@@ -428,5 +470,26 @@ public class FeedService {
         }
 
         return response;
+    }
+
+    private void buildMediaMessage(NewFeedsRequestV2.Builder builder, MediaType mediaType, List<MultiMediaDTO> multiMediaDTOList, String text) {
+        switch (mediaType) {
+            case MEDIA_PICS:
+            case MEDIA_ALBUM:
+                builder.setPics(mediaService.picturesMessage(multiMediaDTOList));
+                break;
+            case MEDIA_HTML:
+                builder.setHtml(mediaService.htmlMessage(multiMediaDTOList.get(0)));
+                break;
+            case MEDIA_VIDEO:
+                builder.setVideo(mediaService.videoMessage(multiMediaDTOList.get(0)));
+                break;
+            case MEDIA_AUDIO:
+                builder.setAudio(mediaService.audioMessage(multiMediaDTOList.get(0)));
+                break;
+        }
+        if (!StringUtils.isEmpty(text)) {
+            builder.setText(StringValue.of(text));
+        }
     }
 }

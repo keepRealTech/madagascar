@@ -9,6 +9,7 @@ import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrig
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
+import com.keepreal.madagascar.lemur.converter.MediaTypeConverter;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
@@ -19,6 +20,7 @@ import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,9 +31,11 @@ import swagger.model.DummyResponse;
 import swagger.model.FeedDTO;
 import swagger.model.FeedResponse;
 import swagger.model.FeedsResponseV2;
+import swagger.model.MultiMediaType;
 import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
 import swagger.model.PostFeedPayload;
+import swagger.model.PostFeedRequestV2;
 import swagger.model.TimelinesResponse;
 import swagger.model.TopFeedRequest;
 import swagger.model.ToppedFeedsDTO;
@@ -414,4 +418,39 @@ public class FeedController implements FeedApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<DummyResponse> apiV11FeedsPost(PostFeedRequestV2 postFeedRequestV2) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        MultiMediaType mediaType = postFeedRequestV2.getMediaType();
+        DummyResponse response = new DummyResponse();
+        switch (mediaType) {
+            case PICS:
+                if (postFeedRequestV2.getMultimedia().size() > 9) {
+                    DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                }
+            case ALBUM:
+                if (postFeedRequestV2.getMultimedia().size() > 18) {
+                    DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                }
+            case VIDEO:
+            case AUDIO:
+                if (CollectionUtils.isEmpty(postFeedRequestV2.getMultimedia()) ||
+                        StringUtils.isEmpty(postFeedRequestV2.getMultimedia().get(0).getVideoId())) {
+                    DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_INVALID_ARGUMENT);
+                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                }
+            case HTML:
+                if (StringUtils.isEmpty(postFeedRequestV2.getText())) {
+                    DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_INVALID_ARGUMENT);
+                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                }
+        }
+
+        this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(), userId, MediaTypeConverter.convertToMediaType(mediaType), postFeedRequestV2.getMultimedia(), postFeedRequestV2.getText());
+
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
