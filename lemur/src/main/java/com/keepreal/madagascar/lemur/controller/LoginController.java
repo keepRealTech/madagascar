@@ -298,6 +298,7 @@ public class LoginController implements LoginApi {
      * @return {@link QrTicketResponse}.
      */
     @Override
+    @CrossOrigin
     public ResponseEntity<QrTicketResponse> apiV1LoginGeneratePost() {
         GenerateQrcodeResponse generateQrcodeResponse = loginService.generateQrcode();
         QrTicketResponse response = new QrTicketResponse();
@@ -320,6 +321,7 @@ public class LoginController implements LoginApi {
      * @return {@link LoginResponse}.
      */
     @Override
+    @CrossOrigin
     public ResponseEntity<LoginResponse> apiV1LoginPollingGet(String sceneId) {
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.checkWechatMpAccountLogin(sceneId);
 
