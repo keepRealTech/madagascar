@@ -68,6 +68,16 @@ spec:
                 secretKeyRef:
                   name: aliyun-oss
                   key: access-secret
+            - name: ALIYUNVOD_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-vod
+                  key: access-key
+            - name: ALIYUNVOD_ACCESSSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-vod
+                  key: access-secret
           volumeMounts:
             - name: lemur-dictionary
               mountPath: "/app/good-dictionary.txt"

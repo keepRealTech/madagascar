@@ -13,12 +13,12 @@ import org.springframework.context.annotation.Configuration;
 public class AcsClientConfig {
 
     private String regionId;
-    private String accessKeyId;
-    private String accessKeySecret;
+    private String accessKey;
+    private String accessSecret;
 
     @Bean
     public DefaultAcsClient acsClient() {
-        DefaultProfile profile = DefaultProfile.getProfile(regionId, accessKeyId, accessKeySecret);
+        DefaultProfile profile = DefaultProfile.getProfile(regionId, this.accessKey, this.accessSecret);
         return new DefaultAcsClient(profile);
     }
 }

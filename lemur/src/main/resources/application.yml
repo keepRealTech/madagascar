@@ -122,12 +122,12 @@ client:
 
 aliyun-oss:
   endpoint: oss-cn-beijing.aliyuncs.com
-  accessKey: 123
-  accessSecret: 123
-  bucketName: kr-thumbnail-staging-cn2-01
-  expireTimeInSeconds: 30
+  access-key: 123
+  access-secret: 123
+  bucket-name: kr-thumbnail-staging-cn2-01
+  expiretime-in-seconds: 30
 
 aliyun-vod:
-  regionId: cn-shanghai
-  accessKeyId: xxx
-  accessKeySecret: xxx
+  region-id: cn-shanghai
+  access-key: xxx
+  access-secret: xxx
