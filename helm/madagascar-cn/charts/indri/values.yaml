@@ -8,7 +8,6 @@ common_configs:
 
 aliyun_oss:
   endpoint: oss-cn-beijing-internal.aliyuncs.com
-  bucket_name: kr-thumbnail-prod-cn2-01
 
 deploy:
   opentracing:

@@ -68,6 +68,11 @@ spec:
                 secretKeyRef:
                   name: aliyun-oss
                   key: access-secret
+            - name: ALIYUNOSS_BUCKETNAME
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-oss
+                  key: bucket-name
             - name: ALIYUNVOD_ACCESSKEY
               valueFrom:
                 secretKeyRef:
