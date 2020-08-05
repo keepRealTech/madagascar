@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -167,6 +168,22 @@ public class UserInfoService {
      */
     public List<UserInfo> findUserInfosByIds(Iterable<String> ids) {
         return this.userInfoRepository.findAllByIdInAndDeletedIsFalse(ids);
+    }
+
+    /**
+     * Flips the should introduce to false.
+     *
+     * @param userId user id
+     */
+    public void dismissIntroduction(String userId) {
+        UserInfo userInfo = this.userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
+
+        if (Objects.isNull(userInfo)) {
+            return;
+        }
+
+        userInfo.setShouldIntroduce(false);
+        this.userInfoRepository.save(userInfo);
     }
 
 }

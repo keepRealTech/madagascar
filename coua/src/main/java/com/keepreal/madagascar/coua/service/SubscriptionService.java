@@ -280,22 +280,6 @@ public class SubscriptionService {
         return subscription != null && subscription.getState() > 0;
     }
 
-    /**
-     * Flips the should introduce to false.
-     *
-     * @param userId   User id.
-     * @param islandId Island id.
-     */
-    public void dismissIntroduction(String userId, String islandId) {
-        Subscription subscription = this.subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
-        if (Objects.isNull(subscription)) {
-            return;
-        }
-
-        subscription.setShouldIntroduce(false);
-        this.subscriptionRepository.save(subscription);
-    }
-
     private void insertSubscription(Subscription subscription) {
         try {
             subscriptionRepository.save(subscription);
