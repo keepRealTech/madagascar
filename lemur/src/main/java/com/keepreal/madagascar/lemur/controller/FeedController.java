@@ -180,6 +180,7 @@ public class FeedController implements FeedApi {
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link FeedsResponse}.
      */
+    @Deprecated
     @Override
     public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedsGet(String islandId,
                                                                      Boolean fromHost,

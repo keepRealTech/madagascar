@@ -74,11 +74,9 @@ public class CacheConfiguration {
      */
     @Bean
     public CacheManager redisCacheManager() {
-        Codec codec = new JsonJacksonCodec();
-
         Map<String, CacheConfig> config = new HashMap<>(16);
-        config.put("config", new CacheConfig(20 * 1000, 12 * 60 * 1000));
-        return new RedissonSpringCacheManager(this.redissonClient, config, codec);
+        config.put("IslandMessage", new CacheConfig(0, 24 * 60 * 60 * 1000));
+        return new RedissonSpringCacheManager(this.redissonClient, config);
     }
 
 }
