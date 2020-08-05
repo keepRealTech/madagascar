@@ -16,8 +16,8 @@ wechat:
     host: https://api.weixin.qq.com
     app-id:
     app-secret:
-    serverToken:
-    expirationInSec: 60
+    server-token:
+    expiration-in-sec: 60
 
 grpc:
   port: 12001
