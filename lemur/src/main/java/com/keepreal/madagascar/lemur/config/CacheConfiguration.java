@@ -1,16 +1,15 @@
 package com.keepreal.madagascar.lemur.config;
 
-import org.ehcache.config.builders.CacheManagerBuilder;
 import org.ehcache.jsr107.EhcacheCachingProvider;
-import org.ehcache.xml.XmlConfiguration;
 import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.Codec;
+import org.redisson.codec.JsonJacksonCodec;
 import org.redisson.spring.cache.CacheConfig;
 import org.redisson.spring.cache.RedissonSpringCacheManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.concurrent.ConcurrentMapCacheManager;
 import org.springframework.cache.jcache.JCacheCacheManager;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -31,13 +30,35 @@ public class CacheConfiguration {
 
     private final RedissonClient redissonClient;
 
+    /**
+     * Constructs the caching configurations.
+     *
+     * @param redissonClient {@link RedissonClient}.
+     */
     public CacheConfiguration(RedissonClient redissonClient) {
         this.redissonClient = redissonClient;
     }
 
+    /**
+     * Represents the default in memory concurrent map for caching.
+     * @Note Use only for ResponseEntity controller level caching. Do not abuse it.
+     *
+     * @return {@link ConcurrentMapCacheManager}.
+     */
     @Bean
     @Primary
-    public CacheManager ehCacheCacheManager() throws URISyntaxException {
+    public CacheManager defaultCacheManager() {
+        return new ConcurrentMapCacheManager();
+    }
+
+    /**
+     * Represents the local ehcache for caching. This can be delicately configured and use local disk.
+     *
+     * @return {@link JCacheCacheManager}.
+     * @throws URISyntaxException Uri exception.
+     */
+    @Bean
+    public CacheManager ehcacheCacheManager() throws URISyntaxException {
         CachingProvider provider = Caching.getCachingProvider(EhcacheCachingProvider.class.getName());
         javax.cache.CacheManager cacheManager = provider.getCacheManager(
                 Objects.requireNonNull(this.getClass().getClassLoader().getResource("ehcache-3.xml")).toURI(),
@@ -46,13 +67,18 @@ public class CacheConfiguration {
         return new JCacheCacheManager(cacheManager);
     }
 
+    /**
+     * Represents the redis for caching.
+     *
+     * @return {@link RedissonSpringCacheManager}.
+     */
     @Bean
     public CacheManager redisCacheManager() {
+        Codec codec = new JsonJacksonCodec();
+
         Map<String, CacheConfig> config = new HashMap<>(16);
-        // create "testMap" cache with ttl = 24 minutes and maxIdleTime = 12 minutes
-        config.put("user", new CacheConfig(20*1000, 12 * 60 * 1000));
-        config.put("people", new CacheConfig(30*1000, 12 * 60 * 1000));
-        return new RedissonSpringCacheManager(this.redissonClient, config);
+        config.put("config", new CacheConfig(20 * 1000, 12 * 60 * 1000));
+        return new RedissonSpringCacheManager(this.redissonClient, config, codec);
     }
 
 }
