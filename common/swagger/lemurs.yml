@@ -2191,6 +2191,8 @@ components:
       properties:
         url:
           type: string
+        title:
+          type: string
         videoId:
           type: string
         thumbnailUrl:
@@ -2201,6 +2203,8 @@ components:
       type: object
       properties:
         url:
+          type: string
+        title:
           type: string
         videoId:
           type: string

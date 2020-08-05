@@ -137,6 +137,7 @@ public class UploadService {
                 videoInfo.setDuration(playInfo.getDuration());
             }
             videoInfo.setCoverURL(response.getVideoBase().getCoverURL());
+            videoInfo.setTitle(response.getVideoBase().getTitle());
 
         } catch (ClientException e) {
             log.error("aliyun error! videoId is {} message is {}", videoId, e.getLocalizedMessage());

@@ -39,6 +39,7 @@ public class MediaMessageConvertUtils {
     public static VideoInfo toVideoInfo(VideoMessage videoMessage) {
         VideoInfo videoInfo = new VideoInfo();
         videoInfo.setUrl(videoMessage.getUrl());
+        videoInfo.setTitle(videoMessage.getTitle());
         videoInfo.setThumbnailUrl(videoMessage.getThumbnailUrl());
         videoInfo.setDuration(videoMessage.getDuration());
         videoInfo.setWidth(videoMessage.getWidth());
@@ -51,6 +52,7 @@ public class MediaMessageConvertUtils {
     public static AudioInfo toAudioInfo(AudioMessage audioMessage) {
         AudioInfo audioInfo = new AudioInfo();
         audioInfo.setUrl(audioMessage.getUrl());
+        audioInfo.setTitle(audioMessage.getTitle());
         audioInfo.setThumbnailUrl(audioMessage.getThumbnailUrl());
         audioInfo.setDuration(audioMessage.getDuration());
         audioInfo.setVideoId(audioMessage.getVideoId());
@@ -86,6 +88,7 @@ public class MediaMessageConvertUtils {
         VideoInfo videoInfo = (VideoInfo) mediaInfo;
         return VideoMessage.newBuilder()
                 .setUrl(videoInfo.getUrl())
+                .setTitle(videoInfo.getTitle())
                 .setThumbnailUrl(videoInfo.getThumbnailUrl())
                 .setDuration(videoInfo.getDuration())
                 .setWidth(videoInfo.getWidth())
@@ -98,6 +101,7 @@ public class MediaMessageConvertUtils {
         AudioInfo audioInfo = (AudioInfo) mediaInfo;
         return AudioMessage.newBuilder()
                 .setUrl(audioInfo.getUrl())
+                .setTitle(audioInfo.getTitle())
                 .setThumbnailUrl(audioInfo.getThumbnailUrl())
                 .setDuration(audioInfo.getDuration())
                 .setVideoId(audioInfo.getVideoId())

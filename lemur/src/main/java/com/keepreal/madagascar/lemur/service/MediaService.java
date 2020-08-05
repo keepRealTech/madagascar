@@ -30,6 +30,7 @@ public class MediaService {
         VideoInfo videoInfo = uploadService.retrieveVideoInfo(videoId);
         return VideoMessage.newBuilder()
                 .setUrl(videoInfo.getPlayURL())
+                .setTitle(this.processTitle(videoInfo.getTitle()))
                 .setThumbnailUrl(this.getThumbnailUrl(multiMediaDTO, videoInfo))
                 .setDuration(this.toMilliseconds(videoInfo.getDuration()))
                 .setWidth(videoInfo.getWidth())
@@ -45,6 +46,7 @@ public class MediaService {
 
         return AudioMessage.newBuilder()
                 .setUrl(videoInfo.getPlayURL())
+                .setTitle(this.processTitle(videoInfo.getTitle()))
                 .setThumbnailUrl(this.getThumbnailUrl(multiMediaDTO, videoInfo))
                 .setDuration(this.toMilliseconds(videoInfo.getDuration()))
                 .setVideoId(videoId)
@@ -77,5 +79,9 @@ public class MediaService {
 
     private String getThumbnailUrl(MultiMediaDTO multiMediaDTO, VideoInfo videoInfo) {
         return StringUtils.isEmpty(multiMediaDTO.getThumbnailUrl()) ? videoInfo.getCoverURL() : multiMediaDTO.getThumbnailUrl();
+    }
+
+    private String processTitle(String title) {
+        return title.substring(0, title.lastIndexOf('.'));
     }
 }
