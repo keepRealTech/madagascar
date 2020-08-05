@@ -59,5 +59,6 @@ public class UserInfo {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
-
+    @Builder.Default
+    private Boolean shouldIntroduce = true;
 }

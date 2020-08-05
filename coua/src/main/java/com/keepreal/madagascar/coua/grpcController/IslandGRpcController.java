@@ -39,6 +39,7 @@ import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtResponse;
 import com.keepreal.madagascar.coua.model.IslandInfo;
 import com.keepreal.madagascar.coua.model.Subscription;
+import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.service.FeedService;
 import com.keepreal.madagascar.coua.service.IslandInfoService;
 import com.keepreal.madagascar.coua.service.SubscriptionService;
@@ -207,14 +208,14 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                 userFound = true;
                 IslandMessage islandMessage = islandInfoService.getIslandMessage(islandInfo);
                 Subscription subscription = subscriptionService.getSubscriptionByIslandIdAndUserId(islandInfo.getId(), request.getUserId());
-
+                UserInfo userInfo = userInfoService.findUserInfoByIdAndDeletedIsFalse(request.getUserId());
                 if (subscription == null || subscription.getState() < 0) {
                     responseBuilder.setUserIndex(StringValue.of(""))
                             .setSubscribedAt(0L);
                 } else {
                     responseBuilder.setUserIndex(StringValue.of(subscription.getIslanderNumber().toString()))
                             .setSubscribedAt(subscription.getCreatedTime())
-                            .setShouldIntroduce(subscription.getShouldIntroduce());
+                            .setShouldIntroduce(userInfo.getShouldIntroduce());
                 }
                 responseBuilder.setIsland(islandMessage)
                         .setHost(userMessage)
@@ -557,8 +558,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     @Override
     public void dismissIntroduction(DismissIntroductionRequest request,
                                     StreamObserver<CommonStatus> responseObserver) {
-        this.subscriptionService.dismissIntroduction(request.getUserId(), request.getIslandId());
-
+        this.userInfoService.dismissIntroduction(request.getUserId());
         responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
         responseObserver.onCompleted();
     }
