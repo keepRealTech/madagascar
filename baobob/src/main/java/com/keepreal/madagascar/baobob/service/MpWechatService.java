@@ -207,7 +207,7 @@ public class MpWechatService {
         RBucket<String> bucket = this.redissonClient.getBucket("wechat-mp-access-token");
 
         String accessToken = bucket.get();
-        if (Objects.nonNull(accessToken)) {
+        if (!StringUtils.isEmpty(accessToken)) {
             return Mono.just(accessToken);
         }
         return this.retrieveNewAccessToken(bucket);
@@ -284,7 +284,7 @@ public class MpWechatService {
                     .flatMap(hashMap -> {
                         String accessToken = String.valueOf(hashMap.get("access_token"));
                         String expiresInSec = String.valueOf(hashMap.get("expires_in"));
-                        bucket.trySet(accessToken, System.currentTimeMillis() + (Long.parseLong(expiresInSec) - 200) * 1000L, TimeUnit.MILLISECONDS);
+                        bucket.trySet(accessToken,  (stringToLong(expiresInSec) - 200L), TimeUnit.SECONDS);
                         return Mono.just(accessToken);
                     });
         }
