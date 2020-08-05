@@ -326,7 +326,7 @@ public class LoginController implements LoginApi {
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.checkWechatMpAccountLogin(sceneId);
 
         LoginResponse response = new LoginResponse();
-        if (!"".equals(loginResponse.getUserId()) && Objects.nonNull(loginResponse.getUserId())) {
+        if (!StringUtils.isEmpty(loginResponse.getUserId())) {
             UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
             response.setData(this.buildTokenInfo(loginResponse, user));
         }
