@@ -9,7 +9,7 @@ common_configs:
 wechat:
   host: https://api.weixin.qq.com
   mp:
-    server_token: keepreal-mp-server
+    server_token: keeprealmpserver
 
 jwt:
   access_token_validity: 604800
