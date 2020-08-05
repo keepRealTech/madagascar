@@ -14,3 +14,5 @@ data:
   JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS: '{{ .Values.jwt.refresh_token_validity }}'
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
+  SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
+  WECHAT_MP_SERVERTOKEN: {{ .Values.wechat.mp.server_token }}

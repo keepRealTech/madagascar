@@ -1,6 +1,11 @@
 spring:
   application:
     name: baobob
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    #password: GcrkNYTcST4PzlV@
+    ssl: false
 
 wechat:
   oauth:
@@ -11,6 +16,8 @@ wechat:
     host: https://api.weixin.qq.com
     app-id:
     app-secret:
+    server-token:
+    expiration-in-sec: 60
 
 grpc:
   port: 12001

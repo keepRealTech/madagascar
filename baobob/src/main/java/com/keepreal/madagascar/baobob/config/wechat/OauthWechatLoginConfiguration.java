@@ -14,5 +14,7 @@ public class OauthWechatLoginConfiguration {
     String appId;
     String appSecret;
     String host;
+    String serverToken;
+    String expirationInSec;
 
 }

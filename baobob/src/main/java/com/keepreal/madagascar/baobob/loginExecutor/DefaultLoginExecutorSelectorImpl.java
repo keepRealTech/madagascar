@@ -5,6 +5,7 @@ import com.keepreal.madagascar.baobob.service.ImageService;
 import com.keepreal.madagascar.baobob.service.UserService;
 import com.keepreal.madagascar.baobob.tokenGranter.LocalTokenGranter;
 import com.keepreal.madagascar.common.LoginType;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerEndpointsConfiguration;
 import org.springframework.security.oauth2.provider.refresh.RefreshTokenGranter;
@@ -21,27 +22,31 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
     private final OauthWechatLoginConfiguration oauthWechatLoginConfiguration;
     private final OauthWechatLoginConfiguration oauthMPWechatLoginConfiguration;
     private final AuthorizationServerEndpointsConfiguration endpoints;
+    private final RedissonClient redissonClient;
 
     /**
      * Constructs the {@link DefaultLoginExecutorSelectorImpl}.
      * Note that the endpoint will not be initialized in bean injection process.
      *
-     * @param userService                       {@link UserService}.
-     * @param imageService                      {@link ImageService}.
-     * @param oauthWechatLoginConfiguration     {@link OauthWechatLoginConfiguration}.
-     * @param oauthMPWechatLoginConfiguration   {@link OauthWechatLoginConfiguration}.
-     * @param endpoints                         {@link AuthorizationServerEndpointsConfiguration}.
+     * @param userService                     {@link UserService}.
+     * @param imageService                    {@link ImageService}.
+     * @param oauthWechatLoginConfiguration   {@link OauthWechatLoginConfiguration}.
+     * @param oauthMPWechatLoginConfiguration {@link OauthWechatLoginConfiguration}.
+     * @param endpoints                       {@link AuthorizationServerEndpointsConfiguration}.
+     * @param redissonClient                  {@link RedissonClient}.
      */
     public DefaultLoginExecutorSelectorImpl(UserService userService,
                                             ImageService imageService,
                                             @Qualifier("wechatAppConfiguration") OauthWechatLoginConfiguration oauthWechatLoginConfiguration,
                                             @Qualifier("wechatMpConfiguration") OauthWechatLoginConfiguration oauthMPWechatLoginConfiguration,
-                                            AuthorizationServerEndpointsConfiguration endpoints) {
+                                            AuthorizationServerEndpointsConfiguration endpoints,
+                                            RedissonClient redissonClient) {
         this.userService = userService;
         this.imageService = imageService;
         this.oauthWechatLoginConfiguration = oauthWechatLoginConfiguration;
         this.oauthMPWechatLoginConfiguration = oauthMPWechatLoginConfiguration;
         this.endpoints = endpoints;
+        this.redissonClient = redissonClient;
     }
 
     /**
@@ -87,6 +92,14 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
                                 this.endpoints.getEndpointsConfigurer().getTokenServices(),
                                 this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
                                 this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
+            case LOGIN_WEB_MP_WECHAT:
+                return new RedisWechatLoginExecutor(this.userService,
+                        new LocalTokenGranter(
+                                this.endpoints.getEndpointsConfigurer().getTokenServices(),
+                                this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
+                                this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()),
+                        this.imageService,
+                        this.redissonClient);
             case UNRECOGNIZED:
             default:
                 return new DummyLoginExecutorImpl();
