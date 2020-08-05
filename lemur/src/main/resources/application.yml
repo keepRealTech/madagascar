@@ -42,7 +42,7 @@ spring:
   redis:
     host: r-2ze4jhfytptucbsu8dpd.redis.rds.aliyuncs.com
     port: 6379
-    password: GcrkNYTcST4PzlV@
+    password: GcrkNYTcST4PzlV
     ssl: false
 
 security:
