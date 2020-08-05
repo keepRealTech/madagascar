@@ -51,6 +51,7 @@ public class MultiMediaDTOFactory {
     private MultiMediaDTO valueOf(VideoMessage videoMessage) {
         MultiMediaDTO dto = new MultiMediaDTO();
         dto.setUrl(videoMessage.getUrl());
+        dto.setTitle(videoMessage.getTitle());
         dto.setThumbnailUrl(videoMessage.getThumbnailUrl());
         dto.setWidth((int) videoMessage.getWidth());
         dto.setHeight((int) videoMessage.getHeight());
@@ -63,6 +64,7 @@ public class MultiMediaDTOFactory {
     private MultiMediaDTO valueOf(AudioMessage audioMessage) {
         MultiMediaDTO dto = new MultiMediaDTO();
         dto.setUrl(audioMessage.getUrl());
+        dto.setTitle(audioMessage.getTitle());
         dto.setThumbnailUrl(audioMessage.getThumbnailUrl());
         dto.setLength((int) audioMessage.getDuration());
         dto.setVideoId(audioMessage.getVideoId());
