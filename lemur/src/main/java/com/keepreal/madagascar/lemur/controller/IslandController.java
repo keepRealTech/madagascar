@@ -35,6 +35,7 @@ import swagger.model.BriefIslandsResponse;
 import swagger.model.CheckIslandDTO;
 import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
+import swagger.model.HostIntroductionDTO;
 import swagger.model.IslandIdentityResponse;
 import swagger.model.IslandPosterResponse;
 import swagger.model.IslandProfileDTO;
@@ -46,6 +47,7 @@ import swagger.model.PosterFeedDTO;
 import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
 import swagger.model.SubscribeIslandRequest;
+import swagger.model.SubscriberIntroductionDTO;
 import swagger.model.UsersResponse;
 
 import javax.validation.Valid;
@@ -223,9 +225,9 @@ public class IslandController implements IslandApi {
         IslandProfileDTO islandProfileDTO = this.islandDTOFactory.valueOf(islandProfileResponse, userId);
 
         if (userId.equals(islandProfileResponse.getHost().getId())
-                && islandProfileResponse.getShouldIntroduce()
+                && islandProfileResponse.getHostShouldIntroduce()
                 && !islandProfileDTO.getHostIntroduction().getShouldPopup()) {
-            this.islandService.dismissIslandIntroduction(id, userId);
+            this.islandService.dismissIslandIntroduction(id, userId, true);
         }
 
         response.setData(islandProfileDTO);
@@ -491,7 +493,7 @@ public class IslandController implements IslandApi {
     public ResponseEntity<DummyResponse> apiV1IslandsIdIntroductionDismissPost(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        this.islandService.dismissIslandIntroduction(id, userId);
+        this.islandService.dismissIslandIntroduction(id, userId, false);
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);

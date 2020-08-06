@@ -79,7 +79,8 @@ message IslandProfileResponse {
     UserMessage host = 3;
     google.protobuf.StringValue userIndex = 4;
     int64 subscribedAt = 5;
-    bool shouldIntroduce = 6;
+    bool hostShouldIntroduce = 6;
+    bool userShouldIntroduce = 7;
 }
 
 message SubscribeIslandByIdRequest {
@@ -152,6 +153,7 @@ message RetrieveDeviceTokensResponse {
 message DismissIntroductionRequest {
     string islandId = 1;
     string userId = 2;
+    bool isIslandHost = 3;
 }
 
 service IslandService {
