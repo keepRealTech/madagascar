@@ -91,7 +91,7 @@ public class UploadService {
             CreateUploadVideoResponse acsResponse = client.getAcsResponse(request);
 
             UploadMediaDTO dto = new UploadMediaDTO();
-            dto.setVedioId(acsResponse.getVideoId());
+            dto.setVideoId(acsResponse.getVideoId());
             dto.setUploadAddress(acsResponse.getUploadAddress());
             dto.setUploadAuth(acsResponse.getUploadAuth());
 
@@ -116,7 +116,7 @@ public class UploadService {
             RefreshUploadVideoResponse response = client.getAcsResponse(request);
 
             UploadMediaDTO dto = new UploadMediaDTO();
-            dto.setVedioId(videoId);
+            dto.setVideoId(videoId);
             dto.setUploadAddress(response.getUploadAddress());
             dto.setUploadAuth(response.getUploadAuth());
 
