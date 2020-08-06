@@ -171,11 +171,11 @@ public class UserInfoService {
     }
 
     /**
-     * Flips the should introduce to false.
+     * Flips the island user should introduce to false.
      *
      * @param userId user id
      */
-    public void dismissIntroduction(String userId) {
+    public void dismissUserIntroduction(String userId) {
         UserInfo userInfo = this.userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
 
         if (Objects.isNull(userInfo)) {

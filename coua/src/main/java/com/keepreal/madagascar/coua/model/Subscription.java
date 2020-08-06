@@ -37,6 +37,8 @@ public class Subscription {
     private String islandId;
     private Integer state;
     private Integer islanderNumber;
+    @Builder.Default
+    private Boolean shouldIntroduce = true;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

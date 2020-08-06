@@ -212,11 +212,13 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                 if (subscription == null || subscription.getState() < 0) {
                     responseBuilder.setUserIndex(StringValue.of(""))
                             .setSubscribedAt(0L)
-                            .setShouldIntroduce(false);
+                            .setUserShouldIntroduce(false)
+                            .setHostShouldIntroduce(false);
                 } else {
                     responseBuilder.setUserIndex(StringValue.of(subscription.getIslanderNumber().toString()))
                             .setSubscribedAt(subscription.getCreatedTime())
-                            .setShouldIntroduce(userInfo.getShouldIntroduce());
+                            .setUserShouldIntroduce(userInfo.getShouldIntroduce())
+                            .setHostShouldIntroduce(subscription.getShouldIntroduce());
                 }
                 responseBuilder.setIsland(islandMessage)
                         .setHost(userMessage)
@@ -559,7 +561,12 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     @Override
     public void dismissIntroduction(DismissIntroductionRequest request,
                                     StreamObserver<CommonStatus> responseObserver) {
-        this.userInfoService.dismissIntroduction(request.getUserId());
+        if (request.getIsIslandHost()) {
+            this.subscriptionService.dismissHostIntroduction(request.getUserId(), request.getIslandId());
+        } else {
+            this.userInfoService.dismissUserIntroduction(request.getUserId());
+        }
+
         responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
         responseObserver.onCompleted();
     }
