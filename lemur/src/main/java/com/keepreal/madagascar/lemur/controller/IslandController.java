@@ -35,7 +35,6 @@ import swagger.model.BriefIslandsResponse;
 import swagger.model.CheckIslandDTO;
 import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
-import swagger.model.HostIntroductionDTO;
 import swagger.model.IslandIdentityResponse;
 import swagger.model.IslandPosterResponse;
 import swagger.model.IslandProfileDTO;
@@ -47,7 +46,6 @@ import swagger.model.PosterFeedDTO;
 import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
 import swagger.model.SubscribeIslandRequest;
-import swagger.model.SubscriberIntroductionDTO;
 import swagger.model.UsersResponse;
 
 import javax.validation.Valid;
