@@ -429,11 +429,13 @@ public class FeedController implements FeedApi {
                     DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
                     return new ResponseEntity<>(HttpStatus.ACCEPTED);
                 }
+                break;
             case ALBUM:
                 if (postFeedRequestV2.getMultimedia().size() > 18) {
                     DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
                     return new ResponseEntity<>(HttpStatus.ACCEPTED);
                 }
+                break;
             case VIDEO:
             case AUDIO:
                 if (CollectionUtils.isEmpty(postFeedRequestV2.getMultimedia()) ||
@@ -441,11 +443,13 @@ public class FeedController implements FeedApi {
                     DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_INVALID_ARGUMENT);
                     return new ResponseEntity<>(HttpStatus.ACCEPTED);
                 }
+                break;
             case HTML:
                 if (StringUtils.isEmpty(postFeedRequestV2.getText())) {
                     DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_INVALID_ARGUMENT);
                     return new ResponseEntity<>(HttpStatus.ACCEPTED);
                 }
+                break;
         }
 
         this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(), userId, MediaTypeConverter.convertToMediaType(mediaType), postFeedRequestV2.getMultimedia(), postFeedRequestV2.getText());
