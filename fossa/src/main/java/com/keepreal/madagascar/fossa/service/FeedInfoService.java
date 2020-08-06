@@ -10,7 +10,6 @@ import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -43,11 +42,11 @@ public class FeedInfoService {
     /**
      * Constructs the feed service
      *
-     * @param mongoTemplate                 {@link MongoTemplate}.
-     * @param commentService                {@link CommentService}.
-     * @param feedInfoRepository            {@link FeedInfoRepository}.
-     * @param reactionRepository            {@link ReactionRepository}.
-     * @param subscribeMembershipService    {@link SubscribeMembershipService}.
+     * @param mongoTemplate              {@link MongoTemplate}.
+     * @param commentService             {@link CommentService}.
+     * @param feedInfoRepository         {@link FeedInfoRepository}.
+     * @param reactionRepository         {@link ReactionRepository}.
+     * @param subscribeMembershipService {@link SubscribeMembershipService}.
      */
     public FeedInfoService(MongoTemplate mongoTemplate,
                            CommentService commentService,
@@ -64,7 +63,7 @@ public class FeedInfoService {
     /**
      * Delete feed by id.
      *
-     * @param id    feed id.
+     * @param id feed id.
      */
     public void deleteFeedById(String id) {
         mongoTemplate.updateFirst(
@@ -76,9 +75,9 @@ public class FeedInfoService {
     /**
      * Retrieves feed message by id.
      *
-     * @param feedId    feed id.
-     * @param userId    user id.
-     * @return  {@link FeedMessage}.
+     * @param feedId feed id.
+     * @param userId user id.
+     * @return {@link FeedMessage}.
      */
     public FeedMessage getFeedMessageById(String feedId, String userId) {
         Optional<FeedInfo> feedInfoOptional = feedInfoRepository.findById(feedId);
@@ -92,8 +91,8 @@ public class FeedInfoService {
     /**
      * Feed count add one by feed id and type
      *
-     * @param feedId    feed id.
-     * @param type      type to be changed.
+     * @param feedId feed id.
+     * @param type   type to be changed.
      */
     public void incFeedCount(String feedId, String type) {
         this.updateFeedCountByType(feedId, type, 1);
@@ -102,8 +101,9 @@ public class FeedInfoService {
     /**
      * Feed count sub one by feed id and type
      * todo negative count
-     * @param feedId    feed id.
-     * @param type      type to be changed.
+     *
+     * @param feedId feed id.
+     * @param type   type to be changed.
      */
     public void subFeedCount(String feedId, String type) {
         this.updateFeedCountByType(feedId, type, -1);
@@ -112,9 +112,9 @@ public class FeedInfoService {
     /**
      * Change feed count by feed id and type
      *
-     * @param feedId    feed id.
-     * @param type      type to be changed.
-     * @param count     add or sub count.
+     * @param feedId feed id.
+     * @param type   type to be changed.
+     * @param count  add or sub count.
      */
     private void updateFeedCountByType(String feedId, String type, Integer count) {
         Update update = new Update();
@@ -137,9 +137,9 @@ public class FeedInfoService {
     /**
      * Retrieves the feed message.
      *
-     * @param feedInfo  {@link FeedInfo}.
-     * @param userId    user id (decide is liked).
-     * @return  {@link FeedMessage}.
+     * @param feedInfo {@link FeedInfo}.
+     * @param userId   user id (decide is liked).
+     * @return {@link FeedMessage}.
      */
     public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
         if (feedInfo == null)
@@ -180,14 +180,14 @@ public class FeedInfoService {
             }
         }
         processMedia(builder, feedInfo);
-        RBucket
+
         return builder.build();
     }
 
     /**
      * Inserts the feeds.
      *
-     * @param feedInfoList  {@link FeedInfo}.
+     * @param feedInfoList {@link FeedInfo}.
      */
     public List<FeedInfo> saveAll(List<FeedInfo> feedInfoList) {
         return feedInfoRepository.saveAll(feedInfoList);
@@ -196,9 +196,9 @@ public class FeedInfoService {
     /**
      * Retrieves feed by id.
      *
-     * @param feedId    feed id.
+     * @param feedId         feed id.
      * @param includeDeleted Whether includes the deleted.
-     * @return  {@link FeedInfo}.
+     * @return {@link FeedInfo}.
      */
     public FeedInfo findFeedInfoById(String feedId, boolean includeDeleted) {
         if (includeDeleted) {
@@ -212,7 +212,7 @@ public class FeedInfoService {
      * Retrieves latest feed by user id.
      *
      * @param userId user id.
-     * @return  {@link FeedInfo}
+     * @return {@link FeedInfo}
      */
     public FeedInfo findTopByUserIdAndDeletedIsFalseOrderByCreatedTimeDesc(String userId) {
         return feedInfoRepository.findTopByUserIdAndDeletedIsFalseOrderByCreatedTimeDesc(userId);
@@ -221,7 +221,7 @@ public class FeedInfoService {
     /**
      * Inserts the feed.
      *
-     * @param feedInfo  {@link FeedInfo}
+     * @param feedInfo {@link FeedInfo}
      */
     public void insert(FeedInfo feedInfo) {
         feedInfoRepository.insert(feedInfo);
@@ -268,7 +268,7 @@ public class FeedInfoService {
      */
     public void cancelToppedFeedByIslandId(String islandId) {
         FeedInfo feedInfo = findToppedFeedByIslandId(islandId);
-        if (Objects.nonNull(feedInfo)){
+        if (Objects.nonNull(feedInfo)) {
             cancelToppedFeedById(feedInfo.getId());
         }
     }

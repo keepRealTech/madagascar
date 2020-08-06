@@ -57,7 +57,7 @@ public class FeedController implements FeedApi {
 
     private static final String SUPER_ADMIN_USER_ID = "99999999";
     private static final String POSTING_INSTRUCTION_TITLE = "高清原图、长篇文章、音频和视频发布指南:";
-    private static final String POSTING_INSTRUCTION_CONTENT = "1.在电脑端打开跳岛官网 https://home.keepreal.cn/\r\n" +
+    private static final String POSTING_INSTRUCTION_CONTENT = "1.在电脑端打开跳岛官网https://home.keepreal.cn/\r\n" +
             "2.微信扫码登录\r\n" +
             "3.点击\"发布\"按钮";
 
