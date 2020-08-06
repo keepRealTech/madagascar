@@ -8,15 +8,17 @@ import com.keepreal.madagascar.baobob.GenerateQrcodeResponse;
 import com.keepreal.madagascar.baobob.HandleEventRequest;
 import com.keepreal.madagascar.baobob.config.wechat.OauthWechatLoginConfiguration;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
-import com.keepreal.madagascar.baobob.util.AutoRedisLock;
 import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
+import com.keepreal.madagascar.baobob.util.ReactiveAutoRedisLock;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
+import org.redisson.Redisson;
+import org.redisson.api.RBucketReactive;
 import org.redisson.api.RedissonClient;
+import org.redisson.api.RedissonReactiveClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -29,7 +31,6 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +46,7 @@ public class MpWechatService {
     private static final String GET_WECHAT_OFFICIAL_ACCOUNT_ACCESS_TOKEN_URL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s";
     private final Gson gson;
     private final OauthWechatLoginConfiguration oauthWechatLoginConfiguration;
-    private final RedissonClient redissonClient;
+    private final RedissonReactiveClient redissonReactiveClient;
     private final GrpcResponseUtils grpcResponseUtils;
 
     /**
@@ -57,7 +58,7 @@ public class MpWechatService {
     public MpWechatService(@Qualifier("wechatMpConfiguration") OauthWechatLoginConfiguration oauthWechatLoginConfiguration,
                            RedissonClient redissonClient) {
         this.oauthWechatLoginConfiguration = oauthWechatLoginConfiguration;
-        this.redissonClient = redissonClient;
+        this.redissonReactiveClient = Redisson.createReactive(redissonClient.getConfig());
         this.gson = new Gson();
         this.grpcResponseUtils = new GrpcResponseUtils();
     }
@@ -140,11 +141,9 @@ public class MpWechatService {
         String eventKey = request.getEventKey();
         switch (event) {
             case "subscribe":
-                this.executeSubscribeEvent(opedId, eventKey);
-                break;
+                return this.executeSubscribeEvent(opedId, eventKey);
             case "SCAN":
-                this.executeScanEvent(opedId, eventKey);
-                break;
+                return this.executeScanEvent(opedId, eventKey);
             default:
                 log.info("unhandled event is {}", event);
         }
@@ -204,13 +203,11 @@ public class MpWechatService {
      * @return Access token.
      */
     private Mono<String> getAccessToken() {
-        RBucket<String> bucket = this.redissonClient.getBucket("wechat-mp-access-token");
+        RBucketReactive<String> bucket = this.redissonReactiveClient.getBucket("wechat-mp-access-token");
 
-        String accessToken = bucket.get();
-        if (!StringUtils.isEmpty(accessToken)) {
-            return Mono.just(accessToken);
-        }
-        return this.retrieveNewAccessToken(bucket);
+        return bucket.get()
+                .filter(token -> !StringUtils.isEmpty(token))
+                .switchIfEmpty(this.retrieveNewAccessToken(bucket));
     }
 
     /**
@@ -219,12 +216,12 @@ public class MpWechatService {
      * @param openId   User open id.
      * @param eventKey Event key.
      */
-    private void executeSubscribeEvent(String openId, String eventKey) {
+    private Mono<Void> executeSubscribeEvent(String openId, String eventKey) {
         String[] sceneStrs = StringUtils.delimitedListToStringArray(eventKey, "_");
         String sceneId = sceneStrs[1];
         WechatUserInfo wechatUserInfo = this.retrieveUserInfoFromWechatByOpenId(openId).block();
-        RBucket<Object> bucket = this.redissonClient.getBucket(sceneId);
-        bucket.trySet(wechatUserInfo, 1L, TimeUnit.MINUTES);
+        return this.redissonReactiveClient.getBucket(sceneId).trySet(wechatUserInfo, 1L, TimeUnit.MINUTES)
+                .then();
     }
 
     /**
@@ -233,10 +230,10 @@ public class MpWechatService {
      * @param openId   User open id.
      * @param eventKey Event key.
      */
-    private void executeScanEvent(String openId, String eventKey) {
+    private Mono<Void> executeScanEvent(String openId, String eventKey) {
         WechatUserInfo wechatUserInfo = this.retrieveUserInfoFromWechatByOpenId(openId).block();
-        RBucket<WechatUserInfo> bucket = this.redissonClient.getBucket(eventKey);
-        bucket.trySet(wechatUserInfo, 1L, TimeUnit.MINUTES);
+        return this.redissonReactiveClient.getBucket(eventKey).trySet(wechatUserInfo, 1L, TimeUnit.MINUTES)
+                .then();
     }
 
     /**
@@ -272,8 +269,8 @@ public class MpWechatService {
      *
      * @return Access token.
      */
-    private Mono<String> retrieveNewAccessToken(RBucket<String> bucket) {
-        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, "try-get-mp-access-token")) {
+    private Mono<String> retrieveNewAccessToken(RBucketReactive<String> bucket) {
+        try (ReactiveAutoRedisLock ignored = new ReactiveAutoRedisLock(this.redissonReactiveClient, "try-get-mp-access-token")) {
             String getTokenUrl = String.format(MpWechatService.GET_WECHAT_OFFICIAL_ACCOUNT_ACCESS_TOKEN_URL,
                     this.oauthWechatLoginConfiguration.getAppId(), this.oauthWechatLoginConfiguration.getAppSecret());
             return WebClient.create(getTokenUrl)
@@ -284,8 +281,8 @@ public class MpWechatService {
                     .flatMap(hashMap -> {
                         String accessToken = String.valueOf(hashMap.get("access_token"));
                         String expiresInSec = String.valueOf(hashMap.get("expires_in"));
-                        bucket.trySet(accessToken,  (stringToLong(expiresInSec) - 200L), TimeUnit.SECONDS);
-                        return Mono.just(accessToken);
+                        return bucket.trySet(accessToken, (stringToLong(expiresInSec) - 200L), TimeUnit.SECONDS)
+                                .then(Mono.just(accessToken));
                     });
         }
     }
