@@ -54,7 +54,7 @@ public interface IslandInfoRepository extends JpaRepository<IslandInfo, String> 
     @Query(value =
             "SELECT id, host_id, island_name, portrait_image_uri, description, " +
                     "secret, state, islander_number, last_feed_at, is_deleted, " +
-                    "locked_until, created_time, updated_time " +
+                    "locked_until, created_time, updated_time, identity_id " +
             "FROM island " +
             "WHERE id IN ?1 ORDER BY FIELD (id, ?1) ",
            nativeQuery = true)
