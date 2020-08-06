@@ -135,6 +135,5 @@ data:
   CLIENT_IOS_UPDATEINFOMAP_120_NEXTVERSION: '120'
 
   ALIYUNOSS_ENDPOINT: {{ .Values.aliyun_oss.endpoint }}
-  ALIYUNOSS_BUCKETNAME: {{ .Values.aliyun_oss.bucket_name }}
   ALIYUNOSS_EXPIRETIMEINSECONDS: '{{ .Values.aliyun_oss.expire_time_in_seconds }}'
   ALIYUNVOD_REGIONID: {{ .Values.aliyun_vod.region_id }}
