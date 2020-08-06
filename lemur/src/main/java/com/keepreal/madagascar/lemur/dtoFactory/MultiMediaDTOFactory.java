@@ -19,6 +19,8 @@ public class MultiMediaDTOFactory {
         MultiMediaDTO dto = new MultiMediaDTO();
 
         switch (feedMessage.getType()) {
+            case MEDIA_TEXT:
+                return Collections.emptyList();
             case MEDIA_PICS:
             case MEDIA_ALBUM:
                 return feedMessage.getPics().getPictureList()
