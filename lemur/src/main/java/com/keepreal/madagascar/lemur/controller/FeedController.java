@@ -427,25 +427,34 @@ public class FeedController implements FeedApi {
             case PICS:
                 if (postFeedRequestV2.getMultimedia().size() > 9) {
                     DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
-                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
+                break;
             case ALBUM:
                 if (postFeedRequestV2.getMultimedia().size() > 18) {
                     DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
-                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
+                break;
             case VIDEO:
             case AUDIO:
                 if (CollectionUtils.isEmpty(postFeedRequestV2.getMultimedia()) ||
                         StringUtils.isEmpty(postFeedRequestV2.getMultimedia().get(0).getVideoId())) {
                     DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_INVALID_ARGUMENT);
-                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
+                break;
             case HTML:
                 if (StringUtils.isEmpty(postFeedRequestV2.getText())) {
                     DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_INVALID_ARGUMENT);
-                    return new ResponseEntity<>(HttpStatus.ACCEPTED);
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
                 }
+                break;
+            case TEXT:
+                break;
+            default:
+                DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_INVALID_ARGUMENT);
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(), userId, MediaTypeConverter.convertToMediaType(mediaType), postFeedRequestV2.getMultimedia(), postFeedRequestV2.getText());
