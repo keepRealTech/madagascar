@@ -211,7 +211,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                 UserInfo userInfo = userInfoService.findUserInfoByIdAndDeletedIsFalse(request.getUserId());
                 if (subscription == null || subscription.getState() < 0) {
                     responseBuilder.setUserIndex(StringValue.of(""))
-                            .setSubscribedAt(0L);
+                            .setSubscribedAt(0L)
+                            .setShouldIntroduce(false);
                 } else {
                     responseBuilder.setUserIndex(StringValue.of(subscription.getIslanderNumber().toString()))
                             .setSubscribedAt(subscription.getCreatedTime())
