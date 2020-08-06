@@ -788,6 +788,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UploadUrlListResponse'
+  /api/v1/upload/ossSignature:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MediaUrlsRequest'
+      tags:
+        - Upload
+      summary: retrieves oss signature
+      responses:
+        '200':
+          description: retrieve oss signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OssSignatureResponse'
   /api/v1/notifications:
     get:
       parameters:
@@ -2687,6 +2705,24 @@ components:
           type: string
         url:
           type: string
+    OssSignatureDTO:
+      type: object
+      properties:
+        accessid:
+          type: string
+        policy:
+          type: string
+        signature:
+          type: string
+        host:
+          type: string
+        expire:
+          type: integer
+          format: int64
+        objectNames:
+          type: array
+          items:
+            type: string
     UploadUrlListResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -2696,6 +2732,13 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/UploadUrlDTO'
+    OssSignatureResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/OssSignatureDTO'
     NotificationsCountResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

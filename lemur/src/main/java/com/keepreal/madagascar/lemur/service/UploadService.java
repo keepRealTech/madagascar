@@ -2,7 +2,10 @@ package com.keepreal.madagascar.lemur.service;
 
 import com.aliyun.oss.HttpMethod;
 import com.aliyun.oss.OSS;
+import com.aliyun.oss.common.utils.BinaryUtil;
 import com.aliyun.oss.model.GeneratePresignedUrlRequest;
+import com.aliyun.oss.model.MatchMode;
+import com.aliyun.oss.model.PolicyConditions;
 import com.aliyuncs.DefaultAcsClient;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.vod.model.v20170321.CreateUploadVideoRequest;
@@ -17,8 +20,10 @@ import com.keepreal.madagascar.lemur.config.OssClientConfiguration;
 import com.keepreal.madagascar.lemur.model.VideoInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import swagger.model.OssSignatureDTO;
 import swagger.model.UploadMediaDTO;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -35,6 +40,8 @@ public class UploadService {
     private final String bucketName;
     private final Integer expireTimeInSeconds;
     private final DefaultAcsClient client;
+    private final String host;
+    private final String accessKey;
 
     /**
      * Constructs the upload service.
@@ -50,6 +57,8 @@ public class UploadService {
         this.bucketName = configuration.getBucketName();
         this.expireTimeInSeconds = configuration.getExpireTimeInSeconds();
         this.client = client;
+        this.host = "https://" + bucketName + "." + configuration.getEndpoint();
+        this.accessKey = configuration.getAccessKey();
     }
 
     /**
@@ -143,6 +152,29 @@ public class UploadService {
             log.error("aliyun error! videoId is {} message is {}", videoId, e.getLocalizedMessage());
         }
         return videoInfo;
+    }
+
+    public OssSignatureDTO retrieveOssSignature() {
+        long expireEndTime = System.currentTimeMillis() + expireTimeInSeconds * 10 * 1000;
+        Date expiration = new Date(expireEndTime);
+
+        PolicyConditions policyConds = new PolicyConditions();
+        policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, 1048576000);
+        policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, "");
+
+        String postPolicy = ossClient.generatePostPolicy(expiration, policyConds);
+        byte[] binaryData = postPolicy.getBytes(StandardCharsets.UTF_8);
+        String encodedPolicy = BinaryUtil.toBase64String(binaryData);
+        String postSignature = ossClient.calculatePostSignature(postPolicy);
+
+        OssSignatureDTO dto = new OssSignatureDTO();
+        dto.setAccessid(this.accessKey);
+        dto.setHost(this.host);
+        dto.setPolicy(encodedPolicy);
+        dto.setSignature(postSignature);
+        dto.expire(expireEndTime / 1000);
+
+        return dto;
     }
 
 }
