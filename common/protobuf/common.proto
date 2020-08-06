@@ -190,7 +190,7 @@ message FeedMessage {
     bool isLiked = 11;
     bool isDeleted = 12;
     bool isAccess = 13;
-    string membershipId = 14;
+    repeated string membershipId = 14;
     bool isMembership = 15;
     bool fromHost = 16;
     bool isTop = 17;
