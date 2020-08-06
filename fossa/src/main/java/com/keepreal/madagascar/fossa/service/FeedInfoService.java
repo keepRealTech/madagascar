@@ -10,6 +10,7 @@ import com.keepreal.madagascar.fossa.dao.ReactionRepository;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -179,7 +180,7 @@ public class FeedInfoService {
             }
         }
         processMedia(builder, feedInfo);
-
+        RBucket
         return builder.build();
     }
 

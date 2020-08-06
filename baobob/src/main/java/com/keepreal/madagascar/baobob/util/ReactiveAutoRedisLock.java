@@ -3,7 +3,9 @@ package com.keepreal.madagascar.baobob.util;
 import lombok.Data;
 import lombok.SneakyThrows;
 import org.redisson.api.RLock;
+import org.redisson.api.RLockReactive;
 import org.redisson.api.RedissonClient;
+import org.redisson.api.RedissonReactiveClient;
 
 import java.util.ConcurrentModificationException;
 import java.util.concurrent.TimeUnit;
@@ -12,17 +14,17 @@ import java.util.concurrent.TimeUnit;
  * Represents a redis lock with auto closable interface.
  */
 @Data
-public class AutoRedisLock implements AutoCloseable {
+public class ReactiveAutoRedisLock implements AutoCloseable {
 
-    private RLock lock;
+    private RLockReactive lock;
 
     /**
      * Constructs a lock.
      *
-     * @param client   {@link RedissonClient}.
+     * @param client   {@link RedissonReactiveClient}.
      * @param lockName Lock name.
      */
-    public AutoRedisLock(RedissonClient client, String lockName) {
+    public ReactiveAutoRedisLock(RedissonReactiveClient client, String lockName) {
         this(client, lockName, 500, 500);
     }
 
@@ -35,9 +37,9 @@ public class AutoRedisLock implements AutoCloseable {
      * @param leaseTimeInMS Lease time in milliseconds.
      */
     @SneakyThrows
-    public AutoRedisLock(RedissonClient client, String lockName, long waitTimeInMS, long leaseTimeInMS) {
+    public ReactiveAutoRedisLock(RedissonReactiveClient client, String lockName, long waitTimeInMS, long leaseTimeInMS) {
         this.lock = client.getLock(lockName);
-        if (!this.lock.tryLock(waitTimeInMS, leaseTimeInMS, TimeUnit.MILLISECONDS)) {
+        if (!Boolean.TRUE.equals(this.lock.tryLock(waitTimeInMS, leaseTimeInMS, TimeUnit.MILLISECONDS).block())) {
             throw new ConcurrentModificationException("Failed to acquire redis lock: " + lockName);
         }
     }
