@@ -3628,7 +3628,7 @@ components:
     UploadMediaDTO:
       type: object
       properties:
-        vedioId:
+        videoId:
           type: string
         uploadAddress:
           type: string
