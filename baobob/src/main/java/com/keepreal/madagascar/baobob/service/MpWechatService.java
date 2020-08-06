@@ -281,8 +281,8 @@ public class MpWechatService {
                     .flatMap(hashMap -> {
                         String accessToken = String.valueOf(hashMap.get("access_token"));
                         String expiresInSec = String.valueOf(hashMap.get("expires_in"));
-                        return bucket.trySet(accessToken,  (stringToLong(expiresInSec) - 200L), TimeUnit.SECONDS)
-                                        .then(Mono.just(accessToken));
+                        return bucket.trySet(accessToken, (stringToLong(expiresInSec) - 200L), TimeUnit.SECONDS)
+                                .then(Mono.just(accessToken));
                     });
         }
     }
