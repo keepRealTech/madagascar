@@ -170,17 +170,17 @@ public class FeedInfoService {
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
             builder.setIsAccess(true);
-            builder.setMembershipId("");
+            builder.addAllMembershipId(Collections.emptyList());
             builder.setIsMembership(false);
         } else {
             builder.setIsMembership(true);
             List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(userId, feedInfo.getIslandId());
             if (userId.equals(feedInfo.getHostId()) || membershipIds.stream().anyMatch(myMembershipIds::contains)) {
                 builder.setIsAccess(true);
-                builder.setMembershipId(membershipIds.get(0));
+                builder.addAllMembershipId(membershipIds);
             } else {
                 builder.setIsAccess(false);
-                builder.setMembershipId(membershipIds.get(0));
+                builder.addAllMembershipId(membershipIds);
             }
         }
         processMedia(builder, feedInfo);

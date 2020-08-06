@@ -23,6 +23,7 @@ import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -120,9 +121,12 @@ public class FeedDTOFactory {
                 feedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
             }
 
-            if (feed.getIsMembership()) {
-                MembershipMessage membershipMessage = this.membershipService.retrieveMembershipById(feed.getMembershipId());
-                feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessage));
+            if (!CollectionUtils.isEmpty(feed.getMembershipIdList())) {
+                List<MembershipMessage> membershipMessages = this.membershipService.retrieveMembershipsByIds(feed.getMembershipIdList());
+                feedDTO.setIsMembership(!CollectionUtils.isEmpty(membershipMessages));
+
+                feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
+                feedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
             }
             feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
             feedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));

@@ -2346,6 +2346,10 @@ components:
               type: boolean
             membership:
               $ref: '#/components/schemas/SimpleMembershipDTO'
+            membershipList:
+              type: array
+              items:
+                $ref: '#/components/schemas/SimpleMembershipDTO'
     PostFeedPayload:
       type: object
       properties:
