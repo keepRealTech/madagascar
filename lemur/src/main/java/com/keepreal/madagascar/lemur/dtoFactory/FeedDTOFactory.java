@@ -2,6 +2,8 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.common.MediaType;
+import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
@@ -13,6 +15,7 @@ import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import swagger.model.BriefFeedDTO;
 import swagger.model.CheckFeedsDTO;
 import swagger.model.FeedDTO;
@@ -92,7 +95,6 @@ public class FeedDTOFactory {
             FeedDTO feedDTO = new FeedDTO();
             feedDTO.setId(feed.getId());
             feedDTO.setText(feed.getText());
-            feedDTO.setImagesUris(feed.getImageUrisList());
             feedDTO.setFromHost(feed.getFromHost());
             feedDTO.setLikesCount(feed.getLikesCount());
             feedDTO.setCommentsCount(feed.getCommentsCount());
@@ -109,6 +111,14 @@ public class FeedDTOFactory {
             feedDTO.setIsTop(feed.getIsTop());
             feedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             feedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
+            if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
+                feedDTO.setImagesUris(feed.getImageUrisList());
+            }
+
+            if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
+                feedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
+            }
 
             if (feed.getIsMembership()) {
                 MembershipMessage membershipMessage = this.membershipService.retrieveMembershipById(feed.getMembershipId());
@@ -142,11 +152,19 @@ public class FeedDTOFactory {
             BriefFeedDTO briefFeedDTO = new BriefFeedDTO();
             briefFeedDTO.setId(feed.getId());
             briefFeedDTO.setText(feed.getText());
-            briefFeedDTO.setImagesUris(feed.getImageUrisList());
             briefFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
             briefFeedDTO.setCreatedAt(feed.getCreatedAt());
             briefFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             briefFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+
+            boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
+            if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
+                briefFeedDTO.setImagesUris(feed.getImageUrisList());
+            }
+
+            if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
+                briefFeedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
+            }
 
             briefFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
             briefFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
