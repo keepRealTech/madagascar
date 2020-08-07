@@ -133,7 +133,9 @@ public class RepostController implements RepostApi {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         IslandRepostMessage repostMessage = this.repostService.createRepostIslandById(
-                id, userId, postRepostRequest.getContent(), postRepostRequest.getIsSuccessful());
+                id, userId,
+                Objects.isNull(postRepostRequest.getContent()) ? "" : postRepostRequest.getContent(),
+                Objects.isNull(postRepostRequest.getIsSuccessful()) ? true : postRepostRequest.getIsSuccessful());
 
         RepostResponse response = new RepostResponse();
         response.setData(this.repostDTOFactory.valueOf(repostMessage));
