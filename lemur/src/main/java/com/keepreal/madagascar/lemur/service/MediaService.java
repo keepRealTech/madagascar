@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import swagger.model.MultiMediaDTO;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,9 +30,13 @@ public class MediaService {
     }
 
     public VideoMessage videoMessage(MultiMediaDTO multiMediaDTO) {
+        if (Objects.isNull(multiMediaDTO)) {
+            return null;
+        }
+
         String videoId = multiMediaDTO.getVideoId();
 
-        VideoInfo videoInfo = uploadService.retrieveVideoInfo(videoId);
+        VideoInfo videoInfo = this.uploadService.retrieveVideoInfo(videoId);
         return VideoMessage.newBuilder()
                 .setUrl(videoInfo.getPlayURL())
                 .setTitle(this.processTitle(videoInfo.getTitle()))
@@ -44,9 +49,13 @@ public class MediaService {
     }
 
     public AudioMessage audioMessage(MultiMediaDTO multiMediaDTO) {
+        if (Objects.isNull(multiMediaDTO)) {
+            return null;
+        }
+
         String videoId = multiMediaDTO.getVideoId();
 
-        VideoInfo videoInfo = uploadService.retrieveVideoInfo(videoId);
+        VideoInfo videoInfo = this.uploadService.retrieveVideoInfo(videoId);
 
         return AudioMessage.newBuilder()
                 .setUrl(videoInfo.getPlayURL())
@@ -58,6 +67,10 @@ public class MediaService {
     }
 
     public PicturesMessage picturesMessage(List<MultiMediaDTO> multiMediaDTOList) {
+        if (Objects.isNull(multiMediaDTOList)) {
+            return null;
+        }
+
         return PicturesMessage.newBuilder()
                 .addAllPicture(
                         multiMediaDTOList.stream()
@@ -72,13 +85,17 @@ public class MediaService {
     }
 
     public HtmlMessage htmlMessage(MultiMediaDTO multiMediaDTO) {
+        if (Objects.isNull(multiMediaDTO)) {
+            return null;
+        }
+
         return HtmlMessage.newBuilder()
                 .setContent(multiMediaDTO.getContent())
                 .build();
     }
 
     private long toMilliseconds(String duration) {
-        return (long) (Float.valueOf(duration) * MILLISECONDS);
+        return (long) (Float.parseFloat(duration) * MILLISECONDS);
     }
 
     private String getThumbnailUrl(MultiMediaDTO multiMediaDTO, VideoInfo videoInfo) {
@@ -88,4 +105,5 @@ public class MediaService {
     private String processTitle(String title) {
         return title.substring(0, title.lastIndexOf('.'));
     }
+
 }
