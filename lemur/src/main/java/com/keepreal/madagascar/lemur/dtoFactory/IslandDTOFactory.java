@@ -232,6 +232,7 @@ public class IslandDTOFactory {
         if (Objects.isNull(shouldIntroduce) || !shouldIntroduce) {
             hostIntroductionDTO.setShouldPopup(false);
             hostIntroductionDTO.setPres(introPrerequestsDTO);
+            return hostIntroductionDTO;
         }
 
         introPrerequestsDTO.setHasReposts(this.repostService.retrieveRepostIslandById(islandId, 0, 1).getIslandRepostsCount() > 0);
