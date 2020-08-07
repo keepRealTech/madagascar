@@ -57,7 +57,7 @@ public class UploadService {
         this.bucketName = configuration.getBucketName();
         this.expireTimeInSeconds = configuration.getExpireTimeInSeconds();
         this.client = client;
-        this.host = "https://" + bucketName + "." + configuration.getOssRegionUrl();
+        this.host = "https://" + bucketName + "." + configuration.getOssEndpoint();
         this.accessKey = configuration.getAccessKey();
     }
 
