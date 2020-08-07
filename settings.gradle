@@ -17,5 +17,4 @@ include 'vanga'
 include 'workflow:settler'
 include 'workflow:reconciliation'
 include 'asity'
-include 'withdrawRinger'
 
