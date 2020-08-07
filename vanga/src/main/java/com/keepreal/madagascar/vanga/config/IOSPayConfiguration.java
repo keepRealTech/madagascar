@@ -25,6 +25,7 @@ public class IOSPayConfiguration {
 
     private String verifyUrl;
     private String verifyUrlSandbox;
+    private Boolean enableSandbox = false;
 
     /**
      * TODO: config connection pool, timeout

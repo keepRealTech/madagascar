@@ -38,17 +38,17 @@ public class PushPriorityConverter {
                 pushPriorityInfo.setExtrasMap(extrasMap);
                 break;
             case PushPriority.NEW_MEMBERSHIP_VALUE:
-                pushPriorityInfo.setText("加入了你的岛");
+                pushPriorityInfo.setText("订阅了你的会员");
                 pushPriorityInfo.setIosUrl("message://vip");
                 extrasMap.put("notification_type", "NOTIFICATION_ISLAND_NOTICE");
-                extrasMap.put("notification_notice_type", "SUBSCRIBER");
+                extrasMap.put("notification_notice_type", "MEMBER");
                 pushPriorityInfo.setExtrasMap(extrasMap);
                 break;
             case PushPriority.NEW_SUBSCRIBE_VALUE:
-                pushPriorityInfo.setText("订阅了你的会员");
+                pushPriorityInfo.setText("加入了你的岛");
                 pushPriorityInfo.setIosUrl("message://island");
                 extrasMap.put("notification_type", "NOTIFICATION_ISLAND_NOTICE");
-                extrasMap.put("notification_notice_type", "MEMBER");
+                extrasMap.put("notification_notice_type", "SUBSCRIBER");
                 pushPriorityInfo.setExtrasMap(extrasMap);
                 break;
             default:

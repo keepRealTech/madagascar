@@ -155,7 +155,7 @@ public class PaymentService {
      * @return {@link Payment}.
      */
     @Transactional
-    public Payment createIOSBuyShellPayments(String userId, ShellSku sku, String transactionId) {
+    public Payment createIOSBuyShellPayments(String userId, ShellSku sku, String transactionId, String orderId) {
         Payment payment = this.paymentRepository.findTopByTradeNumAndTypeAndDeletedIsFalse(transactionId, PaymentType.SHELLBUY.getValue());
 
         if (Objects.nonNull(payment)) {
@@ -170,6 +170,7 @@ public class PaymentService {
                 .userId(userId)
                 .state(PaymentState.CLOSED.getValue())
                 .tradeNum(transactionId)
+                .orderId(orderId)
                 .build();
         return this.paymentRepository.save(payment);
     }

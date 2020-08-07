@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokenResponse;
 import org.redisson.api.RBucket;
 import org.redisson.api.RMap;
+import org.redisson.api.RSet;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
@@ -28,26 +29,27 @@ public class RedissonService {
     }
 
     public void putPushInfo(String userId, PushPriority pushPriority, String latestUserId) {
-        RMap<Object, Object> redisPushMap = redissonClient.getMap("push:"+userId);
-        if (redisPushMap == null || redisPushMap.size() == 0) {
-            redisPushMap.put("type", pushPriority.getNumber());
-            redisPushMap.put("count", 1);
-            redisPushMap.put("latestUserId", latestUserId);
+        RBucket<Object> pushType = redissonClient.getBucket("push:" + userId);
+        RSet<Object> userSet = redissonClient.getSet("userSet:" + userId);
+        if (!pushType.isExists()) {
+            pushType.set(pushPriority.getNumber());
+            pushType.expire(5L, TimeUnit.MINUTES);
+            userSet.add(latestUserId);
+            userSet.expire(5L, TimeUnit.MINUTES);
             return;
         }
 
-        Integer redisPushType = (Integer) redisPushMap.get("type");
+        Integer redisPushType = (Integer) pushType.get();
 
         if (pushPriority.getNumber() == redisPushType) {
-            redisPushMap.addAndGet("count", 1);
+            userSet.add(latestUserId);
         }
 
         if (pushPriority.getNumber() > redisPushType) {
-            redisPushMap.put("type", pushPriority.getNumber());
-            redisPushMap.put("count", 1);
+            pushType.set(pushPriority.getNumber());
+            userSet.clear();
+            userSet.add(latestUserId);
         }
-
-        redisPushMap.put("text", latestUserId);
     }
 
     public Map<String, List<String>> getToken(String pushKey) {
@@ -56,7 +58,7 @@ public class RedissonService {
 
         RMap<Object, Object> tokenMap = redissonClient.getMap("token:" + userId);
 
-        if (tokenMap == null || tokenMap.size() == 0) {
+        if (!tokenMap.isExists() || tokenMap.size() == 0) {
             tokenMap.expire(30L, TimeUnit.MINUTES);
             RetrieveDeviceTokenResponse response = userService.retrieveUserDeviceToken(userId);
 
