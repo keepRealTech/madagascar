@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.service;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,7 @@ public class EhcacheService {
      * @param commentService        {@link CommentService}.
      */
     public EhcacheService(FeedService feedService,
-                          CacheManager cacheManager,
+                          @Qualifier("ehcacheCacheManager") CacheManager cacheManager,
                           CommentService commentService) {
         this.feedService = feedService;
         this.feedExistenceCache = cacheManager.getCache("feed-existence");

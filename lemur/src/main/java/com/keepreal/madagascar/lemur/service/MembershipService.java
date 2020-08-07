@@ -21,6 +21,9 @@ import com.keepreal.madagascar.coua.UpdateMembershipRequest;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -44,6 +47,7 @@ public class MembershipService {
         this.channel = channel;
     }
 
+    @CachePut(value = "MebershipMesaage", key = "#membershipId", cacheManager = "redisCacheManager")
     public void topMembershipById(String membershipId, Boolean isRevoke, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
@@ -65,6 +69,7 @@ public class MembershipService {
         }
     }
 
+    @CacheEvict(value = "MebershipMesaage", key = "#membershipId", cacheManager = "redisCacheManager")
     public void deactivateMembershipById(String membershipId, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
@@ -85,6 +90,7 @@ public class MembershipService {
         }
     }
 
+    @CacheEvict(value = "MebershipMesaage", key = "#membershipId", cacheManager = "redisCacheManager")
     public void deleteMembershipById(String membershipId, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
@@ -131,6 +137,7 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
+    @Cacheable(value = "MebershipMesaage", key = "#membershipId", cacheManager = "redisCacheManager")
     public MembershipMessage retrieveMembershipById(String membershipId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
@@ -150,6 +157,7 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
+    @CachePut(value = "MebershipMesaage", key = "#membershipId", cacheManager = "redisCacheManager")
     public MembershipMessage updateMembershipById(String membershipId, String name, List<String> descriptions, Integer pricePerMonth, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
