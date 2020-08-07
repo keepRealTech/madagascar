@@ -134,7 +134,7 @@ public class FeedService {
                 .setUserId(userId)
                 .setType(mediaType);
 
-        buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
+        this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
 
         NewFeedsResponse newFeedsResponse;
         try {
