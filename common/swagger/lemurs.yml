@@ -1999,6 +1999,8 @@ components:
       properties:
         shouldPopup:
           type: boolean
+        title:
+          type: string
         content:
           type: string
     IslandProfileDTO:

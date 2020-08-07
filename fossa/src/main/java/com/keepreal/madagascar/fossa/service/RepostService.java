@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class RepostService {
 
     private static final String ANDROID_REDIRECT_URL = "/island/home";
-    private static final String IOS_REDIRECT_URL = "";
+    private static final String IOS_REDIRECT_URL = "feeds://island/home";
     private static final String LINKED_URL = "https://www.keepreal.cn/repost?islandId=%s&userId=%s";
     private static final String HOST_TAG = "1";
     private static final String ISLANDER_TAG = "0";
