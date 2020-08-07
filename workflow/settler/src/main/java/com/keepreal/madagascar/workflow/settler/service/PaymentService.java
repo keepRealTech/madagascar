@@ -43,6 +43,15 @@ public class PaymentService {
     }
 
     /**
+     * Counts all open withdraw payments.
+     *
+     * @return Counts.
+     */
+    public Long countWithdrawPayments() {
+        return this.paymentRepository.countByTypeAndStateAndDeletedIsFalse(PaymentType.WITHDRAW.getValue(), PaymentState.OPEN.getValue());
+    }
+
+    /**
      * Updates the state of payments to {@link PaymentState}.
      *
      * @param payments {@link Payment}.
