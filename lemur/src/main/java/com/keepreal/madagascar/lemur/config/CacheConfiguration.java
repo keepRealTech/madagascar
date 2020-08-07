@@ -76,6 +76,9 @@ public class CacheConfiguration {
     public CacheManager redisCacheManager() {
         Map<String, CacheConfig> config = new HashMap<>(16);
         config.put("IslandMessage", new CacheConfig(0, 24 * 60 * 60 * 1000));
+        config.put("UserMessage", new CacheConfig(0, 24 * 60 * 60 * 1000));
+        config.put("MembershipMessage", new CacheConfig(0, 24 * 60 * 60 * 1000));
+        config.put("ShellSku", new CacheConfig(0, 0));
         return new RedissonSpringCacheManager(this.redissonClient, config);
     }
 

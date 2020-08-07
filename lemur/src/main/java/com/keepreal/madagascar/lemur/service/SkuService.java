@@ -13,6 +13,7 @@ import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public class SkuService {
      * @param isWechatPay Whether is wechat pay.
      * @return {@link ShellSkusResponse}.
      */
+    @Cacheable(value = "Shellsku", key = "#isWechatPay", cacheManager = "ehcacheCacheManager")
     public List<ShellSkuMessage> retrieveShellSkus(Boolean isWechatPay) {
         SkuServiceGrpc.SkuServiceBlockingStub stub = SkuServiceGrpc.newBlockingStub(this.channel);
 
