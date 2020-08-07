@@ -25,7 +25,7 @@ public class MediaService {
     public MediaService(UploadService uploadService,
                         OssClientConfiguration clientConfiguration) {
         this.uploadService = uploadService;
-        this.host = "https://" + clientConfiguration.getBucketName() + "." + "oss-cn-beijing.aliyuncs.com/";
+        this.host = clientConfiguration.getOssPrefix();
     }
 
     public VideoMessage videoMessage(MultiMediaDTO multiMediaDTO) {
