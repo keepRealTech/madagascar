@@ -20,6 +20,8 @@ public class OssClientConfiguration {
     private String accessSecret;
     private String bucketName;
     private Integer expireTimeInSeconds;
+    private String ossEndpoint;
+    private String ossPrefix;
     private String roleArn = "acs:ram::1398284016177859:role/aliyunossclientdefaultrole";
     private String stsEndpoint = "sts.aliyuncs.com";
 
