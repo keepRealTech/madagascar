@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.HtmlMessage;
 import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.PicturesMessage;
 import com.keepreal.madagascar.common.VideoMessage;
+import com.keepreal.madagascar.lemur.config.OssClientConfiguration;
 import com.keepreal.madagascar.lemur.model.VideoInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -16,12 +17,15 @@ import java.util.stream.Collectors;
 @Service
 public class MediaService {
 
-    private static long MILLISECONDS = 1000L;
+    private static final long MILLISECONDS = 1000L;
+    private final String host;
 
     private final UploadService uploadService;
 
-    public MediaService(UploadService uploadService) {
+    public MediaService(UploadService uploadService,
+                        OssClientConfiguration clientConfiguration) {
         this.uploadService = uploadService;
+        this.host = "https://" + clientConfiguration.getBucketName() + "." + "oss-cn-beijing.aliyuncs.com/";
     }
 
     public VideoMessage videoMessage(MultiMediaDTO multiMediaDTO) {
@@ -78,7 +82,7 @@ public class MediaService {
     }
 
     private String getThumbnailUrl(MultiMediaDTO multiMediaDTO, VideoInfo videoInfo) {
-        return StringUtils.isEmpty(multiMediaDTO.getThumbnailUrl()) ? videoInfo.getCoverURL() : multiMediaDTO.getThumbnailUrl();
+        return StringUtils.isEmpty(multiMediaDTO.getThumbnailUrl()) ? videoInfo.getCoverURL() : this.host + multiMediaDTO.getThumbnailUrl();
     }
 
     private String processTitle(String title) {
