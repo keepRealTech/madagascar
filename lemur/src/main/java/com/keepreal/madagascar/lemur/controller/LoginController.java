@@ -28,6 +28,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.WXPayUtil;
 import io.micrometer.core.instrument.util.IOUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -83,7 +84,7 @@ public class LoginController implements LoginApi {
                            UserService userService,
                            UserDTOFactory userDTOFactory,
                            OssClientConfiguration ossClientConfiguration,
-                           DefaultAcsClient acsClient) {
+                           @Qualifier("oss-acs-client") DefaultAcsClient acsClient) {
         this.loginService = loginService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
