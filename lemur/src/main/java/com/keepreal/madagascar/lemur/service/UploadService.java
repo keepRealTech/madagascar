@@ -19,6 +19,7 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.OssClientConfiguration;
 import com.keepreal.madagascar.lemur.model.VideoInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import swagger.model.OssSignatureDTO;
 import swagger.model.UploadMediaDTO;
@@ -52,7 +53,7 @@ public class UploadService {
      */
     public UploadService(OSS ossClient,
                          OssClientConfiguration configuration,
-                         DefaultAcsClient client) {
+                         @Qualifier("vod-acs-client") DefaultAcsClient client) {
         this.ossClient = ossClient;
         this.bucketName = configuration.getBucketName();
         this.expireTimeInSeconds = configuration.getExpireTimeInSeconds();
