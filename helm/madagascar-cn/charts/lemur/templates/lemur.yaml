@@ -73,6 +73,16 @@ spec:
                 secretKeyRef:
                   name: aliyun-oss
                   key: bucket-name
+            - name: ALIYUNOSS_OSSENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-oss
+                  key: endpoint
+            - name: ALIYUNOSS_OSSPREFIX
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-oss
+                  key: prefix
             - name: ALIYUNVOD_ACCESSKEY
               valueFrom:
                 secretKeyRef:

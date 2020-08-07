@@ -126,8 +126,8 @@ aliyun-oss:
   access-secret: 123
   bucket-name: kr-thumbnail-staging-cn2-01
   expiretime-in-seconds: 30
-  ossEndpoint: oss-cn-beijing.aliyuncs.com/
-  ossPrefix: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/
+  oss-endpoint: oss-cn-beijing.aliyuncs.com/
+  oss-prefix: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/
 
 aliyun-vod:
   region-id: cn-shanghai
