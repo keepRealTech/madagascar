@@ -57,10 +57,11 @@ public class MediaService {
 
         VideoInfo videoInfo = this.uploadService.retrieveVideoInfo(videoId);
 
+        String thumbnailUrl = this.getThumbnailUrl(multiMediaDTO, videoInfo);
         return AudioMessage.newBuilder()
                 .setUrl(videoInfo.getPlayURL())
                 .setTitle(this.processTitle(videoInfo.getTitle()))
-                .setThumbnailUrl(this.getThumbnailUrl(multiMediaDTO, videoInfo))
+                .setThumbnailUrl(StringUtils.isEmpty(thumbnailUrl) ? "" : thumbnailUrl)
                 .setDuration(this.toMilliseconds(videoInfo.getDuration()))
                 .setVideoId(videoId)
                 .build();
