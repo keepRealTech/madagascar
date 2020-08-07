@@ -16,7 +16,7 @@
         </eh:resources>
     </eh:cache-template>
 
-    <eh:cache alias="shellsku" uses-template="default">
+    <eh:cache alias="Shellsku" uses-template="default">
         <eh:expiry>
             <eh:ttl unit="hours">24</eh:ttl>
         </eh:expiry>
