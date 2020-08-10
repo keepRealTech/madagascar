@@ -57,7 +57,6 @@ public class MediaService {
         String videoId = multiMediaDTO.getVideoId();
 
         VideoInfo videoInfo = this.uploadService.retrieveVideoInfo(videoId);
-        this.uploadService.submitAIMediaJob(videoId);
 
         String thumbnailUrl = this.getThumbnailUrl(multiMediaDTO, videoInfo);
         return AudioMessage.newBuilder()
