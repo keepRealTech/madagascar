@@ -15,9 +15,9 @@ public enum RepostType {
     FEED(1),
     ;
 
-    private int code;
+    private int value;
 
-    RepostType(int code) {
-        this.code = code;
+    RepostType(int value) {
+        this.value = value;
     }
 }

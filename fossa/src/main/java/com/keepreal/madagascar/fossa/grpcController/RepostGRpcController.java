@@ -5,7 +5,6 @@ import com.keepreal.madagascar.common.DeviceType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.FeedRepostResponse;
@@ -30,7 +29,6 @@ import com.keepreal.madagascar.fossa.service.RepostService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.model.RepostInfo;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
-import com.keepreal.madagascar.fossa.util.RepostCodeUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
@@ -74,7 +72,7 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
     @Override
     public void createFeedRepost(NewFeedRepostRequest request, StreamObserver<FeedRepostResponse> responseObserver) {
         RepostInfo repostInfo = repostService.save(request.getFeedId(), request.getUserId(),
-                request.getContent(), request.getIsSuccessful(), RepostType.FEED.getCode());
+                request.getContent(), request.getIsSuccessful(), RepostType.FEED.getValue());
 
         feedInfoService.incFeedCount(request.getFeedId(), FeedCountType.REPOST_COUNT);
 
@@ -97,7 +95,7 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
     public void retrieveFeedRepostsByFeedId(RetrieveFeedRepostsByFeedIdRequest request, StreamObserver<FeedRepostsResponse> responseObserver) {
         String feedId = request.getFeedId();
 
-        Page<RepostInfo> repostInfoPageable = repostService.getRepostInfoPageable(request.getPageRequest(), feedId);
+        Page<RepostInfo> repostInfoPageable = repostService.getRepostInfoPageable(request.getPageRequest(), feedId, RepostType.FEED.getValue());
         List<FeedRepostMessage> repostMessageList = repostInfoPageable.getContent().stream().map(repostService::getFeedRepostMessage).filter(Objects::nonNull).collect(Collectors.toList());
 
         PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(repostInfoPageable);
@@ -120,7 +118,7 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
     @Override
     public void createIslandRepost(NewIslandRepostRequest request, StreamObserver<IslandRepostResponse> responseObserver) {
         RepostInfo repostInfo = repostService.save(request.getIslandId(), request.getUserId(),
-                request.getContent(), request.getIsSuccessful(), RepostType.ISLAND.getCode());
+                request.getContent(), request.getIsSuccessful(), RepostType.ISLAND.getValue());
 
         IslandRepostMessage message = repostService.getIslandRepostMessage(repostInfo);
         IslandRepostResponse response = IslandRepostResponse.newBuilder()
@@ -141,7 +139,7 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
     public void retrieveIslandRepostsByIslandId(RetrieveIslandRepostsByIslandIdRequest request, StreamObserver<IslandRepostsResponse> responseObserver) {
         String islandId = request.getIslandId();
 
-        Page<RepostInfo> repostInfoPageable = repostService.getRepostInfoPageable(request.getPageRequest(), islandId);
+        Page<RepostInfo> repostInfoPageable = repostService.getRepostInfoPageable(request.getPageRequest(), islandId, RepostType.ISLAND.getValue());
         List<IslandRepostMessage> repostMessageList = repostInfoPageable.getContent().stream().map(repostService::getIslandRepostMessage).filter(Objects::nonNull).collect(Collectors.toList());
 
         PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(repostInfoPageable);
