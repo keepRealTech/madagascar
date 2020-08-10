@@ -14,6 +14,7 @@ import com.aliyuncs.vod.model.v20170321.GetPlayInfoRequest;
 import com.aliyuncs.vod.model.v20170321.GetPlayInfoResponse;
 import com.aliyuncs.vod.model.v20170321.RefreshUploadVideoRequest;
 import com.aliyuncs.vod.model.v20170321.RefreshUploadVideoResponse;
+import com.aliyuncs.vod.model.v20170321.SubmitAIMediaAuditJobRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.OssClientConfiguration;
@@ -153,6 +154,16 @@ public class UploadService {
             log.error("aliyun error! videoId is {} message is {}", videoId, e.getLocalizedMessage());
         }
         return videoInfo;
+    }
+
+    public void submitAIMediaJob(String videoId) {
+        try {
+            SubmitAIMediaAuditJobRequest request = new SubmitAIMediaAuditJobRequest();
+            request.setMediaId(videoId);
+            client.getAcsResponse(request);
+        } catch (ClientException e) {
+            log.error("aliyun error! videoId is {} message is {}", videoId, e.getLocalizedMessage());
+        }
     }
 
     public OssSignatureDTO retrieveOssSignature() {
