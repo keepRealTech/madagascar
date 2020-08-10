@@ -27,7 +27,7 @@ ext['mantella.version'] = '1.0.2'
 ext['vanga.version'] = '1.0.5'
 ext['asity.version'] = '1.0.0'
 
-ext['settler.version'] = '1.0.2'
+ext['settler.version'] = '1.0.3'
 ext['reconciliation.version'] = '1.0.1'
 
 subprojects {
