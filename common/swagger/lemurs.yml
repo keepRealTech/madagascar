@@ -1848,6 +1848,10 @@ components:
           $ref: '#/components/schemas/GenderType'
         age:
           type: integer
+        identityTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityType'
     UserDTO:
       allOf:
         - $ref: '#/components/schemas/BriefUserDTO'
@@ -1863,10 +1867,6 @@ components:
             birthday:
               type: string
               format: date
-            identityTypes:
-              type: array
-              items:
-                $ref: '#/components/schemas/IdentityType'
     FullUserDTO:
       allOf:
         - $ref: '#/components/schemas/UserDTO'

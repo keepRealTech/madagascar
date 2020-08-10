@@ -137,6 +137,11 @@ public class UserDTOFactory {
         briefUserDTO.setPortraitImageUri(user.getPortraitImageUri());
         briefUserDTO.setGender(this.convertGender(user.getGender()));
         briefUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
+        briefUserDTO.setIdentityTypes(user.getIdentitiesList()
+                .stream()
+                .map(this::convertIdentityType)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
 
         return briefUserDTO;
     }
