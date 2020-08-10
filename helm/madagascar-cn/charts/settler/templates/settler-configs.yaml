@@ -7,3 +7,4 @@ data:
   aliyun_logs_madagascar-prod: stdout
   SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
   SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
+  LARK_WEBHOOK: {{ .Values.global.common_configs.lark.webhook }}

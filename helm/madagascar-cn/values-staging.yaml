@@ -7,6 +7,8 @@ global:
     acr_secret_name: keepreal-acr-secret
   common_configs:
     namespace: keepreal-stag
+    lark:
+      webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73
     replicas:
       lemur: 1
       baobob: 1
