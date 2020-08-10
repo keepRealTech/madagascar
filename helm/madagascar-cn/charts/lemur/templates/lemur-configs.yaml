@@ -30,6 +30,7 @@ data:
   ROCKETMQ_STATSEVENT_TAG: {{ .Values.rocketmq.tag }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   SECURITY_OAUTH2_RESOURCE_TOKENINFOURI: {{ .Values.security.oauth2.resource.token_info_uri }}
+  SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
 
   GENERAL_ANDROIDUPGRADESTRATEGY: '{{ .Values.release.strategy }}'
   GENERAL_ANDROIDUPGRADERATIO: '{{ .Values.release.ratio }}'

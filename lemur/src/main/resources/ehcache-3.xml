@@ -15,7 +15,7 @@
             <eh:offheap unit="MB">10</eh:offheap>
         </eh:resources>
     </eh:cache-template>
-    
+
     <eh:cache alias="Shellsku" uses-template="default">
         <eh:expiry>
             <eh:ttl unit="hours">24</eh:ttl>
