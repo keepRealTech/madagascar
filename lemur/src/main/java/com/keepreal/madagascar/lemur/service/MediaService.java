@@ -37,6 +37,7 @@ public class MediaService {
         String videoId = multiMediaDTO.getVideoId();
 
         VideoInfo videoInfo = this.uploadService.retrieveVideoInfo(videoId);
+        this.uploadService.submitAIMediaJob(videoId);
         return VideoMessage.newBuilder()
                 .setUrl(videoInfo.getPlayURL())
                 .setTitle(this.processTitle(videoInfo.getTitle()))
