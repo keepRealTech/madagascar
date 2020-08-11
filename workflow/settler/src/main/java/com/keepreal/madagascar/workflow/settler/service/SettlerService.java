@@ -3,14 +3,20 @@ package com.keepreal.madagascar.workflow.settler.service;
 import com.keepreal.madagascar.common.workflow.model.WorkflowLog;
 import com.keepreal.madagascar.common.workflow.service.WorkflowService;
 import com.keepreal.madagascar.workflow.settler.config.ExecutorConfiguration;
+import com.keepreal.madagascar.workflow.settler.config.LarkConfiguration;
 import com.keepreal.madagascar.workflow.settler.model.Balance;
 import com.keepreal.madagascar.workflow.settler.model.Payment;
 import com.keepreal.madagascar.workflow.settler.util.AutoRedisLock;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestTemplate;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
@@ -36,8 +42,11 @@ public class SettlerService {
     private final PaymentService paymentService;
     private final BalanceService balanceService;
     private final RedissonClient redissonClient;
-    private final ExecutorConfiguration executorConfiguration;
     private final ExecutorService executorService;
+    private final ExecutorConfiguration executorConfiguration;
+    private final LarkConfiguration larkConfiguration;
+
+    private final RestTemplate restTemplate;
 
     /**
      * Constructs the settler service.
@@ -47,17 +56,23 @@ public class SettlerService {
      * @param balanceService        {@link BalanceService}.
      * @param redissonClient        {@link RedissonClient}.
      * @param executorConfiguration {@link ExecutorConfiguration}.
+     * @param larkConfiguration     {@link LarkConfiguration}.
+     * @param restTemplate          {@link RestTemplate}.
      */
     public SettlerService(WorkflowService workflowService,
                           PaymentService paymentService,
                           BalanceService balanceService,
                           RedissonClient redissonClient,
-                          ExecutorConfiguration executorConfiguration) {
+                          ExecutorConfiguration executorConfiguration,
+                          LarkConfiguration larkConfiguration,
+                          RestTemplate restTemplate) {
         this.workflowService = workflowService;
         this.paymentService = paymentService;
         this.balanceService = balanceService;
         this.redissonClient = redissonClient;
         this.executorConfiguration = executorConfiguration;
+        this.larkConfiguration = larkConfiguration;
+        this.restTemplate = restTemplate;
         this.executorService = new ThreadPoolExecutor(
                 this.executorConfiguration.getThreads(),
                 this.executorConfiguration.getThreads(),
@@ -74,7 +89,7 @@ public class SettlerService {
      */
     public void run(String... args) {
         log.info("Starting workflow [settler].");
-        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, "settler", TimeUnit.DAYS.toMillis(1L), 500)) {
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, "settler", 5000, TimeUnit.DAYS.toMillis(1L))) {
             WorkflowLog workflowLog = this.workflowService.initialize();
 
             try {
@@ -103,6 +118,14 @@ public class SettlerService {
 
                     CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).get();
                 }
+
+                long withdrawCount = this.paymentService.countWithdrawPayments();
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+                String requestBody = String.format("{\"title\":\"未处理提现请求提醒\", \"text\":\"截止今天共有%d提现尚未处理。\"}", withdrawCount);
+                HttpEntity<String> requst = new HttpEntity<>(requestBody, headers);
+                this.restTemplate.exchange(this.larkConfiguration.getWebhook(), HttpMethod.POST, requst, String.class);
 
                 this.workflowService.succeed(workflowLog);
             } catch (Exception exception) {

@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.RepostMessage;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.IslandRepostMessage;
+import com.keepreal.madagascar.fossa.common.RepostType;
 import com.keepreal.madagascar.fossa.dao.RepostRepository;
 import com.keepreal.madagascar.fossa.model.RepostInfo;
 import com.keepreal.madagascar.fossa.util.RepostCodeUtils;
@@ -18,7 +19,7 @@ public class RepostService {
 
     private static final String ANDROID_REDIRECT_URL = "/island/home";
     private static final String IOS_REDIRECT_URL = "feeds://island/home";
-    private static final String LINKED_URL = "https://www.keepreal.cn/repost?islandId=%s&userId=%s";
+    private static final String LINKED_URL = " https://www.keepreal.cn/repost?islandId=%s&userId=%s";
     private static final String HOST_TAG = "1";
     private static final String ISLANDER_TAG = "0";
 
@@ -36,10 +37,12 @@ public class RepostService {
      *
      * @param pageRequest   {@link org.springframework.data.domain.Pageable}.
      * @param fromId        feed id or island id.
+     * @param type          {@link RepostType}.
      * @return  {@link RepostInfo}.
      */
-    public Page<RepostInfo> getRepostInfoPageable(com.keepreal.madagascar.common.PageRequest pageRequest, String fromId) {
-        return repostRepository.findRepostInfosByFromId(fromId, PageRequest.of(pageRequest.getPage(), pageRequest.getPageSize()));
+    public Page<RepostInfo> getRepostInfoPageable(com.keepreal.madagascar.common.PageRequest pageRequest, String fromId, Integer type) {
+        return repostRepository.findRepostInfosByFromIdAndFromTypeAndDeletedIsFalse(fromId, type,
+                PageRequest.of(pageRequest.getPage(), pageRequest.getPageSize()));
     }
 
     /**

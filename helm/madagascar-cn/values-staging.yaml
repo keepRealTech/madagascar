@@ -7,6 +7,8 @@ global:
     acr_secret_name: keepreal-acr-secret
   common_configs:
     namespace: keepreal-stag
+    lark:
+      webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73
     replicas:
       lemur: 1
       baobob: 1
@@ -62,7 +64,7 @@ global:
       imagePullPolicy: Always
     settler:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/settler
-      tag: 1.0.2-staging
+      tag: 1.0.3-staging
       imagePullPolicy: Always
     reconciliation:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/reconciliation

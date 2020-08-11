@@ -15,5 +15,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RepostRepository extends JpaRepository<RepostInfo, String> {
 
-    Page<RepostInfo> findRepostInfosByFromId(String fromId, Pageable pageable);
+    Page<RepostInfo> findRepostInfosByFromIdAndFromTypeAndDeletedIsFalse(String fromId, Integer type, Pageable pageable);
 }
