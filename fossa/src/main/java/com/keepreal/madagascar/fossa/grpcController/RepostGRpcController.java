@@ -29,7 +29,6 @@ import com.keepreal.madagascar.fossa.service.RepostService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.model.RepostInfo;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
-import com.keepreal.madagascar.fossa.util.RepostCodeUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
@@ -169,12 +168,12 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
         boolean isHost = response.getIsland().getHostId().equals(userId);
         String encode = repostService.encode(islandId, isHost);
         String linkUrl = this.repostService.combineLinkUrl(response.getIsland().getId(), userId);
-        String shortenUrl = this.repostService.generateShortUrl(linkUrl);
+        String shortCode = this.repostService.generateShortCode(linkUrl);
         responseObserver.onNext(GenerateRepostCodeResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
-                .setCode(repostService.generatorCode(response.getIsland(), userId, encode, shortenUrl))
+                .setCode(repostService.generatorCode(response.getIsland(), userId, encode, shortCode))
                 .setLinkUrl(linkUrl)
-                .setShortUrl(shortenUrl)
+                .setShortCode(shortCode)
                 .build());
         responseObserver.onCompleted();
     }

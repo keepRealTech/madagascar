@@ -38,8 +38,8 @@ public class RepostController implements RepostApi {
     /**
      * Constructs the repost controller.
      *
-     * @param repostService     {@link RepostService}.
-     * @param repostDTOFactory  {@link RepostDTOFactory}.
+     * @param repostService    {@link RepostService}.
+     * @param repostDTOFactory {@link RepostDTOFactory}.
      */
     public RepostController(RepostService repostService,
                             RepostDTOFactory repostDTOFactory) {
@@ -148,12 +148,12 @@ public class RepostController implements RepostApi {
      * Implements the generate code api.
      *
      * @param id id (required)
-     * @return  {@link IslandRepostCodeResponse}.
+     * @return {@link IslandRepostCodeResponse}.
      */
     @Override
     public ResponseEntity<IslandRepostCodeResponse> apiV1IslandsIdRepostsGenerateCodeGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        String code = repostService.generateRepostCode(id, userId);
+        String code = this.repostService.generateRepostCode(id, userId);
 
         IslandRepostCodeResponse response = new IslandRepostCodeResponse();
         IslandRepostCodeDTO dto = new IslandRepostCodeDTO();
@@ -167,9 +167,9 @@ public class RepostController implements RepostApi {
     /**
      * Implements the resolve code api.
      *
-     * @param code code (required)
-     * @param deviceType  (required)
-     * @return  {@link ResolveIslandRepostCodeResponse}.
+     * @param code       code (required)
+     * @param deviceType (required)
+     * @return {@link ResolveIslandRepostCodeResponse}.
      */
     @Override
     public ResponseEntity<ResolveIslandRepostCodeResponse> apiV1RepostsResolveCodeGet(@NotNull @Valid String code, @NotNull @Valid DeviceType deviceType) {

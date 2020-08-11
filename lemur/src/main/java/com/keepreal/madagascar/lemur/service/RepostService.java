@@ -21,11 +21,15 @@ import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RMapCache;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import swagger.model.DeviceType;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Represents the repost service.
@@ -35,14 +39,18 @@ import java.util.Objects;
 public class RepostService {
 
     private final Channel channel;
+    private final RedissonClient redissonClient;
 
     /**
      * Constructs the repost service.
      *
-     * @param channel GRpc managed channel connection to service fossa.
+     * @param channel           GRpc managed channel connection to service fossa.
+     * @param redissonClient    {@link RedissonClient}.
      */
-    public RepostService(@Qualifier("fossaChannel") Channel channel) {
+    public RepostService(@Qualifier("fossaChannel") Channel channel,
+                         RedissonClient redissonClient) {
         this.channel = channel;
+        this.redissonClient = redissonClient;
     }
 
     /**
@@ -196,6 +204,8 @@ public class RepostService {
     }
 
     public String generateRepostCode(String islandId, String userId) {
+        RMapCache<String, String> cache = this.redissonClient.getMapCache("ShortLinks", StringCodec.INSTANCE);
+
         RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.channel);
 
         GenerateRepostCodeRequest request = GenerateRepostCodeRequest.newBuilder()
@@ -220,8 +230,12 @@ public class RepostService {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
-        return response.getCode();
+        if (Objects.isNull(cache.get(response.getShortCode()))
+                && !cache.fastPut(response.getShortCode(), response.getLinkUrl(), 24L, TimeUnit.HOURS)) {
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_REDIS_FAILED_PUT_ERROR);
+        }
 
+        return response.getCode();
     }
 
     public ResolveRepostCodeResponse resolveRepostCode(String code, DeviceType deviceType) {
@@ -252,6 +266,17 @@ public class RepostService {
         }
 
         return response;
+    }
+
+    public String getRedirectUrl(String shortCode) {
+        RMapCache<String, String> cache = this.redissonClient.getMapCache("ShortLinks", StringCodec.INSTANCE);
+
+        String redirectRoute = cache.get(shortCode);
+        if (Objects.isNull(redirectRoute)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_REDIS_FAILED_PUT_ERROR);
+        }
+
+        return redirectRoute;
     }
 
 }
