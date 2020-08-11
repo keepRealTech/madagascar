@@ -90,6 +90,7 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
                 .setCommentsCount(0)
                 .setLikesCount(0)
                 .setRepostCount(0)
+                .setIsAccess(true)
                 .build();
     }
 
