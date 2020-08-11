@@ -285,7 +285,7 @@ public class IslandController implements IslandApi {
         IslandProfilesResponse response = new IslandProfilesResponse();
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        response.setData(generalConfiguration.getOfficialIslandIdList().stream()
+        response.setData(this.generalConfiguration.getOfficialIslandIdList().stream()
                 .map(id -> islandService.retrieveIslandProfileById(id, userId))
                 .map(resp -> islandDTOFactory.valueOf(resp, userId))
                 .collect(Collectors.toList()));
