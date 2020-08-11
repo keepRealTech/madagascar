@@ -79,6 +79,7 @@ public class CacheConfiguration {
         config.put("UserMessage", new CacheConfig(0, 24 * 60 * 60 * 1000));
         config.put("MembershipMessage", new CacheConfig(0, 24 * 60 * 60 * 1000));
         config.put("ShellSku", new CacheConfig(0, 0));
+        config.put("ShortLinks", new CacheConfig(24 * 60 * 60 * 1000, 0));
         return new RedissonSpringCacheManager(this.redissonClient, config);
     }
 

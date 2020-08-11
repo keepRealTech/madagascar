@@ -20,6 +20,7 @@ public class RepostService {
     private static final String ANDROID_REDIRECT_URL = "/island/home";
     private static final String IOS_REDIRECT_URL = "feeds://island/home";
     private static final String LINKED_URL = " https://www.keepreal.cn/repost?islandId=%s&userId=%s";
+    private static final String SHORTEN_URL = " https://islands.keepreal.cn/%s";
     private static final String HOST_TAG = "1";
     private static final String ISLANDER_TAG = "0";
 
@@ -116,20 +117,19 @@ public class RepostService {
                 .build();
     }
 
-    public String generatorCode(IslandMessage islandMessage, String userId, String code) {
-        String linkedUrl = combineLinkedUrl(islandMessage.getId(), userId);
+    public String generatorCode(IslandMessage islandMessage, String userId, String code, String shortUrl) {
         if (userId.equals(islandMessage.getHostId())) {
             return String.format("邀请你加入［%s］\n" +
                     "【复制】这段话$%s$打开跳岛App\n" +
                     "输入暗号［%s］即刻登岛\n" +
                     "或点击链接%s",
-                    islandMessage.getName(), code, islandMessage.getSecret(), linkedUrl);
+                    islandMessage.getName(), code, islandMessage.getSecret(), shortUrl);
         }
 
         return String.format("邀请你加入［%s］\n" +
                 "【复制】这段话$%s$打开跳岛App\n" +
                 "或点击链接%s\n" +
-                "暗号接头，限时登岛", islandMessage.getName(), code, linkedUrl);
+                "暗号接头，限时登岛", islandMessage.getName(), code, shortUrl);
     }
 
     public String getRedirectUrlByDeviceType(DeviceType deviceType) {
@@ -158,7 +158,13 @@ public class RepostService {
         return decode.substring(decode.length() - 1).equals(HOST_TAG);
     }
 
-    private String combineLinkedUrl(String islandId, String userId) {
+    public String combineLinkUrl(String islandId, String userId) {
         return String.format(LINKED_URL, islandId, userId);
     }
+
+    public String generateShortUrl(String url) {
+        String encoded = RepostCodeUtils.encode(url);
+        return String.format(RepostService.SHORTEN_URL, url);
+    }
+
 }
