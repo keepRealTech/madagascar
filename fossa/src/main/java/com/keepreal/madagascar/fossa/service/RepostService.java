@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.IslandRepostMessage;
 import com.keepreal.madagascar.fossa.common.RepostType;
+import com.keepreal.madagascar.fossa.config.GeneralConfiguration;
 import com.keepreal.madagascar.fossa.dao.RepostRepository;
 import com.keepreal.madagascar.fossa.model.RepostInfo;
 import com.keepreal.madagascar.fossa.util.RepostCodeUtils;
@@ -20,15 +21,17 @@ public class RepostService {
     private static final String ANDROID_REDIRECT_URL = "/island/home";
     private static final String IOS_REDIRECT_URL = "feeds://island/home";
     private static final String LINK_URL = "/repost?islandId=%s&userId=%s";
-    private static final String SHORT_URL_BASE = "https://islands.keepreal.cn/s/%s";
     private static final String HOST_TAG = "1";
     private static final String ISLANDER_TAG = "0";
 
+    private final GeneralConfiguration generalConfiguration;
     private final RepostRepository repostRepository;
     private final LongIdGenerator idGenerator;
 
-    public RepostService(RepostRepository repostRepository,
+    public RepostService(GeneralConfiguration generalConfiguration,
+                         RepostRepository repostRepository,
                          LongIdGenerator idGenerator) {
+        this.generalConfiguration = generalConfiguration;
         this.repostRepository = repostRepository;
         this.idGenerator = idGenerator;
     }
@@ -123,13 +126,13 @@ public class RepostService {
                     "【复制】这段话$%s$打开跳岛App\n" +
                     "输入暗号［%s］即刻登岛\n" +
                     "或点击链接 %s",
-                    islandMessage.getName(), code, islandMessage.getSecret(), String.format(RepostService.SHORT_URL_BASE, shortCode));
+                    islandMessage.getName(), code, islandMessage.getSecret(), String.format(this.generalConfiguration.getShortCodeBase(), shortCode));
         }
 
         return String.format("邀请你加入［%s］\n" +
                 "【复制】这段话$%s$打开跳岛App\n" +
                 "或点击链接 %s\n" +
-                "暗号接头，限时登岛", islandMessage.getName(), code, String.format(RepostService.SHORT_URL_BASE, shortCode));
+                "暗号接头，限时登岛", islandMessage.getName(), code, String.format(this.generalConfiguration.getShortCodeBase(), shortCode));
     }
 
     public String getRedirectUrlByDeviceType(DeviceType deviceType) {

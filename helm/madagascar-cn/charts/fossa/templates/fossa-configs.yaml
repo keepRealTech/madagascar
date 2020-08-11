@@ -17,3 +17,4 @@ data:
   ROCKETMQ_FEED_TAG: {{ .Values.rocketmq.feed.tag }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
+  MADAGASCAR_SHORTCODEBASE: {{ .Values.global.common_configs.short_code_base }}
