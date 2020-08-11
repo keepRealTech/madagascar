@@ -273,7 +273,7 @@ public class RepostService {
 
         String redirectRoute = cache.get(shortCode);
         if (Objects.isNull(redirectRoute)) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_REDIS_FAILED_PUT_ERROR);
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_REDIS_SHORTURL_NOT_FOUND_ERROR);
         }
 
         return redirectRoute;
