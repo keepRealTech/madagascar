@@ -238,7 +238,7 @@ public class IslandDTOFactory {
         }
 
         introPrerequestsDTO.setHasReposts(this.repostService.retrieveRepostIslandById(islandId, 0, 1).getIslandRepostsCount() > 0);
-        introPrerequestsDTO.setHasFeeds(this.feedService.retrieveIslandFeeds(islandId, true, hostId, null, null, 0, 1, false).getFeedCount() > 1);
+        introPrerequestsDTO.setHasFeeds(this.feedService.retrieveIslandFeeds(islandId, true, hostId, null, null, 0, 2, false).getFeedCount() > 1);
         introPrerequestsDTO.setHasMemberships(this.membershipService.retrieveMembershipsByIslandId(islandId).size() > 0);
 
         hostIntroductionDTO.setPres(introPrerequestsDTO);
