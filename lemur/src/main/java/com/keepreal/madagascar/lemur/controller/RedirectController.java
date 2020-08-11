@@ -30,7 +30,7 @@ public class RedirectController {
      */
     @GetMapping(value = "/s/{shortCode}")
     public String apiRedirectShortUrl(@PathVariable("shortCode") String shortCode) {
-        return String.format("redirect:https://home.keepreal.cn/%s", this.repostService.getRedirectUrl(shortCode));
+        return String.format("redirect:https://www.keepreal.cn/%s", this.repostService.getRedirectUrl(shortCode));
     }
 
 }
