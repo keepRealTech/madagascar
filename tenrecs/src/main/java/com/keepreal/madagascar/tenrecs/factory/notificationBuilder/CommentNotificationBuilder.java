@@ -8,6 +8,7 @@ import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import com.keepreal.madagascar.tenrecs.model.Comment;
 import com.keepreal.madagascar.tenrecs.model.Feed;
 import com.keepreal.madagascar.tenrecs.model.Notification;
+import com.keepreal.madagascar.tenrecs.util.MediaMessageConvertUtils;
 
 import java.util.Objects;
 
@@ -72,6 +73,8 @@ public class CommentNotificationBuilder implements NotificationBuilder {
                 .id(feedMessage.getId())
                 .islandId(feedMessage.getIslandId())
                 .authorId(feedMessage.getUserId())
+                .multiMediaType(feedMessage.getType().name())
+                .mediaInfos(MediaMessageConvertUtils.buildMediaInfos(feedMessage))
                 .text(feedMessage.getText())
                 .imageUris(feedMessage.getImageUrisList())
                 .createdAt(feedMessage.getCreatedAt())
