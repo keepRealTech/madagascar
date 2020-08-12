@@ -3078,8 +3078,6 @@ components:
         - mobile
         - identityNumber
         - accountNumber
-        - idFrontUrl
-        - idBackUrl
     BillingInfoResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
