@@ -39,18 +39,18 @@ import java.util.concurrent.TimeUnit;
 public class RepostService {
 
     private final Channel channel;
-    private final RedissonClient redissonClient;
+    private final RedirectService redirectService;
 
     /**
      * Constructs the repost service.
      *
      * @param channel           GRpc managed channel connection to service fossa.
-     * @param redissonClient    {@link RedissonClient}.
+     * @param redirectService   {@link RedirectService}.
      */
     public RepostService(@Qualifier("fossaChannel") Channel channel,
-                         RedissonClient redissonClient) {
+                         RedirectService redirectService) {
         this.channel = channel;
-        this.redissonClient = redissonClient;
+        this.redirectService = redirectService;
     }
 
     /**
@@ -204,8 +204,6 @@ public class RepostService {
     }
 
     public String generateRepostCode(String islandId, String userId) {
-        RMapCache<String, String> cache = this.redissonClient.getMapCache("ShortLinks", StringCodec.INSTANCE);
-
         RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.channel);
 
         GenerateRepostCodeRequest request = GenerateRepostCodeRequest.newBuilder()
@@ -230,10 +228,7 @@ public class RepostService {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
-        if (Objects.isNull(cache.get(response.getShortCode()))
-                && !cache.fastPut(response.getShortCode(), response.getLinkUrl(), 24L, TimeUnit.HOURS)) {
-                throw new KeepRealBusinessException(ErrorCode.REQUEST_REDIS_FAILED_PUT_ERROR);
-        }
+        this.redirectService.insertRedirectUrl(response.getShortCode(), response.getLinkUrl());
 
         return response.getCode();
     }
@@ -266,17 +261,6 @@ public class RepostService {
         }
 
         return response;
-    }
-
-    public String getRedirectUrl(String shortCode) {
-        RMapCache<String, String> cache = this.redissonClient.getMapCache("ShortLinks", StringCodec.INSTANCE);
-
-        String redirectRoute = cache.get(shortCode);
-        if (Objects.isNull(redirectRoute)) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_REDIS_SHORTURL_NOT_FOUND_ERROR);
-        }
-
-        return redirectRoute;
     }
 
 }
