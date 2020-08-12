@@ -70,6 +70,8 @@ message GenerateRepostCodeRequest {
 message GenerateRepostCodeResponse {
     CommonStatus status = 1;
     string code = 2;
+    string shortCode = 3;
+    string linkUrl = 4;
 }
 
 message ResolveRepostCodeRequest {

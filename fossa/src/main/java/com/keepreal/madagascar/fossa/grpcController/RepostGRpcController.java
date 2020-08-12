@@ -167,9 +167,13 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
         }
         boolean isHost = response.getIsland().getHostId().equals(userId);
         String encode = repostService.encode(islandId, isHost);
+        String linkUrl = this.repostService.combineLinkUrl(response.getIsland().getId(), userId);
+        String shortCode = this.repostService.generateShortCode(linkUrl);
         responseObserver.onNext(GenerateRepostCodeResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
-                .setCode(repostService.generatorCode(response.getIsland(), userId, encode))
+                .setCode(repostService.generatorCode(response.getIsland(), userId, encode, shortCode))
+                .setLinkUrl(linkUrl)
+                .setShortCode(shortCode)
                 .build());
         responseObserver.onCompleted();
     }

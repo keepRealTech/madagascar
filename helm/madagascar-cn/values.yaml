@@ -7,6 +7,8 @@ global:
     acr_secret_name: keepreal-acr-secret
   common_configs:
     namespace: keepreal-prod
+    lark:
+      webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73
     replicas:
       lemur: 2
       baobob: 2
@@ -19,6 +21,7 @@ global:
       tenrecs: 2
       vanga: 2
       asity: 2
+    short_code_base: https://islands.keepreal.cn/s/%s
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur

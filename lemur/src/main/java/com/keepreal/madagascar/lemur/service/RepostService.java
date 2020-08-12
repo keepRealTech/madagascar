@@ -21,11 +21,15 @@ import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RMapCache;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import swagger.model.DeviceType;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Represents the repost service.
@@ -35,14 +39,18 @@ import java.util.Objects;
 public class RepostService {
 
     private final Channel channel;
+    private final RedirectService redirectService;
 
     /**
      * Constructs the repost service.
      *
-     * @param channel GRpc managed channel connection to service fossa.
+     * @param channel           GRpc managed channel connection to service fossa.
+     * @param redirectService   {@link RedirectService}.
      */
-    public RepostService(@Qualifier("fossaChannel") Channel channel) {
+    public RepostService(@Qualifier("fossaChannel") Channel channel,
+                         RedirectService redirectService) {
         this.channel = channel;
+        this.redirectService = redirectService;
     }
 
     /**
@@ -220,8 +228,9 @@ public class RepostService {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
-        return response.getCode();
+        this.redirectService.insertRedirectUrl(response.getShortCode(), response.getLinkUrl());
 
+        return response.getCode();
     }
 
     public ResolveRepostCodeResponse resolveRepostCode(String code, DeviceType deviceType) {

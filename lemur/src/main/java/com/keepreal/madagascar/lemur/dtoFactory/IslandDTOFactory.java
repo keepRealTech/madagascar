@@ -167,6 +167,10 @@ public class IslandDTOFactory {
             islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(false));
             islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(islandProfileResponse.getIsland().getId(),
                     userId, islandProfileResponse.getHostShouldIntroduce()));
+        } else if (this.generalConfiguration.getOfficialIslandIdList().contains(islandProfileResponse.getIsland().getId())) {
+            islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(false));
+            islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(islandProfileResponse.getIsland().getId(),
+                    userId, false));
         } else {
             islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(islandProfileResponse.getUserShouldIntroduce()));
             islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(islandProfileResponse.getIsland().getId(),

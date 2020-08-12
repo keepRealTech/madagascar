@@ -21,6 +21,7 @@ global:
       tenrecs: 1
       vanga: 1
       asity: 1
+    short_code_base: https://staging.keepreal.cn/s/%s
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur

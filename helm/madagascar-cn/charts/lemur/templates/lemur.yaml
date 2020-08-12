@@ -43,6 +43,16 @@ spec:
             - configMapRef:
                 name: lemur
           env:
+            - name: SPRING_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-redis
+                  key: host
+            - name: SPRING_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-redis
+                  key: password
             - name: ROCKETMQ_STATSEVENT_ACCESSKEY
               valueFrom:
                 secretKeyRef:

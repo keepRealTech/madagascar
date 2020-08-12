@@ -40,6 +40,7 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
                 .antMatchers(
+                        "/s/**",
                         "/api/v1/login**",
                         "/api/v1/login/generate**",
                         "/api/v1/login/polling**",

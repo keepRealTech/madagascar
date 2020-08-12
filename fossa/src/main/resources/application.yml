@@ -12,6 +12,9 @@ spring:
       database: fossa
       uri: mongodb://localhost:27017
 
+madagascar:
+  short-code-base: https://staging.keepreal.cn/s/%s
+
 rocketmq:
   notification:
     accessKey: xxx

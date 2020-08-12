@@ -1,9 +1,46 @@
 package com.keepreal.madagascar.fossa.util;
 
 
+import com.aliyun.openservices.shade.org.apache.commons.codec.digest.DigestUtils;
+
+import java.util.Random;
+
 public class RepostCodeUtils {
 
-    private static String str62keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String str62keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final Integer LENGTH = 6;
+
+    public static String getRandomString() {
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < RepostCodeUtils.LENGTH; i++) {
+            int number = random.nextInt(62);
+            sb.append(RepostCodeUtils.str62keys.charAt(number));
+        }
+        return sb.toString();
+    }
+
+    public static String shorten(String url) {
+        String key = "SECRET"; // 自定义生成MD5加密字符串前的混合KEY
+        String hex = DigestUtils.md5Hex(key + url);
+        int hexLen = hex.length();
+        int subHexLen = hexLen / 8;
+        String[] shortStr = new String[subHexLen];
+
+        for (int i = 0; i < subHexLen; i++) {
+            StringBuilder outChars = new StringBuilder();
+            int j = i + 1;
+            String subHex = hex.substring(i * 8, j * 8);
+            long idx = Long.valueOf("3FFFFFFF", 16) & Long.valueOf(subHex, 16);
+            for (int k = 0; k < LENGTH; k++) {
+                int index = (int) (Long.valueOf("0000003D", 16) & idx);
+                outChars.append(str62keys.charAt(index));
+                idx = idx >> 5;
+            }
+            shortStr[i] = outChars.toString();
+        }
+        return String.join("", shortStr);
+    }
 
     public static String decode(String str62) {
         StringBuilder id = new StringBuilder();
