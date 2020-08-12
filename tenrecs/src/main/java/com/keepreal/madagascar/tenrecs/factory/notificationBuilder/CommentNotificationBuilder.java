@@ -3,17 +3,13 @@ package com.keepreal.madagascar.tenrecs.factory.notificationBuilder;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.NotificationType;
-import com.keepreal.madagascar.fossa.NewFeedsRequestV2;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import com.keepreal.madagascar.tenrecs.model.Comment;
 import com.keepreal.madagascar.tenrecs.model.Feed;
-import com.keepreal.madagascar.tenrecs.model.MediaInfo;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.util.MediaMessageConvertUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
