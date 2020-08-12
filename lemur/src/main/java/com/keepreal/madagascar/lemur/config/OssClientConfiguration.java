@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class OssClientConfiguration {
 
-    private String endpoint;
     private String accessKey;
     private String accessSecret;
     private String bucketName;
@@ -27,7 +26,7 @@ public class OssClientConfiguration {
 
     @Bean
     public OSS ossClient() {
-        return new OSSClientBuilder().build(this.endpoint, this.accessKey, this.accessSecret);
+        return new OSSClientBuilder().build(this.ossEndpoint, this.accessKey, this.accessSecret);
     }
 
     @Bean(name = "oss-acs-client")
