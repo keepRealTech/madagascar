@@ -80,7 +80,7 @@ message RetrieveMembershipsByIdsRequest {
 }
 
 service MembershipService {
-    rpc TopMembershipById (TopMembershipRequest) returns (CommonStatus) {};
+    rpc TopMembershipById (TopMembershipRequest) returns (MembershipResponse) {};
     rpc RetrieveMembershipById (MembershipIdRequest) returns (MembershipResponse) {};
     rpc DeactivateMembershipById (MembershipIdRequest) returns (CommonStatus) {};
     rpc DeleteMembershipById (MembershipIdRequest) returns (CommonStatus) {};
