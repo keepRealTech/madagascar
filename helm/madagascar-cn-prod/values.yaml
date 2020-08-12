@@ -34,11 +34,11 @@ global:
       imagePullPolicy: Always
     mantella:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/mantella
-      tag: 1.0.1
+      tag: 1.0.2
       imagePullPolicy: Always
     marty:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/marty
-      tag: 1.0.2
+      tag: 1.0.3
       imagePullPolicy: Always
     tenrecs:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/tenrecs
