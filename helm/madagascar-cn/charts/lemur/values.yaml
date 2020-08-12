@@ -74,7 +74,6 @@ security:
       token_info_uri: http://baobob:8080/oauth/check_token
 
 aliyun_oss:
-  endpoint: oss-cn-beijing-internal.aliyuncs.com
   expire_time_in_seconds: 30
 
 aliyun_vod:
