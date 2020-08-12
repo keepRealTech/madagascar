@@ -8,6 +8,7 @@ import com.keepreal.madagascar.tenrecs.ReactionNotificationMessage;
 import com.keepreal.madagascar.tenrecs.model.Feed;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.model.Reaction;
+import com.keepreal.madagascar.tenrecs.util.MediaMessageConvertUtils;
 
 import java.util.Objects;
 
@@ -80,7 +81,7 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
             return null;
         }
 
-        return FeedMessage.newBuilder()
+        FeedMessage.Builder builder = FeedMessage.newBuilder()
                 .setId(feed.getId())
                 .setUserId(feed.getAuthorId())
                 .setText(feed.getText())
@@ -90,8 +91,11 @@ public class ReactionNotificationMessageBuilder implements NotificationMessageBu
                 .setCommentsCount(0)
                 .setLikesCount(0)
                 .setRepostCount(0)
-                .setIsAccess(true)
-                .build();
+                .setIsAccess(true);
+
+        MediaMessageConvertUtils.processMedia(builder, feed);
+
+        return builder.build();
     }
 
     /**

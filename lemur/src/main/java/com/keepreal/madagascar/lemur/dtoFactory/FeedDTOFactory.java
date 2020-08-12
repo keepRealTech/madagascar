@@ -205,6 +205,18 @@ public class FeedDTOFactory {
         snapshotFeedDTO.setIsDeleted(this.ehcacheService.checkFeedDeleted(feed.getId()));
         snapshotFeedDTO.setIsAccess(feed.getIsAccess());
 
+        snapshotFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
+        snapshotFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+
+        boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
+        if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
+            snapshotFeedDTO.setImagesUris(feed.getImageUrisList());
+        }
+
+        if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
+            snapshotFeedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
+        }
+
         snapshotFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
         snapshotFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
         Boolean isSubscribed = stateMap.get(feed.getIslandId());

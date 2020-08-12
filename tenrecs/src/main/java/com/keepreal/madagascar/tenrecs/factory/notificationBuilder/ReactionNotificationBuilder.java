@@ -9,6 +9,7 @@ import com.keepreal.madagascar.tenrecs.model.Feed;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.model.Reaction;
 import com.keepreal.madagascar.tenrecs.service.NotificationService;
+import com.keepreal.madagascar.tenrecs.util.MediaMessageConvertUtils;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -101,6 +102,8 @@ public class ReactionNotificationBuilder implements NotificationBuilder {
                 .id(feedMessage.getId())
                 .islandId(feedMessage.getIslandId())
                 .authorId(feedMessage.getUserId())
+                .multiMediaType(feedMessage.getType().name())
+                .mediaInfos(MediaMessageConvertUtils.buildMediaInfos(feedMessage))
                 .text(feedMessage.getText())
                 .imageUris(feedMessage.getImageUrisList())
                 .createdAt(feedMessage.getCreatedAt())

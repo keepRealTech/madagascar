@@ -2,12 +2,14 @@ package com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder;
 
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.tenrecs.CommentNotificationMessage;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.model.Comment;
 import com.keepreal.madagascar.tenrecs.model.Feed;
 import com.keepreal.madagascar.tenrecs.model.Notification;
+import com.keepreal.madagascar.tenrecs.util.MediaMessageConvertUtils;
 
 import java.util.Objects;
 
@@ -80,7 +82,7 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
             return null;
         }
 
-        return FeedMessage.newBuilder()
+        FeedMessage.Builder builder = FeedMessage.newBuilder()
                 .setId(feed.getId())
                 .setUserId(feed.getAuthorId())
                 .setText(feed.getText())
@@ -89,8 +91,10 @@ public class CommentNotificationMessageBuilder implements NotificationMessageBui
                 .setCreatedAt(feed.getCreatedAt())
                 .setCommentsCount(0)
                 .setLikesCount(0)
-                .setRepostCount(0)
-                .build();
+                .setRepostCount(0);
+
+        MediaMessageConvertUtils.processMedia(builder, feed);
+        return builder.build();
     }
 
     /**

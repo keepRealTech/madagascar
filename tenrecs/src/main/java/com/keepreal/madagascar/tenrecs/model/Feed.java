@@ -16,6 +16,8 @@ public class Feed {
     private String id;
     private String islandId;
     private String authorId;
+    private String multiMediaType;
+    private List<MediaInfo> mediaInfos;
     @Builder.Default
     private String text = "";
     @Builder.Default
