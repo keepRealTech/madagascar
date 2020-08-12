@@ -3,10 +3,22 @@ package com.keepreal.madagascar.fossa.util;
 
 import com.aliyun.openservices.shade.org.apache.commons.codec.digest.DigestUtils;
 
+import java.util.Random;
+
 public class RepostCodeUtils {
 
-    private static String str62keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private static Integer LENGTH = 6;
+    private static final String str62keys = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final Integer LENGTH = 6;
+
+    public static String getRandomString() {
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < RepostCodeUtils.LENGTH; i++) {
+            int number = random.nextInt(62);
+            sb.append(RepostCodeUtils.str62keys.charAt(number));
+        }
+        return sb.toString();
+    }
 
     public static String shorten(String url) {
         String key = "SECRET"; // 自定义生成MD5加密字符串前的混合KEY

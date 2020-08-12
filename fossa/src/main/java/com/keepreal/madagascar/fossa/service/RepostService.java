@@ -166,7 +166,7 @@ public class RepostService {
     }
 
     public String generateShortCode(String url) {
-         return RepostCodeUtils.shorten(url);
+         return RepostCodeUtils.getRandomString();
     }
 
 }
