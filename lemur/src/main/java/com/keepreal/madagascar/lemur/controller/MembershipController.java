@@ -9,6 +9,7 @@ import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.MembershipApi;
 import swagger.model.DummyResponse;
@@ -49,6 +50,7 @@ public class MembershipController implements MembershipApi {
      * @param id island id.
      * @return {@link FeedMembershipsResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<FeedMembershipsResponse> apiV1IslandsIdFeedMembershipsGet(String id) {
         List<FeedMembershipMessage> feedMembershipMessages = membershipService.retrieveFeedMembershipsByIslandId(id);
@@ -188,4 +190,5 @@ public class MembershipController implements MembershipApi {
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }
