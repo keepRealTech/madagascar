@@ -62,11 +62,11 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
      * @param responseObserver {@link CommonStatus}.
      */
     @Override
-    public void topMembershipById(TopMembershipRequest request, StreamObserver<CommonStatus> responseObserver) {
+    public void topMembershipById(TopMembershipRequest request, StreamObserver<MembershipResponse> responseObserver) {
         String membershipId = request.getId();
         boolean isRevoke = request.getIsRevoke();
         MembershipInfo membership = membershipService.getMembershipById(membershipId);
-        if (notExist(membership, responseObserver) || notPermission(membership, request.getUserId(), responseObserver)) {
+        if (notExistWithMessage(membership, responseObserver) || notPermissionWithMessage(membership, request.getUserId(), responseObserver)) {
             return;
         }
         if (isRevoke) {
@@ -287,9 +287,12 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         responseObserver.onCompleted();
     }
 
-    private void updateAndResponse(MembershipInfo membershipInfo, StreamObserver<CommonStatus> responseObserver) {
+    private void updateAndResponse(MembershipInfo membershipInfo, StreamObserver<MembershipResponse> responseObserver) {
         membershipService.updateMembership(membershipInfo);
-        responseObserver.onNext(CommonStatusUtils.getSuccStatus());
+        responseObserver.onNext(MembershipResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setMessage(this.membershipService.getMembershipMessage(membershipInfo))
+                .build());
         responseObserver.onCompleted();
     }
 
@@ -302,9 +305,31 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         return false;
     }
 
+    private boolean notExistWithMessage(MembershipInfo membershipInfo, StreamObserver<MembershipResponse> responseObserver) {
+        if (membershipInfo == null) {
+            responseObserver.onNext(MembershipResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUNT_ERROR))
+                    .build());
+            responseObserver.onCompleted();
+            return true;
+        }
+        return false;
+    }
+
     private boolean notPermission(MembershipInfo membershipInfo, String userId, StreamObserver<CommonStatus> responseObserver) {
         if (!userId.equals(membershipInfo.getHostId())) {
             responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN));
+            responseObserver.onCompleted();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean notPermissionWithMessage(MembershipInfo membershipInfo, String userId, StreamObserver<MembershipResponse> responseObserver) {
+        if (!userId.equals(membershipInfo.getHostId())) {
+            responseObserver.onNext(MembershipResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
+                    .build());
             responseObserver.onCompleted();
             return true;
         }
