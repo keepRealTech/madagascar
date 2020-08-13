@@ -51,6 +51,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -129,6 +130,14 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             responseObserver.onCompleted();
             return;
         }
+
+        if (this.islandInfoService.getMyCreatedIslands(request.getHostId(), PageRequest.of(0, 1)).getTotalElements() > 0) {
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_CREATE_ERROR);
+            responseObserver.onNext(IslandResponse.newBuilder().setStatus(commonStatus).build());
+            responseObserver.onCompleted();
+            return;
+        }
+
         IslandInfo.IslandInfoBuilder infoBuilder = IslandInfo.builder()
                 .hostId(request.getHostId())
                 .islandName(request.getName());

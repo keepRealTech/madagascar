@@ -29,6 +29,8 @@ public interface IslandInfoRepository extends JpaRepository<IslandInfo, String> 
 
     Page<IslandInfo> findAllByDeletedIsFalse(Pageable pageable);
 
+    Page<IslandInfo> findAllByHostIdAndDeletedIsFalse(String hostId, Pageable pageable);
+
     @Query(value = "SELECT id, last_feed_at AS lastFeedAt FROM island WHERE is_deleted = FALSE AND id IN ?1", nativeQuery = true)
     List<Map<String, Long>> findIslandIdAndLastFeedAtByIslandIdList(List<String> islandIdList);
 
