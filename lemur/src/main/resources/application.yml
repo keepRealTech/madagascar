@@ -39,6 +39,11 @@ spring:
   cache:
     jcache:
       config: ehcache-3.xml
+  redis:
+    host: r-2ze4jhfytptucbsu8dpd.redis.rds.aliyuncs.com
+    port: 6379
+    password: GcrkNYTcST4PzlV
+    ssl: false
 
 security:
   oauth2:
@@ -121,8 +126,14 @@ client:
         nextVersion: 100
 
 aliyun-oss:
-  endpoint: oss-cn-beijing.aliyuncs.com
-  accessKey: 123
-  accessSecret: 123
-  bucketName: kr-thumbnail-staging-cn2-01
-  expireTimeInSeconds: 30
+  access-key: 123
+  access-secret: 123
+  bucket-name: kr-thumbnail-staging-cn2-01
+  expiretime-in-seconds: 30
+  oss-endpoint: oss-cn-beijing.aliyuncs.com/
+  oss-prefix: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/
+
+aliyun-vod:
+  region-id: cn-shanghai
+  access-key: xxx
+  access-secret: xxx

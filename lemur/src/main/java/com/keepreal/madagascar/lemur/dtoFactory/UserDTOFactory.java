@@ -6,7 +6,10 @@ import com.keepreal.madagascar.lemur.service.IslandService;
 import org.springframework.stereotype.Component;
 import swagger.model.AvatarDTO;
 import swagger.model.BriefIslandDTO;
+import swagger.model.BriefMembershipDTO;
 import swagger.model.BriefUserDTO;
+import swagger.model.ChatGroupDTO;
+import swagger.model.ChatUserDTO;
 import swagger.model.FullUserDTO;
 import swagger.model.GenderType;
 import swagger.model.IdentityType;
@@ -14,6 +17,9 @@ import swagger.model.UserDTO;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -131,6 +137,11 @@ public class UserDTOFactory {
         briefUserDTO.setPortraitImageUri(user.getPortraitImageUri());
         briefUserDTO.setGender(this.convertGender(user.getGender()));
         briefUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
+        briefUserDTO.setIdentityTypes(user.getIdentitiesList()
+                .stream()
+                .map(this::convertIdentityType)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
 
         return briefUserDTO;
     }
@@ -151,6 +162,38 @@ public class UserDTOFactory {
         avatarDTO.setPortraitUrl(user.getPortraitImageUri());
 
         return avatarDTO;
+    }
+
+    /**
+     * Builds the {@link ChatUserDTO} from {@link UserMessage} and {@link BriefMembershipDTO}.
+     *
+     * @param user                   {@link UserMessage}.
+     * @param briefMembershipDTOList {@link BriefMembershipDTO}.
+     * @return {@link ChatUserDTO}.
+     */
+    public ChatUserDTO chatUserValueOf(UserMessage user, List<BriefMembershipDTO> briefMembershipDTOList) {
+        if (Objects.isNull(user)) {
+            return null;
+        }
+
+        if (Objects.isNull(briefMembershipDTOList)) {
+            briefMembershipDTOList = new ArrayList<>();
+        }
+
+        ChatUserDTO chatUserDTO = new ChatUserDTO();
+        chatUserDTO.setId(user.getId());
+        chatUserDTO.setDisplayId(user.getDisplayId());
+        chatUserDTO.setName(user.getName());
+        chatUserDTO.setPortraitImageUri(user.getPortraitImageUri());
+        chatUserDTO.setGender(this.convertGender(user.getGender()));
+        chatUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
+
+        chatUserDTO.setMemberships(briefMembershipDTOList.stream()
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(BriefMembershipDTO::getChargePerMonth, Comparator.reverseOrder()))
+                .collect(Collectors.toList()));
+
+        return chatUserDTO;
     }
 
     /**

@@ -17,6 +17,9 @@ spring:
     password:
     ssl: false
 
+lark:
+  webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73
+
 executor:
   threads: 20
 

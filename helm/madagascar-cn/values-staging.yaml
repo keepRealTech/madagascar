@@ -1,0 +1,84 @@
+# Default values for madagascar-cn-prod.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  acr:
+    acr_secret_name: keepreal-acr-secret
+  common_configs:
+    namespace: keepreal-stag
+    lark:
+      webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73
+    replicas:
+      lemur: 1
+      baobob: 1
+      brookesia: 1
+      coua: 1
+      fossa: 1
+      indri: 1
+      mantella: 1
+      marty: 1
+      tenrecs: 1
+      vanga: 1
+      asity: 1
+    short_code_base: https://staging.keepreal.cn/s/%s
+  images:
+    lemur:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
+      tag: 1.1.1-staging
+      imagePullPolicy: Always
+    baobob:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
+      tag: 1.0.4-staging
+      imagePullPolicy: Always
+    brookesia:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/brookesia
+      tag: 1.0.2-staging
+      imagePullPolicy: Always
+    coua:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
+      tag: 1.0.7-staging
+      imagePullPolicy: Always
+    fossa:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
+      tag: 1.0.4-staging
+      imagePullPolicy: Always
+    indri:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
+      tag: 1.0.2-staging
+      imagePullPolicy: Always
+    mantella:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/mantella
+      tag: 1.0.2-staging
+      imagePullPolicy: Always
+    marty:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/marty
+      tag: 1.0.2-staging
+      imagePullPolicy: Always
+    tenrecs:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/tenrecs
+      tag: 1.0.3-staging
+      imagePullPolicy: Always
+    vanga:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
+      tag: 1.0.6-staging
+      imagePullPolicy: Always
+    settler:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/settler
+      tag: 1.0.3-staging
+      imagePullPolicy: Always
+    reconciliation:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/reconciliation
+      tag: 1.0.1-staging
+      imagePullPolicy: Always
+    asity:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
+      tag: 1.0.1-staging
+      imagePullPolicy: Always
+
+deploy:
+  enable_http: true
+  ssl:
+    cert_id: 1398284016177859_172b68dcaf5_-912083987_509863008
+  slb:
+    id: lb-2zefgb9ngv8jjig5oscyj

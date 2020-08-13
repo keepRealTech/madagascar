@@ -13,10 +13,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.RepostApi;
+import swagger.model.DeviceType;
+import swagger.model.IslandRepostCodeDTO;
+import swagger.model.IslandRepostCodeResponse;
 import swagger.model.PostRepostRequest;
 import swagger.model.RepostResponse;
 import swagger.model.RepostsResponse;
+import swagger.model.ResolveIslandRepostCodeResponse;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -32,8 +38,8 @@ public class RepostController implements RepostApi {
     /**
      * Constructs the repost controller.
      *
-     * @param repostService     {@link RepostService}.
-     * @param repostDTOFactory  {@link RepostDTOFactory}.
+     * @param repostService    {@link RepostService}.
+     * @param repostDTOFactory {@link RepostDTOFactory}.
      */
     public RepostController(RepostService repostService,
                             RepostDTOFactory repostDTOFactory) {
@@ -127,10 +133,49 @@ public class RepostController implements RepostApi {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         IslandRepostMessage repostMessage = this.repostService.createRepostIslandById(
-                id, userId, postRepostRequest.getContent(), postRepostRequest.getIsSuccessful());
+                id, userId,
+                Objects.isNull(postRepostRequest.getContent()) ? "" : postRepostRequest.getContent(),
+                Objects.isNull(postRepostRequest.getIsSuccessful()) ? true : postRepostRequest.getIsSuccessful());
 
         RepostResponse response = new RepostResponse();
         response.setData(this.repostDTOFactory.valueOf(repostMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the generate code api.
+     *
+     * @param id id (required)
+     * @return {@link IslandRepostCodeResponse}.
+     */
+    @Override
+    public ResponseEntity<IslandRepostCodeResponse> apiV1IslandsIdRepostsGenerateCodeGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        String code = this.repostService.generateRepostCode(id, userId);
+
+        IslandRepostCodeResponse response = new IslandRepostCodeResponse();
+        IslandRepostCodeDTO dto = new IslandRepostCodeDTO();
+        dto.setContent(code);
+        response.setData(dto);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the resolve code api.
+     *
+     * @param code       code (required)
+     * @param deviceType (required)
+     * @return {@link ResolveIslandRepostCodeResponse}.
+     */
+    @Override
+    public ResponseEntity<ResolveIslandRepostCodeResponse> apiV1RepostsResolveCodeGet(@NotNull @Valid String code, @NotNull @Valid DeviceType deviceType) {
+        ResolveIslandRepostCodeResponse response = new ResolveIslandRepostCodeResponse();
+
+        response.setData(repostDTOFactory.codeValueOf(repostService.resolveRepostCode(code, deviceType)));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

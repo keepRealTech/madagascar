@@ -4,6 +4,7 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.fossa";
 
 import "common.proto";
+import "google/protobuf/wrappers.proto";
 
 message FeedRepostMessage {
     RepostMessage feedRepost = 1;
@@ -61,9 +62,35 @@ message IslandRepostsResponse {
     repeated IslandRepostMessage islandReposts = 3;
 }
 
+message GenerateRepostCodeRequest {
+    string userId = 1;
+    string islandId = 2;
+}
+
+message GenerateRepostCodeResponse {
+    CommonStatus status = 1;
+    string code = 2;
+    string shortCode = 3;
+    string linkUrl = 4;
+}
+
+message ResolveRepostCodeRequest {
+    string code = 1;
+    DeviceType deviceType = 2;
+}
+
+message ResolveRepostCodeResponse {
+    CommonStatus status = 1;
+    string redirectUrl = 2;
+    string islandId = 3;
+    google.protobuf.StringValue secret = 4;
+}
+
 service RepostService {
     rpc CreateFeedRepost(NewFeedRepostRequest) returns (FeedRepostResponse) {};
     rpc RetrieveFeedRepostsByFeedId(RetrieveFeedRepostsByFeedIdRequest) returns (FeedRepostsResponse) {};
     rpc CreateIslandRepost(NewIslandRepostRequest) returns (IslandRepostResponse) {};
     rpc RetrieveIslandRepostsByIslandId(RetrieveIslandRepostsByIslandIdRequest) returns (IslandRepostsResponse) {};
+    rpc GenerateRepostCodeByIslandId(GenerateRepostCodeRequest) returns (GenerateRepostCodeResponse) {};
+    rpc ResolveRepostCode(ResolveRepostCodeRequest) returns (ResolveRepostCodeResponse) {};
 }

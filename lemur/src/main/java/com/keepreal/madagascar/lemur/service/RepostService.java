@@ -5,22 +5,31 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.FeedRepostMessage;
 import com.keepreal.madagascar.fossa.FeedRepostResponse;
 import com.keepreal.madagascar.fossa.FeedRepostsResponse;
+import com.keepreal.madagascar.fossa.GenerateRepostCodeRequest;
+import com.keepreal.madagascar.fossa.GenerateRepostCodeResponse;
 import com.keepreal.madagascar.fossa.IslandRepostMessage;
 import com.keepreal.madagascar.fossa.IslandRepostResponse;
 import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.fossa.NewFeedRepostRequest;
 import com.keepreal.madagascar.fossa.NewIslandRepostRequest;
 import com.keepreal.madagascar.fossa.RepostServiceGrpc;
+import com.keepreal.madagascar.fossa.ResolveRepostCodeRequest;
+import com.keepreal.madagascar.fossa.ResolveRepostCodeResponse;
 import com.keepreal.madagascar.fossa.RetrieveFeedRepostsByFeedIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveIslandRepostsByIslandIdRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RMapCache;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.codec.StringCodec;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import swagger.model.DeviceType;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Represents the repost service.
@@ -30,14 +39,18 @@ import java.util.Objects;
 public class RepostService {
 
     private final Channel channel;
+    private final RedirectService redirectService;
 
     /**
      * Constructs the repost service.
      *
-     * @param channel GRpc managed channel connection to service fossa.
+     * @param channel           GRpc managed channel connection to service fossa.
+     * @param redirectService   {@link RedirectService}.
      */
-    public RepostService(@Qualifier("fossaChannel") Channel channel) {
+    public RepostService(@Qualifier("fossaChannel") Channel channel,
+                         RedirectService redirectService) {
         this.channel = channel;
+        this.redirectService = redirectService;
     }
 
     /**
@@ -188,6 +201,66 @@ public class RepostService {
         }
 
         return repostsResponse;
+    }
+
+    public String generateRepostCode(String islandId, String userId) {
+        RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.channel);
+
+        GenerateRepostCodeRequest request = GenerateRepostCodeRequest.newBuilder()
+                .setUserId(userId)
+                .setIslandId(islandId)
+                .build();
+
+        GenerateRepostCodeResponse response;
+        try {
+            response = stub.generateRepostCodeByIslandId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "generate repost code returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        this.redirectService.insertRedirectUrl(response.getShortCode(), response.getLinkUrl());
+
+        return response.getCode();
+    }
+
+    public ResolveRepostCodeResponse resolveRepostCode(String code, DeviceType deviceType) {
+        RepostServiceGrpc.RepostServiceBlockingStub stub = RepostServiceGrpc.newBlockingStub(this.channel);
+
+        ResolveRepostCodeRequest request = ResolveRepostCodeRequest.newBuilder()
+                .setCode(code)
+                .setDeviceType(deviceType.equals(DeviceType.ANDROID) ?
+                        com.keepreal.madagascar.common.DeviceType.ANDROID :
+                        com.keepreal.madagascar.common.DeviceType.IOS)
+                .build();
+
+        ResolveRepostCodeResponse response;
+        try {
+            response = stub.resolveRepostCode(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "resolve repost code returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
     }
 
 }

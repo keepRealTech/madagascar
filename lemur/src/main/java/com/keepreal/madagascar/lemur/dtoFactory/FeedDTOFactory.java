@@ -2,16 +2,20 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.common.MediaType;
+import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.MembershipMessage;
+import com.keepreal.madagascar.lemur.converter.MediaTypeConverter;
 import com.keepreal.madagascar.lemur.service.EhcacheService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import swagger.model.BriefFeedDTO;
 import swagger.model.CheckFeedsDTO;
 import swagger.model.FeedDTO;
@@ -19,6 +23,7 @@ import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,6 +43,7 @@ public class FeedDTOFactory {
     private final EhcacheService ehcacheService;
     private final MembershipService membershipService;
     private final MembershipDTOFactory membershipDTOFactory;
+    private final MultiMediaDTOFactory multiMediaDTOFactory;
 
     /**
      * Constructs the feed dto factory.
@@ -50,6 +56,7 @@ public class FeedDTOFactory {
      * @param ehcacheService       {@link EhcacheService}.
      * @param membershipService    {@link MembershipService}.
      * @param membershipDTOFactory {@link MembershipDTOFactory}.
+     * @param multiMediaDTOFactory {@link MultiMediaDTOFactory}.
      */
     public FeedDTOFactory(IslandService islandService,
                           IslandDTOFactory islandDTOFactory,
@@ -58,7 +65,8 @@ public class FeedDTOFactory {
                           CommentDTOFactory commentDTOFactory,
                           EhcacheService ehcacheService,
                           MembershipService membershipService,
-                          MembershipDTOFactory membershipDTOFactory) {
+                          MembershipDTOFactory membershipDTOFactory,
+                          MultiMediaDTOFactory multiMediaDTOFactory) {
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
         this.userService = userService;
@@ -67,6 +75,7 @@ public class FeedDTOFactory {
         this.ehcacheService = ehcacheService;
         this.membershipService = membershipService;
         this.membershipDTOFactory = membershipDTOFactory;
+        this.multiMediaDTOFactory = multiMediaDTOFactory;
     }
 
     /**
@@ -87,7 +96,6 @@ public class FeedDTOFactory {
             FeedDTO feedDTO = new FeedDTO();
             feedDTO.setId(feed.getId());
             feedDTO.setText(feed.getText());
-            feedDTO.setImagesUris(feed.getImageUrisList());
             feedDTO.setFromHost(feed.getFromHost());
             feedDTO.setLikesCount(feed.getLikesCount());
             feedDTO.setCommentsCount(feed.getCommentsCount());
@@ -102,10 +110,23 @@ public class FeedDTOFactory {
             feedDTO.setIsAccess(feed.getIsAccess());
             feedDTO.setIsMembership(feed.getIsMembership());
             feedDTO.setIsTop(feed.getIsTop());
+            feedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
+            feedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
+            if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
+                feedDTO.setImagesUris(feed.getImageUrisList());
+            }
 
-            if (feed.getIsMembership()) {
-                MembershipMessage membershipMessage = this.membershipService.retrieveMembershipById(feed.getMembershipId());
-                feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessage));
+            if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
+                feedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
+            }
+
+            if (!CollectionUtils.isEmpty(feed.getMembershipIdList())) {
+                List<MembershipMessage> membershipMessages = this.membershipService.retrieveMembershipsByIds(feed.getMembershipIdList());
+                feedDTO.setIsMembership(!CollectionUtils.isEmpty(membershipMessages));
+
+                feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
+                feedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
             }
             feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
             feedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -135,9 +156,19 @@ public class FeedDTOFactory {
             BriefFeedDTO briefFeedDTO = new BriefFeedDTO();
             briefFeedDTO.setId(feed.getId());
             briefFeedDTO.setText(feed.getText());
-            briefFeedDTO.setImagesUris(feed.getImageUrisList());
             briefFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
             briefFeedDTO.setCreatedAt(feed.getCreatedAt());
+            briefFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
+            briefFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+
+            boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
+            if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
+                briefFeedDTO.setImagesUris(feed.getImageUrisList());
+            }
+
+            if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
+                briefFeedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
+            }
 
             briefFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
             briefFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -172,6 +203,19 @@ public class FeedDTOFactory {
         snapshotFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
         snapshotFeedDTO.setCreatedAt(feed.getCreatedAt());
         snapshotFeedDTO.setIsDeleted(this.ehcacheService.checkFeedDeleted(feed.getId()));
+        snapshotFeedDTO.setIsAccess(feed.getIsAccess());
+
+        snapshotFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
+        snapshotFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+
+        boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
+        if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
+            snapshotFeedDTO.setImagesUris(feed.getImageUrisList());
+        }
+
+        if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
+            snapshotFeedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
+        }
 
         snapshotFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
         snapshotFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));

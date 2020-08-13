@@ -14,6 +14,7 @@ import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
 import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
+import com.keepreal.madagascar.coua.DismissIntroductionRequest;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
@@ -38,6 +39,7 @@ import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtResponse;
 import com.keepreal.madagascar.coua.model.IslandInfo;
 import com.keepreal.madagascar.coua.model.Subscription;
+import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.service.FeedService;
 import com.keepreal.madagascar.coua.service.IslandInfoService;
 import com.keepreal.madagascar.coua.service.SubscriptionService;
@@ -49,6 +51,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -97,8 +100,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the check island name method.
      *
-     * @param request           {@link CheckNameRequest}.
-     * @param responseObserver  {@link CheckNameResponse}.
+     * @param request          {@link CheckNameRequest}.
+     * @param responseObserver {@link CheckNameResponse}.
      */
     @Override
     public void checkName(CheckNameRequest request, StreamObserver<CheckNameResponse> responseObserver) {
@@ -115,8 +118,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the create island method.
      *
-     * @param request           {@link NewIslandRequest}.
-     * @param responseObserver  {@link IslandResponse}.
+     * @param request          {@link NewIslandRequest}.
+     * @param responseObserver {@link IslandResponse}.
      */
     @Override
     public void createIsland(NewIslandRequest request, StreamObserver<IslandResponse> responseObserver) {
@@ -127,6 +130,14 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             responseObserver.onCompleted();
             return;
         }
+
+        if (this.islandInfoService.getMyCreatedIslands(request.getHostId(), PageRequest.of(0, 1)).getTotalElements() > 0) {
+            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_CREATE_ERROR);
+            responseObserver.onNext(IslandResponse.newBuilder().setStatus(commonStatus).build());
+            responseObserver.onCompleted();
+            return;
+        }
+
         IslandInfo.IslandInfoBuilder infoBuilder = IslandInfo.builder()
                 .hostId(request.getHostId())
                 .islandName(request.getName());
@@ -135,6 +146,9 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         }
         if (request.hasSecret()) {
             infoBuilder.secret(request.getSecret().getValue());
+        }
+        if (request.hasIdentityId()) {
+            infoBuilder.identityId(request.getIdentityId().getValue());
         }
 
         IslandInfo save = islandInfoService.createIsland(infoBuilder.build());
@@ -161,8 +175,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the retrieve island by id method.
      *
-     * @param request           {@link RetrieveIslandByIdRequest}.
-     * @param responseObserver  {@link IslandResponse}.
+     * @param request          {@link RetrieveIslandByIdRequest}.
+     * @param responseObserver {@link IslandResponse}.
      */
     @Override
     public void retrieveIslandById(RetrieveIslandByIdRequest request, StreamObserver<IslandResponse> responseObserver) {
@@ -187,8 +201,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the island profile by id method.
      *
-     * @param request           {@link RetrieveIslandProfileByIdRequest}.
-     * @param responseObserver  {@link IslandProfileResponse}.
+     * @param request          {@link RetrieveIslandProfileByIdRequest}.
+     * @param responseObserver {@link IslandProfileResponse}.
      */
     @Override
     public void retrieveIslandProfileById(RetrieveIslandProfileByIdRequest request, StreamObserver<IslandProfileResponse> responseObserver) {
@@ -203,13 +217,17 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                 userFound = true;
                 IslandMessage islandMessage = islandInfoService.getIslandMessage(islandInfo);
                 Subscription subscription = subscriptionService.getSubscriptionByIslandIdAndUserId(islandInfo.getId(), request.getUserId());
-
+                UserInfo userInfo = userInfoService.findUserInfoByIdAndDeletedIsFalse(request.getUserId());
                 if (subscription == null || subscription.getState() < 0) {
                     responseBuilder.setUserIndex(StringValue.of(""))
-                            .setSubscribedAt(0L);
+                            .setSubscribedAt(0L)
+                            .setUserShouldIntroduce(false)
+                            .setHostShouldIntroduce(false);
                 } else {
                     responseBuilder.setUserIndex(StringValue.of(subscription.getIslanderNumber().toString()))
-                            .setSubscribedAt(subscription.getCreatedTime());
+                            .setSubscribedAt(subscription.getCreatedTime())
+                            .setUserShouldIntroduce(userInfo.getShouldIntroduce())
+                            .setHostShouldIntroduce(subscription.getShouldIntroduce());
                 }
                 responseBuilder.setIsland(islandMessage)
                         .setHost(userMessage)
@@ -232,8 +250,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the retrieve island by condition method.
      *
-     * @param request           {@link RetrieveMultipleIslandsRequest} (hostId, subscriberId, islandName)
-     * @param responseObserver  {@link IslandsResponse}.
+     * @param request          {@link RetrieveMultipleIslandsRequest} (hostId, subscriberId, islandName)
+     * @param responseObserver {@link IslandsResponse}.
      */
     @Override
     public void retrieveIslandsByCondition(RetrieveMultipleIslandsRequest request, StreamObserver<IslandsResponse> responseObserver) {
@@ -269,8 +287,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the update island by id method.
      *
-     * @param request           {@link UpdateIslandByIdRequest}.
-     * @param responseObserver  {@link IslandResponse}.
+     * @param request          {@link UpdateIslandByIdRequest}.
+     * @param responseObserver {@link IslandResponse}.
      */
     @Override
     public void updateIslandById(UpdateIslandByIdRequest request, StreamObserver<IslandResponse> responseObserver) {
@@ -315,8 +333,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the island's subscribers by island id method.
      *
-     * @param request           {@link RetrieveIslandSubscribersByIdRequest}.
-     * @param responseObserver  {@link IslandSubscribersResponse}.
+     * @param request          {@link RetrieveIslandSubscribersByIdRequest}.
+     * @param responseObserver {@link IslandSubscribersResponse}.
      */
     @Override
     public void retrieveIslandSubscribersById(RetrieveIslandSubscribersByIdRequest request, StreamObserver<IslandSubscribersResponse> responseObserver) {
@@ -349,8 +367,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements subscribe island by id method.
      *
-     * @param request           {@link SubscribeIslandByIdRequest}.
-     * @param responseObserver  {@link SubscribeIslandResponse}.
+     * @param request          {@link SubscribeIslandByIdRequest}.
+     * @param responseObserver {@link SubscribeIslandResponse}.
      */
     @Override
     @Transactional
@@ -403,8 +421,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the unsubscribe island by id method.
      *
-     * @param request           {@link UnsubscribeIslandByIdRequest}.
-     * @param responseObserver  {@link SubscribeIslandResponse}.
+     * @param request          {@link UnsubscribeIslandByIdRequest}.
+     * @param responseObserver {@link SubscribeIslandResponse}.
      */
     @Override
     public void unsubscribeIslandById(UnsubscribeIslandByIdRequest request, StreamObserver<SubscribeIslandResponse> responseObserver) {
@@ -421,8 +439,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the check new feeds method.
      *
-     * @param request           {@link CheckNewFeedsRequest}.
-     * @param responseObserver  {@link CheckNewFeedsResponse}.
+     * @param request          {@link CheckNewFeedsRequest}.
+     * @param responseObserver {@link CheckNewFeedsResponse}.
      */
     @Override
     public void checkNewFeeds(CheckNewFeedsRequest request, StreamObserver<CheckNewFeedsResponse> responseObserver) {
@@ -450,8 +468,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the update lastFeedAt by id method.
      *
-     * @param request           {@link UpdateLastFeedAtRequest}.
-     * @param responseObserver  {@link UpdateLastFeedAtResponse}.
+     * @param request          {@link UpdateLastFeedAtRequest}.
+     * @param responseObserver {@link UpdateLastFeedAtResponse}.
      */
     @Override
     public void updateLastFeedAtById(UpdateLastFeedAtRequest request, StreamObserver<UpdateLastFeedAtResponse> responseObserver) {
@@ -469,8 +487,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Implements the default islands method.
      *
-     * @param request           {@link RetrieveDefaultIslandsByUserIdRequest}.
-     * @param responseObserver  {@link IslandsResponse}.
+     * @param request          {@link RetrieveDefaultIslandsByUserIdRequest}.
+     * @param responseObserver {@link IslandsResponse}.
      */
     @Override
     public void retrieveDefaultIslandsByUserId(RetrieveDefaultIslandsByUserIdRequest request, StreamObserver<IslandsResponse> responseObserver) {
@@ -542,4 +560,24 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    /**
+     * Dismisses the introduction.
+     *
+     * @param request          {@link DismissIntroductionRequest}.
+     * @param responseObserver {@link CommonStatus}.
+     */
+    @Override
+    public void dismissIntroduction(DismissIntroductionRequest request,
+                                    StreamObserver<CommonStatus> responseObserver) {
+        if (request.getIsIslandHost()) {
+            this.subscriptionService.dismissHostIntroduction(request.getUserId(), request.getIslandId());
+        } else {
+            this.userInfoService.dismissUserIntroduction(request.getUserId());
+        }
+
+        responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+        responseObserver.onCompleted();
+    }
+
 }

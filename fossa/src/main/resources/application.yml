@@ -5,12 +5,15 @@ spring:
     url: jdbc:mysql://root:123456@localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     driver-class-name: com.mysql.jdbc.Driver
   jpa:
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
   data:
     mongodb:
       database: fossa
       uri: mongodb://localhost:27017
+
+madagascar:
+  short-code-base: https://staging.keepreal.cn/s/%s
 
 rocketmq:
   notification:

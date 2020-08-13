@@ -40,11 +40,15 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
                 .antMatchers(
+                        "/s/**",
                         "/api/v1/login**",
+                        "/api/v1/login/generate**",
+                        "/api/v1/login/polling**",
                         "/api/v1/refreshToken**",
                         "/api/v1/configs**",
                         "/api/v1/setupInfo/**",
                         "/api/v1/orders/wechat/callback**",
+                        "/api/v1/events/wechatMp/callback**",
                         "/api/v1/islands/{\\d+}/poster**").permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated();

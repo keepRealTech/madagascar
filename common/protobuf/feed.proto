@@ -23,6 +23,21 @@ message NewFeedsRequest {
     repeated string membershipIds = 6;
 }
 
+message NewFeedsRequestV2 {
+    string userId = 1;
+    repeated string islandId = 2;
+    repeated string hostId = 3;
+    repeated string membershipIds = 4;
+    MediaType type = 5;
+    google.protobuf.StringValue text = 6;
+    oneof message {
+        PicturesMessage pics = 7;
+        VideoMessage video = 8;
+        AudioMessage audio = 9;
+        HtmlMessage html = 10;
+    }
+}
+
 message NewFeedsResponse {
     CommonStatus status = 1;
 }
@@ -108,6 +123,7 @@ message RetrieveToppedFeedByIdResponse {
 
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
+    rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
     rpc RetrieveFeedsByIds (RetrieveFeedsByIdsRequest) returns (FeedsResponse) {};

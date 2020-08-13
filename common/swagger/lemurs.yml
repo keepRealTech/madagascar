@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.2.0"
+  version: "1.3.0"
   title: Keep Real API
 
 security:
@@ -94,6 +94,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RefreshTokenResponse'
+  /api/v1/login/generate:
+    post:
+      tags:
+        - Login
+      summary: 为网页登陆生成二维码凭证
+      responses:
+        '200':
+          description: 二维码凭证
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QrTicketResponse'
+  /api/v1/login/polling:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/sceneIdInQuery'
+      tags:
+        - Login
+      summary: 轮询二维码状态
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
   /api/v1/deviceTokens:
     post:
       tags:
@@ -582,7 +608,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeedResponse'
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/feeds/check:
     post:
       tags:
@@ -762,6 +788,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UploadUrlListResponse'
+  /api/v1/upload/ossSignature:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MediaUrlsRequest'
+      tags:
+        - Upload
+      summary: retrieves oss signature
+      responses:
+        '200':
+          description: retrieve oss signature
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OssSignatureResponse'
   /api/v1/notifications:
     get:
       parameters:
@@ -1363,7 +1407,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostBatchGetAvatarsRequest'
+              $ref: '#/components/schemas/PostBatchGetUsersRequest'
       responses:
         '200':
           description: dummy response
@@ -1371,6 +1415,123 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AvatarsResponse'
+  /api/v1/feeds/tutorial:
+    get:
+      tags:
+        - Feed
+      summary: 获得高级发布指导文件
+      responses:
+        '200':
+          description: 高级发布指导意见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TutorialResponse'
+  /api/v1/islands/identities:
+    get:
+      tags:
+        - Island
+      summary: 获得岛创作者类型
+      responses:
+        '200':
+          description: 高级发布指导意见
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandIdentityResponse'
+  /api/v1/users/getChatUserInfos:
+    post:
+      tags:
+        - User
+      summary: 批量获取私聊用户信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostBatchGetUsersRequest'
+      responses:
+        '200':
+          description: chat users response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatUsersResponse'
+  /api/v1/islands/{id}/reposts/generateCode:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      tags:
+        - Repost
+      summary: 生成分享口令
+      responses:
+        '200':
+          description: island share code response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandRepostCodeResponse'
+  /api/v1/reposts/resolveCode:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/codeInQuery'
+        - $ref: '#/components/parameters/deviceTypeInQuery'
+      tags:
+        - Repost
+      summary: 解析分享口令
+      responses:
+        '200':
+          description: island share code response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolveIslandRepostCodeResponse'
+  /api/v1/islands/{id}/introduction/dismiss:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+      tags:
+        - Island
+      summary: 关闭加入岛成功引导文案
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/upload/refreshVideo:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/videoIdInQuery'
+      tags:
+        - Upload
+      summary: refresh by videoId
+      responses:
+        '200':
+          description: refresh
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshVideoResponse'
+  /api/v1/upload/mediaUrl:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MediaUrlRequest'
+      tags:
+        - Upload
+      summary: retrieves upload video/audio url
+      responses:
+        '200':
+          description: retrieve video/audio url
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1382,6 +1543,13 @@ components:
       in: path
       name: id
       description: id
+      required: true
+      schema:
+        type: string
+    codeInQuery:
+      in: query
+      name: code
+      description: code
       required: true
       schema:
         type: string
@@ -1536,6 +1704,24 @@ components:
       required: true
       schema:
         type: string
+    videoIdInQuery:
+      in: query
+      name: videoId
+      required: true
+      schema:
+        type: string
+    sceneIdInQuery:
+      in: query
+      name: sceneId
+      required: true
+      schema:
+        type: string
+    deviceTypeInQuery:
+      in: query
+      name: deviceType
+      required: true
+      schema:
+        $ref: '#/components/schemas/DeviceType'
   schemas:
     LoginType:
       type: string
@@ -1604,9 +1790,18 @@ components:
     MultiMediaType:
       type: string
       enum:
-        - MULTIMEDIA_TYPE_PIC
-        - MULTIMEDIA_TYPE_VLOG
-        - MULTIMEDIA_TYPE_MUSIC
+        - MULTIMEDIA_TYPE_TEXT
+        - MULTIMEDIA_TYPE_PICS
+        - MULTIMEDIA_TYPE_ALBUM
+        - MULTIMEDIA_TYPE_VIDEO
+        - MULTIMEDIA_TYPE_AUDIO
+        - MULTIMEDIA_TYPE_HTML
+    DeviceType:
+      type: string
+      enum:
+        - DEVICE_TYPE_UNKNOWN
+        - DEVICE_TYPE_IOS
+        - DEVICE_TYPE_ANDROID
     CommonResponse:
       type: object
       properties:
@@ -1653,6 +1848,10 @@ components:
           $ref: '#/components/schemas/GenderType'
         age:
           type: integer
+        identityTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityType'
     UserDTO:
       allOf:
         - $ref: '#/components/schemas/BriefUserDTO'
@@ -1668,10 +1867,6 @@ components:
             birthday:
               type: string
               format: date
-            identityTypes:
-              type: array
-              items:
-                $ref: '#/components/schemas/IdentityType'
     FullUserDTO:
       allOf:
         - $ref: '#/components/schemas/UserDTO'
@@ -1783,6 +1978,31 @@ components:
           properties:
             secret:
               type: string
+    HostIntroductionDTO:
+      type: object
+      properties:
+        shouldPopup:
+          type: boolean
+        pres:
+          $ref: '#/components/schemas/IntroPrerequestsDTO'
+    IntroPrerequestsDTO:
+      type: object
+      properties:
+        hasFeeds:
+          type: boolean
+        hasReposts:
+          type: boolean
+        hasMemberships:
+          type: boolean
+    SubscriberIntroductionDTO:
+      type: object
+      properties:
+        shouldPopup:
+          type: boolean
+        title:
+          type: string
+        content:
+          type: string
     IslandProfileDTO:
       type: object
       properties:
@@ -1799,6 +2019,10 @@ components:
           format: int64
         hasGroupchatAccess:
           type: boolean
+        hostIntroduction:
+          $ref: '#/components/schemas/HostIntroductionDTO'
+        subscriberIntroduction:
+          $ref: '#/components/schemas/SubscriberIntroductionDTO'
     CheckIslandDTO:
       type: object
       properties:
@@ -1825,6 +2049,8 @@ components:
         secret:
           type: string
           description: secrets for joining island
+        identityId:
+          type: string
       required:
         - name
         - secret
@@ -1975,30 +2201,59 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ReportDTO'
-    VLogDTO:
+    HtmlDTO:
       type: object
       properties:
-        uri:
+        content:
+          type: string
+    AudioDTO:
+      type: object
+      properties:
+        url:
+          type: string
+        title:
+          type: string
+        videoId:
+          type: string
+        thumbnailUrl:
           type: string
         length:
           type: integer
-        type:
-          $ref: '#/components/schemas/MultiMediaType'
+    VideoDTO:
+      type: object
+      properties:
+        url:
+          type: string
+        title:
+          type: string
+        videoId:
+          type: string
+        thumbnailUrl:
+          type: string
+        length:
+          type: integer
+        width:
+          type: integer
+        height:
+          type: integer
     PictureDTO:
       type: object
       properties:
-        uri:
+        url:
           type: string
         width:
           type: integer
         height:
           type: integer
-        type:
-          $ref: '#/components/schemas/MultiMediaType'
+        size:
+          type: integer
+          format: int64
     MultiMediaDTO:
       oneOf:
-        - $ref: '#/components/schemas/VLogDTO'
+        - $ref: '#/components/schemas/VideoDTO'
         - $ref: '#/components/schemas/PictureDTO'
+        - $ref: '#/components/schemas/AudioDTO'
+        - $ref: '#/components/schemas/HtmlDTO'
     PosterFeedDTO:
       type: object
       properties:
@@ -2030,6 +2285,8 @@ components:
           type: array
           items:
             type: string
+        mediaType:
+          $ref: '#/components/schemas/MultiMediaType'
         multimedia:
           type: array
           items:
@@ -2055,6 +2312,8 @@ components:
             isDeleted:
               type: boolean
             isSubscribed:
+              type: boolean
+            isAccess:
               type: boolean
     SimpleMembershipDTO:
       type: object
@@ -2089,6 +2348,10 @@ components:
               type: boolean
             membership:
               $ref: '#/components/schemas/SimpleMembershipDTO'
+            membershipList:
+              type: array
+              items:
+                $ref: '#/components/schemas/SimpleMembershipDTO'
     PostFeedPayload:
       type: object
       properties:
@@ -2117,14 +2380,18 @@ components:
     PostFeedRequestV2:
       type: object
       properties:
-        islandId:
-          type: string
+        islandIds:
+          type: array
+          items:
+            type: string
         membershipIds:
           type: array
           items:
             type: string
-        content:
+        text:
           type: string
+        mediaType:
+          $ref: '#/components/schemas/MultiMediaType'
         multimedia:
           type: array
           items:
@@ -2444,6 +2711,24 @@ components:
           type: string
         url:
           type: string
+    OssSignatureDTO:
+      type: object
+      properties:
+        accessid:
+          type: string
+        policy:
+          type: string
+        signature:
+          type: string
+        host:
+          type: string
+        expire:
+          type: integer
+          format: int64
+        objectNames:
+          type: array
+          items:
+            type: string
     UploadUrlListResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -2453,6 +2738,13 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/UploadUrlDTO'
+    OssSignatureResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/OssSignatureDTO'
     NotificationsCountResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -3127,7 +3419,7 @@ components:
           type: string
         portraitUrl:
           type: string
-    PostBatchGetAvatarsRequest:
+    PostBatchGetUsersRequest:
       type: object
       properties:
         userIds:
@@ -3189,3 +3481,160 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/UserPaymentDTO'
+    QrTicketDTO:
+      type: object
+      properties:
+        ticket:
+          type: string
+        expirationInSec:
+          type: integer
+        sceneId:
+          type: string
+    QrTicketResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/QrTicketDTO'
+    TutorialDTO:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+    TutorialResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/TutorialDTO'
+    IslandIdentityDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        iconUri:
+          type: string
+        colors:
+          type: array
+          items:
+            type: string
+    IslandIdentityResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/IslandIdentityDTO'
+    ChatUserDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefUserDTO'
+        - type: object
+          properties:
+            memberships:
+              type: array
+              items:
+                $ref: '#/components/schemas/BriefMembershipDTO'
+    ChatUsersResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ChatUserDTO'
+    PostIslandRequestV2:
+      type: object
+      properties:
+        name:
+          type: string
+          description: 岛名
+        secret:
+          type: string
+          description: 岛暗号
+        portraitImagUri:
+          type: string
+        identityId:
+          type: string
+        description:
+          type: string
+      required:
+        - name
+        - secret
+        - portraitImageUri
+        - identityId
+    IslandRepostCodeDTO:
+      type: object
+      properties:
+        content:
+          type: string
+    IslandRepostCodeResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IslandRepostCodeDTO'
+    CodeItemDTO:
+      type: object
+      properties:
+        islandId:
+          type: string
+        secret:
+          type: string
+    ResolveIslandRepostCodeDTO:
+      type: object
+      properties:
+        redirectUrl:
+          type: string
+        params:
+          $ref: '#/components/schemas/CodeItemDTO'
+    ResolveIslandRepostCodeResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ResolveIslandRepostCodeDTO'
+    MediaUrlRequest:
+      type: object
+      properties:
+        mediaTitle:
+          type: string
+        mediaFilename:
+          type: string
+      required:
+        - mediaType
+    UploadUrlResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UploadMediaDTO'
+    RefreshVideoResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/UploadMediaDTO'
+    UploadMediaDTO:
+      type: object
+      properties:
+        videoId:
+          type: string
+        uploadAddress:
+          type: string
+        uploadAuth:
+          type: string

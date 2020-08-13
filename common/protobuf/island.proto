@@ -17,6 +17,7 @@ message NewIslandRequest {
     string name = 2;
     google.protobuf.StringValue portraitImageUri = 3;
     google.protobuf.StringValue secret = 4;
+    google.protobuf.StringValue identityId = 5;
 }
 
 message IslandResponse {
@@ -78,6 +79,8 @@ message IslandProfileResponse {
     UserMessage host = 3;
     google.protobuf.StringValue userIndex = 4;
     int64 subscribedAt = 5;
+    bool hostShouldIntroduce = 6;
+    bool userShouldIntroduce = 7;
 }
 
 message SubscribeIslandByIdRequest {
@@ -147,6 +150,12 @@ message RetrieveDeviceTokensResponse {
     PageResponse pageResponse = 4;
 }
 
+message DismissIntroductionRequest {
+    string islandId = 1;
+    string userId = 2;
+    bool isIslandHost = 3;
+}
+
 service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
@@ -158,8 +167,9 @@ service IslandService {
     rpc SubscribeIslandById (SubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
     rpc UnsubscribeIslandById (UnsubscribeIslandByIdRequest) returns (SubscribeIslandResponse) {};
     rpc CheckNewFeeds (CheckNewFeedsRequest) returns (CheckNewFeedsResponse) {};
-    rpc UpdateLastFeedAtById (UpdateLastFeedAtRequest) returns (UpdateLastFeedAtResponse) {}
-    rpc RetrieveDefaultIslandsByUserId (RetrieveDefaultIslandsByUserIdRequest) returns (IslandsResponse) {}
-    rpc RetrieveUserSubscriptionState (RetrieveUserSubscriptionStateRequest) returns (RetrieveUserSubscriptionStateResponse) {}
-    rpc RetrieveDeviceTokensById (RetrieveDeviceTokensRequest) returns (RetrieveDeviceTokensResponse) {}
+    rpc UpdateLastFeedAtById (UpdateLastFeedAtRequest) returns (UpdateLastFeedAtResponse) {};
+    rpc RetrieveDefaultIslandsByUserId (RetrieveDefaultIslandsByUserIdRequest) returns (IslandsResponse) {};
+    rpc RetrieveUserSubscriptionState (RetrieveUserSubscriptionStateRequest) returns (RetrieveUserSubscriptionStateResponse) {};
+    rpc RetrieveDeviceTokensById (RetrieveDeviceTokensRequest) returns (RetrieveDeviceTokensResponse) {};
+    rpc DismissIntroduction(DismissIntroductionRequest) returns (CommonStatus) {};
 }

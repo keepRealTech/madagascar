@@ -6,54 +6,47 @@ import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
+import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
-import com.keepreal.madagascar.fossa.IslandRepostMessage;
-import com.keepreal.madagascar.fossa.IslandRepostsResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
-import com.keepreal.madagascar.lemur.dtoFactory.RepostDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.IslandService;
-import com.keepreal.madagascar.lemur.service.RepostService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.textFilter.TextContentFilter;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import swagger.api.ApiUtil;
 import swagger.api.IslandApi;
 import swagger.model.BriefIslandResponse;
 import swagger.model.BriefIslandsResponse;
 import swagger.model.CheckIslandDTO;
 import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
-import swagger.model.FeedsResponse;
+import swagger.model.IslandIdentityResponse;
 import swagger.model.IslandPosterResponse;
+import swagger.model.IslandProfileDTO;
 import swagger.model.IslandProfileResponse;
 import swagger.model.IslandProfilesResponse;
 import swagger.model.IslandResponse;
 import swagger.model.PostIslandPayload;
-import swagger.model.PostRepostRequest;
 import swagger.model.PosterFeedDTO;
 import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
-import swagger.model.RepostResponse;
-import swagger.model.RepostsResponse;
 import swagger.model.SubscribeIslandRequest;
-import swagger.model.TimelinesResponse;
 import swagger.model.UsersResponse;
 
 import javax.validation.Valid;
@@ -228,7 +221,15 @@ public class IslandController implements IslandApi {
                 this.islandService.retrieveIslandProfileById(id, userId);
 
         IslandProfileResponse response = new IslandProfileResponse();
-        response.setData(this.islandDTOFactory.valueOf(islandProfileResponse, userId));
+        IslandProfileDTO islandProfileDTO = this.islandDTOFactory.valueOf(islandProfileResponse, userId);
+
+        if (userId.equals(islandProfileResponse.getHost().getId())
+                && islandProfileResponse.getHostShouldIntroduce()
+                && !islandProfileDTO.getHostIntroduction().getShouldPopup()) {
+            this.islandService.dismissIslandIntroduction(id, userId, true);
+        }
+
+        response.setData(islandProfileDTO);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -284,7 +285,7 @@ public class IslandController implements IslandApi {
         IslandProfilesResponse response = new IslandProfilesResponse();
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        response.setData(generalConfiguration.getOfficialIslandIdList().stream()
+        response.setData(this.generalConfiguration.getOfficialIslandIdList().stream()
                 .map(id -> islandService.retrieveIslandProfileById(id, userId))
                 .map(resp -> islandDTOFactory.valueOf(resp, userId))
                 .collect(Collectors.toList()));
@@ -344,7 +345,7 @@ public class IslandController implements IslandApi {
         }
 
         IslandMessage islandMessage = this.islandService.createIsland(
-                payload.getName(), portraitImageUri, payload.getSecret(), userId);
+                payload.getName(), portraitImageUri, payload.getSecret(), payload.getIdentityId(), userId);
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -362,6 +363,7 @@ public class IslandController implements IslandApi {
      * @return {@link BriefIslandResponse}.
      */
     @Override
+    @CacheEvict(value = "IslandMessage", key = "#id", cacheManager = "redisCacheManager")
     public ResponseEntity<BriefIslandResponse> apiV1IslandsIdPut(
             String id,
             PutIslandPayload payload,
@@ -464,6 +466,41 @@ public class IslandController implements IslandApi {
     }
 
     /**
+     * Implements the island identities get api.
+     *
+     * @return {@link IslandIdentityResponse}.
+     */
+    @Override
+    public ResponseEntity<IslandIdentityResponse> apiV1IslandsIdentitiesGet() {
+        List<IslandIdentityMessage> islandIdentityMessages = this.islandService.retrieveActiveIslandIdentities();
+
+        IslandIdentityResponse response = new IslandIdentityResponse();
+        response.setData(islandIdentityMessages.stream()
+                .map(this.islandDTOFactory::valueOf)
+                .collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the dismiss introduction api.
+     *
+     * @param id id (required) Island id.
+     * @return {@link DummyResponse}.
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1IslandsIdIntroductionDismissPost(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        this.islandService.dismissIslandIntroduction(id, userId, false);
+
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Builds the {@link BriefIslandsResponse} from {@link IslandsResponse}.
      *
      * @param islandsResponse {@link IslandsResponse}.
@@ -490,8 +527,8 @@ public class IslandController implements IslandApi {
      * @return {@link PosterFeedDTO}.
      */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
-    public List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
-        return feedService.retrieveIslandFeeds(islandId, null, userId, 0L, null, 0, 5, false)
+    private List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
+        return this.feedService.retrieveIslandFeeds(islandId, null, userId, 0L, null, 0, 5, false)
                 .getFeedList()
                 .stream()
                 .map(feedDTOFactory::posterValueOf)

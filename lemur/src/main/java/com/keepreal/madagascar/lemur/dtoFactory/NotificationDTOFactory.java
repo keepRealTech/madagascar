@@ -6,6 +6,7 @@ import com.keepreal.madagascar.lemur.config.SystemNotificationConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.CommentNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.NoticeNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.ReactionNotificationDTOBuilder;
+import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
@@ -28,6 +29,7 @@ import java.util.Objects;
 @Component
 public class NotificationDTOFactory {
 
+    private final FeedService feedService;
     private final FeedDTOFactory feedDTOFactory;
     private final ReactionDTOFactory reactionDTOFactory;
     private final CommentDTOFactory commentDTOFactory;
@@ -40,6 +42,7 @@ public class NotificationDTOFactory {
     /**
      * Constructs the notification dto factory.
      *
+     * @param feedService                     {@link FeedService}.
      * @param feedDTOFactory                  {@link FeedDTOFactory}.
      * @param reactionDTOFactory              {@link ReactionDTOFactory}.
      * @param commentDTOFactory               {@link CommentDTOFactory}.
@@ -49,7 +52,8 @@ public class NotificationDTOFactory {
      * @param islandDTOFactory                {@link IslandDTOFactory}.
      * @param systemNotificationConfiguration {@link SystemNotificationConfiguration}.
      */
-    public NotificationDTOFactory(FeedDTOFactory feedDTOFactory,
+    public NotificationDTOFactory(FeedService feedService,
+                                  FeedDTOFactory feedDTOFactory,
                                   ReactionDTOFactory reactionDTOFactory,
                                   CommentDTOFactory commentDTOFactory,
                                   UserService userService,
@@ -57,6 +61,7 @@ public class NotificationDTOFactory {
                                   IslandService islandService,
                                   IslandDTOFactory islandDTOFactory,
                                   SystemNotificationConfiguration systemNotificationConfiguration) {
+        this.feedService = feedService;
         this.feedDTOFactory = feedDTOFactory;
         this.reactionDTOFactory = reactionDTOFactory;
         this.commentDTOFactory = commentDTOFactory;
@@ -142,6 +147,7 @@ public class NotificationDTOFactory {
                     return new CommentNotificationDTOBuilder()
                             .setNotificationMessage(notification)
                             .setFeedDTOFactory(this.feedDTOFactory)
+                            .setFeedService(this.feedService)
                             .setCommentDTOFactory(this.commentDTOFactory)
                             .build();
                 case NOTIFICATION_REACTIONS:

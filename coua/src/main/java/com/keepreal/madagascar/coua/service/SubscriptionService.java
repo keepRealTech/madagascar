@@ -8,14 +8,14 @@ import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import com.keepreal.madagascar.coua.common.SubscriptionState;
+import com.keepreal.madagascar.coua.config.MqConfig;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
+import com.keepreal.madagascar.coua.dao.SubscriptionRepository;
+import com.keepreal.madagascar.coua.model.Subscription;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import com.keepreal.madagascar.tenrecs.SubscribeEvent;
-import com.keepreal.madagascar.coua.common.SubscriptionState;
-import com.keepreal.madagascar.coua.config.MqConfig;
-import com.keepreal.madagascar.coua.dao.SubscriptionRepository;
-import com.keepreal.madagascar.coua.model.Subscription;
 import com.keepreal.madagascar.tenrecs.UnsubscribeEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,6 +24,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -46,11 +47,11 @@ public class SubscriptionService {
     /**
      * Constructs subscription service.
      *
-     * @param subscriptionRepository    {@link SubscriptionRepository}.
-     * @param idGenerator               {@link LongIdGenerator}.
-     * @param producerBean              {@link ProducerBean}.
-     * @param mqConfig                  {@link MqConfig}.
-     * @param islandInfoRepository      {@link IslandInfoRepository}.
+     * @param subscriptionRepository {@link SubscriptionRepository}.
+     * @param idGenerator            {@link LongIdGenerator}.
+     * @param producerBean           {@link ProducerBean}.
+     * @param mqConfig               {@link MqConfig}.
+     * @param islandInfoRepository   {@link IslandInfoRepository}.
      */
     public SubscriptionService(SubscriptionRepository subscriptionRepository, LongIdGenerator idGenerator, ProducerBean producerBean, MqConfig mqConfig, IslandInfoRepository islandInfoRepository) {
         this.subscriptionRepository = subscriptionRepository;
@@ -63,8 +64,8 @@ public class SubscriptionService {
     /**
      * When create island, insert host info.
      *
-     * @param islandId  islandId.
-     * @param hostId    hostId.
+     * @param islandId islandId.
+     * @param hostId   hostId.
      */
     public void initHost(String islandId, String hostId) {
         Subscription subscription = Subscription.builder()
@@ -89,9 +90,9 @@ public class SubscriptionService {
     /**
      * if user subscribed the island
      *
-     * @param islandId  islandId
-     * @param userId    userId
-     * @return  isSubscribed
+     * @param islandId islandId
+     * @param userId   userId
+     * @return isSubscribed
      */
     public boolean isSubScribedIsland(String islandId, String userId) {
         Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
@@ -101,9 +102,9 @@ public class SubscriptionService {
     /**
      * Retrieve pageable islandIdList by user created.
      *
-     * @param userId    userId.
-     * @param pageable  {@link Pageable}.
-     * @return  islandIdList.
+     * @param userId   userId.
+     * @param pageable {@link Pageable}.
+     * @return islandIdList.
      */
     public Page<String> getIslandIdListByUserCreated(String userId, Pageable pageable) {
         int state = SubscriptionState.HOST.getValue();
@@ -113,9 +114,9 @@ public class SubscriptionService {
     /**
      * Retrieve pageable islandIdList by user create and subscribe.
      *
-     * @param userId    userId.
-     * @param pageable  {@link Pageable}.
-     * @return  islandIdList
+     * @param userId   userId.
+     * @param pageable {@link Pageable}.
+     * @return islandIdList
      */
     public Page<String> getIslandIdListByUserSubscribed(String userId, Pageable pageable) {
         return subscriptionRepository.getIslandIdListByUserSubscribed(userId, pageable);
@@ -124,9 +125,9 @@ public class SubscriptionService {
     /**
      * Retrieve pageable userIdList by subscribe the island (with island host).
      *
-     * @param islandId  islandId.
-     * @param pageable  {@link Pageable}.
-     * @return  userIdList.
+     * @param islandId islandId.
+     * @param pageable {@link Pageable}.
+     * @return userIdList.
      */
     public Page<String> getSubscriberIdListByIslandId(String islandId, Pageable pageable) {
         return subscriptionRepository.getSubscriberIdListByIslandId(islandId, pageable);
@@ -135,9 +136,9 @@ public class SubscriptionService {
     /**
      * Retrieve pageable userIdList by subscribe the island (without island host).
      *
-     * @param islandId  islandId.
-     * @param pageable  {@link Pageable}.
-     * @return  userIdList.
+     * @param islandId islandId.
+     * @param pageable {@link Pageable}.
+     * @return userIdList.
      */
     public Page<String> getIslanderIdListByIslandId(String islandId, Pageable pageable) {
         return subscriptionRepository.getIslanderIdListByIslandId(islandId, pageable);
@@ -146,8 +147,8 @@ public class SubscriptionService {
     /**
      * Retrieve island member count.
      *
-     * @param islandId  islandId.
-     * @return  member count.
+     * @param islandId islandId.
+     * @return member count.
      */
     public Integer getMemberCountByIslandId(String islandId) {
         return subscriptionRepository.getCountByIslandId(islandId);
@@ -156,9 +157,9 @@ public class SubscriptionService {
     /**
      * Retrieve user index in this island.
      *
-     * @param islandId  islandId.
-     * @param userId    userId.
-     * @return  user index.
+     * @param islandId islandId.
+     * @param userId   userId.
+     * @return user index.
      */
     public Subscription getSubscriptionByIslandIdAndUserId(String islandId, String userId) {
         return subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
@@ -167,10 +168,10 @@ public class SubscriptionService {
     /**
      * Retrieve islandIdList by user subscription state.
      *
-     * @param userId    userId.
-     * @param state     subscription state.
-     * @param pageable  {@link Pageable}.
-     * @return  islandIdList.
+     * @param userId   userId.
+     * @param state    subscription state.
+     * @param pageable {@link Pageable}.
+     * @return islandIdList.
      */
     private Page<String> getIslandsByUserState(String userId, Integer state, Pageable pageable) {
         return subscriptionRepository.getIslandIdListByUserState(userId, state, pageable);
@@ -179,10 +180,10 @@ public class SubscriptionService {
     /**
      * Subscribe island and send mq message.
      *
-     * @param islandId          islandId.
-     * @param userId            userId.
-     * @param hostId            hostId.
-     * @param islanderNumber    islandNumber.
+     * @param islandId       islandId.
+     * @param userId         userId.
+     * @param hostId         hostId.
+     * @param islanderNumber islandNumber.
      */
     public void subscribeIsland(String islandId, String userId, String hostId, Integer islanderNumber) {
         Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
@@ -219,7 +220,9 @@ public class SubscriptionService {
         message.setKey(uuid);
         producerBean.sendAsync(message, new SendCallback() {
             @Override
-            public void onSuccess(SendResult sendResult) { }
+            public void onSuccess(SendResult sendResult) {
+            }
+
             @Override
             public void onException(OnExceptionContext context) {
                 log.error("this message send failure, message Id is {}", context.getMessageId());
@@ -230,8 +233,8 @@ public class SubscriptionService {
     /**
      * Unsubscribe island.
      *
-     * @param islandId  islandId.
-     * @param userId    userId.
+     * @param islandId islandId.
+     * @param userId   userId.
      */
     public void unsubscribeIsland(String islandId, String userId) {
         Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
@@ -258,7 +261,9 @@ public class SubscriptionService {
         message.setKey(uuid);
         producerBean.sendAsync(message, new SendCallback() {
             @Override
-            public void onSuccess(SendResult sendResult) { }
+            public void onSuccess(SendResult sendResult) {
+            }
+
             @Override
             public void onException(OnExceptionContext context) {
                 log.error("this message send failure, message Id is {}", context.getMessageId());
@@ -273,6 +278,22 @@ public class SubscriptionService {
     public boolean isSubscribed(String userId, String islandId) {
         Subscription subscription = subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
         return subscription != null && subscription.getState() > 0;
+    }
+
+    /**
+     * Flips the island host should introduce to false.
+     *
+     * @param userId   User id.
+     * @param islandId Island id.
+     */
+    public void dismissHostIntroduction(String userId, String islandId) {
+        Subscription subscription = this.subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
+        if (Objects.isNull(subscription)) {
+            return;
+        }
+
+        subscription.setShouldIntroduce(false);
+        this.subscriptionRepository.save(subscription);
     }
 
     private void insertSubscription(Subscription subscription) {

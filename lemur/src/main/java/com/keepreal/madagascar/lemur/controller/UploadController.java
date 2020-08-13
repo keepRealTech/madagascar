@@ -7,10 +7,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.UploadApi;
+import swagger.model.MediaUrlRequest;
 import swagger.model.MediaUrlsRequest;
+import swagger.model.OssSignatureDTO;
+import swagger.model.OssSignatureResponse;
+import swagger.model.RefreshVideoResponse;
+import swagger.model.UploadMediaDTO;
 import swagger.model.UploadUrlDTO;
 import swagger.model.UploadUrlListResponse;
+import swagger.model.UploadUrlResponse;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -56,6 +64,40 @@ public class UploadController implements UploadApi {
 
         UploadUrlListResponse response = new UploadUrlListResponse();
         response.data(uploadUrlDTOList);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<UploadUrlResponse> apiV1UploadMediaUrlPost(@Valid MediaUrlRequest mediaUrlRequest) {
+        UploadMediaDTO uploadVideo = uploadService.createUploadVideo(mediaUrlRequest.getMediaTitle(), mediaUrlRequest.getMediaFilename());
+
+        UploadUrlResponse response = new UploadUrlResponse();
+        response.setData(uploadVideo);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<RefreshVideoResponse> apiV1UploadRefreshVideoGet(@NotNull @Valid String videoId) {
+        UploadMediaDTO dto = uploadService.refreshUploadVideo(videoId);
+
+        RefreshVideoResponse response = new RefreshVideoResponse();
+        response.setData(dto);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<OssSignatureResponse> apiV1UploadOssSignaturePost(@Valid MediaUrlsRequest mediaUrlsRequest) {
+        OssSignatureDTO dto = uploadService.retrieveOssSignature();
+        dto.setObjectNames(mediaUrlsRequest.getFileNames().stream().map(this::generatorObjectName).collect(Collectors.toList()));
+
+        OssSignatureResponse response = new OssSignatureResponse();
+        response.setData(dto);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

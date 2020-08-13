@@ -35,6 +35,8 @@ public class IslandInfo {
     private String hostId;
     private String islandName;
     @Builder.Default
+    private String identityId = "";
+    @Builder.Default
     private String portraitImageUri = "";
     @Builder.Default
     private String description = "";

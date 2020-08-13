@@ -105,7 +105,7 @@ public class IslandInfoService {
     }
 
     /**
-     * Retrieve islandList by user create.
+     * Retrieves islandList by user create.
      *
      * @param userId   userId.
      * @param pageable {@link Pageable}.
@@ -119,6 +119,17 @@ public class IslandInfoService {
             return Collections.emptyList();
         }
         return islandInfoRepository.findIslandInfosByIdInAndDeletedIsFalse(islandIdListPageable.getContent());
+    }
+
+    /**
+     * Retrieves user created islands.
+     *
+     * @param userId User id.
+     * @param pageable {@link Pageable}.
+     * @return {@link IslandInfo}.
+     */
+    public Page<IslandInfo> getMyCreatedIslands(String userId, Pageable pageable) {
+        return this.islandInfoRepository.findAllByHostIdAndDeletedIsFalse(userId, pageable);
     }
 
     /**

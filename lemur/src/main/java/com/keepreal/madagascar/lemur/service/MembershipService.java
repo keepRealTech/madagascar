@@ -21,6 +21,9 @@ import com.keepreal.madagascar.coua.UpdateMembershipRequest;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -44,7 +47,8 @@ public class MembershipService {
         this.channel = channel;
     }
 
-    public void topMembershipById(String membershipId, Boolean isRevoke, String userId) {
+    @CachePut(value = "MembershipMessage", key = "#membershipId", cacheManager = "redisCacheManager")
+    public MembershipMessage topMembershipById(String membershipId, Boolean isRevoke, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         TopMembershipRequest request = TopMembershipRequest.newBuilder()
@@ -53,18 +57,21 @@ public class MembershipService {
                 .setUserId(userId)
                 .build();
 
-        CommonStatus commonStatus;
+        MembershipResponse membershipResponse;
         try {
-            commonStatus = stub.topMembershipById(request);
+            membershipResponse = stub.topMembershipById(request);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
-        if (ErrorCode.REQUEST_SUCC_VALUE != commonStatus.getRtn()) {
-            throw new KeepRealBusinessException(commonStatus);
+        if (ErrorCode.REQUEST_SUCC_VALUE != membershipResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(membershipResponse.getStatus());
         }
+
+        return membershipResponse.getMessage();
     }
 
+    @CacheEvict(value = "MembershipMessage", key = "#membershipId", cacheManager = "redisCacheManager")
     public void deactivateMembershipById(String membershipId, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
@@ -85,6 +92,7 @@ public class MembershipService {
         }
     }
 
+    @CacheEvict(value = "MembershipMessage", key = "#membershipId", cacheManager = "redisCacheManager")
     public void deleteMembershipById(String membershipId, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
@@ -131,6 +139,7 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
+    @Cacheable(value = "MembershipMessage", key = "#membershipId", cacheManager = "redisCacheManager")
     public MembershipMessage retrieveMembershipById(String membershipId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
@@ -150,6 +159,7 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
+    @CachePut(value = "MembershipMessage", key = "#membershipId", cacheManager = "redisCacheManager")
     public MembershipMessage updateMembershipById(String membershipId, String name, List<String> descriptions, Integer pricePerMonth, String userId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 

@@ -1,6 +1,8 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -9,6 +11,10 @@ import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
 import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
+import com.keepreal.madagascar.coua.DismissIntroductionRequest;
+import com.keepreal.madagascar.coua.IslandIdentitiesResponse;
+import com.keepreal.madagascar.coua.IslandIdentityMessage;
+import com.keepreal.madagascar.coua.IslandIdentityServiceGrpc;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
@@ -32,6 +38,7 @@ import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -99,6 +106,7 @@ public class IslandService {
      * @param id Island id.
      * @return {@link IslandMessage}.
      */
+    @Cacheable(value = "IslandMessage", key = "#id", cacheManager = "redisCacheManager")
     public IslandMessage retrieveIslandById(String id) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
@@ -219,15 +227,21 @@ public class IslandService {
      * @param name             Island name.
      * @param portraitImageUri Portrait image uri.
      * @param secret           Secret.
+     * @param identityId       Identity id.
      * @param userId           User id.
      * @return {@link IslandMessage}.
      */
-    public IslandMessage createIsland(String name, String portraitImageUri, String secret, String userId) {
+    public IslandMessage createIsland(String name, String portraitImageUri, String secret, String identityId, String userId) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        if (Objects.isNull(identityId)) {
+            identityId = "";
+        }
 
         NewIslandRequest.Builder requestBuilder = NewIslandRequest.newBuilder()
                 .setName(name)
                 .setSecret(StringValue.of(secret))
+                .setIdentityId(StringValue.of(identityId))
                 .setHostId(userId);
 
         if (!StringUtils.isEmpty(portraitImageUri)) {
@@ -484,6 +498,13 @@ public class IslandService {
         return islandsResponse;
     }
 
+    /**
+     * Retrieves the island subscribe state by user id.
+     *
+     * @param userId        User id.
+     * @param islandIdList  Island ids.
+     * @return True if subscribed.
+     */
     public Map<String, Boolean> retrieveIslandSubscribeStateByUserId(String userId, List<String> islandIdList) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
@@ -512,6 +533,73 @@ public class IslandService {
         return response.getStateMapMap();
     }
 
+    /**
+     * Retrieves all active island identities.
+     *
+     * @return {@link IslandIdentityMessage}.
+     */
+    public List<IslandIdentityMessage> retrieveActiveIslandIdentities() {
+        IslandIdentityServiceGrpc.IslandIdentityServiceBlockingStub stub = IslandIdentityServiceGrpc.newBlockingStub(this.channel);
+
+        IslandIdentitiesResponse response;
+        try {
+            response = stub.retrieveActiveIslandIdentities(Empty.getDefaultInstance());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve island subscribe state returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getIslandIdentitiesList();
+    }
+
+    /**
+     * Dismisses the island host introduction once and for all.
+     *
+     * @param islandId Island id.
+     * @param userId   User id.
+     */
+    public void dismissIslandIntroduction(String islandId, String userId, Boolean isIslandHost) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        DismissIntroductionRequest request = DismissIntroductionRequest.newBuilder()
+                .setUserId(userId)
+                .setIslandId(islandId)
+                .setIsIslandHost(isIslandHost)
+                .build();
+
+        CommonStatus response;
+        try {
+            response = stub.dismissIntroduction(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)) {
+            log.error("Dismiss island introduction returned null.");
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getRtn()) {
+            throw new KeepRealBusinessException(response);
+        }
+    }
+
+    /**
+     * Checks the string length.
+     *
+     * @param str        String.
+     * @param threshold  Max length.
+     * @return Trimmed string.
+     */
     private String checkLength(String str, int threshold) {
         String trimmed = str.trim();
         if (trimmed.length() > threshold)
