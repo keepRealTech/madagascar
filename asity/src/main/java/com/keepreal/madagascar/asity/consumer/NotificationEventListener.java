@@ -70,7 +70,7 @@ public class NotificationEventListener implements MessageListener {
                             || StringUtils.isEmpty(event.getUserId())) {
                         break;
                     }
-                    this.rongCloudService.sendThanks(event.getUserId(), event.getMemberEvent().getMemberId());
+                    this.rongCloudService.sendThanks(event);
                     break;
                 case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
                 default:
