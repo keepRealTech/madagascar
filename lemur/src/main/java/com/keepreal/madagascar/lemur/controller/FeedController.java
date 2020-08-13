@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -419,6 +420,7 @@ public class FeedController implements FeedApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @CrossOrigin
     @Override
     public ResponseEntity<DummyResponse> apiV11FeedsPost(PostFeedRequestV2 postFeedRequestV2) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -463,4 +465,5 @@ public class FeedController implements FeedApi {
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }
