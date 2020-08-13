@@ -125,6 +125,7 @@ public class PaymentService {
      */
     @Transactional
     public List<Payment> createPayShellPayments(String userId, Integer withdrawPercent, MembershipSku sku, ZonedDateTime currentExpireTime) {
+        String tradeNum = UUID.randomUUID().toString().replace("-", "");
         List<Payment> payments =
                 IntStream.range(0, sku.getTimeInMonths())
                         .mapToObj(i -> Payment.builder()
@@ -139,7 +140,7 @@ public class PaymentService {
                                         .plusMonths((i + 1) * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
                                         .toInstant().toEpochMilli())
                                 .membershipSkuId(sku.getId())
-                                .tradeNum(UUID.randomUUID().toString().replace("-", ""))
+                                .tradeNum(tradeNum)
                                 .build())
                         .collect(Collectors.toList());
 

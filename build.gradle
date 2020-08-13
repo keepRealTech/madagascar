@@ -24,7 +24,7 @@ ext['tenrecs.version'] = '1.0.3'
 ext['brookesia.version'] = '1.0.2'
 ext['marty.version'] = '1.0.3'
 ext['mantella.version'] = '1.0.2'
-ext['vanga.version'] = '1.0.5'
+ext['vanga.version'] = '1.0.6'
 ext['asity.version'] = '1.0.0'
 
 ext['settler.version'] = '1.0.3'
