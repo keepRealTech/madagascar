@@ -27,6 +27,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -242,6 +243,7 @@ public class IslandController implements IslandApi {
      * @param pageSize Page size.
      * @return {@link BriefIslandsResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<BriefIslandsResponse> apiV1IslandsMyIslandsGet(Integer page, Integer pageSize) {
         String hostId = HttpContextUtils.getUserIdFromContext();
