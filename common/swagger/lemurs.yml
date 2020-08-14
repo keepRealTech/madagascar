@@ -1530,9 +1530,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResolveIslandRepostCodeResponse'
   /api/v1/islands/{id}/introduction/dismiss:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
     post:
-      parameters:
-        - $ref: '#/components/parameters/idInPath'
       tags:
         - Island
       summary: 关闭加入岛成功引导文案
@@ -1996,6 +1996,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandFeedSnapshotResponse'
+  /api/v1/islands/{id}/support:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Support
+      summary: 获得支持商品信息
+      responses:
+        '200':
+          description: retrieve video/audio url
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportsResponse'
+  /api/v1/islands/{id}/support/wechatPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下微信支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSupportRequest'
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/{id}/support/shellPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下贝壳支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSupportRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -4531,3 +4585,56 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/IslandFeedSnapshotDTO'
+    SponsorSkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        priceInShells:
+          type: integer
+          format: int64
+        priceInCents:
+          type: integer
+          format: int64
+        isDefault:
+          type: boolean
+    SponsorDTO:
+      type: object
+      properties:
+        sponsorSkus:
+          type: array
+          items:
+            $ref: '#/components/schemas/SponsorSkuDTO'
+        customSku:
+          $ref: '#/components/schemas/SponsorSkuDTO'
+        count:
+          type: integer
+    SupportDTO:
+      type: object
+      properties:
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/MembershipDTO'
+        sponsors:
+          $ref: '#/components/schemas/SponsorDTO'
+    SupportsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportDTO'
+    PostSupportRequest:
+      type: object
+      properties:
+        sponsorSkuId:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
+        priceInShells:
+          type: integer
+          format: int64
+      required:
+        - sponsorSkuId 
