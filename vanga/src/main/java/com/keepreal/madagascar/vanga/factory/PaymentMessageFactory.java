@@ -32,7 +32,7 @@ public class PaymentMessageFactory {
      * @return {@link UserPaymentMessage}.
      */
     public UserPaymentMessage valueOf(Payment payment, MembershipSku membershipSku) {
-        if (Objects.isNull(payment)) {
+        if (Objects.isNull(payment) || Objects.isNull(membershipSku)) {
             return null;
         }
 
@@ -43,6 +43,7 @@ public class PaymentMessageFactory {
                 .setPayeeId(payment.getPayeeId())
                 .setMembershipSku(this.skuMessageFactory.valueOf(membershipSku))
                 .setExpiresAt(payment.getValidAfter())
+                .setCreatedAt(payment.getCreatedTime())
                 .build();
     }
 
