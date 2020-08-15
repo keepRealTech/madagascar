@@ -26,6 +26,7 @@ public class SkuService {
     private final LongIdGenerator idGenerator;
     private final List<Integer> membershipPeriods = Stream.of(1, 3, 6, 12).collect(Collectors.toList());
     private final RedissonClient redissonClient;
+    private static final String APPLE_SKU_TEMPLATE = "cn.keepreal.feeds.nonrenewal%d";
 
     /**
      * Constructs the sku service.
@@ -211,6 +212,7 @@ public class SkuService {
                 .defaultSku(timeInMonths == 3)
                 .hostId(hostId)
                 .islandId(islandId)
+                .appleSkuId(String.format(SkuService.APPLE_SKU_TEMPLATE, costInCentsPerMonth * timeInMonths))
                 .build();
     }
 
