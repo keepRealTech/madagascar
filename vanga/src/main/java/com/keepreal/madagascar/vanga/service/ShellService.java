@@ -58,7 +58,7 @@ public class ShellService {
     public Balance buyShell(String userId, String receipt, ShellSku sku) {
         Balance userBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(userId);
 
-        IosOrder iosOrder = this.iosOrderService.verify(userId, receipt, sku);
+        IosOrder iosOrder = this.iosOrderService.verify(userId, receipt, sku.getDescription(), sku.getAppleSkuId(), sku.getId());
         this.paymentService.createIOSBuyShellPayments(userId, sku, iosOrder.getTransactionId(), iosOrder.getId());
         return this.balanceService.addOnShells(userBalance, sku.getShells());
     }

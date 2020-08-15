@@ -54,10 +54,11 @@ public class IOSOrderService {
      * Verifies the receipt is valid.
      *
      * @param receipt Receipt content.
-     * @param sku     {@link ShellSku}.
+     * @param appleSkuId Apple sku id.
+     * @param description Description.
      * @return Transaction id.
      */
-    public IosOrder verify(String userId, String receipt, ShellSku sku) {
+    public IosOrder verify(String userId, String receipt, String description, String appleSkuId, String skuId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -66,7 +67,7 @@ public class IOSOrderService {
         HttpEntity<String> request = new HttpEntity<>(requestBody.toString(), headers);
 
         IosOrder.IosOrderBuilder builder = IosOrder.builder().userId(userId).receiptHashcode(String.valueOf(receipt.hashCode()))
-                .description(String.format("购买%s", sku.getDescription())).shellSkuId(sku.getId());
+                .description(String.format("购买%s", description)).skuId(skuId);
 
         IosOrder iosOrder = this.createIosOrder(builder);
 
@@ -102,8 +103,8 @@ public class IOSOrderService {
         Map<String, HashMap> dictionary = inApps.stream()
                 .collect(Collectors.toMap(app -> app.get("product_id").toString(), Function.identity()));
 
-        if (dictionary.containsKey(sku.getAppleSkuId())) {
-            iosOrder.setTransactionId(dictionary.get(sku.getAppleSkuId()).get("transaction_id").toString());
+        if (dictionary.containsKey(appleSkuId)) {
+            iosOrder.setTransactionId(dictionary.get(appleSkuId).get("transaction_id").toString());
             return iosOrder;
         }
 

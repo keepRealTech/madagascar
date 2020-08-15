@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
+import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
@@ -271,6 +272,34 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             response = BalanceResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(exception.getErrorCode()))
                     .build();
+        }
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the ios subscribe membership api.
+     *
+     * @param request          {@link IOSOrderSubscribeRequest}.
+     * @param responseObserver {@link CommonStatus}.
+     */
+    @Override
+    public void iOSSubscribeMembership(IOSOrderSubscribeRequest request,
+                                       io.grpc.stub.StreamObserver<CommonStatus> responseObserver) {
+        MembershipSku sku = this.skuService.retrieveMembershipSkuById(request.getMembershipSkuId());
+        CommonStatus response;
+        if (Objects.isNull(sku)) {
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_IOS_ORDER_PLACE_ERROR);
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        try {
+            this.subscribeMembershipService.subscibeMembershipWithIOSOrder(request.getUserId(), request.getAppleReceipt(), sku);
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
+        } catch (KeepRealBusinessException exception) {
+            response = CommonStatusUtils.buildCommonStatus(exception.getErrorCode());
         }
         responseObserver.onNext(response);
         responseObserver.onCompleted();

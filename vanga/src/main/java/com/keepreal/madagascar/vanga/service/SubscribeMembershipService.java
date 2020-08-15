@@ -4,9 +4,11 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.Balance;
+import com.keepreal.madagascar.vanga.model.IosOrder;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
+import com.keepreal.madagascar.vanga.model.PaymentType;
 import com.keepreal.madagascar.vanga.model.SubscribeMembership;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
@@ -20,7 +22,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.IntStream;
@@ -32,6 +33,7 @@ import java.util.stream.IntStream;
 public class SubscribeMembershipService {
 
     public static final long PAYMENT_SETTLE_IN_MONTH = 1L;
+    private final IOSOrderService iosOrderService;
     private final BalanceService balanceService;
     private final PaymentService paymentService;
     private final SkuService membershipSkuService;
@@ -43,6 +45,7 @@ public class SubscribeMembershipService {
     /**
      * Constructor the subscribe membership service.
      *
+     * @param iosOrderService                  {@link IOSOrderService}.
      * @param balanceService                   {@link BalanceService}.
      * @param paymentService                   {@link PaymentService}.
      * @param membershipSkuService             {@link SkuService}.
@@ -51,13 +54,15 @@ public class SubscribeMembershipService {
      * @param redissonClient                   {@link RedissonClient}.
      * @param notificationEventProducerService {@link NotificationEventProducerService}.
      */
-    public SubscribeMembershipService(BalanceService balanceService,
+    public SubscribeMembershipService(IOSOrderService iosOrderService,
+                                      BalanceService balanceService,
                                       PaymentService paymentService,
                                       SkuService membershipSkuService,
                                       SubscribeMembershipRepository subscriptionMemberRepository,
                                       LongIdGenerator idGenerator,
                                       RedissonClient redissonClient,
                                       NotificationEventProducerService notificationEventProducerService) {
+        this.iosOrderService = iosOrderService;
         this.balanceService = balanceService;
         this.paymentService = paymentService;
         this.membershipSkuService = membershipSkuService;
@@ -104,7 +109,7 @@ public class SubscribeMembershipService {
             return;
         }
 
-        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-wechat-%s", wechatOrder.getUserId()))) {
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", wechatOrder.getUserId()))) {
             List<Payment> innerPaymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
 
             MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getMemberShipSkuId());
@@ -148,7 +153,7 @@ public class SubscribeMembershipService {
      */
     @Transactional
     public void subscribeMembershipWithShell(String userId, MembershipSku sku) {
-        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-shell-%s", userId))) {
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", userId))) {
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
                     userId, sku.getMembershipId());
             Instant instant = Objects.isNull(currentSubscribeMembership) ?
@@ -165,6 +170,30 @@ public class SubscribeMembershipService {
             this.balanceService.consumeShells(userBalance, sku.getPriceInShells());
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.createPayShellPayments(userId, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
+            this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
+        }
+    }
+
+    /**
+     * Subscribes membership with ios pay.
+     *
+     * @param userId    User id.
+     * @param receipt   Ios receipt.
+     * @param sku       Membership sku.
+     */
+    @Transactional
+    public void subscibeMembershipWithIOSOrder(String userId, String receipt, MembershipSku sku) {
+        IosOrder iosOrder = this.iosOrderService.verify(userId, receipt, sku.getDescription(), sku.getAppleSkuId(), sku.getId());
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", userId))) {
+            SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
+                    userId, sku.getMembershipId());
+            Instant instant = Objects.isNull(currentSubscribeMembership) ?
+                    Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
+            ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+
+            Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
+            this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
+            this.paymentService.createIOSPayPayments(userId, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
         }
     }
@@ -215,7 +244,7 @@ public class SubscribeMembershipService {
     /**
      * Retrieves the membership ids by valid user subscriptions.
      *
-     * @param userId  User id.
+     * @param userId User id.
      * @return Membership id list.
      */
     public List<String> getMembershipIdListByUserId(String userId) {

@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.Balance;
+import com.keepreal.madagascar.vanga.model.IosOrder;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
@@ -11,13 +12,10 @@ import com.keepreal.madagascar.vanga.model.PaymentType;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.repository.PaymentRepository;
-import com.keepreal.madagascar.vanga.util.PaginationUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -148,6 +146,44 @@ public class PaymentService {
     }
 
     /**
+     * Creates new shell payments.
+     *
+     * @param userId            User id.
+     * @param iosOrder          {@link IosOrder}.
+     * @param withdrawPercent   Withdraw percent.
+     * @param sku               {@link MembershipSku}.
+     * @param currentExpireTime {@link ZonedDateTime}.
+     * @return {@link Payment}.
+     */
+    @Transactional
+    public List<Payment> createIOSPayPayments(String userId,
+                                              IosOrder iosOrder,
+                                              Integer withdrawPercent,
+                                              MembershipSku sku,
+                                              ZonedDateTime currentExpireTime) {
+        List<Payment> payments =
+                IntStream.range(0, sku.getTimeInMonths())
+                        .mapToObj(i -> Payment.builder()
+                                .id(String.valueOf(this.idGenerator.nextId()))
+                                .type(PaymentType.IOSBUY.getValue())
+                                .amountInShells(sku.getPriceInShells() / sku.getTimeInMonths())
+                                .userId(userId)
+                                .withdrawPercent(withdrawPercent)
+                                .state(PaymentState.OPEN.getValue())
+                                .payeeId(sku.getHostId())
+                                .validAfter(currentExpireTime
+                                        .plusMonths((i + 1) * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
+                                        .toInstant().toEpochMilli())
+                                .membershipSkuId(sku.getId())
+                                .tradeNum(iosOrder.getTransactionId())
+                                .orderId(iosOrder.getId())
+                                .build())
+                        .collect(Collectors.toList());
+
+        return this.paymentRepository.saveAll(payments);
+    }
+
+    /**
      * Creates new buy shell payments.
      *
      * @param userId        User id.
@@ -179,8 +215,8 @@ public class PaymentService {
     /**
      * Creates new buy shell payments.
      *
-     * @param wechatOrder   {@link WechatOrder}.
-     * @param sku           {@link ShellSku}.
+     * @param wechatOrder {@link WechatOrder}.
+     * @param sku         {@link ShellSku}.
      * @return {@link Payment}.
      */
     @Transactional
@@ -229,8 +265,8 @@ public class PaymentService {
     /**
      * Retrieves valid user payments.
      *
-     * @param userId    User id.
-     * @param pageable  {@link Pageable}.
+     * @param userId   User id.
+     * @param pageable {@link Pageable}.
      * @return {@link Payment}.
      */
     public Page<Payment> retrievePaymentsByUserId(String userId, Pageable pageable) {

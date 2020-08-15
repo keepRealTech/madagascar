@@ -8,14 +8,10 @@ import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.WechatOrderMessage;
-import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import swagger.api.ApiUtil;
 import swagger.api.OrderApi;
 import swagger.model.BalanceResponse;
 import swagger.model.DummyResponse;
@@ -23,8 +19,6 @@ import swagger.model.PostIOSMembershipSubscriptionRequest;
 import swagger.model.PostIOSOrderRequest;
 import swagger.model.PostWechatOrderRequest;
 import swagger.model.WechatOrderResponse;
-
-import javax.validation.Valid;
 
 /**
  * Represents the order controller.
@@ -111,7 +105,7 @@ public class OrderController implements OrderApi {
     /**
      * Implements the ios pay buy membership api.
      *
-     * @param postIOSMembershipSubscriptionRequest  (required) {@link PostIOSMembershipSubscriptionRequest}.
+     * @param postIOSMembershipSubscriptionRequest (required) {@link PostIOSMembershipSubscriptionRequest}.
      * @return {@link DummyResponse}.
      */
     @Override
