@@ -2988,6 +2988,9 @@ components:
           type: string
         receipt:
           type: string
+      required:
+        - shellSkuId
+        - receipt
     PostIOSMembershipSubscriptionRequest:
       type: object
       properties:
@@ -2995,6 +2998,9 @@ components:
           type: string
         receipt:
           type: string
+      required:
+        - membershipSkuId
+        - receipt
     PostWechatOrderRequest:
       type: object
       properties:

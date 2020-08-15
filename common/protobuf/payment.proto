@@ -62,6 +62,12 @@ message IOSOrderBuyShellRequest {
   string appleReceipt = 3;
 }
 
+message IOSOrderSubscribeRequest {
+  string userId = 1;
+  string membershipSkuId = 2;
+  string appleReceipt = 3;
+}
+
 message WechatOrderBuyShellRequest {
   string userId = 1;
   string shellSkuId = 2;
@@ -95,6 +101,7 @@ service PaymentService {
   rpc RetrieveWechatOrderById (RetrieveWechatOrderByIdRequest) returns (WechatOrderResponse) {};
   rpc WechatPayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
   rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};
+  rpc IOSSubscribeMembership (IOSOrderSubscribeRequest) returns (CommonStatus) {};
   rpc WechatBuyShell (WechatOrderBuyShellRequest) returns (WechatOrderResponse) {};
   rpc RetrieveUserPayments (RetrieveUserPaymentsRequest) returns (UserPaymentsResponse) {};
 }

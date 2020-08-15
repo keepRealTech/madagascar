@@ -4,18 +4,27 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.dtoFactory.BalanceDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.WechatOrderDTOFactory;
 import com.keepreal.madagascar.lemur.service.OrderService;
+import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.WechatOrderMessage;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import swagger.api.ApiUtil;
 import swagger.api.OrderApi;
 import swagger.model.BalanceResponse;
+import swagger.model.DummyResponse;
+import swagger.model.PostIOSMembershipSubscriptionRequest;
 import swagger.model.PostIOSOrderRequest;
 import swagger.model.PostWechatOrderRequest;
 import swagger.model.WechatOrderResponse;
+
+import javax.validation.Valid;
 
 /**
  * Represents the order controller.
@@ -96,6 +105,24 @@ public class OrderController implements OrderApi {
         response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the ios pay buy membership api.
+     *
+     * @param postIOSMembershipSubscriptionRequest  (required) {@link PostIOSMembershipSubscriptionRequest}.
+     * @return {@link DummyResponse}.
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1OrdersIosMembershipSubscriptionPost(PostIOSMembershipSubscriptionRequest postIOSMembershipSubscriptionRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        this.orderService.iosSubscribeMembership(userId,
+                postIOSMembershipSubscriptionRequest.getMembershipSkuId(),
+                postIOSMembershipSubscriptionRequest.getReceipt());
+
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

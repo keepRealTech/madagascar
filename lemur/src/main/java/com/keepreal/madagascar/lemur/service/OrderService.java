@@ -1,10 +1,12 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
+import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
@@ -157,6 +159,39 @@ public class OrderService {
         }
 
         return response.getWechatOrder();
+    }
+
+    /**
+     * Subscribes membership with ios receipt.
+     *
+     * @param userId          User id.
+     * @param membershipSkuId Membership sku id.
+     * @param receipt         Receipt content.
+     */
+    public void iosSubscribeMembership(String userId, String membershipSkuId, String receipt) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        IOSOrderSubscribeRequest request = IOSOrderSubscribeRequest.newBuilder()
+                .setUserId(userId)
+                .setMembershipSkuId(membershipSkuId)
+                .setAppleReceipt(receipt)
+                .build();
+
+        CommonStatus response;
+        try {
+            response = stub.iOSSubscribeMembership(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)) {
+            log.error("Subscribe membership with ios buy returned null.");
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getRtn()) {
+            throw new KeepRealBusinessException(response);
+        }
     }
 
 }
