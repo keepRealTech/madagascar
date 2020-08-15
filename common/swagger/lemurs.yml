@@ -936,6 +936,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/orders/ios/membershipSubscription:
+    post:
+      tags:
+        - Order
+      summary: Ios 内购会员
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostIOSMembershipSubscriptionRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/orders/wechat:
     post:
       tags:
@@ -2970,6 +2988,13 @@ components:
           type: string
         receipt:
           type: string
+    PostIOSMembershipSubscriptionRequest:
+      type: object
+      properties:
+        membershipSkuId:
+          type: string
+        receipt:
+          type: string
     PostWechatOrderRequest:
       type: object
       properties:
@@ -3154,6 +3179,8 @@ components:
         priceInShells:
           type: integer
           format: int64
+        appleSkuId:
+          type: string
     MembershipSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
