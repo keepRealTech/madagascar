@@ -193,7 +193,7 @@ public class SubscribeMembershipService {
 
             Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
-            this.paymentService.createIOSPayPayments(userId, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
+            this.paymentService.createIOSPayPayments(userId, iosOrder, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
         }
     }
