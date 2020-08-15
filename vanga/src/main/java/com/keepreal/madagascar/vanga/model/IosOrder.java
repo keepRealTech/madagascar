@@ -45,4 +45,5 @@ public class IosOrder {
     private String receiptHashcode;
     @Transient
     private String transactionId;
+
 }
