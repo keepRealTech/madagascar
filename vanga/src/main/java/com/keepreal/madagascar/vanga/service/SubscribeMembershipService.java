@@ -8,7 +8,6 @@ import com.keepreal.madagascar.vanga.model.IosOrder;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
-import com.keepreal.madagascar.vanga.model.PaymentType;
 import com.keepreal.madagascar.vanga.model.SubscribeMembership;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
@@ -177,13 +176,14 @@ public class SubscribeMembershipService {
     /**
      * Subscribes membership with ios pay.
      *
-     * @param userId    User id.
-     * @param receipt   Ios receipt.
-     * @param sku       Membership sku.
+     * @param userId        User id.
+     * @param receipt       Ios receipt.
+     * @param transactionId Transaction id.
+     * @param sku           Membership sku.
      */
     @Transactional
-    public void subscibeMembershipWithIOSOrder(String userId, String receipt, MembershipSku sku) {
-        IosOrder iosOrder = this.iosOrderService.verify(userId, receipt, sku.getDescription(), sku.getAppleSkuId(), sku.getId());
+    public void subscibeMembershipWithIOSOrder(String userId, String receipt, String transactionId, MembershipSku sku) {
+        IosOrder iosOrder = this.iosOrderService.verify(userId, receipt, sku.getDescription(), sku.getAppleSkuId(), sku.getId(), transactionId);
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", userId))) {
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
                     userId, sku.getMembershipId());

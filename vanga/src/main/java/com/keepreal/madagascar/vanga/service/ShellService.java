@@ -51,14 +51,15 @@ public class ShellService {
      *
      * @param userId  User id.
      * @param receipt Receipt content.
+     * @param transactionId Transaction id.
      * @param sku     {@link ShellSku}.
      * @return {@link Balance}.
      */
     @Transactional
-    public Balance buyShell(String userId, String receipt, ShellSku sku) {
+    public Balance buyShell(String userId, String receipt, String transactionId, ShellSku sku) {
         Balance userBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(userId);
 
-        IosOrder iosOrder = this.iosOrderService.verify(userId, receipt, sku.getDescription(), sku.getAppleSkuId(), sku.getId());
+        IosOrder iosOrder = this.iosOrderService.verify(userId, receipt, sku.getDescription(), sku.getAppleSkuId(), sku.getId(), transactionId);
         this.paymentService.createIOSBuyShellPayments(userId, sku, iosOrder.getTransactionId(), iosOrder.getId());
         return this.balanceService.addOnShells(userBalance, sku.getShells());
     }

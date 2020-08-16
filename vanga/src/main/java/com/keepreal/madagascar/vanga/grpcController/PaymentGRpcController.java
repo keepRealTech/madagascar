@@ -263,7 +263,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         }
 
         try {
-            Balance balance = this.shellService.buyShell(request.getUserId(), request.getAppleReceipt(), sku);
+            Balance balance = this.shellService.buyShell(request.getUserId(), request.getAppleReceipt(), request.getTransactionId(), sku);
             response = BalanceResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setBalance(this.balanceMessageFactory.valueOf(balance))
@@ -296,7 +296,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         }
 
         try {
-            this.subscribeMembershipService.subscibeMembershipWithIOSOrder(request.getUserId(), request.getAppleReceipt(), sku);
+            this.subscribeMembershipService.subscibeMembershipWithIOSOrder(request.getUserId(), request.getAppleReceipt(), request.getTransactionId(), sku);
             response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         } catch (KeepRealBusinessException exception) {
             response = CommonStatusUtils.buildCommonStatus(exception.getErrorCode());
