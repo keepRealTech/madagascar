@@ -71,6 +71,7 @@ public class SkuDTOFactory {
 
         MembershipSkuDTO membershipSkuDTO = new MembershipSkuDTO();
         membershipSkuDTO.setId(membershipSku.getId());
+        membershipSkuDTO.setAppleSkuId(membershipSku.getAppleSkuId());
         membershipSkuDTO.setDescription(membershipSku.getDescription());
         membershipSkuDTO.setIsDefault(membershipSku.getIsDefault());
         membershipSkuDTO.setPriceInCents(membershipSku.getPriceInCents());

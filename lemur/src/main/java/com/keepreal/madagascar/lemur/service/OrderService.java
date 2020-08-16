@@ -1,10 +1,12 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
+import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
@@ -88,18 +90,20 @@ public class OrderService {
     /**
      * Buys shell with ios receipt.
      *
-     * @param userId     User id.
-     * @param shellSkuId Shell sku id.
-     * @param receipt    Receipt content.
+     * @param userId        User id.
+     * @param shellSkuId    Shell sku id.
+     * @param receipt       Receipt content.
+     * @param transactionId Transaction id.
      * @return {@link BalanceMessage}.
      */
-    public BalanceMessage iosBuyShell(String userId, String shellSkuId, String receipt) {
+    public BalanceMessage iosBuyShell(String userId, String shellSkuId, String receipt, String transactionId) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         IOSOrderBuyShellRequest request = IOSOrderBuyShellRequest.newBuilder()
                 .setUserId(userId)
                 .setShellSkuId(shellSkuId)
                 .setAppleReceipt(receipt)
+                .setTransactionId(transactionId)
                 .build();
 
         BalanceResponse response;
@@ -157,6 +161,41 @@ public class OrderService {
         }
 
         return response.getWechatOrder();
+    }
+
+    /**
+     * Subscribes membership with ios receipt.
+     *
+     * @param userId          User id.
+     * @param membershipSkuId Membership sku id.
+     * @param receipt         Receipt content.
+     * @param transactionId   Transaction id.
+     */
+    public void iosSubscribeMembership(String userId, String membershipSkuId, String receipt, String transactionId) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        IOSOrderSubscribeRequest request = IOSOrderSubscribeRequest.newBuilder()
+                .setUserId(userId)
+                .setMembershipSkuId(membershipSkuId)
+                .setAppleReceipt(receipt)
+                .setTransactionId(transactionId)
+                .build();
+
+        CommonStatus response;
+        try {
+            response = stub.iOSSubscribeMembership(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)) {
+            log.error("Subscribe membership with ios buy returned null.");
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getRtn()) {
+            throw new KeepRealBusinessException(response);
+        }
     }
 
 }
