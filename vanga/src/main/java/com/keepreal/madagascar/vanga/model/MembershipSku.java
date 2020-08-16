@@ -34,6 +34,7 @@ public class MembershipSku {
     private String membershipName;
     private String hostId;
     private String islandId;
+    private String appleSkuId;
     @Builder.Default
     private String description = "";
     @Builder.Default
