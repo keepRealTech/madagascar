@@ -161,6 +161,12 @@ public class PaymentService {
                                               Integer withdrawPercent,
                                               MembershipSku sku,
                                               ZonedDateTime currentExpireTime) {
+        Payment payment = this.paymentRepository.findTopByTradeNumAndTypeAndDeletedIsFalse(iosOrder.getTransactionId(), PaymentType.IOSBUY.getValue());
+
+        if (Objects.nonNull(payment)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_SHELL_IOS_RECEIPT_DUPLICATE_ERROR);
+        }
+
         List<Payment> payments =
                 IntStream.range(0, sku.getTimeInMonths())
                         .mapToObj(i -> Payment.builder()

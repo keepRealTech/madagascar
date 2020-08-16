@@ -90,18 +90,20 @@ public class OrderService {
     /**
      * Buys shell with ios receipt.
      *
-     * @param userId     User id.
-     * @param shellSkuId Shell sku id.
-     * @param receipt    Receipt content.
+     * @param userId        User id.
+     * @param shellSkuId    Shell sku id.
+     * @param receipt       Receipt content.
+     * @param transactionId Transaction id.
      * @return {@link BalanceMessage}.
      */
-    public BalanceMessage iosBuyShell(String userId, String shellSkuId, String receipt) {
+    public BalanceMessage iosBuyShell(String userId, String shellSkuId, String receipt, String transactionId) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         IOSOrderBuyShellRequest request = IOSOrderBuyShellRequest.newBuilder()
                 .setUserId(userId)
                 .setShellSkuId(shellSkuId)
                 .setAppleReceipt(receipt)
+                .setTransactionId(transactionId)
                 .build();
 
         BalanceResponse response;
@@ -167,14 +169,16 @@ public class OrderService {
      * @param userId          User id.
      * @param membershipSkuId Membership sku id.
      * @param receipt         Receipt content.
+     * @param transactionId   Transaction id.
      */
-    public void iosSubscribeMembership(String userId, String membershipSkuId, String receipt) {
+    public void iosSubscribeMembership(String userId, String membershipSkuId, String receipt, String transactionId) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         IOSOrderSubscribeRequest request = IOSOrderSubscribeRequest.newBuilder()
                 .setUserId(userId)
                 .setMembershipSkuId(membershipSkuId)
                 .setAppleReceipt(receipt)
+                .setTransactionId(transactionId)
                 .build();
 
         CommonStatus response;

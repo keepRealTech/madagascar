@@ -60,12 +60,14 @@ message IOSOrderBuyShellRequest {
   string userId = 1;
   string shellSkuId = 2;
   string appleReceipt = 3;
+  string transactionId = 4;
 }
 
 message IOSOrderSubscribeRequest {
   string userId = 1;
   string membershipSkuId = 2;
   string appleReceipt = 3;
+  string transactionId = 4;
 }
 
 message WechatOrderBuyShellRequest {

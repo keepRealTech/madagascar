@@ -211,7 +211,6 @@ public class SubscribeMembershipService {
                                                 MembershipSku sku,
                                                 SubscribeMembership subscribeMembership,
                                                 ZonedDateTime currentExpireTime) {
-
         long expireTime = currentExpireTime.plusMonths(sku.getTimeInMonths()).toInstant().toEpochMilli();
 
         if (Objects.nonNull(subscribeMembership)) {

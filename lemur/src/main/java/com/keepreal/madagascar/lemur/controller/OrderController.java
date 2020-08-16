@@ -55,7 +55,9 @@ public class OrderController implements OrderApi {
     public ResponseEntity<BalanceResponse> apiV1OrdersIosPost(PostIOSOrderRequest postIOSOrderRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         BalanceMessage balanceMessage = this.orderService.iosBuyShell(userId,
-                postIOSOrderRequest.getShellSkuId(), postIOSOrderRequest.getReceipt());
+                postIOSOrderRequest.getShellSkuId(),
+                postIOSOrderRequest.getReceipt(),
+                postIOSOrderRequest.getTransactionId());
 
         BalanceResponse response = new BalanceResponse();
         response.setData(this.balanceDTOFactory.valueOf(balanceMessage));
@@ -113,7 +115,8 @@ public class OrderController implements OrderApi {
         String userId = HttpContextUtils.getUserIdFromContext();
         this.orderService.iosSubscribeMembership(userId,
                 postIOSMembershipSubscriptionRequest.getMembershipSkuId(),
-                postIOSMembershipSubscriptionRequest.getReceipt());
+                postIOSMembershipSubscriptionRequest.getReceipt(),
+                postIOSMembershipSubscriptionRequest.getTransactionId());
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);

@@ -2988,6 +2988,8 @@ components:
           type: string
         receipt:
           type: string
+        transactionId:
+          type: string
       required:
         - shellSkuId
         - receipt
@@ -2998,9 +3000,12 @@ components:
           type: string
         receipt:
           type: string
+        transactionId:
+          type: string
       required:
         - membershipSkuId
         - receipt
+        - transactionId
     PostWechatOrderRequest:
       type: object
       properties:
