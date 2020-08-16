@@ -48,6 +48,7 @@ public class SkuMessageFactory {
 
         return MembershipSkuMessage.newBuilder()
                 .setId(membershipSku.getId())
+                .setAppleSkuId(membershipSku.getAppleSkuId())
                 .setDescription(membershipSku.getDescription())
                 .setIsDefault(membershipSku.getDefaultSku())
                 .setPriceInCents(membershipSku.getPriceInCents())

@@ -13,6 +13,7 @@ public enum PaymentType {
     SHELLBUY(2),
     SHELLPAY(3),
     WITHDRAW(4),
+    IOSBUY(5),
     ;
     private final int value;
 
