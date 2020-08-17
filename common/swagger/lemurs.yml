@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.3.0"
+  version: "1.4.0"
   title: Keep Real API
 
 security:
@@ -1532,6 +1532,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UploadUrlResponse'
+  /api/v1/mobile/otp:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostOTPRequest'
+      tags:
+        - Login
+      summary: 向指定手机号发送验证码
+      responses:
+        '200':
+          description: 成功返回
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/users/mobile:
+    put:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUserMobileRequest'
+      tags:
+        - User
+      summary: 更新当前用户手机号
+      responses:
+        '200':
+          description: 成功返回用户信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1867,6 +1903,8 @@ components:
             birthday:
               type: string
               format: date
+            mobile:
+              type: string
     FullUserDTO:
       allOf:
         - $ref: '#/components/schemas/UserDTO'
@@ -3641,3 +3679,15 @@ components:
           type: string
         uploadAuth:
           type: string
+    PostOTPRequest:
+      type: object
+      properties:
+        mobile:
+          type: string
+    PutUserMobileRequest:
+      type: object
+      properties:
+        mobile:
+          type: string
+        otp:
+          type: integer

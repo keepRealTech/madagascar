@@ -62,6 +62,7 @@ public class UserDTOFactory {
         userDTO.setGender(this.convertGender(user.getGender()));
         userDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
         userDTO.setCreatedAt(user.getCreatedAt());
+        userDTO.setMobile(user.getMobile());
         userDTO.setIdentityTypes(user.getIdentitiesList()
                 .stream()
                 .map(this::convertIdentityType)

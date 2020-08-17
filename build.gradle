@@ -53,6 +53,7 @@ subprojects {
     ext['ehcache.version'] = '3.8.1'
     ext['openservices.version'] = '1.8.4.Final'
     ext['oss.version'] = '3.9.0'
+    ext["aliyun-sms.version"] = '4.5.3'
     ext['rongcloud.version'] = '3.1.8'
 
     project.version = rootProject.findProperty("${project.name}.version") ?: 'latest'
@@ -164,6 +165,7 @@ subprojects {
             dependency "org.ehcache:ehcache:${ext['ehcache.version']}"
             dependency "com.aliyun.openservices:ons-client:${ext['openservices.version']}"
             dependency "com.aliyun.oss:aliyun-sdk-oss:${ext['oss.version']}"
+            dependency "com.aliyun:aliyun-java-sdk-core:${ext['aliyun-sms.version']}"
             dependency "io.opentracing.contrib:opentracing-spring-jaeger-web-starter:3.1.1"
             dependency "io.opentracing.contrib:opentracing-grpc:0.2.1"
             dependency "cn.rongcloud.im:server-sdk-java:${ext['rongcloud.version']}"

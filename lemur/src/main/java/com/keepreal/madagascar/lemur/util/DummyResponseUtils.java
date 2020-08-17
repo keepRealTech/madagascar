@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.util;
 
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
 import com.keepreal.madagascar.lemur.converter.ErrorMessageTranslator;
@@ -21,6 +22,11 @@ public class DummyResponseUtils {
     public static void setRtnAndMessage(DummyResponse response, ErrorCode errorCode) {
         response.setRtn(errorCode.getNumber());
         response.setMsg(DummyResponseUtils.errorMessageTranslator.translate(errorCode));
+    }
+
+    public static void setRtnAndMessage(DummyResponse response, CommonStatus commonStatus) {
+        response.setRtn(commonStatus.getRtn());
+        response.setMsg(commonStatus.getMessage());
     }
 
 }

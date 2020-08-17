@@ -106,6 +106,7 @@ public class UserInfoService {
                 .setId(userInfo.getId())
                 .setDisplayId(userInfo.getDisplayId())
                 .setName(userInfo.getNickName())
+                .setMobile(userInfo.getMobile())
                 .setPortraitImageUri(userInfo.getPortraitImageUri())
                 .setGender(Gender.forNumber(userInfo.getGender()))
                 .setDescription(userInfo.getDescription())

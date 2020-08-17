@@ -14,6 +14,7 @@ import com.keepreal.madagascar.baobob.PasswordLoginPayload;
 import com.keepreal.madagascar.baobob.TokenRefreshPayload;
 import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.LoginType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -45,6 +46,7 @@ import swagger.model.LoginTokenInfo;
 import swagger.model.OssTokenDTO;
 import swagger.model.OssTokenResponse;
 import swagger.model.PostLoginRequest;
+import swagger.model.PostOTPRequest;
 import swagger.model.PostRefreshTokenRequest;
 import swagger.model.QrTicketDTO;
 import swagger.model.QrTicketResponse;
@@ -334,6 +336,21 @@ public class LoginController implements LoginApi {
 
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 向指定手机号发送验证码
+     *
+     * @param postOTPRequest  (required) {@link PostOTPRequest}
+     * @return {@link DummyResponse}
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest) {
+        CommonStatus commonStatus = userService.sendOtpToMobile(postOTPRequest.getMobile());
+
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, commonStatus);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

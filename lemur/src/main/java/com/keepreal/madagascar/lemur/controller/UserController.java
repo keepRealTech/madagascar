@@ -29,9 +29,11 @@ import swagger.model.ChatUsersResponse;
 import swagger.model.FullUserResponse;
 import swagger.model.GenderType;
 import swagger.model.PostBatchGetUsersRequest;
+import swagger.model.PutUserMobileRequest;
 import swagger.model.PutUserPayload;
 import swagger.model.UserResponse;
 
+import javax.validation.Valid;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -237,6 +239,35 @@ public class UserController implements UserApi {
                 .collect(Collectors.toList()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 更新当前用户手机号
+     *
+     * @param putUserMobileRequest  (required) {@link PutUserMobileRequest}
+     * @return {@link UserResponse}
+     */
+    @Override
+    public ResponseEntity<UserResponse> apiV1UsersMobilePut(@Valid PutUserMobileRequest putUserMobileRequest) {
+        UserResponse response = new UserResponse();
+
+        if (Objects.isNull(putUserMobileRequest.getMobile()) || Objects.isNull(putUserMobileRequest.getOtp())) {
+            response.setRtn(ErrorCode.REQUEST_INVALID_ARGUMENT.getNumber());
+            response.setMsg(ErrorCode.REQUEST_INVALID_ARGUMENT.getValueDescriptor().getName());
+            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        }
+
+        com.keepreal.madagascar.coua.UserResponse userResponse = this.userService.updateUserMobilePhone(putUserMobileRequest);
+        if (ErrorCode.REQUEST_SUCC_VALUE == userResponse.getStatus().getRtn()) {
+            response.setData(this.userDTOFactory.valueOf(userResponse.getUser()));
+            response.setRtn(userResponse.getStatus().getRtn());
+            response.setMsg(userResponse.getStatus().getMessage());
+        } else {
+            response.setRtn(userResponse.getStatus().getRtn());
+            response.setMsg(userResponse.getStatus().getMessage());
+        }
+
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
