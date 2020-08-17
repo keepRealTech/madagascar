@@ -1612,6 +1612,7 @@ paths:
         - $ref: '#/components/parameters/pageSize'
       tags:
         - FeedGroup
+      summary: 获得所有作品集
       responses:
         '200':
           description: 用户所有作品集返回
