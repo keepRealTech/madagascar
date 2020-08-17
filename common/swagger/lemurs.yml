@@ -43,6 +43,8 @@ tags:
     description: Membership controller
   - name: Chat
     description: Chat controller
+  - name: FeedGroup
+    description: 作品集 controller
 
 paths:
   /api/healthcheck:
@@ -936,6 +938,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BalanceResponse'
+  /api/v1/orders/ios/membershipSubscription:
+    post:
+      tags:
+        - Order
+      summary: Ios 内购会员
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostIOSMembershipSubscriptionRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/orders/wechat:
     post:
       tags:
@@ -1458,9 +1478,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatUsersResponse'
   /api/v1/islands/{id}/reposts/generateCode:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
     get:
-      parameters:
-        - $ref: '#/components/parameters/idInPath'
       tags:
         - Repost
       summary: 生成分享口令
@@ -1552,15 +1572,15 @@ paths:
                 $ref: '#/components/schemas/DummyResponse'
   /api/v1/users/mobile:
     put:
+      tags:
+        - User
+      summary: 更新当前用户手机号
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/PutUserMobileRequest'
-      tags:
-        - User
-      summary: 更新当前用户手机号
       responses:
         '200':
           description: 成功返回用户信息
@@ -1568,6 +1588,117 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+  /api/v1/islands/{id}/feedAccess:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Island
+      summary: 获得当前岛圈权限
+      responses:
+        '200':
+          description: 成功返回用户信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandFeedAccessResponse'
+    put:
+      tags:
+        - Island
+      summary: 更新当前岛圈权限
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutIslandFeedAccessRequest'
+      responses:
+        '200':
+          description: 成功返回用户信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandFeedAccessResponse'
+  /api/v1/feedgroups:
+    post:
+      tags:
+        - FeedGroup
+      summary: 创建一个新的作品集
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostFeedGroupRequest'
+      responses:
+        '200':
+          description: 单一作品集返回
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedGroupResponse'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - FeedGroup
+      summary: 获得所有作品集
+      responses:
+        '200':
+          description: 用户所有作品集返回
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedGroupsResponse'
+  /api/v1/feedgroups/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - FeedGroup
+      summary: 编辑指定的作品集
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutFeedGroupRequest'
+      responses:
+        '200':
+          description: 单一作品集返回
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedGroupResponse'
+    delete:
+      tags:
+        - FeedGroup
+      summary: 删除指定的作品集
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/feedgroups/{id}/feeds:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Feed
+      summary: 获得指定作品集中的动态内容
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedsResponseV2'
 components:
   securitySchemes:
     bearerAuth:
@@ -1775,6 +1906,11 @@ components:
       type: string
       enum:
         - REACTION_LIKE
+    IslandAccessType:
+      type: string
+      enum:
+        - ISLAND_ACCESS_PUBLIC
+        - ISLAND_ACCESS_PRIVATE
     GenderType:
       type: integer
       minimum: 0
@@ -1989,6 +2125,8 @@ components:
           type: string
         description:
           type: string
+        accessType:
+          $ref: '#/components/schemas/IslandAccessType'
     PosterIslandDTO:
       type: object
       properties:
@@ -2057,6 +2195,8 @@ components:
           format: int64
         hasGroupchatAccess:
           type: boolean
+        hasIslandFeedsAccess:
+          type: boolean
         hostIntroduction:
           $ref: '#/components/schemas/HostIntroductionDTO'
         subscriberIntroduction:
@@ -2118,8 +2258,6 @@ components:
         secret:
           type: string
           description: island secret
-      required:
-        - secret
     MediaUrlsRequest:
       type: object
       properties:
@@ -3008,6 +3146,24 @@ components:
           type: string
         receipt:
           type: string
+        transactionId:
+          type: string
+      required:
+        - shellSkuId
+        - receipt
+    PostIOSMembershipSubscriptionRequest:
+      type: object
+      properties:
+        membershipSkuId:
+          type: string
+        receipt:
+          type: string
+        transactionId:
+          type: string
+      required:
+        - membershipSkuId
+        - receipt
+        - transactionId
     PostWechatOrderRequest:
       type: object
       properties:
@@ -3192,6 +3348,8 @@ components:
         priceInShells:
           type: integer
           format: int64
+        appleSkuId:
+          type: string
     MembershipSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -3594,26 +3752,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/ChatUserDTO'
-    PostIslandRequestV2:
-      type: object
-      properties:
-        name:
-          type: string
-          description: 岛名
-        secret:
-          type: string
-          description: 岛暗号
-        portraitImagUri:
-          type: string
-        identityId:
-          type: string
-        description:
-          type: string
-      required:
-        - name
-        - secret
-        - portraitImageUri
-        - identityId
     IslandRepostCodeDTO:
       type: object
       properties:
@@ -3691,3 +3829,79 @@ components:
           type: string
         otp:
           type: integer
+    PutIslandFeedAccessRequest:
+      type: object
+      properties:
+        membershipIds:
+          type: array
+          items:
+            type: string
+    IslandFeedAccessResponse:
+      type: object
+      properties:
+        membershipIds:
+          type: array
+          items:
+            type: string
+    FeedGroupDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        islandId:
+          type: string
+        hostId:
+          type: string
+        updatedAt:
+          type: integer
+          format: int64
+        description:
+          type: string
+        thumbnailUri:
+          type: string
+        itemCount:
+          type: integer
+        imageUris:
+          type: array
+          items:
+            type: string
+    PostFeedGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        thumbnailUri:
+          type: string
+        description:
+          type: string
+      required:
+        - name
+    PutFeedGroupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        thumbnailUri:
+          type: string
+        description:
+          type: string
+    FeedGroupResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FeedGroupDTO'
+    FeedGroupsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeedGroupDTO'

@@ -25,7 +25,7 @@ global:
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.1.1-staging
+      tag: 1.2.0-staging
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
@@ -61,7 +61,7 @@ global:
       imagePullPolicy: Always
     vanga:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
-      tag: 1.0.6-staging
+      tag: 1.1.0-staging
       imagePullPolicy: Always
     settler:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/settler
@@ -73,7 +73,7 @@ global:
       imagePullPolicy: Always
     asity:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
-      tag: 1.0.1-staging
+      tag: 1.0.2-staging
       imagePullPolicy: Always
 
 deploy:

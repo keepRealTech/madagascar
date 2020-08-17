@@ -29,7 +29,7 @@ public class IosOrder {
     @Id
     private String id;
     private String userId;
-    private String shellSkuId;
+    private String skuId;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
@@ -45,4 +45,5 @@ public class IosOrder {
     private String receiptHashcode;
     @Transient
     private String transactionId;
+
 }

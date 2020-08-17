@@ -32,6 +32,7 @@ message MembershipSkuMessage {
   uint64 priceInShells = 5;
   int32 timeInMonths = 6;
   bool isDefault = 7;
+  string appleSkuId = 8;
 }
 
 message RetrieveMembershipSkusByMembershipIdRequest {

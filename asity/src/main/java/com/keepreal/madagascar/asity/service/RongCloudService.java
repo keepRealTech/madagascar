@@ -24,8 +24,8 @@ import org.springframework.util.StringUtils;
 @Slf4j
 public class RongCloudService {
 
-    private static final String HOST_TEMPLATE = "刚刚支持了你（[%s]¥%.2f x %d个月），创作加油！";
-    private static final String MEMBER_TEMPLATE = "你刚刚成为了我的[%s]，感谢你的支持！\n更多信息可前往「我的 - 订单中心」中查看。";
+    private static final String HOST_TEMPLATE = "我刚刚支持了你，成为了你的「%s」会员（¥%.2f x %d个月）。创作加油！";
+    private static final String MEMBER_TEMPLATE = "你刚刚订阅了我的会员「%s」，感谢你的支持！\n更多信息可前往「我的 - 订单中心」中查看。";
     private final RongCloud client;
 
     /**
