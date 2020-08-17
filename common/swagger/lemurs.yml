@@ -1570,15 +1570,15 @@ paths:
                 $ref: '#/components/schemas/DummyResponse'
   /api/v1/users/mobile:
     put:
+      tags:
+        - User
+      summary: 更新当前用户手机号
       requestBody:
         required: true
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/PutUserMobileRequest'
-      tags:
-        - User
-      summary: 更新当前用户手机号
       responses:
         '200':
           description: 成功返回用户信息
@@ -1586,6 +1586,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+  /api/v1/islands/{id}/feedAccess:
+    get:
+      tags:
+        - Island
+      summary: 获得当前岛圈权限
+      responses:
+        '200':
+          description: 成功返回用户信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandFeedAccessResponse'
+    put:
+      tags:
+        - Island
+      summary: 更新当前岛圈权限
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutIslandFeedAccessRequest'
+      responses:
+        '200':
+          description: 成功返回用户信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandFeedAccessResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1793,6 +1822,11 @@ components:
       type: string
       enum:
         - REACTION_LIKE
+    IslandAccessType:
+      type: string
+      enum:
+        - ISLAND_ACCESS_PUBLIC
+        - ISLAND_ACCESS_PRIVATE
     GenderType:
       type: integer
       minimum: 0
@@ -2007,6 +2041,8 @@ components:
           type: string
         description:
           type: string
+        accessType:
+          $ref: '#/components/schemas/IslandAccessType'
     PosterIslandDTO:
       type: object
       properties:
@@ -2075,6 +2111,8 @@ components:
           format: int64
         hasGroupchatAccess:
           type: boolean
+        hasIslandFeedsAccess:
+          type: boolean
         hostIntroduction:
           $ref: '#/components/schemas/HostIntroductionDTO'
         subscriberIntroduction:
@@ -2136,8 +2174,6 @@ components:
         secret:
           type: string
           description: island secret
-      required:
-        - secret
     MediaUrlsRequest:
       type: object
       properties:
@@ -3729,3 +3765,17 @@ components:
           type: string
         otp:
           type: integer
+    PutIslandFeedAccessRequest:
+      type: object
+      properties:
+        membershipIds:
+          type: array
+          items:
+            type: string
+    IslandFeedAccessResponse:
+      type: object
+      properties:
+        membershipIds:
+          type: array
+          items:
+            type: string
