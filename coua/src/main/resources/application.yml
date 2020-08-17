@@ -42,8 +42,8 @@ opentracing:
 
 aliyun:
   sms:
-    accessKeyId: LTAI4GHdcKUjYLX5A54BucRS
-    secret: uWTGsaIBTWQ84PWl8LJCxseWMe6DgW
+    accessKeyId:
+    secret:
 
 server:
   port: 8089
