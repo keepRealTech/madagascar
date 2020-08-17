@@ -1690,17 +1690,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandBoxAccessResponse'
+  /api/v1/islands/{id}/boxes:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
     get:
       tags:
         - Box
-      summary: 获得当前岛提问箱提问权限
+      summary: 获得当前岛提问箱相关咨询
       responses:
         '200':
-          description: box access response
+          description: box response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IslandBoxAccessResponse'
+                $ref: '#/components/schemas/IslandBoxResponse'
   /api/v1/islands/{id}/boxes/freeQuestions:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1773,17 +1776,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuestionResponse'
+  /api/v1/islands/{id}/boxes/questions:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Box
+      summary: 获得当前岛所有被回并可公开围观的问题
+      responses:
+        '200':
+          description: questions response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionsResponse'
   /api/v1/boxes/questions:
     get:
       parameters:
         - $ref: '#/components/parameters/hasAnswerInQuery'
         - $ref: '#/components/parameters/membershipIdInQuery'
         - $ref: '#/components/parameters/complimentaryInQuery'
+        - $ref: '#/components/parameters/publicVisibleInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
         - Box
-      summary: 获得所有提问列表
+      summary: 获得所有提问我的列表
+      responses:
+        '200':
+          description: questions response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionsResponse'
+  /api/v1/boxes/answers:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Box
+      summary: 获得所有被回答的提问列表
       responses:
         '200':
           description: questions response
@@ -1859,6 +1895,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FullQuestionResponse'
+  /api/v1/questions/{id}/reactions:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/isRevokeInQuery'
+      tags:
+        - Reaction
+      summary: 为一个提问创建点赞回应
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostReactionRequest'
+      responses:
+        '200':
+          description: reaction response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReactionResponse'
+  /api/v1/questions/{id}/comments:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Comment
+      summary: 为一个提问创建评论
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCommentRequest'
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2064,6 +2142,12 @@ components:
     complimentaryInQuery:
       in: query
       name: paid
+      required: false
+      schema:
+        type: boolean
+    publicVisibleInQuery:
+      in: query
+      name: public
       required: false
       schema:
         type: boolean
@@ -3084,7 +3168,7 @@ components:
           type: integer
         UnreadReactionsCount:
           type: integer
-        UnreadQuestsionsCount:
+        UnreadBoxesCount:
           $ref: '#/components/schemas/UnreadQuestsionNoticesCountDTO'
         UnreadIslandNoticesCountDTO:
           $ref: '#/components/schemas/UnreadIslandNoticesCountDTO'
@@ -4104,14 +4188,27 @@ components:
     BoxAccessDTO:
       type: object
       properties:
-        islandId:
-          type: string
         enabled:
           type: boolean
         membershipIds:
           type: array
           items:
             type: string
+    BoxDTO:
+      type: object
+      properties:
+        islandId:
+          type: string
+        boxAccess:
+          $ref: '#/components/schemas/BoxAccessDTO'
+        hasSubmitAccess:
+          type: boolean
+        answeredQuestionsCount:
+          type: integer
+        recentAnsweredQuestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionDTO'
     PutIslandBoxAccessRequest:
       type: object
       properties:
@@ -4134,8 +4231,6 @@ components:
         id:
           type: string
         islandId:
-          type: string
-        authorId:
           type: string
         text:
           type: string
@@ -4255,3 +4350,10 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/FullQuestionDTO'
+    IslandBoxResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BoxDTO'
