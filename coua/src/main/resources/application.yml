@@ -44,6 +44,3 @@ aliyun:
   sms:
     accessKeyId:
     secret:
-
-server:
-  port: 8089
