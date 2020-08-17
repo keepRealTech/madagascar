@@ -261,13 +261,9 @@ public class UserController implements UserApi {
         com.keepreal.madagascar.coua.UserResponse userResponse = this.userService.updateUserMobilePhone(putUserMobileRequest);
         if (ErrorCode.REQUEST_SUCC_VALUE == userResponse.getStatus().getRtn()) {
             response.setData(this.userDTOFactory.valueOf(userResponse.getUser()));
-            response.setRtn(userResponse.getStatus().getRtn());
-            response.setMsg(userResponse.getStatus().getMessage());
-        } else {
-            response.setRtn(userResponse.getStatus().getRtn());
-            response.setMsg(userResponse.getStatus().getMessage());
         }
-
+        response.setRtn(userResponse.getStatus().getRtn());
+        response.setMsg(userResponse.getStatus().getMessage());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
