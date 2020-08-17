@@ -45,6 +45,8 @@ tags:
     description: Chat controller
   - name: FeedGroup
     description: 作品集 controller
+  - name: Box
+    description: 提问箱 controller
 
 paths:
   /api/healthcheck:
@@ -1588,37 +1590,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-  /api/v1/islands/{id}/feedAccess:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    get:
-      tags:
-        - Island
-      summary: 获得当前岛圈权限
-      responses:
-        '200':
-          description: 成功返回用户信息
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IslandFeedAccessResponse'
-    put:
-      tags:
-        - Island
-      summary: 更新当前岛圈权限
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PutIslandFeedAccessRequest'
-      responses:
-        '200':
-          description: 成功返回用户信息
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IslandFeedAccessResponse'
   /api/v1/feedgroups:
     post:
       tags:
@@ -1699,6 +1670,195 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FeedsResponseV2'
+  /api/v1/islands/{id}/boxes/access:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Box
+      summary: 修改当前岛提问箱权限
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutIslandBoxAccessRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandBoxAccessResponse'
+    get:
+      tags:
+        - Box
+      summary: 获得当前岛提问箱提问权限
+      responses:
+        '200':
+          description: box access response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandBoxAccessResponse'
+  /api/v1/islands/{id}/boxes/freeQuestions:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Box
+      summary: 发起免费提问
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostQuestionRequest'
+      responses:
+        '200':
+          description: question response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionResponse'
+  /api/v1/boxes/skus:
+    get:
+      tags:
+        - Sku
+      summary: 获得提问箱付费商品
+      responses:
+        '200':
+          description: question skus response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionSkusResponse'
+  /api/v1/islands/{id}/boxes/paidQuestions/wechatPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Box
+      summary: 发起收费提问
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostQuestionRequest'
+      responses:
+        '200':
+          description: question response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/{id}/boxes/paidQuestions/iosPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Box
+      summary: 发起收费提问
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostQuestionRequest'
+      responses:
+        '200':
+          description: question response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionResponse'
+  /api/v1/boxes/questions:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/hasAnswerInQuery'
+        - $ref: '#/components/parameters/membershipIdInQuery'
+        - $ref: '#/components/parameters/complimentaryInQuery'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Box
+      summary: 获得所有提问列表
+      responses:
+        '200':
+          description: questions response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionsResponse'
+  /api/v1/boxes/questions/{id}/reposts:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Repost
+      summary: 分享一个问题
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostRepostRequest'
+      responses:
+        '200':
+          description: reposts response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RepostResponse'
+  /api/v1/boxes/questions/{id}/ignore:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Box
+      summary: 忽略指定问题
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/boxes/questions/{id}/answer:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Box
+      summary: 回答指定问题
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostAnswerRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+  /api/v1/boxes/questions/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Box
+      summary: 获得指定问题详细内容，包括回答、评论等
+      responses:
+        '200':
+          description: full question response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullQuestionResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -1889,6 +2049,24 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/DeviceType'
+    hasAnswerInQuery:
+      in: query
+      name: answered
+      required: false
+      schema:
+        type: boolean
+    membershipIdInQuery:
+      in: query
+      name: membershipId
+      required: false
+      schema:
+        type: string
+    complimentaryInQuery:
+      in: query
+      name: paid
+      required: false
+      schema:
+        type: boolean
   schemas:
     LoginType:
       type: string
@@ -1927,6 +2105,7 @@ components:
         - NOTIFICATION_REACTIONS
         - NOTIFICATION_SYSTEM_NOTICE
         - NOTIFICATION_ISLAND_NOTICE
+        - NOTIFICATION_BOX_NOTICE
     IdentityType:
       type: string
       enum:
@@ -1959,6 +2138,8 @@ components:
       enum:
         - ISLAND_NOTICE_NEW_SUBSCRIBER
         - ISLAND_NOTICE_NEW_MEMBER
+        - BOX_NOTICE_NEW_QUESTION
+        - BOX_NOTICE_NEW_ANSWER
     MultiMediaType:
       type: string
       enum:
@@ -1968,6 +2149,7 @@ components:
         - MULTIMEDIA_TYPE_VIDEO
         - MULTIMEDIA_TYPE_AUDIO
         - MULTIMEDIA_TYPE_HTML
+        - MULTIMEDIA_TYPE_QUESTION
     DeviceType:
       type: string
       enum:
@@ -2195,8 +2377,6 @@ components:
           format: int64
         hasGroupchatAccess:
           type: boolean
-        hasIslandFeedsAccess:
-          type: boolean
         hostIntroduction:
           $ref: '#/components/schemas/HostIntroductionDTO'
         subscriberIntroduction:
@@ -2362,6 +2542,9 @@ components:
         islandId:
           type: string
           description: island id to report
+        questionId:
+          type: string
+          description: question id to report
         userId:
           type: string
           description: user id to report
@@ -2430,6 +2613,7 @@ components:
         - $ref: '#/components/schemas/PictureDTO'
         - $ref: '#/components/schemas/AudioDTO'
         - $ref: '#/components/schemas/HtmlDTO'
+        - $ref: '#/components/schemas/QuestionDTO'
     PosterFeedDTO:
       type: object
       properties:
@@ -2755,6 +2939,7 @@ components:
         - $ref: '#/components/schemas/ReactionNotificationDTO'
         - $ref: '#/components/schemas/NoticeNotificationDTO'
         - $ref: '#/components/schemas/SystemNotificationDTO'
+        - $ref: '#/components/schemas/BoxNotificationDTO'
     NoticeDTO:
       oneOf:
         - $ref: '#/components/schemas/SubscribeNoticeDTO'
@@ -2805,6 +2990,20 @@ components:
               format: int64
             timeInMonths:
               type: integer
+    BoxNotificationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        notificationType:
+          $ref: '#/components/schemas/NotificationType'
+        question:
+          $ref: '#/components/schemas/SnapshotFeedDTO'
+        hasRead:
+          type: boolean
+        createdAt:
+          type: integer
+          format: int64
     ReactionNotificationDTO:
       type: object
       properties:
@@ -2858,6 +3057,13 @@ components:
           type: integer
         UnreadNewMemberNoticeCount:
           type: integer
+    UnreadQuestsionNoticesCountDTO:
+      type: object
+      properties:
+        UnreadQuestionsNoticeCount:
+          type: integer
+        UnreadAnswersNoticeCount:
+          type: integer
     UnreadNotificationCountDTO:
       type: object
       properties:
@@ -2878,6 +3084,8 @@ components:
           type: integer
         UnreadReactionsCount:
           type: integer
+        UnreadQuestsionsCount:
+          $ref: '#/components/schemas/UnreadQuestsionNoticesCountDTO'
         UnreadIslandNoticesCountDTO:
           $ref: '#/components/schemas/UnreadIslandNoticesCountDTO'
     UploadUrlDTO:
@@ -2956,6 +3164,8 @@ components:
         feedId:
           type: string
         islandId:
+          type: string
+        questionId:
           type: string
         isSuccessful:
           type: boolean
@@ -3829,20 +4039,6 @@ components:
           type: string
         otp:
           type: integer
-    PutIslandFeedAccessRequest:
-      type: object
-      properties:
-        membershipIds:
-          type: array
-          items:
-            type: string
-    IslandFeedAccessResponse:
-      type: object
-      properties:
-        membershipIds:
-          type: array
-          items:
-            type: string
     FeedGroupDTO:
       type: object
       properties:
@@ -3905,3 +4101,157 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedGroupDTO'
+    BoxAccessDTO:
+      type: object
+      properties:
+        islandId:
+          type: string
+        enabled:
+          type: boolean
+        membershipIds:
+          type: array
+          items:
+            type: string
+    PutIslandBoxAccessRequest:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        membershipIds:
+          type: array
+          items:
+            type: string
+    IslandBoxAccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BoxAccessDTO'
+    QuestionDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        islandId:
+          type: string
+        authorId:
+          type: string
+        text:
+          type: string
+        hasPaid:
+          type: boolean
+        priceInCents:
+          type: integer
+          format: int64
+        hasAccess:
+          type: boolean
+        hasAnswer:
+          type: boolean
+        hasExpired:
+          type: boolean
+        likesCount:
+          type: integer
+        commentsCount:
+          type: integer
+        publicVisible:
+          type: boolean
+        visibleMemberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/BriefMembershipDTO'
+        createdAt:
+          type: integer
+          format: int64
+    AnswerDTO:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        text:
+          type: string
+        answeredAt:
+          type: integer
+          format: int64
+    FullQuestionDTO:
+      allOf:
+        - $ref: '#/components/schemas/QuestionDTO'
+        - type: object
+          properties:
+            anaswer:
+              $ref: '#/components/schemas/AnswerDTO'
+            comments:
+              type: array
+              items:
+                $ref: '#/components/schemas/CommentDTO'
+    QuestionSkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+        isDefault:
+          type: boolean
+        priceInCents:
+          type: integer
+          format: int64
+        appleSkuId:
+          type: string
+    QuestionSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionSkuDTO'
+    PostQuestionRequest:
+      type: object
+      properties:
+        text:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
+        questionSkuId:
+          type: string
+        receipt:
+          type: string
+        transactionId:
+          type: string
+    QuestionResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/QuestionDTO'
+    QuestionsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              $ref: '#/components/schemas/QuestionDTO'
+    PostAnswerRequest:
+      type: object
+      properties:
+        text:
+          type: string
+        publicVisible:
+          type: boolean
+        visibleMembershipIds:
+          type: array
+          items:
+            type: string
+    FullQuestionResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FullQuestionDTO'
