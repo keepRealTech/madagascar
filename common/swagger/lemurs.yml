@@ -1663,7 +1663,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - Feed
+        - FeedGroup
       summary: 获得指定作品集中的动态内容
       responses:
         '200':
@@ -2495,6 +2495,8 @@ components:
           description: secrets for joining island
         identityId:
           type: string
+        islandAccessType:
+          $ref: "#/components/schemas/IslandAccessType"
       required:
         - name
         - secret
@@ -4245,6 +4247,8 @@ components:
         priceInCents:
           type: integer
           format: int64
+        isLiked:
+          type: boolean
         hasAccess:
           type: boolean
         hasAnswer:
