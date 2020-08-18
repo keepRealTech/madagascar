@@ -34,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-
 import org.springframework.util.StringUtils;
 import swagger.model.MultiMediaDTO;
 import swagger.model.TopFeedRequest;
@@ -59,12 +58,12 @@ public class FeedService {
 
     /**
      * Constructs the feed service.
-     *  @param fossaChannel    GRpc managed channel connection to service Fossa.
-     * @param mantellaChannel
-     * @param islandService   {@link IslandService}
-     * @param mediaService
+     *
+     * @param fossaChannel    GRpc managed channel connection to service Fossa.
+     * @param mantellaChannel GRpc managed channel connection to service Mantella.
+     * @param islandService   {@link IslandService}.
+     * @param mediaService    {@link MediaService}.
      */
-
     public FeedService(@Qualifier("fossaChannel") Channel fossaChannel,
                        @Qualifier("mantellaChannel") Channel mantellaChannel,
                        IslandService islandService,
@@ -329,9 +328,9 @@ public class FeedService {
 
         return new AbstractMap.SimpleEntry<>(timelinesResponse.getHasMore(),
                 this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
-                .stream()
-                .map(TimelineMessage::getFeedId)
-                .collect(Collectors.toList()), userId));
+                        .stream()
+                        .map(TimelineMessage::getFeedId)
+                        .collect(Collectors.toList()), userId));
     }
 
     /**
@@ -414,11 +413,11 @@ public class FeedService {
     /**
      * top or cancel top feed by request
      *
-     * @param topFeedRequest    request
-     * @param id    island id
+     * @param topFeedRequest request
+     * @param id             island id
      */
     public void topFeedByRequest(TopFeedRequest topFeedRequest, String id) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub =  FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
         TopFeedByIdRequest request = TopFeedByIdRequest.newBuilder()
                 .setId(topFeedRequest.getFeedId())
                 .setIsRevoke(topFeedRequest.getIsRevoke())

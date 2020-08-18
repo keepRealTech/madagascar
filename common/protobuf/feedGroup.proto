@@ -26,8 +26,8 @@ message NewFeedGroupRequest {
   string islandId = 1;
   string userId = 2;
   string name = 3;
-  string description = 4;
-  string thumbnailUri = 5;
+  google.protobuf.StringValue description = 4;
+  google.protobuf.StringValue thumbnailUri = 5;
 }
 
 message DeleteFeedGroupByIdRequest {
@@ -44,6 +44,7 @@ message UpdateFeedGroupByIdRequest {
 message RetrieveFeedGroupContentByIdRequest {
   string id = 1;
   PageRequest pageRequest = 2;
+  string userId = 3;
 }
 
 message FeedGroupFeedsResponse {
