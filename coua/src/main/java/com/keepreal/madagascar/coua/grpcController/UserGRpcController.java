@@ -55,7 +55,6 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     private final UserIdentityService userIdentityService;
     private final AliyunSmsService aliyunSmsService;
     private final RedissonClient redissonClient;
-    private static final String MOBILE_PHONE_OTP = "mobile_OTP_";
 
     /**
      * Constructs user grpc controller.
@@ -317,7 +316,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         Integer otp = request.getOtp();
         UserResponse.Builder builder = UserResponse.newBuilder();
 
-        RBucket<Integer> redisOtp = this.redissonClient.getBucket(MOBILE_PHONE_OTP + mobile);
+        RBucket<Integer> redisOtp = this.redissonClient.getBucket(AliyunSmsService.MOBILE_PHONE_OTP + mobile);
         Integer intOtp = redisOtp.get();
         if (Objects.isNull(intOtp) || !otp.equals(intOtp)) {
             builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
@@ -327,6 +326,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
             UserInfo userInfoNew = this.userInfoService.updateUser(userInfo);
             builder.setStatus(CommonStatusUtils.getSuccStatus());
             builder.setUser(this.userInfoService.getUserMessage(userInfoNew));
+            redisOtp.delete();
         }
 
         responseObserver.onNext(builder.build());

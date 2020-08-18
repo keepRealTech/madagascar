@@ -33,9 +33,9 @@ public class AliyunSmsService {
     private static final String REGION_ID = "cn-beijing";
     private static final String SYS_DOMAIN = "dysmsapi.aliyuncs.com";
     private static final String SYS_VERSION = "2017-05-25";
-    private static final String MOBILE_PHONE_LIMIT = "mobile_OTP_limit_";
-    private static final String MOBILE_PHONE_OTP_COUNT = "mobile_OTP_count_";
-    private static final String MOBILE_PHONE_OTP = "mobile_OTP_";
+    private static final String MOBILE_PHONE_LIMIT = "otp_limit_";
+    private static final String MOBILE_PHONE_OTP_COUNT = "otp_count_";
+    public static final String MOBILE_PHONE_OTP = "otp_";
     private final AliyunSmsConfig aliyunSmsConfig;
     private final Random random;
     private final RedissonClient redissonClient;

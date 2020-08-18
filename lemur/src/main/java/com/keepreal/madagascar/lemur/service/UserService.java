@@ -237,7 +237,7 @@ public class UserService {
      *
      * @param mobile 手机号
      */
-    public CommonStatus sendOtpToMobile(String mobile) {
+    public void sendOtpToMobile(String mobile) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
         SendOtpToMobileRequest request = SendOtpToMobileRequest.newBuilder().setMobile(mobile).build();
@@ -255,12 +255,10 @@ public class UserService {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
-        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()
-                && ErrorCode.REQUEST_USER_MOBILE_OTP_TOO_FREQUENTLY_VALUE != response.getStatus().getRtn()) {
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
-        return response.getStatus();
     }
 
     /**
@@ -269,7 +267,7 @@ public class UserService {
      * @param putUserMobileRequest {@link PutUserMobileRequest}
      * @return {@link UserMessage}
      */
-    public UserResponse updateUserMobilePhone(PutUserMobileRequest putUserMobileRequest) {
+    public UserMessage updateUserMobilePhone(PutUserMobileRequest putUserMobileRequest) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
         UpdateUserMobileRequest request = UpdateUserMobileRequest.newBuilder().setUserId(HttpContextUtils.getUserIdFromContext())
@@ -290,12 +288,11 @@ public class UserService {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
-        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()
-                && ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH_VALUE != response.getStatus().getRtn()) {
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
-        return response;
+        return response.getUser();
     }
 
     /**

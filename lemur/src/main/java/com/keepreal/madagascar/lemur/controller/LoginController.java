@@ -347,10 +347,10 @@ public class LoginController implements LoginApi {
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest) {
-        CommonStatus commonStatus = userService.sendOtpToMobile(postOTPRequest.getMobile());
+        userService.sendOtpToMobile(postOTPRequest.getMobile());
 
         DummyResponse response = new DummyResponse();
-        DummyResponseUtils.setRtnAndMessage(response, commonStatus);
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
