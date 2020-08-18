@@ -15,6 +15,7 @@ message FeedGroupMessage {
   uint64 lastFeedTime = 6;
   int32 itemsCount = 7;
   string thumbnailUri = 8;
+  string description = 9;
 }
 
 message FeedGroupResponse {
@@ -47,10 +48,21 @@ message RetrieveFeedGroupContentByIdRequest {
   string userId = 3;
 }
 
+message RetrieveFeedGroupsByIslandIdRequest {
+  string islandId = 1;
+  PageRequest pageRequest = 2;
+}
+
 message FeedGroupFeedsResponse {
   CommonStatus status = 1;
   PageResponse pageResponse = 2;
   repeated FeedMessage feed = 3;
+}
+
+message FeedGroupsResponse {
+  CommonStatus status = 1;
+  PageResponse pageResponse = 2;
+  repeated FeedGroupMessage feedGroups = 3;
 }
 
 service FeedGroupService {
@@ -58,4 +70,5 @@ service FeedGroupService {
   rpc DeleteFeedGroupById (DeleteFeedGroupByIdRequest) returns (CommonStatus) {};
   rpc UpdateFeedGroupById (UpdateFeedGroupByIdRequest) returns (FeedGroupResponse) {};
   rpc RetrieveFeedGroupFeedsById (RetrieveFeedGroupContentByIdRequest) returns (FeedGroupFeedsResponse) {};
+  rpc RetrieveFeedGroupsByIslandId (RetrieveFeedGroupsByIslandIdRequest) returns (FeedGroupsResponse) {};
 }

@@ -1663,7 +1663,7 @@ paths:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
-        - FeedGroup
+        - Feed
       summary: 获得指定作品集中的动态内容
       responses:
         '200':
@@ -1671,7 +1671,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeedsResponseV2'
+                $ref: '#/components/schemas/FeedsResponse'
   /api/v1/islands/{id}/boxes/access:
     parameters:
       - $ref: '#/components/parameters/idInPath'

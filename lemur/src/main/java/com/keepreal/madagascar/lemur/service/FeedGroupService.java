@@ -10,9 +10,12 @@ import com.keepreal.madagascar.fossa.FeedGroupFeedsResponse;
 import com.keepreal.madagascar.fossa.FeedGroupMessage;
 import com.keepreal.madagascar.fossa.FeedGroupResponse;
 import com.keepreal.madagascar.fossa.FeedGroupServiceGrpc;
+import com.keepreal.madagascar.fossa.FeedGroupsResponse;
 import com.keepreal.madagascar.fossa.NewFeedGroupRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupContentByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedGroupsByIslandIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedGroupByIdRequest;
+import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -84,14 +87,14 @@ public class FeedGroupService {
         NewFeedGroupRequest.Builder requestBuilder = NewFeedGroupRequest.newBuilder()
                 .setIslandId(islandId)
                 .setUserId(hostId)
-                .setName(name);
+                .setName(name.trim());
 
         if (!Objects.isNull(description)) {
-            requestBuilder.setDescription(StringValue.of(description));
+            requestBuilder.setDescription(StringValue.of(description.trim()));
         }
 
         if (!Objects.isNull(thumbnailUri)) {
-            requestBuilder.setDescription(StringValue.of(thumbnailUri));
+            requestBuilder.setDescription(StringValue.of(thumbnailUri.trim()));
         }
 
         FeedGroupResponse response;
@@ -130,15 +133,15 @@ public class FeedGroupService {
                 .setId(id);
 
         if (!Objects.isNull(name)) {
-            requestBuilder.setName(StringValue.of(name));
+            requestBuilder.setName(StringValue.of(name.trim()));
         }
 
         if (!Objects.isNull(description)) {
-            requestBuilder.setDescription(StringValue.of(description));
+            requestBuilder.setDescription(StringValue.of(description.trim()));
         }
 
         if (!Objects.isNull(thumbnailUri)) {
-            requestBuilder.setDescription(StringValue.of(thumbnailUri));
+            requestBuilder.setDescription(StringValue.of(thumbnailUri.trim()));
         }
 
         FeedGroupResponse response;
@@ -162,18 +165,57 @@ public class FeedGroupService {
     }
 
     /**
+     * Retrieves the feed groups by island id.
+     *
+     * @param islandId Island id.
+     * @param page     Page.
+     * @param pageSize Page size.
+     * @return {@link FeedGroupsResponse}.
+     */
+    public FeedGroupsResponse retrieveFeedGroupsByIslandId(String islandId, int page, int pageSize) {
+        FeedGroupServiceGrpc.FeedGroupServiceBlockingStub stub = FeedGroupServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        RetrieveFeedGroupsByIslandIdRequest request = RetrieveFeedGroupsByIslandIdRequest.newBuilder()
+                .setIslandId(islandId)
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                .build();
+
+        FeedGroupsResponse response;
+        try {
+            response = stub.retrieveFeedGroupsByIslandId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve feed group feeds returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
+    }
+
+    /**
      * Retrieves the feeds of a feed group.
      *
-     * @param id     Feed group id.
-     * @param userId User id.
-     * @return {@link FeedMessage}.
+     * @param id       Feed group id.
+     * @param userId   User id.
+     * @param page     Page.
+     * @param pageSize Page size.
+     * @return {@link FeedGroupFeedsResponse}.
      */
-    public List<FeedMessage> retrieveFeedGroupFeeds(String id, String userId) {
+    public FeedGroupFeedsResponse retrieveFeedGroupFeeds(String id, String userId, int page, int pageSize) {
         FeedGroupServiceGrpc.FeedGroupServiceBlockingStub stub = FeedGroupServiceGrpc.newBlockingStub(this.fossaChannel);
 
         RetrieveFeedGroupContentByIdRequest request = RetrieveFeedGroupContentByIdRequest.newBuilder()
                 .setId(id)
                 .setUserId(userId)
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
                 .build();
 
         FeedGroupFeedsResponse response;
@@ -193,7 +235,7 @@ public class FeedGroupService {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
-        return response.getFeedList();
+        return response;
     }
 
 }
