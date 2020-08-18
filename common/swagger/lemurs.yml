@@ -1590,7 +1590,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-  /api/v1/feedgroups:
+  /api/v1/islands/{id}/feedgroups:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
     post:
       tags:
         - FeedGroup
@@ -2623,6 +2625,8 @@ components:
         feedId:
           type: string
           description: feed id to report
+        feedGroupId:
+          type: string
         islandId:
           type: string
           description: island id to report
