@@ -500,7 +500,13 @@ public class FeedController implements FeedApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(), postFeedRequestV2.getMembershipIds(), userId, MediaTypeConverter.convertToMediaType(mediaType), postFeedRequestV2.getMultimedia(), postFeedRequestV2.getText());
+        this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(),
+                postFeedRequestV2.getMembershipIds(),
+                userId,
+                MediaTypeConverter.convertToMediaType(mediaType),
+                postFeedRequestV2.getMultimedia(),
+                postFeedRequestV2.getText(),
+                postFeedRequestV2.getFeedGroupId());
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);

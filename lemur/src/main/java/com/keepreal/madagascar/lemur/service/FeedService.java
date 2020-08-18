@@ -118,7 +118,13 @@ public class FeedService {
         }
     }
 
-    public void createFeedV2(List<String> islandIds, List<String> membershipIds, String userId, MediaType mediaType, List<MultiMediaDTO> multiMediaDTOList, String text) {
+    public void createFeedV2(List<String> islandIds,
+                             List<String> membershipIds,
+                             String userId,
+                             MediaType mediaType,
+                             List<MultiMediaDTO> multiMediaDTOList,
+                             String text,
+                             String feedGroupId) {
         if (Objects.isNull(islandIds) || islandIds.size() == 0) {
             log.error("param islandIds is invalid");
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
@@ -133,6 +139,10 @@ public class FeedService {
                 .addAllMembershipIds(membershipIds)
                 .setUserId(userId)
                 .setType(mediaType);
+
+        if (!Objects.isNull(feedGroupId)) {
+            builder.setFeedGroupId(StringValue.of(feedGroupId));
+        }
 
         this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
 

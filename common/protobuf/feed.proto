@@ -30,11 +30,12 @@ message NewFeedsRequestV2 {
     repeated string membershipIds = 4;
     MediaType type = 5;
     google.protobuf.StringValue text = 6;
+    google.protobuf.StringValue feedGroupId = 7;
     oneof message {
-        PicturesMessage pics = 7;
-        VideoMessage video = 8;
-        AudioMessage audio = 9;
-        HtmlMessage html = 10;
+        PicturesMessage pics = 8;
+        VideoMessage video = 9;
+        AudioMessage audio = 10;
+        HtmlMessage html = 11;
     }
 }
 
