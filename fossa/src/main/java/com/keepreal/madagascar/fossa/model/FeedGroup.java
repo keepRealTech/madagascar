@@ -9,6 +9,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.EntityListeners;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,21 +25,17 @@ public class FeedGroup {
     private String id;
     private String islandId;
     private String hostId;
-    private List<String> imageUrls;
-    private List<String> feedIds;
+    private String name;
+    private String description;
     private Long lastFeedTime;
-    private String thumbnailUri;
     @Builder.Default
-    private Integer likesCount = 0;
+    private String thumbnailUri = "";
     @Builder.Default
-    private Integer commentsCount = 0;
+    private List<String> imageUrls = new ArrayList<>();
     @Builder.Default
-    private Integer repostCount = 0;
-    private Integer state;
+    private List<String> feedIds = new ArrayList<>();
     @Builder.Default
     private Boolean deleted = false;
-    @Builder.Default
-    private Boolean isTop = false;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate

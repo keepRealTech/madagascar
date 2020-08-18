@@ -1,6 +1,8 @@
 package com.keepreal.madagascar.fossa.dao;
 
 import com.keepreal.madagascar.fossa.model.FeedInfo;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +24,8 @@ public interface FeedInfoRepository extends MongoRepository<FeedInfo, String> {
     FeedInfo findTopByUserIdAndDeletedIsFalseOrderByCreatedTimeDesc(String userId);
 
     List<FeedInfo> findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(Iterable<String> ids);
+
+    Page<FeedInfo> findAllByFeedGroupIdAndDeletedIsFalseOrderByCreatedTimeDesc(String id, Pageable pageable);
 
     FeedInfo findTopByIslandIdAndIsTopIsTrueAndDeletedIsFalse(String id);
 
