@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.fossa";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message FeedGroupMessage {
+  string id = 1;
+  string islandId = 2;
+  string userId = 3;
+  string name = 4;
+  repeated string imageUris = 5;
+  uint64 lastFeedTime = 6;
+  int32 itemsCount = 7;
+  string thumbnailUri = 8;
+}
+
+message FeedGroupResponse {
+  CommonStatus status = 1;
+  FeedGroupMessage feedGroup = 2;
+}
+
+message NewFeedGroupRequest {
+  string islandId = 1;
+  string userId = 2;
+  string name = 3;
+  string description = 4;
+  string thumbnailUri = 5;
+}
+
+message DeleteFeedGroupByIdRequest {
+  string id = 1;
+}
+
+message UpdateFeedGroupByIdRequest {
+  string id = 1;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue description = 3;
+  google.protobuf.StringValue thumbnailUri = 4;
+}
+
+message RetrieveFeedGroupContentByIdRequest {
+  string id = 1;
+  PageRequest pageRequest = 2;
+}
+
+message FeedGroupFeedsResponse {
+  CommonStatus status = 1;
+  PageResponse pageResponse = 2;
+  repeated FeedMessage feed = 3;
+}
+
+service FeedGroupService {
+  rpc CreateFeedGroup (NewFeedGroupRequest) returns (FeedGroupResponse) {};
+  rpc DeleteFeedGroupById (DeleteFeedGroupByIdRequest) returns (CommonStatus) {};
+  rpc UpdateFeedGroupById (UpdateFeedGroupByIdRequest) returns (FeedGroupResponse) {};
+  rpc RetrieveFeedGroupFeedsById (RetrieveFeedGroupContentByIdRequest) returns (FeedGroupFeedsResponse) {};
+}

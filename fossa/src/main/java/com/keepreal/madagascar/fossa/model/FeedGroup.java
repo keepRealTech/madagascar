@@ -12,30 +12,22 @@ import javax.persistence.EntityListeners;
 import java.util.List;
 
 /**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-04-27
- **/
-
+ * Represents the feed group data entity.
+ */
 @Data
 @Builder
-@Document(value = "feedInfo")
+@Document(value = "feedGroup")
 @EntityListeners(AuditingEntityListener.class)
-public class FeedInfo {
+public class FeedGroup {
 
     @Id
     private String id;
     private String islandId;
-    private String userId;
-    private String text;
     private String hostId;
-    private Boolean fromHost;
     private List<String> imageUrls;
-    private List<String> membershipIds;
-    private String duplicateTag;
-    private String multiMediaType;
-    private List<MediaInfo> mediaInfos;
-    private String feedGroupId;
+    private List<String> feedIds;
+    private Long lastFeedTime;
+    private String thumbnailUri;
     @Builder.Default
     private Integer likesCount = 0;
     @Builder.Default
@@ -49,8 +41,6 @@ public class FeedInfo {
     private Boolean isTop = false;
     @CreatedDate
     private Long createdTime;
-    @CreatedDate
-    private Long toppedTime;
     @LastModifiedDate
     private Long updatedTime;
 
