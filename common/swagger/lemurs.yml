@@ -2844,6 +2844,8 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MultiMediaDTO'
+        feedGroupId:
+          type: string
       required:
         - islandId
     CheckFeedsMessage:
