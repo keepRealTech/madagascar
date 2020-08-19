@@ -93,7 +93,7 @@ public class FeedGroupService {
         }
 
         if (!Objects.isNull(thumbnailUri)) {
-            requestBuilder.setDescription(StringValue.of(thumbnailUri.trim()));
+            requestBuilder.setThumbnailUri(StringValue.of(thumbnailUri.trim()));
         }
 
         FeedGroupResponse response;
@@ -140,7 +140,7 @@ public class FeedGroupService {
         }
 
         if (!Objects.isNull(thumbnailUri)) {
-            requestBuilder.setDescription(StringValue.of(thumbnailUri.trim()));
+            requestBuilder.setThumbnailUri(StringValue.of(thumbnailUri.trim()));
         }
 
         FeedGroupResponse response;
