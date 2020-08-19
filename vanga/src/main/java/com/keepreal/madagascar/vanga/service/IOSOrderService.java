@@ -110,14 +110,14 @@ public class IOSOrderService {
                 iosOrder.setTransactionId(dictionary.get("transaction_id").toString());
                 return iosOrder;
             }
-        }
+        } else {
+            Map<String, HashMap> dictionary = inApps.stream()
+                    .collect(Collectors.toMap(app -> app.get("product_id").toString(), Function.identity()));
 
-        Map<String, HashMap> dictionary = inApps.stream()
-                .collect(Collectors.toMap(app -> app.get("product_id").toString(), Function.identity()));
-
-        if (dictionary.containsKey(appleSkuId)) {
-            iosOrder.setTransactionId(dictionary.get(appleSkuId).get("transaction_id").toString());
-            return iosOrder;
+            if (dictionary.containsKey(appleSkuId)) {
+                iosOrder.setTransactionId(dictionary.get(appleSkuId).get("transaction_id").toString());
+                return iosOrder;
+            }
         }
 
         throw new KeepRealBusinessException(ErrorCode.REQUEST_USER_SHELL_IOS_RECEIPT_INVALID_ERROR);
