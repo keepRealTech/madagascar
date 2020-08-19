@@ -7,8 +7,9 @@ import com.keepreal.madagascar.common.QuestionMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.AnswerQuestionRequest;
-import com.keepreal.madagascar.fossa.AnswerQuestionResponse;
 import com.keepreal.madagascar.fossa.BoxServiceGrpc;
+import com.keepreal.madagascar.fossa.CommonResponse;
+import com.keepreal.madagascar.fossa.CreateOrUpdateBoxRequest;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.NewFeedsRequestV2;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
@@ -84,7 +85,7 @@ public class BoxService {
     public void answerQuestion(String id, String userId, String answer, boolean publicVisible, List<String> visibleMembershipIds) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
-        AnswerQuestionResponse response;
+        CommonResponse response;
 
         try {
             response = stub.answerQuestion(AnswerQuestionRequest.newBuilder()
@@ -93,6 +94,32 @@ public class BoxService {
                     .setAnswer(answer)
                     .setPublicVisible(publicVisible)
                     .addAllVisibleMembershipIds(visibleMembershipIds == null ? Collections.emptyList() : visibleMembershipIds)
+                    .build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Answer question returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+    }
+
+    public void createOrUpdateBoxInfo(String islandId, boolean enabled, List<String> membershipIds) {
+        BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        CommonResponse response;
+
+        try {
+            response = stub.putBox(CreateOrUpdateBoxRequest.newBuilder()
+                    .setIslandId(islandId)
+                    .setEnabled(enabled)
+                    .addAllMembershipIds(membershipIds)
                     .build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());

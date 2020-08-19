@@ -1,7 +1,10 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.lemur.dtoFactory.BoxDTOFactory;
 import com.keepreal.madagascar.lemur.service.BoxService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.BoxApi;
@@ -19,14 +22,18 @@ import swagger.model.WechatOrderResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.util.List;
 
 @RestController
 public class BoxController implements BoxApi {
 
     private final BoxService boxService;
+    private final BoxDTOFactory boxDTOFactory;
 
-    public BoxController(BoxService boxService) {
+    public BoxController(BoxService boxService,
+                         BoxDTOFactory boxDTOFactory) {
         this.boxService = boxService;
+        this.boxDTOFactory = boxDTOFactory;
     }
 
     @Override
@@ -59,7 +66,16 @@ public class BoxController implements BoxApi {
 
     @Override
     public ResponseEntity<IslandBoxAccessResponse> apiV1IslandsIdBoxesAccessPut(String id, @Valid PutIslandBoxAccessRequest putIslandBoxAccessRequest) {
-        return null;
+        Boolean enabled = putIslandBoxAccessRequest.getEnabled();
+        List<String> membershipIds = putIslandBoxAccessRequest.getMembershipIds();
+
+        this.boxService.createOrUpdateBoxInfo(id, enabled, membershipIds);
+
+        IslandBoxAccessResponse response = new IslandBoxAccessResponse();
+        response.setData(this.boxDTOFactory.boxAccessDTO(id));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
