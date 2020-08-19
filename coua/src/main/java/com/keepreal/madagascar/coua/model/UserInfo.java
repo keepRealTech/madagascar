@@ -61,4 +61,6 @@ public class UserInfo {
     private Long updatedTime;
     @Builder.Default
     private Boolean shouldIntroduce = true;
+    @Builder.Default
+    private String mobile = "";
 }

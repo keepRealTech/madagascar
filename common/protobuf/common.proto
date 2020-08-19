@@ -155,6 +155,7 @@ message UserMessage {
     string username = 13;
     string password = 14;
     bool locked = 15;
+    string mobile = 16;
 }
 
 message IslandMessage {
