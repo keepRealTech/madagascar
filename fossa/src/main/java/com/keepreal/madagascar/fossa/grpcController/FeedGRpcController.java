@@ -300,7 +300,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         FeedGroup feedGroup = null;
         if (!StringUtils.isEmpty(feedInfo.getFeedGroupId())) {
-            feedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getId());
+            feedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
         }
         if (Objects.isNull(feedGroup)) {
             responseObserver.onNext(responseBuilder.build());

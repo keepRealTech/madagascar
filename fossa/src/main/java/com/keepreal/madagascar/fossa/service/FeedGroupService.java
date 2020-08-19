@@ -49,6 +49,7 @@ public class FeedGroupService {
                 .map(feedId -> this.feedInfoRepository.findById(feedId).orElse(null))
                 .filter(Objects::nonNull)
                 .map(FeedInfo::getMediaInfos)
+                .flatMap(List::stream)
                 .limit(3)
                 .map(mediaInfo -> ((PictureInfo) mediaInfo).getUrl())
                 .collect(Collectors.toList());
