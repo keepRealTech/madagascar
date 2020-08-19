@@ -637,14 +637,14 @@ paths:
     get:
       tags:
         - Feed
-      summary: retrieves a feed by id
+      summary: 指定id动态详情
       responses:
         '200':
           description: feed response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeedResponse'
+                $ref: '#/components/schemas/FullFeedResponse'
     delete:
       tags:
         - Feed
@@ -2795,6 +2795,24 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/SimpleMembershipDTO'
+    FeedGroupInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        lastFeedId:
+          type: string
+        nextFeedId:
+          type: string
+    FullFeedDTO:
+      allOf:
+        - $ref: '#/components/schemas/FeedDTO'
+        - type: object
+          properties:
+            feedGroupInfo:
+              $ref: '#/components/schemas/FeedGroupInfo'
     PostFeedPayload:
       type: object
       properties:
@@ -4360,3 +4378,10 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BoxDTO'
+    FullFeedResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FullFeedDTO'

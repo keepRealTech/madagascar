@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
+import com.keepreal.madagascar.fossa.FeedGroupFeedResponse;
 import com.keepreal.madagascar.fossa.FeedGroupFeedsResponse;
 import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
@@ -34,6 +35,7 @@ import swagger.model.DummyResponse;
 import swagger.model.FeedDTO;
 import swagger.model.FeedResponse;
 import swagger.model.FeedsResponseV2;
+import swagger.model.FullFeedResponse;
 import swagger.model.MultiMediaType;
 import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
@@ -164,15 +166,18 @@ public class FeedController implements FeedApi {
      * Implements retrieve feed by id api.
      *
      * @param id id (required) Feed id.
-     * @return {@link FeedResponse}.
+     * @return {@link FullFeedResponse}.
      */
     @Override
-    public ResponseEntity<FeedResponse> apiV1FeedsIdGet(String id) {
+    public ResponseEntity<FullFeedResponse> apiV1FeedsIdGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+        FeedGroupFeedResponse feedGroupFeedResponse = this.feedService.retrieveFeedGroupFeedById(id, userId);
 
-        FeedResponse response = new FeedResponse();
-        response.setData(this.feedDTOFactory.valueOf(feedMessage));
+        FullFeedResponse response = new FullFeedResponse();
+        response.setData(this.feedDTOFactory.valueOf(feedGroupFeedResponse.getFeed(),
+                feedGroupFeedResponse.getFeedGroup(),
+                feedGroupFeedResponse.getLastFeedId(),
+                feedGroupFeedResponse.getNextFeedId()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

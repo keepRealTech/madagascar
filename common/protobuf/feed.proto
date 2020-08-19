@@ -123,11 +123,20 @@ message RetrieveToppedFeedByIdResponse {
     FeedMessage feed = 2;
 }
 
+message FeedGroupFeedResponse {
+    CommonStatus status = 1;
+    FeedMessage feed = 2;
+    FeedGroupMessage feedGroup = 3;
+    string lastFeedId = 4;
+    string nextFeedId = 5;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
+    rpc RetrieveFeedGroupFeedById (RetrieveFeedByIdRequest) returns (FeedGroupFeedResponse) {};
     rpc RetrieveFeedsByIds (RetrieveFeedsByIdsRequest) returns (FeedsResponse) {};
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
     rpc CreateDefaultFeed (CreateDefaultFeedRequest) returns (CreateDefaultFeedResponse) {}

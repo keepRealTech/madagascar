@@ -1,6 +1,6 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
-import com.keepreal.madagascar.fossa.FeedGroupMessage;
+import com.keepreal.madagascar.common.FeedGroupMessage;
 import org.springframework.stereotype.Component;
 import swagger.model.FeedGroupDTO;
 

@@ -6,18 +6,6 @@ option java_package = "com.keepreal.madagascar.fossa";
 import "common.proto";
 import "google/protobuf/wrappers.proto";
 
-message FeedGroupMessage {
-  string id = 1;
-  string islandId = 2;
-  string userId = 3;
-  string name = 4;
-  repeated string imageUris = 5;
-  uint64 lastFeedTime = 6;
-  int32 itemsCount = 7;
-  string thumbnailUri = 8;
-  string description = 9;
-}
-
 message FeedGroupResponse {
   CommonStatus status = 1;
   FeedGroupMessage feedGroup = 2;

@@ -205,6 +205,18 @@ message FeedMessage {
     }
 }
 
+message FeedGroupMessage {
+    string id = 1;
+    string islandId = 2;
+    string userId = 3;
+    string name = 4;
+    repeated string imageUris = 5;
+    uint64 lastFeedTime = 6;
+    int32 itemsCount = 7;
+    string thumbnailUri = 8;
+    string description = 9;
+}
+
 message PicturesMessage {
     repeated Picture picture = 1;
 }

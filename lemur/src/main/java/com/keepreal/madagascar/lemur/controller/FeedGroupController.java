@@ -1,7 +1,7 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.fossa.FeedGroupMessage;
+import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedGroupDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedGroupService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;

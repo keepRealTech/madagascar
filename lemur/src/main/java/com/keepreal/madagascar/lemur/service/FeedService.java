@@ -10,6 +10,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
+import com.keepreal.madagascar.fossa.FeedGroupFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.FeedsResponse;
@@ -196,6 +197,42 @@ public class FeedService {
 
     /**
      * Retrieves a feed by id.
+     *
+     * @param id Feed id.
+     * @param userId User id.
+     * @return {@link FeedGroupFeedResponse}.
+     */
+    public FeedGroupFeedResponse retrieveFeedGroupFeedById(String id, String userId) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        RetrieveFeedByIdRequest request = RetrieveFeedByIdRequest.newBuilder()
+                .setId(id)
+                .setUserId(userId)
+                .setIncludeDeleted(false)
+                .build();
+
+        FeedGroupFeedResponse response;
+        try {
+            response = stub.retrieveFeedGroupFeedById(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve feed returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
+    }
+
+    /**
+     * Retrieves a feed with feed group info by id.
      *
      * @param id Feed id.
      * @return {@link FeedMessage}.

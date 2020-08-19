@@ -2,12 +2,11 @@ package com.keepreal.madagascar.lemur.service;
 
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
-import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.fossa.DeleteFeedGroupByIdRequest;
 import com.keepreal.madagascar.fossa.FeedGroupFeedsResponse;
-import com.keepreal.madagascar.fossa.FeedGroupMessage;
 import com.keepreal.madagascar.fossa.FeedGroupResponse;
 import com.keepreal.madagascar.fossa.FeedGroupServiceGrpc;
 import com.keepreal.madagascar.fossa.FeedGroupsResponse;
@@ -21,7 +20,6 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
