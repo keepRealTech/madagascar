@@ -109,7 +109,8 @@ public class BoxDTOFactory {
         }
         dto.setCreatedAt(feedMessage.getCreatedAt());
 
-        dto.setAnaswer(this.answerDTO(question));
+        //dto.setAnaswer(this.answerDTO(question));
+        return null;
     }
 
     public AnswerDTO answerDTO(QuestionMessage questionMessage, String userId) {

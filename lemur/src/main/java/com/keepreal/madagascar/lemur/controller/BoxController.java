@@ -60,7 +60,7 @@ public class BoxController implements BoxApi {
 
 
         FullQuestionResponse response = new FullQuestionResponse();
-        response.setData();
+        //response.setData();
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
