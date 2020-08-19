@@ -164,8 +164,12 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfoList.add(builder.build());
         });
 
-        List<FeedInfo> feedInfos = feedInfoService.saveAll(feedInfoList);
-        islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp);
+        if (request.hasFeedGroupId() && 1 == islandIdList.size()) {
+            feedInfoList.get(0).setFeedGroupId(request.getFeedGroupId().getValue());
+        }
+
+        List<FeedInfo> feedInfos = this.feedInfoService.saveAll(feedInfoList);
+        this.islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp);
 
         feedInfos.forEach(this.feedEventProducerService::produceNewFeedEventAsync);
 

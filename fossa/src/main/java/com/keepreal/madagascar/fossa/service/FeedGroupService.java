@@ -73,8 +73,6 @@ public class FeedGroupService {
             return;
         }
 
-        // TODO: Reset Feeds next info
-
         feedGroup.setDeleted(true);
         this.feedGroupRepository.save(feedGroup);
     }
