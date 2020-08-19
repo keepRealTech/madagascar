@@ -8,6 +8,7 @@ import com.keepreal.madagascar.fossa.FeedGroupResponse;
 import com.keepreal.madagascar.fossa.FeedGroupServiceGrpc;
 import com.keepreal.madagascar.fossa.FeedGroupsResponse;
 import com.keepreal.madagascar.fossa.NewFeedGroupRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedGroupByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupContentByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupsByIslandIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedGroupByIdRequest;
@@ -24,6 +25,8 @@ import org.springframework.data.domain.PageRequest;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the feed group rpc service.
@@ -166,6 +169,7 @@ public class FeedGroupGRpcController extends FeedGroupServiceGrpc.FeedGroupServi
      * @param request          {@link RetrieveFeedGroupContentByIdRequest}.
      * @param responseObserver {@link FeedGroupFeedsResponse}.
      */
+    @Override
     public void retrieveFeedGroupFeedsById(RetrieveFeedGroupContentByIdRequest request,
                                            StreamObserver<FeedGroupFeedsResponse> responseObserver) {
         FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(request.getId());
@@ -190,6 +194,32 @@ public class FeedGroupGRpcController extends FeedGroupServiceGrpc.FeedGroupServi
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
         responseObserver.onNext(feedsResponse);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the get feed group by id.
+     *
+     * @param request           {@link RetrieveFeedGroupByIdRequest}.
+     * @param responseObserver  {@link FeedGroupResponse}.
+     */
+    @Override
+    public void retrieveFeedGroupById(RetrieveFeedGroupByIdRequest request,
+                                      StreamObserver<FeedGroupResponse> responseObserver) {
+        FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(request.getId());
+        FeedGroupResponse response;
+        if (Objects.isNull(feedGroup)) {
+            response = FeedGroupResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEEDGROUP_NOT_FOUND_ERROR))
+                    .build();
+        } else {
+            response = FeedGroupResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.getSuccStatus())
+                    .setFeedGroup(this.feedGroupService.getFeedGroupMessage(feedGroup))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 
