@@ -148,8 +148,9 @@ public class FeedInfoService {
      * @return {@link FeedMessage}.
      */
     public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
-        if (feedInfo == null)
+        if (feedInfo == null) {
             return null;
+        }
 
         List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);

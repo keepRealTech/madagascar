@@ -186,8 +186,14 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
             }
-            feedGroup.getFeedIds().add(feedInfoList.get(0).getId());
+
             feedInfoList.get(0).setFeedGroupId(request.getFeedGroupId().getValue());
+
+            if (MediaType.MEDIA_PICS == mediaType || MediaType.MEDIA_ALBUM == mediaType) {
+                feedGroup.getImageFeedIds().add(feedInfoList.get(0).getId());
+            }
+            feedGroup.getFeedIds().add(feedInfoList.get(0).getId());
+            feedGroup.setLastFeedTime(feedInfoList.get(0).getCreatedTime());
             this.feedGroupService.updateFeedGroup(feedGroup);
         }
 
@@ -225,6 +231,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
             if (Objects.nonNull(feedGroup)) {
                 feedGroup.getFeedIds().remove(feedInfo.getId());
+                feedGroup.getImageFeedIds().remove(feedInfo.getId());
                 this.feedGroupService.updateFeedGroup(feedGroup);
             }
         }

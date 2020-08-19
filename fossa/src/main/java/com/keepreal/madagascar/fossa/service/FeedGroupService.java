@@ -2,13 +2,17 @@ package com.keepreal.madagascar.fossa.service;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.common.FeedGroupMessage;
+import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.dao.FeedGroupRepository;
+import com.keepreal.madagascar.fossa.model.PictureInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the feed group service.
@@ -16,17 +20,47 @@ import java.util.Objects;
 @Service
 public class FeedGroupService {
 
+    private final FeedInfoRepository feedInfoRepository;
     private final FeedGroupRepository feedGroupRepository;
     private final LongIdGenerator idGenerator;
 
-    public FeedGroupService(FeedGroupRepository feedGroupRepository,
+    public FeedGroupService(FeedInfoRepository feedInfoRepository,
+                            FeedGroupRepository feedGroupRepository,
                             LongIdGenerator idGenerator) {
+        this.feedInfoRepository = feedInfoRepository;
         this.feedGroupRepository = feedGroupRepository;
         this.idGenerator = idGenerator;
     }
 
+    /**
+     * Converts the {@link FeedGroup} into {@link FeedGroupMessage}.
+     *
+     * @param feedGroup {@link FeedGroup}.
+     * @return {@link FeedGroupMessage}.
+     */
     public FeedGroupMessage getFeedGroupMessage(FeedGroup feedGroup) {
-        return null;
+        if (Objects.isNull(feedGroup)) {
+            return FeedGroupMessage.getDefaultInstance();
+        }
+
+        List<String> uris = feedGroup.getImageFeedIds().stream()
+                .limit(3)
+                .map(feedId -> this.feedInfoRepository.findById(feedId).orElse(null))
+                .filter(Objects::nonNull)
+                .map(feedInfo -> ((PictureInfo) feedInfo.getMediaInfos()).getUrl())
+                .collect(Collectors.toList());
+
+        return FeedGroupMessage.newBuilder()
+                .setId(feedGroup.getId())
+                .setDescription(feedGroup.getDescription())
+                .setIslandId(feedGroup.getIslandId())
+                .setUserId(feedGroup.getHostId())
+                .setName(feedGroup.getName())
+                .setLastFeedTime(feedGroup.getLastFeedTime())
+                .setItemsCount(feedGroup.getFeedIds().size())
+                .setThumbnailUri(feedGroup.getThumbnailUri())
+                .addAllImageUris(uris)
+                .build();
     }
 
     /**

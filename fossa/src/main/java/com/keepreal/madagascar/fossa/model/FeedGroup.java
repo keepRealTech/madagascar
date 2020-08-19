@@ -33,7 +33,7 @@ public class FeedGroup {
     @Builder.Default
     private String thumbnailUri = "";
     @Builder.Default
-    private List<String> imageUrls = new ArrayList<>();
+    private List<String> imageFeedIds = new ArrayList<>();
     @Builder.Default
     private NavigableSet<String> feedIds = new TreeSet<>();
     @Builder.Default
