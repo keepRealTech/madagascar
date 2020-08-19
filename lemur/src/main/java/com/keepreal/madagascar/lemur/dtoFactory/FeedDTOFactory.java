@@ -17,6 +17,7 @@ import com.keepreal.madagascar.lemur.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import swagger.model.BriefFeedDTO;
 import swagger.model.CheckFeedsDTO;
 import swagger.model.FeedDTO;
@@ -302,13 +303,15 @@ public class FeedDTOFactory {
             fullFeedDTO.setIsTop(feed.getIsTop());
             fullFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
-            if (Objects.nonNull(feedGroup)) {
+            if (!StringUtils.isEmpty(feedGroup.getId())) {
                 FeedGroupInfo feedGroupInfo = new FeedGroupInfo();
                 feedGroupInfo.setId(feedGroup.getId());
                 feedGroupInfo.setName(feedGroup.getName());
                 feedGroupInfo.setLastFeedId(lastFeedId);
                 feedGroupInfo.setNextFeedId(nextFeedId);
                 fullFeedDTO.setFeedGroupInfo(feedGroupInfo);
+            } else {
+                fullFeedDTO.setFeedGroupInfo(null);
             }
 
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
