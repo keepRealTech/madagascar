@@ -4,11 +4,13 @@ import com.keepreal.madagascar.common.AudioMessage;
 import com.keepreal.madagascar.common.HtmlMessage;
 import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.PicturesMessage;
+import com.keepreal.madagascar.common.QuestionMessage;
 import com.keepreal.madagascar.common.VideoMessage;
 import com.keepreal.madagascar.fossa.model.AudioInfo;
 import com.keepreal.madagascar.fossa.model.HtmlInfo;
 import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.model.PictureInfo;
+import com.keepreal.madagascar.fossa.model.QuestionInfo;
 import com.keepreal.madagascar.fossa.model.VideoInfo;
 
 import java.util.List;
@@ -65,6 +67,24 @@ public class MediaMessageConvertUtils {
         htmlInfo.setContent(htmlMessage.getContent());
 
         return htmlInfo;
+    }
+
+    public static QuestionInfo toQuestionInfo(QuestionMessage questionMessage) {
+        QuestionInfo questionInfo = new QuestionInfo();
+        questionInfo.setText(questionMessage.getText());
+        if (questionMessage.hasPriceInCents()) {
+            questionInfo.setPriceInCents(questionMessage.getPriceInCents().getValue());
+        }
+        if (questionMessage.hasQuestionSkuId()) {
+            questionInfo.setQuestionSkuId(questionMessage.getQuestionSkuId().getValue());
+        }
+        if (questionMessage.hasReceipt()) {
+            questionInfo.setReceipt(questionMessage.getReceipt().getValue());
+        }
+        if (questionMessage.hasTransactionId()) {
+            questionInfo.setTransactionId(questionMessage.getTransactionId().getValue());
+        }
+        return questionInfo;
     }
 
     public static PicturesMessage toPicturesMessage(List<MediaInfo> mediaInfos) {

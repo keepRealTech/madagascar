@@ -465,6 +465,9 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             case MEDIA_HTML:
                 mediaInfos.add(MediaMessageConvertUtils.toHtmlInfo(request.getHtml()));
                 break;
+            case MEDIA_QUESTION:
+                mediaInfos.add(MediaMessageConvertUtils.toQuestionInfo(request.getQuestion()));
+                break;
         }
         return mediaInfos;
     }

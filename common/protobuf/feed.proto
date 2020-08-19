@@ -36,6 +36,7 @@ message NewFeedsRequestV2 {
         VideoMessage video = 9;
         AudioMessage audio = 10;
         HtmlMessage html = 11;
+        QuestionMessage question = 12;
     }
 }
 
