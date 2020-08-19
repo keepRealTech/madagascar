@@ -11,6 +11,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.persistence.EntityListeners;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Represents the feed group data entity.
@@ -33,7 +35,7 @@ public class FeedGroup {
     @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
     @Builder.Default
-    private List<String> feedIds = new ArrayList<>();
+    private SortedSet<String> feedIds = new TreeSet<>();
     @Builder.Default
     private Boolean deleted = false;
     @CreatedDate
