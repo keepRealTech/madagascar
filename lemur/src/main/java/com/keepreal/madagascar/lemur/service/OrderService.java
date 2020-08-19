@@ -103,7 +103,7 @@ public class OrderService {
                 .setUserId(userId)
                 .setShellSkuId(shellSkuId)
                 .setAppleReceipt(receipt)
-                .setTransactionId(transactionId)
+                .setTransactionId(Objects.isNull(transactionId) ? "" : transactionId)
                 .build();
 
         BalanceResponse response;
@@ -178,7 +178,7 @@ public class OrderService {
                 .setUserId(userId)
                 .setMembershipSkuId(membershipSkuId)
                 .setAppleReceipt(receipt)
-                .setTransactionId(transactionId)
+                .setTransactionId(Objects.isNull(transactionId) ? "" : transactionId)
                 .build();
 
         CommonStatus response;
