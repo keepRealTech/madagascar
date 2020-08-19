@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.BoxDTOFactory;
 import com.keepreal.madagascar.lemur.service.BoxService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
@@ -56,7 +57,13 @@ public class BoxController implements BoxApi {
 
     @Override
     public ResponseEntity<FullQuestionResponse> apiV1BoxesQuestionsIdGet(String id) {
-        return null;
+
+
+        FullQuestionResponse response = new FullQuestionResponse();
+        response.setData();
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
@@ -69,10 +76,10 @@ public class BoxController implements BoxApi {
         Boolean enabled = putIslandBoxAccessRequest.getEnabled();
         List<String> membershipIds = putIslandBoxAccessRequest.getMembershipIds();
 
-        this.boxService.createOrUpdateBoxInfo(id, enabled, membershipIds);
+        BoxMessage boxMessage = this.boxService.createOrUpdateBoxInfo(id, enabled, membershipIds);
 
         IslandBoxAccessResponse response = new IslandBoxAccessResponse();
-        response.setData(this.boxDTOFactory.boxAccessDTO(id));
+        response.setData(this.boxDTOFactory.boxAccessDTO(boxMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -92,7 +99,7 @@ public class BoxController implements BoxApi {
 
 
         IslandBoxResponse response = new IslandBoxResponse();
-//        response.setData();
+        response.setData(this.boxDTOFactory.boxDTO("", ""));
         return null;
     }
 

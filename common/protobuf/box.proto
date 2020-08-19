@@ -24,7 +24,19 @@ message CreateOrUpdateBoxRequest {
     repeated string membershipIds = 3;
 }
 
+message CreateOrUpdateBoxResponse {
+    CommonStatus status = 1;
+    BoxMessage message = 2;
+}
+
+message BoxMessage {
+    string id = 1;
+    string island = 2;
+    bool enabled = 3;
+    repeated string membershipIds = 4;
+}
+
 service BoxService {
     rpc AnswerQuestion (AnswerQuestionRequest) returns (CommonResponse){}
-    rpc PutBox (CreateOrUpdateBoxRequest) returns (CommonResponse) {}
+    rpc PutBox (CreateOrUpdateBoxRequest) returns (CreateOrUpdateBoxResponse) {}
 }

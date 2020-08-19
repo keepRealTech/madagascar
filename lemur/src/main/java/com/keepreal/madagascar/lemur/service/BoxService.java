@@ -7,9 +7,11 @@ import com.keepreal.madagascar.common.QuestionMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.AnswerQuestionRequest;
+import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.fossa.BoxServiceGrpc;
 import com.keepreal.madagascar.fossa.CommonResponse;
 import com.keepreal.madagascar.fossa.CreateOrUpdateBoxRequest;
+import com.keepreal.madagascar.fossa.CreateOrUpdateBoxResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.NewFeedsRequestV2;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
@@ -110,10 +112,10 @@ public class BoxService {
         }
     }
 
-    public void createOrUpdateBoxInfo(String islandId, boolean enabled, List<String> membershipIds) {
+    public BoxMessage createOrUpdateBoxInfo(String islandId, boolean enabled, List<String> membershipIds) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
-        CommonResponse response;
+        CreateOrUpdateBoxResponse response;
 
         try {
             response = stub.putBox(CreateOrUpdateBoxRequest.newBuilder()
@@ -134,6 +136,8 @@ public class BoxService {
         if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
             throw new KeepRealBusinessException(response.getStatus());
         }
+
+        return response.getMessage();
     }
 
     public void retrieveBoxInfo(String islandId) {
