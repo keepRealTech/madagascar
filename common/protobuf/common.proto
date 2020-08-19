@@ -92,6 +92,9 @@ enum PushPriority {
     NEW_MEMBERSHIP = 2;
     NEW_LIKE = 3;
     NEW_COMMENT = 4;
+    NEW_QUESTION = 5;
+    NEW_REPLY = 6;
+    NEW_PUBLIC_REPLY = 7;
 }
 
 message GenderValue {

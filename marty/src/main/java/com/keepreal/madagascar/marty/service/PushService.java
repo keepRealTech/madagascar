@@ -1,12 +1,15 @@
 package com.keepreal.madagascar.marty.service;
 
 import com.google.common.collect.Lists;
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokenResponse;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokensByUserIdListResponse;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokensResponse;
+import com.keepreal.madagascar.fossa.FeedResponse;
 import com.keepreal.madagascar.mantella.FeedCreateEvent;
+import com.keepreal.madagascar.mantella.FeedUpdateEvent;
 import com.keepreal.madagascar.marty.model.PushType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,7 @@ public class PushService {
     private final UmengPushService umengPushService;
     private final JpushService jpushService;
     private final PushNotificationService pushNotificationService;
+    private final FeedService feedService;
 
     /**
      * @param userService       {@link UserService}.
@@ -30,19 +34,22 @@ public class PushService {
      * @param chatService       {@link ChatService}.
      * @param umengPushService  {@link UmengPushService}.
      * @param jpushService      {@link JpushService}.
-     * @param pushNotificationService
+     * @param pushNotificationService {@link PushNotificationService}
+     * @param feedService {@link FeedService}
      */
     public PushService(UserService userService,
                        IslandService islandService,
                        ChatService chatService, UmengPushService umengPushService,
                        JpushService jpushService,
-                       PushNotificationService pushNotificationService) {
+                       PushNotificationService pushNotificationService,
+                       FeedService feedService) {
         this.userService = userService;
         this.islandService = islandService;
         this.chatService = chatService;
         this.umengPushService = umengPushService;
         this.jpushService = jpushService;
         this.pushNotificationService = pushNotificationService;
+        this.feedService = feedService;
     }
 
     public void pushMessageByType(String userId, PushType pushType) {
@@ -93,4 +100,76 @@ public class PushService {
         List<List<String>> iOSPartition = Lists.partition(iosTokensList, 800);
         iOSPartition.forEach(list -> jpushService.pushIOSUpdateBulletinMessage(chatGroupId, bulletin, pushType, list.toArray(new String[0])));
     }
+
+    /**
+     * 有问题时 向被提问者(岛主)推送通知消息
+     *
+     * @param event    {@link FeedCreateEvent}
+     * @param hostId   岛主 user id
+     */
+    public void pushNewQuestion(FeedCreateEvent event, String hostId) {
+
+        RetrieveDeviceTokenResponse response = userService.retrieveUserDeviceToken(hostId);
+
+        ProtocolStringList androidTokensList = response.getAndroidTokensList();
+        ProtocolStringList iosTokensList = response.getIosTokensList();
+
+        this.pushNotificationService.umengPushAndroidNewQuestionNotification(event.getAuthorId(), event.getFeedId(), androidTokensList);
+        this.pushNotificationService.jPushIosNewQuestionNotificationNotification(event.getAuthorId(), event.getFeedId(), iosTokensList);
+    }
+
+    /**
+     * 有回答时 向提问者推送通知消息 和 向全体岛民推送通知消息(当岛主允许查看回答时)
+     *
+     * @param event   {@link FeedUpdateEvent}
+     */
+    public void pushNewReply(FeedUpdateEvent event) {
+        String feedId = event.getFeedId();
+        String authorId = event.getAuthorId();
+
+        FeedResponse feedResponse = this.feedService.retrieveFeedInfoById(feedId, authorId);
+
+        boolean publicVisible = feedResponse.getFeed().getQuestion().getPublicVisible().getValue();
+        if (publicVisible) {
+            this.pushNewReplyToAllSubscriber(event);
+        } else {
+            RetrieveDeviceTokenResponse response = userService.retrieveUserDeviceToken(authorId);
+            ProtocolStringList androidTokensList = response.getAndroidTokensList();
+            ProtocolStringList iosTokensList = response.getIosTokensList();
+
+            this.pushNotificationService.umengPushAndroidNewReplyNotification(event.getAuthorId(), event.getFeedId(),
+                    androidTokensList, false);
+            this.pushNotificationService.jPushIosNewReplyNotificationNotification(event.getAuthorId(), event.getFeedId(),
+                    iosTokensList, false);
+        }
+    }
+
+    /**
+     * 向该岛所有岛民推送回答通知消息
+     *
+     * @param event {@link FeedUpdateEvent}
+     */
+    private void pushNewReplyToAllSubscriber(FeedUpdateEvent event) {
+        int page = 0;
+        int pageSize = 500;
+        RetrieveDeviceTokensResponse response;
+        String islandId = event.getIslandId();
+        do {
+            PageRequest pageRequest = PageRequest.newBuilder()
+                    .setPage(page++)
+                    .setPageSize(pageSize)
+                    .build();
+            response = islandService.getDeviceTokenList(islandId, pageRequest);
+
+            ProtocolStringList androidTokensList = response.getAndroidTokensList();
+            ProtocolStringList iosTokensList = response.getIosTokensList();
+
+            pushNotificationService.jPushIosNewReplyNotificationNotification(event.getAuthorId(), event.getFeedId(),
+                    iosTokensList, true);
+            pushNotificationService.umengPushAndroidNewReplyNotification(event.getAuthorId(),
+                    event.getFeedId(), androidTokensList, true);
+
+        } while (response.getPageResponse().getHasMore());
+    }
+
 }
