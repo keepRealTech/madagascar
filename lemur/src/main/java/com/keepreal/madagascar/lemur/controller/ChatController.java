@@ -157,7 +157,7 @@ public class ChatController implements ChatApi {
         IslandMessage myIsland = myCreatedIslandResponse.getIslandsList().isEmpty() ?
                 null : myCreatedIslandResponse.getIslandsList().get(0);
 
-        if (Objects.isNull(targetIsland) && Objects.isNull(myIsland)) {
+        if (Objects.isNull(targetIsland)) {
             hasAccess = true;
         }
 
@@ -529,7 +529,9 @@ public class ChatController implements ChatApi {
         BriefUsersResponse response = new BriefUsersResponse();
         response.setData(chatgroupMembersResponse.getMemberIdsList().stream()
                 .map(mid -> userMessageMap.getOrDefault(mid, null))
-                .map(this.userDTOFactory::briefValueOf).collect(Collectors.toList()));
+                .map(this.userDTOFactory::briefValueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(chatgroupMembersResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
