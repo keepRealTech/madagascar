@@ -246,6 +246,8 @@ message QuestionMessage {
     google.protobuf.StringValue transactionId = 5;
     google.protobuf.StringValue answer = 6;
     google.protobuf.BoolValue publicVisible = 7;
+    string answerUserId = 8;
+    int64 answeredAt = 9;
 }
 
 message CommentMessage {
