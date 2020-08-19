@@ -29,7 +29,7 @@ public class FeedGroupDTOFactory {
         feedGroupDTO.setIslandId(feedGroupMessage.getIslandId());
         feedGroupDTO.setItemCount(feedGroupMessage.getItemsCount());
         feedGroupDTO.setName(feedGroupMessage.getName());
-        feedGroupDTO.setUpdatedAt(feedGroupMessage.getLastFeedTime());
+        feedGroupDTO.setLastFeedTimestamp(feedGroupMessage.getLastFeedTime());
         feedGroupDTO.setThumbnailUri(feedGroupMessage.getThumbnailUri());
         feedGroupDTO.setImageUris(feedGroupMessage.getImageUrisList());
         feedGroupDTO.setDescription(feedGroupMessage.getDescription());

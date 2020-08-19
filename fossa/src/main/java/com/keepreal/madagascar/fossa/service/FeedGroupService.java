@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.dao.FeedGroupRepository;
+import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.PictureInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,10 +45,12 @@ public class FeedGroupService {
         }
 
         List<String> uris = feedGroup.getImageFeedIds().stream()
-                .limit(3)
+                .limit(1)
                 .map(feedId -> this.feedInfoRepository.findById(feedId).orElse(null))
                 .filter(Objects::nonNull)
-                .map(feedInfo -> ((PictureInfo) feedInfo.getMediaInfos()).getUrl())
+                .map(FeedInfo::getMediaInfos)
+                .limit(3)
+                .map(mediaInfo -> ((PictureInfo) mediaInfo).getUrl())
                 .collect(Collectors.toList());
 
         return FeedGroupMessage.newBuilder()

@@ -26,8 +26,6 @@ import org.springframework.data.domain.PageRequest;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
-
 /**
  * Represents the feed group rpc service.
  */

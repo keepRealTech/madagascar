@@ -4153,7 +4153,7 @@ components:
           type: string
         hostId:
           type: string
-        updatedAt:
+        lastFeedTimestamp:
           type: integer
           format: int64
         description:

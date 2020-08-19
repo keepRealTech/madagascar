@@ -40,6 +40,7 @@ import swagger.model.MultiMediaDTO;
 import swagger.model.TopFeedRequest;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -137,7 +138,7 @@ public class FeedService {
         NewFeedsRequestV2.Builder builder = NewFeedsRequestV2.newBuilder()
                 .addAllIslandId(islandIds)
                 .addAllHostId(hostIdList)
-                .addAllMembershipIds(membershipIds)
+                .addAllMembershipIds(Objects.isNull(membershipIds) ? new ArrayList<>() : membershipIds)
                 .setUserId(userId)
                 .setType(mediaType);
 
