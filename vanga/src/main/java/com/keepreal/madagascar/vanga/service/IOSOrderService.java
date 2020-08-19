@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -100,13 +101,22 @@ public class IOSOrderService {
         List<HashMap> inApps = JSONObject.parseArray(
                 JSONObject.parseObject(responseData.getString("receipt")).getString("in_app"), HashMap.class);
 
-        HashMap dictionary = inApps.stream()
-                .filter(app -> transactionId.equals(app.get("transaction_id")) && appleSkuId.equals(app.get("product_id")))
-                .findFirst()
-                .orElse(null);
+        if (!StringUtils.isEmpty(transactionId)) {
+            HashMap dictionary = inApps.stream()
+                    .filter(app -> transactionId.equals(app.get("transaction_id")) && appleSkuId.equals(app.get("product_id")))
+                    .findFirst()
+                    .orElse(null);
+            if (Objects.nonNull(dictionary)) {
+                iosOrder.setTransactionId(dictionary.get("transaction_id").toString());
+                return iosOrder;
+            }
+        }
 
-        if (Objects.nonNull(dictionary)) {
-            iosOrder.setTransactionId(dictionary.get("transaction_id").toString());
+        Map<String, HashMap> dictionary = inApps.stream()
+                .collect(Collectors.toMap(app -> app.get("product_id").toString(), Function.identity()));
+
+        if (dictionary.containsKey(appleSkuId)) {
+            iosOrder.setTransactionId(dictionary.get(appleSkuId).get("transaction_id").toString());
             return iosOrder;
         }
 
