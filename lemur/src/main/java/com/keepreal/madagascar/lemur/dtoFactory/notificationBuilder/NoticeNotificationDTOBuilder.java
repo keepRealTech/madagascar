@@ -117,7 +117,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
 
         switch (noticeMessage.getType()) {
             case NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER:
-                noticeDTO.setNoticeType(NoticeType.SUBSCRIBER);
+                noticeDTO.setNoticeType(NoticeType.ISLAND_NOTICE_NEW_SUBSCRIBER);
 
                 if (Objects.isNull(noticeMessage.getSubscribeNotice())) {
                     return noticeDTO;
@@ -133,7 +133,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                                         noticeMessage.getSubscribeNotice().getSubscriberId())));
                 return noticeDTO;
             case NOTICE_TYPE_ISLAND_NEW_MEMBER:
-                noticeDTO.setNoticeType(NoticeType.MEMBER);
+                noticeDTO.setNoticeType(NoticeType.ISLAND_NOTICE_NEW_MEMBER);
 
                 if (Objects.isNull(noticeMessage.getMemberNotice())) {
                     return noticeDTO;

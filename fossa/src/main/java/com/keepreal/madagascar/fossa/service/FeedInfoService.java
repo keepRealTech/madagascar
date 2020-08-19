@@ -198,6 +198,16 @@ public class FeedInfoService {
     }
 
     /**
+     * Update feed.
+     *
+     * @param feedInfo  {@link FeedInfo}.
+     * @return  {@link FeedInfo}.
+     */
+    public FeedInfo update(FeedInfo feedInfo) {
+        return feedInfoRepository.save(feedInfo);
+    }
+
+    /**
      * Retrieves feed by id.
      *
      * @param feedId         feed id.

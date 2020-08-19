@@ -9,6 +9,7 @@ import com.keepreal.madagascar.mantella.FeedCreateEvent;
 import com.keepreal.madagascar.mantella.FeedDeleteEvent;
 import com.keepreal.madagascar.mantella.FeedEventMessage;
 import com.keepreal.madagascar.mantella.FeedEventType;
+import com.keepreal.madagascar.mantella.FeedUpdateEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Service;
@@ -72,6 +73,11 @@ public class FeedEventProducerService {
         this.sendAsync(message, feedId);
     }
 
+    public void produceUpdateFeedEventAsync(FeedInfo feedInfo) {
+        Message message = this.createUpdateFeedEventMessage(feedInfo);
+        this.sendAsync(message, feedInfo.getId());
+    }
+
     /**
      * Sends a message in async manner.
      *
@@ -117,6 +123,29 @@ public class FeedEventProducerService {
         FeedEventMessage event = FeedEventMessage.newBuilder()
                 .setType(FeedEventType.FEED_EVENT_CREATE)
                 .setFeedCreateEvent(feedCreateEvent)
+                .setTimestamp(System.currentTimeMillis())
+                .setEventId(uuid)
+                .build();
+        return new Message(this.feedEventProducerConfiguration.getTopic(),
+                this.feedEventProducerConfiguration.getTag(), uuid, event.toByteArray());
+    }
+
+    private Message createUpdateFeedEventMessage(FeedInfo feedInfo) {
+        if (Objects.isNull(feedInfo)) {
+            return null;
+        }
+
+        FeedUpdateEvent feedUpdateEvent = FeedUpdateEvent.newBuilder()
+                .setFeedId(feedInfo.getId())
+                .setAuthorId(feedInfo.getUserId())
+                .setIslandId(feedInfo.getIslandId())
+                .addAllMembershipIds(feedInfo.getMembershipIds())
+                .build();
+
+        String uuid = UUID.randomUUID().toString();
+        FeedEventMessage event = FeedEventMessage.newBuilder()
+                .setType(FeedEventType.FEED_EVENT_CREATE)
+                .setFeedUpdateEvent(feedUpdateEvent)
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
                 .build();
