@@ -42,7 +42,7 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
     private final NotificationEventProducerService notificationEventProducerService;
 
     /**
-     * Constructs comment grpc controller
+     * Constructs comment grpc controller.
      *
      * @param feedInfoService                  {@link FeedInfoService}.
      * @param commentService                   {@link CommentService}.

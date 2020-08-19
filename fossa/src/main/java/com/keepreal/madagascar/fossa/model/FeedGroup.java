@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.persistence.EntityListeners;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.SortedSet;
+import java.util.NavigableSet;
 import java.util.TreeSet;
 
 /**
@@ -35,7 +35,7 @@ public class FeedGroup {
     @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
     @Builder.Default
-    private SortedSet<String> feedIds = new TreeSet<>();
+    private NavigableSet<String> feedIds = new TreeSet<>();
     @Builder.Default
     private Boolean deleted = false;
     @CreatedDate

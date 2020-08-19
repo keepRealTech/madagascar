@@ -1,7 +1,7 @@
 package com.keepreal.madagascar.fossa.service;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.fossa.FeedGroupMessage;
+import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.dao.FeedGroupRepository;
 import org.springframework.data.domain.Page;
