@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.fossa";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message AnswerQuestionRequest {
+    string id = 1;
+    string userId = 2;
+    string answer = 3;
+    bool publicVisible = 4;
+    repeated string visibleMembershipIds = 5;
+}
+
+message AnswerQuestionResponse {
+    CommonStatus status = 1;
+}
+
+service BoxService {
+    rpc AnswerQuestion (AnswerQuestionRequest) returns (AnswerQuestionResponse){}
+}

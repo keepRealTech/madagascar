@@ -4251,10 +4251,10 @@ components:
           type: integer
         publicVisible:
           type: boolean
-        visibleMemberships:
+        visibleMembershipIds:
           type: array
           items:
-            $ref: '#/components/schemas/BriefMembershipDTO'
+            type: string
         createdAt:
           type: integer
           format: int64

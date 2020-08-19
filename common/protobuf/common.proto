@@ -136,6 +136,7 @@ enum MediaType {
     MEDIA_VIDEO = 4;
     MEDIA_AUDIO = 5;
     MEDIA_HTML = 6;
+    MEDIA_QUESTION = 7;
 }
 
 message UserMessage {
@@ -200,6 +201,7 @@ message FeedMessage {
         VideoMessage video = 20;
         AudioMessage audio = 21;
         HtmlMessage html = 22;
+        QuestionMessage question = 23;
     }
 }
 
@@ -234,6 +236,16 @@ message AudioMessage {
 
 message HtmlMessage {
     string content = 1;
+}
+
+message QuestionMessage {
+    string text = 1;
+    google.protobuf.Int64Value priceInCents = 2;
+    google.protobuf.StringValue questionSkuId = 3;
+    google.protobuf.StringValue receipt = 4;
+    google.protobuf.StringValue transactionId = 5;
+    google.protobuf.StringValue answer = 6;
+    google.protobuf.BoolValue publicVisible = 7;
 }
 
 message CommentMessage {
