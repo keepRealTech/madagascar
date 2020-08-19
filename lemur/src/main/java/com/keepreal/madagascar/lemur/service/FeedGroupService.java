@@ -11,6 +11,7 @@ import com.keepreal.madagascar.fossa.FeedGroupResponse;
 import com.keepreal.madagascar.fossa.FeedGroupServiceGrpc;
 import com.keepreal.madagascar.fossa.FeedGroupsResponse;
 import com.keepreal.madagascar.fossa.NewFeedGroupRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedGroupByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupContentByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupsByIslandIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedGroupByIdRequest;
@@ -145,6 +146,38 @@ public class FeedGroupService {
         FeedGroupResponse response;
         try {
             response = stub.updateFeedGroupById(requestBuilder.build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Update feed group returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getFeedGroup();
+    }
+
+    /**
+     * Retrieves a feed group by id.
+     *
+     * @param id           Feed group id.
+     * @return Updated @link FeedGroupMessage}.
+     */
+    public FeedGroupMessage retrieveFeedGroupById(String id) {
+        FeedGroupServiceGrpc.FeedGroupServiceBlockingStub stub = FeedGroupServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        RetrieveFeedGroupByIdRequest.Builder requestBuilder = RetrieveFeedGroupByIdRequest.newBuilder()
+                .setId(id);
+
+        FeedGroupResponse response;
+        try {
+            response = stub.retrieveFeedGroupById(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

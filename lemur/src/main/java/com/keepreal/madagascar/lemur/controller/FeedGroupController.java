@@ -1,9 +1,12 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedGroupDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedGroupService;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -26,17 +29,21 @@ import java.util.stream.Collectors;
 @RestController
 public class FeedGroupController implements FeedGroupApi {
 
+    private final IslandService islandService;
     private final FeedGroupService feedGroupService;
     private final FeedGroupDTOFactory feedGroupDTOFactory;
 
     /**
      * Constructs the feed group controller.
      *
+     * @param islandService         {@link IslandService}.
      * @param feedGroupService      {@link FeedGroupService}.
      * @param feedGroupDTOFactory   {@link FeedGroupDTOFactory}.
      */
-    public FeedGroupController(FeedGroupService feedGroupService,
+    public FeedGroupController(IslandService islandService,
+                               FeedGroupService feedGroupService,
                                FeedGroupDTOFactory feedGroupDTOFactory) {
+        this.islandService = islandService;
         this.feedGroupService = feedGroupService;
         this.feedGroupDTOFactory = feedGroupDTOFactory;
     }
@@ -50,6 +57,13 @@ public class FeedGroupController implements FeedGroupApi {
     @CrossOrigin
     @Override
     public ResponseEntity<DummyResponse> apiV1FeedgroupsIdDelete(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        FeedGroupMessage feedGroupMessage = this.feedGroupService.retrieveFeedGroupById(id);
+
+        if (!userId.equals(feedGroupMessage.getUserId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         this.feedGroupService.deleteFeedGroupById(id);
 
         DummyResponse response = new DummyResponse();
@@ -68,7 +82,14 @@ public class FeedGroupController implements FeedGroupApi {
     @Override
     public ResponseEntity<FeedGroupResponse> apiV1FeedgroupsIdPut(String id,
                                                                   PutFeedGroupRequest putFeedGroupRequest) {
-        FeedGroupMessage feedGroupMessage = this.feedGroupService.updateFeedGroup(id,
+        String userId = HttpContextUtils.getUserIdFromContext();
+        FeedGroupMessage feedGroupMessage = this.feedGroupService.retrieveFeedGroupById(id);
+
+        if (!userId.equals(feedGroupMessage.getUserId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        feedGroupMessage = this.feedGroupService.updateFeedGroup(id,
                 putFeedGroupRequest.getName(),
                 putFeedGroupRequest.getDescription(),
                 putFeedGroupRequest.getThumbnailUri());
@@ -117,6 +138,11 @@ public class FeedGroupController implements FeedGroupApi {
     public ResponseEntity<FeedGroupResponse> apiV1IslandsIdFeedgroupsPost(String id,
                                                                           PostFeedGroupRequest postFeedGroupRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+        if (!userId.equals(islandMessage.getHostId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         FeedGroupMessage feedGroupMessage = this.feedGroupService.createFeedGroup(id,
                 userId,
                 postFeedGroupRequest.getName(),
