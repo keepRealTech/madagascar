@@ -13,6 +13,7 @@ data:
   WECHATMP_CERTPATH: {{ .Values.wechat_pay.cert_path }}
   IOSPAY_VERIFYURL: {{ .Values.ios_pay.verify_url }}
   IOSPAY_VERIFYURLSANDBOX: {{ .Values.ios_pay.verify_url_sandbox }}
+  IOSPAY_ENABLESANDBOX: "true"
   SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
