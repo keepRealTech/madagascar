@@ -121,8 +121,10 @@ public class BoxController implements BoxApi {
 
     @Override
     public ResponseEntity<DummyResponse> apiV1BoxesQuestionsIdIgnorePost(String id) {
-        //todo...
-        return null;
+        this.boxService.ignoreQuestion(id);
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**

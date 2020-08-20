@@ -90,6 +90,7 @@ public class MediaMessageConvertUtils {
         }
         questionInfo.setAnswerUserId(questionMessage.getAnswerUserId());
         questionInfo.setAnswerAt(questionMessage.getAnsweredAt());
+        questionInfo.setIgnored(false);
         return questionInfo;
     }
 

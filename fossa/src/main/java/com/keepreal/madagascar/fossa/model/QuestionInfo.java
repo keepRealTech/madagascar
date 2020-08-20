@@ -14,4 +14,5 @@ public class QuestionInfo extends MediaInfo {
     private Boolean publicVisible;
     private String answerUserId;
     private Long answerAt;
+    private boolean ignored;
 }

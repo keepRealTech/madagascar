@@ -63,6 +63,10 @@ message RetrieveBoxInfoResponse {
     BoxMessage message = 2;
 }
 
+message IgnoreQuestionRequest {
+    string questionId = 1;
+}
+
 message BoxMessage {
     string id = 1;
     string island = 2;
@@ -78,5 +82,5 @@ service BoxService {
     rpc RetrieveAnsweredAndVisibleQuestion (RetrieveAnsweredAndVisibleQuestionsRequest) returns (QuestionsResponse) {}
     rpc RetrieveAskMeQuestion (RetrieveAskMeQuestionsRequest) returns (QuestionsResponse) {}
     rpc RetrieveAnswerMeQuestions (RetrieveAnswerMeQuestionsRequest) returns (QuestionsResponse) {}
-
+    rpc IgnoreQuestion (IgnoreQuestionRequest) returns (CommonResponse) {}
 }
