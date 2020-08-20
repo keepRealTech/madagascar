@@ -2695,13 +2695,30 @@ components:
         size:
           type: integer
           format: int64
+    AnswerDTO:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        text:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
+        hasExpired:
+          type: boolean
+        publicVisible:
+          type: boolean
+        answeredAt:
+          type: integer
+          format: int64
     MultiMediaDTO:
       oneOf:
         - $ref: '#/components/schemas/VideoDTO'
         - $ref: '#/components/schemas/PictureDTO'
         - $ref: '#/components/schemas/AudioDTO'
         - $ref: '#/components/schemas/HtmlDTO'
-        - $ref: '#/components/schemas/QuestionDTO'
+        - $ref: '#/components/schemas/AnswerDTO'
     PosterFeedDTO:
       type: object
       properties:
@@ -4264,23 +4281,18 @@ components:
         createdAt:
           type: integer
           format: int64
-    AnswerDTO:
-      type: object
-      properties:
-        user:
-          $ref: '#/components/schemas/BriefUserDTO'
-        text:
-          type: string
-        answeredAt:
-          type: integer
-          format: int64
     FullQuestionDTO:
       allOf:
         - $ref: '#/components/schemas/QuestionDTO'
         - type: object
           properties:
-            anaswer:
-              $ref: '#/components/schemas/AnswerDTO'
+            answerer:
+              $ref: '#/components/schemas/BriefUserDTO'
+            answer:
+              type: string
+            answeredAt:
+              type: integer
+              format: int64
             comments:
               type: array
               items:

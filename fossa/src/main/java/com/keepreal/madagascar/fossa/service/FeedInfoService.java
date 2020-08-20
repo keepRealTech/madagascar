@@ -84,9 +84,9 @@ public class FeedInfoService {
      * @return {@link FeedMessage}.
      */
     public FeedMessage getFeedMessageById(String feedId, String userId) {
-        Optional<FeedInfo> feedInfoOptional = feedInfoRepository.findById(feedId);
+        Optional<FeedInfo> feedInfoOptional = this.feedInfoRepository.findById(feedId);
         if (feedInfoOptional.isPresent()) {
-            return getFeedMessage(feedInfoOptional.get(), userId);
+            return this.getFeedMessage(feedInfoOptional.get(), userId);
         } else {
             return FeedMessage.newBuilder().build();
         }
@@ -183,7 +183,7 @@ public class FeedInfoService {
                 builder.addAllMembershipId(membershipIds);
             }
         }
-        processMedia(builder, feedInfo);
+        this.processMedia(builder, feedInfo);
 
         return builder.build();
     }
