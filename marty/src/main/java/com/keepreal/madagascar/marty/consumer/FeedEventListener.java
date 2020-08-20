@@ -27,12 +27,9 @@ import static com.keepreal.madagascar.mantella.FeedEventType.FEED_EVENT_UPDATE;
 public class FeedEventListener implements MessageListener {
 
     private final PushService pushService;
-    private final IslandService islandService;
 
-    public FeedEventListener(PushService pushService,
-                             IslandService islandService) {
+    public FeedEventListener(PushService pushService) {
         this.pushService = pushService;
-        this.islandService = islandService;
     }
 
     /**
@@ -52,8 +49,7 @@ public class FeedEventListener implements MessageListener {
 
             if (feedEventMessage.getType().equals(FEED_EVENT_CREATE)
                     && MediaType.MEDIA_QUESTION_VALUE == feedEventMessage.getFeedCreateEvent().getMediaTypeValue()) {
-                IslandResponse islandResponse = this.islandService.retrieveIslandById(feedEventMessage.getFeedCreateEvent().getIslandId());
-                String hostId = islandResponse.getIsland().getHostId();
+                String hostId = feedEventMessage.getFeedCreateEvent().getHostId();
                 pushService.pushMessageByType(hostId, PushType.PUSH_QUESTION);
                 pushService.pushNewQuestion(feedEventMessage.getFeedCreateEvent(), hostId);
                 return Action.CommitMessage;
