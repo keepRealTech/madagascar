@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.BoxApi;
+import swagger.model.BoxDTO;
 import swagger.model.DummyResponse;
 import swagger.model.FullQuestionResponse;
 import swagger.model.IslandBoxAccessResponse;
@@ -153,14 +154,18 @@ public class BoxController implements BoxApi {
 
     @Override
     public ResponseEntity<IslandBoxResponse> apiV1IslandsIdBoxesGet(String id) {
-        //todo...
-        // get box info
-        // isOpen, membershipIds
+        String userId = HttpContextUtils.getUserIdFromContext();
+        BoxMessage boxMessage = this.boxService.retrieveBoxInfo(id);
 
+        BoxDTO dto = this.boxDTOFactory.boxDTO(boxMessage, userId);
+        List<FeedMessage> feedList = this.boxService.retrieveAnsweredAndVisibleQuestions(id, userId, 0, 2).getFeedList();
+        dto.setRecentAnsweredQuestions(feedList.stream().map(this.boxDTOFactory::questionDTO).collect(Collectors.toList()));
 
         IslandBoxResponse response = new IslandBoxResponse();
-        response.setData(this.boxDTOFactory.boxDTO("", ""));
-        return null;
+        response.setData(dto);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
@@ -179,7 +184,9 @@ public class BoxController implements BoxApi {
 
     @Override
     public ResponseEntity<QuestionsResponse> apiV1IslandsIdBoxesQuestionsGet(String id, @Min(0) @Valid Integer page, @Min(1) @Max(100) @Valid Integer pageSize) {
-        com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAnsweredAndVisibleQuestions(id, page, pageSize);
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAnsweredAndVisibleQuestions(id, userId, page, pageSize);
 
         QuestionsResponse response = new QuestionsResponse();
         response.setData(questionsResponse.getFeedList().stream().map(this.boxDTOFactory::questionDTO).collect(Collectors.toList()));

@@ -20,6 +20,8 @@ import com.keepreal.madagascar.fossa.QuestionsResponse;
 import com.keepreal.madagascar.fossa.RetrieveAnswerMeQuestionsRequest;
 import com.keepreal.madagascar.fossa.RetrieveAnsweredAndVisibleQuestionsRequest;
 import com.keepreal.madagascar.fossa.RetrieveAskMeQuestionsRequest;
+import com.keepreal.madagascar.fossa.RetrieveBoxInfoRequest;
+import com.keepreal.madagascar.fossa.RetrieveBoxInfoResponse;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
@@ -51,7 +53,10 @@ public class BoxService {
         String hostId = this.islandService.retrieveIslandById(islandId).getHostId();
 
 
-        QuestionMessage.Builder questionBuilder = QuestionMessage.newBuilder().setText(text);
+        QuestionMessage.Builder questionBuilder = QuestionMessage.newBuilder()
+                .setText(text)
+                .setAnswerUserId(hostId)
+                .setAnsweredAt(0L);
         if (priceInCents != null && priceInCents > 0) {
             questionBuilder.setPriceInCents(Int64Value.of(priceInCents));
         }
@@ -146,11 +151,33 @@ public class BoxService {
         return response.getMessage();
     }
 
-    public void retrieveBoxInfo(String islandId) {
+    public BoxMessage retrieveBoxInfo(String islandId) {
+        BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
+        RetrieveBoxInfoResponse response;
+
+        try {
+            response = stub.retrieveBoxInfo(RetrieveBoxInfoRequest.newBuilder()
+                    .setIslandId(islandId)
+                    .build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "retrieve box info returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getMessage();
     }
 
-    public QuestionsResponse retrieveAnsweredAndVisibleQuestions(String islandId, int page, int pageSize) {
+    public QuestionsResponse retrieveAnsweredAndVisibleQuestions(String islandId, String userId, int page, int pageSize) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
         QuestionsResponse response;
@@ -158,6 +185,7 @@ public class BoxService {
         try {
             response = stub.retrieveAnsweredAndVisibleQuestion(RetrieveAnsweredAndVisibleQuestionsRequest.newBuilder()
                     .setIslandId(islandId)
+                    .setUserId(userId)
                     .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
                     .build());
         } catch (StatusRuntimeException exception) {

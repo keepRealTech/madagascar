@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.QuestionMessage;
 import com.keepreal.madagascar.fossa.BoxMessage;
@@ -43,18 +44,15 @@ public class BoxDTOFactory {
     }
 
 
-    public BoxDTO boxDTO(String islandId, String userId) {
+    public BoxDTO boxDTO(BoxMessage boxMessage, String userId) {
         BoxDTO dto = new BoxDTO();
 
-        dto.setIslandId(islandId);
-        dto.setAnsweredQuestionsCount(0);
+        dto.setIslandId(boxMessage.getIsland());
+        dto.setAnsweredQuestionsCount(boxMessage.getAnsweredQuestionCount());
 
-        List<String> myMembershipIds = subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(islandId, userId);
-
-        dto.setHasSubmitAccess(false); // 通过比较user的membership确定是否可以提问
-
-//        dto.setBoxAccess(this.boxAccessDTO(islandId));
-        dto.setRecentAnsweredQuestions(Collections.emptyList());
+        List<String> myMembershipIds = subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(boxMessage.getIsland(), userId);
+        ProtocolStringList membershipIdsList = boxMessage.getMembershipIdsList();
+        dto.setHasSubmitAccess(membershipIdsList.stream().anyMatch(myMembershipIds::contains));
 
         return dto;
     }
@@ -77,7 +75,7 @@ public class BoxDTOFactory {
         dto.setId(feedMessage.getId());
         dto.setIslandId(feedMessage.getIslandId());
         dto.setText(question.getText());
-        dto.setHasAccess(false);
+        dto.setHasAccess(feedMessage.getIsAccess());
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis()); // 根据createdAt和当前时间判断
         dto.setHasPaid(question.hasPriceInCents()); // 根据priceInCents是否不为null && 大于0
         dto.setPublicVisible(question.getPublicVisible().getValue()); //
@@ -101,7 +99,7 @@ public class BoxDTOFactory {
         dto.setId(feedMessage.getId());
         dto.setIslandId(feedMessage.getIslandId());
         dto.setText(question.getText());
-        dto.setHasAccess(false);
+        dto.setHasAccess(feedMessage.getIsAccess());
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis()); // 根据createdAt和当前时间判断
         dto.setHasPaid(question.hasPriceInCents()); // 根据priceInCents是否不为null && 大于0
         dto.setPublicVisible(question.getPublicVisible().getValue()); //

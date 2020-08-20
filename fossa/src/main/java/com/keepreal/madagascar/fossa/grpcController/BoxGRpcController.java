@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
 import com.google.protobuf.ProtocolStringList;
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.fossa.AnswerQuestionRequest;
@@ -12,6 +13,8 @@ import com.keepreal.madagascar.fossa.QuestionsResponse;
 import com.keepreal.madagascar.fossa.RetrieveAnswerMeQuestionsRequest;
 import com.keepreal.madagascar.fossa.RetrieveAnsweredAndVisibleQuestionsRequest;
 import com.keepreal.madagascar.fossa.RetrieveAskMeQuestionsRequest;
+import com.keepreal.madagascar.fossa.RetrieveBoxInfoRequest;
+import com.keepreal.madagascar.fossa.RetrieveBoxInfoResponse;
 import com.keepreal.madagascar.fossa.model.BoxInfo;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.QuestionInfo;
@@ -51,7 +54,6 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
     @Override
     public void answerQuestion(AnswerQuestionRequest request, StreamObserver<CommonResponse> responseObserver) {
         String questionId = request.getId();
-        String userId = request.getUserId();
         String answer = request.getAnswer();
         boolean publicVisible = request.getPublicVisible();
         ProtocolStringList visibleMembershipIdsList = request.getVisibleMembershipIdsList();
@@ -65,6 +67,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
             feedInfo.setMembershipIds(visibleMembershipIdsList);
         }
         FeedInfo update = feedInfoService.update(feedInfo);
+        this.boxInfoService.addAnsweredQuestionCount(update.getIslandId());
         this.feedEventProducerService.produceUpdateFeedEventAsync(update);
 
         responseObserver.onNext(CommonResponse.newBuilder()
@@ -135,6 +138,18 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
         responseObserver.onNext(feedsResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveBoxInfo(RetrieveBoxInfoRequest request, StreamObserver<RetrieveBoxInfoResponse> responseObserver) {
+        String islandId = request.getIslandId();
+        BoxInfo boxInfo = this.boxInfoService.getBoxInfoByIslandId(islandId);
+
+        responseObserver.onNext(RetrieveBoxInfoResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setMessage(this.boxInfoService.getBoxMessage(boxInfo))
+                .build());
         responseObserver.onCompleted();
     }
 

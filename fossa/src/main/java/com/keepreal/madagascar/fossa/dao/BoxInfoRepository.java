@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BoxInfoRepository extends JpaRepository<BoxInfo, String> {
 
+    BoxInfo findBoxInfoByIslandId(String islandId);
 }

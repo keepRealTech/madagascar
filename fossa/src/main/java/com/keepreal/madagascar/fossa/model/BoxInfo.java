@@ -29,6 +29,7 @@ public class BoxInfo {
     private String islandId;
     @Column(name = "is_enabled")
     private boolean enabled;
+    private int answeredQuestionCount;
     private String membershipIds;
     @Column(name = "is_deleted")
     @Builder.Default

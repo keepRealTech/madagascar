@@ -32,6 +32,16 @@ public class BoxInfoService {
         return boxInfoRepository.save(boxInfo);
     }
 
+    public void addAnsweredQuestionCount(String islandId) {
+        BoxInfo boxInfo = this.boxInfoRepository.findBoxInfoByIslandId(islandId);
+        boxInfo.setAnsweredQuestionCount(boxInfo.getAnsweredQuestionCount() + 1);
+        this.boxInfoRepository.save(boxInfo);
+    }
+
+    public BoxInfo getBoxInfoByIslandId(String islandId) {
+        return boxInfoRepository.findBoxInfoByIslandId(islandId);
+    }
+
     public Query retrieveAnswerAndVisibleQuestion(String islandId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("islandId").is(islandId));
@@ -77,6 +87,7 @@ public class BoxInfoService {
                 .setIsland(boxInfo.getIslandId())
                 .setEnabled(boxInfo.isEnabled())
                 .addAllMembershipIds(Arrays.asList(boxInfo.getMembershipIds().split(",")))
+                .setAnsweredQuestionCount(boxInfo.getAnsweredQuestionCount())
                 .build();
     }
 }

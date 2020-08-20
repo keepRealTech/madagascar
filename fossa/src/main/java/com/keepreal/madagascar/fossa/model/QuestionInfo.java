@@ -12,4 +12,6 @@ public class QuestionInfo extends MediaInfo {
     private String transactionId;
     private String answer;
     private Boolean publicVisible;
+    private String answerUserId;
+    private Long answerAt;
 }
