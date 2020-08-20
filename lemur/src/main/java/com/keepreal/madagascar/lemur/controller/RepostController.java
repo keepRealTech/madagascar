@@ -92,6 +92,17 @@ public class RepostController implements RepostApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the create repost question api (also a feed).
+     *
+     * @param id                id (required)  Id.
+     * @param postRepostRequest (required) {@link PostRepostRequest}.
+     * @return {@link RepostResponse}.
+     */
+    @Override
+    public ResponseEntity<RepostResponse> apiV1BoxesQuestionsIdRepostsPost(String id, PostRepostRequest postRepostRequest) {
+        return this.apiV1FeedsIdRepostsPost(id, postRepostRequest);
+    }
 
     /**
      * Implements the get reposts by island id api.
