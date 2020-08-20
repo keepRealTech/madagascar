@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 
@@ -27,7 +28,9 @@ public class BoxInfoService {
     }
 
     public BoxInfo createOrUpdate(BoxInfo boxInfo) {
-        boxInfo.setId(String.valueOf(idGenerator.nextId()));
+        if (boxInfo.getId() == null) {
+            boxInfo.setId(String.valueOf(idGenerator.nextId()));
+        }
 
         return boxInfoRepository.save(boxInfo);
     }
@@ -67,7 +70,7 @@ public class BoxInfoService {
             if (paid) {
                 query.addCriteria(Criteria.where("mediaInfos.priceInCents").gt(0));
             }
-            if (membershipId != null) {
+            if (!StringUtils.isEmpty(membershipId)) {
                 query.addCriteria(Criteria.where("membershipIds").is(membershipId));
             }
         } else {

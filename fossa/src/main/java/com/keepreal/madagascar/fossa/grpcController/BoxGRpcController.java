@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
 import com.google.protobuf.ProtocolStringList;
+import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
@@ -28,6 +29,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -61,13 +63,16 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         FeedInfo feedInfo = feedInfoService.findFeedInfoById(questionId, false);
 
         QuestionInfo questionInfo = (QuestionInfo) feedInfo.getMediaInfos().get(0);
+        if (!StringUtils.isEmpty(questionInfo.getAnswer())) {
+            this.boxInfoService.addAnsweredQuestionCount(feedInfo.getIslandId());
+        }
         questionInfo.setAnswer(answer);
         questionInfo.setPublicVisible(publicVisible);
         if (publicVisible) {
             feedInfo.setMembershipIds(visibleMembershipIdsList);
         }
+        questionInfo.setAnswerAt(System.currentTimeMillis());
         FeedInfo update = feedInfoService.update(feedInfo);
-        this.boxInfoService.addAnsweredQuestionCount(update.getIslandId());
         this.feedEventProducerService.produceUpdateFeedEventAsync(update);
 
         responseObserver.onNext(CommonResponse.newBuilder()
@@ -78,7 +83,10 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
 
     @Override
     public void putBox(CreateOrUpdateBoxRequest request, StreamObserver<CreateOrUpdateBoxResponse> responseObserver) {
-        BoxInfo boxInfo = new BoxInfo();
+        BoxInfo boxInfo = this.boxInfoService.getBoxInfoByIslandId(request.getIslandId());
+        if (boxInfo == null) {
+            boxInfo = new BoxInfo();
+        }
         boxInfo.setIslandId(request.getIslandId());
         boxInfo.setEnabled(request.getEnabled());
         boxInfo.setMembershipIds(String.join(",", request.getMembershipIdsList()));
@@ -89,56 +97,25 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .setMessage(this.boxInfoService.getBoxMessage(update))
                 .build());
+        responseObserver.onCompleted();
     }
 
     @Override
     public void retrieveAnsweredAndVisibleQuestion(RetrieveAnsweredAndVisibleQuestionsRequest request, StreamObserver<QuestionsResponse> responseObserver) {
-        String userId = request.getUserId();
         Query query = this.boxInfoService.retrieveAnswerAndVisibleQuestion(request.getIslandId());
         int page = request.getPageRequest().getPage();
         int pageSize = request.getPageRequest().getPageSize();
 
-        long totalCount = mongoTemplate.count(query, FeedInfo.class);
-        List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
-
-        List<FeedMessage> feedMessageList = feedInfoList.stream()
-                .map(info -> feedInfoService.getFeedMessage(info, userId))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(page, pageSize, totalCount);
-        QuestionsResponse feedsResponse = QuestionsResponse.newBuilder()
-                .addAllFeed(feedMessageList)
-                .setPageResponse(pageResponse)
-                .setStatus(CommonStatusUtils.getSuccStatus())
-                .build();
-        responseObserver.onNext(feedsResponse);
-        responseObserver.onCompleted();
+        this.queryAndResponseQuestions(query, request.getUserId(), page, pageSize, responseObserver);
     }
 
     @Override
     public void retrieveAskMeQuestion(RetrieveAskMeQuestionsRequest request, StreamObserver<QuestionsResponse> responseObserver) {
-        // todo: membershipId
-        Query query = this.boxInfoService.retrieveQuestionByCondition(request.getUserId(), request.getAnswered(), request.getPaid(), "");
+        Query query = this.boxInfoService.retrieveQuestionByCondition(request.getUserId(), request.getAnswered(), request.getPaid(), request.getMembershipId());
         int page = request.getPageRequest().getPage();
         int pageSize = request.getPageRequest().getPageSize();
 
-        long totalCount = mongoTemplate.count(query, FeedInfo.class);
-        List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
-
-        List<FeedMessage> feedMessageList = feedInfoList.stream()
-                .map(info -> feedInfoService.getFeedMessage(info, request.getUserId()))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(page, pageSize, totalCount);
-        QuestionsResponse feedsResponse = QuestionsResponse.newBuilder()
-                .addAllFeed(feedMessageList)
-                .setPageResponse(pageResponse)
-                .setStatus(CommonStatusUtils.getSuccStatus())
-                .build();
-        responseObserver.onNext(feedsResponse);
-        responseObserver.onCompleted();
+        this.queryAndResponseQuestions(query, request.getUserId(), page, pageSize, responseObserver);
     }
 
     @Override
@@ -159,11 +136,15 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         int pageSize = request.getPageRequest().getPageSize();
         Query query = this.boxInfoService.retrieveAnswerMeQuestion(request.getUserId());
 
+        this.queryAndResponseQuestions(query, request.getUserId(), page, pageSize, responseObserver);
+    }
+
+    private void queryAndResponseQuestions(Query query, String userId, int page, int pageSize, StreamObserver<QuestionsResponse> responseObserver) {
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
 
         List<FeedMessage> feedMessageList = feedInfoList.stream()
-                .map(info -> feedInfoService.getFeedMessage(info, request.getUserId()))
+                .map(info -> feedInfoService.getFeedMessage(info, userId))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 

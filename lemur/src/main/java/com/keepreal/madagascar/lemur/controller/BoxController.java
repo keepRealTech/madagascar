@@ -46,29 +46,40 @@ public class BoxController implements BoxApi {
         this.boxDTOFactory = boxDTOFactory;
     }
 
+    /**
+     * Implements the answered me question list api.
+     *
+     * @param page page number (optional, default to 0)
+     * @param pageSize size of a page (optional, default to 10)
+     * @return  {@link QuestionsResponse}.
+     */
     @Override
     public ResponseEntity<QuestionsResponse> apiV1BoxesAnswersGet(@Min(0) @Valid Integer page, @Min(1) @Max(100) @Valid Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAnsweredMeQuestion(userId, page, pageSize);
 
         QuestionsResponse response = new QuestionsResponse();
-        response.setData(questionsResponse.getFeedList().stream().map(this.boxDTOFactory::questionDTO).collect(Collectors.toList()));
-        response.setPageInfo(PaginationUtils.getPageInfo(questionsResponse.getPageResponse()));
-        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
-        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        this.questionsResponse(response, questionsResponse, userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the ask me question list by condition(answered, membershipId, paid).
+     *
+     * @param answered  (optional)
+     * @param membershipId  (optional)
+     * @param paid  (optional)
+     * @param page page number (optional, default to 0)
+     * @param pageSize size of a page (optional, default to 10)
+     * @return  {@link QuestionsResponse}.
+     */
     @Override
-    public ResponseEntity<QuestionsResponse> apiV1BoxesQuestionsGet(@Valid Boolean answered, @Valid String membershipId, @Valid Boolean paid, @Valid Boolean _public, @Min(0) @Valid Integer page, @Min(1) @Max(100) @Valid Integer pageSize) {
+    public ResponseEntity<QuestionsResponse> apiV1BoxesQuestionsGet(@Valid Boolean answered, @Valid String membershipId, @Valid Boolean paid, @Min(0) @Valid Integer page, @Min(1) @Max(100) @Valid Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAskMeQuestion(userId, page, pageSize, answered, paid, membershipId);
 
         QuestionsResponse response = new QuestionsResponse();
-        response.setData(questionsResponse.getFeedList().stream().map(this.boxDTOFactory::questionDTO).collect(Collectors.toList()));
-        response.setPageInfo(PaginationUtils.getPageInfo(questionsResponse.getPageResponse()));
-        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
-        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        this.questionsResponse(response, questionsResponse, userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -102,7 +113,7 @@ public class BoxController implements BoxApi {
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
 
         FullQuestionResponse response = new FullQuestionResponse();
-        response.setData(this.boxDTOFactory.fullQuestionDTO(feedMessage));
+        response.setData(this.boxDTOFactory.fullQuestionDTO(feedMessage, userId));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -152,6 +163,12 @@ public class BoxController implements BoxApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the retrieve box info api.
+     *
+     * @param id islandId (required)
+     * @return  {@link IslandBoxResponse}.
+     */
     @Override
     public ResponseEntity<IslandBoxResponse> apiV1IslandsIdBoxesGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -159,7 +176,7 @@ public class BoxController implements BoxApi {
 
         BoxDTO dto = this.boxDTOFactory.boxDTO(boxMessage, userId);
         List<FeedMessage> feedList = this.boxService.retrieveAnsweredAndVisibleQuestions(id, userId, 0, 2).getFeedList();
-        dto.setRecentAnsweredQuestions(feedList.stream().map(this.boxDTOFactory::questionDTO).collect(Collectors.toList()));
+        dto.setRecentAnsweredQuestions(feedList.stream().map(feedMessage -> this.boxDTOFactory.questionDTO(feedMessage, userId)).collect(Collectors.toList()));
 
         IslandBoxResponse response = new IslandBoxResponse();
         response.setData(dto);
@@ -182,6 +199,14 @@ public class BoxController implements BoxApi {
         return null;
     }
 
+    /**
+     * Implements the retrieve answered and visible questions api.
+     *
+     * @param id islandId (required)
+     * @param page page number (optional, default to 0)
+     * @param pageSize size of a page (optional, default to 10)
+     * @return  {@link QuestionsResponse}.
+     */
     @Override
     public ResponseEntity<QuestionsResponse> apiV1IslandsIdBoxesQuestionsGet(String id, @Min(0) @Valid Integer page, @Min(1) @Max(100) @Valid Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -189,10 +214,7 @@ public class BoxController implements BoxApi {
         com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAnsweredAndVisibleQuestions(id, userId, page, pageSize);
 
         QuestionsResponse response = new QuestionsResponse();
-        response.setData(questionsResponse.getFeedList().stream().map(this.boxDTOFactory::questionDTO).collect(Collectors.toList()));
-        response.setPageInfo(PaginationUtils.getPageInfo(questionsResponse.getPageResponse()));
-        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
-        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        this.questionsResponse(response, questionsResponse, userId);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -203,5 +225,12 @@ public class BoxController implements BoxApi {
                 postQuestionRequest.getQuestionSkuId(),
                 postQuestionRequest.getReceipt(),
                 postQuestionRequest.getTransactionId());
+    }
+
+    private void questionsResponse(QuestionsResponse response, com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse, String userId) {
+        response.setData(questionsResponse.getFeedList().stream().map(feedMessage -> this.boxDTOFactory.questionDTO(feedMessage, userId)).collect(Collectors.toList()));
+        response.setPageInfo(PaginationUtils.getPageInfo(questionsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
     }
 }
