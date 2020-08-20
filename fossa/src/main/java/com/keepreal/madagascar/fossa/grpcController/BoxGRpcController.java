@@ -24,8 +24,8 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
     private final FeedEventProducerService feedEventProducerService;
 
     public BoxGRpcController(FeedInfoService feedInfoService,
-                             BoxInfoService boxInfoService,
-                             FeedEventProducerService feedEventProducerService) {
+                             FeedEventProducerService feedEventProducerService,
+                             BoxInfoService boxInfoService) {
         this.feedInfoService = feedInfoService;
         this.boxInfoService = boxInfoService;
         this.feedEventProducerService = feedEventProducerService;
