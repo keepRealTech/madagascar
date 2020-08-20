@@ -54,6 +54,8 @@ public class ReportGRpcController extends ReportServiceGrpc.ReportServiceImplBas
             reportInfoBuilder.islandId(request.getIslandId().getValue());
         } else if (request.hasMessageId()) {
             reportInfoBuilder.messageId(request.getMessageId().getValue());
+        } else if (request.hasFeedGroupId()) {
+            reportInfoBuilder.messageId(request.getFeedGroupId().getValue());
         } else {
             reportInfoBuilder.userId(request.getUserId().getValue());
         }

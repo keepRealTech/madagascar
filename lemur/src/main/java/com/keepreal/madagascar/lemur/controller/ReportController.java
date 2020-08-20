@@ -8,15 +8,12 @@ import com.keepreal.madagascar.lemur.service.ReportService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ReportApi;
 import swagger.model.PostReportRequest;
 import swagger.model.ReportResponse;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Represents the report controller.
@@ -53,7 +50,8 @@ public class ReportController implements ReportApi {
                 postReportRequest.getUserId(),
                 userId,
                 this.convertReportType(postReportRequest.getReportType()),
-                postReportRequest.getMessageId());
+                postReportRequest.getMessageId(),
+                postReportRequest.getFeedGroupId());
 
         ReportResponse response = new ReportResponse();
         response.setData(this.reportDTOFactory.valueOf(reportMessage));
