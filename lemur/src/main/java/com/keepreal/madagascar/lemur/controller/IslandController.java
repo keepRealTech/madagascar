@@ -335,6 +335,7 @@ public class IslandController implements IslandApi {
         }
 
         IslandAccessType accessType = this.convertIslandAccessType(payload.getIslandAccessType());
+        accessType = Objects.isNull(accessType) ? IslandAccessType.ISLAND_ACCESS_PRIVATE : accessType;
 
         if (StringUtils.isEmpty(payload.getName())
                 || (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(payload.getSecret()))) {
@@ -385,6 +386,12 @@ public class IslandController implements IslandApi {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        IslandAccessType accessType = this.convertIslandAccessType(payload.getIslandAccessType());
+
+        if (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(payload.getSecret()))) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         if (this.textContentFilter.isDisallowed(payload.getName())) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
         }
@@ -399,8 +406,12 @@ public class IslandController implements IslandApi {
             portraitImageUri = this.imageService.uploadSingleImage(portraitImage);
         }
 
-        islandMessage = this.islandService.updateIslandById(
-                id, payload.getName(), portraitImageUri, payload.getSecret(), payload.getDescription());
+        islandMessage = this.islandService.updateIslandById(id,
+                payload.getName(),
+                portraitImageUri,
+                payload.getSecret(),
+                payload.getDescription(),
+                accessType);
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -554,7 +565,7 @@ public class IslandController implements IslandApi {
      */
     private IslandAccessType convertIslandAccessType(swagger.model.IslandAccessType islandAccessType) {
         if (Objects.isNull(islandAccessType)) {
-            return IslandAccessType.ISLAND_ACCESS_PRIVATE;
+            return null;
         }
 
         switch (islandAccessType) {

@@ -2484,6 +2484,8 @@ components:
         secret:
           type: string
           description: secrets for joining island
+        islandAccessType:
+          $ref: '#/components/schemas/IslandAccessType'
     PostIslandPayload:
       type: object
       properties:

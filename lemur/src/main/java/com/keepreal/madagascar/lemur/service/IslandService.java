@@ -287,9 +287,10 @@ public class IslandService {
      * @param portraitImageUri Portrait image uri.
      * @param secret           Secret.
      * @param description      Description.
+     * @param islandAccessType Island access type.
      * @return {@link IslandMessage}.
      */
-    public IslandMessage updateIslandById(String id, String name, String portraitImageUri, String secret, String description) {
+    public IslandMessage updateIslandById(String id, String name, String portraitImageUri, String secret, String description, IslandAccessType islandAccessType) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         UpdateIslandByIdRequest.Builder requestBuilder = UpdateIslandByIdRequest.newBuilder()
@@ -302,6 +303,10 @@ public class IslandService {
 
         if (!StringUtils.isEmpty(portraitImageUri)) {
             requestBuilder.setPortraitImageUri(StringValue.of(portraitImageUri));
+        }
+
+        if (Objects.nonNull(islandAccessType)) {
+            requestBuilder.setIslandAccessType(islandAccessType);
         }
 
         if (!StringUtils.isEmpty(secret)) {

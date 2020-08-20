@@ -56,6 +56,7 @@ message UpdateIslandByIdRequest {
     google.protobuf.StringValue portraitImageUri = 3;
     google.protobuf.StringValue secret = 4;
     google.protobuf.StringValue description = 5;
+    IslandAccessType islandAccessType = 6;
 }
 
 message RetrieveIslandSubscribersByIdRequest {

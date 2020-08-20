@@ -321,6 +321,9 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         if (request.hasPortraitImageUri()) {
             islandInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
         }
+        if (!IslandAccessType.ISLAND_ACCESS_UNKNOWN.equals(request.getIslandAccessType())) {
+            islandInfo.setIslandAccessType(request.getIslandAccessTypeValue());
+        }
         if (request.hasSecret() && IslandAccessType.ISLAND_ACCESS_PRIVATE_VALUE == islandInfo.getIslandAccessType()) {
             islandInfo.setSecret(request.getSecret().getValue());
         }
