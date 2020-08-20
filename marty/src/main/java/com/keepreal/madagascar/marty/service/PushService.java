@@ -132,16 +132,15 @@ public class PushService {
         boolean publicVisible = feedResponse.getFeed().getQuestion().getPublicVisible().getValue();
         if (publicVisible) {
             this.pushNewReplyToAllSubscriber(event);
-        } else {
-            RetrieveDeviceTokenResponse response = userService.retrieveUserDeviceToken(authorId);
-            ProtocolStringList androidTokensList = response.getAndroidTokensList();
-            ProtocolStringList iosTokensList = response.getIosTokensList();
-
-            this.pushNotificationService.umengPushAndroidNewReplyNotification(event.getAuthorId(), event.getFeedId(),
-                    androidTokensList, false);
-            this.pushNotificationService.jPushIosNewReplyNotificationNotification(event.getAuthorId(), event.getFeedId(),
-                    iosTokensList, false);
         }
+        RetrieveDeviceTokenResponse response = userService.retrieveUserDeviceToken(authorId);
+        ProtocolStringList androidTokensList = response.getAndroidTokensList();
+        ProtocolStringList iosTokensList = response.getIosTokensList();
+
+        this.pushNotificationService.umengPushAndroidNewReplyNotification(event.getAuthorId(), event.getFeedId(),
+                androidTokensList, false);
+        this.pushNotificationService.jPushIosNewReplyNotificationNotification(event.getAuthorId(), event.getFeedId(),
+                iosTokensList, false);
     }
 
     /**
