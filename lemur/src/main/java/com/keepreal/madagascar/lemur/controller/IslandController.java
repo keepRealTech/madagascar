@@ -2,6 +2,8 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
+import com.keepreal.madagascar.common.IdentityType;
+import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -332,8 +334,10 @@ public class IslandController implements IslandApi {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        IslandAccessType accessType = this.convertIslandAccessType(payload.getIslandAccessType());
+
         if (StringUtils.isEmpty(payload.getName())
-                || StringUtils.isEmpty(payload.getSecret())) {
+                || (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(payload.getSecret()))) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -347,7 +351,12 @@ public class IslandController implements IslandApi {
         }
 
         IslandMessage islandMessage = this.islandService.createIsland(
-                payload.getName(), portraitImageUri, payload.getSecret(), payload.getIdentityId(), userId);
+                payload.getName(),
+                portraitImageUri,
+                payload.getSecret(),
+                payload.getIdentityId(),
+                userId,
+                accessType);
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -535,6 +544,26 @@ public class IslandController implements IslandApi {
                 .stream()
                 .map(feedDTOFactory::posterValueOf)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Converts the {@link swagger.model.IslandAccessType} into {@link IslandAccessType}.
+     *
+     * @param islandAccessType {@link swagger.model.IslandAccessType}.
+     * @return {@link IslandAccessType}.
+     */
+    private IslandAccessType convertIslandAccessType(swagger.model.IslandAccessType islandAccessType) {
+        if (Objects.isNull(islandAccessType)) {
+            return IslandAccessType.ISLAND_ACCESS_PUBLIC;
+        }
+
+        switch (islandAccessType) {
+            case PRIVATE:
+                return IslandAccessType.ISLAND_ACCESS_PRIVATE;
+            case PUBLIC:
+            default:
+                return IslandAccessType.ISLAND_ACCESS_PUBLIC;
+        }
     }
 
 }

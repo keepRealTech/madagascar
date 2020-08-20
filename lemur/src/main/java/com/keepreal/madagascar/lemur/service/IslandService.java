@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.service;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -229,9 +230,15 @@ public class IslandService {
      * @param secret           Secret.
      * @param identityId       Identity id.
      * @param userId           User id.
+     * @param islandAccessType {@link IslandAccessType}.
      * @return {@link IslandMessage}.
      */
-    public IslandMessage createIsland(String name, String portraitImageUri, String secret, String identityId, String userId) {
+    public IslandMessage createIsland(String name,
+                                      String portraitImageUri,
+                                      String secret,
+                                      String identityId,
+                                      String userId,
+                                      IslandAccessType islandAccessType) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         if (Objects.isNull(identityId)) {
@@ -240,9 +247,13 @@ public class IslandService {
 
         NewIslandRequest.Builder requestBuilder = NewIslandRequest.newBuilder()
                 .setName(name)
-                .setSecret(StringValue.of(secret))
                 .setIdentityId(StringValue.of(identityId))
+                .setIslandAccessType(islandAccessType)
                 .setHostId(userId);
+
+        if (!StringUtils.isEmpty(secret)) {
+            requestBuilder.setSecret(StringValue.of(secret));
+        }
 
         if (!StringUtils.isEmpty(portraitImageUri)) {
             requestBuilder.setPortraitImageUri(StringValue.of(portraitImageUri));
@@ -333,15 +344,17 @@ public class IslandService {
     public void subscribeIslandById(String id, String userId, String secret) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
-        SubscribeIslandByIdRequest request = SubscribeIslandByIdRequest.newBuilder()
+        SubscribeIslandByIdRequest.Builder requestBuilder = SubscribeIslandByIdRequest.newBuilder()
                 .setId(id)
-                .setSecret(secret)
-                .setUserId(userId)
-                .build();
+                .setUserId(userId);
+
+        if (Objects.nonNull(secret)) {
+            requestBuilder.setSecret(StringValue.of(secret));
+        }
 
         SubscribeIslandResponse subscribeIslandResponse;
         try {
-            subscribeIslandResponse = stub.subscribeIslandById(request);
+            subscribeIslandResponse = stub.subscribeIslandById(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

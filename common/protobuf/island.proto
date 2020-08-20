@@ -18,6 +18,7 @@ message NewIslandRequest {
     google.protobuf.StringValue portraitImageUri = 3;
     google.protobuf.StringValue secret = 4;
     google.protobuf.StringValue identityId = 5;
+    IslandAccessType islandAccessType = 6;
 }
 
 message IslandResponse {
@@ -85,7 +86,7 @@ message IslandProfileResponse {
 
 message SubscribeIslandByIdRequest {
     string id = 1;
-    string secret = 2;
+    google.protobuf.StringValue secret = 2;
     string userId = 3;
 }
 
