@@ -554,7 +554,7 @@ public class IslandController implements IslandApi {
      */
     private IslandAccessType convertIslandAccessType(swagger.model.IslandAccessType islandAccessType) {
         if (Objects.isNull(islandAccessType)) {
-            return IslandAccessType.ISLAND_ACCESS_PUBLIC;
+            return IslandAccessType.ISLAND_ACCESS_PRIVATE;
         }
 
         switch (islandAccessType) {
