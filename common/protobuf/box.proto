@@ -24,7 +24,59 @@ message CreateOrUpdateBoxRequest {
     repeated string membershipIds = 3;
 }
 
+message CreateOrUpdateBoxResponse {
+    CommonStatus status = 1;
+    BoxMessage message = 2;
+}
+
+message RetrieveAnsweredAndVisibleQuestionsRequest {
+    string userId = 1;
+    string islandId = 2;
+    PageRequest pageRequest = 3;
+}
+
+message RetrieveAskMeQuestionsRequest {
+    string userId = 1;
+    PageRequest pageRequest = 2;
+    bool answered = 3;
+    google.protobuf.StringValue membershipId = 4;
+    bool paid = 5;
+}
+
+message RetrieveAnswerMeQuestionsRequest {
+    string userId = 1;
+    PageRequest pageRequest = 2;
+}
+
+message QuestionsResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated FeedMessage feed = 3;
+}
+
+message RetrieveBoxInfoRequest {
+    string islandId = 1;
+}
+
+message RetrieveBoxInfoResponse {
+    CommonStatus status = 1;
+    BoxMessage message = 2;
+}
+
+message BoxMessage {
+    string id = 1;
+    string island = 2;
+    bool enabled = 3;
+    repeated string membershipIds = 4;
+    int32 answeredQuestionCount = 5;
+}
+
 service BoxService {
-    rpc AnswerQuestion (AnswerQuestionRequest) returns (CommonResponse){}
-    rpc PutBox (CreateOrUpdateBoxRequest) returns (CommonResponse) {}
+    rpc AnswerQuestion (AnswerQuestionRequest) returns (CommonResponse) {}
+    rpc PutBox (CreateOrUpdateBoxRequest) returns (CreateOrUpdateBoxResponse) {}
+    rpc RetrieveBoxInfo (RetrieveBoxInfoRequest) returns (RetrieveBoxInfoResponse) {}
+    rpc RetrieveAnsweredAndVisibleQuestion (RetrieveAnsweredAndVisibleQuestionsRequest) returns (QuestionsResponse) {}
+    rpc RetrieveAskMeQuestion (RetrieveAskMeQuestionsRequest) returns (QuestionsResponse) {}
+    rpc RetrieveAnswerMeQuestions (RetrieveAnswerMeQuestionsRequest) returns (QuestionsResponse) {}
+
 }

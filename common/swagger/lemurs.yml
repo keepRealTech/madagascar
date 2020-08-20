@@ -1725,7 +1725,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QuestionResponse'
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/boxes/skus:
     get:
       tags:
@@ -4349,7 +4349,9 @@ components:
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
-              $ref: '#/components/schemas/QuestionDTO'
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionDTO'
     PostAnswerRequest:
       type: object
       properties:

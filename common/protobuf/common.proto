@@ -92,6 +92,9 @@ enum PushPriority {
     NEW_MEMBERSHIP = 2;
     NEW_LIKE = 3;
     NEW_COMMENT = 4;
+    NEW_QUESTION = 5;
+    NEW_REPLY = 6;
+    NEW_PUBLIC_REPLY = 7;
 }
 
 message GenderValue {
@@ -247,6 +250,8 @@ message QuestionMessage {
     google.protobuf.StringValue transactionId = 5;
     google.protobuf.StringValue answer = 6;
     google.protobuf.BoolValue publicVisible = 7;
+    string answerUserId = 8;
+    int64 answeredAt = 9;
 }
 
 message CommentMessage {

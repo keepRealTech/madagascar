@@ -1,5 +1,8 @@
 package com.keepreal.madagascar.fossa.util;
 
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.AudioMessage;
 import com.keepreal.madagascar.common.HtmlMessage;
 import com.keepreal.madagascar.common.Picture;
@@ -12,6 +15,7 @@ import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.model.PictureInfo;
 import com.keepreal.madagascar.fossa.model.QuestionInfo;
 import com.keepreal.madagascar.fossa.model.VideoInfo;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -84,6 +88,8 @@ public class MediaMessageConvertUtils {
         if (questionMessage.hasTransactionId()) {
             questionInfo.setTransactionId(questionMessage.getTransactionId().getValue());
         }
+        questionInfo.setAnswerUserId(questionMessage.getAnswerUserId());
+        questionInfo.setAnswerAt(questionMessage.getAnsweredAt());
         return questionInfo;
     }
 
@@ -133,5 +139,35 @@ public class MediaMessageConvertUtils {
         return HtmlMessage.newBuilder()
                 .setContent(htmlInfo.getContent())
                 .build();
+    }
+
+    public static QuestionMessage toQuestionMessage(MediaInfo mediaInfo) {
+        QuestionInfo questionInfo = (QuestionInfo) mediaInfo;
+
+        QuestionMessage.Builder builder = QuestionMessage.newBuilder()
+                .setText(questionInfo.getText())
+                .setAnswerUserId(questionInfo.getAnswerUserId())
+                .setAnsweredAt(questionInfo.getAnswerAt());
+
+        if (questionInfo.getPriceInCents() != null) {
+            builder.setPriceInCents(Int64Value.of(questionInfo.getPriceInCents()));
+        }
+        if (!StringUtils.isEmpty(questionInfo.getQuestionSkuId())) {
+            builder.setQuestionSkuId(StringValue.of(questionInfo.getQuestionSkuId()));
+        }
+        if (!StringUtils.isEmpty(questionInfo.getReceipt())) {
+            builder.setReceipt(StringValue.of(questionInfo.getReceipt()));
+        }
+        if (!StringUtils.isEmpty(questionInfo.getTransactionId())) {
+            builder.setTransactionId(StringValue.of(questionInfo.getTransactionId()));
+        }
+        if (!StringUtils.isEmpty(questionInfo.getAnswer())) {
+            builder.setAnswer(StringValue.of(questionInfo.getAnswer()));
+        }
+        if (questionInfo.getPublicVisible() != null) {
+            builder.setPublicVisible(BoolValue.of(questionInfo.getPublicVisible()));
+        }
+
+        return builder.build();
     }
 }

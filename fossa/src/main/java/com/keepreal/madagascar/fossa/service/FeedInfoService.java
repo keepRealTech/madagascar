@@ -332,6 +332,8 @@ public class FeedInfoService {
             case MEDIA_HTML:
                 builder.setHtml(MediaMessageConvertUtils.toHtmlMessage(feedInfo.getMediaInfos().get(0)));
                 break;
+            case MEDIA_QUESTION:
+                builder.setQuestion(MediaMessageConvertUtils.toQuestionMessage(feedInfo.getMediaInfos().get(0)));
         }
     }
 }
