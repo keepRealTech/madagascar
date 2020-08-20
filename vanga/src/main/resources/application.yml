@@ -7,10 +7,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
   redis:
-    host: r-2ze4jhfytptucbsu8d.redis.rds.aliyuncs.com
-    port: 6379
-    password: GcrkNYTcST4PzlV@
-    ssl: false
+    host: localhost
 
 grpc:
   port: 12006
@@ -42,6 +39,7 @@ rocketmq:
     topic: notification-event
     tag: event
     nameSrvAddr: 127.0.0.1:9876
-
 snowflake:
   nodeId: 0
+server:
+  port: 8000

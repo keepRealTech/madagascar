@@ -5,7 +5,6 @@ import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.QuestionMessage;
 import com.keepreal.madagascar.fossa.BoxMessage;
-import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,6 @@ import swagger.model.BriefUserDTO;
 import swagger.model.FullQuestionDTO;
 import swagger.model.QuestionDTO;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -24,21 +22,15 @@ import java.util.stream.Collectors;
 @Component
 public class BoxDTOFactory {
 
-    private final MembershipDTOFactory membershipDTOFactory;
-    private final MembershipService membershipService;
     private final SubscribeMembershipService subscribeMembershipService;
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final CommentDTOFactory commentDTOFactory;
 
-    public BoxDTOFactory(MembershipDTOFactory membershipDTOFactory,
-                         MembershipService membershipService,
-                         SubscribeMembershipService subscribeMembershipService,
+    public BoxDTOFactory(SubscribeMembershipService subscribeMembershipService,
                          UserService userService,
                          UserDTOFactory userDTOFactory,
                          CommentDTOFactory commentDTOFactory) {
-        this.membershipDTOFactory = membershipDTOFactory;
-        this.membershipService = membershipService;
         this.subscribeMembershipService = subscribeMembershipService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
@@ -53,6 +45,7 @@ public class BoxDTOFactory {
         BoxDTO dto = new BoxDTO();
         dto.setIslandId(boxMessage.getIsland());
         dto.setAnsweredQuestionsCount(boxMessage.getAnsweredQuestionCount());
+        dto.setBoxAccess(this.valueOf(boxMessage));
 
         List<String> myMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(boxMessage.getIsland(), userId);
         ProtocolStringList membershipIdsList = boxMessage.getMembershipIdsList();
@@ -73,7 +66,7 @@ public class BoxDTOFactory {
         return dto;
     }
 
-    public QuestionDTO valueOf(FeedMessage feedMessage) {
+    public QuestionDTO valueOf(FeedMessage feedMessage, String userId) {
         if (Objects.isNull(feedMessage)) {
             return null;
         }
@@ -84,7 +77,7 @@ public class BoxDTOFactory {
         dto.setId(feedMessage.getId());
         dto.setIslandId(feedMessage.getIslandId());
         dto.setText(feedMessage.getText());
-        dto.setHasAccess(feedMessage.getIsAccess());
+        dto.setHasAccess(feedMessage.getIsAccess() || userId.equals(feedMessage.getUserId()));
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
         dto.setHasPaid(question.getPriceInCents() > 0);
         dto.setPublicVisible(question.getPublicVisible().getValue());
@@ -98,11 +91,10 @@ public class BoxDTOFactory {
         return dto;
     }
 
-    public FullQuestionDTO fullValueOf(FeedMessage feedMessage) {
+    public FullQuestionDTO fullValueOf(FeedMessage feedMessage, String userId) {
         if (Objects.isNull(feedMessage)) {
             return null;
         }
-
         QuestionMessage question = feedMessage.getQuestion();
 
         FullQuestionDTO dto = new FullQuestionDTO();
@@ -110,7 +102,7 @@ public class BoxDTOFactory {
         dto.setIslandId(feedMessage.getIslandId());
         dto.setText(feedMessage.getText());
         dto.setIsLiked(feedMessage.getIsLiked());
-        dto.setHasAccess(feedMessage.getIsAccess());
+        dto.setHasAccess(feedMessage.getIsAccess() || userId.equals(feedMessage.getUserId()));
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
         dto.setHasPaid(question.getPriceInCents() > 0);
         dto.setPublicVisible(question.getPublicVisible().getValue());

@@ -39,7 +39,7 @@ message RetrieveAskMeQuestionsRequest {
     string userId = 1;
     PageRequest pageRequest = 2;
     bool answered = 3;
-    google.protobuf.StringValue membershipId = 4;
+    string membershipId = 4;
     bool paid = 5;
 }
 

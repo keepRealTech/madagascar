@@ -206,11 +206,8 @@ public class BoxService {
                 .setUserId(userId)
                 .setAnswered(answered == null ? false : answered)
                 .setPaid(paid == null ? false : paid)
-                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize));
-
-        if (!StringUtils.isEmpty(membershipId)) {
-            builder.setMembershipId(StringValue.of(membershipId));
-        }
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                .setMembershipId(membershipId == null ? "" : membershipId);
 
         QuestionsResponse response;
         try {
