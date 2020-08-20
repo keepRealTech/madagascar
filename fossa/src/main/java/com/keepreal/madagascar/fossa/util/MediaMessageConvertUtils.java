@@ -79,15 +79,6 @@ public class MediaMessageConvertUtils {
         if (questionMessage.hasPriceInCents()) {
             questionInfo.setPriceInCents(questionMessage.getPriceInCents().getValue());
         }
-        if (questionMessage.hasQuestionSkuId()) {
-            questionInfo.setQuestionSkuId(questionMessage.getQuestionSkuId().getValue());
-        }
-        if (questionMessage.hasReceipt()) {
-            questionInfo.setReceipt(questionMessage.getReceipt().getValue());
-        }
-        if (questionMessage.hasTransactionId()) {
-            questionInfo.setTransactionId(questionMessage.getTransactionId().getValue());
-        }
         questionInfo.setAnswerUserId(questionMessage.getAnswerUserId());
         questionInfo.setAnswerAt(questionMessage.getAnsweredAt());
         return questionInfo;
@@ -151,15 +142,6 @@ public class MediaMessageConvertUtils {
 
         if (questionInfo.getPriceInCents() != null) {
             builder.setPriceInCents(Int64Value.of(questionInfo.getPriceInCents()));
-        }
-        if (!StringUtils.isEmpty(questionInfo.getQuestionSkuId())) {
-            builder.setQuestionSkuId(StringValue.of(questionInfo.getQuestionSkuId()));
-        }
-        if (!StringUtils.isEmpty(questionInfo.getReceipt())) {
-            builder.setReceipt(StringValue.of(questionInfo.getReceipt()));
-        }
-        if (!StringUtils.isEmpty(questionInfo.getTransactionId())) {
-            builder.setTransactionId(StringValue.of(questionInfo.getTransactionId()));
         }
         if (!StringUtils.isEmpty(questionInfo.getAnswer())) {
             builder.setAnswer(StringValue.of(questionInfo.getAnswer()));

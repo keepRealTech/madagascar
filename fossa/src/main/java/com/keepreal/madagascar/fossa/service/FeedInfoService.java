@@ -296,6 +296,12 @@ public class FeedInfoService {
         return this.feedInfoRepository.findTopByIslandIdAndIsTopIsTrueAndDeletedIsFalse(islandId);
     }
 
+    /**
+     * Processes the multimedia.
+     *
+     * @param builder   {@link FeedMessage.Builder}.
+     * @param feedInfo  {@link FeedInfo}.
+     */
     private void processMedia(FeedMessage.Builder builder, FeedInfo feedInfo) {
         if (feedInfo.getMultiMediaType() == null) {
             if (CollectionUtils.isEmpty(feedInfo.getImageUrls())) {

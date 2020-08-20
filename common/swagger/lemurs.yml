@@ -1801,7 +1801,6 @@ paths:
         - $ref: '#/components/parameters/hasAnswerInQuery'
         - $ref: '#/components/parameters/membershipIdInQuery'
         - $ref: '#/components/parameters/complimentaryInQuery'
-        - $ref: '#/components/parameters/publicVisibleInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -2144,12 +2143,6 @@ components:
     complimentaryInQuery:
       in: query
       name: paid
-      required: false
-      schema:
-        type: boolean
-    publicVisibleInQuery:
-      in: query
-      name: public
       required: false
       schema:
         type: boolean
@@ -4278,6 +4271,8 @@ components:
           type: array
           items:
             type: string
+        isLiked:
+          type: boolean
         createdAt:
           type: integer
           format: int64

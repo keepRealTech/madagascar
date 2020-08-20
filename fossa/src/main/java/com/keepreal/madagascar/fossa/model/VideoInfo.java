@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class VideoInfo extends MediaInfo {
+
     private String url;
     private String title;
     private String thumbnailUrl;
@@ -11,4 +12,5 @@ public class VideoInfo extends MediaInfo {
     private Long width;
     private Long height;
     private Long duration;
+
 }
