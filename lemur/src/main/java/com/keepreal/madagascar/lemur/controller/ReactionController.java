@@ -7,21 +7,15 @@ import com.keepreal.madagascar.lemur.dtoFactory.ReactionDTOFactory;
 import com.keepreal.madagascar.lemur.service.ReactionService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import swagger.api.ApiUtil;
 import swagger.api.ReactionApi;
 import swagger.model.PostReactionRequest;
 import swagger.model.ReactionResponse;
 import swagger.model.ReactionsResponse;
 
-import javax.validation.Valid;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -36,8 +30,9 @@ public class ReactionController implements ReactionApi {
 
     /**
      * Constructs the reaction controller.
-     * @param reactionService       {@link ReactionService}.
-     * @param reactionDTOFactory    {@link ReactionDTOFactory}.
+     *
+     * @param reactionService    {@link ReactionService}.
+     * @param reactionDTOFactory {@link ReactionDTOFactory}.
      */
     public ReactionController(ReactionService reactionService, ReactionDTOFactory reactionDTOFactory) {
         this.reactionService = reactionService;
@@ -109,7 +104,7 @@ public class ReactionController implements ReactionApi {
      * @return {@link ReactionResponse}.
      */
     @Override
-    public ResponseEntity<ReactionResponse> apiV1QuestionsIdReactionsPost(String id,  PostReactionRequest postReactionRequest, Boolean isRevoke) {
+    public ResponseEntity<ReactionResponse> apiV1QuestionsIdReactionsPost(String id, PostReactionRequest postReactionRequest, Boolean isRevoke) {
         return this.apiV1FeedsIdReactionsPost(id, postReactionRequest, isRevoke);
     }
 
