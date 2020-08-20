@@ -15,6 +15,8 @@ import swagger.model.QuestionDTO;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Component
 public class BoxDTOFactory {
@@ -24,17 +26,20 @@ public class BoxDTOFactory {
     private final SubscribeMembershipService subscribeMembershipService;
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final CommentDTOFactory commentDTOFactory;
 
     public BoxDTOFactory(MembershipDTOFactory membershipDTOFactory,
                          MembershipService membershipService,
                          SubscribeMembershipService subscribeMembershipService,
                          UserService userService,
-                         UserDTOFactory userDTOFactory) {
+                         UserDTOFactory userDTOFactory,
+                         CommentDTOFactory commentDTOFactory) {
         this.membershipDTOFactory = membershipDTOFactory;
         this.membershipService = membershipService;
         this.subscribeMembershipService = subscribeMembershipService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.commentDTOFactory = commentDTOFactory;
     }
 
 
@@ -110,12 +115,20 @@ public class BoxDTOFactory {
         dto.setCreatedAt(feedMessage.getCreatedAt());
 
         dto.setAnaswer(this.answerDTO(question));
+        dto.setComments(feedMessage.getLastCommentsList()
+                .stream()
+                .map(this.commentDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+
+        return dto;
     }
 
-    public AnswerDTO answerDTO(QuestionMessage questionMessage, String userId) {
+    public AnswerDTO answerDTO(QuestionMessage questionMessage) {
         AnswerDTO dto = new AnswerDTO();
         dto.setText(questionMessage.getAnswer().getValue());
-        dto.setUser(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(userId)));
+        dto.setUser(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(questionMessage.getAnswerUserId())));
+        dto.setAnsweredAt(questionMessage.getAnsweredAt());
 
         return dto;
     }
