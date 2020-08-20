@@ -59,9 +59,8 @@ public class FeedEventListener implements MessageListener {
                 return Action.CommitMessage;
             }
 
-            if (feedEventMessage.getType().equals(FEED_EVENT_UPDATE)
-                    && MediaType.MEDIA_QUESTION_VALUE == feedEventMessage.getFeedCreateEvent().getMediaTypeValue()) {
-                pushService.pushMessageByType(feedEventMessage.getFeedCreateEvent().getAuthorId(), PushType.PUSH_REPLY);
+            if (feedEventMessage.getType().equals(FEED_EVENT_UPDATE)) {
+                pushService.pushMessageByType(feedEventMessage.getFeedUpdateEvent().getAuthorId(), PushType.PUSH_REPLY);
                 pushService.pushNewReply(feedEventMessage.getFeedUpdateEvent());
                 return Action.CommitMessage;
             }
