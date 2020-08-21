@@ -637,14 +637,14 @@ paths:
     get:
       tags:
         - Feed
-      summary: retrieves a feed by id
+      summary: 指定id动态详情
       responses:
         '200':
           description: feed response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeedResponse'
+                $ref: '#/components/schemas/FullFeedResponse'
     delete:
       tags:
         - Feed
@@ -1671,7 +1671,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FeedsResponseV2'
+                $ref: '#/components/schemas/FeedsResponse'
   /api/v1/islands/{id}/boxes/access:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1801,7 +1801,6 @@ paths:
         - $ref: '#/components/parameters/hasAnswerInQuery'
         - $ref: '#/components/parameters/membershipIdInQuery'
         - $ref: '#/components/parameters/complimentaryInQuery'
-        - $ref: '#/components/parameters/publicVisibleInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -2144,12 +2143,6 @@ components:
     complimentaryInQuery:
       in: query
       name: paid
-      required: false
-      schema:
-        type: boolean
-    publicVisibleInQuery:
-      in: query
-      name: public
       required: false
       schema:
         type: boolean
@@ -2498,7 +2491,7 @@ components:
         identityId:
           type: string
         islandAccessType:
-          $ref: '#/components/schemas/IslandAccessType'
+          $ref: "#/components/schemas/IslandAccessType"
       required:
         - name
     PutIslandRequest:
@@ -2800,6 +2793,24 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/SimpleMembershipDTO'
+    FeedGroupInfo:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        lastFeedId:
+          type: string
+        nextFeedId:
+          type: string
+    FullFeedDTO:
+      allOf:
+        - $ref: '#/components/schemas/FeedDTO'
+        - type: object
+          properties:
+            feedGroupInfo:
+              $ref: '#/components/schemas/FeedGroupInfo'
     PostFeedPayload:
       type: object
       properties:
@@ -4140,7 +4151,7 @@ components:
           type: string
         hostId:
           type: string
-        updatedAt:
+        lastFeedTimestamp:
           type: integer
           format: int64
         description:
@@ -4245,6 +4256,8 @@ components:
         priceInCents:
           type: integer
           format: int64
+        isLiked:
+          type: boolean
         hasAccess:
           type: boolean
         hasAnswer:
@@ -4363,3 +4376,10 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BoxDTO'
+    FullFeedResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FullFeedDTO'

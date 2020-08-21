@@ -68,7 +68,6 @@ public class CommentService {
      */
     public CommentInfo insert(CommentInfo commentInfo) {
         commentInfo.setId(String.valueOf(idGenerator.nextId()));
-        commentInfo.setDeleted(false);
         commentInfo.setCreatedTime(System.currentTimeMillis());
         return commentInfoRepository.insert(commentInfo);
     }

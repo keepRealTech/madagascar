@@ -13,6 +13,8 @@ import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.PictureInfo;
 import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -146,8 +148,9 @@ public class FeedInfoService {
      * @return {@link FeedMessage}.
      */
     public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
-        if (feedInfo == null)
+        if (feedInfo == null) {
             return null;
+        }
 
         List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
@@ -249,6 +252,17 @@ public class FeedInfoService {
      */
     public List<FeedInfo> findByIds(Iterable<String> ids) {
         return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
+    }
+
+    /**
+     * Retrieves feeds by feed group id.
+     *
+     * @param feedGroupId   Feed group id.
+     * @param pageable      {@link Pageable}.
+     * @return {@link FeedInfo}.
+     */
+    public Page<FeedInfo> retrieveFeedsByFeedGroupId(String feedGroupId, Pageable pageable) {
+        return this.feedInfoRepository.findAllByFeedGroupIdAndDeletedIsFalseOrderByCreatedTimeDesc(feedGroupId, pageable);
     }
 
     /**

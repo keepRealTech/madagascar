@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.MediaType;
@@ -16,9 +17,12 @@ import com.keepreal.madagascar.lemur.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import swagger.model.BriefFeedDTO;
 import swagger.model.CheckFeedsDTO;
 import swagger.model.FeedDTO;
+import swagger.model.FeedGroupInfo;
+import swagger.model.FullFeedDTO;
 import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
@@ -260,6 +264,80 @@ public class FeedDTOFactory {
         posterFeedDTO.setImagesUris(feed.getImageUrisList());
         posterFeedDTO.setCreatedAt(feed.getCreatedAt());
         return posterFeedDTO;
+    }
+
+    /**
+     * Builds a feed message with feed group infos.
+     *
+     * @param feed       {@link FeedMessage}.
+     * @param feedGroup  {@link FeedGroupMessage}.
+     * @param lastFeedId Last feed id.
+     * @param nextFeedId Next feed id.
+     * @return {@link FullFeedDTO}.
+     */
+    public FullFeedDTO valueOf(FeedMessage feed, FeedGroupMessage feedGroup, String lastFeedId, String nextFeedId) {
+        if (Objects.isNull(feed)) {
+            return null;
+        }
+
+        try {
+            IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
+            UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+
+            FullFeedDTO fullFeedDTO = new FullFeedDTO();
+            fullFeedDTO.setId(feed.getId());
+            fullFeedDTO.setText(feed.getText());
+            fullFeedDTO.setFromHost(feed.getFromHost());
+            fullFeedDTO.setLikesCount(feed.getLikesCount());
+            fullFeedDTO.setCommentsCount(feed.getCommentsCount());
+            fullFeedDTO.setComments(feed.getLastCommentsList()
+                    .stream()
+                    .map(this.commentDTOFactory::valueOf)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
+            fullFeedDTO.setRepostCount(feed.getRepostCount());
+            fullFeedDTO.setCreatedAt(feed.getCreatedAt());
+            fullFeedDTO.setIsLiked(feed.getIsLiked());
+            fullFeedDTO.setIsAccess(feed.getIsAccess());
+            fullFeedDTO.setIsMembership(feed.getIsMembership());
+            fullFeedDTO.setIsTop(feed.getIsTop());
+            fullFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
+            fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            if (!StringUtils.isEmpty(feedGroup.getId())) {
+                FeedGroupInfo feedGroupInfo = new FeedGroupInfo();
+                feedGroupInfo.setId(feedGroup.getId());
+                feedGroupInfo.setName(feedGroup.getName());
+                feedGroupInfo.setLastFeedId(lastFeedId);
+                feedGroupInfo.setNextFeedId(nextFeedId);
+                fullFeedDTO.setFeedGroupInfo(feedGroupInfo);
+            } else {
+                fullFeedDTO.setFeedGroupInfo(null);
+            }
+
+            boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
+            if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
+                fullFeedDTO.setImagesUris(feed.getImageUrisList());
+            }
+
+            if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
+                fullFeedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
+            }
+
+            if (!CollectionUtils.isEmpty(feed.getMembershipIdList())) {
+                List<MembershipMessage> membershipMessages = this.membershipService.retrieveMembershipsByIds(feed.getMembershipIdList());
+                fullFeedDTO.setIsMembership(!CollectionUtils.isEmpty(membershipMessages));
+
+                fullFeedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
+                fullFeedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
+            }
+            fullFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
+            fullFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
+
+            return fullFeedDTO;
+        } catch (KeepRealBusinessException exception) {
+            log.error("Failed to serialize feed {}, cause {}.", feed.getId(), exception.getErrorCode());
+            return null;
+        }
     }
 
 }

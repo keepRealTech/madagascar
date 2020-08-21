@@ -4,8 +4,10 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.dtoFactory.BoxDTOFactory;
 import com.keepreal.madagascar.lemur.service.BoxService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.BoxApi;
 import swagger.model.DummyResponse;
@@ -42,7 +44,7 @@ public class BoxController implements BoxApi {
     }
 
     @Override
-    public ResponseEntity<QuestionsResponse> apiV1BoxesQuestionsGet(@Valid Boolean answered, @Valid String membershipId, @Valid Boolean paid, @Valid Boolean _public, @Min(0) @Valid Integer page, @Min(1) @Max(100) @Valid Integer pageSize) {
+    public ResponseEntity<QuestionsResponse> apiV1BoxesQuestionsGet(Boolean answered, String membershipId, Boolean paid, Integer page, Integer pageSize) {
         return null;
     }
 
@@ -123,4 +125,5 @@ public class BoxController implements BoxApi {
                 postQuestionRequest.getReceipt(),
                 postQuestionRequest.getTransactionId());
     }
+
 }

@@ -11,6 +11,7 @@ import com.keepreal.madagascar.fossa.CreateDefaultFeedRequest;
 import com.keepreal.madagascar.fossa.CreateDefaultFeedResponse;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
+import com.keepreal.madagascar.fossa.FeedGroupFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.FeedsResponse;
@@ -25,9 +26,11 @@ import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
+import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
+import com.keepreal.madagascar.fossa.service.FeedGroupService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.IslandService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
@@ -41,6 +44,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.util.StringUtils;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -63,6 +67,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     private final LongIdGenerator idGenerator;
     private final IslandService islandService;
     private final FeedInfoService feedInfoService;
+    private final FeedGroupService feedGroupService;
     private final MongoTemplate mongoTemplate;
     private final FeedEventProducerService feedEventProducerService;
 
@@ -72,17 +77,20 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      * @param idGenerator              {@link LongIdGenerator}
      * @param islandService            {@link IslandService}
      * @param feedInfoService          {@link FeedInfoService}
+     * @param feedGroupService         {@link FeedGroupService}.
      * @param mongoTemplate            {@link MongoTemplate}
      * @param feedEventProducerService {@link FeedEventProducerService}.
      */
     public FeedGRpcController(LongIdGenerator idGenerator,
                               IslandService islandService,
                               FeedInfoService feedInfoService,
+                              FeedGroupService feedGroupService,
                               MongoTemplate mongoTemplate,
                               FeedEventProducerService feedEventProducerService) {
         this.idGenerator = idGenerator;
         this.islandService = islandService;
         this.feedInfoService = feedInfoService;
+        this.feedGroupService = feedGroupService;
         this.mongoTemplate = mongoTemplate;
         this.feedEventProducerService = feedEventProducerService;
     }
@@ -133,9 +141,14 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Creates feeds with multimedia.
+     *
+     * @param request          {@link NewFeedsRequestV2}.
+     * @param responseObserver {@link NewFeedsResponse}.
+     */
     @Override
     public void createFeedsV2(NewFeedsRequestV2 request, StreamObserver<NewFeedsResponse> responseObserver) {
-
         String userId = request.getUserId();
         ProtocolStringList islandIdList = request.getIslandIdList();
         ProtocolStringList hostIdList = request.getHostIdList();
@@ -149,7 +162,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         long timestamp = Instant.now().toEpochMilli();
         IntStream.range(0, islandIdList.size()).forEach(i -> {
             FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
-            builder.id(String.valueOf(idGenerator.nextId()));
+            builder.id(String.valueOf(this.idGenerator.nextId()));
             builder.islandId(islandIdList.get(i));
             builder.userId(userId);
             builder.hostId(hostIdList.get(i));
@@ -164,8 +177,28 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfoList.add(builder.build());
         });
 
-        List<FeedInfo> feedInfos = feedInfoService.saveAll(feedInfoList);
-        islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp);
+        if (request.hasFeedGroupId() && 1 == islandIdList.size()) {
+            FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(request.getFeedGroupId().getValue());
+            if (Objects.isNull(feedGroup)) {
+                NewFeedsResponse response = NewFeedsResponse.newBuilder()
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEEDGROUP_NOT_FOUND_ERROR))
+                        .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            }
+
+            feedInfoList.get(0).setFeedGroupId(request.getFeedGroupId().getValue());
+
+            if (MediaType.MEDIA_PICS == mediaType || MediaType.MEDIA_ALBUM == mediaType) {
+                feedGroup.getImageFeedIds().add(feedInfoList.get(0).getId());
+            }
+            feedGroup.getFeedIds().add(feedInfoList.get(0).getId());
+            feedGroup.setLastFeedTime(feedInfoList.get(0).getCreatedTime());
+            this.feedGroupService.updateFeedGroup(feedGroup);
+        }
+
+        List<FeedInfo> feedInfos = this.feedInfoService.saveAll(feedInfoList);
+        this.islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp);
 
         feedInfos.forEach(this.feedEventProducerService::produceNewFeedEventAsync);
 
@@ -184,11 +217,27 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      */
     @Override
     public void deleteFeedById(DeleteFeedByIdRequest request, StreamObserver<DeleteFeedResponse> responseObserver) {
-        String feedId = request.getId();
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(request.getId(), false);
 
-        feedInfoService.deleteFeedById(feedId);
+        if (Objects.isNull(feedInfo)) {
+            DeleteFeedResponse deleteFeedResponse = DeleteFeedResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.getSuccStatus())
+                    .build();
+            responseObserver.onNext(deleteFeedResponse);
+            responseObserver.onCompleted();
+        }
 
-        this.feedEventProducerService.produceDeleteFeedEventAsync(feedId);
+        if (!StringUtils.isEmpty(feedInfo.getFeedGroupId())) {
+            FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
+            if (Objects.nonNull(feedGroup)) {
+                feedGroup.getFeedIds().remove(feedInfo.getId());
+                feedGroup.getImageFeedIds().remove(feedInfo.getId());
+                this.feedGroupService.updateFeedGroup(feedGroup);
+            }
+        }
+
+        this.feedInfoService.deleteFeedById(request.getId());
+        this.feedEventProducerService.produceDeleteFeedEventAsync(request.getId());
 
         DeleteFeedResponse deleteFeedResponse = DeleteFeedResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -209,10 +258,10 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         String userId = request.getUserId();
         String feedId = request.getId();
 
-        FeedInfo feedInfo = feedInfoService.findFeedInfoById(feedId, request.getIncludeDeleted());
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(feedId, request.getIncludeDeleted());
 
         if (feedInfo != null) {
-            FeedMessage feedMessage = feedInfoService.getFeedMessage(feedInfo, userId);
+            FeedMessage feedMessage = this.feedInfoService.getFeedMessage(feedInfo, userId);
             responseBuilder.setFeed(feedMessage)
                     .setUserId(feedInfo.getUserId())
                     .setStatus(CommonStatusUtils.getSuccStatus());
@@ -221,6 +270,51 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
         }
+        responseObserver.onNext(responseBuilder.build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the feed by id with feed group infos.
+     *
+     * @param request          {@link RetrieveFeedByIdRequest}.
+     * @param responseObserver {@link FeedGroupFeedResponse}.
+     */
+    @Override
+    public void retrieveFeedGroupFeedById(RetrieveFeedByIdRequest request,
+                                          StreamObserver<FeedGroupFeedResponse> responseObserver) {
+        FeedGroupFeedResponse.Builder responseBuilder = FeedGroupFeedResponse.newBuilder();
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(request.getId(), request.getIncludeDeleted());
+
+        if (Objects.isNull(feedInfo)) {
+            responseBuilder
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR));
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        responseBuilder
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setFeed(this.feedInfoService.getFeedMessage(feedInfo, request.getUserId()));
+
+        FeedGroup feedGroup = null;
+        if (!StringUtils.isEmpty(feedInfo.getFeedGroupId())) {
+            feedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
+        }
+        if (Objects.isNull(feedGroup)) {
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        String lastFeedId = feedGroup.getFeedIds().lower(request.getId());
+        String nextFeedId = feedGroup.getFeedIds().higher(request.getId());
+        responseBuilder
+                .setFeedGroup(this.feedGroupService.getFeedGroupMessage(feedGroup))
+                .setLastFeedId(Objects.isNull(lastFeedId) ? "" : lastFeedId)
+                .setNextFeedId(Objects.isNull(nextFeedId) ? "" : nextFeedId);
+
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
@@ -236,7 +330,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         int page = request.getPageRequest().getPage();
         int pageSize = request.getPageRequest().getPageSize();
         String userId = request.getUserId();
-        Query query = generatorQueryByRequest(request);
+        Query query = buildQueryByRequest(request);
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
         List<FeedMessage> feedMessageList = feedInfoList.stream()
@@ -314,7 +408,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     public void retrieveMultipleTimelineFeeds(RetrieveMultipleFeedsRequest request, StreamObserver<TimelineFeedsResponse> responseObserver) {
         int page = request.getPageRequest().getPage();
         int pageSize = request.getPageRequest().getPageSize();
-        Query query = generatorQueryByRequest(request);
+        Query query = buildQueryByRequest(request);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
 
         responseObserver.onNext(TimelineFeedsResponse.newBuilder()
@@ -326,7 +420,13 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onCompleted();
     }
 
-    private Query generatorQueryByRequest(RetrieveMultipleFeedsRequest request) {
+    /**
+     * Builds the query.
+     *
+     * @param request {@link RetrieveMultipleFeedsRequest}.
+     * @return {@link Query}.
+     */
+    private Query buildQueryByRequest(RetrieveMultipleFeedsRequest request) {
         QueryFeedCondition condition = request.getCondition();
         boolean fromHost = condition.hasFromHost();
         boolean hasIslandId = condition.hasIslandId();
@@ -386,7 +486,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             this.feedInfoService.cancelToppedFeedByIslandId(islandId);
 
             this.feedInfoService.topFeedById(feedId);
-        }else {
+        } else {
             this.feedInfoService.cancelToppedFeedById(feedId);
         }
 
@@ -404,8 +504,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         FeedInfo feedInfo = this.feedInfoService.findToppedFeedByIslandId(islandId);
         FeedMessage feedMessage = this.feedInfoService.getFeedMessage(feedInfo, userId);
         FeedResponse.Builder builder = FeedResponse.newBuilder()
-                                        .setStatus(CommonStatusUtils.getSuccStatus())
-                                        .setUserId(userId);
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setUserId(userId);
         if (Objects.nonNull(feedMessage)) {
             builder.setFeed(feedMessage);
         }
