@@ -20,6 +20,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'com.aliyun.openservices:ons-client'
+    implementation 'com.aliyun:aliyun-java-sdk-core'
+    implementation 'org.redisson:redisson-spring-boot-starter'
     runtimeOnly 'mysql:mysql-connector-java'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
     implementation 'io.opentracing.contrib:opentracing-spring-jaeger-web-starter'
