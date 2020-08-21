@@ -125,9 +125,14 @@ message RetrieveToppedFeedByIdResponse {
     FeedMessage feed = 2;
 }
 
+message UpdateFeedPaidByIdRequest {
+    string id = 1;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
+    rpc CreateWechatFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
     rpc RetrieveFeedsByIds (RetrieveFeedsByIdsRequest) returns (FeedsResponse) {};
@@ -136,4 +141,5 @@ service FeedService {
     rpc RetrieveMultipleTimelineFeeds (RetrieveMultipleFeedsRequest) returns (TimelineFeedsResponse) {}
     rpc TopFeedById (TopFeedByIdRequest) returns (TopFeedByIdResponse) {}
     rpc RetrieveToppedFeedById (RetrieveToppedFeedByIdRequest) returns (FeedResponse) {}
+    rpc UpdateFeedPaidById (UpdateFeedPaidByIdRequest) returns (CommonStatus) {}
 }
