@@ -5,8 +5,11 @@ import com.aliyun.openservices.ons.api.ConsumeContext;
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.MessageListener;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.keepreal.madagascar.common.MediaType;
+import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.mantella.FeedEventMessage;
 import com.keepreal.madagascar.marty.model.PushType;
+import com.keepreal.madagascar.marty.service.IslandService;
 import com.keepreal.madagascar.marty.service.PushService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 import static com.keepreal.madagascar.mantella.FeedEventType.FEED_EVENT_CREATE;
+import static com.keepreal.madagascar.mantella.FeedEventType.FEED_EVENT_UPDATE;
 
 /**
  * Represents the feed event listener.
@@ -42,6 +46,21 @@ public class FeedEventListener implements MessageListener {
                 return Action.CommitMessage;
             }
             FeedEventMessage feedEventMessage = FeedEventMessage.parseFrom(message.getBody());
+
+            if (feedEventMessage.getType().equals(FEED_EVENT_CREATE)
+                    && MediaType.MEDIA_QUESTION_VALUE == feedEventMessage.getFeedCreateEvent().getMediaTypeValue()) {
+                String hostId = feedEventMessage.getFeedCreateEvent().getHostId();
+                pushService.pushMessageByType(hostId, PushType.PUSH_QUESTION);
+                pushService.pushNewQuestion(feedEventMessage.getFeedCreateEvent(), hostId);
+                return Action.CommitMessage;
+            }
+
+            if (feedEventMessage.getType().equals(FEED_EVENT_UPDATE)) {
+                pushService.pushMessageByType(feedEventMessage.getFeedUpdateEvent().getAuthorId(), PushType.PUSH_REPLY);
+                pushService.pushNewReply(feedEventMessage.getFeedUpdateEvent());
+                return Action.CommitMessage;
+            }
+
             if (feedEventMessage.getType().equals(FEED_EVENT_CREATE)) {
                 pushService.pushNewFeed(feedEventMessage.getFeedCreateEvent(), PushType.PUSH_FEED);
             }

@@ -1725,7 +1725,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QuestionResponse'
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/boxes/skus:
     get:
       tags:
@@ -1801,7 +1801,6 @@ paths:
         - $ref: '#/components/parameters/hasAnswerInQuery'
         - $ref: '#/components/parameters/membershipIdInQuery'
         - $ref: '#/components/parameters/complimentaryInQuery'
-        - $ref: '#/components/parameters/publicVisibleInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
       tags:
@@ -2144,12 +2143,6 @@ components:
     complimentaryInQuery:
       in: query
       name: paid
-      required: false
-      schema:
-        type: boolean
-    publicVisibleInQuery:
-      in: query
-      name: public
       required: false
       schema:
         type: boolean
@@ -2695,13 +2688,27 @@ components:
         size:
           type: integer
           format: int64
+    AnswerDTO:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        text:
+          type: string
+        hasExpired:
+          type: boolean
+        publicVisible:
+          type: boolean
+        answeredAt:
+          type: integer
+          format: int64
     MultiMediaDTO:
       oneOf:
         - $ref: '#/components/schemas/VideoDTO'
         - $ref: '#/components/schemas/PictureDTO'
         - $ref: '#/components/schemas/AudioDTO'
         - $ref: '#/components/schemas/HtmlDTO'
-        - $ref: '#/components/schemas/QuestionDTO'
+        - $ref: '#/components/schemas/AnswerDTO'
     PosterFeedDTO:
       type: object
       properties:
@@ -2733,6 +2740,9 @@ components:
           type: array
           items:
             type: string
+        priceInCents:
+          type: integer
+          format: int64
         mediaType:
           $ref: '#/components/schemas/MultiMediaType'
         multimedia:
@@ -4273,17 +4283,9 @@ components:
           type: array
           items:
             type: string
+        isLiked:
+          type: boolean
         createdAt:
-          type: integer
-          format: int64
-    AnswerDTO:
-      type: object
-      properties:
-        user:
-          $ref: '#/components/schemas/BriefUserDTO'
-        text:
-          type: string
-        answeredAt:
           type: integer
           format: int64
     FullQuestionDTO:
@@ -4291,8 +4293,13 @@ components:
         - $ref: '#/components/schemas/QuestionDTO'
         - type: object
           properties:
-            anaswer:
-              $ref: '#/components/schemas/AnswerDTO'
+            answerer:
+              $ref: '#/components/schemas/BriefUserDTO'
+            answer:
+              type: string
+            answeredAt:
+              type: integer
+              format: int64
             comments:
               type: array
               items:
@@ -4349,7 +4356,9 @@ components:
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
-              $ref: '#/components/schemas/QuestionDTO'
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionDTO'
     PostAnswerRequest:
       type: object
       properties:

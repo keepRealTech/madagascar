@@ -20,6 +20,7 @@ message FeedCreateEvent {
     string duplicateTag = 5;
     bool fromHost = 6;
     MediaType mediaType = 7;
+    string hostId = 8;
 }
 
 message FeedUpdateEvent {
