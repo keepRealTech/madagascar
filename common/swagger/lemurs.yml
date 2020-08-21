@@ -2763,6 +2763,18 @@ components:
               type: boolean
             isAccess:
               type: boolean
+    SimpleQuestionBoxDTO:
+      type: object
+      properties:
+        noticeType:
+          $ref: '#/components/schemas/NoticeType'
+        feedId:
+          type: string
+        text:
+          type: string
+        price:
+          type: integer
+          format: int64
     SimpleMembershipDTO:
       type: object
       properties:
@@ -3088,7 +3100,7 @@ components:
         notificationType:
           $ref: '#/components/schemas/NotificationType'
         question:
-          $ref: '#/components/schemas/SnapshotFeedDTO'
+          $ref: '#/components/schemas/SimpleQuestionBoxDTO'
         hasRead:
           type: boolean
         createdAt:

@@ -34,6 +34,7 @@ enum NotificationType {
     NOTIFICATION_REACTIONS = 2;
     NOTIFICATION_SYSTEM_NOTICE = 3;
     NOTIFICATION_ISLAND_NOTICE = 4;
+    NOTIFICATION_BOX_NOTICE = 5;
 }
 
 message NotificationTypeValue {
@@ -44,6 +45,8 @@ enum NoticeType {
     NOTICE_TYPE_NONE = 0;
     NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER = 1;
     NOTICE_TYPE_ISLAND_NEW_MEMBER = 2;
+    NOTICE_TYPE_BOX_NEW_QUESTION = 3;
+    NOTICE_TYPE_BOX_NEW_ANSWER = 4;
 }
 
 message NoticeTypeValue {

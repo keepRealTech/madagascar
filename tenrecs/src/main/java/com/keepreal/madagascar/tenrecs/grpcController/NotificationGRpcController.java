@@ -89,6 +89,10 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                     && request.getCondition().hasNoticeType()) {
                 notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId, 
                         request.getCondition().getNoticeType().getValue(), pageRequest);
+            } else if (NotificationType.NOTIFICATION_BOX_NOTICE.equals(request.getCondition().getType().getValue())
+                    && request.getCondition().hasNoticeType()) {
+                notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId,
+                        request.getCondition().getNoticeType().getValue(), pageRequest);
             } else {
                 notifications = this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
             }
@@ -121,6 +125,23 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 } else {
                     record.setLastReadIslandNoticeNewMemberNotificationTimestamp(timestamp);
                     record.setLastReadIslandNoticeNewSubscriberNotificationTimestamp(timestamp);
+                }
+                break;
+            case NOTIFICATION_BOX_NOTICE:
+                record.setLastReadBoxNoticeNotificationTimestamp(timestamp);
+                if (request.getCondition().hasNoticeType()) {
+                    switch (request.getCondition().getNoticeType().getValue()) {
+                        case NOTICE_TYPE_BOX_NEW_QUESTION:
+                            record.setLastReadBoxNoticeNewQuestionNotificationTimestamp(timestamp);
+                            break;
+                        case NOTICE_TYPE_BOX_NEW_ANSWER:
+                            record.setLastReadBoxNoticeNewReplyNotificationTimestamp(timestamp);
+                            break;
+                        default:
+                    }
+                } else {
+                    record.setLastReadBoxNoticeNewQuestionNotificationTimestamp(timestamp);
+                    record.setLastReadBoxNoticeNewReplyNotificationTimestamp(timestamp);
                 }
                 break;
             case NOTIFICATION_COMMENTS:

@@ -18,9 +18,9 @@ import java.util.Properties;
  * Represents the Rocket mq configurations.
  */
 @Configuration
-@ConfigurationProperties(prefix = "rocketmq", ignoreUnknownFields = false)
+@ConfigurationProperties(prefix = "rocketmq.notification", ignoreUnknownFields = false)
 @Data
-public class RocketMQConfiguration {
+public class NotificationEventConsumerConfiguration {
 
     private String accessKey;
     private String secretKey;
@@ -36,7 +36,7 @@ public class RocketMQConfiguration {
      *
      * @return {@link ConsumerBean}.
      */
-    @Bean(initMethod = "start", destroyMethod = "shutdown")
+    @Bean(name = "notification-event-consumer", initMethod = "start", destroyMethod = "shutdown")
     public ConsumerBean buildConsumer() {
         ConsumerBean consumerBean = new ConsumerBean();
 

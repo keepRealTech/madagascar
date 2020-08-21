@@ -34,7 +34,18 @@ message NoticeNotificationMessage {
     oneof notice {
         SubscribeNotice SubscribeNotice = 2;
         MemberNotice memberNotice = 3;
+        NewQuestionNotice newQuestionNotice = 4;
+        NewAnswerNotice newAnswerNotice= 5;
     }
+}
+message NewQuestionNotice {
+    string feedId = 1;
+    string authorId = 2;
+}
+
+message NewAnswerNotice {
+    string feedId = 1;
+    string authorId = 2;
 }
 
 message SubscribeNotice {

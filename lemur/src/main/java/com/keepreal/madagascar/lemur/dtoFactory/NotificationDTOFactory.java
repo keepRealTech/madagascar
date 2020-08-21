@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.SystemNotificationConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.CommentNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.NoticeNotificationDTOBuilder;
+import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.QuestionBoxNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.ReactionNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.IslandService;
@@ -155,6 +156,11 @@ public class NotificationDTOFactory {
                             .setNotificationMessage(notification)
                             .setFeedDTOFactory(this.feedDTOFactory)
                             .setReactionDTOFactory(this.reactionDTOFactory)
+                            .build();
+                case NOTIFICATION_BOX_NOTICE:
+                    return new QuestionBoxNotificationDTOBuilder()
+                            .setFeedService(this.feedService)
+                            .setNotificationMessage(notification)
                             .build();
                 case NOTIFICATION_SYSTEM_NOTICE:
                     SystemNoticeDTO systemNotice = new SystemNoticeDTO();

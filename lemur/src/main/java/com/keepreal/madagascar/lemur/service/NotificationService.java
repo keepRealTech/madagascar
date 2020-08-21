@@ -65,6 +65,10 @@ public class NotificationService {
             conditionBuilder.setNoticeType(NoticeTypeValue.newBuilder().setValue(noticeType).build());
         }
 
+        if (NotificationType.NOTIFICATION_BOX_NOTICE.equals(type) && Objects.nonNull(noticeType)) {
+            conditionBuilder.setNoticeType(NoticeTypeValue.newBuilder().setValue(noticeType).build());
+        }
+
         RetrieveMultipleNotificationsRequest request = RetrieveMultipleNotificationsRequest.newBuilder()
                 .setCondition(conditionBuilder.build())
                 .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
