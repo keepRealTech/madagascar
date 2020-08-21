@@ -6,7 +6,7 @@ import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.HtmlMessage;
 import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.VideoMessage;
-import org.springframework.stereotype.Component;
+import com.keepreal.madagascar.lemur.service.UserService;
 import swagger.model.MultiMediaDTO;
 
 import java.util.Collections;
@@ -14,8 +14,16 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Component
 public class MultiMediaDTOFactory {
+
+    private final UserService userService;
+    private final UserDTOFactory userDTOFactory;
+
+    public MultiMediaDTOFactory(UserService userService,
+                                UserDTOFactory userDTOFactory) {
+        this.userService = userService;
+        this.userDTOFactory = userDTOFactory;
+    }
 
     public List<MultiMediaDTO> listValueOf(FeedMessage feedMessage) {
         MultiMediaDTO dto = new MultiMediaDTO();
@@ -59,6 +67,9 @@ public class MultiMediaDTOFactory {
         }
         if (answerMessage.hasPublicVisible()) {
             dto.setPublicVisible(answerMessage.getPublicVisible().getValue());
+        }
+        if (answerMessage.hasAnswerUserId()) {
+            dto.setUser(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(answerMessage.getAnswerUserId().getValue())));
         }
 
         return dto;
