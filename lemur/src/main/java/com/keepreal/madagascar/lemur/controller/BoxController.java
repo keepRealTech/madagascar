@@ -25,9 +25,6 @@ import swagger.model.QuestionResponse;
 import swagger.model.QuestionsResponse;
 import swagger.model.WechatOrderResponse;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,7 +51,8 @@ public class BoxController implements BoxApi {
      * @return  {@link QuestionsResponse}.
      */
     @Override
-    public ResponseEntity<QuestionsResponse> apiV1BoxesAnswersGet(@Min(0) @Valid Integer page, @Min(1) @Max(100) @Valid Integer pageSize) {
+    public ResponseEntity<QuestionsResponse> apiV1BoxesAnswersGet(Integer page,
+                                                                  Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAnsweredMeQuestion(userId, page, pageSize);
 
@@ -74,7 +72,11 @@ public class BoxController implements BoxApi {
      * @return  {@link QuestionsResponse}.
      */
     @Override
-    public ResponseEntity<QuestionsResponse> apiV1BoxesQuestionsGet(@Valid Boolean answered, @Valid String membershipId, @Valid Boolean paid, @Min(0) @Valid Integer page, @Min(1) @Max(100) @Valid Integer pageSize) {
+    public ResponseEntity<QuestionsResponse> apiV1BoxesQuestionsGet(Boolean answered,
+                                                                    String membershipId,
+                                                                    Boolean paid,
+                                                                    Integer page,
+                                                                    Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAskMeQuestion(userId, page, pageSize, answered, paid, membershipId);
 
@@ -91,7 +93,8 @@ public class BoxController implements BoxApi {
      * @return {@link DummyResponse}.
      */
     @Override
-    public ResponseEntity<DummyResponse> apiV1BoxesQuestionsIdAnswerPost(String id, @Valid PostAnswerRequest postAnswerRequest) {
+    public ResponseEntity<DummyResponse> apiV1BoxesQuestionsIdAnswerPost(String id,
+                                                                         PostAnswerRequest postAnswerRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         this.boxService.answerQuestion(id, userId, postAnswerRequest.getText(),
                 postAnswerRequest.getPublicVisible(), postAnswerRequest.getVisibleMembershipIds());
@@ -113,7 +116,7 @@ public class BoxController implements BoxApi {
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
 
         FullQuestionResponse response = new FullQuestionResponse();
-        response.setData(this.boxDTOFactory.fullQuestionDTO(feedMessage, userId));
+        response.setData(this.boxDTOFactory.fullValueOf(feedMessage, userId));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -135,14 +138,15 @@ public class BoxController implements BoxApi {
      * @return  {@link IslandBoxResponse}.
      */
     @Override
-    public ResponseEntity<IslandBoxAccessResponse> apiV1IslandsIdBoxesAccessPut(String id, @Valid PutIslandBoxAccessRequest putIslandBoxAccessRequest) {
+    public ResponseEntity<IslandBoxAccessResponse> apiV1IslandsIdBoxesAccessPut(String id,
+                                                                                PutIslandBoxAccessRequest putIslandBoxAccessRequest) {
         Boolean enabled = putIslandBoxAccessRequest.getEnabled();
         List<String> membershipIds = putIslandBoxAccessRequest.getMembershipIds();
 
         BoxMessage boxMessage = this.boxService.createOrUpdateBoxInfo(id, enabled, membershipIds);
 
         IslandBoxAccessResponse response = new IslandBoxAccessResponse();
-        response.setData(this.boxDTOFactory.boxAccessDTO(boxMessage));
+        response.setData(this.boxDTOFactory.valueOf(boxMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -151,14 +155,16 @@ public class BoxController implements BoxApi {
     /**
      * Implements the create free question api.
      *
-     * @param id id (required)
-     * @param postQuestionRequest  (required)
+     * @param id id (required) Island id.
+     * @param postQuestionRequest  (required) {@link PostQuestionRequest}.
      * @return  {@link DummyResponse}.
      */
     @Override
-    public ResponseEntity<DummyResponse> apiV1IslandsIdBoxesFreeQuestionsPost(String id, @Valid PostQuestionRequest postQuestionRequest) {
+    public ResponseEntity<DummyResponse> apiV1IslandsIdBoxesFreeQuestionsPost(String id,
+                                                                              PostQuestionRequest postQuestionRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        this.createQuestion(id, userId, postQuestionRequest);
+
+        this.boxService.createFreeQuestion(id, userId, postQuestionRequest.getText());
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
@@ -176,9 +182,9 @@ public class BoxController implements BoxApi {
         String userId = HttpContextUtils.getUserIdFromContext();
         BoxMessage boxMessage = this.boxService.retrieveBoxInfo(id);
 
-        BoxDTO dto = this.boxDTOFactory.boxDTO(boxMessage, userId);
+        BoxDTO dto = this.boxDTOFactory.valueOf(boxMessage, userId);
         List<FeedMessage> feedList = this.boxService.retrieveAnsweredAndVisibleQuestions(id, userId, 0, 2).getFeedList();
-        dto.setRecentAnsweredQuestions(feedList.stream().map(feedMessage -> this.boxDTOFactory.questionDTO(feedMessage, userId)).collect(Collectors.toList()));
+        dto.setRecentAnsweredQuestions(feedList.stream().map(feedMessage -> this.boxDTOFactory.valueOf(feedMessage, userId)).collect(Collectors.toList()));
 
         IslandBoxResponse response = new IslandBoxResponse();
         response.setData(dto);
@@ -188,16 +194,16 @@ public class BoxController implements BoxApi {
     }
 
     @Override
-    public ResponseEntity<QuestionResponse> apiV1IslandsIdBoxesPaidQuestionsIosPayPost(String id, @Valid PostQuestionRequest postQuestionRequest) {
+    public ResponseEntity<QuestionResponse> apiV1IslandsIdBoxesPaidQuestionsIosPayPost(String id,
+                                                                                       PostQuestionRequest postQuestionRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        this.createQuestion(id, userId, postQuestionRequest);
         return null;
     }
 
     @Override
-    public ResponseEntity<WechatOrderResponse> apiV1IslandsIdBoxesPaidQuestionsWechatPayPost(String id, @Valid PostQuestionRequest postQuestionRequest) {
+    public ResponseEntity<WechatOrderResponse> apiV1IslandsIdBoxesPaidQuestionsWechatPayPost(String id,
+                                                                                             PostQuestionRequest postQuestionRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        this.createQuestion(id, userId, postQuestionRequest);
         return null;
     }
 
@@ -210,7 +216,9 @@ public class BoxController implements BoxApi {
      * @return  {@link QuestionsResponse}.
      */
     @Override
-    public ResponseEntity<QuestionsResponse> apiV1IslandsIdBoxesQuestionsGet(String id, @Min(0) @Valid Integer page, @Min(1) @Max(100) @Valid Integer pageSize) {
+    public ResponseEntity<QuestionsResponse> apiV1IslandsIdBoxesQuestionsGet(String id,
+                                                                             Integer page,
+                                                                             Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAnsweredAndVisibleQuestions(id, userId, page, pageSize);
@@ -220,19 +228,11 @@ public class BoxController implements BoxApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    private void createQuestion(String islandId, String userId, PostQuestionRequest postQuestionRequest) {
-        boxService.createQuestion(islandId, userId,
-                postQuestionRequest.getText(),
-                postQuestionRequest.getPriceInCents(),
-                postQuestionRequest.getQuestionSkuId(),
-                postQuestionRequest.getReceipt(),
-                postQuestionRequest.getTransactionId());
-    }
-
     private void questionsResponse(QuestionsResponse response, com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse, String userId) {
-        response.setData(questionsResponse.getFeedList().stream().map(feedMessage -> this.boxDTOFactory.questionDTO(feedMessage, userId)).collect(Collectors.toList()));
+        response.setData(questionsResponse.getFeedList().stream().map(feedMessage -> this.boxDTOFactory.valueOf(feedMessage, userId)).collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(questionsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
     }
+
 }

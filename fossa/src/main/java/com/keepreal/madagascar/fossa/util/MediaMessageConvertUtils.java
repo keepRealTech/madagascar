@@ -7,17 +7,18 @@ import com.keepreal.madagascar.common.AudioMessage;
 import com.keepreal.madagascar.common.HtmlMessage;
 import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.PicturesMessage;
-import com.keepreal.madagascar.common.QuestionMessage;
+import com.keepreal.madagascar.common.AnswerMessage;
 import com.keepreal.madagascar.common.VideoMessage;
 import com.keepreal.madagascar.fossa.model.AudioInfo;
 import com.keepreal.madagascar.fossa.model.HtmlInfo;
 import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.model.PictureInfo;
-import com.keepreal.madagascar.fossa.model.QuestionInfo;
+import com.keepreal.madagascar.fossa.model.AnswerInfo;
 import com.keepreal.madagascar.fossa.model.VideoInfo;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -73,25 +74,27 @@ public class MediaMessageConvertUtils {
         return htmlInfo;
     }
 
-    public static QuestionInfo toQuestionInfo(QuestionMessage questionMessage) {
-        QuestionInfo questionInfo = new QuestionInfo();
-        questionInfo.setText(questionMessage.getText());
-        if (questionMessage.hasPriceInCents()) {
-            questionInfo.setPriceInCents(questionMessage.getPriceInCents().getValue());
+    public static AnswerInfo toAnswerInfo(AnswerMessage answerMessage) {
+        AnswerInfo answerInfo = new AnswerInfo();
+
+        if (answerMessage.hasAnswer()) {
+            answerInfo.setAnswer(answerMessage.getAnswer().getValue());
         }
-        if (questionMessage.hasQuestionSkuId()) {
-            questionInfo.setQuestionSkuId(questionMessage.getQuestionSkuId().getValue());
+
+        if (answerMessage.hasAnsweredAt()) {
+            answerInfo.setAnsweredAt(answerMessage.getAnsweredAt().getValue());
         }
-        if (questionMessage.hasReceipt()) {
-            questionInfo.setReceipt(questionMessage.getReceipt().getValue());
+
+        if (answerMessage.hasPublicVisible()) {
+            answerInfo.setPublicVisible(answerMessage.getPublicVisible().getValue());
         }
-        if (questionMessage.hasTransactionId()) {
-            questionInfo.setTransactionId(questionMessage.getTransactionId().getValue());
+
+        if (answerMessage.hasAnswerUserId()) {
+            answerInfo.setAnswerUserId(answerMessage.getAnswerUserId().getValue());
         }
-        questionInfo.setAnswerUserId(questionMessage.getAnswerUserId());
-        questionInfo.setAnswerAt(questionMessage.getAnsweredAt());
-        questionInfo.setIgnored(false);
-        return questionInfo;
+
+        answerInfo.setIgnored(false);
+        return answerInfo;
     }
 
     public static PicturesMessage toPicturesMessage(List<MediaInfo> mediaInfos) {
@@ -142,31 +145,20 @@ public class MediaMessageConvertUtils {
                 .build();
     }
 
-    public static QuestionMessage toQuestionMessage(MediaInfo mediaInfo) {
-        QuestionInfo questionInfo = (QuestionInfo) mediaInfo;
+    public static AnswerMessage toAnswerMessage(AnswerInfo answerInfo) {
+        AnswerMessage.Builder builder = AnswerMessage.newBuilder();
 
-        QuestionMessage.Builder builder = QuestionMessage.newBuilder()
-                .setText(questionInfo.getText())
-                .setAnswerUserId(questionInfo.getAnswerUserId())
-                .setAnsweredAt(questionInfo.getAnswerAt());
-
-        if (questionInfo.getPriceInCents() != null) {
-            builder.setPriceInCents(Int64Value.of(questionInfo.getPriceInCents()));
+        if (!StringUtils.isEmpty(answerInfo.getAnswer())) {
+            builder.setAnswer(StringValue.of(answerInfo.getAnswer()));
         }
-        if (!StringUtils.isEmpty(questionInfo.getQuestionSkuId())) {
-            builder.setQuestionSkuId(StringValue.of(questionInfo.getQuestionSkuId()));
+        if (Objects.nonNull(answerInfo.getPublicVisible())) {
+            builder.setPublicVisible(BoolValue.of(answerInfo.getPublicVisible()));
         }
-        if (!StringUtils.isEmpty(questionInfo.getReceipt())) {
-            builder.setReceipt(StringValue.of(questionInfo.getReceipt()));
+        if (!StringUtils.isEmpty(answerInfo.getAnsweredAt())) {
+            builder.setAnsweredAt(Int64Value.of(answerInfo.getAnsweredAt()));
         }
-        if (!StringUtils.isEmpty(questionInfo.getTransactionId())) {
-            builder.setTransactionId(StringValue.of(questionInfo.getTransactionId()));
-        }
-        if (!StringUtils.isEmpty(questionInfo.getAnswer())) {
-            builder.setAnswer(StringValue.of(questionInfo.getAnswer()));
-        }
-        if (questionInfo.getPublicVisible() != null) {
-            builder.setPublicVisible(BoolValue.of(questionInfo.getPublicVisible()));
+        if (!StringUtils.isEmpty(answerInfo.getAnswerUserId())) {
+            builder.setAnswerUserId(StringValue.of(answerInfo.getAnswerUserId()));
         }
 
         return builder.build();

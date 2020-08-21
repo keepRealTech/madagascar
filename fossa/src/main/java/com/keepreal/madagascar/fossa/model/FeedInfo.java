@@ -36,6 +36,8 @@ public class FeedInfo {
     private String multiMediaType;
     private List<MediaInfo> mediaInfos;
     @Builder.Default
+    private Long priceInCents = 0L;
+    @Builder.Default
     private Integer likesCount = 0;
     @Builder.Default
     private Integer commentsCount = 0;

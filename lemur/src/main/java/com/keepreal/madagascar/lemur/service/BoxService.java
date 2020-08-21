@@ -4,7 +4,7 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.MediaType;
-import com.keepreal.madagascar.common.QuestionMessage;
+import com.keepreal.madagascar.common.AnswerMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.AnswerQuestionRequest;
@@ -49,34 +49,24 @@ public class BoxService {
         this.islandService = islandService;
     }
 
-    public void createQuestion(String islandId, String userId, String text, Long priceInCents, String questionSkuId, String receipt, String transactionId) {
+    /**
+     * Creates a free question.
+     *
+     * @param islandId  Island id.
+     * @param userId    User id.
+     * @param text      Question text.
+     */
+    public void createFreeQuestion(String islandId, String userId, String text) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
         String hostId = this.islandService.retrieveIslandById(islandId).getHostId();
-
-
-        QuestionMessage.Builder questionBuilder = QuestionMessage.newBuilder()
-                .setText(text)
-                .setAnswerUserId(hostId)
-                .setAnsweredAt(0L);
-        if (priceInCents != null && priceInCents > 0) {
-            questionBuilder.setPriceInCents(Int64Value.of(priceInCents));
-        }
-        if (!StringUtils.isEmpty(questionSkuId)) {
-            questionBuilder.setQuestionSkuId(StringValue.of(questionSkuId));
-        }
-        if (!StringUtils.isEmpty(receipt)) {
-            questionBuilder.setReceipt(StringValue.of(receipt));
-        }
-        if (!StringUtils.isEmpty(transactionId)) {
-            questionBuilder.setTransactionId(StringValue.of(transactionId));
-        }
 
         NewFeedsRequestV2.Builder builder = NewFeedsRequestV2.newBuilder()
                 .addAllIslandId(Collections.singletonList(islandId))
                 .addAllHostId(Collections.singletonList(hostId))
                 .setUserId(userId)
                 .setType(MediaType.MEDIA_QUESTION)
-                .setQuestion(questionBuilder.build());
+                .setText(StringValue.of(text))
+                .setPriceInCents(Int64Value.of(0L));
 
         NewFeedsResponse newFeedsResponse;
         try {

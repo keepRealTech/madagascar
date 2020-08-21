@@ -1,13 +1,12 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.google.protobuf.ProtocolStringList;
+import com.keepreal.madagascar.common.AnswerMessage;
 import com.keepreal.madagascar.common.FeedMessage;
-import com.keepreal.madagascar.common.QuestionMessage;
 import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
-import swagger.model.AnswerDTO;
 import swagger.model.BoxAccessDTO;
 import swagger.model.BoxDTO;
 import swagger.model.FullQuestionDTO;
@@ -35,78 +34,88 @@ public class BoxDTOFactory {
         this.commentDTOFactory = commentDTOFactory;
     }
 
+    public BoxDTO valueOf(BoxMessage boxMessage, String userId) {
+        if (Objects.isNull(boxMessage)) {
+            return null;
+        }
 
-    public BoxDTO boxDTO(BoxMessage boxMessage, String userId) {
         BoxDTO dto = new BoxDTO();
-
         dto.setIslandId(boxMessage.getIsland());
         dto.setAnsweredQuestionsCount(boxMessage.getAnsweredQuestionCount());
-        dto.setBoxAccess(this.boxAccessDTO(boxMessage));
+        dto.setBoxAccess(this.valueOf(boxMessage));
 
-        List<String> myMembershipIds = subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(boxMessage.getIsland(), userId);
+        List<String> myMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(boxMessage.getIsland(), userId);
         ProtocolStringList membershipIdsList = boxMessage.getMembershipIdsList();
         dto.setHasSubmitAccess(membershipIdsList.stream().anyMatch(myMembershipIds::contains));
 
         return dto;
     }
 
-    public BoxAccessDTO boxAccessDTO(BoxMessage boxMessage) {
-        BoxAccessDTO dto = new BoxAccessDTO();
+    public BoxAccessDTO valueOf(BoxMessage boxMessage) {
+        if (Objects.isNull(boxMessage)) {
+            return null;
+        }
 
+        BoxAccessDTO dto = new BoxAccessDTO();
         dto.setEnabled(boxMessage.getEnabled());
         dto.setMembershipIds(boxMessage.getMembershipIdsList());
 
         return dto;
     }
 
-    public QuestionDTO questionDTO(FeedMessage feedMessage, String userId) {
+    public QuestionDTO valueOf(FeedMessage feedMessage, String userId) {
+        if (Objects.isNull(feedMessage)) {
+            return null;
+        }
 
-        QuestionMessage question = feedMessage.getQuestion();
+        AnswerMessage question = feedMessage.getQuestion();
 
         QuestionDTO dto = new QuestionDTO();
-
         dto.setId(feedMessage.getId());
         dto.setIslandId(feedMessage.getIslandId());
-        dto.setText(question.getText());
-
+        dto.setText(feedMessage.getText());
         dto.setHasAccess(feedMessage.getIsAccess() || userId.equals(feedMessage.getUserId()));
-        dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis()); // 根据createdAt和当前时间判断
-        dto.setHasPaid(question.hasPriceInCents()); // 根据priceInCents是否不为null && 大于0
-        dto.setPublicVisible(question.getPublicVisible().getValue()); //
+        dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
+        dto.setHasPaid(feedMessage.getPriceInCents() > 0);
+        dto.setPublicVisible(question.getPublicVisible().getValue());
         dto.setHasAnswer(question.hasAnswer());
+        dto.setIsLiked(feedMessage.getIsLiked());
         dto.setVisibleMembershipIds(feedMessage.getMembershipIdList());
         dto.setCommentsCount(feedMessage.getCommentsCount());
         dto.setLikesCount(feedMessage.getLikesCount());
-        if (dto.getHasPaid()) {
-            dto.setPriceInCents(question.getPriceInCents().getValue());
-        }
+        dto.setPriceInCents(feedMessage.getPriceInCents());
         dto.setCreatedAt(feedMessage.getCreatedAt());
-
         return dto;
     }
 
-    public FullQuestionDTO fullQuestionDTO(FeedMessage feedMessage, String userId) {
-
-        QuestionMessage question = feedMessage.getQuestion();
+    public FullQuestionDTO fullValueOf(FeedMessage feedMessage, String userId) {
+        if (Objects.isNull(feedMessage)) {
+            return null;
+        }
+        AnswerMessage question = feedMessage.getQuestion();
 
         FullQuestionDTO dto = new FullQuestionDTO();
         dto.setId(feedMessage.getId());
         dto.setIslandId(feedMessage.getIslandId());
-        dto.setText(question.getText());
+        dto.setText(feedMessage.getText());
+        dto.setIsLiked(feedMessage.getIsLiked());
         dto.setHasAccess(feedMessage.getIsAccess() || userId.equals(feedMessage.getUserId()));
-        dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis()); // 根据createdAt和当前时间判断
-        dto.setHasPaid(question.hasPriceInCents()); // 根据priceInCents是否不为null && 大于0
-        dto.setPublicVisible(question.getPublicVisible().getValue()); //
+        dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
+        dto.setHasPaid(feedMessage.getPriceInCents() > 0);
+        dto.setPublicVisible(question.getPublicVisible().getValue());
         dto.setHasAnswer(question.hasAnswer());
         dto.setVisibleMembershipIds(feedMessage.getMembershipIdList());
         dto.setCommentsCount(feedMessage.getCommentsCount());
         dto.setLikesCount(feedMessage.getLikesCount());
-        if (dto.getHasPaid()) {
-            dto.setPriceInCents(question.getPriceInCents().getValue());
-        }
+        dto.setPriceInCents(feedMessage.getPriceInCents());
         dto.setCreatedAt(feedMessage.getCreatedAt());
 
-        dto.setAnaswer(this.answerDTO(question));
+        if (question.hasAnswer()) {
+            dto.setAnswer(question.getAnswer().getValue());
+            dto.setAnswerer(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(question.getAnswerUserId().getValue())));
+            dto.setAnsweredAt(question.getAnsweredAt().getValue());
+        }
+
         dto.setComments(feedMessage.getLastCommentsList()
                 .stream()
                 .map(this.commentDTOFactory::valueOf)
@@ -116,12 +125,4 @@ public class BoxDTOFactory {
         return dto;
     }
 
-    public AnswerDTO answerDTO(QuestionMessage questionMessage) {
-        AnswerDTO dto = new AnswerDTO();
-        dto.setText(questionMessage.getAnswer().getValue());
-        dto.setUser(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(questionMessage.getAnswerUserId())));
-        dto.setAnsweredAt(questionMessage.getAnsweredAt());
-
-        return dto;
-    }
 }

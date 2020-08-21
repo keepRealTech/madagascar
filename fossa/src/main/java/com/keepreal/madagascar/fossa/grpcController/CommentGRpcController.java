@@ -74,16 +74,16 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
         commentInfo.setContent(content);
         commentInfo.setReplyToId(replyToId);
 
-        CommentInfo save = commentService.insert(commentInfo);
+        CommentInfo save = this.commentService.insert(commentInfo);
 
-        feedInfoService.incFeedCount(feedId, FeedCountType.COMMENTS_COUNT);
-        CommentMessage commentMessage = commentService.getCommentMessage(save);
+        this.feedInfoService.incFeedCount(feedId, FeedCountType.COMMENTS_COUNT);
+        CommentMessage commentMessage = this.commentService.getCommentMessage(save);
         CommentResponse commentResponse = CommentResponse.newBuilder()
                 .setComment(commentMessage)
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
 
-        FeedMessage feedMessage = feedInfoService.getFeedMessageById(feedId, userId);
+        FeedMessage feedMessage = this.feedInfoService.getFeedMessageById(feedId, userId);
 
         this.notificationEventProducerService.produceNewCommentsNotificationEventAsync(
                 commentMessage, feedMessage, replyToId);
