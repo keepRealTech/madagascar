@@ -106,5 +106,6 @@ service PaymentService {
   rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};
   rpc IOSSubscribeMembership (IOSOrderSubscribeRequest) returns (CommonStatus) {};
   rpc WechatBuyShell (WechatOrderBuyShellRequest) returns (WechatOrderResponse) {};
+  rpc WechatCreateFeed (CreatePaidFeedRequest) returns (WechatOrderResponse) {};
   rpc RetrieveUserPayments (RetrieveUserPaymentsRequest) returns (UserPaymentsResponse) {};
 }
