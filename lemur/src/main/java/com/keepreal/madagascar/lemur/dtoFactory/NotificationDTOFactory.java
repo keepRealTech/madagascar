@@ -20,6 +20,7 @@ import swagger.model.SystemNoticeDTO;
 import swagger.model.UnreadIslandNoticesCountDTO;
 import swagger.model.UnreadNotificationCountDTO;
 import swagger.model.UnreadNotificationCountDTOV2;
+import swagger.model.UnreadQuestsionNoticesCountDTO;
 
 import java.util.Objects;
 
@@ -116,9 +117,17 @@ public class NotificationDTOFactory {
         islandNoticesCountDTO.setUnreadNewSubscriberNoticeCount(unreadNotificationsCountMessage.getUnreadNewSubscribersCount());
 
         countDTO.setUnreadIslandNoticesCountDTO(islandNoticesCountDTO);
+
+        UnreadQuestsionNoticesCountDTO unreadQuestsionNoticesCountDTO = new UnreadQuestsionNoticesCountDTO();
+        unreadQuestsionNoticesCountDTO.setUnreadQuestionsNoticeCount(unreadNotificationsCountMessage.getUnreadNewQuestionCount());
+        unreadQuestsionNoticesCountDTO.setUnreadAnswersNoticeCount(unreadNotificationsCountMessage.getUnreadNewAnswerCount());
+
+        countDTO.setUnreadBoxesCount(unreadQuestsionNoticesCountDTO);
         countDTO.setHasUnread(countDTO.getUnreadCommentsCount() > 0
                 || unreadNotificationsCountMessage.getUnreadIslandNoticesCount() > 0
-                || countDTO.getUnreadReactionsCount() > 0);
+                || countDTO.getUnreadReactionsCount() > 0
+                || unreadNotificationsCountMessage.getUnreadNewQuestionCount() > 0
+                || unreadNotificationsCountMessage.getUnreadNewAnswerCount() > 0);
 
         return countDTO;
     }

@@ -68,6 +68,8 @@ message UnreadNotificationsCountMessage {
     int32 unreadIslandNoticesCount = 3;
     int32 unreadNewSubscribersCount = 4;
     int32 unreadNewMembersCount = 5;
+    int32 unreadNewQuestionCount = 6;
+    int32 unreadNewAnswerCount = 7;
 }
 
 message QueryNotificationCondition {
