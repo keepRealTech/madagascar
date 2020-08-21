@@ -4,6 +4,7 @@ import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.DeviceType;
+import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.UserMessage;
@@ -140,11 +141,12 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
 
         IslandInfo.IslandInfoBuilder infoBuilder = IslandInfo.builder()
                 .hostId(request.getHostId())
-                .islandName(request.getName());
+                .islandName(request.getName())
+                .islandAccessType(request.getIslandAccessTypeValue());
         if (request.hasPortraitImageUri()) {
             infoBuilder.portraitImageUri(request.getPortraitImageUri().getValue());
         }
-        if (request.hasSecret()) {
+        if (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(request.getIslandAccessType()) && request.hasSecret()) {
             infoBuilder.secret(request.getSecret().getValue());
         }
         if (request.hasIdentityId()) {
@@ -319,7 +321,10 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         if (request.hasPortraitImageUri()) {
             islandInfo.setPortraitImageUri(request.getPortraitImageUri().getValue());
         }
-        if (request.hasSecret()) {
+        if (!IslandAccessType.ISLAND_ACCESS_UNKNOWN.equals(request.getIslandAccessType())) {
+            islandInfo.setIslandAccessType(request.getIslandAccessTypeValue());
+        }
+        if (request.hasSecret() && IslandAccessType.ISLAND_ACCESS_PRIVATE_VALUE == islandInfo.getIslandAccessType()) {
             islandInfo.setSecret(request.getSecret().getValue());
         }
 
@@ -373,48 +378,53 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     @Override
     @Transactional
     public void subscribeIslandById(SubscribeIslandByIdRequest request, StreamObserver<SubscribeIslandResponse> responseObserver) {
-        String islandId = request.getId();
-        String secret = request.getSecret();
-        String userId = request.getUserId();
-        if (subscriptionService.isSubScribedIsland(islandId, userId)) {
+        if (this.subscriptionService.isSubScribedIsland(request.getId(), request.getUserId())) {
             responseObserver.onNext(SubscribeIslandResponse.newBuilder()
                     .setStatus(CommonStatusUtils.getSuccStatus())
                     .build());
             responseObserver.onCompleted();
             return;
         }
-        SubscribeIslandResponse.Builder responseBuilder = SubscribeIslandResponse.newBuilder();
-        IslandInfo islandInfo = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
-        if (islandInfo != null) {
-            if (secret.equals(islandInfo.getSecret())) {
-                Integer islanderNumber = islandInfoService.getLatestIslanderNumber(islandId);
-                try {
-                    subscriptionService.subscribeIsland(islandId, userId, islandInfo.getHostId(), islanderNumber);
-                } catch (KeepRealBusinessException e) {
-                    CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(e.getErrorCode());
-                    responseBuilder.setStatus(commonStatus);
-                    responseObserver.onNext(responseBuilder.build());
-                    responseObserver.onCompleted();
-                    return;
-                }
-            } else {
-                log.error("[subscribeIslandById] island secret error! island id is [{}], secret is [{}]", islandId, secret);
-                CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_SECRET_ERROR);
-                responseBuilder.setStatus(commonStatus);
-                responseObserver.onNext(responseBuilder.build());
-                responseObserver.onCompleted();
-                return;
-            }
-        } else {
-            log.error("[subscribeIslandById] island not found error! island id is [{}]", islandId);
-            CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR);
-            responseBuilder.setStatus(commonStatus);
+
+        IslandInfo islandInfo = this.islandInfoService.findTopByIdAndDeletedIsFalse(request.getId());
+
+        if (Objects.isNull(islandInfo)) {
+            log.error("[subscribeIslandById] island not found error! island id is [{}]", request.getId());
+            SubscribeIslandResponse response = SubscribeIslandResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
         }
 
-        SubscribeIslandResponse subscribeIslandResponse = SubscribeIslandResponse.newBuilder()
+        if (IslandAccessType.ISLAND_ACCESS_PRIVATE_VALUE == islandInfo.getIslandAccessType()
+                && (!request.hasSecret() || !request.getSecret().getValue().equals(islandInfo.getSecret()))) {
+            log.error("[subscribeIslandById] island secret error! island id is [{}], secret is [{}]", request.getId(), request.getSecret().getValue());
+            SubscribeIslandResponse response = SubscribeIslandResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_SECRET_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        Integer islanderNumber = this.islandInfoService.getLatestIslanderNumber(request.getId());
+        try {
+            this.subscriptionService.subscribeIsland(request.getId(), request.getUserId(), islandInfo.getHostId(), islanderNumber);
+        } catch (KeepRealBusinessException exception) {
+            SubscribeIslandResponse response = SubscribeIslandResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(exception.getErrorCode()))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        SubscribeIslandResponse response = SubscribeIslandResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
-        responseObserver.onNext(subscribeIslandResponse);
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 
@@ -428,7 +438,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     public void unsubscribeIslandById(UnsubscribeIslandByIdRequest request, StreamObserver<SubscribeIslandResponse> responseObserver) {
         String islandId = request.getId();
         String userId = request.getUserId();
-        subscriptionService.unsubscribeIsland(islandId, userId);
+        this.subscriptionService.unsubscribeIsland(islandId, userId);
 
         SubscribeIslandResponse subscribeIslandResponse = SubscribeIslandResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus()).build();
@@ -475,7 +485,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     public void updateLastFeedAtById(UpdateLastFeedAtRequest request, StreamObserver<UpdateLastFeedAtResponse> responseObserver) {
         List<String> islandIdList = request.getIslandIdsList();
         long timestamps = request.getTimestamps();
-        islandInfoService.updateLastFeedAtByIslandIdList(islandIdList, timestamps);
+        this.islandInfoService.updateLastFeedAtByIslandIdList(islandIdList, timestamps);
 
         UpdateLastFeedAtResponse response = UpdateLastFeedAtResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -496,11 +506,11 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         Pageable pageable = PageResponseUtil.getPageable(request.getPageRequest());
         IslandsResponse.Builder builder = IslandsResponse.newBuilder();
 
-        List<IslandInfo> islandInfoList = islandInfoService.getIslandBySubscribed(userId, pageable, builder);
+        List<IslandInfo> islandInfoList = this.islandInfoService.getIslandBySubscribed(userId, pageable, builder);
 
         if (request.hasIslandId()) {
             String islandId = request.getIslandId().getValue();
-            IslandInfo island = islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
+            IslandInfo island = this.islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
             if (island == null || !islandInfoList.contains(island)) {
                 log.error("[retrieveDefaultIslandsByUserId] island not found error! island id is [{}]", islandId);
                 responseObserver.onNext(IslandsResponse.newBuilder()
@@ -512,7 +522,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             islandInfoList.remove(island);
             islandInfoList.add(0, island);
         }
-        builder.addAllIslands(islandInfoList.stream().map(islandInfoService::getIslandMessage).filter(Objects::nonNull).collect(Collectors.toList()));
+        builder.addAllIslands(islandInfoList.stream().map(this.islandInfoService::getIslandMessage).filter(Objects::nonNull).collect(Collectors.toList()));
         builder.setStatus(CommonStatusUtils.getSuccStatus());
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
