@@ -104,7 +104,7 @@ spec:
                   name: aliyun-vod
                   key: access-secret
             - name: RESTART
-              value: "1"
+              value: "2"
           volumeMounts:
             - name: lemur-dictionary
               mountPath: "/app/good-dictionary.txt"
