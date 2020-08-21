@@ -13,7 +13,9 @@ import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
 import swagger.model.FullIslandDTO;
 import swagger.model.HostIntroductionDTO;
+import swagger.model.IdentityType;
 import swagger.model.IntroPrerequestsDTO;
+import swagger.model.IslandAccessType;
 import swagger.model.IslandDTO;
 import swagger.model.IslandIdentityDTO;
 import swagger.model.IslandProfileDTO;
@@ -86,6 +88,7 @@ public class IslandDTOFactory {
         islandDTO.setDescription(island.getDescription());
         islandDTO.setHostId(island.getHostId());
         islandDTO.setPortraitImageUri(island.getPortraitImageUri());
+        islandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
         return islandDTO;
     }
@@ -107,6 +110,7 @@ public class IslandDTOFactory {
         briefIslandDTO.setDescription(island.getDescription());
         briefIslandDTO.setHostId(island.getHostId());
         briefIslandDTO.setPortraitImageUri(island.getPortraitImageUri());
+        briefIslandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
         return briefIslandDTO;
     }
@@ -135,6 +139,7 @@ public class IslandDTOFactory {
         if (island.getId().equals(generalConfiguration.getSingleOfficialIslandId()))
             memberCount = DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT;
         fullIslandDTO.setMemberCount(memberCount);
+        fullIslandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
         return fullIslandDTO;
     }
@@ -251,6 +256,26 @@ public class IslandDTOFactory {
                 || !introPrerequestsDTO.getHasMemberships());
 
         return hostIntroductionDTO;
+    }
+
+    /**
+     * Converts {@link com.keepreal.madagascar.common.IslandAccessType} to {@link IslandAccessType}.
+     *
+     * @param islandAccessType {@link com.keepreal.madagascar.common.IslandAccessType}.
+     * @return {@link IslandAccessType}.
+     */
+    private IslandAccessType convertAccessType(com.keepreal.madagascar.common.IslandAccessType islandAccessType) {
+        if (Objects.isNull(islandAccessType)) {
+            return IslandAccessType.PUBLIC;
+        }
+
+        switch (islandAccessType) {
+            case ISLAND_ACCESS_PRIVATE:
+                return IslandAccessType.PRIVATE;
+            case ISLAND_ACCESS_PUBLIC:
+            default:
+                return IslandAccessType.PUBLIC;
+        }
     }
 
 }

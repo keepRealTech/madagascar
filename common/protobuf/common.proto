@@ -18,6 +18,12 @@ message PageResponse {
     bool hasContent = 4;
 }
 
+enum IslandAccessType {
+    ISLAND_ACCESS_UNKNOWN = 0;
+    ISLAND_ACCESS_PUBLIC = 1;
+    ISLAND_ACCESS_PRIVATE = 2;
+}
+
 enum LoginType {
     LOGIN_TYPE_NONE = 0;
     LOGIN_OAUTH_WECHAT = 1;
@@ -168,6 +174,7 @@ message IslandMessage {
     uint64 createdAt = 7;
     int32 memberCount = 8;
     string secret = 9;
+    IslandAccessType islandAccessType = 10;
 }
 
 message RepostMessage {

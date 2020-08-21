@@ -2477,6 +2477,8 @@ components:
         secret:
           type: string
           description: secrets for joining island
+        islandAccessType:
+          $ref: '#/components/schemas/IslandAccessType'
     PostIslandPayload:
       type: object
       properties:
@@ -2492,7 +2494,6 @@ components:
           $ref: "#/components/schemas/IslandAccessType"
       required:
         - name
-        - secret
     PutIslandRequest:
       type: object
       properties:
@@ -2625,9 +2626,6 @@ components:
         islandId:
           type: string
           description: island id to report
-        questionId:
-          type: string
-          description: question id to report
         userId:
           type: string
           description: user id to report

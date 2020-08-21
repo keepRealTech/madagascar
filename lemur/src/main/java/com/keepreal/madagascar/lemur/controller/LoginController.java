@@ -241,7 +241,7 @@ public class LoginController implements LoginApi {
         request.setSysEndpoint(this.ossClientConfiguration.getStsEndpoint());
         request.setSysMethod(MethodType.POST);
         request.setRoleArn(this.ossClientConfiguration.getRoleArn());
-        request.setRoleSessionName(userId);
+        request.setRoleSessionName("id_" + userId);
         request.setDurationSeconds(3600L);
         try {
             AssumeRoleResponse roleResponse = this.acsClient.getAcsResponse(request);
