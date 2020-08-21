@@ -18,6 +18,7 @@ import com.keepreal.madagascar.fossa.RetrieveBoxInfoResponse;
 import com.keepreal.madagascar.fossa.model.BoxInfo;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.AnswerInfo;
+import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.service.BoxInfoService;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
@@ -30,7 +31,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -63,9 +63,14 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
 
         FeedInfo feedInfo = feedInfoService.findFeedInfoById(questionId, false);
 
-        AnswerInfo answerInfo = (AnswerInfo) feedInfo.getMediaInfos().get(0);
-        if (StringUtils.isEmpty(answerInfo.getAnswer())) {
+        AnswerInfo answerInfo;
+        List<MediaInfo> mediaInfos = feedInfo.getMediaInfos();
+        if (mediaInfos.isEmpty()) {
             this.boxInfoService.addAnsweredQuestionCount(feedInfo.getIslandId());
+            answerInfo = new AnswerInfo();
+            mediaInfos.add(answerInfo);
+        } else {
+            answerInfo = (AnswerInfo) mediaInfos.get(0);
         }
 
         answerInfo.setAnswer(answer);
