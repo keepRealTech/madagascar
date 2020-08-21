@@ -56,7 +56,6 @@ public class FeedDTOFactory {
      * @param ehcacheService       {@link EhcacheService}.
      * @param membershipService    {@link MembershipService}.
      * @param membershipDTOFactory {@link MembershipDTOFactory}.
-     * @param multiMediaDTOFactory {@link MultiMediaDTOFactory}.
      */
     public FeedDTOFactory(IslandService islandService,
                           IslandDTOFactory islandDTOFactory,
@@ -65,8 +64,7 @@ public class FeedDTOFactory {
                           CommentDTOFactory commentDTOFactory,
                           EhcacheService ehcacheService,
                           MembershipService membershipService,
-                          MembershipDTOFactory membershipDTOFactory,
-                          MultiMediaDTOFactory multiMediaDTOFactory) {
+                          MembershipDTOFactory membershipDTOFactory) {
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
         this.userService = userService;
@@ -75,7 +73,7 @@ public class FeedDTOFactory {
         this.ehcacheService = ehcacheService;
         this.membershipService = membershipService;
         this.membershipDTOFactory = membershipDTOFactory;
-        this.multiMediaDTOFactory = multiMediaDTOFactory;
+        this.multiMediaDTOFactory = new MultiMediaDTOFactory(userService, userDTOFactory);
     }
 
     /**
