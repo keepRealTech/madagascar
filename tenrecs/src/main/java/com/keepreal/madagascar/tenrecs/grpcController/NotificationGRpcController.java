@@ -153,6 +153,9 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 record.setLastReadCommentNotificationTimestamp(timestamp);
                 record.setLastReadIslandNoticeNewSubscriberNotificationTimestamp(timestamp);
                 record.setLastReadIslandNoticeNewMemberNotificationTimestamp(timestamp);
+                record.setLastReadBoxNoticeNotificationTimestamp(timestamp);
+                record.setLastReadBoxNoticeNewQuestionNotificationTimestamp(timestamp);
+                record.setLastReadBoxNoticeNewReplyNotificationTimestamp(timestamp);
         }
 
         this.userNotificationRecordService.update(record);

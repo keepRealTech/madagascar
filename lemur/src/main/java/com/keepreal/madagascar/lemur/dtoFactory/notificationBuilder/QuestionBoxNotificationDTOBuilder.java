@@ -74,8 +74,7 @@ public class QuestionBoxNotificationDTOBuilder implements NotificationDTOBuilder
             return null;
         }
 
-        FeedMessage feedMessage = this.feedService.retrieveFeedById(message.getNewQuestionNotice().getFeedId()
-                , message.getNewQuestionNotice().getAuthorId());
+        FeedMessage feedMessage;
 
         SimpleQuestionBoxDTO questionDTO = new SimpleQuestionBoxDTO();
 
@@ -84,15 +83,19 @@ public class QuestionBoxNotificationDTOBuilder implements NotificationDTOBuilder
                 if (Objects.isNull(message.getNewQuestionNotice())) {
                     return questionDTO;
                 }
+                feedMessage = this.feedService.retrieveFeedById(message.getNewQuestionNotice().getFeedId(),
+                        message.getNewQuestionNotice().getAuthorId());
                 questionDTO.setNoticeType(NoticeType.BOX_NOTICE_NEW_QUESTION);
                 questionDTO.setFeedId(message.getNewQuestionNotice().getFeedId());
                 questionDTO.setText(feedMessage.getText());
-                questionDTO.setPrice(feedMessage.getQuestion().getPriceInCents().getValue());
+                questionDTO.setPrice(feedMessage.getPriceInCents());
                 return questionDTO;
             case NOTICE_TYPE_BOX_NEW_ANSWER:
                 if (Objects.isNull(message.getNewAnswerNotice())) {
                     return questionDTO;
                 }
+                feedMessage = this.feedService.retrieveFeedById(message.getNewAnswerNotice().getFeedId(),
+                        message.getNewAnswerNotice().getAuthorId());
                 questionDTO.setNoticeType(NoticeType.BOX_NOTICE_NEW_ANSWER);
                 questionDTO.setFeedId(message.getNewAnswerNotice().getFeedId());
                 questionDTO.setText(feedMessage.getText());

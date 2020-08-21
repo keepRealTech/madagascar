@@ -37,13 +37,13 @@ public class FeedEventToNotificationFactory {
                         .newQuestionNotice(NewQuestionNotice.builder().feedId(event.getFeedCreateEvent().getFeedId())
                                 .authorId(event.getFeedCreateEvent().getAuthorId()).build())
                         .build())
-                        .userId("event.getFeedCreateEvent().getHostId()")
+                        .userId(event.getFeedCreateEvent().getHostId())
                         .build();
             case FEED_EVENT_UPDATE:
                 return builder.notice(Notice.builder()
                         .type(NoticeType.NOTICE_TYPE_BOX_NEW_ANSWER)
                         .newReplyNotice(NewReplyNotice.builder().feedId(event.getFeedUpdateEvent().getFeedId())
-                                .authorId(event.getFeedCreateEvent().getAuthorId()).build())
+                                .authorId(event.getFeedUpdateEvent().getAuthorId()).build())
                         .build())
                         .userId(event.getFeedUpdateEvent().getAuthorId())
                         .build();

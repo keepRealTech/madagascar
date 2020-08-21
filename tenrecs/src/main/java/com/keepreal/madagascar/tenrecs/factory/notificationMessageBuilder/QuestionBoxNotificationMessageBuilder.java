@@ -96,7 +96,7 @@ public class QuestionBoxNotificationMessageBuilder implements NotificationMessag
                 }
 
                 NewAnswerNotice newAnswerNotice = NewAnswerNotice.newBuilder()
-                        .setFeedId(notice.getNewQuestionNotice().getFeedId())
+                        .setFeedId(notice.getNewReplyNotice().getFeedId())
                         .setAuthorId(notice.getNewReplyNotice().getAuthorId())
                         .build();
 
