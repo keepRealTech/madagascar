@@ -30,12 +30,15 @@ message NewFeedsRequestV2 {
     repeated string membershipIds = 4;
     MediaType type = 5;
     google.protobuf.StringValue text = 6;
+    google.protobuf.Int64Value priceInCents = 7;
+    google.protobuf.StringValue questionSkuId = 8;
+    google.protobuf.StringValue receipt = 9;
+    google.protobuf.StringValue transactionId = 10;
     oneof message {
-        PicturesMessage pics = 7;
-        VideoMessage video = 8;
-        AudioMessage audio = 9;
-        HtmlMessage html = 10;
-        QuestionMessage question = 11;
+        PicturesMessage pics = 11;
+        VideoMessage video = 12;
+        AudioMessage audio = 13;
+        HtmlMessage html = 14;
     }
 }
 

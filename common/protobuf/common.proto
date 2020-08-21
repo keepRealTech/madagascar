@@ -200,15 +200,13 @@ message FeedMessage {
     bool fromHost = 16;
     bool isTop = 17;
     MediaType type = 18;
-    google.protobuf.StringValue questionSkuId = 19;
-    google.protobuf.StringValue receipt = 20;
-    google.protobuf.StringValue transactionId = 21;
+    int64 priceInCents = 19;
     oneof message {
-        PicturesMessage pics = 22;
-        VideoMessage video = 23;
-        AudioMessage audio = 24;
-        HtmlMessage html = 25;
-        QuestionMessage question = 26;
+        PicturesMessage pics = 20;
+        VideoMessage video = 21;
+        AudioMessage audio = 22;
+        HtmlMessage html = 23;
+        AnswerMessage question = 24;
     }
 }
 
@@ -245,12 +243,11 @@ message HtmlMessage {
     string content = 1;
 }
 
-message QuestionMessage {
-    int64 priceInCents = 1;
-    google.protobuf.StringValue answer = 2;
-    google.protobuf.BoolValue publicVisible = 3;
-    google.protobuf.StringValue answerUserId = 4;
-    google.protobuf.Int64Value answeredAt = 5;
+message AnswerMessage {
+    google.protobuf.StringValue answer = 1;
+    google.protobuf.BoolValue publicVisible = 2;
+    google.protobuf.StringValue answerUserId = 3;
+    google.protobuf.Int64Value answeredAt = 4;
 }
 
 message CommentMessage {

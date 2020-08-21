@@ -6,12 +6,11 @@ import lombok.Data;
  * Represents the question info entity.
  */
 @Data
-public class QuestionInfo extends MediaInfo {
+public class AnswerInfo extends MediaInfo {
 
     private String answer;
-    private Long priceInCents;
     private Boolean publicVisible;
     private String answerUserId;
-    private Long answerAt;
+    private Long answeredAt;
 
 }

@@ -4,7 +4,7 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.MediaType;
-import com.keepreal.madagascar.common.QuestionMessage;
+import com.keepreal.madagascar.common.AnswerMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.AnswerQuestionRequest;
@@ -59,16 +59,13 @@ public class BoxService {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
         String hostId = this.islandService.retrieveIslandById(islandId).getHostId();
 
-        QuestionMessage question = QuestionMessage.newBuilder()
-                .setPriceInCents(0L)
-                .build();
         NewFeedsRequestV2.Builder builder = NewFeedsRequestV2.newBuilder()
                 .addAllIslandId(Collections.singletonList(islandId))
                 .addAllHostId(Collections.singletonList(hostId))
                 .setUserId(userId)
                 .setType(MediaType.MEDIA_QUESTION)
                 .setText(StringValue.of(text))
-                .setQuestion(question);
+                .setPriceInCents(Int64Value.of(0L));
 
         NewFeedsResponse newFeedsResponse;
         try {

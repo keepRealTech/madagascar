@@ -1,8 +1,6 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
 import com.google.protobuf.ProtocolStringList;
-import com.google.protobuf.UInt64Value;
-import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.fossa.AnswerQuestionRequest;
@@ -18,7 +16,7 @@ import com.keepreal.madagascar.fossa.RetrieveBoxInfoRequest;
 import com.keepreal.madagascar.fossa.RetrieveBoxInfoResponse;
 import com.keepreal.madagascar.fossa.model.BoxInfo;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
-import com.keepreal.madagascar.fossa.model.QuestionInfo;
+import com.keepreal.madagascar.fossa.model.AnswerInfo;
 import com.keepreal.madagascar.fossa.service.BoxInfoService;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
@@ -62,16 +60,18 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
 
         FeedInfo feedInfo = feedInfoService.findFeedInfoById(questionId, false);
 
-        QuestionInfo questionInfo = (QuestionInfo) feedInfo.getMediaInfos().get(0);
-        if (!StringUtils.isEmpty(questionInfo.getAnswer())) {
+        AnswerInfo answerInfo = (AnswerInfo) feedInfo.getMediaInfos().get(0);
+        if (StringUtils.isEmpty(answerInfo.getAnswer())) {
             this.boxInfoService.addAnsweredQuestionCount(feedInfo.getIslandId());
         }
-        questionInfo.setAnswer(answer);
-        questionInfo.setPublicVisible(publicVisible);
+
+        answerInfo.setAnswer(answer);
+        answerInfo.setAnsweredAt(System.currentTimeMillis());
+        answerInfo.setAnswerUserId(request.getUserId());
+        answerInfo.setPublicVisible(publicVisible);
         if (publicVisible) {
             feedInfo.setMembershipIds(visibleMembershipIdsList);
         }
-        questionInfo.setAnswerAt(System.currentTimeMillis());
         FeedInfo update = feedInfoService.update(feedInfo);
         this.feedEventProducerService.produceUpdateFeedEventAsync(update);
 
@@ -157,4 +157,5 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         responseObserver.onNext(feedsResponse);
         responseObserver.onCompleted();
     }
+
 }

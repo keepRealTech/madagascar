@@ -25,6 +25,7 @@ import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
+import com.keepreal.madagascar.fossa.model.AnswerInfo;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
@@ -135,7 +136,6 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
     @Override
     public void createFeedsV2(NewFeedsRequestV2 request, StreamObserver<NewFeedsResponse> responseObserver) {
-
         String userId = request.getUserId();
         ProtocolStringList islandIdList = request.getIslandIdList();
         ProtocolStringList hostIdList = request.getHostIdList();
@@ -161,6 +161,9 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.membershipIds(membershipIdsList);
             builder.createdTime(timestamp);
             builder.toppedTime(timestamp);
+            if (request.hasPriceInCents()) {
+                builder.priceInCents(request.getPriceInCents().getValue());
+            }
             feedInfoList.add(builder.build());
         });
 
@@ -430,7 +433,6 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 mediaInfos.add(MediaMessageConvertUtils.toHtmlInfo(request.getHtml()));
                 break;
             case MEDIA_QUESTION:
-                mediaInfos.add(MediaMessageConvertUtils.toQuestionInfo(request.getQuestion()));
                 break;
         }
         return mediaInfos;

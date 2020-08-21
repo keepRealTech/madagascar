@@ -1,17 +1,14 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.protobuf.ProtocolStringList;
+import com.keepreal.madagascar.common.AnswerMessage;
 import com.keepreal.madagascar.common.FeedMessage;
-import com.keepreal.madagascar.common.QuestionMessage;
 import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
-import swagger.model.AnswerDTO;
 import swagger.model.BoxAccessDTO;
 import swagger.model.BoxDTO;
-import swagger.model.BriefUserDTO;
 import swagger.model.FullQuestionDTO;
 import swagger.model.QuestionDTO;
 
@@ -71,7 +68,7 @@ public class BoxDTOFactory {
             return null;
         }
 
-        QuestionMessage question = feedMessage.getQuestion();
+        AnswerMessage question = feedMessage.getQuestion();
 
         QuestionDTO dto = new QuestionDTO();
         dto.setId(feedMessage.getId());
@@ -79,14 +76,14 @@ public class BoxDTOFactory {
         dto.setText(feedMessage.getText());
         dto.setHasAccess(feedMessage.getIsAccess() || userId.equals(feedMessage.getUserId()));
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
-        dto.setHasPaid(question.getPriceInCents() > 0);
+        dto.setHasPaid(feedMessage.getPriceInCents() > 0);
         dto.setPublicVisible(question.getPublicVisible().getValue());
         dto.setHasAnswer(question.hasAnswer());
         dto.setIsLiked(feedMessage.getIsLiked());
         dto.setVisibleMembershipIds(feedMessage.getMembershipIdList());
         dto.setCommentsCount(feedMessage.getCommentsCount());
         dto.setLikesCount(feedMessage.getLikesCount());
-        dto.setPriceInCents(question.getPriceInCents());
+        dto.setPriceInCents(feedMessage.getPriceInCents());
         dto.setCreatedAt(feedMessage.getCreatedAt());
         return dto;
     }
@@ -95,7 +92,7 @@ public class BoxDTOFactory {
         if (Objects.isNull(feedMessage)) {
             return null;
         }
-        QuestionMessage question = feedMessage.getQuestion();
+        AnswerMessage question = feedMessage.getQuestion();
 
         FullQuestionDTO dto = new FullQuestionDTO();
         dto.setId(feedMessage.getId());
@@ -104,13 +101,13 @@ public class BoxDTOFactory {
         dto.setIsLiked(feedMessage.getIsLiked());
         dto.setHasAccess(feedMessage.getIsAccess() || userId.equals(feedMessage.getUserId()));
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
-        dto.setHasPaid(question.getPriceInCents() > 0);
+        dto.setHasPaid(feedMessage.getPriceInCents() > 0);
         dto.setPublicVisible(question.getPublicVisible().getValue());
         dto.setHasAnswer(question.hasAnswer());
         dto.setVisibleMembershipIds(feedMessage.getMembershipIdList());
         dto.setCommentsCount(feedMessage.getCommentsCount());
         dto.setLikesCount(feedMessage.getLikesCount());
-        dto.setPriceInCents(question.getPriceInCents());
+        dto.setPriceInCents(feedMessage.getPriceInCents());
         dto.setCreatedAt(feedMessage.getCreatedAt());
 
         if (question.hasAnswer()) {

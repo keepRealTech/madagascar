@@ -9,8 +9,8 @@ import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.fossa.TimelineFeedMessage;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
+import com.keepreal.madagascar.fossa.model.AnswerInfo;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
-import com.keepreal.madagascar.fossa.model.PictureInfo;
 import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -339,7 +339,7 @@ public class FeedInfoService {
                 builder.setHtml(MediaMessageConvertUtils.toHtmlMessage(feedInfo.getMediaInfos().get(0)));
                 break;
             case MEDIA_QUESTION:
-                builder.setQuestion(MediaMessageConvertUtils.toQuestionMessage(feedInfo.getMediaInfos().get(0)));
+                builder.setQuestion(MediaMessageConvertUtils.toAnswerMessage((AnswerInfo) feedInfo.getMediaInfos().get(0)));
         }
     }
 }
