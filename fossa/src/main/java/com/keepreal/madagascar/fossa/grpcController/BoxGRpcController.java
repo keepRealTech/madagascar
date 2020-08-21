@@ -68,6 +68,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         if (mediaInfos.isEmpty()) {
             this.boxInfoService.addAnsweredQuestionCount(feedInfo.getIslandId());
             answerInfo = new AnswerInfo();
+            answerInfo.setIgnored(false);
             mediaInfos.add(answerInfo);
         } else {
             answerInfo = (AnswerInfo) mediaInfos.get(0);
@@ -98,6 +99,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         boxInfo.setIslandId(request.getIslandId());
         boxInfo.setEnabled(request.getEnabled());
         boxInfo.setMembershipIds(String.join(",", request.getMembershipIdsList()));
+        boxInfo.setHostId(request.getUserId());
 
         BoxInfo update = this.boxInfoService.createOrUpdate(boxInfo);
 
@@ -153,7 +155,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
 
         this.mongoTemplate.updateFirst(
                 Query.query(Criteria.where("id").is(questionId)),
-                Update.update("mediaInfos.ignored", true),
+                Update.update("mediaInfos.0.ignored", true),
                 FeedInfo.class);
 
         responseObserver.onNext(CommonResponse.newBuilder()

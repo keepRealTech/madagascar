@@ -114,7 +114,7 @@ public class BoxService {
         }
     }
 
-    public BoxMessage createOrUpdateBoxInfo(String islandId, boolean enabled, List<String> membershipIds) {
+    public BoxMessage createOrUpdateBoxInfo(String islandId, String userId, boolean enabled, List<String> membershipIds) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
         CreateOrUpdateBoxResponse response;
@@ -124,6 +124,7 @@ public class BoxService {
                     .setIslandId(islandId)
                     .setEnabled(enabled)
                     .addAllMembershipIds(membershipIds)
+                    .setUserId(userId)
                     .build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());

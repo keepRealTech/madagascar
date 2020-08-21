@@ -140,10 +140,11 @@ public class BoxController implements BoxApi {
     @Override
     public ResponseEntity<IslandBoxAccessResponse> apiV1IslandsIdBoxesAccessPut(String id,
                                                                                 PutIslandBoxAccessRequest putIslandBoxAccessRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
         Boolean enabled = putIslandBoxAccessRequest.getEnabled();
         List<String> membershipIds = putIslandBoxAccessRequest.getMembershipIds();
 
-        BoxMessage boxMessage = this.boxService.createOrUpdateBoxInfo(id, enabled, membershipIds);
+        BoxMessage boxMessage = this.boxService.createOrUpdateBoxInfo(id, userId, enabled, membershipIds);
 
         IslandBoxAccessResponse response = new IslandBoxAccessResponse();
         response.setData(this.boxDTOFactory.valueOf(boxMessage));

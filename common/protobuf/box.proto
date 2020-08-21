@@ -22,6 +22,7 @@ message CreateOrUpdateBoxRequest {
     string islandId = 1;
     bool enabled = 2;
     repeated string membershipIds = 3;
+    string userId = 4;
 }
 
 message CreateOrUpdateBoxResponse {
@@ -73,6 +74,7 @@ message BoxMessage {
     bool enabled = 3;
     repeated string membershipIds = 4;
     int32 answeredQuestionCount = 5;
+    string hostId = 6;
 }
 
 service BoxService {

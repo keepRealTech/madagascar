@@ -87,6 +87,7 @@ public class BoxInfoService {
                 .setEnabled(boxInfo.isEnabled())
                 .addAllMembershipIds(Arrays.asList(boxInfo.getMembershipIds().split(",")))
                 .setAnsweredQuestionCount(boxInfo.getAnsweredQuestionCount())
+                .setHostId(boxInfo.getHostId())
                 .build();
     }
 }

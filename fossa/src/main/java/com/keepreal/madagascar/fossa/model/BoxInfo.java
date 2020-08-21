@@ -27,6 +27,7 @@ public class BoxInfo {
     @Id
     private String id;
     private String islandId;
+    private String hostId;
     @Column(name = "is_enabled")
     private boolean enabled;
     private int answeredQuestionCount;
