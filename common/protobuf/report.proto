@@ -14,6 +14,7 @@ message ReportMessage {
     google.protobuf.StringValue islandId = 5;
     google.protobuf.StringValue userId = 6;
     google.protobuf.StringValue messageId = 7;
+    google.protobuf.StringValue feedGroupId = 8;
 }
 
 message NewReportRequest {
@@ -23,6 +24,7 @@ message NewReportRequest {
     google.protobuf.StringValue islandId = 4;
     google.protobuf.StringValue userId = 5;
     google.protobuf.StringValue messageId = 6;
+    google.protobuf.StringValue feedGroupId = 7;
 }
 
 message ReportResponse {

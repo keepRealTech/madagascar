@@ -71,12 +71,12 @@ public class RepostGRpcController extends RepostServiceGrpc.RepostServiceImplBas
      */
     @Override
     public void createFeedRepost(NewFeedRepostRequest request, StreamObserver<FeedRepostResponse> responseObserver) {
-        RepostInfo repostInfo = repostService.save(request.getFeedId(), request.getUserId(),
+        RepostInfo repostInfo = this.repostService.save(request.getFeedId(), request.getUserId(),
                 request.getContent(), request.getIsSuccessful(), RepostType.FEED.getValue());
 
-        feedInfoService.incFeedCount(request.getFeedId(), FeedCountType.REPOST_COUNT);
+        this.feedInfoService.incFeedCount(request.getFeedId(), FeedCountType.REPOST_COUNT);
 
-        FeedRepostMessage message = repostService.getFeedRepostMessage(repostInfo);
+        FeedRepostMessage message = this.repostService.getFeedRepostMessage(repostInfo);
         FeedRepostResponse response = FeedRepostResponse.newBuilder()
                 .setFeedRepost(message)
                 .setStatus(CommonStatusUtils.getSuccStatus())

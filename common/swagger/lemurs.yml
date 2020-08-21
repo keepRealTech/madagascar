@@ -2630,9 +2630,6 @@ components:
         islandId:
           type: string
           description: island id to report
-        questionId:
-          type: string
-          description: question id to report
         userId:
           type: string
           description: user id to report
