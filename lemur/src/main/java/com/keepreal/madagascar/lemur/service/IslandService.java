@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import swagger.model.IslandAccessType;
 
 import java.util.List;
 import java.util.Map;
@@ -245,6 +246,10 @@ public class IslandService {
             identityId = "";
         }
 
+        if (Objects.isNull(islandAccessType)) {
+            islandAccessType = IslandAccessType.PRIVATE;
+        }
+
         NewIslandRequest.Builder requestBuilder = NewIslandRequest.newBuilder()
                 .setName(name)
                 .setIdentityId(StringValue.of(identityId))
@@ -290,7 +295,12 @@ public class IslandService {
      * @param islandAccessType Island access type.
      * @return {@link IslandMessage}.
      */
-    public IslandMessage updateIslandById(String id, String name, String portraitImageUri, String secret, String description, IslandAccessType islandAccessType) {
+    public IslandMessage updateIslandById(String id,
+                                          String name,
+                                          String portraitImageUri,
+                                          String secret,
+                                          String description,
+                                          IslandAccessType islandAccessType) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         UpdateIslandByIdRequest.Builder requestBuilder = UpdateIslandByIdRequest.newBuilder()
