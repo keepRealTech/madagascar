@@ -14,6 +14,7 @@ import com.keepreal.madagascar.fossa.CommonResponse;
 import com.keepreal.madagascar.fossa.CreateOrUpdateBoxRequest;
 import com.keepreal.madagascar.fossa.CreateOrUpdateBoxResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
+import com.keepreal.madagascar.fossa.IgnoreQuestionRequest;
 import com.keepreal.madagascar.fossa.NewFeedsRequestV2;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QuestionsResponse;
@@ -130,7 +131,7 @@ public class BoxService {
 
         if (Objects.isNull(response)
                 || !response.hasStatus()) {
-            log.error(Objects.isNull(response) ? "Answer question returned null." : response.toString());
+            log.error(Objects.isNull(response) ? "update box info returned null." : response.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
@@ -251,5 +252,29 @@ public class BoxService {
         }
 
         return response;
+    }
+
+    public void ignoreQuestion(String questionId) {
+        BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        CommonResponse response;
+
+        try {
+            response = stub.ignoreQuestion(IgnoreQuestionRequest.newBuilder()
+                    .setQuestionId(questionId)
+                    .build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "ignore question returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
     }
 }

@@ -93,6 +93,7 @@ public class MediaMessageConvertUtils {
             answerInfo.setAnswerUserId(answerMessage.getAnswerUserId().getValue());
         }
 
+        answerInfo.setIgnored(false);
         return answerInfo;
     }
 

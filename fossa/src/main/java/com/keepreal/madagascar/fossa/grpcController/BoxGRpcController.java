@@ -8,6 +8,7 @@ import com.keepreal.madagascar.fossa.BoxServiceGrpc;
 import com.keepreal.madagascar.fossa.CommonResponse;
 import com.keepreal.madagascar.fossa.CreateOrUpdateBoxRequest;
 import com.keepreal.madagascar.fossa.CreateOrUpdateBoxResponse;
+import com.keepreal.madagascar.fossa.IgnoreQuestionRequest;
 import com.keepreal.madagascar.fossa.QuestionsResponse;
 import com.keepreal.madagascar.fossa.RetrieveAnswerMeQuestionsRequest;
 import com.keepreal.madagascar.fossa.RetrieveAnsweredAndVisibleQuestionsRequest;
@@ -26,7 +27,9 @@ import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -137,6 +140,21 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         Query query = this.boxInfoService.retrieveAnswerMeQuestion(request.getUserId());
 
         this.queryAndResponseQuestions(query, request.getUserId(), page, pageSize, responseObserver);
+    }
+
+    @Override
+    public void ignoreQuestion(IgnoreQuestionRequest request, StreamObserver<CommonResponse> responseObserver) {
+        String questionId = request.getQuestionId();
+
+        this.mongoTemplate.updateFirst(
+                Query.query(Criteria.where("id").is(questionId)),
+                Update.update("mediaInfos.ignored", true),
+                FeedInfo.class);
+
+        responseObserver.onNext(CommonResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build());
+        responseObserver.onCompleted();
     }
 
     private void queryAndResponseQuestions(Query query, String userId, int page, int pageSize, StreamObserver<QuestionsResponse> responseObserver) {
