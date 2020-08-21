@@ -68,8 +68,8 @@ public class BoxDTOFactory {
             return null;
         }
 
-        AnswerMessage question = feedMessage.getQuestion();
-        question = Objects.isNull(question) ? AnswerMessage.getDefaultInstance() : question;
+        AnswerMessage answer = feedMessage.getAnswer();
+        answer = Objects.isNull(answer) ? AnswerMessage.getDefaultInstance() : answer;
 
         QuestionDTO dto = new QuestionDTO();
         dto.setId(feedMessage.getId());
@@ -78,8 +78,8 @@ public class BoxDTOFactory {
         dto.setHasAccess(feedMessage.getIsAccess() || userId.equals(feedMessage.getUserId()));
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
         dto.setHasPaid(feedMessage.getPriceInCents() > 0);
-        dto.setPublicVisible(question.hasPublicVisible() ? question.getPublicVisible().getValue() : null);
-        dto.setHasAnswer(question.hasAnswer());
+        dto.setPublicVisible(answer.hasPublicVisible() ? answer.getPublicVisible().getValue() : null);
+        dto.setHasAnswer(answer.hasAnswer());
         dto.setIsLiked(feedMessage.getIsLiked());
         dto.setVisibleMembershipIds(feedMessage.getMembershipIdList());
         dto.setCommentsCount(feedMessage.getCommentsCount());
@@ -94,8 +94,8 @@ public class BoxDTOFactory {
             return null;
         }
 
-        AnswerMessage question = feedMessage.getQuestion();
-        question = Objects.isNull(question) ? AnswerMessage.getDefaultInstance() : question;
+        AnswerMessage answer = feedMessage.getAnswer();
+        answer = Objects.isNull(answer) ? AnswerMessage.getDefaultInstance() : answer;
 
         FullQuestionDTO dto = new FullQuestionDTO();
         dto.setId(feedMessage.getId());
@@ -105,18 +105,18 @@ public class BoxDTOFactory {
         dto.setHasAccess(feedMessage.getIsAccess() || userId.equals(feedMessage.getUserId()));
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
         dto.setHasPaid(feedMessage.getPriceInCents() > 0);
-        dto.setHasAnswer(question.hasAnswer());
+        dto.setHasAnswer(answer.hasAnswer());
         dto.setVisibleMembershipIds(feedMessage.getMembershipIdList());
         dto.setCommentsCount(feedMessage.getCommentsCount());
         dto.setLikesCount(feedMessage.getLikesCount());
         dto.setPriceInCents(feedMessage.getPriceInCents());
         dto.setCreatedAt(feedMessage.getCreatedAt());
 
-        if (question.hasAnswer()) {
-            dto.setAnswer(question.getAnswer().getValue());
-            dto.setAnswerer(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(question.getAnswerUserId().getValue())));
-            dto.setAnsweredAt(question.getAnsweredAt().getValue());
-            dto.setPublicVisible(!question.hasPublicVisible() || question.getPublicVisible().getValue());
+        if (answer.hasAnswer()) {
+            dto.setAnswer(answer.getAnswer().getValue());
+            dto.setAnswerer(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(answer.getAnswerUserId().getValue())));
+            dto.setAnsweredAt(answer.getAnsweredAt().getValue());
+            dto.setPublicVisible(!answer.hasPublicVisible() || answer.getPublicVisible().getValue());
         }
 
         dto.setComments(feedMessage.getLastCommentsList()

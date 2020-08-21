@@ -2702,6 +2702,8 @@ components:
         answeredAt:
           type: integer
           format: int64
+        ignored:
+          type: boolean
     MultiMediaDTO:
       oneOf:
         - $ref: '#/components/schemas/VideoDTO'

@@ -206,7 +206,7 @@ message FeedMessage {
         VideoMessage video = 21;
         AudioMessage audio = 22;
         HtmlMessage html = 23;
-        AnswerMessage question = 24;
+        AnswerMessage answer = 24;
     }
 }
 
