@@ -30,8 +30,9 @@ public class ReactionController implements ReactionApi {
 
     /**
      * Constructs the reaction controller.
-     * @param reactionService       {@link ReactionService}.
-     * @param reactionDTOFactory    {@link ReactionDTOFactory}.
+     *
+     * @param reactionService    {@link ReactionService}.
+     * @param reactionDTOFactory {@link ReactionDTOFactory}.
      */
     public ReactionController(ReactionService reactionService, ReactionDTOFactory reactionDTOFactory) {
         this.reactionService = reactionService;
@@ -92,6 +93,19 @@ public class ReactionController implements ReactionApi {
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the post or revoke reaction api for question.
+     *
+     * @param id                  id (required) Feed id.
+     * @param postReactionRequest (required) {@link PostReactionRequest}.
+     * @param isRevoke            whether is revoking a reaction (optional) Whether create or revoke.
+     * @return {@link ReactionResponse}.
+     */
+    @Override
+    public ResponseEntity<ReactionResponse> apiV1QuestionsIdReactionsPost(String id, PostReactionRequest postReactionRequest, Boolean isRevoke) {
+        return this.apiV1FeedsIdReactionsPost(id, postReactionRequest, isRevoke);
     }
 
     /**
