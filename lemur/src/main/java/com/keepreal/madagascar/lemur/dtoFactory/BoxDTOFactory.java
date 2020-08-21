@@ -69,6 +69,7 @@ public class BoxDTOFactory {
         }
 
         AnswerMessage question = feedMessage.getQuestion();
+        question = Objects.isNull(question) ? AnswerMessage.getDefaultInstance() : question;
 
         QuestionDTO dto = new QuestionDTO();
         dto.setId(feedMessage.getId());
@@ -77,7 +78,7 @@ public class BoxDTOFactory {
         dto.setHasAccess(feedMessage.getIsAccess() || userId.equals(feedMessage.getUserId()));
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
         dto.setHasPaid(feedMessage.getPriceInCents() > 0);
-        dto.setPublicVisible(question.getPublicVisible().getValue());
+        dto.setPublicVisible(question.hasPublicVisible() ? question.getPublicVisible().getValue() : null);
         dto.setHasAnswer(question.hasAnswer());
         dto.setIsLiked(feedMessage.getIsLiked());
         dto.setVisibleMembershipIds(feedMessage.getMembershipIdList());
@@ -92,7 +93,9 @@ public class BoxDTOFactory {
         if (Objects.isNull(feedMessage)) {
             return null;
         }
+
         AnswerMessage question = feedMessage.getQuestion();
+        question = Objects.isNull(question) ? AnswerMessage.getDefaultInstance() : question;
 
         FullQuestionDTO dto = new FullQuestionDTO();
         dto.setId(feedMessage.getId());
@@ -102,7 +105,6 @@ public class BoxDTOFactory {
         dto.setHasAccess(feedMessage.getIsAccess() || userId.equals(feedMessage.getUserId()));
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
         dto.setHasPaid(feedMessage.getPriceInCents() > 0);
-        dto.setPublicVisible(question.getPublicVisible().getValue());
         dto.setHasAnswer(question.hasAnswer());
         dto.setVisibleMembershipIds(feedMessage.getMembershipIdList());
         dto.setCommentsCount(feedMessage.getCommentsCount());
@@ -114,6 +116,7 @@ public class BoxDTOFactory {
             dto.setAnswer(question.getAnswer().getValue());
             dto.setAnswerer(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(question.getAnswerUserId().getValue())));
             dto.setAnsweredAt(question.getAnsweredAt().getValue());
+            dto.setPublicVisible(!question.hasPublicVisible() || question.getPublicVisible().getValue());
         }
 
         dto.setComments(feedMessage.getLastCommentsList()
