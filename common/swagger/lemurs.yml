@@ -2695,9 +2695,6 @@ components:
           $ref: '#/components/schemas/BriefUserDTO'
         text:
           type: string
-        priceInCents:
-          type: integer
-          format: int64
         hasExpired:
           type: boolean
         publicVisible:
@@ -2743,6 +2740,9 @@ components:
           type: array
           items:
             type: string
+        priceInCents:
+          type: integer
+          format: int64
         mediaType:
           $ref: '#/components/schemas/MultiMediaType'
         multimedia:

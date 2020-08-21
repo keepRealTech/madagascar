@@ -164,6 +164,7 @@ public class FeedInfoService {
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
                 .setIsDeleted(feedInfo.getDeleted())
+                .setPriceInCents(Objects.nonNull(feedInfo.getPriceInCents()) ? feedInfo.getPriceInCents() : 0L)
                 .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost())
                 .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop());
 
