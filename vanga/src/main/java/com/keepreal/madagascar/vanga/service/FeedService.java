@@ -1,12 +1,12 @@
 package com.keepreal.madagascar.vanga.service;
 
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdRequest;
 import com.keepreal.madagascar.vanga.model.Balance;
-import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
-import com.keepreal.madagascar.vanga.model.SubscribeMembership;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import io.grpc.Channel;
@@ -19,9 +19,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.IntStream;
 
 /**
  * Represents the feed service.
@@ -32,19 +30,28 @@ public class FeedService {
 
     private final Channel channel;
     private final PaymentService paymentService;
+    private final WechatOrderService wechatOrderService;
+    private final WechatPayService wechatPayService;
     private final BalanceService balanceService;
 
     /**
      * Constructs the feed service.
-     *  @param channel Managed channel for grpc traffic.
-     * @param paymentService {@link PaymentService}.
-     * @param balanceService    {@link BalanceService}.
+     *
+     * @param channel            Managed channel for grpc traffic.
+     * @param paymentService     {@link PaymentService}.
+     * @param wechatOrderService {@link WechatOrderService}.
+     * @param wechatPayService   {@link WechatPayService}.
+     * @param balanceService     {@link BalanceService}.
      */
     public FeedService(@Qualifier("fossaChannel") Channel channel,
                        PaymentService paymentService,
+                       WechatOrderService wechatOrderService,
+                       WechatPayService wechatPayService,
                        BalanceService balanceService) {
         this.channel = channel;
         this.paymentService = paymentService;
+        this.wechatOrderService = wechatOrderService;
+        this.wechatPayService = wechatPayService;
         this.balanceService = balanceService;
     }
 
@@ -77,6 +84,35 @@ public class FeedService {
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(Collections.singletonList(payment));
         this.updatePaidQuestion(wechatOrder.getPropertyId());
+    }
+
+    /**
+     * Refunds the unsettled payment for given question feed.
+     *
+     * @param feedId Feed id.
+     * @param userId User id.
+     */
+    @Transactional
+    public void refundQuestionPaid(String feedId, String userId) {
+        WechatOrder wechatOrder = this.wechatOrderService.retrieveByQuestionId(feedId);
+        Payment payment = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId()).stream().findFirst().orElse(null);
+
+        if (Objects.isNull(payment) || PaymentState.PENDING.getValue() != payment.getState()) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR);
+        }
+
+        if (!payment.getUserId().equals(userId)
+                && !payment.getPayeeId().equals(userId)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FORBIDDEN);
+        }
+
+        Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payment.getPayeeId());
+
+        payment.setState(PaymentState.CLOSED.getValue());
+
+        this.wechatPayService.tryRefund(wechatOrder);
+        this.balanceService.subtractCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), payment.getWithdrawPercent()));
+        this.paymentService.updateAll(Collections.singletonList(payment));
     }
 
     /**

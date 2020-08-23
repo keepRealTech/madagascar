@@ -104,6 +104,11 @@ message CreatePaidFeedRequest {
   string hostId = 4;
 }
 
+message RefundWechatFeedRequest {
+  string feedId = 1;
+  string userId = 2;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
@@ -115,4 +120,5 @@ service PaymentService {
   rpc WechatBuyShell (WechatOrderBuyShellRequest) returns (WechatOrderResponse) {};
   rpc WechatCreateFeed (CreatePaidFeedRequest) returns (WechatOrderResponse) {};
   rpc RetrieveUserPayments (RetrieveUserPaymentsRequest) returns (UserPaymentsResponse) {};
+  rpc RefundWechatPaidFeed (RefundWechatFeedRequest) returns (CommonStatus) {};
 }

@@ -9,6 +9,7 @@ import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
+import com.keepreal.madagascar.vanga.RefundWechatFeedRequest;
 import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
@@ -46,8 +47,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.keepreal.madagascar.vanga.model.WechatOrderType.PAYMEMBERSHIP;
 
 /**
  * Represents the payment grpc controller.
@@ -155,7 +154,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId(),
-                PAYMEMBERSHIP);
+                WechatOrderType.PAYMEMBERSHIP);
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -195,12 +194,12 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
                 return;
             }
-            case PAYSHELL:{
+            case PAYSHELL: {
                 wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
                 this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
                 return;
             }
-            case PAYQUESTION:{
+            case PAYQUESTION: {
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 return;
@@ -236,11 +235,11 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
                 return;
             }
-            case PAYSHELL:{
+            case PAYSHELL: {
                 this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
                 return;
             }
-            case PAYQUESTION:{
+            case PAYQUESTION: {
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 return;
             }
@@ -399,6 +398,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         UserPaymentsResponse response = UserPaymentsResponse.newBuilder()
                 .addAllUserPayments(paymentPage.getContent().stream()
                         .map(payment -> this.paymentMessageFactory.valueOf(payment, membershipSkuMap.getOrDefault(payment.getMembershipSkuId(), null)))
+                        .filter(Objects::nonNull)
                         .collect(Collectors.toList()))
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .setPageResponse(PaginationUtils.valueOf(paymentPage, request.getPageRequest()))
@@ -412,7 +412,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * Implements the feed creation with wechat pay.
      * Note: the creator pays with wechat in order to create successfully.
      *
-     * @param request {@link CreatePaidFeedRequest}.
+     * @param request          {@link CreatePaidFeedRequest}.
      * @param responseObserver {@link WechatOrderResponse}.
      */
     @Override
@@ -434,6 +434,27 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
                     .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the feed question refund wechat pay.
+     *
+     * @param request          {@link CreatePaidFeedRequest}.
+     * @param responseObserver {@link WechatOrderResponse}.
+     */
+    @Override
+    public void refundWechatPaidFeed(RefundWechatFeedRequest request,
+                                     StreamObserver<CommonStatus> responseObserver) {
+        CommonStatus response;
+        try {
+            this.feedService.refundQuestionPaid(request.getFeedId(), request.getUserId());
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
+        } catch (KeepRealBusinessException exception) {
+            response = CommonStatusUtils.buildCommonStatus(exception.getErrorCode());
         }
 
         responseObserver.onNext(response);
