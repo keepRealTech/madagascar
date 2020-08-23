@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.BalanceResponse;
+import com.keepreal.madagascar.vanga.CreatePaidFeedRequest;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
@@ -23,6 +24,7 @@ import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
+import com.keepreal.madagascar.vanga.model.WechatOrderType;
 import com.keepreal.madagascar.vanga.service.MpWechatPayService;
 import com.keepreal.madagascar.vanga.service.PaymentService;
 import com.keepreal.madagascar.vanga.service.ShellService;
@@ -146,7 +148,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
 
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
-                sku.getId());
+                sku.getId(),
+                WechatOrderType.PAYMEMBERSHIP);
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -154,7 +157,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
                     .build();
-            this.paymentService.createNewWechatPayments(wechatOrder, sku);
+            this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
         } else {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
@@ -369,6 +372,38 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .setPageResponse(PaginationUtils.valueOf(paymentPage, request.getPageRequest()))
                 .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the feed creation with wechat pay.
+     * Note: the creator pays with wechat in order to create successfully.
+     *
+     * @param request {@link CreatePaidFeedRequest}.
+     * @param responseObserver {@link WechatOrderResponse}.
+     */
+    @Override
+    public void wechatCreateFeed(CreatePaidFeedRequest request,
+                                 StreamObserver<WechatOrderResponse> responseObserver) {
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
+                String.valueOf(request.getPriceInCents()),
+                request.getFeedId(),
+                WechatOrderType.PAYQUESTION);
+
+        WechatOrderResponse response;
+        if (Objects.nonNull(wechatOrder)) {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .build();
+            this.paymentService.createNewWechatQuestionFeedPayment(wechatOrder, request.getHostId(), request.getPriceInCents());
+        } else {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

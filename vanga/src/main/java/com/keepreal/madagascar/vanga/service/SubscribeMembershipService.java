@@ -114,7 +114,7 @@ public class SubscribeMembershipService {
             MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getMemberShipSkuId());
 
             if (innerPaymentList.isEmpty()) {
-                innerPaymentList = this.paymentService.createNewWechatPayments(wechatOrder, sku);
+                innerPaymentList = this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
             } else if (innerPaymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
                 return;
             }

@@ -3,21 +3,19 @@ package com.keepreal.madagascar.vanga.model;
 import lombok.Getter;
 
 /**
- * Represents the payment states.
+ * Represents the wechat order type.
  */
 @Getter
-public enum PaymentState {
+public enum WechatOrderType {
 
     UNKNOWN(0),
-    DRAFTED(1),
-    OPEN(2),
-    CLOSED(3),
-    PENDING(4),
+    PAYSHELL(1),
+    PAYMEMBERSHIP(2),
+    PAYQUESTION(3),
     ;
-
     private final int value;
 
-    PaymentState(int value) {
+    WechatOrderType(int value) {
         this.value = value;
     }
 

@@ -97,6 +97,13 @@ message RetrieveUserPaymentsRequest {
   PageRequest pageRequest = 2;
 }
 
+message CreatePaidFeedRequest {
+  string feedId = 1;
+  uint64 priceInCents = 2;
+  string userId = 3;
+  string hostId = 4;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};

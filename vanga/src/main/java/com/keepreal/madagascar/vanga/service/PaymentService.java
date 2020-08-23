@@ -93,7 +93,7 @@ public class PaymentService {
      * @return {@link Payment}.
      */
     @Transactional
-    public List<Payment> createNewWechatPayments(WechatOrder wechatOrder, MembershipSku sku) {
+    public List<Payment> createNewWechatMembershipPayments(WechatOrder wechatOrder, MembershipSku sku) {
         List<Payment> payments =
                 IntStream.range(0, sku.getTimeInMonths())
                         .mapToObj(i -> Payment.builder()
@@ -110,6 +110,31 @@ public class PaymentService {
                         .collect(Collectors.toList());
 
         return this.paymentRepository.saveAll(payments);
+    }
+
+    /**
+     * Creates new wechat payments for given order.
+     *
+     * @param wechatOrder  {@link WechatOrder}.
+     * @param hostId       Host id.
+     * @param priceIncents Price in cents.
+     * @return {@link Payment}.
+     */
+    @Transactional
+    public Payment createNewWechatQuestionFeedPayment(WechatOrder wechatOrder, String hostId, long priceIncents) {
+        Payment payment = Payment.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .type(PaymentType.WECHATPAY.getValue())
+                .amountInCents(priceIncents)
+                .userId(wechatOrder.getUserId())
+                .state(PaymentState.DRAFTED.getValue())
+                .payeeId(hostId)
+                .orderId(wechatOrder.getId())
+                .tradeNum(wechatOrder.getTradeNumber())
+                .membershipSkuId(wechatOrder.getMemberShipSkuId())
+                .build();
+
+        return this.paymentRepository.save(payment);
     }
 
     /**

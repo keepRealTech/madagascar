@@ -3,6 +3,7 @@ package com.keepreal.madagascar.vanga.service;
 import com.keepreal.madagascar.vanga.config.WechatPayConfiguration;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
+import com.keepreal.madagascar.vanga.model.WechatOrderType;
 import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayUtil;
@@ -47,15 +48,17 @@ public class WechatPayService {
      *
      * @param userId          User id.
      * @param feeInCents      Cost in cents.
-     * @param membershipSkuId Membership sku id.
+     * @param propertyId      Property id.
+     * @param wechatOrderType {@link WechatOrderType}.
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryPlaceOrder(String userId,
                                      String feeInCents,
-                                     String membershipSkuId) {
+                                     String propertyId,
+                                     WechatOrderType wechatOrderType) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
 
-        String description = String.format("购买会员%s", membershipSkuId);
+        String description = String.format("Type:[%s], Id:[%s]", wechatOrderType.name(), propertyId);
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
@@ -63,7 +66,7 @@ public class WechatPayService {
                 .appId(this.wechatPayConfiguration.getAppId())
                 .mchId(this.wechatPayConfiguration.getMchId())
                 .tradeNumber(tradeNum)
-                .memberShipSkuId(membershipSkuId)
+                .propertyId(propertyId)
                 .description(description)
                 .feeInCents(feeInCents)
                 .build();
