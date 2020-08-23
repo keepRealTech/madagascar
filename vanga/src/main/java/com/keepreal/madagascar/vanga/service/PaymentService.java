@@ -105,7 +105,7 @@ public class PaymentService {
                                 .payeeId(sku.getHostId())
                                 .orderId(wechatOrder.getId())
                                 .tradeNum(wechatOrder.getTradeNumber())
-                                .membershipSkuId(wechatOrder.getMemberShipSkuId())
+                                .membershipSkuId(wechatOrder.getPropertyId())
                                 .build())
                         .collect(Collectors.toList());
 
@@ -131,7 +131,7 @@ public class PaymentService {
                 .payeeId(hostId)
                 .orderId(wechatOrder.getId())
                 .tradeNum(wechatOrder.getTradeNumber())
-                .membershipSkuId(wechatOrder.getMemberShipSkuId())
+                .membershipSkuId(wechatOrder.getPropertyId())
                 .build();
 
         return this.paymentRepository.save(payment);

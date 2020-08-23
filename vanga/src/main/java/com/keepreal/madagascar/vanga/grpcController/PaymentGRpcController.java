@@ -25,6 +25,7 @@ import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderType;
+import com.keepreal.madagascar.vanga.service.FeedService;
 import com.keepreal.madagascar.vanga.service.MpWechatPayService;
 import com.keepreal.madagascar.vanga.service.PaymentService;
 import com.keepreal.madagascar.vanga.service.ShellService;
@@ -38,7 +39,6 @@ import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
-import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +47,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.keepreal.madagascar.vanga.model.WechatOrderType.PAYMEMBERSHIP;
+
 /**
  * Represents the payment grpc controller.
  */
@@ -54,6 +56,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImplBase {
 
+    private final FeedService feedService;
     private final PaymentService paymentService;
     private final WechatOrderService wechatOrderService;
     private final WechatPayService wechatPayService;
@@ -68,6 +71,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     /**
      * Constructs the payment grpc controller.
      *
+     * @param feedService                {@link FeedService}.
      * @param paymentService             {@link PaymentService}.
      * @param wechatOrderService         {@link WechatOrderService}.
      * @param wechatPayService           {@link WechatPayService}.
@@ -79,7 +83,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param paymentMessageFactory      {@link PaymentMessageFactory}.
      */
-    public PaymentGRpcController(PaymentService paymentService,
+    public PaymentGRpcController(FeedService feedService,
+                                 PaymentService paymentService,
                                  WechatOrderService wechatOrderService,
                                  WechatPayService wechatPayService,
                                  MpWechatPayService mpWechatPayService,
@@ -89,6 +94,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                  WechatOrderMessageFactory wechatOrderMessageFactory,
                                  SubscribeMembershipService subscribeMembershipService,
                                  PaymentMessageFactory paymentMessageFactory) {
+        this.feedService = feedService;
         this.paymentService = paymentService;
         this.wechatOrderService = wechatOrderService;
         this.wechatPayService = wechatPayService;
@@ -149,7 +155,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId(),
-                WechatOrderType.PAYMEMBERSHIP);
+                PAYMEMBERSHIP);
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -179,10 +185,27 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                         StreamObserver<WechatOrderResponse> responseObserver) {
         WechatOrder wechatOrder = this.wechatOrderService.retrieveById(request.getId());
 
-        if (StringUtils.isEmpty(wechatOrder.getShellSkuId())) {
-            wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
-        } else {
-            wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
+        if (Objects.isNull(wechatOrder)) {
+            return;
+        }
+
+        switch (WechatOrderType.fromValue(wechatOrder.getType())) {
+            case PAYMEMBERSHIP: {
+                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+                this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
+                return;
+            }
+            case PAYSHELL:{
+                wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
+                this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
+                return;
+            }
+            case PAYQUESTION:{
+                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+                this.feedService.confirmQuestionPaid(wechatOrder);
+                return;
+            }
+            default:
         }
 
         WechatOrderResponse response = WechatOrderResponse.newBuilder()
@@ -191,12 +214,6 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
-
-        if (StringUtils.isEmpty(wechatOrder.getShellSkuId())) {
-            this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
-        } else {
-            this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getShellSkuId()));
-        }
     }
 
     /**
@@ -210,10 +227,24 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                   StreamObserver<CommonStatus> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
 
-        if (StringUtils.isEmpty(wechatOrder.getShellSkuId())) {
-            this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
-        } else {
-            this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getShellSkuId()));
+        if (Objects.isNull(wechatOrder)) {
+            return;
+        }
+
+        switch (WechatOrderType.fromValue(wechatOrder.getType())) {
+            case PAYMEMBERSHIP: {
+                this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
+                return;
+            }
+            case PAYSHELL:{
+                this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
+                return;
+            }
+            case PAYQUESTION:{
+                this.feedService.confirmQuestionPaid(wechatOrder);
+                return;
+            }
+            default:
         }
     }
 

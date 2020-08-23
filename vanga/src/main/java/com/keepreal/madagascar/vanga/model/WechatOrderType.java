@@ -19,4 +19,14 @@ public enum WechatOrderType {
         this.value = value;
     }
 
+    public static WechatOrderType fromValue(int value) {
+        for (WechatOrderType type : values()) {
+            if (value == type.getValue()) {
+                return type;
+            }
+        }
+
+        return WechatOrderType.UNKNOWN;
+    }
+
 }

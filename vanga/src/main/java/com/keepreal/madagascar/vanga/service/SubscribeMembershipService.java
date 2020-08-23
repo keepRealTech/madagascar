@@ -111,7 +111,7 @@ public class SubscribeMembershipService {
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", wechatOrder.getUserId()))) {
             List<Payment> innerPaymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
 
-            MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getMemberShipSkuId());
+            MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getPropertyId());
 
             if (innerPaymentList.isEmpty()) {
                 innerPaymentList = this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
