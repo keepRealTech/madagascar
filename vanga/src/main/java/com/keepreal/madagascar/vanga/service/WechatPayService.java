@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -229,13 +231,20 @@ public class WechatPayService {
      * Refunds the state of an order and update the database.
      *
      * @param wechatOrder {@link WechatOrder}.
+     * @param reason      Refund reason.
+     * @return {@link WechatOrder}.
      */
-    public void tryRefund(WechatOrder wechatOrder) {
+    public WechatOrder tryRefund(WechatOrder wechatOrder, String reason) {
         if (Objects.isNull(wechatOrder)) {
-            return;
+            return wechatOrder;
         }
 
         String refundNum = UUID.randomUUID().toString().replace("-", "");
+        wechatOrder.setRefundNumber(refundNum);
+        wechatOrder.setRefundInCents(wechatOrder.getFeeInCents());
+        wechatOrder.setRefundReason(reason);
+        wechatOrder.setRefundTime(Instant.now().toEpochMilli());
+
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("out_trade_no", wechatOrder.getTradeNumber());
         requestBody.put("out_refund_no", refundNum);
@@ -250,10 +259,15 @@ public class WechatPayService {
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
-                wechatOrder.setRefundNumber(refundNum);
+                wechatOrder.setState(WechatOrderState.REFUND.getValue());
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            wechatOrder.setErrorMessage(e.getMessage());
+        } finally {
+            wechatOrder = this.wechatOrderService.update(wechatOrder);
         }
+
+        return wechatOrder;
     }
 
 }

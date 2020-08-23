@@ -106,12 +106,9 @@ public class FeedService {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_FORBIDDEN);
         }
 
-        Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payment.getPayeeId());
+        payment.setState(PaymentState.REFUNDING.getValue());
 
-        payment.setState(PaymentState.CLOSED.getValue());
-
-        this.wechatPayService.tryRefund(wechatOrder);
-        this.balanceService.subtractCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), payment.getWithdrawPercent()));
+        this.wechatPayService.tryRefund(wechatOrder, "撤销付费问题。");
         this.paymentService.updateAll(Collections.singletonList(payment));
     }
 

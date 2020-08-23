@@ -13,6 +13,7 @@ public enum PaymentState {
     OPEN(2),
     CLOSED(3),
     PENDING(4),
+    REFUNDING(5),
     ;
 
     private final int value;

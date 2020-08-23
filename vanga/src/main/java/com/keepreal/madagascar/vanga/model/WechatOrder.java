@@ -63,5 +63,7 @@ public class WechatOrder {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+    @Builder.Default
+    private Long refundTime = 0L;
 
 }
