@@ -104,7 +104,7 @@ public class SubscribeMembershipService {
 
         List<Payment> paymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
 
-        if (paymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
+        if (paymentList.stream().allMatch(payment -> PaymentState.DRAFTED.getValue() != payment.getState())) {
             return;
         }
 
