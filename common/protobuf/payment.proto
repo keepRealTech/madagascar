@@ -109,6 +109,11 @@ message RefundWechatFeedRequest {
   string userId = 2;
 }
 
+message ActivatePendingFeedPaymentRequest {
+  string feedId = 1;
+  string userId = 2;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
@@ -121,4 +126,6 @@ service PaymentService {
   rpc WechatCreateFeed (CreatePaidFeedRequest) returns (WechatOrderResponse) {};
   rpc RetrieveUserPayments (RetrieveUserPaymentsRequest) returns (UserPaymentsResponse) {};
   rpc RefundWechatPaidFeed (RefundWechatFeedRequest) returns (CommonStatus) {};
+  rpc ActivateFeedPayment (ActivatePendingFeedPaymentRequest) returns (CommonStatus) {};
+  rpc WechatRefundCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
 }

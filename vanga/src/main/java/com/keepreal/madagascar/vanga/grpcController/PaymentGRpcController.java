@@ -3,6 +3,7 @@ package com.keepreal.madagascar.vanga.grpcController;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.vanga.ActivatePendingFeedPaymentRequest;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreatePaidFeedRequest;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
@@ -248,6 +249,32 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     }
 
     /**
+     * Implements the wechat order refund callback api.
+     *
+     * @param request          {@link WechatOrderCallbackRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void wechatRefundCallback(WechatOrderCallbackRequest request,
+                                     StreamObserver<CommonStatus> responseObserver) {
+        WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
+
+        if (Objects.isNull(wechatOrder)) {
+            return;
+        }
+
+        switch (WechatOrderType.fromValue(wechatOrder.getType())) {
+            case PAYQUESTION: {
+
+                return;
+            }
+            case PAYSHELL:
+            case PAYMEMBERSHIP:
+            default:
+        }
+    }
+
+    /**
      * Implements the shell pay api.
      *
      * @param request          {@link SubscribeMembershipRequest}.
@@ -452,6 +479,26 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         CommonStatus response;
         try {
             this.feedService.refundQuestionPaid(request.getFeedId(), request.getUserId());
+            response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
+        } catch (KeepRealBusinessException exception) {
+            response = CommonStatusUtils.buildCommonStatus(exception.getErrorCode());
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the feed question answered to flip payment state.
+     *
+     * @param request          {@link ActivatePendingFeedPaymentRequest}.
+     * @param responseObserver {@link CommonStatus}.
+     */
+    public void activateFeedPayment(ActivatePendingFeedPaymentRequest request,
+                                    StreamObserver<CommonStatus> responseObserver) {
+        CommonStatus response;
+        try {
+            this.feedService.activatePayment(request.getFeedId(), request.getUserId());
             response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         } catch (KeepRealBusinessException exception) {
             response = CommonStatusUtils.buildCommonStatus(exception.getErrorCode());

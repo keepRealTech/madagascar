@@ -113,6 +113,32 @@ public class FeedService {
     }
 
     /**
+     * Activates the pending payment for settling.
+     *
+     * @param feedId Feed id.
+     * @param userId User id.
+     */
+    @Transactional
+    public void activatePayment(String feedId, String userId) {
+        WechatOrder wechatOrder = this.wechatOrderService.retrieveByQuestionId(feedId);
+        Payment payment = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId()).stream().findFirst().orElse(null);
+
+        if (Objects.isNull(payment) || PaymentState.PENDING.getValue() != payment.getState()) {
+            log.warn("Failed to activate payment for feed {}", feedId);
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR);
+        }
+
+        if (!payment.getUserId().equals(userId)) {
+            log.warn("Failed to activate payment {}: FORBIDDEN", payment.getId());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FORBIDDEN);
+        }
+
+        payment.setState(PaymentState.OPEN.getValue());
+
+        this.paymentService.updateAll(Collections.singletonList(payment));
+    }
+
+    /**
      * Updates the question feed to visible.
      *
      * @param feedId Feed id.
