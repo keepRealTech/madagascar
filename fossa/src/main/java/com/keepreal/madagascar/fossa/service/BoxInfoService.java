@@ -60,19 +60,29 @@ public class BoxInfoService {
         return query;
     }
 
-    public Query retrieveQuestionByCondition(String userId, boolean answered, boolean paid, String membershipId) {
+    public Query retrieveQuestionByCondition(String userId, Boolean answered, Boolean paid, String membershipId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("hostId").is(userId));
-        if (answered) {
-            query.addCriteria(Criteria.where("mediaInfos.answer").ne(null));
+
+        if (answered != null) {
+            if (answered) {
+                query.addCriteria(Criteria.where("mediaInfos.answer").ne(null));
+            } else {
+                query.addCriteria(Criteria.where("mediaInfos.answer").is(null));
+            }
+        }
+
+        if (paid != null) {
             if (paid) {
                 query.addCriteria(Criteria.where("mediaInfos.priceInCents").gt(0));
+            } else {
+                query.addCriteria(Criteria.where("mediaInfos.priceInCents").is(0)
+                        .orOperator(Criteria.where("mediaInfos.priceInCents").is(null)));
             }
-            if (!StringUtils.isEmpty(membershipId)) {
-                query.addCriteria(Criteria.where("membershipIds").is(membershipId));
-            }
-        } else {
-            query.addCriteria(Criteria.where("mediaInfos.answer").is(null));
+        }
+
+        if (!StringUtils.isEmpty(membershipId)) {
+            query.addCriteria(Criteria.where("membershipIds").is(membershipId));
         }
 
         return query;

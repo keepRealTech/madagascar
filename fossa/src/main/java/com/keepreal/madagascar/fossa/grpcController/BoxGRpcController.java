@@ -121,7 +121,9 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
 
     @Override
     public void retrieveAskMeQuestion(RetrieveAskMeQuestionsRequest request, StreamObserver<QuestionsResponse> responseObserver) {
-        Query query = this.boxInfoService.retrieveQuestionByCondition(request.getUserId(), request.getAnswered(), request.getPaid(), request.getMembershipId());
+        Boolean answered = request.hasAnswered() ? request.getAnswered().getValue() : null;
+        Boolean paid = request.hasPaid() ? request.getPaid().getValue() : null;
+        Query query = this.boxInfoService.retrieveQuestionByCondition(request.getUserId(), answered, paid, request.getMembershipId());
         int page = request.getPageRequest().getPage();
         int pageSize = request.getPageRequest().getPageSize();
 

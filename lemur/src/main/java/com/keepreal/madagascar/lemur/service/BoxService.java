@@ -239,10 +239,14 @@ public class BoxService {
         RetrieveAskMeQuestionsRequest.Builder builder = RetrieveAskMeQuestionsRequest
                 .newBuilder()
                 .setUserId(userId)
-                .setAnswered(answered == null ? false : answered)
-                .setPaid(paid == null ? false : paid)
                 .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
                 .setMembershipId(membershipId == null ? "" : membershipId);
+        if (answered != null) {
+            builder.setAnswered(BoolValue.of(answered));
+        }
+        if (paid != null) {
+            builder.setPaid(BoolValue.of(paid));
+        }
 
         QuestionsResponse response;
         try {
