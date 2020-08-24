@@ -12,6 +12,6 @@ public interface FeedGroupRepository extends MongoRepository<FeedGroup, String> 
 
     FeedGroup findByIdAndDeletedIsFalse(String id);
 
-    Page<FeedGroup> findAllByIslandIdAndDeletedIsFalse(String islandId, Pageable pageable);
+    Page<FeedGroup> findAllByIslandIdAndDeletedIsFalseOrderByLastFeedTimeDesc(String islandId, Pageable pageable);
 
 }

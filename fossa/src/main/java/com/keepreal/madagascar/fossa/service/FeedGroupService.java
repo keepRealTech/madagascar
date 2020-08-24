@@ -76,7 +76,6 @@ public class FeedGroupService {
     public FeedGroup insert(FeedGroup feedGroup) {
         feedGroup.setId(String.valueOf(this.idGenerator.nextId()));
         feedGroup.setCreatedTime(System.currentTimeMillis());
-        feedGroup.setLastFeedTime(feedGroup.getCreatedTime());
         return this.feedGroupRepository.insert(feedGroup);
     }
 
@@ -123,7 +122,7 @@ public class FeedGroupService {
      * @return {@link FeedGroup}.
      */
     public Page<FeedGroup> retrieveFeedGroupsByIslandId(String islandId, Pageable pageable) {
-        return this.feedGroupRepository.findAllByIslandIdAndDeletedIsFalse(islandId, pageable);
+        return this.feedGroupRepository.findAllByIslandIdAndDeletedIsFalseOrderByLastFeedTimeDesc(islandId, pageable);
     }
 
 }

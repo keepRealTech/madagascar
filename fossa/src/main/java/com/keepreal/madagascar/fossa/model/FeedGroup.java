@@ -29,7 +29,8 @@ public class FeedGroup {
     private String hostId;
     private String name;
     private String description;
-    private Long lastFeedTime;
+    @Builder.Default
+    private Long lastFeedTime = 0L;
     @Builder.Default
     private String thumbnailUri = "";
     @Builder.Default
