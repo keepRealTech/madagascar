@@ -18,6 +18,7 @@ import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.fossa.NewFeedsRequest;
 import com.keepreal.madagascar.fossa.NewFeedsRequestV2;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
+import com.keepreal.madagascar.fossa.NewWechatFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
@@ -26,6 +27,7 @@ import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
+import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdResponse;
 import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdRequest;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
@@ -34,6 +36,7 @@ import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedGroupService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.IslandService;
+import com.keepreal.madagascar.fossa.service.PaymentService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
@@ -71,6 +74,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     private final FeedGroupService feedGroupService;
     private final MongoTemplate mongoTemplate;
     private final FeedEventProducerService feedEventProducerService;
+    private final PaymentService paymentService;
 
     /**
      * Constructs the feed grpc controller
@@ -81,19 +85,22 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      * @param feedGroupService         {@link FeedGroupService}.
      * @param mongoTemplate            {@link MongoTemplate}
      * @param feedEventProducerService {@link FeedEventProducerService}.
+     * @param paymentService           {@link PaymentService}.
      */
     public FeedGRpcController(LongIdGenerator idGenerator,
                               IslandService islandService,
                               FeedInfoService feedInfoService,
                               FeedGroupService feedGroupService,
                               MongoTemplate mongoTemplate,
-                              FeedEventProducerService feedEventProducerService) {
+                              FeedEventProducerService feedEventProducerService,
+                              PaymentService paymentService) {
         this.idGenerator = idGenerator;
         this.islandService = islandService;
         this.feedInfoService = feedInfoService;
         this.feedGroupService = feedGroupService;
         this.mongoTemplate = mongoTemplate;
         this.feedEventProducerService = feedEventProducerService;
+        this.paymentService = paymentService;
     }
 
     /**
@@ -520,7 +527,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     }
 
     @Override
-    public void createWechatFeedsV2(NewFeedsRequestV2 request, StreamObserver<NewFeedsResponse> responseObserver) {
+    public void createWechatFeedsV2(NewFeedsRequestV2 request, StreamObserver<NewWechatFeedsResponse> responseObserver) {
         String userId = request.getUserId();
         ProtocolStringList islandIdList = request.getIslandIdList();
         ProtocolStringList hostIdList = request.getHostIdList();
@@ -553,19 +560,27 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             feedInfoList.add(builder.build());
         });
 
-        feedInfoService.saveAll(feedInfoList);
+        List<FeedInfo> infoList = feedInfoService.saveAll(feedInfoList);
 
-        NewFeedsResponse newFeedsResponse = NewFeedsResponse.newBuilder()
+        NewWechatFeedsResponse newFeedsResponse = NewWechatFeedsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
+                .setMessage(this.paymentService.wechatCreateFeed(infoList.get(0).getId(), request.getPriceInCents().getValue()))
                 .build();
         responseObserver.onNext(newFeedsResponse);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void updateFeedPaidById(UpdateFeedPaidByIdRequest request, StreamObserver<CommonStatus> responseObserver) {
+    public void updateFeedPaidById(UpdateFeedPaidByIdRequest request, StreamObserver<UpdateFeedPaidByIdResponse> responseObserver) {
         String feedId = request.getId();
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(feedId, false);
+        feedInfo.setTemped(false);
+        this.feedInfoService.update(feedInfo);
 
+        responseObserver.onNext(UpdateFeedPaidByIdResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build());
+        responseObserver.onCompleted();
     }
 
     private List<MediaInfo> buildMediaInfos(NewFeedsRequestV2 request) {

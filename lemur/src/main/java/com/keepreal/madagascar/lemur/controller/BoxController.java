@@ -1,9 +1,11 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.BoxDTOFactory;
+import com.keepreal.madagascar.lemur.dtoFactory.WechatOrderDTOFactory;
 import com.keepreal.madagascar.lemur.service.BoxService;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
@@ -34,13 +36,16 @@ public class BoxController implements BoxApi {
     private final BoxService boxService;
     private final FeedService feedService;
     private final BoxDTOFactory boxDTOFactory;
+    private final WechatOrderDTOFactory wechatOrderDTOFactory;
 
     public BoxController(BoxService boxService,
                          FeedService feedService,
-                         BoxDTOFactory boxDTOFactory) {
+                         BoxDTOFactory boxDTOFactory,
+                         WechatOrderDTOFactory wechatOrderDTOFactory) {
         this.boxService = boxService;
         this.feedService = feedService;
         this.boxDTOFactory = boxDTOFactory;
+        this.wechatOrderDTOFactory = wechatOrderDTOFactory;
     }
 
     /**
@@ -205,7 +210,17 @@ public class BoxController implements BoxApi {
     public ResponseEntity<WechatOrderResponse> apiV1IslandsIdBoxesPaidQuestionsWechatPayPost(String id,
                                                                                              PostQuestionRequest postQuestionRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        return null;
+        String text = postQuestionRequest.getText();
+        Long priceInCents = postQuestionRequest.getPriceInCents();
+
+        WechatOrderMessage wechatOrderMessage = this.boxService.createWechatFeed(id, userId, text, priceInCents);
+
+        WechatOrderResponse response = new WechatOrderResponse();
+
+        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**

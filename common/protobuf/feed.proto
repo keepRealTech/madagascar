@@ -45,6 +45,11 @@ message NewFeedsResponse {
     CommonStatus status = 1;
 }
 
+message NewWechatFeedsResponse {
+    CommonStatus status = 1;
+    WechatOrderMessage message = 2;
+}
+
 message RetrieveFeedByIdRequest {
     string id = 1;
     string userId = 2;
@@ -136,10 +141,14 @@ message UpdateFeedPaidByIdRequest {
     string id = 1;
 }
 
+message UpdateFeedPaidByIdResponse {
+    CommonStatus status = 1;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
-    rpc CreateWechatFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
+    rpc CreateWechatFeedsV2 (NewFeedsRequestV2) returns (NewWechatFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
     rpc RetrieveFeedGroupFeedById (RetrieveFeedByIdRequest) returns (FeedGroupFeedResponse) {};
@@ -149,5 +158,5 @@ service FeedService {
     rpc RetrieveMultipleTimelineFeeds (RetrieveMultipleFeedsRequest) returns (TimelineFeedsResponse) {}
     rpc TopFeedById (TopFeedByIdRequest) returns (TopFeedByIdResponse) {}
     rpc RetrieveToppedFeedById (RetrieveToppedFeedByIdRequest) returns (FeedResponse) {}
-    rpc UpdateFeedPaidById (UpdateFeedPaidByIdRequest) returns (CommonStatus) {}
+    rpc UpdateFeedPaidById (UpdateFeedPaidByIdRequest) returns (UpdateFeedPaidByIdResponse) {}
 }

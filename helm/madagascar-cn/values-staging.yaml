@@ -73,7 +73,7 @@ global:
       imagePullPolicy: Always
     asity:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
-      tag: 1.0.2-staging
+      tag: 1.0.3-staging
       imagePullPolicy: Always
 
 deploy:
