@@ -48,6 +48,8 @@ public class FeedInfo {
     private Boolean deleted = false;
     @Builder.Default
     private Boolean isTop = false;
+    @Builder.Default
+    private Boolean temped = false;
     @CreatedDate
     private Long createdTime;
     @CreatedDate

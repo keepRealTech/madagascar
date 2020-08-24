@@ -25,7 +25,7 @@ import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
-import com.keepreal.madagascar.fossa.model.AnswerInfo;
+import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdRequest;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
@@ -336,6 +336,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         Query query = new Query();
         query.addCriteria(Criteria.where("deleted").is(false));
+        query.addCriteria(Criteria.where("multiMediaType").is(MediaType.MEDIA_QUESTION.name()));
+        query.addCriteria(Criteria.where("temped").ne(true));
         if (fromHost && hasIslandId) {
             Criteria criteria = Criteria
                     .where("islandId").is(condition.getIslandId().getValue())
@@ -414,6 +416,55 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
         responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void createWechatFeedsV2(NewFeedsRequestV2 request, StreamObserver<NewFeedsResponse> responseObserver) {
+        String userId = request.getUserId();
+        ProtocolStringList islandIdList = request.getIslandIdList();
+        ProtocolStringList hostIdList = request.getHostIdList();
+        String text = request.hasText() ? request.getText().getValue() : "";
+        ProtocolStringList membershipIdsList = request.getMembershipIdsList();
+        MediaType mediaType = request.getType();
+
+        String duplicateTag = UUID.randomUUID().toString();
+
+        List<FeedInfo> feedInfoList = new ArrayList<>();
+        long timestamp = Instant.now().toEpochMilli();
+        IntStream.range(0, islandIdList.size()).forEach(i -> {
+            FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
+            builder.id(String.valueOf(idGenerator.nextId()));
+            builder.islandId(islandIdList.get(i));
+            builder.userId(userId);
+            builder.hostId(hostIdList.get(i));
+            builder.fromHost(userId.equals(hostIdList.get(i)));
+            builder.text(text);
+            builder.duplicateTag(duplicateTag);
+            builder.multiMediaType(mediaType.name());
+            builder.mediaInfos(this.buildMediaInfos(request));
+            builder.membershipIds(membershipIdsList);
+            builder.createdTime(timestamp);
+            builder.toppedTime(timestamp);
+            builder.temped(true);
+            if (request.hasPriceInCents()) {
+                builder.priceInCents(request.getPriceInCents().getValue());
+            }
+            feedInfoList.add(builder.build());
+        });
+
+        feedInfoService.saveAll(feedInfoList);
+
+        NewFeedsResponse newFeedsResponse = NewFeedsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(newFeedsResponse);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void updateFeedPaidById(UpdateFeedPaidByIdRequest request, StreamObserver<CommonStatus> responseObserver) {
+        String feedId = request.getId();
+
     }
 
     private List<MediaInfo> buildMediaInfos(NewFeedsRequestV2 request) {

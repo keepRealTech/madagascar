@@ -30,7 +30,7 @@ message NewFeedsRequestV2 {
     repeated string membershipIds = 4;
     MediaType type = 5;
     google.protobuf.StringValue text = 6;
-    google.protobuf.Int64Value priceInCents = 7;
+    google.protobuf.Int64Value \ = 7;
     google.protobuf.StringValue questionSkuId = 8;
     google.protobuf.StringValue receipt = 9;
     google.protobuf.StringValue transactionId = 10;
