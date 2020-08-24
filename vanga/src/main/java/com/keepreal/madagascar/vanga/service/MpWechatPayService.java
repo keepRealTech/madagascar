@@ -79,11 +79,7 @@ public class MpWechatPayService {
             requestBody.put("spbill_create_ip", this.mpWechatPayConfiguration.getHostIp());
             requestBody.put("openid", openId);
 
-            log.info(requestBody.toString());
-
             response = this.client.unifiedOrder(requestBody);
-
-            log.info(response.toString());
 
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));

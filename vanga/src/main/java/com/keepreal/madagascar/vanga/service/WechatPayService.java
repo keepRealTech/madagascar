@@ -82,11 +82,7 @@ public class WechatPayService {
             requestBody.put("body", description);
             requestBody.put("spbill_create_ip", this.wechatPayConfiguration.getHostIp());
 
-            log.info(requestBody.toString());
-
             response = this.client.unifiedOrder(requestBody);
-
-            log.info(response.toString());
 
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
@@ -239,8 +235,6 @@ public class WechatPayService {
 
         try {
             Map<String, String> response = this.client.processRefundResponseXml(callbackPayload);
-
-            log.info(response.toString());
 
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 return null;

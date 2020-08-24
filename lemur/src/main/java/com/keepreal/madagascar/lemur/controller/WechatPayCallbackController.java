@@ -74,8 +74,6 @@ public class WechatPayCallbackController {
             String requestXml = IOUtils.toString(request.getInputStream(), Charset.forName(request.getCharacterEncoding()));
             this.orderService.wechatOrderRefundCallback(requestXml);
 
-            log.info(requestXml);
-
             BufferedOutputStream out = new BufferedOutputStream(response.getOutputStream());
             out.write(this.successResponseXml.getBytes());
             out.flush();
