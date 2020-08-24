@@ -151,6 +151,11 @@ public class BoxService {
     public BoxMessage createOrUpdateBoxInfo(String islandId, String userId, boolean enabled, List<String> membershipIds) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(islandId);
+        if (!userId.equals(islandMessage.getHostId())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FORBIDDEN);
+        }
+
         CreateOrUpdateBoxResponse response;
 
         try {
@@ -295,7 +300,7 @@ public class BoxService {
         return response;
     }
 
-    public void ignoreQuestion(String questionId) {
+    public void ignoreQuestion(String questionId, String userId) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
         CommonResponse response;
@@ -303,6 +308,7 @@ public class BoxService {
         try {
             response = stub.ignoreQuestion(IgnoreQuestionRequest.newBuilder()
                     .setQuestionId(questionId)
+                    .setUserId(userId)
                     .build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());

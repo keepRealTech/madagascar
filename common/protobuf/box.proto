@@ -67,6 +67,7 @@ message RetrieveBoxInfoResponse {
 
 message IgnoreQuestionRequest {
     string questionId = 1;
+    string userId = 2;
 }
 
 message BoxMessage {

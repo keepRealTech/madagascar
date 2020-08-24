@@ -3,6 +3,7 @@ package com.keepreal.madagascar.fossa.grpcController;
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PageResponse;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.AnswerQuestionRequest;
 import com.keepreal.madagascar.fossa.BoxServiceGrpc;
 import com.keepreal.madagascar.fossa.CommonResponse;
@@ -66,6 +67,13 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         ProtocolStringList visibleMembershipIdsList = request.getVisibleMembershipIdsList();
 
         FeedInfo feedInfo = feedInfoService.findFeedInfoById(questionId, false);
+        if (!answer.equals(feedInfo.getHostId())) {
+            responseObserver.onNext(CommonResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
 
         AnswerInfo answerInfo;
         List<MediaInfo> mediaInfos = feedInfo.getMediaInfos();
@@ -168,12 +176,21 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
     public void ignoreQuestion(IgnoreQuestionRequest request, StreamObserver<CommonResponse> responseObserver) {
         String questionId = request.getQuestionId();
 
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(questionId, false);
+        if (!request.getUserId().equals(feedInfo.getHostId())) {
+            responseObserver.onNext(CommonResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
+
         this.mongoTemplate.updateFirst(
                 Query.query(Criteria.where("id").is(questionId)),
                 Update.update("mediaInfos.0.ignored", true),
                 FeedInfo.class);
 
-        this.paymentService.refundWechatPaidFeed(questionId, "");
+        this.paymentService.refundWechatPaidFeed(questionId, request.getUserId());
         responseObserver.onNext(CommonResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build());
