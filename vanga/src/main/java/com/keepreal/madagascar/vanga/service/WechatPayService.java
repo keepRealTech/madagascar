@@ -208,8 +208,7 @@ public class WechatPayService {
             WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
 
             if (Objects.isNull(wechatOrder)
-                    || wechatOrder.getState() == WechatOrderState.SUCCESS.getValue()
-                    || wechatOrder.getState() == WechatOrderState.PAYERROR.getValue()) {
+                    || wechatOrder.getState() != WechatOrderState.REFUNDING.getValue()) {
                 return null;
             }
 
@@ -218,6 +217,46 @@ public class WechatPayService {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
                 wechatOrder.setState(WechatOrderState.SUCCESS.getValue());
+                wechatOrder.setTransactionId(response.get("transaction_id"));
+            }
+            return this.wechatOrderService.update(wechatOrder);
+        } catch (Exception ignored) {
+        }
+
+        return null;
+    }
+
+    /**
+     * Implements the refund callback logic.
+     *
+     * @param callbackPayload Payload.
+     * @return {@link WechatOrder}.
+     */
+    public WechatOrder refundCallback(String callbackPayload) {
+        if (StringUtils.isEmpty(callbackPayload)) {
+            return null;
+        }
+
+        try {
+            Map<String, String> response = this.client.processRefundResponseXml(callbackPayload);
+
+            if (response.get("return_code").equals(WXPayConstants.FAIL)) {
+                return null;
+            }
+
+            WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
+
+            if (Objects.isNull(wechatOrder)
+                    || wechatOrder.getState() != WechatOrderState.REFUNDING.getValue()) {
+                return null;
+            }
+
+            if (WXPayConstants.FAIL.equals(response.get("result_code"))
+                    || !WXPayConstants.SUCCESS.equals(response.get("refund_status"))) {
+                wechatOrder.setState(WechatOrderState.PAYERROR.getValue());
+                wechatOrder.setErrorMessage(response.get("refund_status"));
+            } else {
+                wechatOrder.setState(WechatOrderState.REFUNDED.getValue());
                 wechatOrder.setTransactionId(response.get("transaction_id"));
             }
             return this.wechatOrderService.update(wechatOrder);
@@ -259,7 +298,7 @@ public class WechatPayService {
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
-                wechatOrder.setState(WechatOrderState.REFUND.getValue());
+                wechatOrder.setState(WechatOrderState.REFUNDING.getValue());
             }
         } catch (Exception e) {
             wechatOrder.setErrorMessage(e.getMessage());

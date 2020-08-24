@@ -24,8 +24,10 @@ import com.keepreal.madagascar.vanga.factory.WechatOrderMessageFactory;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Payment;
+import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
+import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.model.WechatOrderType;
 import com.keepreal.madagascar.vanga.service.FeedService;
 import com.keepreal.madagascar.vanga.service.MpWechatPayService;
@@ -42,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -227,7 +230,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                   StreamObserver<CommonStatus> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
 
-        if (Objects.isNull(wechatOrder)) {
+        if (Objects.isNull(wechatOrder) || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()) {
             return;
         }
 
@@ -257,15 +260,21 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     @Override
     public void wechatRefundCallback(WechatOrderCallbackRequest request,
                                      StreamObserver<CommonStatus> responseObserver) {
-        WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
+        WechatOrder wechatOrder = this.wechatPayService.refundCallback(request.getPayload());
 
-        if (Objects.isNull(wechatOrder)) {
+        if (Objects.isNull(wechatOrder) || WechatOrderState.REFUNDED.getValue() != wechatOrder.getState()) {
             return;
         }
 
         switch (WechatOrderType.fromValue(wechatOrder.getType())) {
             case PAYQUESTION: {
+                Payment payment = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId()).stream().findFirst().orElse(null);
+                if (Objects.isNull(payment)) {
+                    return;
+                }
 
+                payment.setState(PaymentState.REFUNDED.getValue());
+                this.paymentService.updateAll(Collections.singletonList(payment));
                 return;
             }
             case PAYSHELL:
@@ -494,6 +503,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param request          {@link ActivatePendingFeedPaymentRequest}.
      * @param responseObserver {@link CommonStatus}.
      */
+    @Override
     public void activateFeedPayment(ActivatePendingFeedPaymentRequest request,
                                     StreamObserver<CommonStatus> responseObserver) {
         CommonStatus response;

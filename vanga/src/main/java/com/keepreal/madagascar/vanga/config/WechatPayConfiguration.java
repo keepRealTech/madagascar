@@ -33,6 +33,7 @@ public class WechatPayConfiguration extends WXPayConfig {
     private String merchantId;
     private String merchantKey;
     private String callbackAddress;
+    private String refundCallbackAddress;
     private String certPath;
     private String hostIp;
 
@@ -108,7 +109,7 @@ public class WechatPayConfiguration extends WXPayConfig {
     @Bean(name = "wechatpay")
     @SneakyThrows
     public WXPay getWechatPayClient() {
-        return new WXPay(this, this.callbackAddress, false);
+        return new WXPay(this, this.callbackAddress, this.refundCallbackAddress, false);
     }
 
 }
