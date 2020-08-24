@@ -9,52 +9,37 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.persistence.EntityListeners;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 
 /**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-04-27
- **/
-
+ * Represents the feed group data entity.
+ */
 @Data
 @Builder
-@Document(value = "feedInfo")
+@Document(value = "feedGroup")
 @EntityListeners(AuditingEntityListener.class)
-public class FeedInfo {
+public class FeedGroup {
 
     @Id
     private String id;
     private String islandId;
-    private String userId;
-    private String text;
     private String hostId;
-    private Boolean fromHost;
-    private List<String> imageUrls;
-    private List<String> membershipIds;
-    private String duplicateTag;
-    private String multiMediaType;
-    private List<MediaInfo> mediaInfos;
-    private String feedGroupId;
+    private String name;
+    private String description;
+    private Long lastFeedTime;
     @Builder.Default
-    private Long priceInCents = 0L;
+    private String thumbnailUri = "";
     @Builder.Default
-    private Integer likesCount = 0;
+    private List<String> imageFeedIds = new ArrayList<>();
     @Builder.Default
-    private Integer commentsCount = 0;
-    @Builder.Default
-    private Integer repostCount = 0;
-    private Integer state;
+    private NavigableSet<String> feedIds = new TreeSet<>();
     @Builder.Default
     private Boolean deleted = false;
-    @Builder.Default
-    private Boolean isTop = false;
-    @Builder.Default
-    private Boolean temped = false;
     @CreatedDate
     private Long createdTime;
-    @CreatedDate
-    private Long toppedTime;
     @LastModifiedDate
     private Long updatedTime;
 

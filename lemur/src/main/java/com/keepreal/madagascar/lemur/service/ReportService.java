@@ -38,14 +38,22 @@ public class ReportService {
     /**
      * Creates a new report.
      *
-     * @param feedId     Feed id.
-     * @param islandId   Island id.
-     * @param userId     User id.
-     * @param reporterId Reporter id.
-     * @param type       {@link ReportType}.
+     * @param feedId      Feed id.
+     * @param islandId    Island id.
+     * @param userId      User id.
+     * @param reporterId  Reporter id.
+     * @param type        {@link ReportType}.
+     * @param messageId   Chat message id.
+     * @param feedGroupId Feed group id.
      * @return {@link ReportMessage}.
      */
-    public ReportMessage createReport(String feedId, String islandId, String userId, String reporterId, ReportType type, String messageId) {
+    public ReportMessage createReport(String feedId,
+                                      String islandId,
+                                      String userId,
+                                      String reporterId,
+                                      ReportType type,
+                                      String messageId,
+                                      String feedGroupId) {
         ReportServiceGrpc.ReportServiceBlockingStub stub = ReportServiceGrpc.newBlockingStub(this.channel);
 
         NewReportRequest.Builder requestBuilder = NewReportRequest.newBuilder()
@@ -58,6 +66,8 @@ public class ReportService {
             requestBuilder.setFeedId(StringValue.of(islandId));
         } else if (!StringUtils.isEmpty(messageId)) {
             requestBuilder.setMessageId(StringValue.of(messageId));
+        } else if (!StringUtils.isEmpty(feedGroupId)) {
+            requestBuilder.setFeedGroupId(StringValue.of(feedGroupId));
         } else {
             requestBuilder.setUserId(StringValue.of(userId));
         }

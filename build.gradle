@@ -15,17 +15,17 @@ allprojects {
     }
 }
 
-ext['baobob.version'] = '1.0.4'
-ext['indri.version'] = '1.0.2'
-ext['coua.version'] = '1.0.7'
-ext['fossa.version'] = '1.0.4'
-ext['lemur.version'] = '1.2.1'
-ext['tenrecs.version'] = '1.0.3'
-ext['brookesia.version'] = '1.0.2'
-ext['marty.version'] = '1.0.3'
-ext['mantella.version'] = '1.0.2'
-ext['vanga.version'] = '1.1.1'
-ext['asity.version'] = '1.0.2'
+ext['baobob.version'] = '1.0.5'
+ext['indri.version'] = '1.0.3'
+ext['coua.version'] = '1.0.9'
+ext['fossa.version'] = '1.0.6'
+ext['lemur.version'] = '1.2.3'
+ext['tenrecs.version'] = '1.0.4'
+ext['brookesia.version'] = '1.0.3'
+ext['marty.version'] = '1.0.4'
+ext['mantella.version'] = '1.0.3'
+ext['vanga.version'] = '1.1.2'
+ext['asity.version'] = '1.0.3'
 
 ext['settler.version'] = '1.0.3'
 ext['reconciliation.version'] = '1.0.1'

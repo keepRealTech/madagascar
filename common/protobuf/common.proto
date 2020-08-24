@@ -18,6 +18,12 @@ message PageResponse {
     bool hasContent = 4;
 }
 
+enum IslandAccessType {
+    ISLAND_ACCESS_UNKNOWN = 0;
+    ISLAND_ACCESS_PUBLIC = 1;
+    ISLAND_ACCESS_PRIVATE = 2;
+}
+
 enum LoginType {
     LOGIN_TYPE_NONE = 0;
     LOGIN_OAUTH_WECHAT = 1;
@@ -171,6 +177,7 @@ message IslandMessage {
     uint64 createdAt = 7;
     int32 memberCount = 8;
     string secret = 9;
+    IslandAccessType islandAccessType = 10;
 }
 
 message RepostMessage {
@@ -208,6 +215,18 @@ message FeedMessage {
         HtmlMessage html = 23;
         AnswerMessage answer = 24;
     }
+}
+
+message FeedGroupMessage {
+    string id = 1;
+    string islandId = 2;
+    string userId = 3;
+    string name = 4;
+    repeated string imageUris = 5;
+    uint64 lastFeedTime = 6;
+    int32 itemsCount = 7;
+    string thumbnailUri = 8;
+    string description = 9;
 }
 
 message PicturesMessage {
