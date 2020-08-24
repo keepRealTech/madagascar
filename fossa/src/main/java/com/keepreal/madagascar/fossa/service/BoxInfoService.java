@@ -7,9 +7,11 @@ import com.keepreal.madagascar.fossa.model.BoxInfo;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 @Service
 public class BoxInfoService {
@@ -85,8 +87,11 @@ public class BoxInfoService {
                 .setId(boxInfo.getId())
                 .setIsland(boxInfo.getIslandId())
                 .setEnabled(boxInfo.isEnabled())
-                .addAllMembershipIds(Arrays.asList(boxInfo.getMembershipIds().split(",")))
+                .addAllMembershipIds(StringUtils.isEmpty(boxInfo.getMembershipIds()) ?
+                        Collections.emptyList() :
+                        Arrays.asList(boxInfo.getMembershipIds().split(",")))
                 .setAnsweredQuestionCount(boxInfo.getAnsweredQuestionCount())
+                .setHostId(boxInfo.getHostId())
                 .build();
     }
 }

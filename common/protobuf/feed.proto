@@ -30,20 +30,24 @@ message NewFeedsRequestV2 {
     repeated string membershipIds = 4;
     MediaType type = 5;
     google.protobuf.StringValue text = 6;
-    google.protobuf.Int64Value priceInCents = 7;
-    google.protobuf.StringValue questionSkuId = 8;
-    google.protobuf.StringValue receipt = 9;
-    google.protobuf.StringValue transactionId = 10;
+    google.protobuf.StringValue feedGroupId = 7;
+    google.protobuf.Int64Value priceInCents = 8;
     oneof message {
-        PicturesMessage pics = 11;
-        VideoMessage video = 12;
-        AudioMessage audio = 13;
-        HtmlMessage html = 14;
+        PicturesMessage pics = 9;
+        VideoMessage video = 10;
+        AudioMessage audio = 11;
+        HtmlMessage html = 12;
+        AnswerMessage question = 13;
     }
 }
 
 message NewFeedsResponse {
     CommonStatus status = 1;
+}
+
+message NewWechatFeedsResponse {
+    CommonStatus status = 1;
+    WechatOrderMessage message = 2;
 }
 
 message RetrieveFeedByIdRequest {
@@ -125,21 +129,34 @@ message RetrieveToppedFeedByIdResponse {
     FeedMessage feed = 2;
 }
 
+message FeedGroupFeedResponse {
+    CommonStatus status = 1;
+    FeedMessage feed = 2;
+    FeedGroupMessage feedGroup = 3;
+    string lastFeedId = 4;
+    string nextFeedId = 5;
+}
+
 message UpdateFeedPaidByIdRequest {
     string id = 1;
+}
+
+message UpdateFeedPaidByIdResponse {
+    CommonStatus status = 1;
 }
 
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
-    rpc CreateWechatFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
+    rpc CreateWechatFeedsV2 (NewFeedsRequestV2) returns (NewWechatFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
+    rpc RetrieveFeedGroupFeedById (RetrieveFeedByIdRequest) returns (FeedGroupFeedResponse) {};
     rpc RetrieveFeedsByIds (RetrieveFeedsByIdsRequest) returns (FeedsResponse) {};
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
     rpc CreateDefaultFeed (CreateDefaultFeedRequest) returns (CreateDefaultFeedResponse) {}
     rpc RetrieveMultipleTimelineFeeds (RetrieveMultipleFeedsRequest) returns (TimelineFeedsResponse) {}
     rpc TopFeedById (TopFeedByIdRequest) returns (TopFeedByIdResponse) {}
     rpc RetrieveToppedFeedById (RetrieveToppedFeedByIdRequest) returns (FeedResponse) {}
-    rpc UpdateFeedPaidById (UpdateFeedPaidByIdRequest) returns (CommonStatus) {}
+    rpc UpdateFeedPaidById (UpdateFeedPaidByIdRequest) returns (UpdateFeedPaidByIdResponse) {}
 }

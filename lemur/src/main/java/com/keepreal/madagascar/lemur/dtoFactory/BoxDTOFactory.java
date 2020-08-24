@@ -46,7 +46,7 @@ public class BoxDTOFactory {
 
         List<String> myMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(boxMessage.getIsland(), userId);
         ProtocolStringList membershipIdsList = boxMessage.getMembershipIdsList();
-        dto.setHasSubmitAccess(membershipIdsList.stream().anyMatch(myMembershipIds::contains));
+        dto.setHasSubmitAccess(userId.equals(boxMessage.getHostId()) || membershipIdsList.stream().anyMatch(myMembershipIds::contains));
 
         return dto;
     }

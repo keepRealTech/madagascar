@@ -7,10 +7,13 @@ import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
+import com.keepreal.madagascar.fossa.FeedGroupFeedResponse;
+import com.keepreal.madagascar.fossa.FeedGroupFeedsResponse;
 import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
 import com.keepreal.madagascar.lemur.converter.MediaTypeConverter;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
+import com.keepreal.madagascar.lemur.service.FeedGroupService;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.IslandService;
@@ -32,6 +35,7 @@ import swagger.model.DummyResponse;
 import swagger.model.FeedDTO;
 import swagger.model.FeedResponse;
 import swagger.model.FeedsResponseV2;
+import swagger.model.FullFeedResponse;
 import swagger.model.MultiMediaType;
 import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
@@ -65,23 +69,27 @@ public class FeedController implements FeedApi {
     private final ImageService imageService;
     private final FeedService feedService;
     private final IslandService islandService;
+    private final FeedGroupService feedGroupService;
     private final FeedDTOFactory feedDTOFactory;
 
     /**
      * Constructs the feed controller.
      *
-     * @param imageService   {@link ImageService}.
-     * @param feedService    {@link FeedService}.
-     * @param islandService  {@link IslandService}.
-     * @param feedDTOFactory {@link FeedDTOFactory}.
+     * @param imageService     {@link ImageService}.
+     * @param feedService      {@link FeedService}.
+     * @param islandService    {@link IslandService}.
+     * @param feedGroupService {@link FeedGroupService}.
+     * @param feedDTOFactory   {@link FeedDTOFactory}.
      */
     public FeedController(ImageService imageService,
                           FeedService feedService,
                           IslandService islandService,
+                          FeedGroupService feedGroupService,
                           FeedDTOFactory feedDTOFactory) {
         this.imageService = imageService;
         this.feedService = feedService;
         this.islandService = islandService;
+        this.feedGroupService = feedGroupService;
         this.feedDTOFactory = feedDTOFactory;
     }
 
@@ -158,15 +166,18 @@ public class FeedController implements FeedApi {
      * Implements retrieve feed by id api.
      *
      * @param id id (required) Feed id.
-     * @return {@link FeedResponse}.
+     * @return {@link FullFeedResponse}.
      */
     @Override
-    public ResponseEntity<FeedResponse> apiV1FeedsIdGet(String id) {
+    public ResponseEntity<FullFeedResponse> apiV1FeedsIdGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+        FeedGroupFeedResponse feedGroupFeedResponse = this.feedService.retrieveFeedGroupFeedById(id, userId);
 
-        FeedResponse response = new FeedResponse();
-        response.setData(this.feedDTOFactory.valueOf(feedMessage));
+        FullFeedResponse response = new FullFeedResponse();
+        response.setData(this.feedDTOFactory.valueOf(feedGroupFeedResponse.getFeed(),
+                feedGroupFeedResponse.getFeedGroup(),
+                feedGroupFeedResponse.getLastFeedId(),
+                feedGroupFeedResponse.getNextFeedId()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -420,6 +431,40 @@ public class FeedController implements FeedApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the feed group get feeds api.
+     *
+     * @param id       id (required) Feed group id.
+     * @param page     page number (optional, default to 0) Page.
+     * @param pageSize size of a page (optional, default to 10) Page size.
+     * @return {@link FeedsResponse}.
+     */
+    @Override
+    public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedgroupsIdFeedsGet(String id,
+                                                                                 Integer page,
+                                                                                 Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        FeedGroupFeedsResponse feedGroupFeedsResponse = this.feedGroupService.retrieveFeedGroupFeeds(id, userId, page, pageSize);
+
+        swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
+        response.setData(feedGroupFeedsResponse.getFeedList()
+                .stream()
+                .map(this.feedDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setCurrentTime(System.currentTimeMillis());
+        response.setPageInfo(PaginationUtils.getPageInfo(feedGroupFeedsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Posts new feed.
+     *
+     * @param postFeedRequestV2 (required)
+     * @return {@link DummyResponse}.
+     */
     @CrossOrigin
     @Override
     public ResponseEntity<DummyResponse> apiV11FeedsPost(PostFeedRequestV2 postFeedRequestV2) {
@@ -460,7 +505,13 @@ public class FeedController implements FeedApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(), postFeedRequestV2.getMembershipIds(), userId, MediaTypeConverter.convertToMediaType(mediaType), postFeedRequestV2.getMultimedia(), postFeedRequestV2.getText());
+        this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(),
+                postFeedRequestV2.getMembershipIds(),
+                userId,
+                MediaTypeConverter.convertToMediaType(mediaType),
+                postFeedRequestV2.getMultimedia(),
+                postFeedRequestV2.getText(),
+                postFeedRequestV2.getFeedGroupId());
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);

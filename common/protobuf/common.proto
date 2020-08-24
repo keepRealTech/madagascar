@@ -15,7 +15,14 @@ message PageResponse {
     int32 page = 1;
     int32 pageSize = 2;
     bool hasMore = 3;
+    bool hasMore = 3;
     bool hasContent = 4;
+}
+
+enum IslandAccessType {
+    ISLAND_ACCESS_UNKNOWN = 0;
+    ISLAND_ACCESS_PUBLIC = 1;
+    ISLAND_ACCESS_PRIVATE = 2;
 }
 
 enum LoginType {
@@ -171,6 +178,7 @@ message IslandMessage {
     uint64 createdAt = 7;
     int32 memberCount = 8;
     string secret = 9;
+    IslandAccessType islandAccessType = 10;
 }
 
 message RepostMessage {
@@ -208,6 +216,44 @@ message FeedMessage {
         HtmlMessage html = 23;
         AnswerMessage answer = 24;
     }
+}
+
+message WechatOrderMessage {
+    string id = 1;
+    string tradeNumber = 2;
+    string nonceStr = 3;
+    string appId = 4;
+    string partnerId = 5;
+    string prepayId = 6;
+    string signature = 7;
+    string userId = 8;
+    uint64 feeInCents = 9;
+    uint64 timestamp = 10;
+    WechatOrderState state = 11;
+}
+
+enum WechatOrderState {
+    WECHAT_ORDER_STATE_UNKNOWN = 0;
+    WECHAT_ORDER_STATE_NOTPAY = 1;
+    WECHAT_ORDER_STATE_USERPAYING = 2;
+    WECHAT_ORDER_STATE_SUCCESS = 3;
+    WECHAT_ORDER_STATE_CLOSED = 4;
+    WECHAT_ORDER_STATE_REFUND = 5;
+    WECHAT_ORDER_STATE_PAYERROR = 6;
+    WECHAT_ORDER_STATE_REVOKED = 7;
+    WECHAT_ORDER_STATE_REFUNDED = 8;
+}
+
+message FeedGroupMessage {
+    string id = 1;
+    string islandId = 2;
+    string userId = 3;
+    string name = 4;
+    repeated string imageUris = 5;
+    uint64 lastFeedTime = 6;
+    int32 itemsCount = 7;
+    string thumbnailUri = 8;
+    string description = 9;
 }
 
 message PicturesMessage {

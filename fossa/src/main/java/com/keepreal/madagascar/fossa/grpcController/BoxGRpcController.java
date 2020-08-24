@@ -18,6 +18,7 @@ import com.keepreal.madagascar.fossa.RetrieveBoxInfoResponse;
 import com.keepreal.madagascar.fossa.model.BoxInfo;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.AnswerInfo;
+import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.service.BoxInfoService;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
@@ -30,7 +31,6 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -63,9 +63,15 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
 
         FeedInfo feedInfo = feedInfoService.findFeedInfoById(questionId, false);
 
-        AnswerInfo answerInfo = (AnswerInfo) feedInfo.getMediaInfos().get(0);
-        if (StringUtils.isEmpty(answerInfo.getAnswer())) {
+        AnswerInfo answerInfo;
+        List<MediaInfo> mediaInfos = feedInfo.getMediaInfos();
+        if (mediaInfos.isEmpty()) {
             this.boxInfoService.addAnsweredQuestionCount(feedInfo.getIslandId());
+            answerInfo = new AnswerInfo();
+            answerInfo.setIgnored(false);
+            mediaInfos.add(answerInfo);
+        } else {
+            answerInfo = (AnswerInfo) mediaInfos.get(0);
         }
 
         answerInfo.setAnswer(answer);
@@ -93,6 +99,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         boxInfo.setIslandId(request.getIslandId());
         boxInfo.setEnabled(request.getEnabled());
         boxInfo.setMembershipIds(String.join(",", request.getMembershipIdsList()));
+        boxInfo.setHostId(request.getUserId());
 
         BoxInfo update = this.boxInfoService.createOrUpdate(boxInfo);
 
@@ -125,6 +132,14 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
     public void retrieveBoxInfo(RetrieveBoxInfoRequest request, StreamObserver<RetrieveBoxInfoResponse> responseObserver) {
         String islandId = request.getIslandId();
         BoxInfo boxInfo = this.boxInfoService.getBoxInfoByIslandId(islandId);
+        if (boxInfo == null) {
+            BoxInfo newBox = new BoxInfo();
+            newBox.setIslandId(islandId);
+            newBox.setEnabled(true);
+            newBox.setAnsweredQuestionCount(0);
+            newBox.setHostId(request.getHostId());
+            boxInfo = this.boxInfoService.createOrUpdate(newBox);
+        }
 
         responseObserver.onNext(RetrieveBoxInfoResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -148,7 +163,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
 
         this.mongoTemplate.updateFirst(
                 Query.query(Criteria.where("id").is(questionId)),
-                Update.update("mediaInfos.ignored", true),
+                Update.update("mediaInfos.0.ignored", true),
                 FeedInfo.class);
 
         responseObserver.onNext(CommonResponse.newBuilder()

@@ -129,7 +129,7 @@ public class PushService {
 
         FeedResponse feedResponse = this.feedService.retrieveFeedInfoById(feedId, authorId);
 
-        boolean publicVisible = feedResponse.getFeed().getQuestion().getPublicVisible().getValue();
+        boolean publicVisible = feedResponse.getFeed().getAnswer().getPublicVisible().getValue();
         if (publicVisible) {
             this.pushNewReplyToAllSubscriber(event);
         }

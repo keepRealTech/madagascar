@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.coua.model;
 
+import com.keepreal.madagascar.common.IslandAccessType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,6 +35,8 @@ public class IslandInfo {
     private String id;
     private String hostId;
     private String islandName;
+    @Builder.Default
+    private Integer islandAccessType = IslandAccessType.ISLAND_ACCESS_PUBLIC_VALUE;
     @Builder.Default
     private String identityId = "";
     @Builder.Default
