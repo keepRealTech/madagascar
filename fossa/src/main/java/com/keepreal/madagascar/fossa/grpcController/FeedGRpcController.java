@@ -444,7 +444,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         Query query = new Query();
         query.addCriteria(Criteria.where("deleted").is(false));
-        query.addCriteria(Criteria.where("multiMediaType").is(MediaType.MEDIA_QUESTION.name()));
+        query.addCriteria(Criteria.where("multiMediaType").ne(MediaType.MEDIA_QUESTION.name()));
         query.addCriteria(Criteria.where("temped").ne(true));
         if (fromHost && hasIslandId) {
             Criteria criteria = Criteria
