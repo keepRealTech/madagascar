@@ -20,8 +20,8 @@ wechat-pay:
   merchant-id: xxx
   merchant-key: xxx
   callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
-  refund-callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
-  cert-path: /Users/sli/development/madagascar/vanga/apiclient_cert.p12
+  refund-callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/refund/callback
+  cert-path: /app/apiclient_cert.p12
   host-ip: 127.0.0.1
 
 wechat-mp:

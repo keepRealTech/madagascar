@@ -240,6 +240,8 @@ public class WechatPayService {
         try {
             Map<String, String> response = this.client.processRefundResponseXml(callbackPayload);
 
+            log.info(response.toString());
+
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 return null;
             }
