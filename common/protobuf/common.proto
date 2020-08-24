@@ -15,7 +15,6 @@ message PageResponse {
     int32 page = 1;
     int32 pageSize = 2;
     bool hasMore = 3;
-    bool hasMore = 3;
     bool hasContent = 4;
 }
 
