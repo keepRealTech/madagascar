@@ -1,5 +1,8 @@
 package com.keepreal.madagascar.fossa.util;
 
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.Int64Value;
+import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.PageResponse;
 import org.springframework.data.domain.Page;
@@ -25,6 +28,7 @@ public class PageRequestResponseUtils {
                 .setPageSize(page.getSize())
                 .setHasContent(page.hasContent())
                 .setHasMore(!page.isLast())
+                .setTotalCount(Int32Value.of(Math.toIntExact(page.getTotalElements())))
                 .build();
     }
 
@@ -34,6 +38,7 @@ public class PageRequestResponseUtils {
                 .setPageSize(pageSize)
                 .setHasContent(pageIndex * pageSize < totalElements)
                 .setHasMore(totalElements / pageSize > pageIndex)
+                .setTotalCount(Int32Value.of(Math.toIntExact(totalElements)))
                 .build();
     }
 

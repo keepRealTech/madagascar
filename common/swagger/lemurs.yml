@@ -2266,6 +2266,9 @@ components:
         pageSize:
           type: integer
           description: page size
+        total:
+          type: integer
+          description: total size
     BriefUserDTO:
       type: object
       properties:
@@ -4275,8 +4278,6 @@ components:
         priceInCents:
           type: integer
           format: int64
-        isLiked:
-          type: boolean
         hasAccess:
           type: boolean
         hasAnswer:
