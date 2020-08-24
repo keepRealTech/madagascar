@@ -132,6 +132,14 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
     public void retrieveBoxInfo(RetrieveBoxInfoRequest request, StreamObserver<RetrieveBoxInfoResponse> responseObserver) {
         String islandId = request.getIslandId();
         BoxInfo boxInfo = this.boxInfoService.getBoxInfoByIslandId(islandId);
+        if (boxInfo == null) {
+            BoxInfo newBox = new BoxInfo();
+            newBox.setIslandId(islandId);
+            newBox.setEnabled(true);
+            newBox.setAnsweredQuestionCount(0);
+            newBox.setHostId(request.getHostId());
+            boxInfo = this.boxInfoService.createOrUpdate(newBox);
+        }
 
         responseObserver.onNext(RetrieveBoxInfoResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())

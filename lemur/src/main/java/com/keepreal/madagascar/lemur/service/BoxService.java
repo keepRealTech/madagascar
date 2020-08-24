@@ -3,6 +3,7 @@ package com.keepreal.madagascar.lemur.service;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.AnswerMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
@@ -178,12 +179,14 @@ public class BoxService {
 
     public BoxMessage retrieveBoxInfo(String islandId) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(islandId);
 
         RetrieveBoxInfoResponse response;
 
         try {
             response = stub.retrieveBoxInfo(RetrieveBoxInfoRequest.newBuilder()
                     .setIslandId(islandId)
+                    .setHostId(islandMessage.getHostId())
                     .build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());

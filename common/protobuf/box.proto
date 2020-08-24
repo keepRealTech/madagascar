@@ -56,6 +56,7 @@ message QuestionsResponse {
 
 message RetrieveBoxInfoRequest {
     string islandId = 1;
+    string hostId = 2;
 }
 
 message RetrieveBoxInfoResponse {

@@ -9,8 +9,6 @@ spring:
   redis:
     host: 127.0.0.1
     port: 6379
-    password: GcrkNYTcST4PzlV@
-    ssl: false
 
 rocketmq:
   accessKey: xxx
@@ -39,7 +37,8 @@ opentracing:
     grpc-server-interceptor: false
     const-sampler:
       decision: false
-
+server:
+  port: 8090
 aliyun:
   sms:
     accessKeyId:
