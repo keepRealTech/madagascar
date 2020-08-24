@@ -85,7 +85,7 @@ subprojects {
             name "registry.cn-beijing.aliyuncs.com/keepreal/${project.name.replace('_','-')}:$project.version"
             tag 'staging', "registry.cn-beijing.aliyuncs.com/keepreal/${project.name.replace('_','-')}:$project.version-staging"
             dockerfile file("$projectDir/dockerfile")
-            files "$projectDir/start.sh", "$projectDir/healthcheck.sh", "$projectDir/apiclient_cert.pem"
+            files "$projectDir/start.sh", "$projectDir/healthcheck.sh", "$projectDir/apiclient_cert.p12"
             copySpec.from(tasks.unpack.outputs).into("dependency")
             buildArgs(['DEPENDENCY': "dependency"])
             pull true

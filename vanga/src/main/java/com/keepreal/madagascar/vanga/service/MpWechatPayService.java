@@ -64,7 +64,7 @@ public class MpWechatPayService {
                 .mchId(this.mpWechatPayConfiguration.getMchId())
                 .userId(userId)
                 .tradeNumber(tradeNum)
-                .shellSkuId(shellSkuId)
+                .propertyId(shellSkuId)
                 .description(description)
                 .feeInCents(feeInCents)
                 .build();

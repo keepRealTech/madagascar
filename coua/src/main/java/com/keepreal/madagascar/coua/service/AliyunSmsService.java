@@ -60,7 +60,7 @@ public class AliyunSmsService {
             return CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_TOO_FREQUENTLY);
         }
 
-        DefaultProfile profile = DefaultProfile.getProfile(REGION_ID, aliyunSmsConfig.getAccessKeyId(), aliyunSmsConfig.getSecret());
+        DefaultProfile profile = DefaultProfile.getProfile(REGION_ID, aliyunSmsConfig.getAccessKey(), aliyunSmsConfig.getAccessSecret());
         IAcsClient client = new DefaultAcsClient(profile);
 
         int otpCode = this.generateOtp();

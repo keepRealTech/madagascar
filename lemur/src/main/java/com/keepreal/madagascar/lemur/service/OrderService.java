@@ -88,6 +88,21 @@ public class OrderService {
     }
 
     /**
+     * Calls back on wechat order refund notification.
+     *
+     * @param payload Payload.
+     */
+    public void wechatOrderRefundCallback(String payload) {
+        PaymentServiceGrpc.PaymentServiceFutureStub stub = PaymentServiceGrpc.newFutureStub(this.channel);
+
+        WechatOrderCallbackRequest request = WechatOrderCallbackRequest.newBuilder()
+                .setPayload(payload)
+                .build();
+
+        stub.wechatRefundCallback(request);
+    }
+
+    /**
      * Buys shell with ios receipt.
      *
      * @param userId        User id.
