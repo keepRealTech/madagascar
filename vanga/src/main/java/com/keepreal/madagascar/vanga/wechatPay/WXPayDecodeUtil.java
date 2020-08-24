@@ -1,8 +1,8 @@
 package com.keepreal.madagascar.vanga.wechatPay;
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
 import lombok.SneakyThrows;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.util.encoders.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;

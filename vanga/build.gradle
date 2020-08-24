@@ -17,6 +17,8 @@ dependencies {
     implementation project(":common:exceptions")
     implementation project(":common:id-generator-starter")
 
+    implementation 'org.bouncycastle:bcprov-jdk15to18:1.66'
+
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'com.aliyun.openservices:ons-client'

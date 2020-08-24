@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -167,6 +168,12 @@ public class FeedService {
     private Long calculateAmount(Long amount, int ratio) {
         assert amount > 0;
         return amount * ratio / 100L;
+    }
+
+    @PostConstruct
+    private void init() {
+        WechatOrder wechatOrder = this.wechatOrderService.retrieveById("6679631266045755392");
+        this.wechatPayService.tryRefund(wechatOrder, "测试撤销付费问题。");
     }
 
 }
