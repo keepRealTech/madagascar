@@ -170,9 +170,4 @@ public class FeedService {
         return amount * ratio / 100L;
     }
 
-    private void init() {
-        WechatOrder wechatOrder = this.wechatOrderService.retrieveById("6681059860332675072");
-        this.wechatPayService.tryRefund(wechatOrder, "测试撤销付费问题。");
-    }
-
 }

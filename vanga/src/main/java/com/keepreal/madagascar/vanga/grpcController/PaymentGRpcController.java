@@ -263,22 +263,17 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.refundCallback(request.getPayload());
 
         if (Objects.isNull(wechatOrder) || WechatOrderState.REFUNDED.getValue() != wechatOrder.getState()) {
-            log.info("11111");
             return;
         }
-
-        log.info("2222222");
 
         switch (WechatOrderType.fromValue(wechatOrder.getType())) {
             case PAYQUESTION: {
                 Payment payment = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId()).stream().findFirst().orElse(null);
                 if (Objects.isNull(payment)) {
-                    log.info("333333");
                     return;
                 }
 
                 payment.setState(PaymentState.REFUNDED.getValue());
-                log.info("{}", payment.getId());
                 this.paymentService.updateAll(Collections.singletonList(payment));
                 return;
             }
