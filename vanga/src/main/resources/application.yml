@@ -2,7 +2,7 @@ spring:
   application:
     name: vanga
   datasource:
-    url: jdbc:mysql://root:123456@localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
+    url: jdbc:mysql://kr_admin:gYvi89kGKJoqZbzk@rm-2ze0p9v29ef1p05us6o.mysql.rds.aliyuncs.com:3306/vanga?autoReconnect=true&useUnicode=true&characterEncoding=utf8&character_set_server=utf8mb4&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
@@ -20,7 +20,8 @@ wechat-pay:
   merchant-id: xxx
   merchant-key: xxx
   callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
-  cert-path: /app/apiclient_cert.pem
+  refund-callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
+  cert-path: /Users/sli/development/madagascar/vanga/apiclient_cert.p12
   host-ip: 127.0.0.1
 
 wechat-mp:
@@ -28,7 +29,7 @@ wechat-mp:
   merchant-id: xxx
   merchant-key: xxx
   callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
-  cert-path: /app/apiclient_cert.pem
+  cert-path: /app/apiclient_cert.p12
   host-ip: 127.0.0.1
 
 ios-pay:
