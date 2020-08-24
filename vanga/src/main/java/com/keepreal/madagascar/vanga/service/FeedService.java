@@ -172,7 +172,7 @@ public class FeedService {
 
     @PostConstruct
     private void init() {
-        WechatOrder wechatOrder = this.wechatOrderService.retrieveById("6679631266045755392");
+        WechatOrder wechatOrder = this.wechatOrderService.retrieveById("6683370248940290048");
         this.wechatPayService.tryRefund(wechatOrder, "测试撤销付费问题。");
     }
 

@@ -16,12 +16,12 @@ grpc:
     port: 12003
 
 wechat-pay:
-  app-id: xxx
-  merchant-id: xxx
-  merchant-key: xxx
-  callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/callback
-  refund-callback-address: http://123.57.72.117:8081/api/v1/orders/wechat/refund/callback
-  cert-path: /app/apiclient_cert.p12
+  app-id: wx301608aae2f8f0ea
+  merchant-id: 1594907001
+  merchant-key: fbf367eff80d415b889cedf1a2f04890
+  callback-address: https://staging.keepreal.cn/api/v1/orders/wechat/callback
+  refund-callback-address: https://staging.keepreal.cn/api/v1/orders/wechat/refund/callback
+  cert-path: /Users/sli/development/madagascar/vanga/apiclient_cert.p12
   host-ip: 127.0.0.1
 
 wechat-mp:
