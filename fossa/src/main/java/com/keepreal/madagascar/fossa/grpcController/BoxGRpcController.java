@@ -22,6 +22,7 @@ import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.service.BoxInfoService;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
+import com.keepreal.madagascar.fossa.service.PaymentService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
@@ -43,15 +44,18 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
     private final BoxInfoService boxInfoService;
     private final FeedEventProducerService feedEventProducerService;
     private final MongoTemplate mongoTemplate;
+    private final PaymentService paymentService;
 
     public BoxGRpcController(FeedInfoService feedInfoService,
                              BoxInfoService boxInfoService,
                              FeedEventProducerService feedEventProducerService,
-                             MongoTemplate mongoTemplate) {
+                             MongoTemplate mongoTemplate,
+                             PaymentService paymentService) {
         this.feedInfoService = feedInfoService;
         this.boxInfoService = boxInfoService;
         this.feedEventProducerService = feedEventProducerService;
         this.mongoTemplate = mongoTemplate;
+        this.paymentService = paymentService;
     }
 
     @Override
@@ -83,6 +87,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         }
         FeedInfo update = feedInfoService.update(feedInfo);
         this.feedEventProducerService.produceUpdateFeedEventAsync(update);
+        this.paymentService.activateFeedPayment(update.getId(), request.getUserId());
 
         responseObserver.onNext(CommonResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -168,6 +173,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
                 Update.update("mediaInfos.0.ignored", true),
                 FeedInfo.class);
 
+        this.paymentService.refundWechatPaidFeed(questionId, "");
         responseObserver.onNext(CommonResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build());
