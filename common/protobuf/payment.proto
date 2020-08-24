@@ -73,7 +73,19 @@ message RetrieveUserPaymentsRequest {
 
 message CreatePaidFeedRequest {
   string feedId = 1;
-  uint64 priceInCents = 9;
+  uint64 priceInCents = 2;
+  string userId = 3;
+  string hostId = 4;
+}
+
+message RefundWechatFeedRequest {
+  string feedId = 1;
+  string userId = 2;
+}
+
+message ActivatePendingFeedPaymentRequest {
+  string feedId = 1;
+  string userId = 2;
 }
 
 service PaymentService {
@@ -87,4 +99,7 @@ service PaymentService {
   rpc WechatBuyShell (WechatOrderBuyShellRequest) returns (WechatOrderResponse) {};
   rpc WechatCreateFeed (CreatePaidFeedRequest) returns (WechatOrderResponse) {};
   rpc RetrieveUserPayments (RetrieveUserPaymentsRequest) returns (UserPaymentsResponse) {};
+  rpc RefundWechatPaidFeed (RefundWechatFeedRequest) returns (CommonStatus) {};
+  rpc ActivateFeedPayment (ActivatePendingFeedPaymentRequest) returns (CommonStatus) {};
+  rpc WechatRefundCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
 }

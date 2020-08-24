@@ -12,32 +12,38 @@ public class WXPay {
     private boolean autoReport;
     private boolean useSandbox;
     private String notifyUrl;
+    private String refundNotifyUrl;
     private WXPayRequest wxPayRequest;
+    private WXPayDecodeUtil wxPayDecodeUtil;
 
     public WXPay(final WXPayConfig config) throws Exception {
-        this(config, null, true, false);
+        this(config, null, null, true, false);
     }
 
     public WXPay(final WXPayConfig config, final boolean autoReport) throws Exception {
-        this(config, null, autoReport, false);
+        this(config, null, null, autoReport, false);
     }
 
-
     public WXPay(final WXPayConfig config, final boolean autoReport, final boolean useSandbox) throws Exception{
-        this(config, null, autoReport, useSandbox);
+        this(config, null, null, autoReport, useSandbox);
     }
 
     public WXPay(final WXPayConfig config, final String notifyUrl) throws Exception {
-        this(config, notifyUrl, true, false);
+        this(config, notifyUrl, null, true, false);
     }
 
     public WXPay(final WXPayConfig config, final String notifyUrl, final boolean autoReport) throws Exception {
-        this(config, notifyUrl, autoReport, false);
+        this(config, notifyUrl, null, autoReport, false);
     }
 
-    public WXPay(final WXPayConfig config, final String notifyUrl, final boolean autoReport, final boolean useSandbox) throws Exception {
+    public WXPay(final WXPayConfig config, final String notifyUrl, String refundNotifyUrl, final boolean autoReport) throws Exception {
+        this(config, notifyUrl, refundNotifyUrl, autoReport, false);
+    }
+
+    public WXPay(final WXPayConfig config, final String notifyUrl, final String refundNotifyUrl, final boolean autoReport, final boolean useSandbox) throws Exception {
         this.config = config;
         this.notifyUrl = notifyUrl;
+        this.refundNotifyUrl = refundNotifyUrl;
         this.autoReport = autoReport;
         this.useSandbox = useSandbox;
         if (useSandbox) {
@@ -47,6 +53,7 @@ public class WXPay {
             this.signType = SignType.HMACSHA256;
         }
         this.wxPayRequest = new WXPayRequest(config);
+        this.wxPayDecodeUtil = new WXPayDecodeUtil(this.config.getKey());
     }
 
     private void checkWXPayConfig() throws Exception {
@@ -235,6 +242,38 @@ public class WXPay {
            else {
                throw new Exception(String.format("Invalid sign value in XML: %s", xmlStr));
            }
+        }
+        else {
+            throw new Exception(String.format("return_code value %s is invalid in XML: %s", return_code, xmlStr));
+        }
+    }
+
+    /**
+     * 处理 HTTPS API返回数据，转换成Map对象。
+     * @param xmlStr API返回的XML格式数据
+     * @return Map类型数据
+     * @throws Exception
+     */
+    public Map<String, String> processRefundResponseXml(String xmlStr) throws Exception {
+        String RETURN_CODE = "return_code";
+        String return_code;
+        Map<String, String> respData = WXPayUtil.xmlToMap(xmlStr);
+        if (respData.containsKey(RETURN_CODE)) {
+            return_code = respData.get(RETURN_CODE);
+        }
+        else {
+            throw new Exception(String.format("No `return_code` in XML: %s", xmlStr));
+        }
+
+        if (return_code.equals(WXPayConstants.FAIL)) {
+            return respData;
+        }
+        else if (return_code.equals(WXPayConstants.SUCCESS)) {
+            String reqInfo = respData.get("req_info");
+            // 进行AES解密 获取req_info中包含的相关信息(解密失败会抛出异常)
+            String refundDecryptedData = this.wxPayDecodeUtil.decryptData(reqInfo);
+            respData.putAll(WXPayUtil.xmlToMap(refundDecryptedData));
+            return respData;
         }
         else {
             throw new Exception(String.format("return_code value %s is invalid in XML: %s", return_code, xmlStr));
@@ -528,6 +567,9 @@ public class WXPay {
         }
         else {
             url = WXPayConstants.REFUND_URL_SUFFIX;
+        }
+        if(this.refundNotifyUrl != null) {
+            reqData.put("notify_url", this.refundNotifyUrl);
         }
         String respXml = this.requestWithCert(url, this.fillRequestData(reqData), connectTimeoutMs, readTimeoutMs);
         return this.processResponseXml(respXml);

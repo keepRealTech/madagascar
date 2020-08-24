@@ -41,5 +41,5 @@ server:
   port: 8090
 aliyun:
   sms:
-    accessKeyId:
-    secret:
+    access-key:
+    access-secret:

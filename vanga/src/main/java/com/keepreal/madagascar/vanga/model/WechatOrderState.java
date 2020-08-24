@@ -13,7 +13,7 @@ public enum WechatOrderState {
     USERPAYING(2),
     SUCCESS(3),
     CLOSED(4),
-    REFUND(5),
+    REFUNDING(5),
     PAYERROR(6),
     REVOKED(7),
     REFUNDED(8),

@@ -104,17 +104,17 @@ public class SubscribeMembershipService {
 
         List<Payment> paymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
 
-        if (paymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
+        if (paymentList.stream().allMatch(payment -> PaymentState.DRAFTED.getValue() != payment.getState())) {
             return;
         }
 
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", wechatOrder.getUserId()))) {
             List<Payment> innerPaymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
 
-            MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getMemberShipSkuId());
+            MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getPropertyId());
 
             if (innerPaymentList.isEmpty()) {
-                innerPaymentList = this.paymentService.createNewWechatPayments(wechatOrder, sku);
+                innerPaymentList = this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
             } else if (innerPaymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
                 return;
             }
