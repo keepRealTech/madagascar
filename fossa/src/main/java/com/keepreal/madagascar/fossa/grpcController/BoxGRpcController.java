@@ -2,6 +2,7 @@ package com.keepreal.madagascar.fossa.grpcController;
 
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.AnswerQuestionRequest;
@@ -70,6 +71,14 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         if (!answer.equals(feedInfo.getHostId())) {
             responseObserver.onNext(CommonResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        if (!feedInfo.getMultiMediaType().equals(MediaType.MEDIA_QUESTION.name())) {
+            responseObserver.onNext(CommonResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_INVALID_ARGUMENT))
                     .build());
             responseObserver.onCompleted();
             return;

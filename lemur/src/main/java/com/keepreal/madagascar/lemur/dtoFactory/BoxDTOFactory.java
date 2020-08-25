@@ -44,9 +44,19 @@ public class BoxDTOFactory {
         dto.setAnsweredQuestionsCount(boxMessage.getAnsweredQuestionCount());
         dto.setBoxAccess(this.valueOf(boxMessage));
 
-        List<String> myMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(boxMessage.getIsland(), userId);
         ProtocolStringList membershipIdsList = boxMessage.getMembershipIdsList();
-        dto.setHasSubmitAccess(userId.equals(boxMessage.getHostId()) || membershipIdsList.stream().anyMatch(myMembershipIds::contains));
+
+        boolean hasSubmitAccess;
+        if (!boxMessage.getEnabled()) {
+            dto.setHasSubmitAccess(false);
+        } else {
+            hasSubmitAccess = userId.equals(boxMessage.getHostId()) || membershipIdsList.isEmpty();
+            if (!hasSubmitAccess) {
+                List<String> myMembershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(boxMessage.getIsland(), userId);
+                hasSubmitAccess = membershipIdsList.stream().anyMatch(myMembershipIds::contains);
+            }
+            dto.setHasSubmitAccess(hasSubmitAccess);
+        }
 
         return dto;
     }
