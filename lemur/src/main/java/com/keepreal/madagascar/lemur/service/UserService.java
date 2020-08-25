@@ -267,6 +267,7 @@ public class UserService {
      * @param putUserMobileRequest {@link PutUserMobileRequest}
      * @return {@link UserMessage}
      */
+    @CachePut(value = "UserMesaage", key = "#id", cacheManager = "redisCacheManager")
     public UserMessage updateUserMobilePhone(PutUserMobileRequest putUserMobileRequest) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
