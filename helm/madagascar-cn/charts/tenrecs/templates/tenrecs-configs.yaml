@@ -6,8 +6,11 @@ metadata:
 data:
   aliyun_logs_madagascar-prod: stdout
   SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
-  ROCKETMQ_TOPIC: {{ .Values.rocketmq.topic }}
-  ROCKETMQ_GROUPID: {{ .Values.rocketmq.group_id }}
-  ROCKETMQ_TAG: {{ .Values.rocketmq.tag }}
+  ROCKETMQ_NOTIFICATION_TOPIC: {{ .Values.rocketmq.notification.topic }}
+  ROCKETMQ_NOTIFICATION_GROUPID: {{ .Values.rocketmq.notification.group_id }}
+  ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
+  ROCKETMQ_FEED_TOPIC: {{ .Values.rocketmq.feed.topic }}
+  ROCKETMQ_FEED_GROUPID: {{ .Values.rocketmq.feed.group_id }}
+  ROCKETMQ_FEED_TAG: {{ .Values.rocketmq.feed.tag }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
