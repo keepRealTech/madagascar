@@ -3,6 +3,7 @@ package com.keepreal.madagascar.vanga.service;
 import com.keepreal.madagascar.vanga.config.MpWechatPayConfiguration;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
+import com.keepreal.madagascar.vanga.model.WechatOrderType;
 import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayUtil;
@@ -64,9 +65,10 @@ public class MpWechatPayService {
                 .mchId(this.mpWechatPayConfiguration.getMchId())
                 .userId(userId)
                 .tradeNumber(tradeNum)
-                .shellSkuId(shellSkuId)
+                .propertyId(shellSkuId)
                 .description(description)
                 .feeInCents(feeInCents)
+                .type(WechatOrderType.PAYSHELL.getValue())
                 .build();
 
         Map<String, String> response;
@@ -79,11 +81,7 @@ public class MpWechatPayService {
             requestBody.put("spbill_create_ip", this.mpWechatPayConfiguration.getHostIp());
             requestBody.put("openid", openId);
 
-            log.info(requestBody.toString());
-
             response = this.client.unifiedOrder(requestBody);
-
-            log.info(response.toString());
 
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));

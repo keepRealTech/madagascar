@@ -1,18 +1,32 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.MediaType;
-import com.keepreal.madagascar.common.QuestionMessage;
+import com.keepreal.madagascar.common.AnswerMessage;
+import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.AnswerQuestionRequest;
+import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.fossa.BoxServiceGrpc;
 import com.keepreal.madagascar.fossa.CommonResponse;
 import com.keepreal.madagascar.fossa.CreateOrUpdateBoxRequest;
+import com.keepreal.madagascar.fossa.CreateOrUpdateBoxResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
+import com.keepreal.madagascar.fossa.IgnoreQuestionRequest;
 import com.keepreal.madagascar.fossa.NewFeedsRequestV2;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
+import com.keepreal.madagascar.fossa.NewWechatFeedsResponse;
+import com.keepreal.madagascar.fossa.QuestionsResponse;
+import com.keepreal.madagascar.fossa.RetrieveAnswerMeQuestionsRequest;
+import com.keepreal.madagascar.fossa.RetrieveAnsweredAndVisibleQuestionsRequest;
+import com.keepreal.madagascar.fossa.RetrieveAskMeQuestionsRequest;
+import com.keepreal.madagascar.fossa.RetrieveBoxInfoRequest;
+import com.keepreal.madagascar.fossa.RetrieveBoxInfoResponse;
+import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -38,31 +52,23 @@ public class BoxService {
         this.islandService = islandService;
     }
 
-    public void createQuestion(String userId, String islandId, String text, Long priceInCents, String questionSkuId, String receipt, String transactionId) {
+    /**
+     * Creates a free question.
+     *
+     * @param islandId  Island id.
+     * @param userId    User id.
+     * @param text      Question text.
+     */
+    public void createFreeQuestion(String islandId, String userId, String text) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
         String hostId = this.islandService.retrieveIslandById(islandId).getHostId();
-
-
-        QuestionMessage.Builder questionBuilder = QuestionMessage.newBuilder().setText(text);
-        if (priceInCents != null && priceInCents > 0) {
-            questionBuilder.setPriceInCents(Int64Value.of(priceInCents));
-        }
-        if (!StringUtils.isEmpty(questionSkuId)) {
-            questionBuilder.setQuestionSkuId(StringValue.of(questionSkuId));
-        }
-        if (!StringUtils.isEmpty(receipt)) {
-            questionBuilder.setReceipt(StringValue.of(receipt));
-        }
-        if (!StringUtils.isEmpty(transactionId)) {
-            questionBuilder.setTransactionId(StringValue.of(transactionId));
-        }
 
         NewFeedsRequestV2.Builder builder = NewFeedsRequestV2.newBuilder()
                 .addAllIslandId(Collections.singletonList(islandId))
                 .addAllHostId(Collections.singletonList(hostId))
                 .setUserId(userId)
                 .setType(MediaType.MEDIA_QUESTION)
-                .setQuestion(questionBuilder.build());
+                .setText(StringValue.of(text));
 
         NewFeedsResponse newFeedsResponse;
         try {
@@ -73,13 +79,45 @@ public class BoxService {
 
         if (Objects.isNull(newFeedsResponse)
                 || !newFeedsResponse.hasStatus()) {
-            log.error(Objects.isNull(newFeedsResponse) ? "Create feed returned null." : newFeedsResponse.toString());
+            log.error(Objects.isNull(newFeedsResponse) ? "Create free question returned null." : newFeedsResponse.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
         if (ErrorCode.REQUEST_SUCC_VALUE != newFeedsResponse.getStatus().getRtn()) {
             throw new KeepRealBusinessException(newFeedsResponse.getStatus());
         }
+    }
+
+    public WechatOrderMessage createWechatFeed(String islandId, String userId, String text, Long priceInCents) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        String hostId = this.islandService.retrieveIslandById(islandId).getHostId();
+
+        NewFeedsRequestV2.Builder builder = NewFeedsRequestV2.newBuilder()
+                .addAllIslandId(Collections.singletonList(islandId))
+                .addAllHostId(Collections.singletonList(hostId))
+                .setUserId(userId)
+                .setType(MediaType.MEDIA_QUESTION)
+                .setText(StringValue.of(text))
+                .setPriceInCents(Int64Value.of(priceInCents));
+
+        NewWechatFeedsResponse response;
+        try {
+            response = stub.createWechatFeedsV2(builder.build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create wechat feed returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getMessage();
     }
 
     public void answerQuestion(String id, String userId, String answer, boolean publicVisible, List<String> visibleMembershipIds) {
@@ -110,16 +148,22 @@ public class BoxService {
         }
     }
 
-    public void createOrUpdateBoxInfo(String islandId, boolean enabled, List<String> membershipIds) {
+    public BoxMessage createOrUpdateBoxInfo(String islandId, String userId, boolean enabled, List<String> membershipIds) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
-        CommonResponse response;
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(islandId);
+        if (!userId.equals(islandMessage.getHostId())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FORBIDDEN);
+        }
+
+        CreateOrUpdateBoxResponse response;
 
         try {
             response = stub.putBox(CreateOrUpdateBoxRequest.newBuilder()
                     .setIslandId(islandId)
                     .setEnabled(enabled)
                     .addAllMembershipIds(membershipIds)
+                    .setUserId(userId)
                     .build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
@@ -127,16 +171,157 @@ public class BoxService {
 
         if (Objects.isNull(response)
                 || !response.hasStatus()) {
-            log.error(Objects.isNull(response) ? "Answer question returned null." : response.toString());
+            log.error(Objects.isNull(response) ? "update box info returned null." : response.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
         if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
             throw new KeepRealBusinessException(response.getStatus());
         }
+
+        return response.getMessage();
     }
 
-    public void retrieveBoxInfo(String islandId) {
+    public BoxMessage retrieveBoxInfo(String islandId) {
+        BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(islandId);
 
+        RetrieveBoxInfoResponse response;
+
+        try {
+            response = stub.retrieveBoxInfo(RetrieveBoxInfoRequest.newBuilder()
+                    .setIslandId(islandId)
+                    .setHostId(islandMessage.getHostId())
+                    .build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "retrieve box info returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getMessage();
+    }
+
+    public QuestionsResponse retrieveAnsweredAndVisibleQuestions(String islandId, String userId, int page, int pageSize) {
+        BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        QuestionsResponse response;
+
+        try {
+            response = stub.retrieveAnsweredAndVisibleQuestion(RetrieveAnsweredAndVisibleQuestionsRequest.newBuilder()
+                    .setIslandId(islandId)
+                    .setUserId(userId)
+                    .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                    .build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "retrieve answer and visible questions returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
+    }
+
+    public QuestionsResponse retrieveAskMeQuestion(String userId, int page, int pageSize, Boolean answered, Boolean paid, String membershipId) {
+        BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        RetrieveAskMeQuestionsRequest.Builder builder = RetrieveAskMeQuestionsRequest
+                .newBuilder()
+                .setUserId(userId)
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                .setMembershipId(membershipId == null ? "" : membershipId);
+        if (answered != null) {
+            builder.setAnswered(BoolValue.of(answered));
+        }
+        if (paid != null) {
+            builder.setPaid(BoolValue.of(paid));
+        }
+
+        QuestionsResponse response;
+        try {
+            response = stub.retrieveAskMeQuestion(builder.build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "retrieve ask me questions returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
+    }
+
+    public QuestionsResponse retrieveAnsweredMeQuestion(String userId, int page, int pageSize) {
+        BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        QuestionsResponse response;
+
+        try {
+            response = stub.retrieveAnswerMeQuestions(RetrieveAnswerMeQuestionsRequest.newBuilder()
+                    .setUserId(userId)
+                    .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                    .build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "retrieve answer me questions returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
+    }
+
+    public void ignoreQuestion(String questionId, String userId) {
+        BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        CommonResponse response;
+
+        try {
+            response = stub.ignoreQuestion(IgnoreQuestionRequest.newBuilder()
+                    .setQuestionId(questionId)
+                    .setUserId(userId)
+                    .build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "ignore question returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
     }
 }

@@ -72,7 +72,9 @@ public class ShellService {
      */
     @Transactional
     public void buyShellWithWechat(WechatOrder wechatOrder, ShellSku sku) {
-        if (Objects.isNull(wechatOrder) || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()) {
+        if (Objects.isNull(wechatOrder)
+                || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()
+                || Objects.isNull(sku)) {
             return;
         }
 

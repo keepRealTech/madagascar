@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.dtoFactory.BalanceDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.WechatOrderDTOFactory;
@@ -7,7 +8,6 @@ import com.keepreal.madagascar.lemur.service.OrderService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.vanga.BalanceMessage;
-import com.keepreal.madagascar.vanga.WechatOrderMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;

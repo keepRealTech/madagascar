@@ -60,7 +60,6 @@ public class FeedDTOFactory {
      * @param ehcacheService       {@link EhcacheService}.
      * @param membershipService    {@link MembershipService}.
      * @param membershipDTOFactory {@link MembershipDTOFactory}.
-     * @param multiMediaDTOFactory {@link MultiMediaDTOFactory}.
      */
     public FeedDTOFactory(IslandService islandService,
                           IslandDTOFactory islandDTOFactory,
@@ -69,8 +68,7 @@ public class FeedDTOFactory {
                           CommentDTOFactory commentDTOFactory,
                           EhcacheService ehcacheService,
                           MembershipService membershipService,
-                          MembershipDTOFactory membershipDTOFactory,
-                          MultiMediaDTOFactory multiMediaDTOFactory) {
+                          MembershipDTOFactory membershipDTOFactory) {
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
         this.userService = userService;
@@ -79,7 +77,7 @@ public class FeedDTOFactory {
         this.ehcacheService = ehcacheService;
         this.membershipService = membershipService;
         this.membershipDTOFactory = membershipDTOFactory;
-        this.multiMediaDTOFactory = multiMediaDTOFactory;
+        this.multiMediaDTOFactory = new MultiMediaDTOFactory(userService, userDTOFactory);
     }
 
     /**
@@ -116,6 +114,7 @@ public class FeedDTOFactory {
             feedDTO.setIsTop(feed.getIsTop());
             feedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             feedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            feedDTO.setPriceInCents(feed.getPriceInCents());
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
                 feedDTO.setImagesUris(feed.getImageUrisList());
@@ -164,6 +163,7 @@ public class FeedDTOFactory {
             briefFeedDTO.setCreatedAt(feed.getCreatedAt());
             briefFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             briefFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            briefFeedDTO.setPriceInCents(feed.getPriceInCents());
 
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
@@ -208,6 +208,7 @@ public class FeedDTOFactory {
         snapshotFeedDTO.setCreatedAt(feed.getCreatedAt());
         snapshotFeedDTO.setIsDeleted(this.ehcacheService.checkFeedDeleted(feed.getId()));
         snapshotFeedDTO.setIsAccess(feed.getIsAccess());
+        snapshotFeedDTO.setPriceInCents(feed.getPriceInCents());
 
         snapshotFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
         snapshotFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));

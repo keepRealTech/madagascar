@@ -37,6 +37,8 @@ public class FeedInfo {
     private List<MediaInfo> mediaInfos;
     private String feedGroupId;
     @Builder.Default
+    private Long priceInCents = 0L;
+    @Builder.Default
     private Integer likesCount = 0;
     @Builder.Default
     private Integer commentsCount = 0;
@@ -47,6 +49,8 @@ public class FeedInfo {
     private Boolean deleted = false;
     @Builder.Default
     private Boolean isTop = false;
+    @Builder.Default
+    private Boolean temped = false;
     @CreatedDate
     private Long createdTime;
     @CreatedDate

@@ -388,7 +388,7 @@ public class IslandController implements IslandApi {
 
         IslandAccessType accessType = this.convertIslandAccessType(payload.getIslandAccessType());
 
-        if (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(payload.getSecret()))) {
+        if (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(payload.getSecret())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -549,7 +549,7 @@ public class IslandController implements IslandApi {
      * @return {@link PosterFeedDTO}.
      */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
-    private List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
+    public List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
         return this.feedService.retrieveIslandFeeds(islandId, null, userId, 0L, null, 0, 5, false)
                 .getFeedList()
                 .stream()

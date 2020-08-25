@@ -17,32 +17,6 @@ message SubscribeMembershipRequest {
   string membershipSkuId = 2;
 }
 
-message WechatOrderMessage {
-  string id = 1;
-  string tradeNumber = 2;
-  string nonceStr = 3;
-  string appId = 4;
-  string partnerId = 5;
-  string prepayId = 6;
-  string signature = 7;
-  string userId = 8;
-  uint64 feeInCents = 9;
-  uint64 timestamp = 10;
-  WechatOrderState state = 11;
-}
-
-enum WechatOrderState {
-  WECHAT_ORDER_STATE_UNKNOWN = 0;
-  WECHAT_ORDER_STATE_NOTPAY = 1;
-  WECHAT_ORDER_STATE_USERPAYING = 2;
-  WECHAT_ORDER_STATE_SUCCESS = 3;
-  WECHAT_ORDER_STATE_CLOSED = 4;
-  WECHAT_ORDER_STATE_REFUND = 5;
-  WECHAT_ORDER_STATE_PAYERROR = 6;
-  WECHAT_ORDER_STATE_REVOKED = 7;
-  WECHAT_ORDER_STATE_REFUNDED = 8;
-}
-
 message WechatOrderResponse {
   CommonStatus status = 1;
   WechatOrderMessage wechatOrder = 2;
@@ -97,6 +71,23 @@ message RetrieveUserPaymentsRequest {
   PageRequest pageRequest = 2;
 }
 
+message CreatePaidFeedRequest {
+  string feedId = 1;
+  uint64 priceInCents = 2;
+  string userId = 3;
+  string hostId = 4;
+}
+
+message RefundWechatFeedRequest {
+  string feedId = 1;
+  string userId = 2;
+}
+
+message ActivatePendingFeedPaymentRequest {
+  string feedId = 1;
+  string userId = 2;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
@@ -106,5 +97,9 @@ service PaymentService {
   rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};
   rpc IOSSubscribeMembership (IOSOrderSubscribeRequest) returns (CommonStatus) {};
   rpc WechatBuyShell (WechatOrderBuyShellRequest) returns (WechatOrderResponse) {};
+  rpc WechatCreateFeed (CreatePaidFeedRequest) returns (WechatOrderResponse) {};
   rpc RetrieveUserPayments (RetrieveUserPaymentsRequest) returns (UserPaymentsResponse) {};
+  rpc RefundWechatPaidFeed (RefundWechatFeedRequest) returns (CommonStatus) {};
+  rpc ActivateFeedPayment (ActivatePendingFeedPaymentRequest) returns (CommonStatus) {};
+  rpc WechatRefundCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
 }

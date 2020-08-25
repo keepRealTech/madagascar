@@ -222,7 +222,7 @@ public class LoginController implements LoginApi {
         UserMessage user = this.userService.retrieveUserById(userId);
 
         UserResponse response = new UserResponse();
-        response.setData(this.userDTOFactory.valueOf(user));
+        response.setData(this.userDTOFactory.valueOf(user, false));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -383,7 +383,7 @@ public class LoginController implements LoginApi {
         LoginTokenInfo loginTokenInfo = new LoginTokenInfo();
         loginTokenInfo.setToken(loginResponse.getToken());
         loginTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
-        loginTokenInfo.setUser(this.userDTOFactory.valueOf(userMessage));
+        loginTokenInfo.setUser(this.userDTOFactory.valueOf(userMessage, false));
         loginTokenInfo.setOpenId(loginResponse.getOpenId());
         return loginTokenInfo;
     }

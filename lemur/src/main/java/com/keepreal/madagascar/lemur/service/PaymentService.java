@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -11,7 +12,6 @@ import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
 import com.keepreal.madagascar.vanga.UserPaymentsResponse;
-import com.keepreal.madagascar.vanga.WechatOrderMessage;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;

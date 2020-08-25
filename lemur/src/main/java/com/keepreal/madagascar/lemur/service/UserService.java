@@ -264,15 +264,19 @@ public class UserService {
     /**
      * 更新当前用户手机号
      *
-     * @param putUserMobileRequest {@link PutUserMobileRequest}
+     * @param userId    User id.
+     * @param mobile    Mobile.
+     * @param otp       One time password.
      * @return {@link UserMessage}
      */
-    public UserMessage updateUserMobilePhone(PutUserMobileRequest putUserMobileRequest) {
+    @CachePut(value = "UserMesaage", key = "#userId", cacheManager = "redisCacheManager")
+    public UserMessage updateUserMobilePhone(String userId, String mobile, Integer otp) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
-        UpdateUserMobileRequest request = UpdateUserMobileRequest.newBuilder().setUserId(HttpContextUtils.getUserIdFromContext())
-                .setMobile(putUserMobileRequest.getMobile())
-                .setOtp(putUserMobileRequest.getOtp())
+        UpdateUserMobileRequest request = UpdateUserMobileRequest.newBuilder()
+                .setUserId(userId)
+                .setMobile(mobile)
+                .setOtp(otp)
                 .build();
 
         UserResponse response;

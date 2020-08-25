@@ -25,6 +25,10 @@ public class PaginationUtils {
         pageInfo.setPage(pageResponse.getPage());
         pageInfo.setHasContent(pageResponse.getHasContent());
         pageInfo.setHasMore(pageResponse.getHasMore());
+
+        if (pageResponse.hasTotalCount()) {
+            pageInfo.setTotal(pageResponse.getTotalCount().getValue());
+        }
         return pageInfo;
     }
 

@@ -1,9 +1,8 @@
 package com.keepreal.madagascar.lemur.controller;
 
-import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedGroupDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedGroupService;
 import com.keepreal.madagascar.lemur.service.IslandService;
@@ -36,9 +35,9 @@ public class FeedGroupController implements FeedGroupApi {
     /**
      * Constructs the feed group controller.
      *
-     * @param islandService         {@link IslandService}.
-     * @param feedGroupService      {@link FeedGroupService}.
-     * @param feedGroupDTOFactory   {@link FeedGroupDTOFactory}.
+     * @param islandService       {@link IslandService}.
+     * @param feedGroupService    {@link FeedGroupService}.
+     * @param feedGroupDTOFactory {@link FeedGroupDTOFactory}.
      */
     public FeedGroupController(IslandService islandService,
                                FeedGroupService feedGroupService,
@@ -74,8 +73,8 @@ public class FeedGroupController implements FeedGroupApi {
     /**
      * PUT /api/v1/feedgroups/{id} : 编辑指定的作品集
      *
-     * @param id id (required)
-     * @param putFeedGroupRequest  (required)
+     * @param id                  id (required)
+     * @param putFeedGroupRequest (required)
      * @return 单一作品集返回 (status code 200)
      */
     @CrossOrigin
@@ -104,11 +103,12 @@ public class FeedGroupController implements FeedGroupApi {
     /**
      * GET /api/v1/islands/{id}/feedgroups : 获得所有作品集
      *
-     * @param id id (required)
-     * @param page page number (optional, default to 0)
+     * @param id       id (required)
+     * @param page     page number (optional, default to 0)
      * @param pageSize size of a page (optional, default to 10)
      * @return 用户所有作品集返回 (status code 200)
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<FeedGroupsResponse> apiV1IslandsIdFeedgroupsGet(String id,
                                                                           Integer page,
@@ -129,8 +129,8 @@ public class FeedGroupController implements FeedGroupApi {
     /**
      * POST /api/v1/islands/{id}/feedgroups : 创建一个新的作品集
      *
-     * @param id id (required)
-     * @param postFeedGroupRequest  (required)
+     * @param id                   id (required)
+     * @param postFeedGroupRequest (required)
      * @return 单一作品集返回 (status code 200)
      */
     @CrossOrigin
@@ -148,6 +148,23 @@ public class FeedGroupController implements FeedGroupApi {
                 postFeedGroupRequest.getName(),
                 postFeedGroupRequest.getDescription(),
                 postFeedGroupRequest.getThumbnailUri());
+
+        FeedGroupResponse response = new FeedGroupResponse();
+        response.setData(this.feedGroupDTOFactory.valueOf(feedGroupMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the get feed group api.
+     *
+     * @param id id (required) Feed group id.
+     * @return {@link FeedGroupResponse}.
+     */
+    @Override
+    public ResponseEntity<FeedGroupResponse> apiV1FeedgroupsIdGet(String id) {
+        FeedGroupMessage feedGroupMessage = this.feedGroupService.retrieveFeedGroupById(id);
 
         FeedGroupResponse response = new FeedGroupResponse();
         response.setData(this.feedGroupDTOFactory.valueOf(feedGroupMessage));

@@ -22,6 +22,9 @@ rocketmq:
   topic: notification-event
   tag: event
 
+redis:
+  port: 6379
+
 deploy:
   opentracing:
     enable_jaeger: false

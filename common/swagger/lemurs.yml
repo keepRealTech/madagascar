@@ -1627,6 +1627,17 @@ paths:
   /api/v1/feedgroups/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - FeedGroup
+      summary: 获得一个作品集
+      responses:
+        '200':
+          description: 单一作品集返回
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedGroupResponse'
     put:
       tags:
         - FeedGroup
@@ -1725,7 +1736,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QuestionResponse'
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/boxes/skus:
     get:
       tags:
@@ -2266,6 +2277,9 @@ components:
         pageSize:
           type: integer
           description: page size
+        total:
+          type: integer
+          description: total size
     BriefUserDTO:
       type: object
       properties:
@@ -2688,13 +2702,29 @@ components:
         size:
           type: integer
           format: int64
+    AnswerDTO:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        text:
+          type: string
+        hasExpired:
+          type: boolean
+        publicVisible:
+          type: boolean
+        answeredAt:
+          type: integer
+          format: int64
+        ignored:
+          type: boolean
     MultiMediaDTO:
       oneOf:
         - $ref: '#/components/schemas/VideoDTO'
         - $ref: '#/components/schemas/PictureDTO'
         - $ref: '#/components/schemas/AudioDTO'
         - $ref: '#/components/schemas/HtmlDTO'
-        - $ref: '#/components/schemas/QuestionDTO'
+        - $ref: '#/components/schemas/AnswerDTO'
     PosterFeedDTO:
       type: object
       properties:
@@ -2726,6 +2756,9 @@ components:
           type: array
           items:
             type: string
+        priceInCents:
+          type: integer
+          format: int64
         mediaType:
           $ref: '#/components/schemas/MultiMediaType'
         multimedia:
@@ -2756,6 +2789,18 @@ components:
               type: boolean
             isAccess:
               type: boolean
+    SimpleQuestionBoxDTO:
+      type: object
+      properties:
+        noticeType:
+          $ref: '#/components/schemas/NoticeType'
+        feedId:
+          type: string
+        text:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
     SimpleMembershipDTO:
       type: object
       properties:
@@ -3099,7 +3144,7 @@ components:
         notificationType:
           $ref: '#/components/schemas/NotificationType'
         question:
-          $ref: '#/components/schemas/SnapshotFeedDTO'
+          $ref: '#/components/schemas/SimpleQuestionBoxDTO'
         hasRead:
           type: boolean
         createdAt:
@@ -4149,8 +4194,8 @@ components:
           type: string
         islandId:
           type: string
-        hostId:
-          type: string
+        host:
+          $ref: '#/components/schemas/BriefUserDTO'
         lastFeedTimestamp:
           type: integer
           format: int64
@@ -4256,8 +4301,6 @@ components:
         priceInCents:
           type: integer
           format: int64
-        isLiked:
-          type: boolean
         hasAccess:
           type: boolean
         hasAnswer:
@@ -4274,17 +4317,9 @@ components:
           type: array
           items:
             type: string
+        isLiked:
+          type: boolean
         createdAt:
-          type: integer
-          format: int64
-    AnswerDTO:
-      type: object
-      properties:
-        user:
-          $ref: '#/components/schemas/BriefUserDTO'
-        text:
-          type: string
-        answeredAt:
           type: integer
           format: int64
     FullQuestionDTO:
@@ -4292,8 +4327,13 @@ components:
         - $ref: '#/components/schemas/QuestionDTO'
         - type: object
           properties:
-            anaswer:
-              $ref: '#/components/schemas/AnswerDTO'
+            answerer:
+              $ref: '#/components/schemas/BriefUserDTO'
+            answer:
+              type: string
+            answeredAt:
+              type: integer
+              format: int64
             comments:
               type: array
               items:
@@ -4350,7 +4390,9 @@ components:
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
-              $ref: '#/components/schemas/QuestionDTO'
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionDTO'
     PostAnswerRequest:
       type: object
       properties:

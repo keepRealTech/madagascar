@@ -1,19 +1,29 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.keepreal.madagascar.common.AnswerMessage;
 import com.keepreal.madagascar.common.AudioMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.HtmlMessage;
 import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.VideoMessage;
-import org.springframework.stereotype.Component;
+import com.keepreal.madagascar.lemur.service.UserService;
 import swagger.model.MultiMediaDTO;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-@Component
 public class MultiMediaDTOFactory {
+
+    private final UserService userService;
+    private final UserDTOFactory userDTOFactory;
+
+    public MultiMediaDTOFactory(UserService userService,
+                                UserDTOFactory userDTOFactory) {
+        this.userService = userService;
+        this.userDTOFactory = userDTOFactory;
+    }
 
     public List<MultiMediaDTO> listValueOf(FeedMessage feedMessage) {
         MultiMediaDTO dto = new MultiMediaDTO();
@@ -36,8 +46,33 @@ public class MultiMediaDTOFactory {
             case MEDIA_HTML:
                 dto = this.valueOf(feedMessage.getHtml());
                 break;
+            case MEDIA_QUESTION:
+                dto = this.valueOf(feedMessage.getAnswer(), feedMessage.getCreatedAt());
         }
         return Collections.singletonList(dto);
+    }
+
+    private MultiMediaDTO valueOf(AnswerMessage answerMessage, long creatTimestamp) {
+        MultiMediaDTO dto = new MultiMediaDTO();
+        dto.setHasExpired(creatTimestamp > System.currentTimeMillis());
+        if (Objects.isNull(answerMessage)) {
+            return dto;
+        }
+
+        if (answerMessage.hasAnswer()) {
+            dto.setText(answerMessage.getAnswer().getValue());
+        }
+        if (answerMessage.hasAnsweredAt()) {
+            dto.setAnsweredAt(answerMessage.getAnsweredAt().getValue());
+        }
+        if (answerMessage.hasPublicVisible()) {
+            dto.setPublicVisible(answerMessage.getPublicVisible().getValue());
+        }
+        if (answerMessage.hasAnswerUserId()) {
+            dto.setUser(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(answerMessage.getAnswerUserId().getValue())));
+        }
+
+        return dto;
     }
 
     private MultiMediaDTO valueOf(Picture picture) {

@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 public class AliyunSmsConfig {
 
-    private String accessKeyId;
-    private String secret;
+    private String accessKey;
+    private String accessSecret;
 
 }

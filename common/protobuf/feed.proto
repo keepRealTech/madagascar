@@ -31,17 +31,23 @@ message NewFeedsRequestV2 {
     MediaType type = 5;
     google.protobuf.StringValue text = 6;
     google.protobuf.StringValue feedGroupId = 7;
+    google.protobuf.Int64Value priceInCents = 8;
     oneof message {
-        PicturesMessage pics = 8;
-        VideoMessage video = 9;
-        AudioMessage audio = 10;
-        HtmlMessage html = 11;
-        QuestionMessage question = 12;
+        PicturesMessage pics = 9;
+        VideoMessage video = 10;
+        AudioMessage audio = 11;
+        HtmlMessage html = 12;
+        AnswerMessage question = 13;
     }
 }
 
 message NewFeedsResponse {
     CommonStatus status = 1;
+}
+
+message NewWechatFeedsResponse {
+    CommonStatus status = 1;
+    WechatOrderMessage message = 2;
 }
 
 message RetrieveFeedByIdRequest {
@@ -131,9 +137,18 @@ message FeedGroupFeedResponse {
     string nextFeedId = 5;
 }
 
+message UpdateFeedPaidByIdRequest {
+    string id = 1;
+}
+
+message UpdateFeedPaidByIdResponse {
+    CommonStatus status = 1;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
+    rpc CreateWechatFeedsV2 (NewFeedsRequestV2) returns (NewWechatFeedsResponse) {};
     rpc DeleteFeedById (DeleteFeedByIdRequest) returns (DeleteFeedResponse) {};
     rpc RetrieveFeedById (RetrieveFeedByIdRequest) returns (FeedResponse) {};
     rpc RetrieveFeedGroupFeedById (RetrieveFeedByIdRequest) returns (FeedGroupFeedResponse) {};
@@ -143,4 +158,5 @@ service FeedService {
     rpc RetrieveMultipleTimelineFeeds (RetrieveMultipleFeedsRequest) returns (TimelineFeedsResponse) {}
     rpc TopFeedById (TopFeedByIdRequest) returns (TopFeedByIdResponse) {}
     rpc RetrieveToppedFeedById (RetrieveToppedFeedByIdRequest) returns (FeedResponse) {}
+    rpc UpdateFeedPaidById (UpdateFeedPaidByIdRequest) returns (UpdateFeedPaidByIdResponse) {}
 }

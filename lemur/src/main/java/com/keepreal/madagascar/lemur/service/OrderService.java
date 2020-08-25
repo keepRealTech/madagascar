@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.BalanceMessage;
@@ -11,7 +12,6 @@ import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
-import com.keepreal.madagascar.vanga.WechatOrderMessage;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
@@ -85,6 +85,21 @@ public class OrderService {
                 .build();
 
         stub.wechatPayCallback(request);
+    }
+
+    /**
+     * Calls back on wechat order refund notification.
+     *
+     * @param payload Payload.
+     */
+    public void wechatOrderRefundCallback(String payload) {
+        PaymentServiceGrpc.PaymentServiceFutureStub stub = PaymentServiceGrpc.newFutureStub(this.channel);
+
+        WechatOrderCallbackRequest request = WechatOrderCallbackRequest.newBuilder()
+                .setPayload(payload)
+                .build();
+
+        stub.wechatRefundCallback(request);
     }
 
     /**

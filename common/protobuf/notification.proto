@@ -34,7 +34,18 @@ message NoticeNotificationMessage {
     oneof notice {
         SubscribeNotice SubscribeNotice = 2;
         MemberNotice memberNotice = 3;
+        NewQuestionNotice newQuestionNotice = 4;
+        NewAnswerNotice newAnswerNotice= 5;
     }
+}
+message NewQuestionNotice {
+    string feedId = 1;
+    string authorId = 2;
+}
+
+message NewAnswerNotice {
+    string feedId = 1;
+    string authorId = 2;
 }
 
 message SubscribeNotice {
@@ -57,6 +68,8 @@ message UnreadNotificationsCountMessage {
     int32 unreadIslandNoticesCount = 3;
     int32 unreadNewSubscribersCount = 4;
     int32 unreadNewMembersCount = 5;
+    int32 unreadNewQuestionCount = 6;
+    int32 unreadNewAnswerCount = 7;
 }
 
 message QueryNotificationCondition {

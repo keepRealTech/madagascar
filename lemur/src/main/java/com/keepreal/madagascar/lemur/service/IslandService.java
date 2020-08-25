@@ -42,7 +42,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import swagger.model.IslandAccessType;
 
 import java.util.List;
 import java.util.Map;
@@ -247,7 +246,7 @@ public class IslandService {
         }
 
         if (Objects.isNull(islandAccessType)) {
-            islandAccessType = IslandAccessType.PRIVATE;
+            islandAccessType = IslandAccessType.ISLAND_ACCESS_PRIVATE;
         }
 
         NewIslandRequest.Builder requestBuilder = NewIslandRequest.newBuilder()
