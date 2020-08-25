@@ -104,7 +104,9 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         }
         FeedInfo update = feedInfoService.update(feedInfo);
         this.feedEventProducerService.produceUpdateFeedEventAsync(update);
-        this.paymentService.activateFeedPayment(update.getId(), request.getUserId());
+        if (feedInfo.getPriceInCents() != null && feedInfo.getPriceInCents() > 0) {
+            this.paymentService.activateFeedPayment(update.getId(), request.getUserId());
+        }
 
         responseObserver.onNext(CommonResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
