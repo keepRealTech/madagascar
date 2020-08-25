@@ -1,10 +1,10 @@
 package com.keepreal.madagascar.vanga.config;
 
-import com.keepreal.madagascar.vanga.wechatPay.IWXPayDomain;
-import com.keepreal.madagascar.vanga.wechatPay.WXPay;
-import com.keepreal.madagascar.vanga.wechatPay.WXPayConfig;
+import com.keepreal.madagascar.common.wechat_pay.IWXPayDomain;
+import com.keepreal.madagascar.common.wechat_pay.WXPay;
+import com.keepreal.madagascar.common.wechat_pay.WXPayConfig;
 
-import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
+import com.keepreal.madagascar.common.wechat_pay.WXPayConstants;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.SneakyThrows;

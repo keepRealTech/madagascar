@@ -16,13 +16,13 @@ sourceSets {
 dependencies {
     implementation project(":common:exceptions")
     implementation project(":common:id-generator-starter")
+    implementation project(":common:wechat-pay-starter")
 
-    implementation 'org.bouncycastle:bcprov-jdk15to18:1.66'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.3'
 
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'com.aliyun.openservices:ons-client'
-    implementation 'org.apache.httpcomponents:httpclient:4.5.3'
     implementation 'org.redisson:redisson-spring-boot-starter'
     runtimeOnly 'mysql:mysql-connector-java'
     implementation 'io.github.lognet:grpc-spring-boot-starter'
