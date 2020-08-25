@@ -354,7 +354,9 @@ public class FeedInfoService {
                 builder.setHtml(MediaMessageConvertUtils.toHtmlMessage(feedInfo.getMediaInfos().get(0)));
                 break;
             case MEDIA_QUESTION:
-                builder.setAnswer(MediaMessageConvertUtils.toAnswerMessage((AnswerInfo) feedInfo.getMediaInfos().get(0)));
+                if (feedInfo.getMediaInfos().size() > 0) {
+                    builder.setAnswer(MediaMessageConvertUtils.toAnswerMessage((AnswerInfo) feedInfo.getMediaInfos().get(0)));
+                }
         }
     }
 }

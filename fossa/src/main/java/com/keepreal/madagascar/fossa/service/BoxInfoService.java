@@ -47,7 +47,7 @@ public class BoxInfoService {
         Query query = new Query();
         query.addCriteria(Criteria.where("islandId").is(islandId));
         query.addCriteria(Criteria.where("mediaInfos.publicVisible").is(true));
-        query.addCriteria(Criteria.where("mediaInfos.answer").ne(null));
+        query.addCriteria(Criteria.where("mediaInfos").size(1));
 
         return query;
     }
@@ -55,7 +55,7 @@ public class BoxInfoService {
     public Query retrieveAnswerMeQuestion(String userId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("userId").is(userId));
-        query.addCriteria(Criteria.where("mediaInfos.answer").ne(null));
+        query.addCriteria(Criteria.where("mediaInfos").size(1));
 
         return query;
     }
@@ -66,18 +66,17 @@ public class BoxInfoService {
 
         if (answered != null) {
             if (answered) {
-                query.addCriteria(Criteria.where("mediaInfos.answer").ne(null));
+                query.addCriteria(Criteria.where("mediaInfos").size(1));
             } else {
-                query.addCriteria(Criteria.where("mediaInfos.answer").is(null));
+                query.addCriteria(Criteria.where("mediaInfos").size(0));
             }
         }
 
         if (paid != null) {
             if (paid) {
-                query.addCriteria(Criteria.where("mediaInfos.priceInCents").gt(0));
+                query.addCriteria(Criteria.where("priceInCents").gt(0));
             } else {
-                query.addCriteria(Criteria.where("mediaInfos.priceInCents").is(0)
-                        .orOperator(Criteria.where("mediaInfos.priceInCents").is(null)));
+                query.addCriteria(new Criteria().orOperator(Criteria.where("priceInCents").is(0), Criteria.where("priceInCents").is(null)));
             }
         }
 
