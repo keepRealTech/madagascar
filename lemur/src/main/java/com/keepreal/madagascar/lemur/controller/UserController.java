@@ -250,16 +250,18 @@ public class UserController implements UserApi {
      * @return {@link UserResponse}
      */
     @Override
-    public ResponseEntity<UserResponse> apiV1UsersMobilePut(@Valid PutUserMobileRequest putUserMobileRequest) {
-        UserResponse response = new UserResponse();
+    public ResponseEntity<UserResponse> apiV1UsersMobilePut(PutUserMobileRequest putUserMobileRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
 
+        UserResponse response = new UserResponse();
         if (StringUtils.isEmpty(putUserMobileRequest.getMobile()) || Objects.isNull(putUserMobileRequest.getOtp())) {
             response.setRtn(ErrorCode.REQUEST_INVALID_ARGUMENT.getNumber());
             response.setMsg(ErrorCode.REQUEST_INVALID_ARGUMENT.getValueDescriptor().getName());
-            return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
 
-        UserMessage userMessage = this.userService.updateUserMobilePhone(putUserMobileRequest);
+        UserMessage userMessage = this.userService.updateUserMobilePhone(userId,
+                putUserMobileRequest.getMobile(), putUserMobileRequest.getOtp());
 
         response.setData(this.userDTOFactory.valueOf(userMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
