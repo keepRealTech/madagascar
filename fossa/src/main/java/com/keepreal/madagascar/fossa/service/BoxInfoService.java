@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.fossa.service;
 
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.fossa.dao.BoxInfoRepository;
@@ -63,6 +64,7 @@ public class BoxInfoService {
     public Query retrieveQuestionByCondition(String userId, Boolean answered, Boolean paid, String membershipId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("hostId").is(userId));
+        query.addCriteria(Criteria.where("multiMediaType").is(MediaType.MEDIA_QUESTION.name()));
 
         if (answered != null) {
             if (answered) {
