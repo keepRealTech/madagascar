@@ -564,7 +564,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         NewWechatFeedsResponse newFeedsResponse = NewWechatFeedsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
-                .setMessage(this.paymentService.wechatCreateFeed(infoList.get(0).getId(), request.getPriceInCents().getValue()))
+                .setMessage(this.paymentService.wechatCreateFeed(infoList.get(0).getId(), request.getPriceInCents().getValue(), userId, infoList.get(0).getHostId()))
                 .build();
         responseObserver.onNext(newFeedsResponse);
         responseObserver.onCompleted();
