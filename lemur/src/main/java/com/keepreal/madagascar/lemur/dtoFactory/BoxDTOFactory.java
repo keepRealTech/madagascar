@@ -4,6 +4,7 @@ import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.AnswerMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.fossa.BoxMessage;
+import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
@@ -23,15 +24,21 @@ public class BoxDTOFactory {
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final CommentDTOFactory commentDTOFactory;
+    private final MembershipService membershipService;
+    private final MembershipDTOFactory membershipDTOFactory;
 
     public BoxDTOFactory(SubscribeMembershipService subscribeMembershipService,
                          UserService userService,
                          UserDTOFactory userDTOFactory,
-                         CommentDTOFactory commentDTOFactory) {
+                         CommentDTOFactory commentDTOFactory,
+                         MembershipService membershipService,
+                         MembershipDTOFactory membershipDTOFactory) {
         this.subscribeMembershipService = subscribeMembershipService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.commentDTOFactory = commentDTOFactory;
+        this.membershipService = membershipService;
+        this.membershipDTOFactory = membershipDTOFactory;
     }
 
     public BoxDTO valueOf(BoxMessage boxMessage, String userId) {
@@ -91,7 +98,14 @@ public class BoxDTOFactory {
         dto.setPublicVisible(answer.hasPublicVisible() ? answer.getPublicVisible().getValue() : null);
         dto.setHasAnswer(answer.hasAnswer());
         dto.setIsLiked(feedMessage.getIsLiked());
-        dto.setVisibleMembershipIds(feedMessage.getMembershipIdList());
+        dto.setVisibleMemberships(this.membershipService.retrieveMembershipsByIds(feedMessage.getMembershipIdList())
+                .stream()
+                .map(this.membershipDTOFactory::simpleValueOf)
+                .collect(Collectors.toList()));
+        dto.setUserMemberships(this.membershipService.retrieveMembershipsByIds(feedMessage.getUserMembershipIdList())
+                .stream()
+                .map(this.membershipDTOFactory::simpleValueOf)
+                .collect(Collectors.toList()));
         dto.setCommentsCount(feedMessage.getCommentsCount());
         dto.setLikesCount(feedMessage.getLikesCount());
         dto.setPriceInCents(feedMessage.getPriceInCents());
@@ -116,7 +130,14 @@ public class BoxDTOFactory {
         dto.setHasExpired(feedMessage.getCreatedAt() > System.currentTimeMillis());
         dto.setHasPaid(feedMessage.getPriceInCents() > 0);
         dto.setHasAnswer(answer.hasAnswer());
-        dto.setVisibleMembershipIds(feedMessage.getMembershipIdList());
+        dto.setVisibleMemberships(this.membershipService.retrieveMembershipsByIds(feedMessage.getMembershipIdList())
+                .stream()
+                .map(this.membershipDTOFactory::simpleValueOf)
+                .collect(Collectors.toList()));
+        dto.setUserMemberships(this.membershipService.retrieveMembershipsByIds(feedMessage.getUserMembershipIdList())
+                .stream()
+                .map(this.membershipDTOFactory::simpleValueOf)
+                .collect(Collectors.toList()));
         dto.setCommentsCount(feedMessage.getCommentsCount());
         dto.setLikesCount(feedMessage.getLikesCount());
         dto.setPriceInCents(feedMessage.getPriceInCents());

@@ -189,6 +189,8 @@ public class FeedInfoService {
         }
         this.processMedia(builder, feedInfo);
 
+        builder.addAllUserMembershipId(CollectionUtils.isEmpty(feedInfo.getUserMembershipIds()) ? Collections.emptyList() : feedInfo.getUserMembershipIds());
+
         return builder.build();
     }
 
@@ -241,8 +243,8 @@ public class FeedInfoService {
      *
      * @param feedInfo {@link FeedInfo}
      */
-    public void insert(FeedInfo feedInfo) {
-        feedInfoRepository.insert(feedInfo);
+    public FeedInfo insert(FeedInfo feedInfo) {
+        return feedInfoRepository.insert(feedInfo);
     }
 
     /**

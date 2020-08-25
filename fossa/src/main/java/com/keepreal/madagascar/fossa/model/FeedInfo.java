@@ -32,6 +32,7 @@ public class FeedInfo {
     private Boolean fromHost;
     private List<String> imageUrls;
     private List<String> membershipIds;
+    private List<String> userMembershipIds;
     private String duplicateTag;
     private String multiMediaType;
     private List<MediaInfo> mediaInfos;

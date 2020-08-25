@@ -1810,7 +1810,7 @@ paths:
     get:
       parameters:
         - $ref: '#/components/parameters/hasAnswerInQuery'
-        - $ref: '#/components/parameters/membershipIdInQuery'
+        - $ref: '#/components/parameters/hasMembershipInQuery'
         - $ref: '#/components/parameters/complimentaryInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
@@ -2145,12 +2145,12 @@ components:
       required: false
       schema:
         type: boolean
-    membershipIdInQuery:
+    hasMembershipInQuery:
       in: query
-      name: membershipId
+      name: hasMembership
       required: false
       schema:
-        type: string
+        type: boolean
     complimentaryInQuery:
       in: query
       name: paid
@@ -4313,10 +4313,14 @@ components:
           type: integer
         publicVisible:
           type: boolean
-        visibleMembershipIds:
+        visibleMemberships:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/SimpleMembershipDTO'
+        userMemberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleMembershipDTO'
         isLiked:
           type: boolean
         createdAt:

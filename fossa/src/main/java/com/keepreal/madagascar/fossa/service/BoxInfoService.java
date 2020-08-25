@@ -61,10 +61,11 @@ public class BoxInfoService {
         return query;
     }
 
-    public Query retrieveQuestionByCondition(String userId, Boolean answered, Boolean paid, String membershipId) {
+    public Query retrieveQuestionByCondition(String userId, Boolean answered, Boolean paid, Boolean hasMembership) {
         Query query = new Query();
         query.addCriteria(Criteria.where("hostId").is(userId));
         query.addCriteria(Criteria.where("multiMediaType").is(MediaType.MEDIA_QUESTION.name()));
+        query.addCriteria(Criteria.where("mediaInfos.ignored").ne(true));
 
         if (answered != null) {
             if (answered) {
@@ -82,8 +83,12 @@ public class BoxInfoService {
             }
         }
 
-        if (!StringUtils.isEmpty(membershipId)) {
-            query.addCriteria(Criteria.where("membershipIds").is(membershipId));
+        if (hasMembership != null) {
+            if (hasMembership) {
+                query.addCriteria(new Criteria().andOperator(Criteria.where("userMembershipIds").ne(null), Criteria.where("userMembershipIds").not().size(0)));
+            } else {
+                query.addCriteria(new Criteria().orOperator(Criteria.where("userMembershipIds").is(null), Criteria.where("userMembershipIds").size(0)));
+            }
         }
 
         return query;
