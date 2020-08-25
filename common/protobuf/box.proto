@@ -4,6 +4,7 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.fossa";
 
 import "common.proto";
+import "google/protobuf/wrappers.proto";
 
 message AnswerQuestionRequest {
     string id = 1;
@@ -38,9 +39,9 @@ message RetrieveAnsweredAndVisibleQuestionsRequest {
 message RetrieveAskMeQuestionsRequest {
     string userId = 1;
     PageRequest pageRequest = 2;
-    bool answered = 3;
+    google.protobuf.BoolValue answered = 3;
     string membershipId = 4;
-    bool paid = 5;
+    google.protobuf.BoolValue paid = 5;
 }
 
 message RetrieveAnswerMeQuestionsRequest {
@@ -66,6 +67,7 @@ message RetrieveBoxInfoResponse {
 
 message IgnoreQuestionRequest {
     string questionId = 1;
+    string userId = 2;
 }
 
 message BoxMessage {

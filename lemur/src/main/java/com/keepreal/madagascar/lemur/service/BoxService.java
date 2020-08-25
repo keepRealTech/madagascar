@@ -151,6 +151,11 @@ public class BoxService {
     public BoxMessage createOrUpdateBoxInfo(String islandId, String userId, boolean enabled, List<String> membershipIds) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(islandId);
+        if (!userId.equals(islandMessage.getHostId())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FORBIDDEN);
+        }
+
         CreateOrUpdateBoxResponse response;
 
         try {
@@ -239,10 +244,14 @@ public class BoxService {
         RetrieveAskMeQuestionsRequest.Builder builder = RetrieveAskMeQuestionsRequest
                 .newBuilder()
                 .setUserId(userId)
-                .setAnswered(answered == null ? false : answered)
-                .setPaid(paid == null ? false : paid)
                 .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
                 .setMembershipId(membershipId == null ? "" : membershipId);
+        if (answered != null) {
+            builder.setAnswered(BoolValue.of(answered));
+        }
+        if (paid != null) {
+            builder.setPaid(BoolValue.of(paid));
+        }
 
         QuestionsResponse response;
         try {
@@ -291,7 +300,7 @@ public class BoxService {
         return response;
     }
 
-    public void ignoreQuestion(String questionId) {
+    public void ignoreQuestion(String questionId, String userId) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
         CommonResponse response;
@@ -299,6 +308,7 @@ public class BoxService {
         try {
             response = stub.ignoreQuestion(IgnoreQuestionRequest.newBuilder()
                     .setQuestionId(questionId)
+                    .setUserId(userId)
                     .build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());

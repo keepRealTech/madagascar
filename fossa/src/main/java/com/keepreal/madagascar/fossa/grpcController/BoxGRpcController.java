@@ -2,7 +2,9 @@ package com.keepreal.madagascar.fossa.grpcController;
 
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.PageResponse;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.AnswerQuestionRequest;
 import com.keepreal.madagascar.fossa.BoxServiceGrpc;
 import com.keepreal.madagascar.fossa.CommonResponse;
@@ -22,6 +24,7 @@ import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.service.BoxInfoService;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
+import com.keepreal.madagascar.fossa.service.PaymentService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
@@ -43,15 +46,18 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
     private final BoxInfoService boxInfoService;
     private final FeedEventProducerService feedEventProducerService;
     private final MongoTemplate mongoTemplate;
+    private final PaymentService paymentService;
 
     public BoxGRpcController(FeedInfoService feedInfoService,
                              BoxInfoService boxInfoService,
                              FeedEventProducerService feedEventProducerService,
-                             MongoTemplate mongoTemplate) {
+                             MongoTemplate mongoTemplate,
+                             PaymentService paymentService) {
         this.feedInfoService = feedInfoService;
         this.boxInfoService = boxInfoService;
         this.feedEventProducerService = feedEventProducerService;
         this.mongoTemplate = mongoTemplate;
+        this.paymentService = paymentService;
     }
 
     @Override
@@ -62,6 +68,21 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         ProtocolStringList visibleMembershipIdsList = request.getVisibleMembershipIdsList();
 
         FeedInfo feedInfo = feedInfoService.findFeedInfoById(questionId, false);
+        if (!answer.equals(feedInfo.getHostId())) {
+            responseObserver.onNext(CommonResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        if (!feedInfo.getMultiMediaType().equals(MediaType.MEDIA_QUESTION.name())) {
+            responseObserver.onNext(CommonResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_INVALID_ARGUMENT))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
 
         AnswerInfo answerInfo;
         List<MediaInfo> mediaInfos = feedInfo.getMediaInfos();
@@ -83,6 +104,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         }
         FeedInfo update = feedInfoService.update(feedInfo);
         this.feedEventProducerService.produceUpdateFeedEventAsync(update);
+        this.paymentService.activateFeedPayment(update.getId(), request.getUserId());
 
         responseObserver.onNext(CommonResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -121,7 +143,9 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
 
     @Override
     public void retrieveAskMeQuestion(RetrieveAskMeQuestionsRequest request, StreamObserver<QuestionsResponse> responseObserver) {
-        Query query = this.boxInfoService.retrieveQuestionByCondition(request.getUserId(), request.getAnswered(), request.getPaid(), request.getMembershipId());
+        Boolean answered = request.hasAnswered() ? request.getAnswered().getValue() : null;
+        Boolean paid = request.hasPaid() ? request.getPaid().getValue() : null;
+        Query query = this.boxInfoService.retrieveQuestionByCondition(request.getUserId(), answered, paid, request.getMembershipId());
         int page = request.getPageRequest().getPage();
         int pageSize = request.getPageRequest().getPageSize();
 
@@ -161,11 +185,21 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
     public void ignoreQuestion(IgnoreQuestionRequest request, StreamObserver<CommonResponse> responseObserver) {
         String questionId = request.getQuestionId();
 
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(questionId, false);
+        if (!request.getUserId().equals(feedInfo.getHostId())) {
+            responseObserver.onNext(CommonResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
+
         this.mongoTemplate.updateFirst(
                 Query.query(Criteria.where("id").is(questionId)),
                 Update.update("mediaInfos.0.ignored", true),
                 FeedInfo.class);
 
+        this.paymentService.refundWechatPaidFeed(questionId, request.getUserId());
         responseObserver.onNext(CommonResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build());
