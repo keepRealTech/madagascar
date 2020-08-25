@@ -88,7 +88,7 @@ public class QuestionBoxNotificationDTOBuilder implements NotificationDTOBuilder
                 questionDTO.setNoticeType(NoticeType.BOX_NOTICE_NEW_QUESTION);
                 questionDTO.setFeedId(message.getNewQuestionNotice().getFeedId());
                 questionDTO.setText(feedMessage.getText());
-                questionDTO.setPrice(feedMessage.getPriceInCents());
+                questionDTO.setPriceInCents(feedMessage.getPriceInCents());
                 return questionDTO;
             case NOTICE_TYPE_BOX_NEW_ANSWER:
                 if (Objects.isNull(message.getNewAnswerNotice())) {
