@@ -98,10 +98,12 @@ public class UserController implements UserApi {
      */
     @Override
     public ResponseEntity<FullUserResponse> apiV1UsersIdGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
         UserMessage userMessage = this.userService.retrieveUserById(id);
 
         FullUserResponse response = new FullUserResponse();
-        response.setData(this.userDTOFactory.fullValueOf(userMessage));
+        response.setData(this.userDTOFactory.fullValueOf(userMessage, !id.equals(userId)));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -156,7 +158,7 @@ public class UserController implements UserApi {
                 identityTypeList.stream().map(this::convertIdentityType).collect(Collectors.toList()));
 
         UserResponse response = new UserResponse();
-        response.setData(this.userDTOFactory.valueOf(userMessage));
+        response.setData(this.userDTOFactory.valueOf(userMessage, false));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
