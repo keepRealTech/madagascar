@@ -68,7 +68,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         ProtocolStringList visibleMembershipIdsList = request.getVisibleMembershipIdsList();
 
         FeedInfo feedInfo = feedInfoService.findFeedInfoById(questionId, false);
-        if (!answer.equals(feedInfo.getHostId())) {
+        if (!request.getUserId().equals(feedInfo.getHostId())) {
             responseObserver.onNext(CommonResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
                     .build());
