@@ -71,6 +71,7 @@ public class WechatPayService {
                 .propertyId(propertyId)
                 .description(description)
                 .feeInCents(feeInCents)
+                .type(wechatOrderType.getValue())
                 .build();
 
         Map<String, String> response;
