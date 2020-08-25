@@ -76,6 +76,7 @@ public class FeedGroupService {
     public FeedGroup insert(FeedGroup feedGroup) {
         feedGroup.setId(String.valueOf(this.idGenerator.nextId()));
         feedGroup.setCreatedTime(System.currentTimeMillis());
+        feedGroup.setLastFeedTime(feedGroup.getCreatedTime());
         return this.feedGroupRepository.insert(feedGroup);
     }
 
