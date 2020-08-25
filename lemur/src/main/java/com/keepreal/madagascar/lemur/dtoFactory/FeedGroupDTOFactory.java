@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.FeedGroupMessage;
+import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
 import swagger.model.FeedGroupDTO;
 
@@ -11,6 +12,21 @@ import java.util.Objects;
  */
 @Component
 public class FeedGroupDTOFactory {
+
+    private final UserService userService;
+    private final UserDTOFactory userDTOFactory;
+
+    /**
+     * Constructs the feed group dto factory.
+     *
+     * @param userService       {@link UserService}.
+     * @param userDTOFactory    {@link UserDTOFactory}.
+     */
+    public FeedGroupDTOFactory(UserService userService,
+                               UserDTOFactory userDTOFactory) {
+        this.userService = userService;
+        this.userDTOFactory = userDTOFactory;
+    }
 
     /**
      * Converts the {@link FeedGroupMessage} into {@link FeedGroupDTO}.
@@ -25,7 +41,6 @@ public class FeedGroupDTOFactory {
 
         FeedGroupDTO feedGroupDTO = new FeedGroupDTO();
         feedGroupDTO.setId(feedGroupMessage.getId());
-        feedGroupDTO.setHostId(feedGroupMessage.getUserId());
         feedGroupDTO.setIslandId(feedGroupMessage.getIslandId());
         feedGroupDTO.setItemCount(feedGroupMessage.getItemsCount());
         feedGroupDTO.setName(feedGroupMessage.getName());
@@ -33,6 +48,9 @@ public class FeedGroupDTOFactory {
         feedGroupDTO.setThumbnailUri(feedGroupMessage.getThumbnailUri());
         feedGroupDTO.setImageUris(feedGroupMessage.getImageUrisList());
         feedGroupDTO.setDescription(feedGroupMessage.getDescription());
+
+        feedGroupDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(feedGroupMessage.getUserId())));
+
         return feedGroupDTO;
     }
 
