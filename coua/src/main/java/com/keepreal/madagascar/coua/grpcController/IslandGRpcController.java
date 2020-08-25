@@ -29,6 +29,8 @@ import com.keepreal.madagascar.coua.RetrieveDeviceTokensResponse;
 import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandProfileByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
+import com.keepreal.madagascar.coua.RetrieveIslanderPortraitUrlRequest;
+import com.keepreal.madagascar.coua.RetrieveIslanderPortraitUrlResponse;
 import com.keepreal.madagascar.coua.RetrieveMultipleIslandsRequest;
 import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateRequest;
 import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateResponse;
@@ -590,4 +592,15 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void retrieveIslanderPortraitUrlByIslandId(RetrieveIslanderPortraitUrlRequest request, StreamObserver<RetrieveIslanderPortraitUrlResponse> responseObserver) {
+        String islandId = request.getIslandId();
+        Page<String> userIdList = this.subscriptionService.getSubscriberIdListByIslandId(islandId, PageRequest.of(0, 6));
+        List<UserInfo> userInfoList = this.userInfoService.findUserInfosByIds(userIdList);
+
+        responseObserver.onNext(RetrieveIslanderPortraitUrlResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllPortraitUrl(userInfoList.stream().map(UserInfo::getPortraitImageUri).filter(Objects::nonNull).limit(3).collect(Collectors.toList()))
+                .build());
+    }
 }

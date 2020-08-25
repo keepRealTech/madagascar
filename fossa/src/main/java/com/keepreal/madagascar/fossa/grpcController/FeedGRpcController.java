@@ -21,6 +21,8 @@ import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.NewWechatFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedCountRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedCountResponse;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
@@ -582,6 +584,22 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         responseObserver.onNext(UpdateFeedPaidByIdResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveFeedCountByIslandId(RetrieveFeedCountRequest request, StreamObserver<RetrieveFeedCountResponse> responseObserver) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("islandId").is(request.getIslandId()));
+        query.addCriteria(Criteria.where("deleted").is(false));
+        query.addCriteria(Criteria.where("multiMediaType").ne(MediaType.MEDIA_QUESTION.name()));
+
+        long totalCount = mongoTemplate.count(query, FeedInfo.class);
+
+        responseObserver.onNext(RetrieveFeedCountResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setFeedCount((int) totalCount)
                 .build());
         responseObserver.onCompleted();
     }

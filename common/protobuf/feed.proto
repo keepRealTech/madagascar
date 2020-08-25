@@ -145,6 +145,15 @@ message UpdateFeedPaidByIdResponse {
     CommonStatus status = 1;
 }
 
+message RetrieveFeedCountRequest {
+    string islandId = 1;
+}
+
+message RetrieveFeedCountResponse {
+    CommonStatus status = 1;
+    int32 feedCount = 2;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
@@ -159,4 +168,5 @@ service FeedService {
     rpc TopFeedById (TopFeedByIdRequest) returns (TopFeedByIdResponse) {}
     rpc RetrieveToppedFeedById (RetrieveToppedFeedByIdRequest) returns (FeedResponse) {}
     rpc UpdateFeedPaidById (UpdateFeedPaidByIdRequest) returns (UpdateFeedPaidByIdResponse) {}
+    rpc RetrieveFeedCountByIslandId (RetrieveFeedCountRequest) returns (RetrieveFeedCountResponse) {}
 }
