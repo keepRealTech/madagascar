@@ -1627,6 +1627,17 @@ paths:
   /api/v1/feedgroups/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - FeedGroup
+      summary: 获得一个作品集
+      responses:
+        '200':
+          description: 单一作品集返回
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedGroupResponse'
     put:
       tags:
         - FeedGroup
@@ -2266,6 +2277,9 @@ components:
         pageSize:
           type: integer
           description: page size
+        total:
+          type: integer
+          description: total size
     BriefUserDTO:
       type: object
       properties:
@@ -4168,8 +4182,8 @@ components:
           type: string
         islandId:
           type: string
-        hostId:
-          type: string
+        host:
+          $ref: '#/components/schemas/BriefUserDTO'
         lastFeedTimestamp:
           type: integer
           format: int64
@@ -4275,8 +4289,6 @@ components:
         priceInCents:
           type: integer
           format: int64
-        isLiked:
-          type: boolean
         hasAccess:
           type: boolean
         hasAnswer:

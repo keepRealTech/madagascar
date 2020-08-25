@@ -22,6 +22,7 @@ import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -146,7 +147,9 @@ public class FeedGroupGRpcController extends FeedGroupServiceGrpc.FeedGroupServi
     public void retrieveFeedGroupsByIslandId(RetrieveFeedGroupsByIslandIdRequest request,
                                              StreamObserver<FeedGroupsResponse> responseObserver) {
         Page<FeedGroup> feedGroupPage = this.feedGroupService.retrieveFeedGroupsByIslandId(request.getIslandId(),
-                PageRequest.of(request.getPageRequest().getPage(), request.getPageRequest().getPageSize()));
+                PageRequest.of(request.getPageRequest().getPage(),
+                        request.getPageRequest().getPageSize(),
+                        Sort.by(Sort.Direction.DESC, "createdTime")));
 
         FeedGroupsResponse response = FeedGroupsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())

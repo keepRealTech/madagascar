@@ -123,7 +123,7 @@ public class FeedGroupService {
      * @return {@link FeedGroup}.
      */
     public Page<FeedGroup> retrieveFeedGroupsByIslandId(String islandId, Pageable pageable) {
-        return this.feedGroupRepository.findAllByIslandIdAndDeletedIsFalse(islandId, pageable);
+        return this.feedGroupRepository.findAllByIslandIdAndDeletedIsFalseOrderByLastFeedTimeDesc(islandId, pageable);
     }
 
 }

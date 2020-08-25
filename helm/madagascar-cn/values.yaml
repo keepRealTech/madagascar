@@ -22,6 +22,9 @@ global:
       vanga: 2
       asity: 2
     short_code_base: https://islands.keepreal.cn/s/%s
+    wechat_pay:
+      callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/callback
+      refund_callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/refund/callback
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur

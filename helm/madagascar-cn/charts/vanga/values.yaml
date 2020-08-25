@@ -12,8 +12,7 @@ rocketmq:
     tag: event
 
 wechat_pay:
-  callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/callback
-  cert_path: /app/apiclient_cert.pem
+  cert_path: /app/apiclient_cert.p12
 
 ios_pay:
   verify_url: https://buy.itunes.apple.com/verifyReceipt

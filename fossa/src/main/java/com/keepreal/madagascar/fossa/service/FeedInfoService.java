@@ -345,18 +345,25 @@ public class FeedInfoService {
                 builder.setPics(MediaMessageConvertUtils.toPicturesMessage(feedInfo.getMediaInfos()));
                 break;
             case MEDIA_VIDEO:
-                builder.setVideo(MediaMessageConvertUtils.toVideoMessage(feedInfo.getMediaInfos().get(0)));
+                if (!feedInfo.getMediaInfos().isEmpty()) {
+                    builder.setVideo(MediaMessageConvertUtils.toVideoMessage(feedInfo.getMediaInfos().get(0)));
+                }
                 break;
             case MEDIA_AUDIO:
-                builder.setAudio(MediaMessageConvertUtils.toAudioMessage(feedInfo.getMediaInfos().get(0)));
+                if (!feedInfo.getMediaInfos().isEmpty()) {
+                    builder.setAudio(MediaMessageConvertUtils.toAudioMessage(feedInfo.getMediaInfos().get(0)));
+                }
                 break;
             case MEDIA_HTML:
-                builder.setHtml(MediaMessageConvertUtils.toHtmlMessage(feedInfo.getMediaInfos().get(0)));
+                if (!feedInfo.getMediaInfos().isEmpty()) {
+                    builder.setHtml(MediaMessageConvertUtils.toHtmlMessage(feedInfo.getMediaInfos().get(0)));
+                }
                 break;
             case MEDIA_QUESTION:
-                if (feedInfo.getMediaInfos().size() > 0) {
+                if (!feedInfo.getMediaInfos().isEmpty()) {
                     builder.setAnswer(MediaMessageConvertUtils.toAnswerMessage((AnswerInfo) feedInfo.getMediaInfos().get(0)));
                 }
+                break;
         }
     }
 }
