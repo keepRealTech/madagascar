@@ -3,6 +3,7 @@ package com.keepreal.madagascar.vanga.service;
 import com.keepreal.madagascar.vanga.config.MpWechatPayConfiguration;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
+import com.keepreal.madagascar.vanga.model.WechatOrderType;
 import com.keepreal.madagascar.vanga.wechatPay.WXPay;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
 import com.keepreal.madagascar.vanga.wechatPay.WXPayUtil;
@@ -67,6 +68,7 @@ public class MpWechatPayService {
                 .propertyId(shellSkuId)
                 .description(description)
                 .feeInCents(feeInCents)
+                .type(WechatOrderType.PAYSHELL.getValue())
                 .build();
 
         Map<String, String> response;
