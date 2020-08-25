@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.converter;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import swagger.model.PostIslandPayload;
@@ -13,13 +14,13 @@ import swagger.model.PutUserPayload;
 @Component
 public class PostIslandPayloadConverter implements Converter<String, PostIslandPayload> {
 
-    private final Gson gson;
+    private final ObjectMapper objectMapper;
 
     /**
      * Constructs the converter.
      */
     public PostIslandPayloadConverter() {
-        this.gson = new Gson();
+        this.objectMapper = new ObjectMapper();
     }
 
     /**
@@ -28,9 +29,10 @@ public class PostIslandPayloadConverter implements Converter<String, PostIslandP
      * @param payload Payload in json.
      * @return {@link PutUserPayload}.
      */
+    @SneakyThrows
     @Override
     public PostIslandPayload convert(String payload) {
-        return this.gson.fromJson(payload, PostIslandPayload.class);
+        return this.objectMapper.readValue(payload, PostIslandPayload.class);
     }
 
 }
