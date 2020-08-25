@@ -2782,7 +2782,7 @@ components:
           type: string
         text:
           type: string
-        price:
+        priceInCents:
           type: integer
           format: int64
     SimpleMembershipDTO:
