@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.SystemNotificationConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.CommentNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.NoticeNotificationDTOBuilder;
+import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.QuestionBoxNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.ReactionNotificationDTOBuilder;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.IslandService;
@@ -19,6 +20,7 @@ import swagger.model.SystemNoticeDTO;
 import swagger.model.UnreadIslandNoticesCountDTO;
 import swagger.model.UnreadNotificationCountDTO;
 import swagger.model.UnreadNotificationCountDTOV2;
+import swagger.model.UnreadQuestsionNoticesCountDTO;
 
 import java.util.Objects;
 
@@ -115,9 +117,17 @@ public class NotificationDTOFactory {
         islandNoticesCountDTO.setUnreadNewSubscriberNoticeCount(unreadNotificationsCountMessage.getUnreadNewSubscribersCount());
 
         countDTO.setUnreadIslandNoticesCountDTO(islandNoticesCountDTO);
+
+        UnreadQuestsionNoticesCountDTO unreadQuestsionNoticesCountDTO = new UnreadQuestsionNoticesCountDTO();
+        unreadQuestsionNoticesCountDTO.setUnreadQuestionsNoticeCount(unreadNotificationsCountMessage.getUnreadNewQuestionCount());
+        unreadQuestsionNoticesCountDTO.setUnreadAnswersNoticeCount(unreadNotificationsCountMessage.getUnreadNewAnswerCount());
+
+        countDTO.setUnreadBoxesCount(unreadQuestsionNoticesCountDTO);
         countDTO.setHasUnread(countDTO.getUnreadCommentsCount() > 0
                 || unreadNotificationsCountMessage.getUnreadIslandNoticesCount() > 0
-                || countDTO.getUnreadReactionsCount() > 0);
+                || countDTO.getUnreadReactionsCount() > 0
+                || unreadNotificationsCountMessage.getUnreadNewQuestionCount() > 0
+                || unreadNotificationsCountMessage.getUnreadNewAnswerCount() > 0);
 
         return countDTO;
     }
@@ -155,6 +165,11 @@ public class NotificationDTOFactory {
                             .setNotificationMessage(notification)
                             .setFeedDTOFactory(this.feedDTOFactory)
                             .setReactionDTOFactory(this.reactionDTOFactory)
+                            .build();
+                case NOTIFICATION_BOX_NOTICE:
+                    return new QuestionBoxNotificationDTOBuilder()
+                            .setFeedService(this.feedService)
+                            .setNotificationMessage(notification)
                             .build();
                 case NOTIFICATION_SYSTEM_NOTICE:
                     SystemNoticeDTO systemNotice = new SystemNoticeDTO();
