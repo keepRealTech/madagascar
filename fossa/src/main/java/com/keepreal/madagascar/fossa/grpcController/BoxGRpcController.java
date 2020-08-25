@@ -147,7 +147,8 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
     public void retrieveAskMeQuestion(RetrieveAskMeQuestionsRequest request, StreamObserver<QuestionsResponse> responseObserver) {
         Boolean answered = request.hasAnswered() ? request.getAnswered().getValue() : null;
         Boolean paid = request.hasPaid() ? request.getPaid().getValue() : null;
-        Query query = this.boxInfoService.retrieveQuestionByCondition(request.getUserId(), answered, paid, request.getMembershipId());
+        Boolean hasMembership = request.hasHasMembership() ? request.getHasMembership().getValue() : null;
+        Query query = this.boxInfoService.retrieveQuestionByCondition(request.getUserId(), answered, paid, hasMembership);
         int page = request.getPageRequest().getPage();
         int pageSize = request.getPageRequest().getPageSize();
 
@@ -201,7 +202,9 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
                 Update.update("mediaInfos.0.ignored", true),
                 FeedInfo.class);
 
-        this.paymentService.refundWechatPaidFeed(questionId, request.getUserId());
+        if (feedInfo.getPriceInCents() != null && feedInfo.getPriceInCents() > 0) {
+            this.paymentService.refundWechatPaidFeed(questionId, request.getUserId());
+        }
         responseObserver.onNext(CommonResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build());

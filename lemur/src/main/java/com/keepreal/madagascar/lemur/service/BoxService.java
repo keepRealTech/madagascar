@@ -238,19 +238,21 @@ public class BoxService {
         return response;
     }
 
-    public QuestionsResponse retrieveAskMeQuestion(String userId, int page, int pageSize, Boolean answered, Boolean paid, String membershipId) {
+    public QuestionsResponse retrieveAskMeQuestion(String userId, int page, int pageSize, Boolean answered, Boolean paid, Boolean hasMembership) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
         RetrieveAskMeQuestionsRequest.Builder builder = RetrieveAskMeQuestionsRequest
                 .newBuilder()
                 .setUserId(userId)
-                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
-                .setMembershipId(membershipId == null ? "" : membershipId);
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize));
         if (answered != null) {
             builder.setAnswered(BoolValue.of(answered));
         }
         if (paid != null) {
             builder.setPaid(BoolValue.of(paid));
+        }
+        if (hasMembership != null) {
+            builder.setHasMembership(BoolValue.of(hasMembership));
         }
 
         QuestionsResponse response;

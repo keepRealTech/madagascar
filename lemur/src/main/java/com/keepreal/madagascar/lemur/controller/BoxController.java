@@ -70,7 +70,7 @@ public class BoxController implements BoxApi {
      * Implements the ask me question list by condition(answered, membershipId, paid).
      *
      * @param answered  (optional)
-     * @param membershipId  (optional)
+     * @param hasMembership  (optional)
      * @param paid  (optional)
      * @param page page number (optional, default to 0)
      * @param pageSize size of a page (optional, default to 10)
@@ -78,12 +78,12 @@ public class BoxController implements BoxApi {
      */
     @Override
     public ResponseEntity<QuestionsResponse> apiV1BoxesQuestionsGet(Boolean answered,
-                                                                    String membershipId,
+                                                                    Boolean hasMembership,
                                                                     Boolean paid,
                                                                     Integer page,
                                                                     Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAskMeQuestion(userId, page, pageSize, answered, paid, membershipId);
+        com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAskMeQuestion(userId, page, pageSize, answered, paid, hasMembership);
 
         QuestionsResponse response = new QuestionsResponse();
         this.questionsResponse(response, questionsResponse, userId);
