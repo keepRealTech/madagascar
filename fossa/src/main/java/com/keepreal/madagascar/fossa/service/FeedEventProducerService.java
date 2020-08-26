@@ -3,6 +3,7 @@ package com.keepreal.madagascar.fossa.service;
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.OrderProducerBean;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.fossa.config.FeedEventProducerConfiguration;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.mantella.FeedCreateEvent;
@@ -119,6 +120,7 @@ public class FeedEventProducerService {
                 .setDuplicateTag(feedInfo.getDuplicateTag())
                 .setFromHost(feedInfo.getFromHost())
                 .setHostId(feedInfo.getHostId())
+                .setMediaType(MediaType.valueOf(feedInfo.getMultiMediaType()))
                 .build();
         String uuid = UUID.randomUUID().toString();
         FeedEventMessage event = FeedEventMessage.newBuilder()
