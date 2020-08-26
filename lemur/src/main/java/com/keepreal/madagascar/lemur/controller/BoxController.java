@@ -6,12 +6,14 @@ import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.FeedMembershipMessage;
 import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.BoxDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.WechatOrderDTOFactory;
 import com.keepreal.madagascar.lemur.service.BoxService;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.IslandService;
+import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -22,6 +24,7 @@ import swagger.api.BoxApi;
 import swagger.model.BoxDTO;
 import swagger.model.DummyResponse;
 import swagger.model.FullQuestionResponse;
+import swagger.model.IslandBoxAccessListResponse;
 import swagger.model.IslandBoxAccessResponse;
 import swagger.model.IslandBoxResponse;
 import swagger.model.PostAnswerRequest;
@@ -256,6 +259,15 @@ public class BoxController implements BoxApi {
 
         QuestionsResponse response = new QuestionsResponse();
         this.questionsResponse(response, questionsResponse, userId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<IslandBoxAccessListResponse> apiV1IslandsIdBoxesAccessGet(String id) {
+        IslandBoxAccessListResponse response = new IslandBoxAccessListResponse();
+        response.setData(this.boxDTOFactory.listValueOf(id));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
