@@ -158,6 +158,16 @@ message DismissIntroductionRequest {
     bool isIslandHost = 3;
 }
 
+message CheckIslandSubscriptionRequest {
+    string islandId = 1;
+    string userId = 2;
+}
+
+message IslandSubscriptionStateResponse {
+    CommonStatus status = 1;
+    bool hasSubscribed = 2;
+}
+
 service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
@@ -174,4 +184,5 @@ service IslandService {
     rpc RetrieveUserSubscriptionState (RetrieveUserSubscriptionStateRequest) returns (RetrieveUserSubscriptionStateResponse) {};
     rpc RetrieveDeviceTokensById (RetrieveDeviceTokensRequest) returns (RetrieveDeviceTokensResponse) {};
     rpc DismissIntroduction(DismissIntroductionRequest) returns (CommonStatus) {};
+    rpc CheckIslandSubscription(CheckIslandSubscriptionRequest) returns (IslandSubscriptionStateResponse) {};
 }

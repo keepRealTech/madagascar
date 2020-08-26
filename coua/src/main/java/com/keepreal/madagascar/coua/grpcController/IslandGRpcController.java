@@ -10,6 +10,7 @@ import com.keepreal.madagascar.common.PageResponse;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.CheckIslandSubscriptionRequest;
 import com.keepreal.madagascar.coua.CheckNameRequest;
 import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
@@ -20,6 +21,7 @@ import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
+import com.keepreal.madagascar.coua.IslandSubscriptionStateResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.coua.NewIslandRequest;
 import com.keepreal.madagascar.coua.QueryIslandCondition;
@@ -38,6 +40,7 @@ import com.keepreal.madagascar.coua.UnsubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtResponse;
+import com.keepreal.madagascar.coua.common.SubscriptionState;
 import com.keepreal.madagascar.coua.model.IslandInfo;
 import com.keepreal.madagascar.coua.model.Subscription;
 import com.keepreal.madagascar.coua.model.UserInfo;
@@ -63,6 +66,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the island GRpc controller.
@@ -587,6 +592,30 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         }
 
         responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Checks island subscription state.
+     *
+     * @param request               {@link CheckIslandSubscriptionRequest}.
+     * @param responseObserver      {@link IslandSubscriptionStateResponse}.
+     */
+    @Override
+    public void checkIslandSubscription(CheckIslandSubscriptionRequest request,
+                                        StreamObserver<IslandSubscriptionStateResponse> responseObserver) {
+        Subscription subscription = this.subscriptionService.getSubscriptionByIslandIdAndUserId(request.getIslandId(), request.getUserId());
+
+        IslandSubscriptionStateResponse.Builder responseBuilder = IslandSubscriptionStateResponse.newBuilder();
+        if (Objects.isNull(subscription)
+                || (SubscriptionState.ISLANDER.getValue() != (subscription.getState()) && SubscriptionState.HOST.getValue() != subscription.getState())) {
+            responseBuilder.setHasSubscribed(false);
+        } else {
+            responseBuilder.setHasSubscribed(true);
+        }
+
+        responseBuilder.setStatus(CommonStatusUtils.getSuccStatus());
+        responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
 
