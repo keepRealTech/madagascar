@@ -4,6 +4,8 @@ import com.keepreal.madagascar.workflow.settler.model.WechatOrder;
 import com.keepreal.madagascar.workflow.settler.repository.WechatOrderRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class WechatOrderService {
 
@@ -19,8 +21,8 @@ public class WechatOrderService {
      * @param id Order id.
      * @return {@link WechatOrder}.
      */
-    public WechatOrder retrieveById(String id) {
-        return this.wechatOrderRepository.findByIdAndDeletedIsFalse(id);
+    public List<WechatOrder> retrieveByIds(Iterable<String> id) {
+        return this.wechatOrderRepository.findAllByIdInAndDeletedIsFalse(id);
     }
 
     /**

@@ -131,7 +131,6 @@ public class PaymentService {
                 .payeeId(hostId)
                 .orderId(wechatOrder.getId())
                 .tradeNum(wechatOrder.getTradeNumber())
-                .membershipSkuId(wechatOrder.getPropertyId())
                 .build();
 
         return this.paymentRepository.save(payment);

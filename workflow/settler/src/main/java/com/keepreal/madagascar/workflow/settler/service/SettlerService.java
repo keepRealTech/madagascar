@@ -6,6 +6,7 @@ import com.keepreal.madagascar.workflow.settler.config.ExecutorConfiguration;
 import com.keepreal.madagascar.workflow.settler.config.LarkConfiguration;
 import com.keepreal.madagascar.workflow.settler.model.Balance;
 import com.keepreal.madagascar.workflow.settler.model.Payment;
+import com.keepreal.madagascar.workflow.settler.model.WechatOrder;
 import com.keepreal.madagascar.workflow.settler.util.AutoRedisLock;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
@@ -38,6 +39,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SettlerService {
 
+    private final WechatOrderService wechatOrderService;
+    private final WechatPayService wechatPayService;
     private final WorkflowService workflowService;
     private final PaymentService paymentService;
     private final BalanceService balanceService;
@@ -51,6 +54,8 @@ public class SettlerService {
     /**
      * Constructs the settler service.
      *
+     * @param wechatOrderService    {@link WechatOrderService}.
+     * @param wechatPayService      {@link WechatPayService}.
      * @param workflowService       {@link WorkflowService}.
      * @param paymentService        {@link PaymentService}.
      * @param balanceService        {@link BalanceService}.
@@ -59,13 +64,15 @@ public class SettlerService {
      * @param larkConfiguration     {@link LarkConfiguration}.
      * @param restTemplate          {@link RestTemplate}.
      */
-    public SettlerService(WorkflowService workflowService,
+    public SettlerService(WechatOrderService wechatOrderService, WechatPayService wechatPayService, WorkflowService workflowService,
                           PaymentService paymentService,
                           BalanceService balanceService,
                           RedissonClient redissonClient,
                           ExecutorConfiguration executorConfiguration,
                           LarkConfiguration larkConfiguration,
                           RestTemplate restTemplate) {
+        this.wechatOrderService = wechatOrderService;
+        this.wechatPayService = wechatPayService;
         this.workflowService = workflowService;
         this.paymentService = paymentService;
         this.balanceService = balanceService;
@@ -241,6 +248,10 @@ public class SettlerService {
      */
     @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     public List<String> expires(Balance userBalance, List<Payment> payments) {
+        this.wechatOrderService.retrieveByIds(payments.stream().map(Payment::getOrderId).collect(Collectors.toList()))
+                .stream()
+                .map(wechatOrder -> this.wechatPayService.tryRefund(wechatOrder, "过期退款"));
+
         long amount = this.paymentService.expiresPayment(payments);
         this.balanceService.subtractCents(userBalance, amount);
 

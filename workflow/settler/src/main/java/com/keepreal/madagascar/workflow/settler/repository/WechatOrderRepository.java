@@ -4,13 +4,13 @@ import com.keepreal.madagascar.workflow.settler.model.WechatOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface WechatOrderRepository extends JpaRepository<WechatOrder, String> {
 
     WechatOrder findByIdAndDeletedIsFalse(String id);
 
-    WechatOrder findTopByTradeNumberAndDeletedIsFalse(String tradeNumber);
-
-    WechatOrder findByPropertyIdAndTypeAndDeletedIsFalse(String propertyId, Integer type);
+    List<WechatOrder> findAllByIdInAndDeletedIsFalse(Iterable<String> ids);
 
 }
