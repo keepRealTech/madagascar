@@ -176,16 +176,10 @@ public class BoxDTOFactory {
 
         boolean hasChecked;
 
-        FeedMembershipCheckedDTO dto = new FeedMembershipCheckedDTO();
-        dto.setId("");
-        dto.setMembershipName("禁止提问");
-
         hasChecked = !boxMessage.getEnabled();
-        dto.setChecked(hasChecked);
-        dtoList.add(dto);
 
-        dto = new FeedMembershipCheckedDTO();
-        dto.setId("");
+        FeedMembershipCheckedDTO dto = new FeedMembershipCheckedDTO();
+        dto.setId("-1");
         dto.setMembershipName("所有岛民");
         dto.setChecked(!hasChecked && CollectionUtils.isEmpty(boxMessage.getMembershipIdsList()));
         hasChecked = hasChecked || CollectionUtils.isEmpty(boxMessage.getMembershipIdsList());
@@ -206,6 +200,11 @@ public class BoxDTOFactory {
 
         dtoList.addAll(checkedDTOS);
 
+        dto = new FeedMembershipCheckedDTO();
+        dto.setId("-2");
+        dto.setMembershipName("禁止提问");
+        dto.setChecked(!boxMessage.getEnabled());
+        dtoList.add(dto);
         return dtoList;
     }
 
