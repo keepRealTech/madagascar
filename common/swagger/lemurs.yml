@@ -1810,7 +1810,7 @@ paths:
     get:
       parameters:
         - $ref: '#/components/parameters/hasAnswerInQuery'
-        - $ref: '#/components/parameters/membershipIdInQuery'
+        - $ref: '#/components/parameters/hasMembershipInQuery'
         - $ref: '#/components/parameters/complimentaryInQuery'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
@@ -1949,6 +1949,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommentResponse'
+  /api/v1/islands/{id}/feeds/snapshot:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Feed
+      summary: 获得岛圈动态快照
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandFeedSnapshotResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2145,12 +2159,12 @@ components:
       required: false
       schema:
         type: boolean
-    membershipIdInQuery:
+    hasMembershipInQuery:
       in: query
-      name: membershipId
+      name: hasMembership
       required: false
       schema:
-        type: string
+        type: boolean
     complimentaryInQuery:
       in: query
       name: paid
@@ -4313,10 +4327,14 @@ components:
           type: integer
         publicVisible:
           type: boolean
-        visibleMembershipIds:
+        visibleMemberships:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/SimpleMembershipDTO'
+        userMemberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleMembershipDTO'
         isLiked:
           type: boolean
         createdAt:
@@ -4425,3 +4443,19 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/FullFeedDTO'
+    IslandFeedSnapshotDTO:
+      type: object
+      properties:
+        userPortraitUris:
+          type: array
+          items:
+            type: string
+        feedCount:
+          type: integer
+    IslandFeedSnapshotResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IslandFeedSnapshotDTO'

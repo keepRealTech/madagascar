@@ -219,6 +219,7 @@ message FeedMessage {
         HtmlMessage html = 23;
         AnswerMessage answer = 24;
     }
+    repeated string userMembershipId = 25;
 }
 
 message WechatOrderMessage {

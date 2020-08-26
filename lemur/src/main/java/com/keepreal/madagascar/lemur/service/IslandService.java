@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.CheckIslandSubscriptionRequest;
 import com.keepreal.madagascar.coua.CheckNameRequest;
 import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
@@ -20,6 +21,7 @@ import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
+import com.keepreal.madagascar.coua.IslandSubscriptionStateResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.coua.NewIslandRequest;
 import com.keepreal.madagascar.coua.QueryIslandCondition;
@@ -27,6 +29,8 @@ import com.keepreal.madagascar.coua.RetrieveDefaultIslandsByUserIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandProfileByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
+import com.keepreal.madagascar.coua.RetrieveIslanderPortraitUrlRequest;
+import com.keepreal.madagascar.coua.RetrieveIslanderPortraitUrlResponse;
 import com.keepreal.madagascar.coua.RetrieveMultipleIslandsRequest;
 import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateRequest;
 import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateResponse;
@@ -528,8 +532,8 @@ public class IslandService {
     /**
      * Retrieves the island subscribe state by user id.
      *
-     * @param userId        User id.
-     * @param islandIdList  Island ids.
+     * @param userId       User id.
+     * @param islandIdList Island ids.
      * @return True if subscribed.
      */
     public Map<String, Boolean> retrieveIslandSubscribeStateByUserId(String userId, List<String> islandIdList) {
@@ -621,10 +625,78 @@ public class IslandService {
     }
 
     /**
+     * Checks if the user id is a subscriber of island.
+     *
+     * @param islandId Island id.
+     * @param userId   User id.
+     * @return True if an islander or host.
+     */
+    public boolean checkIslandSubscription(String islandId, String userId) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        CheckIslandSubscriptionRequest request = CheckIslandSubscriptionRequest.newBuilder()
+                .setUserId(userId)
+                .setIslandId(islandId)
+                .build();
+
+        IslandSubscriptionStateResponse response;
+        try {
+            response = stub.checkIslandSubscription(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve island subscribe state returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getHasSubscribed();
+    }
+
+    /**
+     * Retrieves the islander portraits.
+     *
+     * @param islandId Island id.
+     * @return Portrait uris.
+     */
+    public List<String> retrieveIslanderPortraitUrlByIslandId(String islandId) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveIslanderPortraitUrlRequest request = RetrieveIslanderPortraitUrlRequest.newBuilder()
+                .setIslandId(islandId)
+                .build();
+
+        RetrieveIslanderPortraitUrlResponse response;
+        try {
+            response = stub.retrieveIslanderPortraitUrlByIslandId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve islander portraits returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getPortraitUrlList();
+    }
+
+    /**
      * Checks the string length.
      *
-     * @param str        String.
-     * @param threshold  Max length.
+     * @param str       String.
+     * @param threshold Max length.
      * @return Trimmed string.
      */
     private String checkLength(String str, int threshold) {

@@ -22,7 +22,7 @@ public class PaymentService {
         this.channel = channel;
     }
 
-    public WechatOrderMessage wechatCreateFeed(String feedId, long priceInCents) {
+    public WechatOrderMessage wechatCreateFeed(String feedId, long priceInCents, String userId, String hostId) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         WechatOrderResponse response;
@@ -31,6 +31,8 @@ public class PaymentService {
             response = stub.wechatCreateFeed(CreatePaidFeedRequest.newBuilder()
                     .setFeedId(feedId)
                     .setPriceInCents(priceInCents)
+                    .setUserId(userId)
+                    .setHostId(hostId)
                     .build());
         } catch (Exception e) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);

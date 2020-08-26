@@ -21,6 +21,8 @@ import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.NewWechatFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedCountRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedCountResponse;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
@@ -37,6 +39,7 @@ import com.keepreal.madagascar.fossa.service.FeedGroupService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.IslandService;
 import com.keepreal.madagascar.fossa.service.PaymentService;
+import com.keepreal.madagascar.fossa.service.SubscribeMembershipService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
@@ -75,6 +78,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     private final MongoTemplate mongoTemplate;
     private final FeedEventProducerService feedEventProducerService;
     private final PaymentService paymentService;
+    private final SubscribeMembershipService subscribeMembershipService;
 
     /**
      * Constructs the feed grpc controller
@@ -86,6 +90,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      * @param mongoTemplate            {@link MongoTemplate}
      * @param feedEventProducerService {@link FeedEventProducerService}.
      * @param paymentService           {@link PaymentService}.
+     * @param subscribeMembershipService
      */
     public FeedGRpcController(LongIdGenerator idGenerator,
                               IslandService islandService,
@@ -93,7 +98,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                               FeedGroupService feedGroupService,
                               MongoTemplate mongoTemplate,
                               FeedEventProducerService feedEventProducerService,
-                              PaymentService paymentService) {
+                              PaymentService paymentService,
+                              SubscribeMembershipService subscribeMembershipService) {
         this.idGenerator = idGenerator;
         this.islandService = islandService;
         this.feedInfoService = feedInfoService;
@@ -101,6 +107,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         this.mongoTemplate = mongoTemplate;
         this.feedEventProducerService = feedEventProducerService;
         this.paymentService = paymentService;
+        this.subscribeMembershipService = subscribeMembershipService;
     }
 
     /**
@@ -185,6 +192,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             if (request.hasPriceInCents()) {
                 builder.priceInCents(request.getPriceInCents().getValue());
             }
+            builder.userMembershipIds(this.subscribeMembershipService.retrieveMembershipIds(userId, islandIdList.get(i)));
             feedInfoList.add(builder.build());
         });
 
@@ -529,42 +537,39 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     @Override
     public void createWechatFeedsV2(NewFeedsRequestV2 request, StreamObserver<NewWechatFeedsResponse> responseObserver) {
         String userId = request.getUserId();
-        ProtocolStringList islandIdList = request.getIslandIdList();
-        ProtocolStringList hostIdList = request.getHostIdList();
+        String islandId = request.getIslandIdList().get(0);
+        String hostId = request.getHostIdList().get(0);
         String text = request.hasText() ? request.getText().getValue() : "";
         ProtocolStringList membershipIdsList = request.getMembershipIdsList();
         MediaType mediaType = request.getType();
 
         String duplicateTag = UUID.randomUUID().toString();
 
-        List<FeedInfo> feedInfoList = new ArrayList<>();
         long timestamp = Instant.now().toEpochMilli();
-        IntStream.range(0, islandIdList.size()).forEach(i -> {
-            FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
-            builder.id(String.valueOf(idGenerator.nextId()));
-            builder.islandId(islandIdList.get(i));
-            builder.userId(userId);
-            builder.hostId(hostIdList.get(i));
-            builder.fromHost(userId.equals(hostIdList.get(i)));
-            builder.text(text);
-            builder.duplicateTag(duplicateTag);
-            builder.multiMediaType(mediaType.name());
-            builder.mediaInfos(this.buildMediaInfos(request));
-            builder.membershipIds(membershipIdsList);
-            builder.createdTime(timestamp);
-            builder.toppedTime(timestamp);
-            builder.temped(true);
-            if (request.hasPriceInCents()) {
-                builder.priceInCents(request.getPriceInCents().getValue());
-            }
-            feedInfoList.add(builder.build());
-        });
+        FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
+        builder.id(String.valueOf(idGenerator.nextId()));
+        builder.islandId(islandId);
+        builder.userId(userId);
+        builder.hostId(hostId);
+        builder.fromHost(userId.equals(hostId));
+        builder.text(text);
+        builder.duplicateTag(duplicateTag);
+        builder.multiMediaType(mediaType.name());
+        builder.mediaInfos(this.buildMediaInfos(request));
+        builder.membershipIds(membershipIdsList);
+        builder.createdTime(timestamp);
+        builder.toppedTime(timestamp);
+        builder.temped(true);
+        if (request.hasPriceInCents()) {
+            builder.priceInCents(request.getPriceInCents().getValue());
+        }
+        builder.userMembershipIds(this.subscribeMembershipService.retrieveMembershipIds(userId, islandId));
 
-        List<FeedInfo> infoList = feedInfoService.saveAll(feedInfoList);
+        FeedInfo feedInfo = feedInfoService.insert(builder.build());
 
         NewWechatFeedsResponse newFeedsResponse = NewWechatFeedsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
-                .setMessage(this.paymentService.wechatCreateFeed(infoList.get(0).getId(), request.getPriceInCents().getValue()))
+                .setMessage(this.paymentService.wechatCreateFeed(feedInfo.getId(), request.getPriceInCents().getValue(), userId, hostId))
                 .build();
         responseObserver.onNext(newFeedsResponse);
         responseObserver.onCompleted();
@@ -579,6 +584,22 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         responseObserver.onNext(UpdateFeedPaidByIdResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveFeedCountByIslandId(RetrieveFeedCountRequest request, StreamObserver<RetrieveFeedCountResponse> responseObserver) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("islandId").is(request.getIslandId()));
+        query.addCriteria(Criteria.where("deleted").is(false));
+        query.addCriteria(Criteria.where("multiMediaType").ne(MediaType.MEDIA_QUESTION.name()));
+
+        long totalCount = mongoTemplate.count(query, FeedInfo.class);
+
+        responseObserver.onNext(RetrieveFeedCountResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setFeedCount(Math.toIntExact(totalCount))
                 .build());
         responseObserver.onCompleted();
     }

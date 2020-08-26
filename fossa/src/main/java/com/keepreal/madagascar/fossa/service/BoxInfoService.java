@@ -48,7 +48,7 @@ public class BoxInfoService {
         Query query = new Query();
         query.addCriteria(Criteria.where("islandId").is(islandId));
         query.addCriteria(Criteria.where("mediaInfos.publicVisible").is(true));
-        query.addCriteria(Criteria.where("mediaInfos").size(1));
+        query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
 
         return query;
     }
@@ -56,19 +56,20 @@ public class BoxInfoService {
     public Query retrieveAnswerMeQuestion(String userId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("userId").is(userId));
-        query.addCriteria(Criteria.where("mediaInfos").size(1));
+        query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
 
         return query;
     }
 
-    public Query retrieveQuestionByCondition(String userId, Boolean answered, Boolean paid, String membershipId) {
+    public Query retrieveQuestionByCondition(String userId, Boolean answered, Boolean paid, Boolean hasMembership) {
         Query query = new Query();
         query.addCriteria(Criteria.where("hostId").is(userId));
         query.addCriteria(Criteria.where("multiMediaType").is(MediaType.MEDIA_QUESTION.name()));
+        query.addCriteria(Criteria.where("mediaInfos.ignored").ne(true));
 
         if (answered != null) {
             if (answered) {
-                query.addCriteria(Criteria.where("mediaInfos").size(1));
+                query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
             } else {
                 query.addCriteria(Criteria.where("mediaInfos").size(0));
             }
@@ -82,8 +83,12 @@ public class BoxInfoService {
             }
         }
 
-        if (!StringUtils.isEmpty(membershipId)) {
-            query.addCriteria(Criteria.where("membershipIds").is(membershipId));
+        if (hasMembership != null) {
+            if (hasMembership) {
+                query.addCriteria(new Criteria().andOperator(Criteria.where("userMembershipIds").ne(null), Criteria.where("userMembershipIds").not().size(0)));
+            } else {
+                query.addCriteria(new Criteria().orOperator(Criteria.where("userMembershipIds").is(null), Criteria.where("userMembershipIds").size(0)));
+            }
         }
 
         return query;
