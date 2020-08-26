@@ -96,6 +96,12 @@ public class FeedService {
     @Transactional
     public void refundQuestionPaid(String feedId, String userId) {
         WechatOrder wechatOrder = this.wechatOrderService.retrieveByQuestionId(feedId);
+
+        if (Objects.isNull(wechatOrder)) {
+            log.error("Refund feed {} error, no wechat order found.", feedId);
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
         Payment payment = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId()).stream().findFirst().orElse(null);
 
         if (Objects.isNull(payment) || PaymentState.PENDING.getValue() != payment.getState()) {
