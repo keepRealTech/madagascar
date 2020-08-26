@@ -23,6 +23,14 @@ public class NoticeTypeConverter implements Converter<String, NoticeType> {
             return null;
         }
 
+        if ("member".equals(payload.toLowerCase())) {
+            return NoticeType.ISLAND_NOTICE_NEW_MEMBER;
+        }
+
+        if ("subscriber".equals(payload.toLowerCase())) {
+            return NoticeType.ISLAND_NOTICE_NEW_SUBSCRIBER;
+        }
+
         return NoticeType.fromValue(payload);
     }
 
