@@ -43,6 +43,7 @@ import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -440,7 +441,10 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                      StreamObserver<UserPaymentsResponse> responseObserver) {
         Page<Payment> paymentPage = this.paymentService.retrievePaymentsByUserId(request.getUserId(), PaginationUtils.valueOf(request.getPageRequest(), "created_time"));
 
-        List<String> membershipSkuIds = paymentPage.getContent().stream().map(Payment::getMembershipSkuId).collect(Collectors.toList());
+        List<String> membershipSkuIds = paymentPage.getContent().stream()
+                .map(Payment::getMembershipSkuId)
+                .filter(membershipId -> !StringUtils.isEmpty(membershipId))
+                .collect(Collectors.toList());
 
         Map<String, MembershipSku> membershipSkuMap = this.skuService.retrieveMembershipSkusByIds(membershipSkuIds).stream()
                 .collect(Collectors.toMap(MembershipSku::getId, Function.identity(), (m1, m2) -> m1, HashMap::new));
