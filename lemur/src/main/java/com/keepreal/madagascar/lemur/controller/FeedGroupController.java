@@ -167,14 +167,6 @@ public class FeedGroupController implements FeedGroupApi {
      */
     @Override
     public ResponseEntity<FeedGroupResponse> apiV1FeedgroupsIdGet(String id) {
-        String userId = HttpContextUtils.getUserIdFromContext();
-        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
-
-        if (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(islandMessage.getIslandAccessType())
-                && !this.islandService.checkIslandSubscription(id, userId)) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_USER_NOT_SUBSCRIBED_ERROR);
-        }
-
         FeedGroupMessage feedGroupMessage = this.feedGroupService.retrieveFeedGroupById(id);
 
         FeedGroupResponse response = new FeedGroupResponse();
