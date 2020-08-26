@@ -30,7 +30,7 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             "min(updated_time) as updated_time FROM balance_log where (type=1 OR type=3 OR type=5) AND (state=2 OR state=3) AND is_deleted=0 " +
             "AND user_id=?1 GROUP BY trade_num",
            countQuery = "SELECT COUNT(1) FROM (SELECT trade_num FROM balance_log where (type=1 OR type=3 OR type=5) AND (state=2 OR state=3) " +
-                   "AND is_deleted=0 GROUP BY trade_num) AS groups",
+                   "AND is_deleted=0 AND user_id=?1 GROUP BY trade_num) AS groups",
            nativeQuery = true)
     Page<Payment> findAllValidPaymentsByUserId(String userId, Pageable pageable);
 
