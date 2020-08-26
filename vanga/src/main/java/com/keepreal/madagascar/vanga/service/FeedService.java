@@ -151,7 +151,7 @@ public class FeedService {
      * @param feedId Feed id.
      */
     private void updatePaidQuestion(String feedId) {
-        FeedServiceGrpc.FeedServiceFutureStub stub = FeedServiceGrpc.newFutureStub(this.channel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
 
         UpdateFeedPaidByIdRequest request = UpdateFeedPaidByIdRequest.newBuilder()
                 .setId(feedId)
