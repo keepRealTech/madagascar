@@ -189,24 +189,28 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatOrderService.retrieveById(request.getId());
 
         if (Objects.isNull(wechatOrder)) {
-            return;
+            WechatOrderResponse response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WECHAT_ORDER_NOT_FOUND_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
         }
 
         switch (WechatOrderType.fromValue(wechatOrder.getType())) {
             case PAYMEMBERSHIP: {
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
                 this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
-                return;
+                break;
             }
             case PAYSHELL: {
                 wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
                 this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
-                return;
+                break;
             }
             case PAYQUESTION: {
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
                 this.feedService.confirmQuestionPaid(wechatOrder);
-                return;
+                break;
             }
             default:
         }
@@ -231,24 +235,29 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
 
         if (Objects.isNull(wechatOrder) || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()) {
+            responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+            responseObserver.onCompleted();
             return;
         }
 
         switch (WechatOrderType.fromValue(wechatOrder.getType())) {
             case PAYMEMBERSHIP: {
                 this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
-                return;
+                break;
             }
             case PAYSHELL: {
                 this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
-                return;
+                break;
             }
             case PAYQUESTION: {
                 this.feedService.confirmQuestionPaid(wechatOrder);
-                return;
+                break;
             }
             default:
         }
+
+        responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+        responseObserver.onCompleted();
     }
 
     /**
@@ -263,6 +272,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.refundCallback(request.getPayload());
 
         if (Objects.isNull(wechatOrder) || WechatOrderState.REFUNDED.getValue() != wechatOrder.getState()) {
+            responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+            responseObserver.onCompleted();
             return;
         }
 
@@ -281,6 +292,9 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             case PAYMEMBERSHIP:
             default:
         }
+
+        responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+        responseObserver.onCompleted();
     }
 
     /**

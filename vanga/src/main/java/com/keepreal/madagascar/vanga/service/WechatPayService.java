@@ -169,11 +169,13 @@ public class WechatPayService {
         try {
             Map<String, String> response = this.client.orderQuery(requestBody);
 
+            log.info(response.toString());
+
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
-            } else {
+            } else if (response.get("trade_state").equals(WXPayConstants.SUCCESS)){
                 wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
                 wechatOrder.setTransactionId(response.get("transaction_id"));
             }
