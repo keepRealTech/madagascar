@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.fossa.dao.BoxInfoRepository;
 import com.keepreal.madagascar.fossa.model.BoxInfo;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,7 @@ public class BoxInfoService {
         query.addCriteria(Criteria.where("mediaInfos.publicVisible").is(true));
         query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
 
-        return query;
+        return query.with(Sort.by(Sort.Order.desc("createdTime")));
     }
 
     public Query retrieveAnswerMeQuestion(String userId) {
@@ -59,7 +60,7 @@ public class BoxInfoService {
         query.addCriteria(Criteria.where("userId").is(userId));
         query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
 
-        return query;
+        return query.with(Sort.by(Sort.Order.desc("createdTime")));
     }
 
     public Query retrieveQuestionByCondition(String userId, Boolean answered, Boolean paid, Boolean hasMembership) {
@@ -93,7 +94,7 @@ public class BoxInfoService {
             }
         }
 
-        return query;
+        return query.with(Sort.by(Sort.Order.desc("createdTime")));
     }
 
     public BoxMessage getBoxMessage(BoxInfo boxInfo) {
