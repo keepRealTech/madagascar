@@ -197,10 +197,17 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
             return;
         }
 
-        this.mongoTemplate.updateFirst(
-                Query.query(Criteria.where("id").is(questionId)),
-                Update.update("mediaInfos.0.ignored", true),
-                FeedInfo.class);
+        AnswerInfo answerInfo;
+        List<MediaInfo> mediaInfos = feedInfo.getMediaInfos();
+        if (mediaInfos.isEmpty()) {
+            answerInfo = new AnswerInfo();
+            mediaInfos.add(answerInfo);
+        } else {
+            answerInfo = (AnswerInfo) mediaInfos.get(0);
+        }
+        answerInfo.setIgnored(true);
+
+        feedInfoService.update(feedInfo);
 
         if (feedInfo.getPriceInCents() != null && feedInfo.getPriceInCents() > 0) {
             this.paymentService.refundWechatPaidFeed(questionId, request.getUserId());

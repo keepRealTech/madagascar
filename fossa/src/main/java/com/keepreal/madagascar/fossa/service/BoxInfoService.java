@@ -48,7 +48,7 @@ public class BoxInfoService {
         Query query = new Query();
         query.addCriteria(Criteria.where("islandId").is(islandId));
         query.addCriteria(Criteria.where("mediaInfos.publicVisible").is(true));
-        query.addCriteria(Criteria.where("mediaInfos").size(1));
+        query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
 
         return query;
     }
@@ -56,7 +56,7 @@ public class BoxInfoService {
     public Query retrieveAnswerMeQuestion(String userId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("userId").is(userId));
-        query.addCriteria(Criteria.where("mediaInfos").size(1));
+        query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
 
         return query;
     }
@@ -69,7 +69,7 @@ public class BoxInfoService {
 
         if (answered != null) {
             if (answered) {
-                query.addCriteria(Criteria.where("mediaInfos").size(1));
+                query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
             } else {
                 query.addCriteria(Criteria.where("mediaInfos").size(0));
             }
