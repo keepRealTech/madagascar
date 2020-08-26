@@ -601,7 +601,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     public void retrieveIslanderPortraitUrlByIslandId(RetrieveIslanderPortraitUrlRequest request, StreamObserver<RetrieveIslanderPortraitUrlResponse> responseObserver) {
         String islandId = request.getIslandId();
         Page<String> userIdList = this.subscriptionService.getSubscriberIdListByIslandId(islandId, PageRequest.of(0, 6));
-        List<UserInfo> userInfoList = this.userInfoService.findUserInfosByIds(userIdList);
+        List<UserInfo> userInfoList = this.userInfoService.findUserInfosByIds(userIdList.getContent());
 
         responseObserver.onNext(RetrieveIslanderPortraitUrlResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())

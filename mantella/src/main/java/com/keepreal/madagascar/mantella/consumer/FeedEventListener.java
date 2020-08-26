@@ -5,6 +5,7 @@ import com.aliyun.openservices.ons.api.order.ConsumeOrderContext;
 import com.aliyun.openservices.ons.api.order.MessageOrderListener;
 import com.aliyun.openservices.ons.api.order.OrderAction;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.mantella.FeedEventMessage;
 import com.keepreal.madagascar.mantella.service.TimelineService;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,9 @@ public class FeedEventListener implements MessageOrderListener {
 
             switch (feedEventMessage.getType()) {
                 case FEED_EVENT_CREATE:
+                    if (MediaType.MEDIA_QUESTION_VALUE == feedEventMessage.getFeedCreateEvent().getMediaTypeValue()) {
+                        return OrderAction.Success;
+                    }
                     Boolean hasConsumed = this.timelineService.hasConsumed(message.getKey()).block();
 
                     if (Boolean.TRUE.equals(hasConsumed)) {
