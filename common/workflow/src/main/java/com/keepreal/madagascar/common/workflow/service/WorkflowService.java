@@ -31,11 +31,12 @@ public class WorkflowService {
     /**
      * Initializes a workflow log.
      *
+     * @param label Label.
      * @return {@link WorkflowLog}.
      */
-    public WorkflowLog initialize() {
+    public WorkflowLog initialize(String label) {
         WorkflowLog workflowLog = WorkflowLog.builder()
-                .type(this.workflowConfiguration.getType())
+                .type(this.workflowConfiguration.getType() + label)
                 .startTimestamp(Instant.now().toEpochMilli())
                 .state("In progress")
                 .build();

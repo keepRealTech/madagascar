@@ -9,5 +9,8 @@ common_configs:
 mongodb:
   database: workflow
 
+wechat_pay:
+  cert_path: /app/apiclient_cert.p12
+
 redis:
   port: 6379

@@ -60,4 +60,19 @@ public class BalanceService {
         return this.updateBalance(balance);
     }
 
+    /**
+     * Subtracts cents from the balance.
+     *
+     * @param balance       {@link Balance}.
+     * @param amountInCents Amount to subtract.
+     * @return {@link Balance}.
+     */
+    @Transactional
+    public Balance subtractCents(Balance balance, Long amountInCents) {
+        balance = this.balanceRepository.findByIdAndDeletedIsFalse(balance.getId());
+        balance.setBalanceInCents(balance.getBalanceInCents() - amountInCents);
+
+        return this.updateBalance(balance);
+    }
+
 }
