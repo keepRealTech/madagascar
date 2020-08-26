@@ -24,6 +24,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import swagger.api.ApiUtil;
 import swagger.api.FeedApi;
 import swagger.model.CheckFeedsMessage;
 import swagger.model.DummyResponse;
@@ -38,6 +40,8 @@ import swagger.model.FeedDTO;
 import swagger.model.FeedResponse;
 import swagger.model.FeedsResponseV2;
 import swagger.model.FullFeedResponse;
+import swagger.model.IslandFeedSnapshotDTO;
+import swagger.model.IslandFeedSnapshotResponse;
 import swagger.model.MultiMediaType;
 import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
@@ -524,6 +528,29 @@ public class FeedController implements FeedApi {
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the api for unsubscribed island feeds.
+     *
+     * @param id id (required) Island id.
+     * @return {@link IslandFeedSnapshotResponse}.
+     */
+    @CrossOrigin
+    @Override
+    public ResponseEntity<IslandFeedSnapshotResponse> apiV1IslandsIdFeedsSnapshotGet(String id) {
+        Integer count = this.feedService.retrieveFeedCountByIslandId(id);
+        List<String> imageUris = this.islandService.retrieveIslanderPortraitUrlByIslandId(id);
+
+        IslandFeedSnapshotDTO dto = new IslandFeedSnapshotDTO();
+        dto.setFeedCount(count);
+        dto.setUserPortraitUris(imageUris);
+
+        IslandFeedSnapshotResponse response = new IslandFeedSnapshotResponse();
+        response.setData(dto);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
     }
 
 }
