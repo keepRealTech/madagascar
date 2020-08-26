@@ -1703,6 +1703,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandBoxAccessResponse'
+    get:
+      tags:
+        - Box
+      summary: 获取当前岛提问箱权限
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandBoxAccessListResponse'
   /api/v1/islands/{id}/boxes:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -4301,6 +4312,22 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BoxAccessDTO'
+    FeedMembershipCheckedDTO:
+      allOf:
+        - $ref: '#/components/schemas/FeedMembershipDTO'
+        - type: object
+          properties:
+            checked:
+              type: boolean
+    IslandBoxAccessListResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/FeedMembershipCheckedDTO'
     QuestionDTO:
       type: object
       properties:
