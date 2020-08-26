@@ -47,6 +47,7 @@ public class BoxInfoService {
     public Query retrieveAnswerAndVisibleQuestion(String islandId) {
         Query query = new Query();
         query.addCriteria(Criteria.where("islandId").is(islandId));
+        query.addCriteria(Criteria.where("deleted").is(false));
         query.addCriteria(Criteria.where("mediaInfos.publicVisible").is(true));
         query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
 
@@ -66,6 +67,7 @@ public class BoxInfoService {
         query.addCriteria(Criteria.where("hostId").is(userId));
         query.addCriteria(Criteria.where("multiMediaType").is(MediaType.MEDIA_QUESTION.name()));
         query.addCriteria(Criteria.where("mediaInfos.ignored").ne(true));
+        query.addCriteria(Criteria.where("deleted").is(false));
 
         if (answered != null) {
             if (answered) {
