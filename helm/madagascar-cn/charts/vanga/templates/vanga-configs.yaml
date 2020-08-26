@@ -15,6 +15,8 @@ data:
   IOSPAY_VERIFYURL: {{ .Values.ios_pay.verify_url }}
   IOSPAY_VERIFYURLSANDBOX: {{ .Values.ios_pay.verify_url_sandbox }}
   IOSPAY_ENABLESANDBOX: "false"
+  GRPC_FOSSA_HOST: {{ .Values.fossa.host }}
+  GRPC_FOSSA_PORT: '{{ .Values.fossa.port }}'
   SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
