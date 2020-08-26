@@ -1,8 +1,11 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.google.api.Http;
 import com.keepreal.madagascar.common.FeedGroupMessage;
+import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedGroupDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedGroupService;
 import com.keepreal.madagascar.lemur.service.IslandService;
@@ -164,6 +167,14 @@ public class FeedGroupController implements FeedGroupApi {
      */
     @Override
     public ResponseEntity<FeedGroupResponse> apiV1FeedgroupsIdGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+
+        if (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(islandMessage.getIslandAccessType())
+                && !this.islandService.checkIslandSubscription(id, userId)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_USER_NOT_SUBSCRIBED_ERROR);
+        }
+
         FeedGroupMessage feedGroupMessage = this.feedGroupService.retrieveFeedGroupById(id);
 
         FeedGroupResponse response = new FeedGroupResponse();

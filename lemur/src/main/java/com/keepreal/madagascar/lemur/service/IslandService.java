@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.CheckIslandSubscriptionRequest;
 import com.keepreal.madagascar.coua.CheckNameRequest;
 import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
@@ -20,6 +21,7 @@ import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.coua.IslandResponse;
 import com.keepreal.madagascar.coua.IslandServiceGrpc;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
+import com.keepreal.madagascar.coua.IslandSubscriptionStateResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.coua.NewIslandRequest;
 import com.keepreal.madagascar.coua.QueryIslandCondition;
@@ -42,6 +44,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import swagger.model.CheckIslandResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -618,6 +621,41 @@ public class IslandService {
         if (ErrorCode.REQUEST_SUCC_VALUE != response.getRtn()) {
             throw new KeepRealBusinessException(response);
         }
+    }
+
+    /**
+     * Checks if the user id is a subscriber of island.
+     *
+     * @param islandId  Island id.
+     * @param userId    User id.
+     * @return True if an islander or host.
+     */
+    public boolean checkIslandSubscription(String islandId, String userId) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        CheckIslandSubscriptionRequest request = CheckIslandSubscriptionRequest.newBuilder()
+                .setUserId(userId)
+                .setIslandId(islandId)
+                .build();
+
+        IslandSubscriptionStateResponse response;
+        try {
+            response = stub.checkIslandSubscription(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve island subscribe state returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getHasSubscribed();
     }
 
     /**
