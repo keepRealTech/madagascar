@@ -1,13 +1,17 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.IslandAccessType;
+import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.BoxDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.WechatOrderDTOFactory;
 import com.keepreal.madagascar.lemur.service.BoxService;
 import com.keepreal.madagascar.lemur.service.FeedService;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -35,15 +39,18 @@ public class BoxController implements BoxApi {
 
     private final BoxService boxService;
     private final FeedService feedService;
+    private final IslandService islandService;
     private final BoxDTOFactory boxDTOFactory;
     private final WechatOrderDTOFactory wechatOrderDTOFactory;
 
     public BoxController(BoxService boxService,
                          FeedService feedService,
+                         IslandService islandService,
                          BoxDTOFactory boxDTOFactory,
                          WechatOrderDTOFactory wechatOrderDTOFactory) {
         this.boxService = boxService;
         this.feedService = feedService;
+        this.islandService = islandService;
         this.boxDTOFactory = boxDTOFactory;
         this.wechatOrderDTOFactory = wechatOrderDTOFactory;
     }
@@ -237,6 +244,13 @@ public class BoxController implements BoxApi {
                                                                              Integer page,
                                                                              Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+
+        if (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(islandMessage.getIslandAccessType())
+                && !this.islandService.checkIslandSubscription(id, userId)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_USER_NOT_SUBSCRIBED_ERROR);
+        }
+
 
         com.keepreal.madagascar.fossa.QuestionsResponse questionsResponse = this.boxService.retrieveAnsweredAndVisibleQuestions(id, userId, page, pageSize);
 

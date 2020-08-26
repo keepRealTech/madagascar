@@ -167,6 +167,16 @@ message RetrieveIslanderPortraitUrlResponse {
     repeated string portraitUrl = 2;
 }
 
+message CheckIslandSubscriptionRequest {
+    string islandId = 1;
+    string userId = 2;
+}
+
+message IslandSubscriptionStateResponse {
+    CommonStatus status = 1;
+    bool hasSubscribed = 2;
+}
+
 service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
@@ -184,4 +194,5 @@ service IslandService {
     rpc RetrieveDeviceTokensById (RetrieveDeviceTokensRequest) returns (RetrieveDeviceTokensResponse) {};
     rpc DismissIntroduction(DismissIntroductionRequest) returns (CommonStatus) {};
     rpc RetrieveIslanderPortraitUrlByIslandId(RetrieveIslanderPortraitUrlRequest) returns (RetrieveIslanderPortraitUrlResponse) {}
+    rpc CheckIslandSubscription(CheckIslandSubscriptionRequest) returns (IslandSubscriptionStateResponse) {};
 }
