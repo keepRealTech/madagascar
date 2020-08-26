@@ -23,6 +23,7 @@ import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +65,7 @@ import java.util.stream.Collectors;
  * Represents the feed controller.
  */
 @RestController
+@Slf4j
 public class FeedController implements FeedApi {
 
     private static final String SUPER_ADMIN_USER_ID = "99999999";
@@ -550,7 +552,7 @@ public class FeedController implements FeedApi {
         response.setData(dto);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
-        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

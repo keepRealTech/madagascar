@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.converter;
 
 import com.keepreal.madagascar.common.MediaType;
+import swagger.model.MultiMediaDTO;
 import swagger.model.MultiMediaType;
 
 public class MediaTypeConverter {
@@ -19,6 +20,8 @@ public class MediaTypeConverter {
                 return MediaType.MEDIA_AUDIO;
             case HTML:
                 return MediaType.MEDIA_HTML;
+            case QUESTION:
+                return MediaType.MEDIA_QUESTION;
             default:
                 return MediaType.MEDIA_NONE;
         }
@@ -38,6 +41,8 @@ public class MediaTypeConverter {
                 return MultiMediaType.AUDIO;
             case MEDIA_HTML:
                 return MultiMediaType.HTML;
+            case MEDIA_QUESTION:
+                return MultiMediaType.QUESTION;
             default:
                 return MultiMediaType.TEXT;
         }
