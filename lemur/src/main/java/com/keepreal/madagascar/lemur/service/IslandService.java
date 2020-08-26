@@ -29,6 +29,8 @@ import com.keepreal.madagascar.coua.RetrieveDefaultIslandsByUserIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandProfileByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
+import com.keepreal.madagascar.coua.RetrieveIslanderPortraitUrlRequest;
+import com.keepreal.madagascar.coua.RetrieveIslanderPortraitUrlResponse;
 import com.keepreal.madagascar.coua.RetrieveMultipleIslandsRequest;
 import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateRequest;
 import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateResponse;
@@ -44,7 +46,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import swagger.model.CheckIslandResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -531,8 +532,8 @@ public class IslandService {
     /**
      * Retrieves the island subscribe state by user id.
      *
-     * @param userId        User id.
-     * @param islandIdList  Island ids.
+     * @param userId       User id.
+     * @param islandIdList Island ids.
      * @return True if subscribed.
      */
     public Map<String, Boolean> retrieveIslandSubscribeStateByUserId(String userId, List<String> islandIdList) {
@@ -626,8 +627,8 @@ public class IslandService {
     /**
      * Checks if the user id is a subscriber of island.
      *
-     * @param islandId  Island id.
-     * @param userId    User id.
+     * @param islandId Island id.
+     * @param userId   User id.
      * @return True if an islander or host.
      */
     public boolean checkIslandSubscription(String islandId, String userId) {
@@ -659,10 +660,43 @@ public class IslandService {
     }
 
     /**
+     * Retrieves the islander portraits.
+     *
+     * @param islandId Island id.
+     * @return Portrait uris.
+     */
+    public List<String> retrieveIslanderPortraitUrlByIslandId(String islandId) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveIslanderPortraitUrlRequest request = RetrieveIslanderPortraitUrlRequest.newBuilder()
+                .setIslandId(islandId)
+                .build();
+
+        RetrieveIslanderPortraitUrlResponse response;
+        try {
+            response = stub.retrieveIslanderPortraitUrlByIslandId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve islander portraits returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getPortraitUrlList();
+    }
+
+    /**
      * Checks the string length.
      *
-     * @param str        String.
-     * @param threshold  Max length.
+     * @param str       String.
+     * @param threshold Max length.
      * @return Trimmed string.
      */
     private String checkLength(String str, int threshold) {

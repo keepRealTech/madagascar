@@ -19,6 +19,8 @@ import com.keepreal.madagascar.fossa.NewFeedsRequestV2;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedCountRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedCountResponse;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
@@ -199,7 +201,7 @@ public class FeedService {
     /**
      * Retrieves a feed by id.
      *
-     * @param id Feed id.
+     * @param id     Feed id.
      * @param userId User id.
      * @return {@link FeedGroupFeedResponse}.
      */
@@ -488,7 +490,6 @@ public class FeedService {
         }
     }
 
-
     /**
      * retrieve topped feed (only one in this version) of the island by island id
      *
@@ -518,6 +519,36 @@ public class FeedService {
         }
 
         return response;
+    }
+
+    /**
+     * Retrieves the feed count for an island.
+     *
+     * @param islandId Island id.
+     * @return Count.
+     */
+    public Integer retrieveFeedCountByIslandId(String islandId) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        RetrieveFeedCountRequest request = RetrieveFeedCountRequest.newBuilder()
+                .setIslandId(islandId)
+                .build();
+
+        RetrieveFeedCountResponse response;
+        try {
+            response = stub.retrieveFeedCountByIslandId(request);
+        } catch (StatusRuntimeException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, e.getMessage());
+        }
+
+        if (Objects.isNull(response) || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "retrieve island feed count returns null" : response.toString());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getFeedCount();
     }
 
     private void buildMediaMessage(NewFeedsRequestV2.Builder builder, MediaType mediaType, List<MultiMediaDTO> multiMediaDTOList, String text) {

@@ -599,7 +599,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         responseObserver.onNext(RetrieveFeedCountResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
-                .setFeedCount((int) totalCount)
+                .setFeedCount(Math.toIntExact(totalCount))
                 .build());
         responseObserver.onCompleted();
     }
