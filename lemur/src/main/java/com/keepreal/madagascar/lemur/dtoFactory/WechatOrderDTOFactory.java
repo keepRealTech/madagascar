@@ -36,6 +36,7 @@ public class WechatOrderDTOFactory {
         wechatOrderDTO.setUserId(wechatOrder.getUserId());
         wechatOrderDTO.setFeeInCents(wechatOrder.getFeeInCents());
         wechatOrderDTO.setState(this.convert(wechatOrder.getState()));
+        wechatOrderDTO.setMwebUrl("");
 
         return wechatOrderDTO;
     }
