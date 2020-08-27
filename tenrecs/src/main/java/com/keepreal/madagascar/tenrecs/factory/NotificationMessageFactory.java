@@ -48,7 +48,8 @@ public class NotificationMessageFactory {
                         .build();
             case NOTIFICATION_BOX_NOTICE:
                 return new QuestionBoxNotificationMessageBuilder()
-                        .setLastReadTimestamp(record.getLastReadBoxNoticeNotificationTimestamp())
+                        .setLastReadTimestamp(Objects.isNull(record.getLastReadBoxNoticeNotificationTimestamp())
+                                ? 0L : record.getLastReadBoxNoticeNotificationTimestamp())
                         .setNotification(notification)
                         .build();
             default:
