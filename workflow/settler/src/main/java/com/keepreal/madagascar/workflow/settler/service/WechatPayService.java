@@ -68,14 +68,15 @@ public class WechatPayService {
             Map<String, String> response = this.client.refund(requestBody);
 
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
-                wechatOrder.setErrorMessage(response.get("return_msg"));
+                throw new Exception(response.get("return_msg"));
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
-                wechatOrder.setErrorMessage(response.get("err_code_des"));
+                throw new Exception(response.get("err_code_des"));
             } else {
                 wechatOrder.setState(WechatOrderState.REFUNDING.getValue());
             }
         } catch (Exception e) {
             wechatOrder.setErrorMessage(e.getMessage());
+            throw new RuntimeException("Failed apply refund.");
         } finally {
             wechatOrder = this.wechatOrderService.update(wechatOrder);
         }

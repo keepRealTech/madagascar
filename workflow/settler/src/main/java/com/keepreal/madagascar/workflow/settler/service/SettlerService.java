@@ -249,8 +249,7 @@ public class SettlerService {
     @Transactional(value = Transactional.TxType.REQUIRES_NEW)
     public List<String> expires(Balance userBalance, List<Payment> payments) {
         this.wechatOrderService.retrieveByIds(payments.stream().map(Payment::getOrderId).collect(Collectors.toList()))
-                .stream()
-                .map(wechatOrder -> this.wechatPayService.tryRefund(wechatOrder, "过期退款"));
+                .forEach(wechatOrder -> this.wechatPayService.tryRefund(wechatOrder, "过期退款"));
 
         long amount = this.paymentService.expiresPayment(payments);
         this.balanceService.subtractCents(userBalance, amount);
