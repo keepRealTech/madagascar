@@ -9,6 +9,8 @@ import com.keepreal.madagascar.common.IdentityType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
+import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
 import com.keepreal.madagascar.coua.DeviceTokenResponse;
 import com.keepreal.madagascar.coua.QueryUserCondition;
@@ -297,6 +299,33 @@ public class UserService {
         }
 
         return response.getUser();
+    }
+
+    /**
+     * 判断 手机号是否已被绑定
+     *
+     * @param mobile 手机号
+     */
+    public void checkUserMobileIsExisted(String mobile) {
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
+        CheckUserMobileIsExistedRequest request = CheckUserMobileIsExistedRequest.newBuilder().setMobile(mobile).build();
+        CheckUserMobileIsExistedResponse response;
+
+        try {
+            response = stub.checkUserMobileIsExisted(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "check user mobile return null" : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
     }
 
     /**

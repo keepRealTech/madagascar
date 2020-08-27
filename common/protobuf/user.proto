@@ -99,6 +99,14 @@ message UpdateUserMobileRequest {
     int32 otp = 3;
 }
 
+message CheckUserMobileIsExistedRequest {
+    string mobile = 1;
+}
+
+message CheckUserMobileIsExistedResponse {
+    CommonStatus status = 1;
+}
+
 service UserService {
     rpc CreateUser(NewUserRequest) returns (UserResponse) {};
     rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
@@ -109,4 +117,5 @@ service UserService {
     rpc RetrieveUsersByIds(RetreiveMultipleUsersByIdsRequest) returns (UsersReponse) {};
     rpc SendOtpToMobile(SendOtpToMobileRequest) returns (SendOtpToMobileResponse) {};
     rpc UpdateUserMobile(UpdateUserMobileRequest) returns (UserResponse) {};
+    rpc CheckUserMobileIsExisted(CheckUserMobileIsExistedRequest) returns (CheckUserMobileIsExistedResponse) {};
 }

@@ -4322,10 +4322,10 @@ components:
       properties:
         enabled:
           type: boolean
-        membershipIds:
+        memberships:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/SimpleMembershipDTO'
     BoxDTO:
       type: object
       properties:
