@@ -996,6 +996,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/wechatPay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+      - $ref: '#/components/parameters/sceneTypeInQuery'
+    post:
+      tags:
+        - Payment
+      summary: 微信h5会员订阅支付
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeMemberRequest'
+      responses:
+        '200':
+          description: dummy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
   /api/v1/islands/{id}/memberSubscription/shellPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1565,6 +1586,7 @@ paths:
       tags:
         - Login
       summary: 向指定手机号发送验证码
+      security: []
       responses:
         '200':
           description: 成功返回
@@ -2164,6 +2186,12 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/DeviceType'
+    sceneTypeInQuery:
+      in: query
+      name: sceneType
+      required: true
+      schema:
+        $ref: '#/components/schemas/SceneType'
     hasAnswerInQuery:
       in: query
       name: answered
@@ -2190,6 +2218,13 @@ components:
         - LOGIN_OAUTH_MP_WECHAT
         - LOGIN_PASSWORD
         - LOGIN_JWT_IOS
+        - LOGIN_MOBILE
+    SceneType:
+      type: string
+      enum:
+        - SCENE_IOS
+        - SCENE_ANDROID
+        - SCENE_WAP
     ConfigType:
       type: string
       enum:
@@ -3384,10 +3419,18 @@ components:
           type: string
         password:
           type: string
+    MobileLoginPayload:
+      type: object
+      properties:
+        mobile:
+          type: string
+        otp:
+          type: string
     LoginPayload:
       oneOf:
         - $ref: '#/components/schemas/WechatOAuthLoginPayload'
         - $ref: '#/components/schemas/PasswordLoginPayload'
+        - $ref: '#/components/schemas/MobileLoginPayload'
     PostLoginRequest:
       type: object
       properties:
@@ -3577,6 +3620,8 @@ components:
           format: int64
         state:
           $ref: '#/components/schemas/OrderState'
+        mwebUrl:
+          type: string
     WechatOrderResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
