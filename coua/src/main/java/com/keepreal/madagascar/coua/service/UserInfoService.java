@@ -188,12 +188,13 @@ public class UserInfoService {
     }
 
     /**
-     * 获取所有用户的手机号
+     * 根据手机号查询用户信息
      *
-     * @return 所有用户手机号
+     * @param mobile 手机号
+     * @return {@link UserInfo}
      */
-    public List<String> findAllUserMobile() {
-        return this.userInfoRepository.findAll().stream().map(UserInfo::getMobile).collect(Collectors.toList());
+    public UserInfo findUserInfoByMobile(String mobile) {
+        return this.userInfoRepository.findTopByMobileAndDeletedIsFalse(mobile);
     }
 
 }
