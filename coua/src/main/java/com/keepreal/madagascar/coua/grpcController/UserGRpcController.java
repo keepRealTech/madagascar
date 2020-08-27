@@ -6,6 +6,8 @@ import com.keepreal.madagascar.common.DeviceType;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
+import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
 import com.keepreal.madagascar.coua.DeviceTokenResponse;
 import com.keepreal.madagascar.coua.NewUserRequest;
@@ -330,6 +332,34 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         }
 
         responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * 判断手机号是否已经被绑定
+     *
+     * @param request {@link CheckUserMobileIsExistedRequest}
+     * @param responseObserver {@link StreamObserver}
+     */
+    @Override
+    public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
+        List<String> allMobile = this.userInfoService.findAllUserMobile();
+        String mobile = request.getMobile();
+        Boolean existed = false;
+        for (String dbMobile : allMobile) {
+            if (dbMobile.equals(mobile)) {
+                existed = true;
+                break;
+            }
+        }
+
+        if (existed) {
+            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
+        } else {
+            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.getSuccStatus()).build());
+        }
         responseObserver.onCompleted();
     }
 

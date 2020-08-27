@@ -187,4 +187,13 @@ public class UserInfoService {
         this.userInfoRepository.save(userInfo);
     }
 
+    /**
+     * 获取所有用户的手机号
+     *
+     * @return 所有用户手机号
+     */
+    public List<String> findAllUserMobile() {
+        return this.userInfoRepository.findAll().stream().map(UserInfo::getMobile).collect(Collectors.toList());
+    }
+
 }
