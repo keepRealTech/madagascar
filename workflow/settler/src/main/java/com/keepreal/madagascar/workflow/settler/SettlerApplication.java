@@ -45,7 +45,8 @@ public class SettlerApplication implements CommandLineRunner {
      */
     @Override
     public void run(String... args) {
-        this.settlerService.run(args);
+        this.settlerService.settlePayments();
+        this.settlerService.expirePayments();
         System.exit(0);
     }
 

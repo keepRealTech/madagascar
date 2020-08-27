@@ -49,6 +49,21 @@ spec:
                     secretKeyRef:
                       name: aliyun-redis
                       key: password
+                - name: WECHATPAY_APPID
+                  valueFrom:
+                    secretKeyRef:
+                      name: wechat-pay
+                      key: app-id
+                - name: WECHATPAY_MERCHANTID
+                  valueFrom:
+                    secretKeyRef:
+                      name: wechat-pay
+                      key: mch-id
+                - name: WECHATPAY_MERCHANTKEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: wechat-pay
+                      key: mch-key
               resources:
                 limits:
                   memory: {{ .Values.common_configs.memory }}

@@ -23,5 +23,14 @@ lark:
 executor:
   threads: 20
 
+wechat-pay:
+  app-id: xxx
+  merchant-id: xxx
+  merchant-key: xxx
+  callback-address: https://staging.keepreal.cn/api/v1/orders/wechat/callback
+  refund-callback-address: https://staging.keepreal.cn/api/v1/orders/wechat/refund/callback
+  cert-path: /app/apiclient_cert.p12
+  host-ip: 127.0.0.1
+
 workflow:
   type: settler-daily

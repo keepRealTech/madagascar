@@ -1,6 +1,5 @@
-package com.keepreal.madagascar.vanga.wechatPay;
+package com.keepreal.madagascar.common.wechat_pay;
 
-import lombok.SneakyThrows;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
 
@@ -49,11 +48,14 @@ public class WXPayDecodeUtil {
      * 构造方法(容器初始化时从配置文件中获取key，在全局中维护一个唯一的SecretKeySpec)
      * @param key
      */
-    @SneakyThrows
     public WXPayDecodeUtil(String key) {
         this.key = key;
         // 转化成JAVA的密钥格式
-        this.secretKey = new SecretKeySpec(WXPayUtil.MD5(key).toLowerCase().getBytes(), this.algorithm);
+        try {
+            this.secretKey = new SecretKeySpec(WXPayUtil.MD5(key).toLowerCase().getBytes(), this.algorithm);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         this.initialize();
     }
 

@@ -1,6 +1,6 @@
-package com.keepreal.madagascar.vanga.wechatPay;
+package com.keepreal.madagascar.common.wechat_pay;
 
-import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants.SignType;
+import com.keepreal.madagascar.common.wechat_pay.WXPayConstants.SignType;
 
 import java.util.HashMap;
 import java.util.Map;

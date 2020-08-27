@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.vanga.wechatPay;
+package com.keepreal.madagascar.common.wechat_pay;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -24,7 +24,7 @@ import java.net.UnknownHostException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 
-import static com.keepreal.madagascar.vanga.wechatPay.WXPayConstants.USER_AGENT;
+import static com.keepreal.madagascar.common.wechat_pay.WXPayConstants.USER_AGENT;
 
 public class WXPayRequest {
     private WXPayConfig config;

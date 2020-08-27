@@ -1,9 +1,8 @@
-package com.keepreal.madagascar.vanga.config;
+package com.keepreal.madagascar.workflow.settler.config;
 
 import com.keepreal.madagascar.common.wechat_pay.IWXPayDomain;
 import com.keepreal.madagascar.common.wechat_pay.WXPay;
 import com.keepreal.madagascar.common.wechat_pay.WXPayConfig;
-
 import com.keepreal.madagascar.common.wechat_pay.WXPayConstants;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

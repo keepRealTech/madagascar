@@ -43,6 +43,17 @@ public class PaymentService {
     }
 
     /**
+     * Retrieves all the pending expiring payments by today.
+     *
+     * @return {@link Payment}.
+     */
+    public List<Payment> retrieveTop5000ExpiredPendingPayments() {
+        long today = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        return this.paymentRepository.findTop5000ByTypeInAndStateAndValidAfterBeforeAndDeletedIsFalseOrderByCreatedTime(this.unsettledType,
+                PaymentState.PENDING.getValue(), today);
+    }
+
+    /**
      * Counts all open withdraw payments.
      *
      * @return Counts.
@@ -64,6 +75,20 @@ public class PaymentService {
         payments = payments.stream().peek(payment -> payment.setState(PaymentState.CLOSED.getValue())).collect(Collectors.toList());
         this.paymentRepository.saveAll(payments);
         return totalCents + totalShells;
+    }
+
+    /**
+     * Updates the state of payments to {@link PaymentState}.
+     *
+     * @param payments {@link Payment}.
+     * @return {@link Payment}.
+     */
+    @Transactional
+    public Long expiresPayment(List<Payment> payments) {
+        Long totalCents = payments.stream().map(payment -> this.calculateAmount(payment.getAmountInCents(), payment.getWithdrawPercent())).reduce(0L, Long::sum);
+        payments = payments.stream().peek(payment -> payment.setState(PaymentState.CLOSED.getValue())).collect(Collectors.toList());
+        this.paymentRepository.saveAll(payments);
+        return totalCents;
     }
 
     /**

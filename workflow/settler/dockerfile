@@ -5,5 +5,6 @@ ARG DEPENDENCY=target/dependency
 COPY ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY ${DEPENDENCY}/META-INF /app/META-INF
 COPY ${DEPENDENCY}/BOOT-INF/classes /app
+COPY ${DEPENDENCY}/apiclient_cert.p12 /app
 COPY ${DEPENDENCY}/start.sh /app
 ENTRYPOINT ["sh", "/app/start.sh"]
