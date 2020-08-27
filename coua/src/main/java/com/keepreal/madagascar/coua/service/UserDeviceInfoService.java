@@ -6,6 +6,7 @@ import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
 import com.keepreal.madagascar.coua.model.UserDeviceInfo;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -72,7 +73,7 @@ public class UserDeviceInfoService {
      * @return  device token list.
      */
     public List<SimpleDeviceToken> getDeviceTokenListByUserIdList(List<String> userIdList) {
-        return userDeviceInfoRepository.findDeviceTokenListByUserIdList(userIdList);
+        return userIdList.isEmpty() ? Collections.emptyList() : userDeviceInfoRepository.findDeviceTokenListByUserIdList(userIdList);
     }
 
     /**
