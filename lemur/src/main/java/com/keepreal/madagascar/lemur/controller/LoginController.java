@@ -347,7 +347,8 @@ public class LoginController implements LoginApi {
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest) {
-        userService.sendOtpToMobile(postOTPRequest.getMobile());
+        this.userService.checkUserMobileIsExisted(postOTPRequest.getMobile());
+        this.userService.sendOtpToMobile(postOTPRequest.getMobile());
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);

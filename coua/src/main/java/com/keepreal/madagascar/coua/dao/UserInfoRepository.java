@@ -36,4 +36,6 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
             "WHERE id IN ?1 ORDER BY FIELD (id, ?1) ",
             nativeQuery = true)
     List<UserInfo> findUserInfoInfosByIdInAndDeletedIsFalse(List<String> idList);
+
+    UserInfo findTopByMobileAndDeletedIsFalse(String mobile);
 }
