@@ -14,7 +14,7 @@ data:
   WECHATMP_CERTPATH: {{ .Values.wechat_pay.cert_path }}
   IOSPAY_VERIFYURL: {{ .Values.ios_pay.verify_url }}
   IOSPAY_VERIFYURLSANDBOX: {{ .Values.ios_pay.verify_url_sandbox }}
-  IOSPAY_ENABLESANDBOX: "false"
+  IOSPAY_ENABLESANDBOX: "true"
   GRPC_FOSSA_HOST: {{ .Values.fossa.host }}
   GRPC_FOSSA_PORT: '{{ .Values.fossa.port }}'
   SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
