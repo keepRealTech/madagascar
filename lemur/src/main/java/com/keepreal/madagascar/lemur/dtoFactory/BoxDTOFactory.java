@@ -84,7 +84,10 @@ public class BoxDTOFactory {
 
         BoxAccessDTO dto = new BoxAccessDTO();
         dto.setEnabled(boxMessage.getEnabled());
-        dto.setMembershipIds(boxMessage.getMembershipIdsList());
+        dto.setMemberships(this.membershipService.retrieveMembershipsByIds(boxMessage.getMembershipIdsList())
+                .stream()
+                .map(this.membershipDTOFactory::simpleValueOf)
+                .collect(Collectors.toList()));
 
         return dto;
     }
