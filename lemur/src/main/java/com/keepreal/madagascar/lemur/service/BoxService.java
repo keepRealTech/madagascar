@@ -120,7 +120,7 @@ public class BoxService {
         return response.getMessage();
     }
 
-    public void answerQuestion(String id, String userId, String answer, boolean publicVisible, List<String> visibleMembershipIds) {
+    public void answerQuestion(String id, String userId, String answer, Boolean publicVisible, List<String> visibleMembershipIds) {
         BoxServiceGrpc.BoxServiceBlockingStub stub = BoxServiceGrpc.newBlockingStub(this.fossaChannel);
 
         CommonResponse response;
@@ -130,7 +130,7 @@ public class BoxService {
                     .setId(id)
                     .setUserId(userId)
                     .setAnswer(answer)
-                    .setPublicVisible(publicVisible)
+                    .setPublicVisible(publicVisible == null ? true : publicVisible)
                     .addAllVisibleMembershipIds(visibleMembershipIds == null ? Collections.emptyList() : visibleMembershipIds)
                     .build());
         } catch (StatusRuntimeException exception) {
