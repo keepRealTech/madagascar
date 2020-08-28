@@ -38,7 +38,7 @@ public class PushPriorityConverter {
                 pushPriorityInfo.setExtrasMap(extrasMap);
                 break;
             case PushPriority.NEW_MEMBERSHIP_VALUE:
-                pushPriorityInfo.setText("订阅了你的会员");
+                pushPriorityInfo.setText("刚刚支持了你");
                 pushPriorityInfo.setIosUrl("message://vip");
                 extrasMap.put("notification_type", "NOTIFICATION_ISLAND_NOTICE");
                 extrasMap.put("notification_notice_type", "MEMBER");
