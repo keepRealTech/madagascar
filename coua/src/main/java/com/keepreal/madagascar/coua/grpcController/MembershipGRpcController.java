@@ -91,7 +91,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         MembershipInfo membership = membershipService.getMembershipById(membershipId);
         if (membership == null) {
             responseObserver.onNext(MembershipResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUNT_ERROR))
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUND_ERROR))
                     .build());
             responseObserver.onCompleted();
             return;
@@ -159,7 +159,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
 
         if (membership == null) {
             responseObserver.onNext(MembershipResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUNT_ERROR))
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUND_ERROR))
                     .build());
             responseObserver.onCompleted();
             return;
@@ -298,7 +298,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
 
     private boolean notExist(MembershipInfo membershipInfo, StreamObserver<CommonStatus> responseObserver) {
         if (membershipInfo == null) {
-            responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUNT_ERROR));
+            responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUND_ERROR));
             responseObserver.onCompleted();
             return true;
         }
@@ -308,7 +308,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
     private boolean notExistWithMessage(MembershipInfo membershipInfo, StreamObserver<MembershipResponse> responseObserver) {
         if (membershipInfo == null) {
             responseObserver.onNext(MembershipResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUNT_ERROR))
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUND_ERROR))
                     .build());
             responseObserver.onCompleted();
             return true;
