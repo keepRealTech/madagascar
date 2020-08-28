@@ -37,9 +37,12 @@ opentracing:
     grpc-server-interceptor: false
     const-sampler:
       decision: false
+
 server:
   port: 8090
+
 aliyun:
   sms:
     access-key:
     access-secret:
+    template-id: SMS_200712472

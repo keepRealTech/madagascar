@@ -74,7 +74,7 @@ public class AliyunSmsService {
         request.putQueryParameter("RegionId", REGION_ID);
         request.putQueryParameter("PhoneNumbers", mobile);
         request.putQueryParameter("SignName", "跳岛");
-        request.putQueryParameter("TemplateCode", "SMS_199772682");
+        request.putQueryParameter("TemplateCode", this.aliyunSmsConfig.getTemplateId());
         request.putQueryParameter("TemplateParam", "{\"code\" : " + otpCode + "}");
 
         try {
