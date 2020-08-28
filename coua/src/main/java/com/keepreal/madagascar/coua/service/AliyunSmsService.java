@@ -92,7 +92,7 @@ public class AliyunSmsService {
 
         this.updateMobileLimitStatus(mobile);
         RBucket<Integer> mobileOtp = this.redissonClient.getBucket(MOBILE_PHONE_OTP + mobile);
-        mobileOtp.set(otpCode, 1L, TimeUnit.MINUTES);
+        mobileOtp.set(otpCode, 3L, TimeUnit.MINUTES);
         return CommonStatusUtils.getSuccStatus();
     }
 
