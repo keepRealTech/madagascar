@@ -124,7 +124,7 @@ public class PushNotificationService {
         alert += "\n" + feedService.retrieveFeedTextById(feedId, userId);
 
         Map<String, String> extrasMap = new HashMap<>();
-        extrasMap.put("URL", pushPriorityInfo.getIosUrl() + feedId);
+        extrasMap.put("URL", pushPriorityInfo.getIosUrl());
 
         this.jpushService.pushIosNotification(alert, extrasMap, tokenList.toArray(new String[0]));
     }
@@ -186,7 +186,7 @@ public class PushNotificationService {
         alert += "\n" + feedService.retrieveFeedTextById(feedId, userId);
 
         Map<String, String> extrasMap = new HashMap<>();
-        extrasMap.put("URL", pushPriorityInfo.getIosUrl() + feedId);
+        extrasMap.put("URL", pushPriorityInfo.getIosUrl());
 
         this.jpushService.pushIosNotification(alert, extrasMap, tokenList.toArray(new String[0]));
     }
