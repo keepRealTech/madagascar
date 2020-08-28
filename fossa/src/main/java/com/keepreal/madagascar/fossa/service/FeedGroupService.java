@@ -45,7 +45,7 @@ public class FeedGroupService {
         }
 
         List<String> uris = feedGroup.getImageFeedIds().stream()
-                .limit(1)
+                .skip(feedGroup.getImageFeedIds().size() - 1)
                 .map(feedId -> this.feedInfoRepository.findById(feedId).orElse(null))
                 .filter(Objects::nonNull)
                 .map(FeedInfo::getMediaInfos)
