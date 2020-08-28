@@ -65,7 +65,7 @@ release:
 client:
   android:
     setup_info:
-      version: 110
+      version: 140
       address: https://images.keepreal.cn/tiaodao_v131_kr.apk
 
 security:
