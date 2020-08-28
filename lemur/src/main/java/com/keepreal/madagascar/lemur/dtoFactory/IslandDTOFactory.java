@@ -33,9 +33,9 @@ public class IslandDTOFactory {
     private static final int DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT = 99_999_999;
     private static final String SUBSCRIBER_INTRODUCTION_TITLE = "欢迎加入我的岛！在这里你可以：";
     private static final String SUBSCRIBER_INTRODUCTION_CONTENT =
-            "1.最快了解我的动态\r\n" +
-            "2.与岛民们畅聊和分享同好\r\n" +
-            "3.订阅会员支持我，并获得专属权益";
+            "1.支持我更好创作\r\n" +
+            "2.支持后享受专属权益\r\n" +
+            "3.最快看到我的动态和作品，或向我提问";
 
     private final ChatService chatService;
     private final RepostService repostService;
