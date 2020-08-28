@@ -220,6 +220,7 @@ message FeedMessage {
         AnswerMessage answer = 24;
     }
     repeated string userMembershipId = 25;
+    string hostId = 26;
 }
 
 message WechatOrderMessage {
