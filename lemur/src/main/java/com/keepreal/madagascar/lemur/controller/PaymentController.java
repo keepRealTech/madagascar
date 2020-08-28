@@ -92,8 +92,10 @@ public class PaymentController implements PaymentApi {
     public ResponseEntity<WechatOrderResponse> apiV1IslandsIdMemberSubscriptionWechatPayPost(String id,
                                                                                              SubscribeMemberRequest subscribeMemberRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
+        String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
 
         WechatOrderMessage wechatOrderMessage = this.paymentService.submitSubscribeMembershipWithWechatPay(userId,
+                remoteAddress,
                 subscribeMemberRequest.getMembershipSkuId());
 
         WechatOrderResponse response = new WechatOrderResponse();

@@ -106,13 +106,15 @@ public class PaymentService {
      * Submit a membership subscription request for a given user with wechat pay.
      *
      * @param userId          User id.
+     * @param remoteAddress   Remote address ip.
      * @param membershipSkuId Membership sku id.
      */
-    public WechatOrderMessage submitSubscribeMembershipWithWechatPay(String userId, String membershipSkuId) {
+    public WechatOrderMessage submitSubscribeMembershipWithWechatPay(String userId, String remoteAddress, String membershipSkuId) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         SubscribeMembershipRequest request = SubscribeMembershipRequest.newBuilder()
                 .setUserId(userId)
+                .setIpAddress(remoteAddress)
                 .setMembershipSkuId(membershipSkuId)
                 .build();
 
