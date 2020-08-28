@@ -11,5 +11,6 @@ public class AliyunSmsConfig {
 
     private String accessKey;
     private String accessSecret;
+    private String templateId;
 
 }
