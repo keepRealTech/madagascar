@@ -53,6 +53,7 @@ public class PushPriorityConverter {
                 break;
             case PushPriority.NEW_QUESTION_VALUE:
                 pushPriorityInfo.setText("你收到了一个提问，立即查看");
+                pushPriorityInfo.setAndroidUrl("/flutter/notification_question_box");
                 pushPriorityInfo.setIosUrl("message://ask");
                 extrasMap.put("notification_type", "NOTIFICATION_QUESTIONBOX");
                 extrasMap.put("notification_box_type", "QUESTION");
@@ -60,6 +61,7 @@ public class PushPriorityConverter {
                 break;
             case PushPriority.NEW_REPLY_VALUE:
                 pushPriorityInfo.setText("你收到了一个回答，立即查看");
+                pushPriorityInfo.setAndroidUrl("/flutter/notification_question_box");
                 pushPriorityInfo.setIosUrl("message://answer");
                 extrasMap.put("notification_type", "NOTIFICATION_QUESTIONBOX");
                 extrasMap.put("notification_box_type", "REPLY");
@@ -67,6 +69,7 @@ public class PushPriorityConverter {
                 break;
             case PushPriority.NEW_PUBLIC_REPLY_VALUE:
                 pushPriorityInfo.setText("刚刚回答了一个问题，速来围观！");
+                pushPriorityInfo.setAndroidUrl("/flutter/notification_question_box");
                 pushPriorityInfo.setIosUrl("message://answer");
                 extrasMap.put("notification_type", "NOTIFICATION_QUESTIONBOX");
                 extrasMap.put("notification_box_type", "REPLY");
