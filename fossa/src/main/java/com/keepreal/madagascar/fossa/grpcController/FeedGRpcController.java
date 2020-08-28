@@ -208,7 +208,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
             feedInfoList.get(0).setFeedGroupId(request.getFeedGroupId().getValue());
 
-            if (MediaType.MEDIA_PICS == mediaType || MediaType.MEDIA_ALBUM == mediaType) {
+            if ((MediaType.MEDIA_PICS == mediaType || MediaType.MEDIA_ALBUM == mediaType) && membershipIdsList.isEmpty()) {
                 feedGroup.getImageFeedIds().add(feedInfoList.get(0).getId());
             }
             feedGroup.getFeedIds().add(feedInfoList.get(0).getId());
