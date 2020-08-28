@@ -48,7 +48,7 @@ public class ReconciliationService {
     public void run() {
         log.info("Starting workflow [reconciliation].");
         Map<String, String> map;
-        WorkflowLog workflowLog = this.workflowService.initialize();
+        WorkflowLog workflowLog = this.workflowService.initialize("");
         try {
             map = wechatBillService.downloadBill();
             if ("SUCCESS".equals(map.get("return_code"))) {
