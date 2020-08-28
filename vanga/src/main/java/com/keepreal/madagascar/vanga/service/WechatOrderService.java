@@ -2,6 +2,7 @@ package com.keepreal.madagascar.vanga.service;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
+import com.keepreal.madagascar.vanga.model.WechatOrderType;
 import com.keepreal.madagascar.vanga.repository.WechatOrderRepository;
 import org.springframework.stereotype.Service;
 
@@ -52,9 +53,20 @@ public class WechatOrderService {
      * Update the wechat order.
      *
      * @param order {@link WechatOrder}.
+     * @return {@link WechatOrder}.
      */
     public WechatOrder update(WechatOrder order) {
         return this.wechatOrderRepository.save(order);
+    }
+
+    /**
+     * Retrieves the wechat order for question payment.
+     *
+     * @param feedId Feed id.
+     * @return {@link WechatOrder}.
+     */
+    public WechatOrder retrieveByQuestionId(String feedId) {
+        return this.wechatOrderRepository.findByPropertyIdAndTypeAndDeletedIsFalse(feedId, WechatOrderType.PAYQUESTION.getValue());
     }
 
 }

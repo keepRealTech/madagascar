@@ -89,6 +89,10 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                     && request.getCondition().hasNoticeType()) {
                 notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId, 
                         request.getCondition().getNoticeType().getValue(), pageRequest);
+            } else if (NotificationType.NOTIFICATION_BOX_NOTICE.equals(request.getCondition().getType().getValue())
+                    && request.getCondition().hasNoticeType()) {
+                notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId,
+                        request.getCondition().getNoticeType().getValue(), pageRequest);
             } else {
                 notifications = this.notificationService.retrieveByUserIdAndTypeWithPagination(userId, type, pageRequest);
             }
@@ -123,6 +127,23 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                     record.setLastReadIslandNoticeNewSubscriberNotificationTimestamp(timestamp);
                 }
                 break;
+            case NOTIFICATION_BOX_NOTICE:
+                record.setLastReadBoxNoticeNotificationTimestamp(timestamp);
+                if (request.getCondition().hasNoticeType()) {
+                    switch (request.getCondition().getNoticeType().getValue()) {
+                        case NOTICE_TYPE_BOX_NEW_QUESTION:
+                            record.setLastReadBoxNoticeNewQuestionNotificationTimestamp(timestamp);
+                            break;
+                        case NOTICE_TYPE_BOX_NEW_ANSWER:
+                            record.setLastReadBoxNoticeNewReplyNotificationTimestamp(timestamp);
+                            break;
+                        default:
+                    }
+                } else {
+                    record.setLastReadBoxNoticeNewQuestionNotificationTimestamp(timestamp);
+                    record.setLastReadBoxNoticeNewReplyNotificationTimestamp(timestamp);
+                }
+                break;
             case NOTIFICATION_COMMENTS:
                 record.setLastReadCommentNotificationTimestamp(timestamp);
                 break;
@@ -132,6 +153,9 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 record.setLastReadCommentNotificationTimestamp(timestamp);
                 record.setLastReadIslandNoticeNewSubscriberNotificationTimestamp(timestamp);
                 record.setLastReadIslandNoticeNewMemberNotificationTimestamp(timestamp);
+                record.setLastReadBoxNoticeNotificationTimestamp(timestamp);
+                record.setLastReadBoxNoticeNewQuestionNotificationTimestamp(timestamp);
+                record.setLastReadBoxNoticeNewReplyNotificationTimestamp(timestamp);
         }
 
         this.userNotificationRecordService.update(record);
@@ -164,6 +188,19 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 Objects.isNull(record.getLastReadIslandNoticeNewMemberNotificationTimestamp())
                         ? 0 : record.getLastReadIslandNoticeNewMemberNotificationTimestamp());
 
+        int newQuestionCount = this.notificationService.countByUserIdAndNoticeTypeAndCreatedAtAfter(
+                userId,
+                NoticeType.NOTICE_TYPE_BOX_NEW_QUESTION,
+                Objects.isNull(record.getLastReadBoxNoticeNewQuestionNotificationTimestamp())
+                        ? 0 : record.getLastReadBoxNoticeNewQuestionNotificationTimestamp());
+
+
+        int newAnswerCount = this.notificationService.countByUserIdAndNoticeTypeAndCreatedAtAfter(
+                userId,
+                NoticeType.NOTICE_TYPE_BOX_NEW_ANSWER,
+                Objects.isNull(record.getLastReadBoxNoticeNewReplyNotificationTimestamp())
+                        ? 0 : record.getLastReadBoxNoticeNewReplyNotificationTimestamp());
+
         UnreadNotificationsCountMessage unreadNotificationsCountMessage =
                 UnreadNotificationsCountMessage.newBuilder()
                         .setUnreadCommentsCount(
@@ -178,6 +215,8 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                         .setUnreadIslandNoticesCount(newMemberCount + newSubscriberCount)
                         .setUnreadNewSubscribersCount(newSubscriberCount)
                         .setUnreadNewMembersCount(newMemberCount)
+                        .setUnreadNewQuestionCount(newQuestionCount)
+                        .setUnreadNewAnswerCount(newAnswerCount)
                         .build();
 
         CountUnreadNotificationsResponse response = CountUnreadNotificationsResponse.newBuilder()

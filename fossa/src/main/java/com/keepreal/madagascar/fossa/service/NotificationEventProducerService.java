@@ -4,6 +4,7 @@ import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.ReactionMessage;
 import com.keepreal.madagascar.fossa.config.NotificationEventProducerConfiguration;
 import com.keepreal.madagascar.tenrecs.CommentEvent;
@@ -66,6 +67,10 @@ public class NotificationEventProducerService {
         this.sendAsync(message);
         if (!StringUtils.isEmpty(replyToId) && !replyToId.equals(feedMessage.getUserId())) {
             message = this.createNewCommentEventMessage(commentMessage, feedMessage, replyToId);
+            this.sendAsync(message);
+        }
+        if (feedMessage.getType().equals(MediaType.MEDIA_QUESTION)) {
+            message = this.createNewCommentEventMessage(commentMessage, feedMessage, feedMessage.getHostId());
             this.sendAsync(message);
         }
     }

@@ -68,8 +68,12 @@ public class MembershipService {
         return repository.findMembershipInfoByIdAndActiveIsTrueAndDeletedIsFalse(id);
     }
 
-    public List<MembershipInfo> getMembershipListByIslandId(String islandId) {
-        return repository.findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandId);
+    public List<MembershipInfo> getMembershipListByIslandId(String islandId, boolean includeInactive) {
+        if (includeInactive) {
+            return repository.findMembershipInfosByIslandIdAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandId);
+        } else {
+            return repository.findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandId);
+        }
     }
 
     public List<MembershipInfo> getMembershipListByIslandIds(List<String> islandIds) {

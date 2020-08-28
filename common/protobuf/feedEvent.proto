@@ -3,10 +3,13 @@ syntax = "proto3";
 option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.mantella";
 
+import "common.proto";
+
 enum FeedEventType {
     FEED_EVENT_NONE = 0;
     FEED_EVENT_CREATE= 1;
     FEED_EVENT_DELETE = 2;
+    FEED_EVENT_UPDATE = 3;
 }
 
 message FeedCreateEvent {
@@ -16,6 +19,15 @@ message FeedCreateEvent {
     uint64 createdAt = 4;
     string duplicateTag = 5;
     bool fromHost = 6;
+    MediaType mediaType = 7;
+    string hostId = 8;
+}
+
+message FeedUpdateEvent {
+    string feedId = 1;
+    string islandId = 2;
+    string authorId = 3;
+    repeated string membershipIds = 4;
 }
 
 message FeedDeleteEvent {
@@ -29,5 +41,6 @@ message FeedEventMessage {
     oneof event {
       FeedCreateEvent feedCreateEvent = 4;
       FeedDeleteEvent feedDeleteEvent = 5;
+      FeedUpdateEvent feedUpdateEvent = 6;
     }
 }

@@ -8,7 +8,6 @@ import swagger.model.AvatarDTO;
 import swagger.model.BriefIslandDTO;
 import swagger.model.BriefMembershipDTO;
 import swagger.model.BriefUserDTO;
-import swagger.model.ChatGroupDTO;
 import swagger.model.ChatUserDTO;
 import swagger.model.FullUserDTO;
 import swagger.model.GenderType;
@@ -43,10 +42,21 @@ public class UserDTOFactory {
     /**
      * Converts {@link UserMessage} to {@link UserDTO}.
      *
-     * @param user {@link UserMessage}.
+     * @param user              {@link UserMessage}.
      * @return {@link UserDTO}.
      */
     public UserDTO valueOf(UserMessage user) {
+        return this.valueOf(user, true);
+    }
+
+    /**
+     * Converts {@link UserMessage} to {@link UserDTO}.
+     *
+     * @param user              {@link UserMessage}.
+     * @param shouldMaskMobile  Whether should mask user mobile.
+     * @return {@link UserDTO}.
+     */
+    public UserDTO valueOf(UserMessage user, Boolean shouldMaskMobile) {
         if (Objects.isNull(user)) {
             return null;
         }
@@ -62,6 +72,8 @@ public class UserDTOFactory {
         userDTO.setGender(this.convertGender(user.getGender()));
         userDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
         userDTO.setCreatedAt(user.getCreatedAt());
+        userDTO.setMobile(shouldMaskMobile ? "***********" : user.getMobile());
+
         userDTO.setIdentityTypes(user.getIdentitiesList()
                 .stream()
                 .map(this::convertIdentityType)
@@ -74,10 +86,11 @@ public class UserDTOFactory {
     /**
      * Converts {@link UserMessage} to {@link FullUserDTO}.
      *
-     * @param user {@link UserMessage}.
+     * @param user             {@link UserMessage}.
+     * @param shouldMaskMobile Whether should mask user mobile.
      * @return {@link FullUserDTO}.
      */
-    public FullUserDTO fullValueOf(UserMessage user) {
+    public FullUserDTO fullValueOf(UserMessage user, Boolean shouldMaskMobile) {
         if (Objects.isNull(user)) {
             return null;
         }
@@ -93,6 +106,7 @@ public class UserDTOFactory {
         fullUserDTO.setGender(this.convertGender(user.getGender()));
         fullUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
         fullUserDTO.setCreatedAt(user.getCreatedAt());
+        fullUserDTO.setMobile(shouldMaskMobile ? "***********" : user.getMobile());
 
         fullUserDTO.setIdentityTypes(
                 user.getIdentitiesList()

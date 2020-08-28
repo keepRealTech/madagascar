@@ -106,6 +106,7 @@ public class UserInfoService {
                 .setId(userInfo.getId())
                 .setDisplayId(userInfo.getDisplayId())
                 .setName(userInfo.getNickName())
+                .setMobile(userInfo.getMobile())
                 .setPortraitImageUri(userInfo.getPortraitImageUri())
                 .setGender(Gender.forNumber(userInfo.getGender()))
                 .setDescription(userInfo.getDescription())
@@ -184,6 +185,16 @@ public class UserInfoService {
 
         userInfo.setShouldIntroduce(false);
         this.userInfoRepository.save(userInfo);
+    }
+
+    /**
+     * 根据手机号查询用户信息
+     *
+     * @param mobile 手机号
+     * @return {@link UserInfo}
+     */
+    public UserInfo findUserInfoByMobile(String mobile) {
+        return this.userInfoRepository.findTopByMobileAndDeletedIsFalse(mobile);
     }
 
 }

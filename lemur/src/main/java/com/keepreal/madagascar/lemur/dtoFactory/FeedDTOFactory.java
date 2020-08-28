@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.MediaType;
@@ -16,9 +17,12 @@ import com.keepreal.madagascar.lemur.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import swagger.model.BriefFeedDTO;
 import swagger.model.CheckFeedsDTO;
 import swagger.model.FeedDTO;
+import swagger.model.FeedGroupInfo;
+import swagger.model.FullFeedDTO;
 import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
@@ -56,7 +60,6 @@ public class FeedDTOFactory {
      * @param ehcacheService       {@link EhcacheService}.
      * @param membershipService    {@link MembershipService}.
      * @param membershipDTOFactory {@link MembershipDTOFactory}.
-     * @param multiMediaDTOFactory {@link MultiMediaDTOFactory}.
      */
     public FeedDTOFactory(IslandService islandService,
                           IslandDTOFactory islandDTOFactory,
@@ -65,8 +68,7 @@ public class FeedDTOFactory {
                           CommentDTOFactory commentDTOFactory,
                           EhcacheService ehcacheService,
                           MembershipService membershipService,
-                          MembershipDTOFactory membershipDTOFactory,
-                          MultiMediaDTOFactory multiMediaDTOFactory) {
+                          MembershipDTOFactory membershipDTOFactory) {
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
         this.userService = userService;
@@ -75,7 +77,7 @@ public class FeedDTOFactory {
         this.ehcacheService = ehcacheService;
         this.membershipService = membershipService;
         this.membershipDTOFactory = membershipDTOFactory;
-        this.multiMediaDTOFactory = multiMediaDTOFactory;
+        this.multiMediaDTOFactory = new MultiMediaDTOFactory(userService, userDTOFactory);
     }
 
     /**
@@ -112,6 +114,7 @@ public class FeedDTOFactory {
             feedDTO.setIsTop(feed.getIsTop());
             feedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             feedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            feedDTO.setPriceInCents(feed.getPriceInCents());
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
                 feedDTO.setImagesUris(feed.getImageUrisList());
@@ -160,6 +163,7 @@ public class FeedDTOFactory {
             briefFeedDTO.setCreatedAt(feed.getCreatedAt());
             briefFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             briefFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            briefFeedDTO.setPriceInCents(feed.getPriceInCents());
 
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
@@ -204,6 +208,7 @@ public class FeedDTOFactory {
         snapshotFeedDTO.setCreatedAt(feed.getCreatedAt());
         snapshotFeedDTO.setIsDeleted(this.ehcacheService.checkFeedDeleted(feed.getId()));
         snapshotFeedDTO.setIsAccess(feed.getIsAccess());
+        snapshotFeedDTO.setPriceInCents(feed.getPriceInCents());
 
         snapshotFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
         snapshotFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
@@ -260,6 +265,80 @@ public class FeedDTOFactory {
         posterFeedDTO.setImagesUris(feed.getImageUrisList());
         posterFeedDTO.setCreatedAt(feed.getCreatedAt());
         return posterFeedDTO;
+    }
+
+    /**
+     * Builds a feed message with feed group infos.
+     *
+     * @param feed       {@link FeedMessage}.
+     * @param feedGroup  {@link FeedGroupMessage}.
+     * @param lastFeedId Last feed id.
+     * @param nextFeedId Next feed id.
+     * @return {@link FullFeedDTO}.
+     */
+    public FullFeedDTO valueOf(FeedMessage feed, FeedGroupMessage feedGroup, String lastFeedId, String nextFeedId) {
+        if (Objects.isNull(feed)) {
+            return null;
+        }
+
+        try {
+            IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
+            UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+
+            FullFeedDTO fullFeedDTO = new FullFeedDTO();
+            fullFeedDTO.setId(feed.getId());
+            fullFeedDTO.setText(feed.getText());
+            fullFeedDTO.setFromHost(feed.getFromHost());
+            fullFeedDTO.setLikesCount(feed.getLikesCount());
+            fullFeedDTO.setCommentsCount(feed.getCommentsCount());
+            fullFeedDTO.setComments(feed.getLastCommentsList()
+                    .stream()
+                    .map(this.commentDTOFactory::valueOf)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
+            fullFeedDTO.setRepostCount(feed.getRepostCount());
+            fullFeedDTO.setCreatedAt(feed.getCreatedAt());
+            fullFeedDTO.setIsLiked(feed.getIsLiked());
+            fullFeedDTO.setIsAccess(feed.getIsAccess());
+            fullFeedDTO.setIsMembership(feed.getIsMembership());
+            fullFeedDTO.setIsTop(feed.getIsTop());
+            fullFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
+            fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            if (!StringUtils.isEmpty(feedGroup.getId())) {
+                FeedGroupInfo feedGroupInfo = new FeedGroupInfo();
+                feedGroupInfo.setId(feedGroup.getId());
+                feedGroupInfo.setName(feedGroup.getName());
+                feedGroupInfo.setLastFeedId(lastFeedId);
+                feedGroupInfo.setNextFeedId(nextFeedId);
+                fullFeedDTO.setFeedGroupInfo(feedGroupInfo);
+            } else {
+                fullFeedDTO.setFeedGroupInfo(null);
+            }
+
+            boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
+            if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
+                fullFeedDTO.setImagesUris(feed.getImageUrisList());
+            }
+
+            if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
+                fullFeedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
+            }
+
+            if (!CollectionUtils.isEmpty(feed.getMembershipIdList())) {
+                List<MembershipMessage> membershipMessages = this.membershipService.retrieveMembershipsByIds(feed.getMembershipIdList());
+                fullFeedDTO.setIsMembership(!CollectionUtils.isEmpty(membershipMessages));
+
+                fullFeedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
+                fullFeedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
+            }
+            fullFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
+            fullFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
+
+            return fullFeedDTO;
+        } catch (KeepRealBusinessException exception) {
+            log.error("Failed to serialize feed {}, cause {}.", feed.getId(), exception.getErrorCode());
+            return null;
+        }
     }
 
 }

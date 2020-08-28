@@ -32,9 +32,13 @@ public class FeedInfo {
     private Boolean fromHost;
     private List<String> imageUrls;
     private List<String> membershipIds;
+    private List<String> userMembershipIds;
     private String duplicateTag;
     private String multiMediaType;
     private List<MediaInfo> mediaInfos;
+    private String feedGroupId;
+    @Builder.Default
+    private Long priceInCents = 0L;
     @Builder.Default
     private Integer likesCount = 0;
     @Builder.Default
@@ -46,6 +50,8 @@ public class FeedInfo {
     private Boolean deleted = false;
     @Builder.Default
     private Boolean isTop = false;
+    @Builder.Default
+    private Boolean temped = false;
     @CreatedDate
     private Long createdTime;
     @CreatedDate

@@ -1,7 +1,7 @@
 package com.keepreal.madagascar.vanga.factory;
 
-import com.keepreal.madagascar.vanga.WechatOrderMessage;
-import com.keepreal.madagascar.vanga.WechatOrderState;
+import com.keepreal.madagascar.common.WechatOrderMessage;
+import com.keepreal.madagascar.common.WechatOrderState;
 import com.keepreal.madagascar.vanga.config.WechatPayConfiguration;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import org.springframework.stereotype.Component;

@@ -10,6 +10,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
 import com.keepreal.madagascar.fossa.DeleteFeedResponse;
+import com.keepreal.madagascar.fossa.FeedGroupFeedResponse;
 import com.keepreal.madagascar.fossa.FeedResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
 import com.keepreal.madagascar.fossa.FeedsResponse;
@@ -18,6 +19,8 @@ import com.keepreal.madagascar.fossa.NewFeedsRequestV2;
 import com.keepreal.madagascar.fossa.NewFeedsResponse;
 import com.keepreal.madagascar.fossa.QueryFeedCondition;
 import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedCountRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedCountResponse;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
@@ -34,12 +37,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-
 import org.springframework.util.StringUtils;
 import swagger.model.MultiMediaDTO;
 import swagger.model.TopFeedRequest;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -59,12 +62,12 @@ public class FeedService {
 
     /**
      * Constructs the feed service.
-     *  @param fossaChannel    GRpc managed channel connection to service Fossa.
-     * @param mantellaChannel
-     * @param islandService   {@link IslandService}
-     * @param mediaService
+     *
+     * @param fossaChannel    GRpc managed channel connection to service Fossa.
+     * @param mantellaChannel GRpc managed channel connection to service Mantella.
+     * @param islandService   {@link IslandService}.
+     * @param mediaService    {@link MediaService}.
      */
-
     public FeedService(@Qualifier("fossaChannel") Channel fossaChannel,
                        @Qualifier("mantellaChannel") Channel mantellaChannel,
                        IslandService islandService,
@@ -119,7 +122,13 @@ public class FeedService {
         }
     }
 
-    public void createFeedV2(List<String> islandIds, List<String> membershipIds, String userId, MediaType mediaType, List<MultiMediaDTO> multiMediaDTOList, String text) {
+    public void createFeedV2(List<String> islandIds,
+                             List<String> membershipIds,
+                             String userId,
+                             MediaType mediaType,
+                             List<MultiMediaDTO> multiMediaDTOList,
+                             String text,
+                             String feedGroupId) {
         if (Objects.isNull(islandIds) || islandIds.size() == 0) {
             log.error("param islandIds is invalid");
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
@@ -131,9 +140,13 @@ public class FeedService {
         NewFeedsRequestV2.Builder builder = NewFeedsRequestV2.newBuilder()
                 .addAllIslandId(islandIds)
                 .addAllHostId(hostIdList)
-                .addAllMembershipIds(membershipIds)
+                .addAllMembershipIds(Objects.isNull(membershipIds) ? new ArrayList<>() : membershipIds)
                 .setUserId(userId)
                 .setType(mediaType);
+
+        if (!Objects.isNull(feedGroupId)) {
+            builder.setFeedGroupId(StringValue.of(feedGroupId));
+        }
 
         this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
 
@@ -187,6 +200,42 @@ public class FeedService {
 
     /**
      * Retrieves a feed by id.
+     *
+     * @param id     Feed id.
+     * @param userId User id.
+     * @return {@link FeedGroupFeedResponse}.
+     */
+    public FeedGroupFeedResponse retrieveFeedGroupFeedById(String id, String userId) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        RetrieveFeedByIdRequest request = RetrieveFeedByIdRequest.newBuilder()
+                .setId(id)
+                .setUserId(userId)
+                .setIncludeDeleted(false)
+                .build();
+
+        FeedGroupFeedResponse response;
+        try {
+            response = stub.retrieveFeedGroupFeedById(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve feed returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
+    }
+
+    /**
+     * Retrieves a feed with feed group info by id.
      *
      * @param id Feed id.
      * @return {@link FeedMessage}.
@@ -329,9 +378,9 @@ public class FeedService {
 
         return new AbstractMap.SimpleEntry<>(timelinesResponse.getHasMore(),
                 this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
-                .stream()
-                .map(TimelineMessage::getFeedId)
-                .collect(Collectors.toList()), userId));
+                        .stream()
+                        .map(TimelineMessage::getFeedId)
+                        .collect(Collectors.toList()), userId));
     }
 
     /**
@@ -414,11 +463,11 @@ public class FeedService {
     /**
      * top or cancel top feed by request
      *
-     * @param topFeedRequest    request
-     * @param id    island id
+     * @param topFeedRequest request
+     * @param id             island id
      */
     public void topFeedByRequest(TopFeedRequest topFeedRequest, String id) {
-        FeedServiceGrpc.FeedServiceBlockingStub stub =  FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
         TopFeedByIdRequest request = TopFeedByIdRequest.newBuilder()
                 .setId(topFeedRequest.getFeedId())
                 .setIsRevoke(topFeedRequest.getIsRevoke())
@@ -440,7 +489,6 @@ public class FeedService {
             throw new KeepRealBusinessException(response.getStatus());
         }
     }
-
 
     /**
      * retrieve topped feed (only one in this version) of the island by island id
@@ -471,6 +519,36 @@ public class FeedService {
         }
 
         return response;
+    }
+
+    /**
+     * Retrieves the feed count for an island.
+     *
+     * @param islandId Island id.
+     * @return Count.
+     */
+    public Integer retrieveFeedCountByIslandId(String islandId) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        RetrieveFeedCountRequest request = RetrieveFeedCountRequest.newBuilder()
+                .setIslandId(islandId)
+                .build();
+
+        RetrieveFeedCountResponse response;
+        try {
+            response = stub.retrieveFeedCountByIslandId(request);
+        } catch (StatusRuntimeException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, e.getMessage());
+        }
+
+        if (Objects.isNull(response) || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "retrieve island feed count returns null" : response.toString());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getFeedCount();
     }
 
     private void buildMediaMessage(NewFeedsRequestV2.Builder builder, MediaType mediaType, List<MultiMediaDTO> multiMediaDTOList, String text) {

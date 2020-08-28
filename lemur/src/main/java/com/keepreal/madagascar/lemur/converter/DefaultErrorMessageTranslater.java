@@ -56,6 +56,12 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "你都创建100个群了！你克制点！";
             case REQUEST_REDIS_SHORTURL_NOT_FOUND_ERROR:
                 return "分享链接已失效";
+            case REQUEST_USER_MOBILE_OTP_NOT_MATCH:
+                return "验证码错误，请重新输入";
+            case REQUEST_USER_MOBILE_OTP_TOO_FREQUENTLY:
+                return "验证码获取太频繁，请稍后再试";
+            case REQUEST_USER_MOBILE_EXISTED:
+                return "该手机号已被绑定，请重新输入";
             default:
                 return errorCode.getValueDescriptor().getName();
         }

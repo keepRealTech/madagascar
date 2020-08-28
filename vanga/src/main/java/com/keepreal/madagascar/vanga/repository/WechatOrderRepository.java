@@ -11,4 +11,6 @@ public interface WechatOrderRepository extends JpaRepository<WechatOrder, String
 
     WechatOrder findTopByTradeNumberAndDeletedIsFalse(String tradeNumber);
 
+    WechatOrder findByPropertyIdAndTypeAndDeletedIsFalse(String propertyId, Integer type);
+
 }

@@ -31,9 +31,11 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
     @Query(value =
             "SELECT id, display_id, nick_name, portrait_image_uri, gender, " +
                     "description, city, birthday, state, union_id, is_deleted, " +
-                    "locked_until, created_time, updated_time, username, password, should_introduce " +
+                    "locked_until, created_time, updated_time, username, password, should_introduce, mobile " +
             "FROM user " +
             "WHERE id IN ?1 ORDER BY FIELD (id, ?1) ",
             nativeQuery = true)
     List<UserInfo> findUserInfoInfosByIdInAndDeletedIsFalse(List<String> idList);
+
+    UserInfo findTopByMobileAndDeletedIsFalse(String mobile);
 }

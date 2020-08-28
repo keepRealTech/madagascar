@@ -22,50 +22,53 @@ global:
       vanga: 2
       asity: 2
     short_code_base: https://islands.keepreal.cn/s/%s
+    wechat_pay:
+      callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/callback
+      refund_callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/refund/callback
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.2.2
+      tag: 1.2.3
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
-      tag: 1.0.4
+      tag: 1.0.5
       imagePullPolicy: Always
     brookesia:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/brookesia
-      tag: 1.0.2
+      tag: 1.0.3
       imagePullPolicy: Always
     coua:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-      tag: 1.0.7
+      tag: 1.0.9
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-      tag: 1.0.4
+      tag: 1.0.6
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
-      tag: 1.0.2
+      tag: 1.0.3
       imagePullPolicy: Always
     mantella:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/mantella
-      tag: 1.0.2
+      tag: 1.0.3
       imagePullPolicy: Always
     marty:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/marty
-      tag: 1.0.3
+      tag: 1.0.4
       imagePullPolicy: Always
     tenrecs:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/tenrecs
-      tag: 1.0.3
+      tag: 1.0.4
       imagePullPolicy: Always
     vanga:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
-      tag: 1.1.1
+      tag: 1.1.2
       imagePullPolicy: Always
     settler:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/settler
-      tag: 1.0.3
+      tag: 1.1.0
       imagePullPolicy: Always
     reconciliation:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/reconciliation
@@ -73,7 +76,7 @@ global:
       imagePullPolicy: Always
     asity:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
-      tag: 1.0.2
+      tag: 1.0.3
       imagePullPolicy: Always
 
 deploy:

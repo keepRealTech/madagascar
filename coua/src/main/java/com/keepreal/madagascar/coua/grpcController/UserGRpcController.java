@@ -6,6 +6,8 @@ import com.keepreal.madagascar.common.DeviceType;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
+import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
 import com.keepreal.madagascar.coua.DeviceTokenResponse;
 import com.keepreal.madagascar.coua.NewUserRequest;
@@ -16,12 +18,16 @@ import com.keepreal.madagascar.coua.RetrieveDeviceTokenResponse;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokensByUserIdListRequest;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokensByUserIdListResponse;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
+import com.keepreal.madagascar.coua.SendOtpToMobileRequest;
+import com.keepreal.madagascar.coua.SendOtpToMobileResponse;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
+import com.keepreal.madagascar.coua.UpdateUserMobileRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
 import com.keepreal.madagascar.coua.UsersReponse;
 import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
 import com.keepreal.madagascar.coua.model.UserInfo;
+import com.keepreal.madagascar.coua.service.AliyunSmsService;
 import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
 import com.keepreal.madagascar.coua.service.UserIdentityService;
 import com.keepreal.madagascar.coua.service.UserInfoService;
@@ -29,6 +35,8 @@ import com.keepreal.madagascar.coua.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.util.StringUtils;
 
 import java.sql.Date;
@@ -47,6 +55,8 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     private final UserInfoService userInfoService;
     private final UserDeviceInfoService userDeviceInfoService;
     private final UserIdentityService userIdentityService;
+    private final AliyunSmsService aliyunSmsService;
+    private final RedissonClient redissonClient;
 
     /**
      * Constructs user grpc controller.
@@ -54,13 +64,18 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
      * @param userInfoService       {@link UserInfoService}.
      * @param userDeviceInfoService {@link UserDeviceInfoService}.
      * @param userIdentityService   {@link UserIdentityService}.
+     * @param aliyunSmsService      {@link AliyunSmsService}
      */
     public UserGRpcController(UserInfoService userInfoService,
                               UserDeviceInfoService userDeviceInfoService,
-                              UserIdentityService userIdentityService) {
+                              UserIdentityService userIdentityService,
+                              AliyunSmsService aliyunSmsService,
+                              RedissonClient redissonClient) {
         this.userInfoService = userInfoService;
         this.userDeviceInfoService = userDeviceInfoService;
         this.userIdentityService = userIdentityService;
+        this.aliyunSmsService = aliyunSmsService;
+        this.redissonClient = redissonClient;
     }
 
     /**
@@ -277,6 +292,70 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     }
 
     /**
+     * Implements the send otp to mobile phone .
+     *
+     * @param request          {@link SendOtpToMobileRequest}
+     * @param responseObserver {@link StreamObserver}
+     */
+    @Override
+    public void sendOtpToMobile(SendOtpToMobileRequest request, StreamObserver<SendOtpToMobileResponse> responseObserver) {
+        CommonStatus commonStatus = aliyunSmsService.sendOtpToMobile(request.getMobile());
+        SendOtpToMobileResponse response = SendOtpToMobileResponse.newBuilder().setStatus(commonStatus).build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * 更新当前用户手机号
+     *
+     * @param request {@link UpdateUserMobileRequest}
+     * @param responseObserver {@link StreamObserver}
+     */
+    @Override
+    public void updateUserMobile(UpdateUserMobileRequest request, StreamObserver<UserResponse> responseObserver) {
+        String userId = request.getUserId();
+        String mobile = request.getMobile();
+        Integer otp = request.getOtp();
+        UserResponse.Builder builder = UserResponse.newBuilder();
+
+        RBucket<Integer> redisOtp = this.redissonClient.getBucket(AliyunSmsService.MOBILE_PHONE_OTP + mobile);
+        Integer intOtp = redisOtp.get();
+        if (Objects.isNull(intOtp) || !otp.equals(intOtp)) {
+            builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
+        } else {
+            UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
+            userInfo.setMobile(mobile);
+            UserInfo userInfoNew = this.userInfoService.updateUser(userInfo);
+            builder.setStatus(CommonStatusUtils.getSuccStatus());
+            builder.setUser(this.userInfoService.getUserMessage(userInfoNew));
+            redisOtp.delete();
+        }
+
+        responseObserver.onNext(builder.build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * 判断手机号是否已经被绑定
+     *
+     * @param request {@link CheckUserMobileIsExistedRequest}
+     * @param responseObserver {@link StreamObserver}
+     */
+    @Override
+    public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
+        String mobile = request.getMobile();
+        UserInfo userInfo = this.userInfoService.findUserInfoByMobile(mobile);
+        if (Objects.nonNull(userInfo)) {
+            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
+        } else {
+            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.getSuccStatus()).build());
+        }
+        responseObserver.onCompleted();
+    }
+
+    /**
      * basic response.
      *
      * @param responseObserver {@link UserResponse}.
@@ -289,4 +368,5 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         responseObserver.onNext(userResponse);
         responseObserver.onCompleted();
     }
+
 }

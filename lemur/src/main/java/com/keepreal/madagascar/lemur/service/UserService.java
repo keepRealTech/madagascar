@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.DeviceType;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.GenderValue;
@@ -8,15 +9,21 @@ import com.keepreal.madagascar.common.IdentityType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
+import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
 import com.keepreal.madagascar.coua.DeviceTokenResponse;
 import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.RetreiveMultipleUsersByIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
+import com.keepreal.madagascar.coua.SendOtpToMobileRequest;
+import com.keepreal.madagascar.coua.SendOtpToMobileResponse;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
+import com.keepreal.madagascar.coua.UpdateUserMobileRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
 import com.keepreal.madagascar.coua.UsersReponse;
+import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +32,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import swagger.model.PutUserMobileRequest;
 
 import java.util.List;
 import java.util.Objects;
@@ -223,6 +231,100 @@ public class UserService {
 
         if (ErrorCode.REQUEST_SUCC_VALUE != deviceTokenResponse.getStatus().getRtn()) {
             throw new KeepRealBusinessException(deviceTokenResponse.getStatus());
+        }
+    }
+
+    /**
+     * 向指定手机号发送验证码
+     *
+     * @param mobile 手机号
+     */
+    public void sendOtpToMobile(String mobile) {
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
+
+        SendOtpToMobileRequest request = SendOtpToMobileRequest.newBuilder().setMobile(mobile).build();
+
+        SendOtpToMobileResponse response;
+        try {
+            response = stub.sendOtpToMobile(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "send otp to mobile return null" : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+    }
+
+    /**
+     * 更新当前用户手机号
+     *
+     * @param userId    User id.
+     * @param mobile    Mobile.
+     * @param otp       One time password.
+     * @return {@link UserMessage}
+     */
+    @CachePut(value = "UserMesaage", key = "#userId", cacheManager = "redisCacheManager")
+    public UserMessage updateUserMobilePhone(String userId, String mobile, Integer otp) {
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
+
+        UpdateUserMobileRequest request = UpdateUserMobileRequest.newBuilder()
+                .setUserId(userId)
+                .setMobile(mobile)
+                .setOtp(otp)
+                .build();
+
+        UserResponse response;
+        try {
+            response = stub.updateUserMobile(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "update user mobile return null" : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getUser();
+    }
+
+    /**
+     * 判断 手机号是否已被绑定
+     *
+     * @param mobile 手机号
+     */
+    public void checkUserMobileIsExisted(String mobile) {
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
+        CheckUserMobileIsExistedRequest request = CheckUserMobileIsExistedRequest.newBuilder().setMobile(mobile).build();
+        CheckUserMobileIsExistedResponse response;
+
+        try {
+            response = stub.checkUserMobileIsExisted(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "check user mobile return null" : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
         }
     }
 

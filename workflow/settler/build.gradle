@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation project(":common:workflow")
+    implementation project(":common:wechat-pay-starter")
 
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-aop'

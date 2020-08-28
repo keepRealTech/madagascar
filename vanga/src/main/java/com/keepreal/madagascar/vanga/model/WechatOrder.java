@@ -34,10 +34,9 @@ public class WechatOrder {
     private String description;
     private String tradeNumber;
     private String feeInCents;
+    private Integer type;
     @Builder.Default
-    private String memberShipSkuId = "";
-    @Builder.Default
-    private String shellSkuId = "";
+    private String propertyId = "";
     private String appId;
     private String mchId;
     @Transient
@@ -64,5 +63,7 @@ public class WechatOrder {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+    @Builder.Default
+    private Long refundTime = 0L;
 
 }

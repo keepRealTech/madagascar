@@ -137,6 +137,8 @@ public class NotificationController implements NotificationApi {
                 return NotificationType.NOTIFICATION_REACTIONS;
             case ISLAND_NOTICE:
                 return NotificationType.NOTIFICATION_ISLAND_NOTICE;
+            case BOX_NOTICE:
+                return NotificationType.NOTIFICATION_BOX_NOTICE;
             default:
                 return NotificationType.UNRECOGNIZED;
         }
@@ -154,10 +156,14 @@ public class NotificationController implements NotificationApi {
         }
 
         switch (noticeType) {
-            case SUBSCRIBER:
+            case ISLAND_NOTICE_NEW_SUBSCRIBER:
                 return NoticeType.NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER;
-            case MEMBER:
+            case ISLAND_NOTICE_NEW_MEMBER:
                 return NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER;
+            case BOX_NOTICE_NEW_QUESTION:
+                return NoticeType.NOTICE_TYPE_BOX_NEW_QUESTION;
+            case BOX_NOTICE_NEW_ANSWER:
+                return NoticeType.NOTICE_TYPE_BOX_NEW_ANSWER;
             default:
                 return NoticeType.UNRECOGNIZED;
         }

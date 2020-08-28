@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.PaymentDTOFactory;
@@ -11,9 +12,7 @@ import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
-import com.keepreal.madagascar.vanga.WechatOrderMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;

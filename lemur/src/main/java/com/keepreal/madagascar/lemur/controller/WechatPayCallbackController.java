@@ -62,4 +62,25 @@ public class WechatPayCallbackController {
         }
     }
 
+    /**
+     * Implements the wechat refund order callback api.
+     *
+     * @param request  {@link HttpServletRequest}.
+     * @param response {@link HttpServletResponse}.
+     */
+    @RequestMapping(value = "/api/v1/orders/wechat/refund/callback", method = RequestMethod.POST)
+    public void apiV1OrdersWechatRefundCallback(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            String requestXml = IOUtils.toString(request.getInputStream(), Charset.forName(request.getCharacterEncoding()));
+            this.orderService.wechatOrderRefundCallback(requestXml);
+
+            BufferedOutputStream out = new BufferedOutputStream(response.getOutputStream());
+            out.write(this.successResponseXml.getBytes());
+            out.flush();
+            out.close();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
 }

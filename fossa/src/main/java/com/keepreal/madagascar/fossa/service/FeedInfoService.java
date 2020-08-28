@@ -9,10 +9,12 @@ import com.keepreal.madagascar.common.ReactionType;
 import com.keepreal.madagascar.fossa.TimelineFeedMessage;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
+import com.keepreal.madagascar.fossa.model.AnswerInfo;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
-import com.keepreal.madagascar.fossa.model.PictureInfo;
 import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -84,9 +86,9 @@ public class FeedInfoService {
      * @return {@link FeedMessage}.
      */
     public FeedMessage getFeedMessageById(String feedId, String userId) {
-        Optional<FeedInfo> feedInfoOptional = feedInfoRepository.findById(feedId);
+        Optional<FeedInfo> feedInfoOptional = this.feedInfoRepository.findById(feedId);
         if (feedInfoOptional.isPresent()) {
-            return getFeedMessage(feedInfoOptional.get(), userId);
+            return this.getFeedMessage(feedInfoOptional.get(), userId);
         } else {
             return FeedMessage.newBuilder().build();
         }
@@ -146,8 +148,9 @@ public class FeedInfoService {
      * @return {@link FeedMessage}.
      */
     public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
-        if (feedInfo == null)
+        if (feedInfo == null) {
             return null;
+        }
 
         List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
@@ -164,8 +167,10 @@ public class FeedInfoService {
                 .addAllLastComments(lastCommentMessage)
                 .setIsLiked(isLiked)
                 .setIsDeleted(feedInfo.getDeleted())
+                .setPriceInCents(Objects.nonNull(feedInfo.getPriceInCents()) ? feedInfo.getPriceInCents() : 0L)
                 .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost())
-                .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop());
+                .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop())
+                .setHostId(feedInfo.getHostId());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
@@ -183,7 +188,9 @@ public class FeedInfoService {
                 builder.addAllMembershipId(membershipIds);
             }
         }
-        processMedia(builder, feedInfo);
+        this.processMedia(builder, feedInfo);
+
+        builder.addAllUserMembershipId(CollectionUtils.isEmpty(feedInfo.getUserMembershipIds()) ? Collections.emptyList() : feedInfo.getUserMembershipIds());
 
         return builder.build();
     }
@@ -195,6 +202,16 @@ public class FeedInfoService {
      */
     public List<FeedInfo> saveAll(List<FeedInfo> feedInfoList) {
         return feedInfoRepository.saveAll(feedInfoList);
+    }
+
+    /**
+     * Update feed.
+     *
+     * @param feedInfo  {@link FeedInfo}.
+     * @return  {@link FeedInfo}.
+     */
+    public FeedInfo update(FeedInfo feedInfo) {
+        return feedInfoRepository.save(feedInfo);
     }
 
     /**
@@ -227,8 +244,8 @@ public class FeedInfoService {
      *
      * @param feedInfo {@link FeedInfo}
      */
-    public void insert(FeedInfo feedInfo) {
-        feedInfoRepository.insert(feedInfo);
+    public FeedInfo insert(FeedInfo feedInfo) {
+        return feedInfoRepository.insert(feedInfo);
     }
 
     /**
@@ -239,6 +256,17 @@ public class FeedInfoService {
      */
     public List<FeedInfo> findByIds(Iterable<String> ids) {
         return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
+    }
+
+    /**
+     * Retrieves feeds by feed group id.
+     *
+     * @param feedGroupId   Feed group id.
+     * @param pageable      {@link Pageable}.
+     * @return {@link FeedInfo}.
+     */
+    public Page<FeedInfo> retrieveFeedsByFeedGroupId(String feedGroupId, Pageable pageable) {
+        return this.feedInfoRepository.findAllByFeedGroupIdAndDeletedIsFalseOrderByCreatedTimeDesc(feedGroupId, pageable);
     }
 
     /**
@@ -286,6 +314,12 @@ public class FeedInfoService {
         return this.feedInfoRepository.findTopByIslandIdAndIsTopIsTrueAndDeletedIsFalse(islandId);
     }
 
+    /**
+     * Processes the multimedia.
+     *
+     * @param builder   {@link FeedMessage.Builder}.
+     * @param feedInfo  {@link FeedInfo}.
+     */
     private void processMedia(FeedMessage.Builder builder, FeedInfo feedInfo) {
         if (feedInfo.getMultiMediaType() == null) {
             if (CollectionUtils.isEmpty(feedInfo.getImageUrls())) {
@@ -314,13 +348,24 @@ public class FeedInfoService {
                 builder.setPics(MediaMessageConvertUtils.toPicturesMessage(feedInfo.getMediaInfos()));
                 break;
             case MEDIA_VIDEO:
-                builder.setVideo(MediaMessageConvertUtils.toVideoMessage(feedInfo.getMediaInfos().get(0)));
+                if (!feedInfo.getMediaInfos().isEmpty()) {
+                    builder.setVideo(MediaMessageConvertUtils.toVideoMessage(feedInfo.getMediaInfos().get(0)));
+                }
                 break;
             case MEDIA_AUDIO:
-                builder.setAudio(MediaMessageConvertUtils.toAudioMessage(feedInfo.getMediaInfos().get(0)));
+                if (!feedInfo.getMediaInfos().isEmpty()) {
+                    builder.setAudio(MediaMessageConvertUtils.toAudioMessage(feedInfo.getMediaInfos().get(0)));
+                }
                 break;
             case MEDIA_HTML:
-                builder.setHtml(MediaMessageConvertUtils.toHtmlMessage(feedInfo.getMediaInfos().get(0)));
+                if (!feedInfo.getMediaInfos().isEmpty()) {
+                    builder.setHtml(MediaMessageConvertUtils.toHtmlMessage(feedInfo.getMediaInfos().get(0)));
+                }
+                break;
+            case MEDIA_QUESTION:
+                if (!feedInfo.getMediaInfos().isEmpty()) {
+                    builder.setAnswer(MediaMessageConvertUtils.toAnswerMessage((AnswerInfo) feedInfo.getMediaInfos().get(0)));
+                }
                 break;
         }
     }

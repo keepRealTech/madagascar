@@ -1,0 +1,90 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.fossa";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message AnswerQuestionRequest {
+    string id = 1;
+    string userId = 2;
+    string answer = 3;
+    bool publicVisible = 4;
+    repeated string visibleMembershipIds = 5;
+}
+
+message CommonResponse {
+    CommonStatus status = 1;
+}
+
+message CreateOrUpdateBoxRequest {
+    string islandId = 1;
+    bool enabled = 2;
+    repeated string membershipIds = 3;
+    string userId = 4;
+}
+
+message CreateOrUpdateBoxResponse {
+    CommonStatus status = 1;
+    BoxMessage message = 2;
+}
+
+message RetrieveAnsweredAndVisibleQuestionsRequest {
+    string userId = 1;
+    string islandId = 2;
+    PageRequest pageRequest = 3;
+}
+
+message RetrieveAskMeQuestionsRequest {
+    string userId = 1;
+    PageRequest pageRequest = 2;
+    google.protobuf.BoolValue answered = 3;
+    google.protobuf.BoolValue hasMembership = 4;
+    google.protobuf.BoolValue paid = 5;
+}
+
+message RetrieveAnswerMeQuestionsRequest {
+    string userId = 1;
+    PageRequest pageRequest = 2;
+}
+
+message QuestionsResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated FeedMessage feed = 3;
+}
+
+message RetrieveBoxInfoRequest {
+    string islandId = 1;
+    string hostId = 2;
+}
+
+message RetrieveBoxInfoResponse {
+    CommonStatus status = 1;
+    BoxMessage message = 2;
+}
+
+message IgnoreQuestionRequest {
+    string questionId = 1;
+    string userId = 2;
+}
+
+message BoxMessage {
+    string id = 1;
+    string island = 2;
+    bool enabled = 3;
+    repeated string membershipIds = 4;
+    int32 answeredQuestionCount = 5;
+    string hostId = 6;
+}
+
+service BoxService {
+    rpc AnswerQuestion (AnswerQuestionRequest) returns (CommonResponse) {}
+    rpc PutBox (CreateOrUpdateBoxRequest) returns (CreateOrUpdateBoxResponse) {}
+    rpc RetrieveBoxInfo (RetrieveBoxInfoRequest) returns (RetrieveBoxInfoResponse) {}
+    rpc RetrieveAnsweredAndVisibleQuestion (RetrieveAnsweredAndVisibleQuestionsRequest) returns (QuestionsResponse) {}
+    rpc RetrieveAskMeQuestion (RetrieveAskMeQuestionsRequest) returns (QuestionsResponse) {}
+    rpc RetrieveAnswerMeQuestions (RetrieveAnswerMeQuestionsRequest) returns (QuestionsResponse) {}
+    rpc IgnoreQuestion (IgnoreQuestionRequest) returns (CommonResponse) {}
+}

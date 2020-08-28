@@ -85,6 +85,28 @@ message UsersReponse {
     repeated UserMessage users = 2;
 }
 
+message SendOtpToMobileRequest {
+    string mobile = 1;
+}
+
+message SendOtpToMobileResponse {
+    CommonStatus status = 1;
+}
+
+message UpdateUserMobileRequest {
+    string userId = 1;
+    string mobile = 2;
+    int32 otp = 3;
+}
+
+message CheckUserMobileIsExistedRequest {
+    string mobile = 1;
+}
+
+message CheckUserMobileIsExistedResponse {
+    CommonStatus status = 1;
+}
+
 service UserService {
     rpc CreateUser(NewUserRequest) returns (UserResponse) {};
     rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
@@ -93,4 +115,7 @@ service UserService {
     rpc RetrieveDeviceTokenByUserId(RetrieveDeviceTokenRequest) returns (RetrieveDeviceTokenResponse) {};
     rpc RetrieveDeviceTokensByUserIdList(RetrieveDeviceTokensByUserIdListRequest) returns (RetrieveDeviceTokensByUserIdListResponse) {};
     rpc RetrieveUsersByIds(RetreiveMultipleUsersByIdsRequest) returns (UsersReponse) {};
+    rpc SendOtpToMobile(SendOtpToMobileRequest) returns (SendOtpToMobileResponse) {};
+    rpc UpdateUserMobile(UpdateUserMobileRequest) returns (UserResponse) {};
+    rpc CheckUserMobileIsExisted(CheckUserMobileIsExistedRequest) returns (CheckUserMobileIsExistedResponse) {};
 }

@@ -14,6 +14,7 @@ import com.keepreal.madagascar.baobob.PasswordLoginPayload;
 import com.keepreal.madagascar.baobob.TokenRefreshPayload;
 import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
+import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.LoginType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -45,6 +46,7 @@ import swagger.model.LoginTokenInfo;
 import swagger.model.OssTokenDTO;
 import swagger.model.OssTokenResponse;
 import swagger.model.PostLoginRequest;
+import swagger.model.PostOTPRequest;
 import swagger.model.PostRefreshTokenRequest;
 import swagger.model.QrTicketDTO;
 import swagger.model.QrTicketResponse;
@@ -220,7 +222,7 @@ public class LoginController implements LoginApi {
         UserMessage user = this.userService.retrieveUserById(userId);
 
         UserResponse response = new UserResponse();
-        response.setData(this.userDTOFactory.valueOf(user));
+        response.setData(this.userDTOFactory.valueOf(user, false));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -239,7 +241,7 @@ public class LoginController implements LoginApi {
         request.setSysEndpoint(this.ossClientConfiguration.getStsEndpoint());
         request.setSysMethod(MethodType.POST);
         request.setRoleArn(this.ossClientConfiguration.getRoleArn());
-        request.setRoleSessionName(userId);
+        request.setRoleSessionName("id_" + userId);
         request.setDurationSeconds(3600L);
         try {
             AssumeRoleResponse roleResponse = this.acsClient.getAcsResponse(request);
@@ -338,6 +340,22 @@ public class LoginController implements LoginApi {
     }
 
     /**
+     * 向指定手机号发送验证码
+     *
+     * @param postOTPRequest  (required) {@link PostOTPRequest}
+     * @return {@link DummyResponse}
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest) {
+        this.userService.checkUserMobileIsExisted(postOTPRequest.getMobile());
+        this.userService.sendOtpToMobile(postOTPRequest.getMobile());
+
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Builds the {@link OssTokenDTO}.
      *
      * @param response {@link AssumeRoleResponse}.
@@ -366,7 +384,7 @@ public class LoginController implements LoginApi {
         LoginTokenInfo loginTokenInfo = new LoginTokenInfo();
         loginTokenInfo.setToken(loginResponse.getToken());
         loginTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
-        loginTokenInfo.setUser(this.userDTOFactory.valueOf(userMessage));
+        loginTokenInfo.setUser(this.userDTOFactory.valueOf(userMessage, false));
         loginTokenInfo.setOpenId(loginResponse.getOpenId());
         return loginTokenInfo;
     }

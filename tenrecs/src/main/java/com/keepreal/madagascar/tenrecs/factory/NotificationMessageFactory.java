@@ -3,6 +3,7 @@ package com.keepreal.madagascar.tenrecs.factory;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder.CommentNotificationMessageBuilder;
 import com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder.NoticeNotificationMessageBuilder;
+import com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder.QuestionBoxNotificationMessageBuilder;
 import com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder.ReactionNotificationMessageBuilder;
 import com.keepreal.madagascar.tenrecs.model.Notification;
 import com.keepreal.madagascar.tenrecs.model.UserNotificationRecord;
@@ -44,6 +45,12 @@ public class NotificationMessageFactory {
                 return new NoticeNotificationMessageBuilder()
                         .setNotification(notification)
                         .setLastReadTimestamp(record.getLastReadIslandNoticeNotificationTimestamp())
+                        .build();
+            case NOTIFICATION_BOX_NOTICE:
+                return new QuestionBoxNotificationMessageBuilder()
+                        .setLastReadTimestamp(Objects.isNull(record.getLastReadBoxNoticeNotificationTimestamp())
+                                ? 0L : record.getLastReadBoxNoticeNotificationTimestamp())
+                        .setNotification(notification)
                         .build();
             default:
                 return null;

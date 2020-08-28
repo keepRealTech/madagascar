@@ -190,10 +190,13 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
-    public List<MembershipMessage> retrieveMembershipsByIslandId(String islandId) {
+    public List<MembershipMessage> retrieveMembershipsByIslandId(String islandId, boolean includeInactive) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
-        RetrieveMembershipsRequest request = RetrieveMembershipsRequest.newBuilder().setIslandId(islandId).build();
+        RetrieveMembershipsRequest request = RetrieveMembershipsRequest.newBuilder()
+                .setIslandId(islandId)
+                .setIncludeInactive(includeInactive)
+                .build();
 
         MembershipsResponse membershipsResponse;
         try {

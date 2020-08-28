@@ -16,6 +16,13 @@ message PageResponse {
     int32 pageSize = 2;
     bool hasMore = 3;
     bool hasContent = 4;
+    google.protobuf.Int32Value totalCount = 5;
+}
+
+enum IslandAccessType {
+    ISLAND_ACCESS_UNKNOWN = 0;
+    ISLAND_ACCESS_PUBLIC = 1;
+    ISLAND_ACCESS_PRIVATE = 2;
 }
 
 enum LoginType {
@@ -34,6 +41,7 @@ enum NotificationType {
     NOTIFICATION_REACTIONS = 2;
     NOTIFICATION_SYSTEM_NOTICE = 3;
     NOTIFICATION_ISLAND_NOTICE = 4;
+    NOTIFICATION_BOX_NOTICE = 5;
 }
 
 message NotificationTypeValue {
@@ -44,6 +52,8 @@ enum NoticeType {
     NOTICE_TYPE_NONE = 0;
     NOTICE_TYPE_ISLAND_NEW_SUBSCRIBER = 1;
     NOTICE_TYPE_ISLAND_NEW_MEMBER = 2;
+    NOTICE_TYPE_BOX_NEW_QUESTION = 3;
+    NOTICE_TYPE_BOX_NEW_ANSWER = 4;
 }
 
 message NoticeTypeValue {
@@ -92,6 +102,9 @@ enum PushPriority {
     NEW_MEMBERSHIP = 2;
     NEW_LIKE = 3;
     NEW_COMMENT = 4;
+    NEW_QUESTION = 5;
+    NEW_REPLY = 6;
+    NEW_PUBLIC_REPLY = 7;
 }
 
 message GenderValue {
@@ -136,6 +149,7 @@ enum MediaType {
     MEDIA_VIDEO = 4;
     MEDIA_AUDIO = 5;
     MEDIA_HTML = 6;
+    MEDIA_QUESTION = 7;
 }
 
 message UserMessage {
@@ -154,6 +168,7 @@ message UserMessage {
     string username = 13;
     string password = 14;
     bool locked = 15;
+    string mobile = 16;
 }
 
 message IslandMessage {
@@ -166,6 +181,7 @@ message IslandMessage {
     uint64 createdAt = 7;
     int32 memberCount = 8;
     string secret = 9;
+    IslandAccessType islandAccessType = 10;
 }
 
 message RepostMessage {
@@ -195,12 +211,54 @@ message FeedMessage {
     bool fromHost = 16;
     bool isTop = 17;
     MediaType type = 18;
+    int64 priceInCents = 19;
     oneof message {
-        PicturesMessage pics = 19;
-        VideoMessage video = 20;
-        AudioMessage audio = 21;
-        HtmlMessage html = 22;
+        PicturesMessage pics = 20;
+        VideoMessage video = 21;
+        AudioMessage audio = 22;
+        HtmlMessage html = 23;
+        AnswerMessage answer = 24;
     }
+    repeated string userMembershipId = 25;
+    string hostId = 26;
+}
+
+message WechatOrderMessage {
+    string id = 1;
+    string tradeNumber = 2;
+    string nonceStr = 3;
+    string appId = 4;
+    string partnerId = 5;
+    string prepayId = 6;
+    string signature = 7;
+    string userId = 8;
+    uint64 feeInCents = 9;
+    uint64 timestamp = 10;
+    WechatOrderState state = 11;
+}
+
+enum WechatOrderState {
+    WECHAT_ORDER_STATE_UNKNOWN = 0;
+    WECHAT_ORDER_STATE_NOTPAY = 1;
+    WECHAT_ORDER_STATE_USERPAYING = 2;
+    WECHAT_ORDER_STATE_SUCCESS = 3;
+    WECHAT_ORDER_STATE_CLOSED = 4;
+    WECHAT_ORDER_STATE_REFUND = 5;
+    WECHAT_ORDER_STATE_PAYERROR = 6;
+    WECHAT_ORDER_STATE_REVOKED = 7;
+    WECHAT_ORDER_STATE_REFUNDED = 8;
+}
+
+message FeedGroupMessage {
+    string id = 1;
+    string islandId = 2;
+    string userId = 3;
+    string name = 4;
+    repeated string imageUris = 5;
+    uint64 lastFeedTime = 6;
+    int32 itemsCount = 7;
+    string thumbnailUri = 8;
+    string description = 9;
 }
 
 message PicturesMessage {
@@ -234,6 +292,13 @@ message AudioMessage {
 
 message HtmlMessage {
     string content = 1;
+}
+
+message AnswerMessage {
+    google.protobuf.StringValue answer = 1;
+    google.protobuf.BoolValue publicVisible = 2;
+    google.protobuf.StringValue answerUserId = 3;
+    google.protobuf.Int64Value answeredAt = 4;
 }
 
 message CommentMessage {

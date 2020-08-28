@@ -1,7 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
-import com.keepreal.madagascar.vanga.WechatOrderMessage;
-import com.keepreal.madagascar.vanga.WechatOrderState;
+import com.keepreal.madagascar.common.WechatOrderMessage;
+import com.keepreal.madagascar.common.WechatOrderState;
 import org.springframework.stereotype.Component;
 import swagger.model.OrderState;
 import swagger.model.WechatOrderDTO;
@@ -36,6 +36,7 @@ public class WechatOrderDTOFactory {
         wechatOrderDTO.setUserId(wechatOrder.getUserId());
         wechatOrderDTO.setFeeInCents(wechatOrder.getFeeInCents());
         wechatOrderDTO.setState(this.convert(wechatOrder.getState()));
+        wechatOrderDTO.setMwebUrl("");
 
         return wechatOrderDTO;
     }

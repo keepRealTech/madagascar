@@ -13,7 +13,9 @@ import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
 import swagger.model.FullIslandDTO;
 import swagger.model.HostIntroductionDTO;
+import swagger.model.IdentityType;
 import swagger.model.IntroPrerequestsDTO;
+import swagger.model.IslandAccessType;
 import swagger.model.IslandDTO;
 import swagger.model.IslandIdentityDTO;
 import swagger.model.IslandProfileDTO;
@@ -31,9 +33,9 @@ public class IslandDTOFactory {
     private static final int DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT = 99_999_999;
     private static final String SUBSCRIBER_INTRODUCTION_TITLE = "欢迎加入我的岛！在这里你可以：";
     private static final String SUBSCRIBER_INTRODUCTION_CONTENT =
-            "1.最快了解我的动态\r\n" +
-            "2.与岛民们畅聊和分享同好\r\n" +
-            "3.订阅会员支持我，并获得专属权益";
+            "1.支持我更好创作\r\n" +
+            "2.支持后享受专属权益\r\n" +
+            "3.最快看到我的动态和作品，或向我提问";
 
     private final ChatService chatService;
     private final RepostService repostService;
@@ -86,6 +88,7 @@ public class IslandDTOFactory {
         islandDTO.setDescription(island.getDescription());
         islandDTO.setHostId(island.getHostId());
         islandDTO.setPortraitImageUri(island.getPortraitImageUri());
+        islandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
         return islandDTO;
     }
@@ -107,6 +110,7 @@ public class IslandDTOFactory {
         briefIslandDTO.setDescription(island.getDescription());
         briefIslandDTO.setHostId(island.getHostId());
         briefIslandDTO.setPortraitImageUri(island.getPortraitImageUri());
+        briefIslandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
         return briefIslandDTO;
     }
@@ -135,6 +139,7 @@ public class IslandDTOFactory {
         if (island.getId().equals(generalConfiguration.getSingleOfficialIslandId()))
             memberCount = DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT;
         fullIslandDTO.setMemberCount(memberCount);
+        fullIslandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
         return fullIslandDTO;
     }
@@ -243,7 +248,7 @@ public class IslandDTOFactory {
 
         introPrerequestsDTO.setHasReposts(this.repostService.retrieveRepostIslandById(islandId, 0, 1).getIslandRepostsCount() > 0);
         introPrerequestsDTO.setHasFeeds(this.feedService.retrieveIslandFeeds(islandId, true, hostId, null, null, 0, 2, false).getFeedCount() > 1);
-        introPrerequestsDTO.setHasMemberships(this.membershipService.retrieveMembershipsByIslandId(islandId).size() > 0);
+        introPrerequestsDTO.setHasMemberships(this.membershipService.retrieveMembershipsByIslandId(islandId, false).size() > 0);
 
         hostIntroductionDTO.setPres(introPrerequestsDTO);
         hostIntroductionDTO.setShouldPopup(!introPrerequestsDTO.getHasFeeds()
@@ -251,6 +256,26 @@ public class IslandDTOFactory {
                 || !introPrerequestsDTO.getHasMemberships());
 
         return hostIntroductionDTO;
+    }
+
+    /**
+     * Converts {@link com.keepreal.madagascar.common.IslandAccessType} to {@link IslandAccessType}.
+     *
+     * @param islandAccessType {@link com.keepreal.madagascar.common.IslandAccessType}.
+     * @return {@link IslandAccessType}.
+     */
+    private IslandAccessType convertAccessType(com.keepreal.madagascar.common.IslandAccessType islandAccessType) {
+        if (Objects.isNull(islandAccessType)) {
+            return IslandAccessType.PUBLIC;
+        }
+
+        switch (islandAccessType) {
+            case ISLAND_ACCESS_PRIVATE:
+                return IslandAccessType.PRIVATE;
+            case ISLAND_ACCESS_PUBLIC:
+            default:
+                return IslandAccessType.PUBLIC;
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.coua.service;
 
+import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -86,6 +87,7 @@ public class IslandInfoService {
                 .setCreatedAt(islandInfo.getCreatedTime())
                 .setSecret(islandInfo.getSecret())
                 .setMemberCount(memberCount)
+                .setIslandAccessType(IslandAccessType.forNumber(islandInfo.getIslandAccessType()))
                 .build();
     }
 

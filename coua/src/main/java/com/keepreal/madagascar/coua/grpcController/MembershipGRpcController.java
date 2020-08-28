@@ -222,7 +222,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
     @Override
     public void retrieveMembershipsByIslandId(RetrieveMembershipsRequest request, StreamObserver<MembershipsResponse> responseObserver) {
         String islandId = request.getIslandId();
-        List<MembershipMessage> membershipMessages = membershipService.getMembershipListByIslandId(islandId)
+        List<MembershipMessage> membershipMessages = membershipService.getMembershipListByIslandId(islandId, request.getIncludeInactive())
                 .stream()
                 .map(membershipService::getMembershipMessage)
                 .collect(Collectors.toList());
@@ -239,7 +239,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         String islandId = request.getIslandId();
         List<FeedMembershipMessage> feedMembershipMessages = new ArrayList<>();
         feedMembershipMessages.addAll(membershipService.generateBaseMessage(islandId));
-        feedMembershipMessages.addAll(membershipService.getMembershipListByIslandId(islandId)
+        feedMembershipMessages.addAll(membershipService.getMembershipListByIslandId(islandId, false)
                 .stream()
                 .map(membershipService::getFeedMembershipMessage)
                 .collect(Collectors.toList()));

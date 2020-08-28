@@ -3,14 +3,17 @@ package com.keepreal.madagascar.vanga.service;
 import com.keepreal.madagascar.vanga.config.WechatPayConfiguration;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
-import com.keepreal.madagascar.vanga.wechatPay.WXPay;
-import com.keepreal.madagascar.vanga.wechatPay.WXPayConstants;
-import com.keepreal.madagascar.vanga.wechatPay.WXPayUtil;
+import com.keepreal.madagascar.vanga.model.WechatOrderType;
+import com.keepreal.madagascar.common.wechat_pay.WXPay;
+import com.keepreal.madagascar.common.wechat_pay.WXPayConstants;
+import com.keepreal.madagascar.common.wechat_pay.WXPayUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -47,15 +50,17 @@ public class WechatPayService {
      *
      * @param userId          User id.
      * @param feeInCents      Cost in cents.
-     * @param membershipSkuId Membership sku id.
+     * @param propertyId      Property id.
+     * @param wechatOrderType {@link WechatOrderType}.
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryPlaceOrder(String userId,
                                      String feeInCents,
-                                     String membershipSkuId) {
+                                     String propertyId,
+                                     WechatOrderType wechatOrderType) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
 
-        String description = String.format("购买会员%s", membershipSkuId);
+        String description = String.format("Type:[%s], Id:[%s]", wechatOrderType.name(), propertyId);
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
@@ -63,9 +68,10 @@ public class WechatPayService {
                 .appId(this.wechatPayConfiguration.getAppId())
                 .mchId(this.wechatPayConfiguration.getMchId())
                 .tradeNumber(tradeNum)
-                .memberShipSkuId(membershipSkuId)
+                .propertyId(propertyId)
                 .description(description)
                 .feeInCents(feeInCents)
+                .type(wechatOrderType.getValue())
                 .build();
 
         Map<String, String> response;
@@ -77,11 +83,7 @@ public class WechatPayService {
             requestBody.put("body", description);
             requestBody.put("spbill_create_ip", this.wechatPayConfiguration.getHostIp());
 
-            log.info(requestBody.toString());
-
             response = this.client.unifiedOrder(requestBody);
-
-            log.info(response.toString());
 
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
@@ -167,11 +169,13 @@ public class WechatPayService {
         try {
             Map<String, String> response = this.client.orderQuery(requestBody);
 
+            log.info(response.toString());
+
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
-            } else {
+            } else if (response.get("trade_state").equals(WXPayConstants.SUCCESS)){
                 wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
                 wechatOrder.setTransactionId(response.get("transaction_id"));
             }
@@ -203,8 +207,7 @@ public class WechatPayService {
             WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
 
             if (Objects.isNull(wechatOrder)
-                    || wechatOrder.getState() == WechatOrderState.SUCCESS.getValue()
-                    || wechatOrder.getState() == WechatOrderState.PAYERROR.getValue()) {
+                    || wechatOrder.getState() != WechatOrderState.REFUNDING.getValue()) {
                 return null;
             }
 
@@ -223,16 +226,63 @@ public class WechatPayService {
     }
 
     /**
+     * Implements the refund callback logic.
+     *
+     * @param callbackPayload Payload.
+     * @return {@link WechatOrder}.
+     */
+    public WechatOrder refundCallback(String callbackPayload) {
+        if (StringUtils.isEmpty(callbackPayload)) {
+            return null;
+        }
+
+        try {
+            Map<String, String> response = this.client.processRefundResponseXml(callbackPayload);
+
+            if (response.get("return_code").equals(WXPayConstants.FAIL)) {
+                return null;
+            }
+
+            WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
+
+            if (Objects.isNull(wechatOrder)
+                    || wechatOrder.getState() != WechatOrderState.REFUNDING.getValue()) {
+                return null;
+            }
+
+            if (WXPayConstants.FAIL.equals(response.get("result_code"))
+                    || !WXPayConstants.SUCCESS.equals(response.get("refund_status"))) {
+                wechatOrder.setState(WechatOrderState.PAYERROR.getValue());
+                wechatOrder.setErrorMessage(response.get("refund_status"));
+            } else {
+                wechatOrder.setState(WechatOrderState.REFUNDED.getValue());
+                wechatOrder.setTransactionId(response.get("transaction_id"));
+            }
+            return this.wechatOrderService.update(wechatOrder);
+        } catch (Exception ignored) {
+        }
+
+        return null;
+    }
+
+    /**
      * Refunds the state of an order and update the database.
      *
      * @param wechatOrder {@link WechatOrder}.
+     * @param reason      Refund reason.
+     * @return {@link WechatOrder}.
      */
-    public void tryRefund(WechatOrder wechatOrder) {
+    public WechatOrder tryRefund(WechatOrder wechatOrder, String reason) {
         if (Objects.isNull(wechatOrder)) {
-            return;
+            return wechatOrder;
         }
 
         String refundNum = UUID.randomUUID().toString().replace("-", "");
+        wechatOrder.setRefundNumber(refundNum);
+        wechatOrder.setRefundInCents(wechatOrder.getFeeInCents());
+        wechatOrder.setRefundReason(reason);
+        wechatOrder.setRefundTime(Instant.now().toEpochMilli());
+
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("out_trade_no", wechatOrder.getTradeNumber());
         requestBody.put("out_refund_no", refundNum);
@@ -247,10 +297,15 @@ public class WechatPayService {
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
-                wechatOrder.setRefundNumber(refundNum);
+                wechatOrder.setState(WechatOrderState.REFUNDING.getValue());
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            wechatOrder.setErrorMessage(e.getMessage());
+        } finally {
+            wechatOrder = this.wechatOrderService.update(wechatOrder);
         }
+
+        return wechatOrder;
     }
 
 }

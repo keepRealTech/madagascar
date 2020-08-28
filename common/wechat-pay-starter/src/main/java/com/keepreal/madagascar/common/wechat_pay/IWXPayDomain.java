@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.vanga.wechatPay;
+package com.keepreal.madagascar.common.wechat_pay;
 
 /**
  * 域名管理，实现主备域名自动切换

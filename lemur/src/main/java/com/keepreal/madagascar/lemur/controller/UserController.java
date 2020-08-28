@@ -19,6 +19,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,9 +30,11 @@ import swagger.model.ChatUsersResponse;
 import swagger.model.FullUserResponse;
 import swagger.model.GenderType;
 import swagger.model.PostBatchGetUsersRequest;
+import swagger.model.PutUserMobileRequest;
 import swagger.model.PutUserPayload;
 import swagger.model.UserResponse;
 
+import javax.validation.Valid;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,10 +98,12 @@ public class UserController implements UserApi {
      */
     @Override
     public ResponseEntity<FullUserResponse> apiV1UsersIdGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
         UserMessage userMessage = this.userService.retrieveUserById(id);
 
         FullUserResponse response = new FullUserResponse();
-        response.setData(this.userDTOFactory.fullValueOf(userMessage));
+        response.setData(this.userDTOFactory.fullValueOf(userMessage, !id.equals(userId)));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -153,7 +158,7 @@ public class UserController implements UserApi {
                 identityTypeList.stream().map(this::convertIdentityType).collect(Collectors.toList()));
 
         UserResponse response = new UserResponse();
-        response.setData(this.userDTOFactory.valueOf(userMessage));
+        response.setData(this.userDTOFactory.valueOf(userMessage, false));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -218,7 +223,7 @@ public class UserController implements UserApi {
         Map<String, List<BriefMembershipDTO>> membershipMap = new HashMap<>();
         if (!createdIslandList.isEmpty()) {
             String islandId = createdIslandList.get(0).getId();
-            Map<String, MembershipMessage> islandMembershipMap = this.membershipService.retrieveMembershipsByIslandId(islandId).stream()
+            Map<String, MembershipMessage> islandMembershipMap = this.membershipService.retrieveMembershipsByIslandId(islandId, true).stream()
                     .collect(Collectors.toMap(MembershipMessage::getId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
             userMessages.forEach(user -> {
                 List<String> membershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(islandId, user.getId());
@@ -235,6 +240,32 @@ public class UserController implements UserApi {
                 .map(user -> this.userDTOFactory.chatUserValueOf(user, membershipMap.getOrDefault(user.getId(), null)))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 更新当前用户手机号
+     *
+     * @param putUserMobileRequest  (required) {@link PutUserMobileRequest}
+     * @return {@link UserResponse}
+     */
+    @Override
+    public ResponseEntity<UserResponse> apiV1UsersMobilePut(PutUserMobileRequest putUserMobileRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        UserResponse response = new UserResponse();
+        if (StringUtils.isEmpty(putUserMobileRequest.getMobile()) || Objects.isNull(putUserMobileRequest.getOtp())) {
+            response.setRtn(ErrorCode.REQUEST_INVALID_ARGUMENT.getNumber());
+            response.setMsg(ErrorCode.REQUEST_INVALID_ARGUMENT.getValueDescriptor().getName());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        UserMessage userMessage = this.userService.updateUserMobilePhone(userId,
+                putUserMobileRequest.getMobile(), putUserMobileRequest.getOtp());
+
+        response.setData(this.userDTOFactory.valueOf(userMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

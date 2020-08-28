@@ -10,10 +10,14 @@ mongodb:
   database: tenrecs
 
 rocketmq:
-  topic: notification-event
-  group_id: GID-tenrecs-default
-  tag: event
-
+  notification:
+    topic: notification-event
+    group_id: GID-tenrecs-notification-default
+    tag: event
+  feed:
+    topic: feed-event
+    group_id: GID-tenrecs-feed-default
+    tag: event
 deploy:
   opentracing:
     enable_jaeger: false

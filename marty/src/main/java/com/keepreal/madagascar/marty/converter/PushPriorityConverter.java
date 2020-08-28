@@ -38,7 +38,7 @@ public class PushPriorityConverter {
                 pushPriorityInfo.setExtrasMap(extrasMap);
                 break;
             case PushPriority.NEW_MEMBERSHIP_VALUE:
-                pushPriorityInfo.setText("订阅了你的会员");
+                pushPriorityInfo.setText("刚刚支持了你");
                 pushPriorityInfo.setIosUrl("message://vip");
                 extrasMap.put("notification_type", "NOTIFICATION_ISLAND_NOTICE");
                 extrasMap.put("notification_notice_type", "MEMBER");
@@ -49,6 +49,30 @@ public class PushPriorityConverter {
                 pushPriorityInfo.setIosUrl("message://island");
                 extrasMap.put("notification_type", "NOTIFICATION_ISLAND_NOTICE");
                 extrasMap.put("notification_notice_type", "SUBSCRIBER");
+                pushPriorityInfo.setExtrasMap(extrasMap);
+                break;
+            case PushPriority.NEW_QUESTION_VALUE:
+                pushPriorityInfo.setText("你收到了一个提问，立即查看");
+                pushPriorityInfo.setAndroidUrl("/flutter/notification_question_box");
+                pushPriorityInfo.setIosUrl("message://ask");
+                extrasMap.put("notification_type", "NOTIFICATION_QUESTIONBOX");
+                extrasMap.put("notification_box_type", "QUESTION");
+                pushPriorityInfo.setExtrasMap(extrasMap);
+                break;
+            case PushPriority.NEW_REPLY_VALUE:
+                pushPriorityInfo.setText("你收到了一个回答，立即查看");
+                pushPriorityInfo.setAndroidUrl("/flutter/notification_question_box");
+                pushPriorityInfo.setIosUrl("message://answer");
+                extrasMap.put("notification_type", "NOTIFICATION_QUESTIONBOX");
+                extrasMap.put("notification_box_type", "REPLY");
+                pushPriorityInfo.setExtrasMap(extrasMap);
+                break;
+            case PushPriority.NEW_PUBLIC_REPLY_VALUE:
+                pushPriorityInfo.setText("刚刚回答了一个问题，速来围观！");
+                pushPriorityInfo.setAndroidUrl("/flutter/notification_question_box");
+                pushPriorityInfo.setIosUrl("message://answer");
+                extrasMap.put("notification_type", "NOTIFICATION_QUESTIONBOX");
+                extrasMap.put("notification_box_type", "REPLY");
                 pushPriorityInfo.setExtrasMap(extrasMap);
                 break;
             default:

@@ -32,7 +32,24 @@ public class FeedService {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
-
-        return feedResponse.getFeed().getIsMembership() ? "这是给你的「会员专属动态」" : feedResponse.getFeed().getText();
+        return feedResponse.getFeed().getIsMembership() ? "这是给你的「支持者专属动态」" : feedResponse.getFeed().getText();
     }
+
+    public FeedResponse retrieveFeedInfoById(String feedId, String userId) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(channel);
+
+        FeedResponse feedResponse;
+        try {
+            feedResponse = stub.retrieveFeedById(RetrieveFeedByIdRequest.newBuilder()
+                    .setId(feedId)
+                    .setUserId(userId)
+                    .build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+
+        return feedResponse;
+    }
+
 }

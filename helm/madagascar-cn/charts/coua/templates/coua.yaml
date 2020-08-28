@@ -44,6 +44,16 @@ spec:
             - configMapRef:
                 name: coua
           env:
+            - name: ALIYUN_SMS_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-sms
+                  key: access-key
+            - name: ALIYUN_SMS_ACCESSSECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-sms
+                  key: access-secret
             - name: ROCKETMQ_ACCESSKEY
               valueFrom:
                 secretKeyRef:
@@ -64,6 +74,16 @@ spec:
                 secretKeyRef:
                   name: aliyun-rdb
                   key: coua-connection-string
+            - name: SPRING_REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-redis
+                  key: host
+            - name: SPRING_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-redis
+                  key: password
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}

@@ -2,6 +2,8 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
+import com.keepreal.madagascar.common.IdentityType;
+import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -332,8 +334,11 @@ public class IslandController implements IslandApi {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        IslandAccessType accessType = this.convertIslandAccessType(payload.getIslandAccessType());
+        accessType = Objects.isNull(accessType) ? IslandAccessType.ISLAND_ACCESS_PRIVATE : accessType;
+
         if (StringUtils.isEmpty(payload.getName())
-                || StringUtils.isEmpty(payload.getSecret())) {
+                || (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(payload.getSecret()))) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -347,7 +352,12 @@ public class IslandController implements IslandApi {
         }
 
         IslandMessage islandMessage = this.islandService.createIsland(
-                payload.getName(), portraitImageUri, payload.getSecret(), payload.getIdentityId(), userId);
+                payload.getName(),
+                portraitImageUri,
+                payload.getSecret(),
+                payload.getIdentityId(),
+                userId,
+                accessType);
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -376,6 +386,12 @@ public class IslandController implements IslandApi {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        IslandAccessType accessType = this.convertIslandAccessType(payload.getIslandAccessType());
+
+        if (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(payload.getSecret())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         if (this.textContentFilter.isDisallowed(payload.getName())) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
         }
@@ -390,8 +406,12 @@ public class IslandController implements IslandApi {
             portraitImageUri = this.imageService.uploadSingleImage(portraitImage);
         }
 
-        islandMessage = this.islandService.updateIslandById(
-                id, payload.getName(), portraitImageUri, payload.getSecret(), payload.getDescription());
+        islandMessage = this.islandService.updateIslandById(id,
+                payload.getName(),
+                portraitImageUri,
+                payload.getSecret(),
+                payload.getDescription(),
+                accessType);
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -529,12 +549,32 @@ public class IslandController implements IslandApi {
      * @return {@link PosterFeedDTO}.
      */
     @Cacheable(value = "posterFeedDTO", key = "islandId")
-    private List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
+    public List<PosterFeedDTO> getPosterFeedDTO(String islandId, String userId) {
         return this.feedService.retrieveIslandFeeds(islandId, null, userId, 0L, null, 0, 5, false)
                 .getFeedList()
                 .stream()
                 .map(feedDTOFactory::posterValueOf)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Converts the {@link swagger.model.IslandAccessType} into {@link IslandAccessType}.
+     *
+     * @param islandAccessType {@link swagger.model.IslandAccessType}.
+     * @return {@link IslandAccessType}.
+     */
+    private IslandAccessType convertIslandAccessType(swagger.model.IslandAccessType islandAccessType) {
+        if (Objects.isNull(islandAccessType)) {
+            return null;
+        }
+
+        switch (islandAccessType) {
+            case PRIVATE:
+                return IslandAccessType.ISLAND_ACCESS_PRIVATE;
+            case PUBLIC:
+            default:
+                return IslandAccessType.ISLAND_ACCESS_PUBLIC;
+        }
     }
 
 }

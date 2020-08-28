@@ -6,6 +6,10 @@ spring:
     driver-class-name: com.mysql.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
 rocketmq:
   accessKey: xxx
   secretKey: xxx
@@ -33,3 +37,9 @@ opentracing:
     grpc-server-interceptor: false
     const-sampler:
       decision: false
+server:
+  port: 8090
+aliyun:
+  sms:
+    access-key:
+    access-secret:

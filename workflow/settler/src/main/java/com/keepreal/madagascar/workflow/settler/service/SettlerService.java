@@ -6,6 +6,7 @@ import com.keepreal.madagascar.workflow.settler.config.ExecutorConfiguration;
 import com.keepreal.madagascar.workflow.settler.config.LarkConfiguration;
 import com.keepreal.madagascar.workflow.settler.model.Balance;
 import com.keepreal.madagascar.workflow.settler.model.Payment;
+import com.keepreal.madagascar.workflow.settler.model.WechatOrder;
 import com.keepreal.madagascar.workflow.settler.util.AutoRedisLock;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
@@ -38,6 +39,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SettlerService {
 
+    private final WechatOrderService wechatOrderService;
+    private final WechatPayService wechatPayService;
     private final WorkflowService workflowService;
     private final PaymentService paymentService;
     private final BalanceService balanceService;
@@ -51,6 +54,8 @@ public class SettlerService {
     /**
      * Constructs the settler service.
      *
+     * @param wechatOrderService    {@link WechatOrderService}.
+     * @param wechatPayService      {@link WechatPayService}.
      * @param workflowService       {@link WorkflowService}.
      * @param paymentService        {@link PaymentService}.
      * @param balanceService        {@link BalanceService}.
@@ -59,13 +64,15 @@ public class SettlerService {
      * @param larkConfiguration     {@link LarkConfiguration}.
      * @param restTemplate          {@link RestTemplate}.
      */
-    public SettlerService(WorkflowService workflowService,
+    public SettlerService(WechatOrderService wechatOrderService, WechatPayService wechatPayService, WorkflowService workflowService,
                           PaymentService paymentService,
                           BalanceService balanceService,
                           RedissonClient redissonClient,
                           ExecutorConfiguration executorConfiguration,
                           LarkConfiguration larkConfiguration,
                           RestTemplate restTemplate) {
+        this.wechatOrderService = wechatOrderService;
+        this.wechatPayService = wechatPayService;
         this.workflowService = workflowService;
         this.paymentService = paymentService;
         this.balanceService = balanceService;
@@ -84,13 +91,11 @@ public class SettlerService {
 
     /**
      * The entry point for the workflow.
-     *
-     * @param args Args.
      */
-    public void run(String... args) {
+    public void settlePayments() {
         log.info("Starting workflow [settler].");
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, "settler", 5000, TimeUnit.DAYS.toMillis(1L))) {
-            WorkflowLog workflowLog = this.workflowService.initialize();
+            WorkflowLog workflowLog = this.workflowService.initialize(" settling");
 
             try {
                 while (true) {
@@ -135,6 +140,47 @@ public class SettlerService {
     }
 
     /**
+     * Expires pending payments.
+     */
+    public void expirePayments() {
+        log.info("Starting workflow [settler].");
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, "settler", 5000, TimeUnit.DAYS.toMillis(1L))) {
+            WorkflowLog workflowLog = this.workflowService.initialize(" expiring");
+
+            try {
+                while (true) {
+                    List<Payment> expiredPayments = this.paymentService.retrieveTop5000ExpiredPendingPayments().stream()
+                            .filter(payment -> !StringUtils.isEmpty(payment.getPayeeId()))
+                            .collect(Collectors.toList());
+
+                    if (expiredPayments.isEmpty()) {
+                        break;
+                    }
+
+                    Map<String, List<Payment>> paymentMap = expiredPayments.stream()
+                            .collect(Collectors.groupingBy(Payment::getPayeeId, HashMap::new, Collectors.toList()));
+
+                    Map<Integer, Map<String, List<Payment>>> batchedPaymentMap = paymentMap.entrySet().stream()
+                            .collect(Collectors.groupingBy(
+                                    entry -> entry.getKey().hashCode() % this.executorConfiguration.getThreads(),
+                                    HashMap::new,
+                                    Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+                    List<CompletableFuture<Void>> futures = new ArrayList<>();
+                    batchedPaymentMap.forEach((key, value) ->
+                            futures.add(CompletableFuture.supplyAsync(() -> this.batchExpire(value), this.executorService)
+                                    .thenAccept(succeedIds -> workflowLog.getPaymentIds().addAll(succeedIds))));
+
+                    CompletableFuture.allOf(futures.toArray(new CompletableFuture[futures.size()])).get();
+                }
+                this.workflowService.succeed(workflowLog);
+            } catch (Exception exception) {
+                this.workflowService.failed(workflowLog, exception);
+            }
+        }
+    }
+
+    /**
      * Settles payments by a batch.
      *
      * @param batch A bach of user id and related unsettled payments.
@@ -157,6 +203,28 @@ public class SettlerService {
     }
 
     /**
+     * Expires payments by a batch.
+     *
+     * @param batch A bach of user id and related expired payments.
+     * @return Successfully settled payment ids.
+     */
+    public List<String> batchExpire(Map<String, List<Payment>> batch) {
+        List<String> succeedIds = new ArrayList<>();
+
+        batch.forEach((key, value) -> {
+            Balance userBalance = this.balanceService.retrieveByUserId(key);
+
+            if (Objects.isNull(userBalance)) {
+                return;
+            }
+
+            succeedIds.addAll(this.expires(userBalance, value));
+        });
+
+        return succeedIds;
+    }
+
+    /**
      * Settles a list of payment for a user.
      *
      * @param userBalance {@link Balance}.
@@ -167,6 +235,24 @@ public class SettlerService {
     public List<String> settle(Balance userBalance, List<Payment> payments) {
         long amount = this.paymentService.settlePayment(payments);
         this.balanceService.addOnCents(userBalance, amount);
+
+        return payments.stream().map(Payment::getId).collect(Collectors.toList());
+    }
+
+    /**
+     * Expires a list of payments for a user.
+     *
+     * @param userBalance {@link Balance}.
+     * @param payments    {@link Payment}.
+     * @return Payment ids.
+     */
+    @Transactional(value = Transactional.TxType.REQUIRES_NEW)
+    public List<String> expires(Balance userBalance, List<Payment> payments) {
+        this.wechatOrderService.retrieveByIds(payments.stream().map(Payment::getOrderId).collect(Collectors.toList()))
+                .forEach(wechatOrder -> this.wechatPayService.tryRefund(wechatOrder, "过期退款"));
+
+        long amount = this.paymentService.expiresPayment(payments);
+        this.balanceService.subtractCents(userBalance, amount);
 
         return payments.stream().map(Payment::getId).collect(Collectors.toList());
     }

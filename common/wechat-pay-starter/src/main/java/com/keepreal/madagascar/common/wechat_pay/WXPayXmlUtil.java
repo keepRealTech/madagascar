@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.vanga.wechatPay;
+package com.keepreal.madagascar.common.wechat_pay;
 
 import org.w3c.dom.Document;
 

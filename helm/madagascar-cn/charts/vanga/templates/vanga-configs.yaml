@@ -7,13 +7,16 @@ data:
   aliyun_logs_madagascar-prod: stdout
   ROCKETMQ_NOTIFICATION_TOPIC: {{ .Values.rocketmq.notification.topic }}
   ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
-  WECHATPAY_CALLBACKADDRESS: {{ .Values.wechat_pay.callback_address }}
+  WECHATPAY_CALLBACKADDRESS: {{ .Values.global.common_configs.wechat_pay.callback_address }}
+  WECHATPAY_REFUNDCALLBACKADDRESS: {{ .Values.global.common_configs.wechat_pay.refund_callback_address }}
   WECHATPAY_CERTPATH: {{ .Values.wechat_pay.cert_path }}
-  WECHATMP_CALLBACKADDRESS: {{ .Values.wechat_pay.callback_address }}
+  WECHATMP_CALLBACKADDRESS: {{ .Values.global.common_configs.wechat_pay.callback_address }}
   WECHATMP_CERTPATH: {{ .Values.wechat_pay.cert_path }}
   IOSPAY_VERIFYURL: {{ .Values.ios_pay.verify_url }}
   IOSPAY_VERIFYURLSANDBOX: {{ .Values.ios_pay.verify_url_sandbox }}
   IOSPAY_ENABLESANDBOX: "true"
+  GRPC_FOSSA_HOST: {{ .Values.fossa.host }}
+  GRPC_FOSSA_PORT: '{{ .Values.fossa.port }}'
   SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'

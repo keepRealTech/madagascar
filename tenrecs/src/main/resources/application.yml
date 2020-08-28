@@ -7,12 +7,20 @@ spring:
       uri: mongodb://127.0.0.1:27017
 
 rocketmq:
-  accessKey: xxx
-  secretKey: xxx
-  nameSrvAddr: 127.0.0.1:9876
-  topic: notification-event
-  groupId: GID-tenrecs-default
-  tag: event
+  notification:
+    accessKey: xxx
+    secretKey: xxx
+    nameSrvAddr: 127.0.0.1:9876
+    topic: notification-event
+    groupId: GID-tenrecs-default
+    tag: event
+  feed:
+    accessKey: 1
+    secretKey: 2
+    nameSrvAddr: 127.0.0.1:9876
+    topic: feed-event
+    groupId: GID-tenrecs-default
+    tag: event
 
 grpc:
   port: 12004
