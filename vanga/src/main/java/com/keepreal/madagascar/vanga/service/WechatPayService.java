@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.vanga.service;
 
+import com.keepreal.madagascar.common.SceneType;
 import com.keepreal.madagascar.vanga.config.WechatPayConfiguration;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
@@ -26,6 +27,9 @@ import java.util.UUID;
 @Slf4j
 public class WechatPayService {
 
+    private static final String IOS_SCENE_INFO = "";
+    private static final String ANDROID_SCENE_INFO = "";
+    private static final String WAP_SCENE_INFO = "";
     private final WXPay client;
     private final WechatPayConfiguration wechatPayConfiguration;
     private final WechatOrderService wechatOrderService;
@@ -52,15 +56,24 @@ public class WechatPayService {
      * @param feeInCents      Cost in cents.
      * @param propertyId      Property id.
      * @param wechatOrderType {@link WechatOrderType}.
+     * @param sceneType       {@link SceneType}.
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryPlaceOrder(String userId,
                                      String feeInCents,
                                      String propertyId,
-                                     WechatOrderType wechatOrderType) {
+                                     WechatOrderType wechatOrderType,
+                                     SceneType sceneType,
+                                     String remoteIp) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
 
         String description = String.format("Type:[%s], Id:[%s]", wechatOrderType.name(), propertyId);
+
+        if (WechatOrderType.PAYMEMBERSHIPH5.equals(wechatOrderType)
+                && (Objects.isNull(sceneType) || SceneType.SCENE_NONE.equals(sceneType))) {
+            log.error("Invalid scene type for h5 wechat pay.");
+            return null;
+        }
 
         WechatOrder wechatOrder = WechatOrder.builder()
                 .state(WechatOrderState.NOTPAY.getValue())
@@ -75,13 +88,32 @@ public class WechatPayService {
                 .build();
 
         Map<String, String> response;
+        String tradeType = WechatOrderType.PAYMEMBERSHIPH5.equals(wechatOrderType) ? "MWEB" : "APP";
         try {
             Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("trade_type", "APP");
+            requestBody.put("trade_type", tradeType);
             requestBody.put("out_trade_no", tradeNum);
             requestBody.put("total_fee", feeInCents);
             requestBody.put("body", description);
-            requestBody.put("spbill_create_ip", this.wechatPayConfiguration.getHostIp());
+            requestBody.put("spbill_create_ip", remoteIp);
+
+            if (WechatOrderType.PAYMEMBERSHIPH5.equals(wechatOrderType)) {
+                String sceneInfo;
+                switch (sceneType) {
+                    case SCENE_IOS:
+                        sceneInfo = WechatPayService.IOS_SCENE_INFO;
+                        break;
+                    case SCENE_WAP:
+                        sceneInfo = WechatPayService.WAP_SCENE_INFO;
+                        break;
+                    case SCENE_ANDROID:
+                        sceneInfo = WechatPayService.ANDROID_SCENE_INFO;
+                        break;
+                    default:
+                        return null;
+                }
+                requestBody.put("scene_info", sceneInfo);
+            }
 
             response = this.client.unifiedOrder(requestBody);
 
@@ -110,6 +142,8 @@ public class WechatPayService {
             wechatOrder.setPrepayId(response.get("prepay_id"));
             wechatOrder.setSignature(request.get("sign"));
             wechatOrder.setNonceStr(request.get("noncestr"));
+
+            wechatOrder.setMwebUrl(request.getOrDefault("mweb_url", ""));
 
             return wechatOrder;
         } catch (Exception e) {

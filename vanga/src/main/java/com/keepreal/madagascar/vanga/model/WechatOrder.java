@@ -45,6 +45,8 @@ public class WechatOrder {
     private String signature;
     @Transient
     private String prepayId;
+    @Transient
+    private String mwebUrl;
     @Builder.Default
     private String transactionId = "";
     @Builder.Default

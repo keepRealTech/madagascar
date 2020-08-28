@@ -12,6 +12,7 @@ public enum WechatOrderType {
     PAYSHELL(1),
     PAYMEMBERSHIP(2),
     PAYQUESTION(3),
+    PAYMEMBERSHIPH5(3),
     ;
     private final int value;
 

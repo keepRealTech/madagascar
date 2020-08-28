@@ -15,17 +15,6 @@ import java.util.Objects;
 @Component
 public class WechatOrderMessageFactory {
 
-    private final WechatPayConfiguration wechatPayConfiguration;
-
-    /**
-     * Constructs the wechat order message factory.
-     *
-     * @param wechatPayConfiguration {@link WechatPayConfiguration}.
-     */
-    public WechatOrderMessageFactory(WechatPayConfiguration wechatPayConfiguration) {
-        this.wechatPayConfiguration = wechatPayConfiguration;
-    }
-
     /**
      * Converts {@link WechatOrder} into {@link WechatOrderMessage}.
      *
@@ -49,6 +38,10 @@ public class WechatOrderMessageFactory {
             wechatOrder.setSignature("");
         }
 
+        if (!StringUtils.isEmpty(wechatOrder.getMwebUrl())) {
+            wechatOrder.setMwebUrl("");
+        }
+
         return  WechatOrderMessage.newBuilder()
                 .setId(wechatOrder.getId())
                 .setAppId(wechatOrder.getAppId())
@@ -60,6 +53,7 @@ public class WechatOrderMessageFactory {
                 .setUserId(wechatOrder.getUserId())
                 .setFeeInCents(Long.parseLong(wechatOrder.getFeeInCents()))
                 .setState(this.convert(wechatOrder.getState()))
+                .setMwebUrl(wechatOrder.getMwebUrl())
                 .build();
     }
 
