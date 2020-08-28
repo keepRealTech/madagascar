@@ -34,7 +34,6 @@ import swagger.model.PutUserMobileRequest;
 import swagger.model.PutUserPayload;
 import swagger.model.UserResponse;
 
-import javax.validation.Valid;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -248,7 +247,7 @@ public class UserController implements UserApi {
     /**
      * 更新当前用户手机号
      *
-     * @param putUserMobileRequest  (required) {@link PutUserMobileRequest}
+     * @param putUserMobileRequest (required) {@link PutUserMobileRequest}
      * @return {@link UserResponse}
      */
     @Override
