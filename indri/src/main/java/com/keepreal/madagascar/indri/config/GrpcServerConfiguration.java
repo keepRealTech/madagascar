@@ -34,8 +34,8 @@ public class GrpcServerConfiguration extends GRpcServerBuilderConfigurer {
      */
     @Override
     public void configure(ServerBuilder<?> serverBuilder) {
-        serverBuilder.maxInboundMessageSize(6291456);
-        serverBuilder.maxInboundMetadataSize(6291456);
+        serverBuilder.maxInboundMessageSize(20971520);
+        serverBuilder.maxInboundMetadataSize(20971520);
     }
 
     /**

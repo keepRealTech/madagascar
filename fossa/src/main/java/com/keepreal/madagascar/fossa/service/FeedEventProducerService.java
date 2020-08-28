@@ -147,7 +147,7 @@ public class FeedEventProducerService {
 
         String uuid = UUID.randomUUID().toString();
         FeedEventMessage event = FeedEventMessage.newBuilder()
-                .setType(FeedEventType.FEED_EVENT_CREATE)
+                .setType(FeedEventType.FEED_EVENT_UPDATE)
                 .setFeedUpdateEvent(feedUpdateEvent)
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
