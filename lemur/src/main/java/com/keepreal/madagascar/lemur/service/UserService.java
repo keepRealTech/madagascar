@@ -132,7 +132,7 @@ public class UserService {
             requestBuilder.setPortraitImageUri(StringValue.of(portraitImageUri));
         }
 
-        if (!StringUtils.isEmpty(description)) {
+        if (!Objects.isNull(description)) {
             description = checkLength(description, DESCRIPTION_LENGTH_THRESHOLD);
             requestBuilder.setDescription(StringValue.of(description));
         }

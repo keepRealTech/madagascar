@@ -327,7 +327,7 @@ public class IslandService {
             requestBuilder.setSecret(StringValue.of(secret));
         }
 
-        if (!StringUtils.isEmpty(description)) {
+        if (!Objects.isNull(description)) {
             description = this.checkLength(description, DESCRIPTION_LENGTH_THRESHOLD);
             requestBuilder.setDescription(StringValue.of(description));
         }
