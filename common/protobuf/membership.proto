@@ -35,6 +35,7 @@ message CreateMembershipRequest {
 
 message RetrieveMembershipsRequest {
     string islandId = 1;
+    bool includeInactive = 2;
 }
 
 message MembershipMessage {

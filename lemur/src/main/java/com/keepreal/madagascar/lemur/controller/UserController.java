@@ -223,7 +223,7 @@ public class UserController implements UserApi {
         Map<String, List<BriefMembershipDTO>> membershipMap = new HashMap<>();
         if (!createdIslandList.isEmpty()) {
             String islandId = createdIslandList.get(0).getId();
-            Map<String, MembershipMessage> islandMembershipMap = this.membershipService.retrieveMembershipsByIslandId(islandId).stream()
+            Map<String, MembershipMessage> islandMembershipMap = this.membershipService.retrieveMembershipsByIslandId(islandId, true).stream()
                     .collect(Collectors.toMap(MembershipMessage::getId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
             userMessages.forEach(user -> {
                 List<String> membershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(islandId, user.getId());

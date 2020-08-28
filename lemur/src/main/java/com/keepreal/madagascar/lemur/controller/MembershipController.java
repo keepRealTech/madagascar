@@ -70,7 +70,7 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<MembershipsResponse> apiV1IslandsIdMembershipsGet(String id) {
-        List<MembershipMessage> membershipMessages = membershipService.retrieveMembershipsByIslandId(id);
+        List<MembershipMessage> membershipMessages = membershipService.retrieveMembershipsByIslandId(id, false);
 
         MembershipsResponse response = new MembershipsResponse();
         response.data(membershipMessages.stream().map(membershipDTOFactory::valueOf).collect(Collectors.toList()));
