@@ -169,7 +169,8 @@ public class FeedInfoService {
                 .setIsDeleted(feedInfo.getDeleted())
                 .setPriceInCents(Objects.nonNull(feedInfo.getPriceInCents()) ? feedInfo.getPriceInCents() : 0L)
                 .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost())
-                .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop());
+                .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop())
+                .setHostId(feedInfo.getHostId());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
