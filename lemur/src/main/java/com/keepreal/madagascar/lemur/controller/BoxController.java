@@ -19,6 +19,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.BoxApi;
 import swagger.model.BoxDTO;
@@ -181,6 +182,10 @@ public class BoxController implements BoxApi {
                                                                               PostQuestionRequest postQuestionRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
+        if (StringUtils.isEmpty(postQuestionRequest.getText().trim())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
         this.boxService.createFreeQuestion(id, userId, postQuestionRequest.getText());
 
         DummyResponse response = new DummyResponse();
@@ -221,10 +226,15 @@ public class BoxController implements BoxApi {
     public ResponseEntity<WechatOrderResponse> apiV1IslandsIdBoxesPaidQuestionsWechatPayPost(String id,
                                                                                              PostQuestionRequest postQuestionRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        String text = postQuestionRequest.getText();
-        Long priceInCents = postQuestionRequest.getPriceInCents();
 
-        WechatOrderMessage wechatOrderMessage = this.boxService.createWechatFeed(id, userId, text, priceInCents);
+        if (StringUtils.isEmpty(postQuestionRequest.getText().trim())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
+        WechatOrderMessage wechatOrderMessage = this.boxService.createWechatFeed(id,
+                userId,
+                postQuestionRequest.getText(),
+                postQuestionRequest.getPriceInCents());
 
         WechatOrderResponse response = new WechatOrderResponse();
 
