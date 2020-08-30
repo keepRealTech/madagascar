@@ -996,6 +996,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/iosPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Payment
+      summary: 会员订购H5跳转
+      responses:
+        '200':
+          description: H5 跳转地址
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5RedirectResponse'
   /api/v1/islands/{id}/memberSubscription/wechatPay/html5:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2011,6 +2025,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupportsResponse'
+  /api/v1/islands/{id}/support/iosPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Payment
+      summary: 支持一下 H5跳转地址
+      responses:
+        '200':
+          description: H5 跳转地址
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5RedirectResponse'
   /api/v1/islands/{id}/support/wechatPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2053,6 +2081,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/discovery:
+    get:
+      tags:
+        - Island
+      summary: 发现创作者
+      responses:
+        '200':
+          description: island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandDiscoveryResponse'
+  /api/v1/feeds/public:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Feed
+      summary: 获得所有公开岛的岛主动态
+      responses:
+        '200':
+          description: feeds response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinesResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2537,8 +2593,21 @@ components:
         - $ref: '#/components/schemas/BriefIslandDTO'
         - type: object
           properties:
+            host:
+              $ref: '#/components/schemas/BriefUserDTO'
             memberCount:
               type: integer
+    RecommendIslandDTO:
+      allOf:
+        - $ref: '#/components/schemas/IslandDTO'
+        - type: object
+          properties:
+            host:
+              $ref: '#/components/schemas/BriefUserDTO'
+            memberCount:
+              type: integer
+            recommendation:
+              type: string
     FullIslandDTO:
       allOf:
         - $ref: '#/components/schemas/IslandDTO'
@@ -4641,3 +4710,24 @@ components:
           format: int64
       required:
         - sponsorSkuId
+    H5RedirectDTO:
+      type: object
+      properties:
+        url:
+          type: string
+    H5RedirectResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/H5RedirectDTO'
+    IslandDiscoveryResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RecommendIslandDTO'
