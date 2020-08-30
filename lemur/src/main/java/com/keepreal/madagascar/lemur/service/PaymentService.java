@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.SceneType;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -121,6 +122,44 @@ public class PaymentService {
         WechatOrderResponse response;
         try {
             response = stub.submitSubscribeMembershipWithWechatPay(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create wechat order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getWechatOrder();
+    }
+
+    /**
+     * Submit a membership subscription request for a given user with wechat pay.
+     *
+     * @param userId          User id.
+     * @param remoteAddress   Remote address ip.
+     * @param membershipSkuId Membership sku id.
+     * @param sceneType       Scene type.
+     */
+    public WechatOrderMessage submitSubscribeMembershipWithWechatPayH5(String userId, String remoteAddress, String membershipSkuId, SceneType sceneType) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        SubscribeMembershipRequest request = SubscribeMembershipRequest.newBuilder()
+                .setUserId(userId)
+                .setIpAddress(remoteAddress)
+                .setMembershipSkuId(membershipSkuId)
+                .setSceneType(sceneType)
+                .build();
+
+        WechatOrderResponse response;
+        try {
+            response = stub.submitSubscribeMembershipWithWechatPayH5(request);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

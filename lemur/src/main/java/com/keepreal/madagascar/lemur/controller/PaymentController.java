@@ -18,15 +18,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.PaymentApi;
 import swagger.model.DummyResponse;
+import swagger.model.SceneType;
 import swagger.model.SubscribeMemberRequest;
 import swagger.model.UserPaymentsResponse;
 import swagger.model.WechatOrderResponse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -44,6 +45,7 @@ public class PaymentController implements PaymentApi {
 
     /**
      * Constructs the payment controller.
+     *
      * @param paymentService        {@link PaymentService}.
      * @param userService
      * @param membershipService
@@ -106,9 +108,36 @@ public class PaymentController implements PaymentApi {
     }
 
     /**
+     * Implements the H5 wechat pay for membership subscription.
+     *
+     * @param id                     id (required) Island id.
+     * @param sceneType              (required) Scene type.
+     * @param subscribeMemberRequest (required) {@link SubscribeMemberRequest}.
+     * @return {@link WechatOrderResponse}.
+     */
+    @Override
+    public ResponseEntity<WechatOrderResponse> apiV1IslandsIdMemberSubscriptionWechatPayHtml5Post(String id,
+                                                                                                  SceneType sceneType,
+                                                                                                  SubscribeMemberRequest subscribeMemberRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
+
+        WechatOrderMessage wechatOrderMessage = this.paymentService.submitSubscribeMembershipWithWechatPayH5(userId,
+                remoteAddress,
+                subscribeMemberRequest.getMembershipSkuId(),
+                this.convertType(sceneType));
+
+        WechatOrderResponse response = new WechatOrderResponse();
+        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Implements the get user payment history api.
      *
-     * @param page page number (optional, default to 0).
+     * @param page     page number (optional, default to 0).
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link UserPaymentsResponse}.
      */
@@ -156,4 +185,22 @@ public class PaymentController implements PaymentApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Converts the {@link SceneType} into {@link com.keepreal.madagascar.common.SceneType}.
+     *
+     * @param sceneType {@link SceneType}.
+     * @return {@link com.keepreal.madagascar.common.SceneType}.
+     */
+    private com.keepreal.madagascar.common.SceneType convertType(SceneType sceneType) {
+        switch (sceneType) {
+            case IOS:
+                return com.keepreal.madagascar.common.SceneType.SCENE_IOS;
+            case WAP:
+                return com.keepreal.madagascar.common.SceneType.SCENE_WAP;
+            case ANDROID:
+                return com.keepreal.madagascar.common.SceneType.SCENE_ANDROID;
+            default:
+                return com.keepreal.madagascar.common.SceneType.SCENE_WAP;
+        }
+    }
 }
