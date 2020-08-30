@@ -114,4 +114,35 @@ public class UserService {
         return stub.createUser(request).map(UserResponse::getUser);
     }
 
+    /**
+     * Retrieves the user by mobile phone.
+     *
+     * @param mobile Mobile.
+     * @return {@link UserMessage}.
+     */
+    public Mono<UserMessage> retrieveUserByMobileMono(String mobile) {
+        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
+
+        QueryUserCondition condition = QueryUserCondition.newBuilder().setMobile(StringValue.of(mobile)).build();
+        RetrieveSingleUserRequest request = RetrieveSingleUserRequest.newBuilder().setCondition(condition).build();
+
+        return stub.retrieveSingleUser(request)
+                .filter(userResponse -> ErrorCode.REQUEST_SUCC_VALUE == (userResponse.getStatus().getRtn()))
+                .map(UserResponse::getUser);
+    }
+
+    /**
+     * 根据手机号创建新用户 (默认昵称, 默认头像)
+     *
+     * @param mobile 手机号
+     * @return {@link UserMessage}
+     */
+    public Mono<UserMessage> createUserByMobileMono(String mobile) {
+        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
+        NewUserRequest request = NewUserRequest.newBuilder()
+                .setMobile(StringValue.of(mobile))
+                .build();
+        return stub.createUser(request).map(UserResponse::getUser);
+    }
+
 }

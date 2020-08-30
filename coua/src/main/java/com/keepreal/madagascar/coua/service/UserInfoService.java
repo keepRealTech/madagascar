@@ -57,6 +57,9 @@ public class UserInfoService {
     public UserInfo createUser(UserInfo userInfo) {
         userInfo.setId(String.valueOf(idGenerator.nextId()));
         userInfo.setDisplayId(displayIdGenerator.nextDisplayId());
+        if (StringUtils.isEmpty(userInfo.getNickName()) && !StringUtils.isEmpty(userInfo.getMobile())) {
+            userInfo.setNickName("用户" + userInfo.getDisplayId());
+        }
         userInfo = userInfoRepository.save(userInfo);
 
         this.balanceService.createBalanceByUserId(userInfo.getId());
@@ -195,6 +198,10 @@ public class UserInfoService {
      */
     public UserInfo findUserInfoByMobile(String mobile) {
         return this.userInfoRepository.findTopByMobileAndDeletedIsFalse(mobile);
+    }
+
+    public UserInfo findUserInfoByMobileAndUnionIdIsNotNul(String mobile) {
+        return this.userInfoRepository.findTopByMobileAndUnionIdIsNotNullAndDeletedIsFalse(mobile);
     }
 
 }

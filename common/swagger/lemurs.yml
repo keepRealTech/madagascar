@@ -3425,7 +3425,7 @@ components:
         mobile:
           type: string
         otp:
-          type: string
+          type: integer
     LoginPayload:
       oneOf:
         - $ref: '#/components/schemas/WechatOAuthLoginPayload'
