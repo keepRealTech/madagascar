@@ -999,8 +999,9 @@ paths:
   /api/v1/islands/{id}/memberSubscription/wechatPay/html5:
     parameters:
       - $ref: '#/components/parameters/idInPath'
-      - $ref: '#/components/parameters/sceneTypeInQuery'
     post:
+      parameters:
+        - $ref: '#/components/parameters/sceneTypeInQuery'
       tags:
         - Payment
       summary: 微信h5会员订阅支付
@@ -2001,7 +2002,7 @@ paths:
       - $ref: '#/components/parameters/idInPath'
     get:
       tags:
-        - Support
+        - Sku
       summary: 获得支持商品信息
       responses:
         '200':
@@ -2030,13 +2031,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
-  /api/v1/islands/{id}/support/shellPay:
+  /api/v1/islands/{id}/support/wechatPay/html5:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
+      parameters:
+        - $ref: '#/components/parameters/sceneTypeInQuery'
       tags:
         - Payment
-      summary: 支持一下贝壳支付渠道
+      summary: 支持一下h5微信支付渠道
       requestBody:
         required: true
         content:
@@ -2049,7 +2052,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DummyResponse'
+                $ref: '#/components/schemas/WechatOrderResponse'
 components:
   securitySchemes:
     bearerAuth:
