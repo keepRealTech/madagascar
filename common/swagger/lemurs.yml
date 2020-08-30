@@ -3961,6 +3961,10 @@ components:
           type: integer
         colorType:
           type: integer
+        useCustomMessage:
+          type: boolean
+        message:
+          type: string
     MembershipDTO:
       allOf:
         - $ref: '#/components/schemas/BriefMembershipDTO'
@@ -3983,6 +3987,10 @@ components:
           maximum: 1000000000
         name:
           type: string
+        useCustomMessage:
+          type: boolean
+        message:
+          type: string
     PutMembershipRequest:
       type: object
       properties:
@@ -3995,6 +4003,10 @@ components:
           minimum: 100
           description: can only increase
         name:
+          type: string
+        useCustomMessage:
+          type: boolean
+        message:
           type: string
     MembershipResponse:
       allOf:
