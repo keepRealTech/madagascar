@@ -4637,4 +4637,4 @@ components:
           type: integer
           format: int64
       required:
-        - sponsorSkuId 
+        - sponsorSkuId
