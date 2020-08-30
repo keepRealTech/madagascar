@@ -35,7 +35,7 @@ public class IslandDTOFactory {
     private static final String SUBSCRIBER_INTRODUCTION_CONTENT =
             "1.支持我更好创作\r\n" +
             "2.支持后享受专属权益\r\n" +
-            "3.最快看到我的动态和作品，或向我提问";
+            "3.最快看到我的动态，或向我提问";
 
     private final ChatService chatService;
     private final RepostService repostService;
