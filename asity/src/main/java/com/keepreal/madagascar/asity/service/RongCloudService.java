@@ -4,6 +4,7 @@ import com.keepreal.madagascar.asity.config.RongCloudConfiguration;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.MembershipMessage;
+import com.keepreal.madagascar.coua.CreateIslandEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import io.rong.RongCloud;
 import io.rong.messages.TxtMessage;
@@ -29,6 +30,7 @@ public class RongCloudService {
 
     private static final String HOST_TEMPLATE = "我刚刚支持了你的「%s」会员（¥%.2f x %d个月）。创作加油！";
     private static final String MEMBER_TEMPLATE = "感谢你的支持！\n更多信息可前往「我的 - 订单中心」中查看。";
+    private final static String OFFICIAL_USER_ID = "4";
     private final RongCloud client;
 
     /**
@@ -195,6 +197,22 @@ public class RongCloudService {
                 .setIsCounted(0)
                 .setIsIncludeSender(1);
         this.client.message.msgPrivate.send(memberMessage);
+    }
+
+    @SneakyThrows
+    public void sentCreateIslandNotice(CreateIslandEvent createIslandEvent) {
+        TxtMessage txtMessage = new TxtMessage("", "");
+
+        PrivateMessage message = new PrivateMessage()
+                .setSenderId(OFFICIAL_USER_ID)
+                .setTargetId(new String[]{createIslandEvent.getHostId()})
+                .setObjectName(txtMessage.getType())
+                .setContent(txtMessage)
+                .setVerifyBlacklist(0)
+                .setIsPersisted(0)
+                .setIsCounted(0)
+                .setIsIncludeSender(1);
+        this.client.message.msgPrivate.send(message);
     }
 
 }

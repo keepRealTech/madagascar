@@ -11,4 +11,5 @@ public class JPushConfig {
 
     private String appKey;
     private String appSecret;
+    private Boolean jPushProduction;
 }

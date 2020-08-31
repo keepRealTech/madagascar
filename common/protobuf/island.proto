@@ -20,6 +20,7 @@ message NewIslandRequest {
     google.protobuf.StringValue secret = 4;
     google.protobuf.StringValue identityId = 5;
     IslandAccessType islandAccessType = 6;
+    google.protobuf.StringValue description = 7;
 }
 
 message IslandResponse {

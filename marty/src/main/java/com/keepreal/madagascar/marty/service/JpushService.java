@@ -4,12 +4,14 @@ import cn.jiguang.common.resp.APIConnectionException;
 import cn.jiguang.common.resp.APIRequestException;
 import cn.jpush.api.JPushClient;
 import cn.jpush.api.push.model.Message;
+import cn.jpush.api.push.model.Options;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
 import com.keepreal.madagascar.marty.config.JPushConfig;
 import com.keepreal.madagascar.marty.model.PushType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -18,10 +20,13 @@ import java.util.Map;
 @Slf4j
 public class JpushService {
 
+    private final boolean jPushProduction;
+
     private final JPushClient jPushClient;
 
     public JpushService(JPushConfig jPushConfig) {
         this.jPushClient = new JPushClient(jPushConfig.getAppSecret(), jPushConfig.getAppKey());
+        this.jPushProduction = jPushConfig.getJPushProduction();
     }
 
     public void pushIOSMessageByType(PushType pushType, String... registrationIds) {
@@ -31,6 +36,9 @@ public class JpushService {
             jPushClient.sendPush(PushPayload.newBuilder()
                     .setPlatform(Platform.ios())
                     .setAudience(Audience.registrationId(registrationIds))
+                    .setOptions(Options.newBuilder()
+                            .setApnsProduction(jPushProduction)
+                            .build())
                     .setMessage(Message.newBuilder()
                             .setMsgContent("notification")
                             .addExtra("type", pushType.getValue())
@@ -48,6 +56,9 @@ public class JpushService {
             jPushClient.sendPush(PushPayload.newBuilder()
                     .setPlatform(Platform.ios())
                     .setAudience(Audience.registrationId(registrationIds))
+                    .setOptions(Options.newBuilder()
+                            .setApnsProduction(jPushProduction)
+                            .build())
                     .setMessage(Message.newBuilder()
                             .setMsgContent("notification")
                             .addExtra("type", pushType.getValue())
@@ -66,6 +77,9 @@ public class JpushService {
             jPushClient.sendPush(PushPayload.newBuilder()
                     .setPlatform(Platform.ios())
                     .setAudience(Audience.registrationId(registrationIds))
+                    .setOptions(Options.newBuilder()
+                            .setApnsProduction(jPushProduction)
+                            .build())
                     .setMessage(Message.newBuilder()
                             .setMsgContent("notification")
                             .addExtra("type", pushType.getValue())

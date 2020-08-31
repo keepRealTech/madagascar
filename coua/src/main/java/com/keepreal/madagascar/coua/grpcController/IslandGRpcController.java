@@ -51,6 +51,7 @@ import com.keepreal.madagascar.coua.model.IslandInfo;
 import com.keepreal.madagascar.coua.model.Subscription;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.service.FeedService;
+import com.keepreal.madagascar.coua.service.IslandEventProducerService;
 import com.keepreal.madagascar.coua.service.IslandInfoService;
 import com.keepreal.madagascar.coua.service.SubscriptionService;
 import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
@@ -85,26 +86,30 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     private final FeedService feedService;
     private final UserInfoService userInfoService;
     private final UserDeviceInfoService userDeviceInfoService;
+    private final IslandEventProducerService islandEventProducerService;
 
     /**
      * Constructs the island grpc controller.
      *
-     * @param islandInfoService     {@link IslandInfoService}.
-     * @param subscriptionService   {@link SubscriptionService}.
-     * @param feedService           {@link FeedService}.
-     * @param userInfoService       {@link UserInfoService}.
-     * @param userDeviceInfoService {@link UserDeviceInfoService}.
+     * @param islandInfoService          {@link IslandInfoService}.
+     * @param subscriptionService        {@link SubscriptionService}.
+     * @param feedService                {@link FeedService}.
+     * @param userInfoService            {@link UserInfoService}.
+     * @param userDeviceInfoService      {@link UserDeviceInfoService}.
+     * @param islandEventProducerService {@link IslandEventProducerService}
      */
     public IslandGRpcController(IslandInfoService islandInfoService,
                                 SubscriptionService subscriptionService,
                                 FeedService feedService,
                                 UserInfoService userInfoService,
-                                UserDeviceInfoService userDeviceInfoService) {
+                                UserDeviceInfoService userDeviceInfoService,
+                                IslandEventProducerService islandEventProducerService) {
         this.islandInfoService = islandInfoService;
         this.subscriptionService = subscriptionService;
         this.feedService = feedService;
         this.userInfoService = userInfoService;
         this.userDeviceInfoService = userDeviceInfoService;
+        this.islandEventProducerService = islandEventProducerService;
     }
 
     /**
@@ -161,6 +166,9 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         if (request.hasIdentityId()) {
             infoBuilder.identityId(request.getIdentityId().getValue());
         }
+        if (request.hasDescription()) {
+            infoBuilder.description(request.getDescription().getValue());
+        }
 
         IslandInfo save = islandInfoService.createIsland(infoBuilder.build());
         try {
@@ -173,6 +181,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             responseObserver.onCompleted();
             return;
         }
+
+        this.islandEventProducerService.produceCreateIslandEventAsync(request.getHostId());
 
         IslandMessage islandMessage = islandInfoService.getIslandMessage(save);
         IslandResponse islandResponse = IslandResponse.newBuilder()
