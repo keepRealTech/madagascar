@@ -8,6 +8,7 @@ import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
+import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
@@ -27,18 +28,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import swagger.api.ApiUtil;
 import swagger.api.IslandApi;
 import swagger.model.BriefIslandResponse;
 import swagger.model.BriefIslandsResponse;
 import swagger.model.CheckIslandDTO;
 import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
+import swagger.model.IslandDiscoveryResponse;
 import swagger.model.IslandIdentityResponse;
 import swagger.model.IslandPosterResponse;
 import swagger.model.IslandProfileDTO;
@@ -519,6 +523,25 @@ public class IslandController implements IslandApi {
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the get discovery islands api.
+     *
+     * @return {@link IslandDiscoveryResponse}.
+     */
+    @Override
+    public ResponseEntity<IslandDiscoveryResponse> apiV1IslandsDiscoveryGet() {
+        List<DiscoverIslandMessage> discoverIslandMessageList = this.islandService.retrieveIslandsInDiscovery();
+
+        IslandDiscoveryResponse response = new IslandDiscoveryResponse();
+        response.setData(discoverIslandMessageList.stream()
+                .filter(Objects::nonNull)
+                .map(this.islandDTOFactory::valueOf)
+                .collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
