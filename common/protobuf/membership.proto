@@ -23,6 +23,8 @@ message UpdateMembershipRequest {
     google.protobuf.StringValue description = 3;
     google.protobuf.Int32Value pricePerMonth = 4;
     string userId = 5;
+    google.protobuf.BoolValue useCustomMessage = 6;
+    google.protobuf.StringValue message = 7;
 }
 
 message CreateMembershipRequest {
@@ -31,6 +33,8 @@ message CreateMembershipRequest {
     string description = 3;
     int32 pricePerMonth = 4;
     string hostId = 5;
+    bool useCustomMessage = 6;
+    string message = 7;
 }
 
 message RetrieveMembershipsRequest {
@@ -48,6 +52,8 @@ message MembershipMessage {
     int32 colorType = 7;
     bool isTop = 8;
     int32 memberCount = 9;
+    bool useCustomMessage = 10;
+    string message = 11;
 }
 
 message MembershipResponse {

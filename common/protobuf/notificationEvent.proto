@@ -33,6 +33,8 @@ message MemberEvent {
     string membershipName = 4;
     uint64 priceInCents = 5;
     int32 timeInMonths = 6;
+    bool useCustomMessage = 7;
+    string message = 8;
 }
 
 message CommentEvent {
