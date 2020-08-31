@@ -234,6 +234,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandsResponse'
+  /api/v1.1/islands:
+    post:
+      tags:
+        - Island
+      summary: 创建新的创作首页
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostIslandRequestV2'
+      responses:
+        '200':
+          description: brief island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandResponse'
   /api/v1/islands/checkName:
     get:
       parameters:
@@ -2694,6 +2712,24 @@ components:
           $ref: "#/components/schemas/IslandAccessType"
       required:
         - name
+    PostIslandPayloadV2:
+      type: object
+      properties:
+        name:
+          type: string
+          description: island name
+        secret:
+          type: string
+          description: secrets for joining island
+        identityId:
+          type: string
+        description:
+          type: string
+        islandAccessType:
+          $ref: "#/components/schemas/IslandAccessType"
+      required:
+        - name
+        - description
     PutIslandRequest:
       type: object
       properties:
@@ -2708,6 +2744,17 @@ components:
       properties:
         payload:
           $ref: '#/components/schemas/PostIslandPayload'
+        portraitImage:
+          type: string
+          description: portrait image
+          format: binary
+      required:
+        - payload
+    PostIslandRequestV2:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/PostIslandPayloadV2'
         portraitImage:
           type: string
           description: portrait image
