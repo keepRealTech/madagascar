@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,6 +56,8 @@ import swagger.model.TutorialDTO;
 import swagger.model.TutorialResponse;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +76,7 @@ public class FeedController implements FeedApi {
     private static final String POSTING_INSTRUCTION_CONTENT = "1.在电脑端打开跳岛官网 tiaodaoapp.com\r\n" +
             "2.微信扫码登录\r\n" +
             "3.点击\"发布\"按钮";
+    private static final String PUBLIC_INBOX_USER_ID = "00000000";
 
     private final ImageService imageService;
     private final FeedService feedService;
@@ -246,6 +250,31 @@ public class FeedController implements FeedApi {
         String userId = HttpContextUtils.getUserIdFromContext();
         AbstractMap.SimpleEntry<Boolean, FeedsResponse> entry =
                 this.feedService.retrieveUserFeeds(userId, minTimestamp, maxTimestamp, pageSize);
+
+        TimelinesResponse response = new TimelinesResponse();
+        response.setData(entry.getValue().getFeedList()
+                .stream()
+                .map(this.feedDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().getFeedCount() > 0, entry.getKey(), pageSize));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the get public accessible feeds api.
+     *
+     * @param minTimestamp (optional, default to 0) minimal feed created timestamp.
+     * @param maxTimestamp (optional, default to 0) maximal feed created timestamp.
+     * @param pageSize     (optional, default to 10) size of a page .
+     * @return {@link TimelinesResponse}.
+     */
+    @Override
+    public ResponseEntity<TimelinesResponse> apiV1FeedsPublicGet(Long minTimestamp, Long maxTimestamp, Integer pageSize) {
+        AbstractMap.SimpleEntry<Boolean, FeedsResponse> entry =
+                this.feedService.retrieveUserFeeds(FeedController.PUBLIC_INBOX_USER_ID, minTimestamp, maxTimestamp, pageSize);
 
         TimelinesResponse response = new TimelinesResponse();
         response.setData(entry.getValue().getFeedList()

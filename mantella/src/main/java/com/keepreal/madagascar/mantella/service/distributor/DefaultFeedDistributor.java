@@ -7,6 +7,7 @@ import com.keepreal.madagascar.mantella.service.IslandService;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Represents a default implementation for feed distributor.
@@ -17,6 +18,7 @@ public class DefaultFeedDistributor implements FeedDistributor {
 
     private final TimelineFactory timelineFactory;
     private final IslandService islandService;
+    private static final String PUBLIC_INBOX_USER_ID = "00000000";
 
     /**
      * Constructs the default feed distributor.
@@ -38,8 +40,14 @@ public class DefaultFeedDistributor implements FeedDistributor {
      */
     @Override
     public Flux<Timeline> distribute(FeedCreateEvent feedCreateEvent, String eventId) {
-        return this.islandService.retrieveSubscriberIdsByIslandId(feedCreateEvent.getIslandId())
+        Flux<Timeline> subscriberFlux = this.islandService.retrieveSubscriberIdsByIslandId(feedCreateEvent.getIslandId())
                 .map(userId -> this.timelineFactory.valueOf(feedCreateEvent, userId, eventId));
+
+        Mono<Timeline> publicMono = this.islandService.checkIslandAccessTypeIsPublic(feedCreateEvent.getIslandId())
+                .filter(Boolean.TRUE::equals)
+                .map(signal -> this.timelineFactory.valueOf(feedCreateEvent, DefaultFeedDistributor.PUBLIC_INBOX_USER_ID, eventId));
+
+        return subscriberFlux.mergeWith(publicMono);
     }
 
 }
