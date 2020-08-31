@@ -58,8 +58,11 @@ public class MembershipService {
         colorTypeList.forEach(defaultColorList::remove);
         membershipInfo.setColorType(defaultColorList.get(0));
 
-        this.skuService.createMembershipSkusByMembershipId(membershipInfo.getId(), membershipInfo.getName(),
-                membershipInfo.getPricePerMonth(), membershipInfo.getHostId(), membershipInfo.getIslandId());
+        this.skuService.createMembershipSkusByMembershipId(membershipInfo.getId(),
+                membershipInfo.getName(),
+                membershipInfo.getPricePerMonth(),
+                membershipInfo.getHostId(),
+                membershipInfo.getIslandId(),);
 
         return repository.save(membershipInfo);
     }
@@ -135,6 +138,8 @@ public class MembershipService {
                 .setColorType(membershipInfo.getColorType())
                 .setIsTop(membershipInfo.getTop())
                 .setMemberCount(subscribeMembershipService.getMemberCountByMembershipId(membershipInfo.getId()))
+                .setUseCustomMessage(membershipInfo.getUseCustomMessage())
+                .setMessage(membershipInfo.getMessage())
                 .build();
     }
 
@@ -183,6 +188,13 @@ public class MembershipService {
 
         if (request.hasDescription()) {
             membershipInfo.setDescription(request.getDescription().getValue());
+        }
+
+        if (request.hasUseCustomMessage()) {
+            membershipInfo.setUseCustomMessage(request.getUseCustomMessage().getValue());
+            if (request.hasMessage()) {
+                membershipInfo.setMessage(request.getMessage().getValue());
+            }
         }
 
         this.skuService.updateMembershipSkusByMembershipId(request.getId(), newName, newPrice, null);

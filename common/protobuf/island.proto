@@ -5,6 +5,7 @@ option java_package = "com.keepreal.madagascar.coua";
 
 import "common.proto";
 import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
 
 message QueryIslandCondition {
     google.protobuf.StringValue name = 1;
@@ -178,6 +179,16 @@ message IslandSubscriptionStateResponse {
     bool hasSubscribed = 2;
 }
 
+message DiscoverIslandsResponse {
+    CommonStatus status = 1;
+    repeated DiscoverIslandMessage dicoverIslands = 2;
+}
+
+message DiscoverIslandMessage {
+    IslandMessage island = 1;
+    string recommendation = 2;
+}
+
 service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
@@ -196,4 +207,5 @@ service IslandService {
     rpc DismissIntroduction(DismissIntroductionRequest) returns (CommonStatus) {};
     rpc RetrieveIslanderPortraitUrlByIslandId(RetrieveIslanderPortraitUrlRequest) returns (RetrieveIslanderPortraitUrlResponse) {}
     rpc CheckIslandSubscription(CheckIslandSubscriptionRequest) returns (IslandSubscriptionStateResponse) {};
+    rpc DiscoverIslands(google.protobuf.Empty) returns (DiscoverIslandsResponse) {};
 }

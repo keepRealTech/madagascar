@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.coua.grpcController;
 
 import com.aliyuncs.utils.StringUtils;
+import com.google.protobuf.Empty;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
@@ -17,6 +18,8 @@ import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
 import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
+import com.keepreal.madagascar.coua.DiscoverIslandMessage;
+import com.keepreal.madagascar.coua.DiscoverIslandsResponse;
 import com.keepreal.madagascar.coua.DismissIntroductionRequest;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.coua.IslandResponse;
@@ -631,15 +634,30 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         Subscription subscription = this.subscriptionService.getSubscriptionByIslandIdAndUserId(request.getIslandId(), request.getUserId());
 
         IslandSubscriptionStateResponse.Builder responseBuilder = IslandSubscriptionStateResponse.newBuilder();
-        if (Objects.isNull(subscription)
-                || (SubscriptionState.ISLANDER.getValue() != (subscription.getState()) && SubscriptionState.HOST.getValue() != subscription.getState())) {
-            responseBuilder.setHasSubscribed(false);
-        } else {
-            responseBuilder.setHasSubscribed(true);
-        }
+        responseBuilder.setHasSubscribed(!Objects.isNull(subscription)
+                && (SubscriptionState.ISLANDER.getValue() == (subscription.getState()) || SubscriptionState.HOST.getValue() == subscription.getState()));
 
         responseBuilder.setStatus(CommonStatusUtils.getSuccStatus());
         responseObserver.onNext(responseBuilder.build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Retrieves all islands in discovery.
+     *
+     * @param request          {@link Empty}.
+     * @param responseObserver {@link DiscoverIslandsResponse}.
+     */
+    @Override
+    public void discoverIslands(Empty request,
+                                StreamObserver<DiscoverIslandsResponse> responseObserver) {
+        List<DiscoverIslandMessage> discoverIslandMessageList = this.islandInfoService.retrieveAllDiscoveredIslands();
+
+        DiscoverIslandsResponse response = DiscoverIslandsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllDicoverIslands(discoverIslandMessageList)
+                .build();
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 

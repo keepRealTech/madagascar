@@ -30,6 +30,10 @@ public class MembershipInfo {
     private String name;
     private String description;
     private Integer pricePerMonth;
+    @Builder.Default
+    private Boolean useCustomMessage = false;
+    @Builder.Default
+    private String message = "";
     @Column(name = "is_active")
     @Builder.Default
     private Boolean active = true;
@@ -44,4 +48,5 @@ public class MembershipInfo {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }

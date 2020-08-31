@@ -22,7 +22,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -294,6 +296,10 @@ public class SubscriptionService {
 
         subscription.setShouldIntroduce(false);
         this.subscriptionRepository.save(subscription);
+    }
+
+    public Page<String> getIslandIdsByUsername(String username, Pageable pageable) {
+        return this.subscriptionRepository.getIslandIdsByUsername(username, pageable);
     }
 
     private void insertSubscription(Subscription subscription) {

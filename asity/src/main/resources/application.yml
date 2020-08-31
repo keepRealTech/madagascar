@@ -10,7 +10,9 @@ spring:
 
 grpc:
   port: 12007
-
+  coua:
+    host: coua
+    port: 12002
 rongcloud:
   app-key: 123
   app-secret: 456
