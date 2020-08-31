@@ -2657,7 +2657,7 @@ components:
           type: boolean
         hasMemberships:
           type: boolean
-    SubscriberIntroductionDTO:
+    IntroductionDTO:
       type: object
       properties:
         shouldPopup:
@@ -2685,7 +2685,9 @@ components:
         hostIntroduction:
           $ref: '#/components/schemas/HostIntroductionDTO'
         subscriberIntroduction:
-          $ref: '#/components/schemas/SubscriberIntroductionDTO'
+          $ref: '#/components/schemas/IntroductionDTO'
+        introduction:
+          $ref: '#/components/schemas/IntroductionDTO'
     CheckIslandDTO:
       type: object
       properties:

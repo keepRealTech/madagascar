@@ -16,12 +16,12 @@ import swagger.model.BriefIslandDTO;
 import swagger.model.FullIslandDTO;
 import swagger.model.HostIntroductionDTO;
 import swagger.model.IntroPrerequestsDTO;
+import swagger.model.IntroductionDTO;
 import swagger.model.IslandAccessType;
 import swagger.model.IslandDTO;
 import swagger.model.IslandIdentityDTO;
 import swagger.model.IslandProfileDTO;
 import swagger.model.RecommendIslandDTO;
-import swagger.model.SubscriberIntroductionDTO;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -38,6 +38,8 @@ public class IslandDTOFactory {
                     "1.支持我更好创作\r\n" +
                     "2.支持后享受专属权益\r\n" +
                     "3.最快看到我的动态，或向我提问";
+    private static final String HOST_INTRODUCTION_TITLE = "你成为了一名创作者！";
+    private static final String HOST_INTRODUCTION_CONTENT = "现在去分享你的创作主页来获得粉丝的支持吧！";
 
     private final ChatService chatService;
     private final RepostService repostService;
@@ -204,18 +206,16 @@ public class IslandDTOFactory {
         islandProfileDTO.setHasGroupchatAccess(this.chatService.retrieveChatAccessByIslandId(islandProfileResponse
                 .getIsland().getId()).getChatAccess().getHasAccess());
 
+        // Deprecated fields
+        islandProfileDTO.setHostIntroduction(this.buildHostIntroduction());
+        islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(false));
+
         if (userId.equals(islandProfileDTO.getHost().getId())) {
-            islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(false));
-            islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(islandProfileResponse.getIsland().getId(),
-                    userId, islandProfileResponse.getHostShouldIntroduce()));
+            islandProfileDTO.setIntroduction(this.buildHostIntroduction(islandProfileResponse.getHostShouldIntroduce()));
         } else if (this.generalConfiguration.getOfficialIslandIdList().contains(islandProfileResponse.getIsland().getId())) {
-            islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(false));
-            islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(islandProfileResponse.getIsland().getId(),
-                    userId, false));
+            islandProfileDTO.setIntroduction(this.buildSubscriberIntroduction(false));
         } else {
-            islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(islandProfileResponse.getUserShouldIntroduce()));
-            islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(islandProfileResponse.getIsland().getId(),
-                    userId, false));
+            islandProfileDTO.setIntroduction(this.buildSubscriberIntroduction(islandProfileResponse.getUserShouldIntroduce()));
         }
 
         return islandProfileDTO;
@@ -246,10 +246,10 @@ public class IslandDTOFactory {
      * Builds the subscriber introduction dto.
      *
      * @param shouldIntroduce Whether should pop up the intro.
-     * @return {@link SubscriberIntroductionDTO}
+     * @return {@link IntroductionDTO}
      */
-    private SubscriberIntroductionDTO buildSubscriberIntroduction(Boolean shouldIntroduce) {
-        SubscriberIntroductionDTO subscriberIntroductionDTO = new SubscriberIntroductionDTO();
+    private IntroductionDTO buildSubscriberIntroduction(Boolean shouldIntroduce) {
+        IntroductionDTO subscriberIntroductionDTO = new IntroductionDTO();
 
         if (Objects.isNull(shouldIntroduce) || !shouldIntroduce) {
             subscriberIntroductionDTO.setShouldPopup(false);
@@ -267,30 +267,37 @@ public class IslandDTOFactory {
      * Builds the host introduction dto.
      *
      * @param shouldIntroduce Whether should pip up the intro.
+     * @return {@link IntroductionDTO}.
+     */
+    private IntroductionDTO buildHostIntroduction(Boolean shouldIntroduce) {
+        IntroductionDTO hostIntroductionDTO = new IntroductionDTO();
+
+        if (Objects.isNull(shouldIntroduce) || !shouldIntroduce) {
+            hostIntroductionDTO.setShouldPopup(false);
+            return hostIntroductionDTO;
+        }
+
+        hostIntroductionDTO.setShouldPopup(true);
+        hostIntroductionDTO.setTitle(IslandDTOFactory.HOST_INTRODUCTION_TITLE);
+        hostIntroductionDTO.setContent(IslandDTOFactory.HOST_INTRODUCTION_CONTENT);
+
+        return hostIntroductionDTO;
+    }
+
+    /**
+     * Builds the host introduction dto.
+     *
      * @return {@link HostIntroductionDTO}.
      */
-    private HostIntroductionDTO buildHostIntroduction(String islandId, String hostId, Boolean shouldIntroduce) {
+    @Deprecated
+    private HostIntroductionDTO buildHostIntroduction() {
         HostIntroductionDTO hostIntroductionDTO = new HostIntroductionDTO();
         IntroPrerequestsDTO introPrerequestsDTO = new IntroPrerequestsDTO();
         introPrerequestsDTO.setHasFeeds(true);
         introPrerequestsDTO.setHasMemberships(true);
         introPrerequestsDTO.setHasReposts(true);
-
-        if (Objects.isNull(shouldIntroduce) || !shouldIntroduce) {
-            hostIntroductionDTO.setShouldPopup(false);
-            hostIntroductionDTO.setPres(introPrerequestsDTO);
-            return hostIntroductionDTO;
-        }
-
-        introPrerequestsDTO.setHasReposts(this.repostService.retrieveRepostIslandById(islandId, 0, 1).getIslandRepostsCount() > 0);
-        introPrerequestsDTO.setHasFeeds(this.feedService.retrieveIslandFeeds(islandId, true, hostId, null, null, 0, 2, false).getFeedCount() > 1);
-        introPrerequestsDTO.setHasMemberships(this.membershipService.retrieveMembershipsByIslandId(islandId, false).size() > 0);
-
+        hostIntroductionDTO.setShouldPopup(false);
         hostIntroductionDTO.setPres(introPrerequestsDTO);
-        hostIntroductionDTO.setShouldPopup(!introPrerequestsDTO.getHasFeeds()
-                || !introPrerequestsDTO.getHasReposts()
-                || !introPrerequestsDTO.getHasMemberships());
-
         return hostIntroductionDTO;
     }
 

@@ -230,12 +230,6 @@ public class IslandController implements IslandApi {
         IslandProfileResponse response = new IslandProfileResponse();
         IslandProfileDTO islandProfileDTO = this.islandDTOFactory.valueOf(islandProfileResponse, userId);
 
-        if (userId.equals(islandProfileResponse.getHost().getId())
-                && islandProfileResponse.getHostShouldIntroduce()
-                && !islandProfileDTO.getHostIntroduction().getShouldPopup()) {
-            this.islandService.dismissIslandIntroduction(id, userId, true);
-        }
-
         response.setData(islandProfileDTO);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
@@ -520,7 +514,9 @@ public class IslandController implements IslandApi {
     public ResponseEntity<DummyResponse> apiV1IslandsIdIntroductionDismissPost(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        this.islandService.dismissIslandIntroduction(id, userId, false);
+        IslandMessage island = this.islandService.retrieveIslandById(id);
+
+        this.islandService.dismissIslandIntroduction(id, userId, userId.equals(island.getHostId()));
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
