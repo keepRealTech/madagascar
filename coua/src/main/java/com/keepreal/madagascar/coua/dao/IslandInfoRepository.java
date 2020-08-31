@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @program: madagascar
@@ -63,4 +64,6 @@ public interface IslandInfoRepository extends JpaRepository<IslandInfo, String> 
             "WHERE id IN ?1 ORDER BY FIELD (id, ?1) ",
            nativeQuery = true)
     List<IslandInfo> findIslandInfosByIdInAndDeletedIsFalse(List<String> idList);
+
+    List<IslandInfo> findByIdInAndDeletedIsFalse(Set<String> idList);
 }
