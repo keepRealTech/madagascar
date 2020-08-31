@@ -47,6 +47,8 @@ tags:
     description: 作品集 controller
   - name: Box
     description: 提问箱 controller
+  - name: Support
+    description: 支持一下 controller
 
 paths:
   /api/healthcheck:
@@ -1182,6 +1184,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipSkusResponse'
+  /api/v1/islands/{id}/support/skus:
+    parameters:
+      - $ref: "#/components/parameters/idInPath"
+    get:
+      tags:
+        - Sku
+      summary: 获得支持一下商品信息
+      responses:
+        '200':
+          description: skus
+          content:
+            applicaiton/json:
+              schema:
+                $ref: '#/components/schemas/SupportSkusResponse'
   /api/v1/islands/{id}/memberships:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2034,7 +2050,7 @@ paths:
       - $ref: '#/components/parameters/idInPath'
     get:
       tags:
-        - Sku
+        - Support
       summary: 获得支持商品信息
       responses:
         '200':
@@ -4729,15 +4745,27 @@ components:
           format: int64
         isDefault:
           type: boolean
-    SponsorDTO:
+    SupportSkusDTO:
       type: object
       properties:
         sponsorSkus:
           type: array
           items:
             $ref: '#/components/schemas/SponsorSkuDTO'
-        customSku:
+        customizedSku:
           $ref: '#/components/schemas/SponsorSkuDTO'
+    SupportSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportSkusDTO'
+    SponsorDTO:
+      type: object
+      properties:
+        text:
+          type: string
         count:
           type: integer
     SupportDTO:
