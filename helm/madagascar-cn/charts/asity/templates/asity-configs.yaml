@@ -12,3 +12,5 @@ data:
   ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
   ROCKETMQ_CHAT_TOPIC: {{ .Values.rocketmq.chat.topic }}
   ROCKETMQ_CHAT_TAG: {{ .Values.rocketmq.chat.tag }}
+  GRPC_COUA_HOST: {{ .Values.coua.host }}
+  GRPC_COUA_PORT: '{{ .Values.coua.port }}'
