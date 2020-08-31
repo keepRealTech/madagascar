@@ -66,7 +66,8 @@ public class IslandDTOFactory {
                             MembershipService membershipService,
                             UserService userService,
                             UserDTOFactory userDTOFactory,
-                            GeneralConfiguration generalConfiguration, UserService userService) {
+                            GeneralConfiguration generalConfiguration,
+                            UserService userService) {
         this.chatService = chatService;
         this.repostService = repostService;
         this.feedService = feedService;
