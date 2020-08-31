@@ -210,6 +210,8 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         membershipInfo.setHostId(request.getHostId());
         membershipInfo.setDescription(request.getDescription());
         membershipInfo.setPricePerMonth(request.getPricePerMonth());
+        membershipInfo.setUseCustomMessage(request.getUseCustomMessage());
+        membershipInfo.setMessage(request.getMessage());
         MembershipInfo membership = membershipService.createMembership(membershipInfo);
 
         responseObserver.onNext(MembershipResponse.newBuilder()

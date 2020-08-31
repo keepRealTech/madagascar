@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
@@ -29,6 +30,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents the membership service.
@@ -113,7 +115,25 @@ public class MembershipService {
         }
     }
 
-    public MembershipMessage createMembership(String name, Integer pricePerMonth, List<String> descriptions, String islandId, String hostId) {
+    /**
+     * Calls coua to update a membership.
+     *
+     * @param name             Name.
+     * @param pricePerMonth    Price per month in cents.
+     * @param descriptions     A list of privileges.
+     * @param islandId         Island id.
+     * @param hostId           Island host id.
+     * @param useCustomMessage Whether use customized thank you message.
+     * @param message          Thank you message template.
+     * @return {@link MembershipMessage}.
+     */
+    public MembershipMessage createMembership(String name,
+                                              Integer pricePerMonth,
+                                              List<String> descriptions,
+                                              String islandId,
+                                              String hostId,
+                                              boolean useCustomMessage,
+                                              String message) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         String descriptionStr = String.join(",", descriptions);
@@ -123,6 +143,8 @@ public class MembershipService {
                 .setIslandId(islandId)
                 .setHostId(hostId)
                 .setDescription(descriptionStr)
+                .setUseCustomMessage(useCustomMessage)
+                .setMessage(message)
                 .build();
 
         MembershipResponse membershipResponse;
@@ -139,6 +161,12 @@ public class MembershipService {
         return membershipResponse.getMessage();
     }
 
+    /**
+     * Retrieves a membership by id.
+     *
+     * @param membershipId Membership id.
+     * @return {@link MembershipMessage}.
+     */
     @Cacheable(value = "MembershipMessage", key = "#membershipId", cacheManager = "redisCacheManager")
     public MembershipMessage retrieveMembershipById(String membershipId) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
@@ -160,7 +188,13 @@ public class MembershipService {
     }
 
     @CachePut(value = "MembershipMessage", key = "#membershipId", cacheManager = "redisCacheManager")
-    public MembershipMessage updateMembershipById(String membershipId, String name, List<String> descriptions, Integer pricePerMonth, String userId) {
+    public MembershipMessage updateMembershipById(String membershipId,
+                                                  String name,
+                                                  List<String> descriptions,
+                                                  Integer pricePerMonth,
+                                                  String userId,
+                                                  Boolean useCustomMessage,
+                                                  String messsage) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         UpdateMembershipRequest.Builder builder = UpdateMembershipRequest.newBuilder()
@@ -174,6 +208,12 @@ public class MembershipService {
         }
         if (descriptions != null && descriptions.size() > 0) {
             builder.setDescription(StringValue.of(String.join(",", descriptions)));
+        }
+        if (Objects.nonNull(useCustomMessage)) {
+            builder.setUseCustomMessage(BoolValue.of(useCustomMessage));
+        }
+        if (Boolean.TRUE.equals(useCustomMessage) && Objects.nonNull(messsage)) {
+            builder.setMessage(StringValue.of(messsage));
         }
 
         MembershipResponse membershipResponse;

@@ -93,7 +93,9 @@ public class MembershipController implements MembershipApi {
                 postMembershipRequest.getChargePerMonth(),
                 postMembershipRequest.getDescription(),
                 id,
-                userId);
+                userId,
+                postMembershipRequest.getUseCustomMessage(),
+                postMembershipRequest.getMessage());
 
         MembershipResponse response = new MembershipResponse();
         response.data(membershipDTOFactory.briefValueOf(membershipMessage));
@@ -165,7 +167,9 @@ public class MembershipController implements MembershipApi {
                 putMembershipRequest.getName(),
                 putMembershipRequest.getDescription(),
                 putMembershipRequest.getChargePerMonth(),
-                userId);
+                userId,
+                putMembershipRequest.getUseCustomMessage(),
+                putMembershipRequest.getMessage());
 
         MembershipResponse response = new MembershipResponse();
         response.data(membershipDTOFactory.briefValueOf(membershipMessage));
