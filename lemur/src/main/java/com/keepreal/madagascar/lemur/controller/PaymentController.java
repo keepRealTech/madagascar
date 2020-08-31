@@ -13,8 +13,10 @@ import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.PaymentApi;
 import swagger.model.DummyResponse;
@@ -23,6 +25,7 @@ import swagger.model.SubscribeMemberRequest;
 import swagger.model.UserPaymentsResponse;
 import swagger.model.WechatOrderResponse;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,10 +50,10 @@ public class PaymentController implements PaymentApi {
      * Constructs the payment controller.
      *
      * @param paymentService        {@link PaymentService}.
-     * @param userService
-     * @param membershipService
+     * @param userService           {@link UserService}.
+     * @param membershipService     {@link MembershipService}.
      * @param wechatOrderDTOFactory {@link WechatOrderDTOFactory}.
-     * @param paymentDTOFactory
+     * @param paymentDTOFactory     {@link PaymentDTOFactory}.
      */
     public PaymentController(PaymentService paymentService,
                              UserService userService,
@@ -113,25 +116,25 @@ public class PaymentController implements PaymentApi {
      * @param id                     id (required) Island id.
      * @param sceneType              (required) Scene type.
      * @param subscribeMemberRequest (required) {@link SubscribeMemberRequest}.
-     * @return {@link WechatOrderResponse}.
+     * @return {@link DummyResponse}.
      */
+    @CrossOrigin
     @Override
-    public ResponseEntity<WechatOrderResponse> apiV1IslandsIdMemberSubscriptionWechatPayHtml5Post(String id,
+    public ResponseEntity<DummyResponse> apiV1IslandsIdMemberSubscriptionWechatPayHtml5Post(String id,
                                                                                                   SceneType sceneType,
                                                                                                   SubscribeMemberRequest subscribeMemberRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
 
-        WechatOrderMessage wechatOrderMessage = this.paymentService.submitSubscribeMembershipWithWechatPayH5(userId,
+        String redirectUrl = this.paymentService.submitSubscribeMembershipWithWechatPayH5(userId,
                 remoteAddress,
                 subscribeMemberRequest.getMembershipSkuId(),
                 this.convertType(sceneType));
 
-        WechatOrderResponse response = new WechatOrderResponse();
-        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
-        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
-        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(redirectUrl));
+
+        return new ResponseEntity<>(null, headers, HttpStatus.FOUND);
     }
 
     /**

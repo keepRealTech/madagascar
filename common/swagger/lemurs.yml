@@ -1049,7 +1049,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WechatOrderResponse'
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/islands/{id}/memberSubscription/shellPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2098,7 +2098,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WechatOrderResponse'
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/islands/discovery:
     get:
       tags:

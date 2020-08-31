@@ -54,6 +54,9 @@ public class FeedEventListener implements MessageOrderListener {
                     if (MediaType.MEDIA_QUESTION_VALUE == feedEventMessage.getFeedCreateEvent().getMediaTypeValue()) {
                         return OrderAction.Success;
                     }
+                    if (!feedEventMessage.getFeedCreateEvent().getFromHost()) {
+                        return OrderAction.Success;
+                    }
                     Boolean hasConsumed = this.timelineService.hasConsumed(message.getKey()).block();
 
                     if (Boolean.TRUE.equals(hasConsumed)) {
