@@ -22,8 +22,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -154,9 +156,21 @@ public class IslandInfoService {
      * @return {@link IslandInfo}.
      */
     public List<IslandInfo> getIslandByName(String islandName, Pageable pageable, IslandsResponse.Builder builder) {
-        Page<IslandInfo> islandIdListPageable = islandInfoRepository.findByIslandNameStartingWithAndDeletedIsFalse(islandName, pageable);
-        builder.setPageResponse(PageResponseUtil.buildResponse(islandIdListPageable));
-        return islandIdListPageable.getContent();
+        Page<IslandInfo> islandListPageable = islandInfoRepository.findByIslandNameStartingWithAndDeletedIsFalse(islandName, pageable);
+
+        Page<String> islandIdsPageable = this.subscriptionService.getIslandIdsByUsername(islandName, pageable);
+        Set<String> islandIds = new HashSet<>(islandIdsPageable.getContent());
+        islandIds.removeAll(islandListPageable.getContent().stream().map(IslandInfo::getId).collect(Collectors.toList()));
+        List<IslandInfo> islandInfos = this.islandInfoRepository.findByIdInAndDeletedIsFalse(islandIds);
+        islandInfos.addAll(islandListPageable.getContent());
+
+        if (islandListPageable.hasContent()) {
+            builder.setPageResponse(PageResponseUtil.buildResponse(islandListPageable));
+        } else {
+            builder.setPageResponse(PageResponseUtil.buildResponse(islandIdsPageable));
+        }
+
+        return islandInfos.stream().sorted(Comparator.comparing(IslandInfo::getIdentityId).thenComparing(IslandInfo::getIslanderNumber)).collect(Collectors.toList());
     }
 
     /**
