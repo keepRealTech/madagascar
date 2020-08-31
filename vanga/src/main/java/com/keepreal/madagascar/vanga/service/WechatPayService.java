@@ -117,6 +117,8 @@ public class WechatPayService {
 
             response = this.client.unifiedOrder(requestBody);
 
+            log.info(response.toString());
+
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
                 wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());
@@ -139,11 +141,11 @@ public class WechatPayService {
             wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
             wechatOrder = this.wechatOrderService.insert(wechatOrder);
 
-            wechatOrder.setPrepayId(response.get("prepay_id"));
+            wechatOrder.setPrepayId(request.get("prepay_id"));
             wechatOrder.setSignature(request.get("sign"));
             wechatOrder.setNonceStr(request.get("noncestr"));
 
-            wechatOrder.setMwebUrl(request.getOrDefault("mweb_url", ""));
+            wechatOrder.setMwebUrl(response.getOrDefault("mweb_url", ""));
 
             return wechatOrder;
         } catch (Exception e) {

@@ -10,6 +10,7 @@ import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
+import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.RefundWechatFeedRequest;
 import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
@@ -544,14 +545,14 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * Implements the H5 payment api.
      *
      * @param request {@link SubscribeMembershipRequest}.
-     * @param responseObserver {@link WechatOrderResponse}.
+     * @param responseObserver {@link RedirectResponse}.
      */
     @Override
     public void submitSubscribeMembershipWithWechatPayH5(SubscribeMembershipRequest request,
-                                                         StreamObserver<WechatOrderResponse> responseObserver) {
+                                                         StreamObserver<RedirectResponse> responseObserver) {
         MembershipSku sku = this.skuService.retrieveMembershipSkuById(request.getMembershipSkuId());
         if (Objects.isNull(sku)) {
-            WechatOrderResponse response = WechatOrderResponse.newBuilder()
+            RedirectResponse response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
                     .build();
             responseObserver.onNext(response);
@@ -566,15 +567,15 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 request.getSceneType(),
                 request.getIpAddress());
 
-        WechatOrderResponse response;
+        RedirectResponse response;
         if (Objects.nonNull(wechatOrder)) {
-            response = WechatOrderResponse.newBuilder()
+            response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .setRedirectUrl(wechatOrder.getMwebUrl())
                     .build();
             this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
         } else {
-            response = WechatOrderResponse.newBuilder()
+            response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
                     .build();
         }
