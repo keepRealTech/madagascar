@@ -15,6 +15,8 @@ message CreateWithdrawRequest {
 message SubscribeMembershipRequest {
   string userId = 1;
   string membershipSkuId = 2;
+  SceneType sceneType = 3;
+  string ipAddress = 4;
 }
 
 message WechatOrderResponse {
@@ -76,6 +78,7 @@ message CreatePaidFeedRequest {
   uint64 priceInCents = 2;
   string userId = 3;
   string hostId = 4;
+  string ipAddress = 5;
 }
 
 message RefundWechatFeedRequest {
@@ -92,6 +95,7 @@ service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
   rpc SubmitSubscribeMembershipWithWechatPay (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
+  rpc SubmitSubscribeMembershipWithWechatPayH5 (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
   rpc RetrieveWechatOrderById (RetrieveWechatOrderByIdRequest) returns (WechatOrderResponse) {};
   rpc WechatPayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
   rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};

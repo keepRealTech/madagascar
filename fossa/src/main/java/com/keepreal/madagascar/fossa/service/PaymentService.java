@@ -33,6 +33,7 @@ public class PaymentService {
                     .setPriceInCents(priceInCents)
                     .setUserId(userId)
                     .setHostId(hostId)
+                    .setIpAddress("127.0.0.1")
                     .build());
         } catch (Exception e) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);

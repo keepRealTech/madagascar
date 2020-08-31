@@ -83,6 +83,13 @@ enum IdentityType {
     IDENTITY_OTHERS = 14;
 }
 
+enum SceneType {
+    SCENE_NONE = 0;
+    SCENE_IOS = 1;
+    SCENE_ANDROID = 2;
+    SCENE_WAP = 3;
+}
+
 enum Gender {
     UNKNOWN = 0;
     MALE = 1;
@@ -235,6 +242,7 @@ message WechatOrderMessage {
     uint64 feeInCents = 9;
     uint64 timestamp = 10;
     WechatOrderState state = 11;
+    string mwebUrl = 12;
 }
 
 enum WechatOrderState {

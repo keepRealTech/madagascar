@@ -159,7 +159,9 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId(),
-                WechatOrderType.PAYMEMBERSHIP);
+                WechatOrderType.PAYMEMBERSHIP,
+                null,
+                request.getIpAddress());
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -475,7 +477,9 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(request.getPriceInCents()),
                 request.getFeedId(),
-                WechatOrderType.PAYQUESTION);
+                WechatOrderType.PAYQUESTION,
+                null,
+                request.getIpAddress());
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -530,6 +534,49 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         } catch (KeepRealBusinessException exception) {
             response = CommonStatusUtils.buildCommonStatus(exception.getErrorCode());
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the H5 payment api.
+     *
+     * @param request {@link SubscribeMembershipRequest}.
+     * @param responseObserver {@link WechatOrderResponse}.
+     */
+    @Override
+    public void submitSubscribeMembershipWithWechatPayH5(SubscribeMembershipRequest request,
+                                                         StreamObserver<WechatOrderResponse> responseObserver) {
+        MembershipSku sku = this.skuService.retrieveMembershipSkuById(request.getMembershipSkuId());
+        if (Objects.isNull(sku)) {
+            WechatOrderResponse response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
+                String.valueOf(sku.getPriceInCents()),
+                sku.getId(),
+                WechatOrderType.PAYMEMBERSHIPH5,
+                request.getSceneType(),
+                request.getIpAddress());
+
+        WechatOrderResponse response;
+        if (Objects.nonNull(wechatOrder)) {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .build();
+            this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
+        } else {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
         }
 
         responseObserver.onNext(response);
