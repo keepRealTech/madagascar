@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
@@ -8,17 +9,18 @@ import com.keepreal.madagascar.lemur.service.ChatService;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.RepostService;
+import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
 import swagger.model.FullIslandDTO;
 import swagger.model.HostIntroductionDTO;
-import swagger.model.IdentityType;
 import swagger.model.IntroPrerequestsDTO;
 import swagger.model.IslandAccessType;
 import swagger.model.IslandDTO;
 import swagger.model.IslandIdentityDTO;
 import swagger.model.IslandProfileDTO;
+import swagger.model.RecommendIslandDTO;
 import swagger.model.SubscriberIntroductionDTO;
 
 import java.util.Arrays;
@@ -33,23 +35,26 @@ public class IslandDTOFactory {
     private static final int DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT = 99_999_999;
     private static final String SUBSCRIBER_INTRODUCTION_TITLE = "欢迎加入我的岛！在这里你可以：";
     private static final String SUBSCRIBER_INTRODUCTION_CONTENT =
-            "1.支持我更好创作\r\n" +
-            "2.支持后享受专属权益\r\n" +
-            "3.最快看到我的动态，或向我提问";
+                    "1.支持我更好创作\r\n" +
+                    "2.支持后享受专属权益\r\n" +
+                    "3.最快看到我的动态，或向我提问";
 
     private final ChatService chatService;
     private final RepostService repostService;
     private final FeedService feedService;
     private final MembershipService membershipService;
+    private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final GeneralConfiguration generalConfiguration;
 
     /**
      * Constructs the island dto factory.
+     *
      * @param chatService          {@link ChatService}.
      * @param repostService        {@link RepostService}.
      * @param feedService          {@link FeedService}.
      * @param membershipService    {@link MembershipService}.
+     * @param userService          {@link UserService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
      */
@@ -57,12 +62,14 @@ public class IslandDTOFactory {
                             RepostService repostService,
                             FeedService feedService,
                             MembershipService membershipService,
+                            UserService userService,
                             UserDTOFactory userDTOFactory,
                             GeneralConfiguration generalConfiguration) {
         this.chatService = chatService;
         this.repostService = repostService;
         this.feedService = feedService;
         this.membershipService = membershipService;
+        this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.generalConfiguration = generalConfiguration;
     }
@@ -90,6 +97,8 @@ public class IslandDTOFactory {
         islandDTO.setPortraitImageUri(island.getPortraitImageUri());
         islandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
+        islandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
+
         return islandDTO;
     }
 
@@ -113,6 +122,31 @@ public class IslandDTOFactory {
         briefIslandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
         return briefIslandDTO;
+    }
+
+    /**
+     * Converts the {@link DiscoverIslandMessage} into {@link RecommendIslandDTO}.
+     *
+     * @param discoverIsland {@link DiscoverIslandMessage}.
+     * @return {@link RecommendIslandDTO}.
+     */
+    public RecommendIslandDTO valueOf(DiscoverIslandMessage discoverIsland) {
+        if (Objects.isNull(discoverIsland)) {
+            return null;
+        }
+
+        RecommendIslandDTO recommendIslandDTO = new RecommendIslandDTO();
+        recommendIslandDTO.setId(discoverIsland.getIsland().getId());
+        recommendIslandDTO.setName(discoverIsland.getIsland().getName());
+        recommendIslandDTO.setDescription(discoverIsland.getIsland().getDescription());
+        recommendIslandDTO.setHostId(discoverIsland.getIsland().getHostId());
+        recommendIslandDTO.setPortraitImageUri(discoverIsland.getIsland().getPortraitImageUri());
+        recommendIslandDTO.setAccessType(this.convertAccessType(discoverIsland.getIsland().getIslandAccessType()));
+
+        recommendIslandDTO.setRecommendation(discoverIsland.getRecommendation());
+        recommendIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(discoverIsland.getIsland().getHostId())));
+
+        return recommendIslandDTO;
     }
 
     /**
@@ -140,6 +174,8 @@ public class IslandDTOFactory {
             memberCount = DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT;
         fullIslandDTO.setMemberCount(memberCount);
         fullIslandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
+
+        fullIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 
         return fullIslandDTO;
     }
