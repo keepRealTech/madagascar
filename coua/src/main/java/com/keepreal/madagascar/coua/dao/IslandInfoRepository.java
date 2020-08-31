@@ -23,6 +23,8 @@ public interface IslandInfoRepository extends JpaRepository<IslandInfo, String> 
 
     IslandInfo findTopByIslandNameAndDeletedIsFalse(String islandName);
 
+    List<IslandInfo> findAllByIdInAndDeletedIsFalse(Iterable<String> ids);
+
     Page<IslandInfo> findByIslandNameStartingWithAndDeletedIsFalse(String islandName, Pageable pageable);
 
     IslandInfo findTopByIdAndDeletedIsFalse(String id);
