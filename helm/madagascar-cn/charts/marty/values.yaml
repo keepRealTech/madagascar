@@ -38,3 +38,6 @@ umeng:
 deploy:
   opentracing:
     enable_jaeger: false
+
+jpush:
+  isProduction: true

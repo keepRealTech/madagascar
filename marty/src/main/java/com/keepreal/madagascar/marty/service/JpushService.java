@@ -4,6 +4,7 @@ import cn.jiguang.common.resp.APIConnectionException;
 import cn.jiguang.common.resp.APIRequestException;
 import cn.jpush.api.JPushClient;
 import cn.jpush.api.push.model.Message;
+import cn.jpush.api.push.model.Options;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
@@ -19,9 +20,11 @@ import java.util.Map;
 public class JpushService {
 
     private final JPushClient jPushClient;
+    private final boolean isProduction;
 
     public JpushService(JPushConfig jPushConfig) {
         this.jPushClient = new JPushClient(jPushConfig.getAppSecret(), jPushConfig.getAppKey());
+        this.isProduction = jPushConfig.getIsProduction();
     }
 
     public void pushIOSMessageByType(PushType pushType, String... registrationIds) {
@@ -31,6 +34,9 @@ public class JpushService {
             jPushClient.sendPush(PushPayload.newBuilder()
                     .setPlatform(Platform.ios())
                     .setAudience(Audience.registrationId(registrationIds))
+                    .setOptions(Options.newBuilder()
+                            .setApnsProduction(isProduction)
+                            .build())
                     .setMessage(Message.newBuilder()
                             .setMsgContent("notification")
                             .addExtra("type", pushType.getValue())
@@ -48,6 +54,9 @@ public class JpushService {
             jPushClient.sendPush(PushPayload.newBuilder()
                     .setPlatform(Platform.ios())
                     .setAudience(Audience.registrationId(registrationIds))
+                    .setOptions(Options.newBuilder()
+                            .setApnsProduction(isProduction)
+                            .build())
                     .setMessage(Message.newBuilder()
                             .setMsgContent("notification")
                             .addExtra("type", pushType.getValue())
@@ -66,6 +75,9 @@ public class JpushService {
             jPushClient.sendPush(PushPayload.newBuilder()
                     .setPlatform(Platform.ios())
                     .setAudience(Audience.registrationId(registrationIds))
+                    .setOptions(Options.newBuilder()
+                            .setApnsProduction(isProduction)
+                            .build())
                     .setMessage(Message.newBuilder()
                             .setMsgContent("notification")
                             .addExtra("type", pushType.getValue())

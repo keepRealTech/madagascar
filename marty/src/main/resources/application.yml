@@ -48,3 +48,4 @@ spring:
 jpush:
   appKey: xxx000xxx000xxx000xxx000
   appSecret: xxx000xxx000xxx000xxx000
+  isProduction: false
