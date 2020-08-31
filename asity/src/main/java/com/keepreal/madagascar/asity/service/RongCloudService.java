@@ -3,6 +3,7 @@ package com.keepreal.madagascar.asity.service;
 import com.keepreal.madagascar.asity.config.RongCloudConfiguration;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.CreateIslandEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import io.rong.RongCloud;
 import io.rong.messages.TxtMessage;
@@ -182,6 +183,22 @@ public class RongCloudService {
                 .setIsCounted(0)
                 .setIsIncludeSender(1);
         this.client.message.msgPrivate.send(memberMessage);
+    }
+
+    @SneakyThrows
+    public void sentCreateIslandNotice(CreateIslandEvent createIslandEvent) {
+        TxtMessage txtMessage = new TxtMessage("", "");
+
+        PrivateMessage message = new PrivateMessage()
+                .setSenderId("4")
+                .setTargetId(new String[]{createIslandEvent.getHostId()})
+                .setObjectName(txtMessage.getType())
+                .setContent(txtMessage)
+                .setVerifyBlacklist(0)
+                .setIsPersisted(0)
+                .setIsCounted(0)
+                .setIsIncludeSender(1);
+        this.client.message.msgPrivate.send(message);
     }
 
 }

@@ -242,7 +242,8 @@ public class IslandService {
                                       String secret,
                                       String identityId,
                                       String userId,
-                                      IslandAccessType islandAccessType) {
+                                      IslandAccessType islandAccessType,
+                                      String description) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         if (Objects.isNull(identityId)) {
@@ -265,6 +266,10 @@ public class IslandService {
 
         if (!StringUtils.isEmpty(portraitImageUri)) {
             requestBuilder.setPortraitImageUri(StringValue.of(portraitImageUri));
+        }
+
+        if (!StringUtils.isEmpty(description)) {
+            requestBuilder.setDescription(StringValue.of(description));
         }
 
         IslandResponse islandResponse;
