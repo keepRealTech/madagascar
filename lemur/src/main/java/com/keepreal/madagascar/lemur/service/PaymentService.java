@@ -10,6 +10,7 @@ import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
+import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
 import com.keepreal.madagascar.vanga.UserPaymentsResponse;
@@ -146,8 +147,9 @@ public class PaymentService {
      * @param remoteAddress   Remote address ip.
      * @param membershipSkuId Membership sku id.
      * @param sceneType       Scene type.
+     * @return Redirect url.
      */
-    public WechatOrderMessage submitSubscribeMembershipWithWechatPayH5(String userId, String remoteAddress, String membershipSkuId, SceneType sceneType) {
+    public String submitSubscribeMembershipWithWechatPayH5(String userId, String remoteAddress, String membershipSkuId, SceneType sceneType) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         SubscribeMembershipRequest request = SubscribeMembershipRequest.newBuilder()
@@ -157,7 +159,7 @@ public class PaymentService {
                 .setSceneType(sceneType)
                 .build();
 
-        WechatOrderResponse response;
+        RedirectResponse response;
         try {
             response = stub.submitSubscribeMembershipWithWechatPayH5(request);
         } catch (StatusRuntimeException exception) {
@@ -166,7 +168,7 @@ public class PaymentService {
 
         if (Objects.isNull(response)
                 || !response.hasStatus()) {
-            log.error(Objects.isNull(response) ? "Create wechat order returned null." : response.toString());
+            log.error(Objects.isNull(response) ? "Create wechat h5 order returned null." : response.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
@@ -174,7 +176,7 @@ public class PaymentService {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
-        return response.getWechatOrder();
+        return response.getRedirectUrl();
     }
 
     /**
