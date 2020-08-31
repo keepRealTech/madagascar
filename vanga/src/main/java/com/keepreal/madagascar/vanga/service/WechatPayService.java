@@ -117,6 +117,8 @@ public class WechatPayService {
 
             response = this.client.unifiedOrder(requestBody);
 
+            log.info(response.toString());
+
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
                 wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());
@@ -143,7 +145,7 @@ public class WechatPayService {
             wechatOrder.setSignature(request.get("sign"));
             wechatOrder.setNonceStr(request.get("noncestr"));
 
-            wechatOrder.setMwebUrl(request.getOrDefault("mweb_url", ""));
+            wechatOrder.setMwebUrl(response.getOrDefault("mweb_url", ""));
 
             return wechatOrder;
         } catch (Exception e) {
