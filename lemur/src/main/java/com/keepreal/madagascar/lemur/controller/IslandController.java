@@ -2,7 +2,6 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
-import com.keepreal.madagascar.common.IdentityType;
 import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;

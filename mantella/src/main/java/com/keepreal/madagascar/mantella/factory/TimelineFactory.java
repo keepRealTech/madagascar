@@ -21,7 +21,9 @@ public class TimelineFactory {
      * @param eventId         Event id.
      * @return {@link Timeline}.
      */
-    public Timeline valueOf(FeedCreateEvent feedCreateEvent, String userId, String eventId) {
+    public Timeline valueOf(FeedCreateEvent feedCreateEvent,
+                            String userId,
+                            String eventId) {
         if (Objects.isNull(feedCreateEvent)) {
             return null;
         }
@@ -52,7 +54,12 @@ public class TimelineFactory {
      * @param eventId       Event id.
      * @return {@link Timeline}.
      */
-    public Timeline valueOf(String feedId, String islandId, String userId, Long feedCreatedAt, String eventId, String duplicateTag) {
+    public Timeline valueOf(String feedId,
+                            String islandId,
+                            String userId,
+                            Long feedCreatedAt,
+                            String eventId,
+                            String duplicateTag) {
         return Timeline.builder()
                 .feedId(feedId)
                 .islandId(islandId)
