@@ -46,6 +46,7 @@ public class IslandDTOFactory {
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final GeneralConfiguration generalConfiguration;
+    private final UserService userService;
 
     /**
      * Constructs the island dto factory.
@@ -57,6 +58,7 @@ public class IslandDTOFactory {
      * @param userService          {@link UserService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
+     * @param userService          {@link UserService}.
      */
     public IslandDTOFactory(ChatService chatService,
                             RepostService repostService,
@@ -64,7 +66,7 @@ public class IslandDTOFactory {
                             MembershipService membershipService,
                             UserService userService,
                             UserDTOFactory userDTOFactory,
-                            GeneralConfiguration generalConfiguration) {
+                            GeneralConfiguration generalConfiguration, UserService userService) {
         this.chatService = chatService;
         this.repostService = repostService;
         this.feedService = feedService;
@@ -72,6 +74,7 @@ public class IslandDTOFactory {
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.generalConfiguration = generalConfiguration;
+        this.userService = userService;
     }
 
     /**
@@ -96,6 +99,7 @@ public class IslandDTOFactory {
         islandDTO.setHostId(island.getHostId());
         islandDTO.setPortraitImageUri(island.getPortraitImageUri());
         islandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
+        islandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 
         islandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 
@@ -174,6 +178,8 @@ public class IslandDTOFactory {
             memberCount = DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT;
         fullIslandDTO.setMemberCount(memberCount);
         fullIslandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
+        fullIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
+
 
         fullIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 

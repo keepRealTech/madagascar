@@ -170,7 +170,7 @@ public class IslandInfoService {
             builder.setPageResponse(PageResponseUtil.buildResponse(islandIdsPageable));
         }
 
-        return islandInfos.stream().sorted(Comparator.comparing(IslandInfo::getIdentityId).thenComparing(IslandInfo::getIslanderNumber)).collect(Collectors.toList());
+        return islandInfos.stream().sorted(Comparator.comparing((IslandInfo island) -> island.getIdentityId().length()).thenComparing(IslandInfo::getIslanderNumber).reversed()).collect(Collectors.toList());
     }
 
     /**
