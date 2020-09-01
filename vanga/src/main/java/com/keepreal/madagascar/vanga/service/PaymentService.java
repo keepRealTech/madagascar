@@ -136,6 +136,22 @@ public class PaymentService {
         return this.paymentRepository.save(payment);
     }
 
+    @Transactional
+    public Payment createNewWechatSupportPayment(WechatOrder wechatOrder, String payeeId, long priceIncents) {
+        Payment payment = Payment.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .type(PaymentType.WECHATPAY.getValue())
+                .amountInCents(priceIncents)
+                .userId(wechatOrder.getUserId())
+                .state(PaymentState.DRAFTED.getValue())
+                .payeeId(payeeId)
+                .orderId(wechatOrder.getId())
+                .tradeNum(wechatOrder.getTradeNumber())
+                .build();
+
+        return this.paymentRepository.save(payment);
+    }
+
     /**
      * Creates new shell payments.
      *
@@ -301,6 +317,11 @@ public class PaymentService {
      */
     public Page<Payment> retrievePaymentsByUserId(String userId, Pageable pageable) {
         return this.paymentRepository.findAllValidPaymentsByUserId(userId, pageable);
+    }
+
+    public int supportCount(String userId) {
+        Integer count = this.paymentRepository.countByPayeeIdAndState(userId, PaymentState.CLOSED.getValue());
+        return count == null ? 0 : count;
     }
 
 }

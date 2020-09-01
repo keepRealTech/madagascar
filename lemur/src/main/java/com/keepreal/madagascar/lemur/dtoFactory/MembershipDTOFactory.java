@@ -46,6 +46,8 @@ public class MembershipDTOFactory {
         dto.setMembershipName(membershipMessage.getName());
         dto.setColorType(membershipMessage.getColorType());
         dto.setChargePerMonth(membershipMessage.getPricePerMonth());
+        dto.setUseCustomMessage(membershipMessage.getUseCustomMessage());
+        dto.setMessage(membershipMessage.getMessage());
         return dto;
     }
 
@@ -77,6 +79,8 @@ public class MembershipDTOFactory {
         dto.setColorType(membershipMessage.getColorType());
         dto.setIsTop(membershipMessage.getIsTop());
         dto.setMemberCount(membershipMessage.getMemberCount());
+        dto.setUseCustomMessage(membershipMessage.getUseCustomMessage());
+        dto.setMessage(membershipMessage.getMessage());
         return dto;
     }
 }

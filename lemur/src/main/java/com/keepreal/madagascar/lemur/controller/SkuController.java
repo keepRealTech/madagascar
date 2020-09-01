@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import swagger.api.SkuApi;
 import swagger.model.IOSShellSkusResponse;
 import swagger.model.MembershipSkusResponse;
+import swagger.model.SupportSkusResponse;
 import swagger.model.WechatShellSkusResponse;
 
 import java.util.List;
@@ -97,4 +98,12 @@ public class SkuController implements SkuApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<SupportSkusResponse> apiV1IslandsIdSupportSkusGet(String id) {
+        SupportSkusResponse response = new SupportSkusResponse();
+        response.setData(this.skuDTOFactory.valueOf(this.skuService.retrieveSupportSkus()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

@@ -11,8 +11,12 @@ import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RedirectResponse;
+import com.keepreal.madagascar.vanga.RetrieveSupportInfoRequest;
+import com.keepreal.madagascar.vanga.RetrieveSupportInfoResponse;
 import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
+import com.keepreal.madagascar.vanga.SupportMessage;
+import com.keepreal.madagascar.vanga.SupportRequest;
 import com.keepreal.madagascar.vanga.UserPaymentsResponse;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
 import io.grpc.Channel;
@@ -179,6 +183,73 @@ public class PaymentService {
         return response.getRedirectUrl();
     }
 
+    public WechatOrderMessage submitSupportWithWechatPay(String userId, String payeeId, String sponsorSkuId, Long priceInCents, Long priceInShells, String ipAddress) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        SupportRequest request = SupportRequest.newBuilder()
+                .setUserId(userId)
+                .setPayeeId(payeeId)
+                .setSponsorSkuId(sponsorSkuId)
+                .setPriceInCents(priceInCents)
+                .setPriceInShells(priceInShells)
+                .setIpAddress(ipAddress)
+                .build();
+
+        WechatOrderResponse response;
+
+        try {
+            response = stub.submitSupportWithWechatPay(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create wechat order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getWechatOrder();
+    }
+
+    public String submitSupportWithWechatPayH5(String userId, String payeeId, String sponsorSkuId, Long priceInCents, Long priceInShells, String ipAddress, SceneType sceneType) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        SupportRequest request = SupportRequest.newBuilder()
+                .setUserId(userId)
+                .setPayeeId(payeeId)
+                .setSponsorSkuId(sponsorSkuId)
+                .setPriceInCents(priceInCents)
+                .setPriceInShells(priceInShells)
+                .setIpAddress(ipAddress)
+                .setSceneType(sceneType)
+                .build();
+
+        RedirectResponse response;
+
+        try {
+            response = stub.submitSupportWithWechatPayH5(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create wechat h5 order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getRedirectUrl();
+    }
+
     /**
      * Retrieves the user payment history.
      *
@@ -215,4 +286,31 @@ public class PaymentService {
         return response;
     }
 
+    public SupportMessage retrieveSupportInfo(String userId) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveSupportInfoRequest request = RetrieveSupportInfoRequest.newBuilder()
+                .setHostId(userId)
+                .build();
+
+        RetrieveSupportInfoResponse response;
+
+        try {
+            response = stub.retrieveSupportInfo(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve support info returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getMessage();
+    }
 }

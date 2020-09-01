@@ -2,8 +2,10 @@ package com.keepreal.madagascar.vanga.factory;
 
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.ShellSkuMessage;
+import com.keepreal.madagascar.vanga.SupportSkuMessage;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
+import com.keepreal.madagascar.vanga.model.SupportSku;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -55,6 +57,18 @@ public class SkuMessageFactory {
                 .setPriceInShells(membershipSku.getPriceInShells())
                 .setMembershipId(membershipSku.getMembershipId())
                 .setTimeInMonths(membershipSku.getTimeInMonths())
+                .build();
+    }
+
+    public SupportSkuMessage valueOf(SupportSku supportSku) {
+        if (Objects.isNull(supportSku)) {
+            return null;
+        }
+        return SupportSkuMessage.newBuilder()
+                .setId(supportSku.getId())
+                .setPriceInCents(supportSku.getPriceInCents())
+                .setPriceInShells(supportSku.getShells())
+                .setDefaulted(supportSku.getDeleted())
                 .build();
     }
 

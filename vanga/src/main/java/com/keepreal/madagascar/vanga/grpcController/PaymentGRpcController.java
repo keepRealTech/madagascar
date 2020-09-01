@@ -12,9 +12,13 @@ import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.RefundWechatFeedRequest;
+import com.keepreal.madagascar.vanga.RetrieveSupportInfoRequest;
+import com.keepreal.madagascar.vanga.RetrieveSupportInfoResponse;
 import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
 import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
+import com.keepreal.madagascar.vanga.SupportMessage;
+import com.keepreal.madagascar.vanga.SupportRequest;
 import com.keepreal.madagascar.vanga.UserPaymentsResponse;
 import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
@@ -60,6 +64,8 @@ import java.util.stream.Collectors;
 @GRpcService
 @Slf4j
 public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImplBase {
+
+    private final static String SUPPORT_TEXT = "";
 
     private final FeedService feedService;
     private final PaymentService paymentService;
@@ -584,4 +590,70 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void retrieveSupportInfo(RetrieveSupportInfoRequest request, StreamObserver<RetrieveSupportInfoResponse> responseObserver) {
+        String hostId = request.getHostId();
+        int count = this.paymentService.supportCount(hostId);
+
+        responseObserver.onNext(RetrieveSupportInfoResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setMessage(SupportMessage.newBuilder()
+                        .setCount(count)
+                        .setText(SUPPORT_TEXT)
+                        .build())
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void submitSupportWithWechatPay(SupportRequest request, StreamObserver<WechatOrderResponse> responseObserver) {
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
+                String.valueOf(request.getPriceInCents()),
+                request.getSponsorSkuId(),
+                WechatOrderType.PAYSUPPORT,
+                null,
+                request.getIpAddress());
+
+        WechatOrderResponse response;
+        if (Objects.nonNull(wechatOrder)) {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .build();
+            this.paymentService.createNewWechatSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void submitSupportWithWechatPayH5(SupportRequest request, StreamObserver<RedirectResponse> responseObserver) {
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
+                String.valueOf(request.getPriceInCents()),
+                request.getSponsorSkuId(),
+                WechatOrderType.PAYSUPPORTH5,
+                request.getSceneType(),
+                request.getIpAddress());
+
+        RedirectResponse response;
+        if (Objects.nonNull(wechatOrder)) {
+            response = RedirectResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setRedirectUrl(wechatOrder.getMwebUrl())
+                    .build();
+            this.paymentService.createNewWechatSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = RedirectResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
 }

@@ -7,12 +7,15 @@ import com.keepreal.madagascar.vanga.DeleteMembershipSkusByIdRequest;
 import com.keepreal.madagascar.vanga.MembershipSkusResponse;
 import com.keepreal.madagascar.vanga.RetrieveMembershipSkusByMembershipIdRequest;
 import com.keepreal.madagascar.vanga.RetrieveShellSkusRequest;
+import com.keepreal.madagascar.vanga.RetrieveSupportSkusRequest;
+import com.keepreal.madagascar.vanga.RetrieveSupportSkusResponse;
 import com.keepreal.madagascar.vanga.ShellSkusResponse;
 import com.keepreal.madagascar.vanga.SkuServiceGrpc;
 import com.keepreal.madagascar.vanga.UpdateMembershipSkusByIdRequest;
 import com.keepreal.madagascar.vanga.factory.SkuMessageFactory;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
+import com.keepreal.madagascar.vanga.model.SupportSku;
 import com.keepreal.madagascar.vanga.service.SkuService;
 import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
@@ -176,4 +179,14 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void retrieveActiveSupportSkus(RetrieveSupportSkusRequest request, StreamObserver<RetrieveSupportSkusResponse> responseObserver) {
+        List<SupportSku> supportSkus = this.skuService.retrieveSupportSkus();
+
+        responseObserver.onNext(RetrieveSupportSkusResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .addAllSupportSkus(supportSkus.stream().map(this.skuMessageFactory::valueOf).collect(Collectors.toList()))
+                .build());
+
+    }
 }

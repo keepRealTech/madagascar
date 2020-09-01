@@ -3,8 +3,10 @@ package com.keepreal.madagascar.vanga.service;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
+import com.keepreal.madagascar.vanga.model.SupportSku;
 import com.keepreal.madagascar.vanga.repository.MembershipSkuRepository;
 import com.keepreal.madagascar.vanga.repository.ShellSkuRepository;
+import com.keepreal.madagascar.vanga.repository.SupportSkuRepository;
 import com.keepreal.madagascar.vanga.util.AutoRedisLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,7 @@ public class SkuService {
 
     private final ShellSkuRepository shellSkuRepository;
     private final MembershipSkuRepository membershipSkuRepository;
+    private final SupportSkuRepository supportSkuRepository;
     private final LongIdGenerator idGenerator;
     private final List<Integer> membershipPeriods = Stream.of(1, 3, 6, 12).collect(Collectors.toList());
     private final RedissonClient redissonClient;
@@ -33,15 +36,18 @@ public class SkuService {
      *
      * @param shellSkuRepository      {@link ShellSkuRepository}.
      * @param membershipSkuRepository {@link MembershipSkuRepository}.
+     * @param supportSkuRepository    {@link SupportSkuRepository}.
      * @param idGenerator             {@link LongIdGenerator}.
      * @param redissonClient          {@link RedissonClient}.
      */
     public SkuService(ShellSkuRepository shellSkuRepository,
                       MembershipSkuRepository membershipSkuRepository,
+                      SupportSkuRepository supportSkuRepository,
                       LongIdGenerator idGenerator,
                       RedissonClient redissonClient) {
         this.shellSkuRepository = shellSkuRepository;
         this.membershipSkuRepository = membershipSkuRepository;
+        this.supportSkuRepository = supportSkuRepository;
         this.idGenerator = idGenerator;
         this.redissonClient = redissonClient;
     }
@@ -182,6 +188,10 @@ public class SkuService {
      */
     public ShellSku retrieveShellSkuById(String shellSkuId) {
         return this.shellSkuRepository.findById(shellSkuId).orElse(null);
+    }
+
+    public List<SupportSku> retrieveSupportSkus() {
+        return this.supportSkuRepository.findAllByActiveIsTrueAndDeletedIsFalseAndOrderByPriceInCents();
     }
 
     /**
