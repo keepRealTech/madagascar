@@ -144,6 +144,7 @@ public class IslandDTOFactory {
         recommendIslandDTO.setHostId(discoverIsland.getIsland().getHostId());
         recommendIslandDTO.setPortraitImageUri(discoverIsland.getIsland().getPortraitImageUri());
         recommendIslandDTO.setAccessType(this.convertAccessType(discoverIsland.getIsland().getIslandAccessType()));
+        recommendIslandDTO.setMemberCount(discoverIsland.getIsland().getMemberCount());
 
         recommendIslandDTO.setRecommendation(discoverIsland.getRecommendation());
         recommendIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(discoverIsland.getIsland().getHostId())));
