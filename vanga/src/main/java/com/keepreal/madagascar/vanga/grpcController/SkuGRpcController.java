@@ -187,6 +187,6 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .addAllSupportSkus(supportSkus.stream().map(this.skuMessageFactory::valueOf).collect(Collectors.toList()))
                 .build());
-
+        responseObserver.onCompleted();
     }
 }

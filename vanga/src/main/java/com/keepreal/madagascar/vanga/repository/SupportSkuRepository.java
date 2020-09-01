@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface SupportSkuRepository extends JpaRepository<SupportSku, String> {
 
-    List<SupportSku> findAllByActiveIsTrueAndDeletedIsFalseAndOrderByPriceInCents();
+    List<SupportSku> findAllByActiveIsTrueAndDeletedIsFalseOrderByPriceInCents();
 }

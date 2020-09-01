@@ -191,7 +191,7 @@ public class SkuService {
     }
 
     public List<SupportSku> retrieveSupportSkus() {
-        return this.supportSkuRepository.findAllByActiveIsTrueAndDeletedIsFalseAndOrderByPriceInCents();
+        return this.supportSkuRepository.findAllByActiveIsTrueAndDeletedIsFalseOrderByPriceInCents();
     }
 
     /**

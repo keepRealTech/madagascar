@@ -68,7 +68,7 @@ public class SkuMessageFactory {
                 .setId(supportSku.getId())
                 .setPriceInCents(supportSku.getPriceInCents())
                 .setPriceInShells(supportSku.getShells())
-                .setDefaulted(supportSku.getDeleted())
+                .setDefaulted(supportSku.getDefaultSku())
                 .build();
     }
 

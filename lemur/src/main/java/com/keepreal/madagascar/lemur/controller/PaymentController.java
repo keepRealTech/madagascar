@@ -265,11 +265,6 @@ public class PaymentController implements PaymentApi {
     }
 
     @Override
-    public ResponseEntity<H5RedirectResponse> apiV1IslandsIdSupportIosPayGet(String id) {
-        return null;
-    }
-
-    @Override
     public ResponseEntity<DummyResponse> apiV1IslandsIdSupportWechatPayHtml5Post(String id, @NotNull @Valid SceneType sceneType, @Valid PostSupportRequest postSupportRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
@@ -281,7 +276,7 @@ public class PaymentController implements PaymentApi {
                 postSupportRequest.getSponsorSkuId(),
                 postSupportRequest.getPriceInCents(),
                 postSupportRequest.getPriceInShells(),
-                remoteAddress,
+                "123.123.123.123",
                 this.convertType(sceneType));
 
         HttpHeaders headers = new HttpHeaders();
@@ -302,7 +297,7 @@ public class PaymentController implements PaymentApi {
                 postSupportRequest.getSponsorSkuId(),
                 postSupportRequest.getPriceInCents(),
                 postSupportRequest.getPriceInShells(),
-                remoteAddress);
+                "123.123.123.123");
 
         WechatOrderResponse response = new WechatOrderResponse();
         response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));

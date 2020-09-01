@@ -1197,7 +1197,7 @@ paths:
         '200':
           description: skus
           content:
-            applicaiton/json:
+            application/json:
               schema:
                 $ref: '#/components/schemas/SupportSkusResponse'
   /api/v1/islands/{id}/memberships:

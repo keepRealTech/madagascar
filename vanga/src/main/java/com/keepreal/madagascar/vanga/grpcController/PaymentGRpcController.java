@@ -40,6 +40,7 @@ import com.keepreal.madagascar.vanga.service.PaymentService;
 import com.keepreal.madagascar.vanga.service.ShellService;
 import com.keepreal.madagascar.vanga.service.SkuService;
 import com.keepreal.madagascar.vanga.service.SubscribeMembershipService;
+import com.keepreal.madagascar.vanga.service.SupportService;
 import com.keepreal.madagascar.vanga.service.WechatOrderService;
 import com.keepreal.madagascar.vanga.service.WechatPayService;
 import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
@@ -78,6 +79,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final WechatOrderMessageFactory wechatOrderMessageFactory;
     private final BalanceMessageFactory balanceMessageFactory;
     private final PaymentMessageFactory paymentMessageFactory;
+    private final SupportService supportService;
 
     /**
      * Constructs the payment grpc controller.
@@ -93,6 +95,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param wechatOrderMessageFactory  {@link WechatOrderMessageFactory}.
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param paymentMessageFactory      {@link PaymentMessageFactory}.
+     * @param supportService             {@link SupportService}.
      */
     public PaymentGRpcController(FeedService feedService,
                                  PaymentService paymentService,
@@ -104,7 +107,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                  ShellService shellService,
                                  WechatOrderMessageFactory wechatOrderMessageFactory,
                                  SubscribeMembershipService subscribeMembershipService,
-                                 PaymentMessageFactory paymentMessageFactory) {
+                                 PaymentMessageFactory paymentMessageFactory,
+                                 SupportService supportService) {
         this.feedService = feedService;
         this.paymentService = paymentService;
         this.wechatOrderService = wechatOrderService;
@@ -116,6 +120,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         this.wechatOrderMessageFactory = wechatOrderMessageFactory;
         this.subscribeMembershipService = subscribeMembershipService;
         this.paymentMessageFactory = paymentMessageFactory;
+        this.supportService = supportService;
     }
 
     /**
@@ -222,6 +227,12 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 break;
             }
+            case PAYSUPPORT:
+            case PAYSUPPORTH5: {
+                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+
+                break;
+            }
             default:
         }
 
@@ -261,6 +272,11 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             }
             case PAYQUESTION: {
                 this.feedService.confirmQuestionPaid(wechatOrder);
+                break;
+            }
+            case PAYSUPPORT:
+            case PAYSUPPORTH5: {
+                this.supportService.supportWithWechatOrder(wechatOrder);
                 break;
             }
             default:
