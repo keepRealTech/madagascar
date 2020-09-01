@@ -359,8 +359,10 @@ public class LoginController implements LoginApi {
      * @return {@link DummyResponse}
      */
     @Override
-    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest) {
-        this.userService.checkUserMobileIsExisted(postOTPRequest.getMobile());
+    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest,  @Valid Boolean login) {
+        if (!login) {
+            this.userService.checkUserMobileIsExisted(postOTPRequest.getMobile());
+        }
         this.userService.sendOtpToMobile(postOTPRequest.getMobile());
 
         DummyResponse response = new DummyResponse();
