@@ -276,7 +276,7 @@ public class PaymentController implements PaymentApi {
                 postSupportRequest.getSponsorSkuId(),
                 postSupportRequest.getPriceInCents(),
                 postSupportRequest.getPriceInShells(),
-                "123.123.123.123",
+                remoteAddress,
                 this.convertType(sceneType));
 
         HttpHeaders headers = new HttpHeaders();
@@ -297,7 +297,7 @@ public class PaymentController implements PaymentApi {
                 postSupportRequest.getSponsorSkuId(),
                 postSupportRequest.getPriceInCents(),
                 postSupportRequest.getPriceInShells(),
-                "123.123.123.123");
+                remoteAddress);
 
         WechatOrderResponse response = new WechatOrderResponse();
         response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
