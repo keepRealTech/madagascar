@@ -46,7 +46,6 @@ public class FeedInfoService {
     private final FeedInfoRepository feedInfoRepository;
     private final ReactionRepository reactionRepository;
     private final SubscribeMembershipService subscribeMembershipService;
-    private final BoxInfoService boxInfoService;
 
     /**
      * Constructs the feed service
@@ -61,14 +60,12 @@ public class FeedInfoService {
                            CommentService commentService,
                            FeedInfoRepository feedInfoRepository,
                            ReactionRepository reactionRepository,
-                           SubscribeMembershipService subscribeMembershipService,
-                           BoxInfoService boxInfoService) {
+                           SubscribeMembershipService subscribeMembershipService) {
         this.mongoTemplate = mongoTemplate;
         this.commentService = commentService;
         this.feedInfoRepository = feedInfoRepository;
         this.reactionRepository = reactionRepository;
         this.subscribeMembershipService = subscribeMembershipService;
-        this.boxInfoService = boxInfoService;
     }
 
     /**
@@ -329,7 +326,11 @@ public class FeedInfoService {
     public void mergeUserBoxInfo(String wechatUserId, String webMobileUserId) throws RuntimeException{
         int page = 0;
         int pageSize = 50;
-        Query query = this.boxInfoService.retrieveAnswerMeQuestion(webMobileUserId);
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("userId").is(webMobileUserId));
+        query.addCriteria(Criteria.where("multiMediaType").is(MediaType.MEDIA_QUESTION.name()));
+
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         do {
             List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
