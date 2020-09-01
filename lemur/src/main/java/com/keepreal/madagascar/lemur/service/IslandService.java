@@ -602,8 +602,9 @@ public class IslandService {
     /**
      * Dismisses the island host introduction once and for all.
      *
-     * @param islandId Island id.
-     * @param userId   User id.
+     * @param islandId     Island id.
+     * @param userId       User id.
+     * @param isIslandHost Whether it is the host.
      */
     public void dismissIslandIntroduction(String islandId, String userId, Boolean isIslandHost) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
