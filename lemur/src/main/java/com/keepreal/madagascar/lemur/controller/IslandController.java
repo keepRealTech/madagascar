@@ -524,7 +524,9 @@ public class IslandController implements IslandApi {
     }
 
     @Override
-    public ResponseEntity<BriefIslandResponse> apiV11IslandsPost(PostIslandPayloadV2 payload, @Valid MultipartFile portraitImage) {
+    public ResponseEntity<BriefIslandResponse> apiV11IslandsPost(
+            PostIslandPayloadV2 payload,
+            @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         if (Objects.isNull(payload)) {
