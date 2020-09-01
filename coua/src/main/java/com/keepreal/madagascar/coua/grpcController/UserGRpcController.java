@@ -349,7 +349,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
         String mobile = request.getMobile();
-        UserInfo userInfo = this.userInfoService.findUserInfoByMobile(mobile);
+        UserInfo userInfo = this.userInfoService.findUserInfoByMobileAndUnionIdIsNotNul(mobile);
         if (Objects.nonNull(userInfo)) {
             responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());

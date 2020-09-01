@@ -200,8 +200,13 @@ public class UserInfoService {
         return this.userInfoRepository.findTopByMobileAndDeletedIsFalse(mobile);
     }
 
+    /**
+     * 根据手机号查找微信用户(unionId不为空)
+     * @param mobile 手机号
+     * @return {@link UserInfo}
+     */
     public UserInfo findUserInfoByMobileAndUnionIdIsNotNul(String mobile) {
-        return this.userInfoRepository.findTopByMobileAndUnionIdIsNotNullAndDeletedIsFalse(mobile);
+        return this.userInfoRepository.findTopByUnionIdNotAndMobileEqualsAndDeletedIsFalse("", mobile);
     }
 
 }
