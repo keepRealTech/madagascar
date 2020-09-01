@@ -57,7 +57,8 @@ public class UserInfoService {
     public UserInfo createUser(UserInfo userInfo) {
         userInfo.setId(String.valueOf(idGenerator.nextId()));
         userInfo.setDisplayId(displayIdGenerator.nextDisplayId());
-        if (StringUtils.isEmpty(userInfo.getNickName()) && !StringUtils.isEmpty(userInfo.getMobile())) {
+        if (StringUtils.isEmpty(userInfo.getNickName()) && !StringUtils.isEmpty(userInfo.getMobile())
+                && StringUtils.isEmpty(userInfo.getUnionId())) {
             userInfo.setNickName("用户" + userInfo.getDisplayId());
         }
         userInfo = userInfoRepository.save(userInfo);
