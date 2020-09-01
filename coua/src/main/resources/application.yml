@@ -17,6 +17,12 @@ rocketmq:
     topic: island-event
     tag: event
     nameSrvAddr: 127.0.0.1:9876
+  notification:
+    accessKey: xxx
+    secretKey: xxx
+    topic: notification-event
+    tag: event
+    nameSrvAddr: 127.0.0.1:9876
 
 grpc:
   fossa:

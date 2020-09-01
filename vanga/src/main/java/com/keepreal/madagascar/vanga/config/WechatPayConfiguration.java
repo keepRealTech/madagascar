@@ -36,7 +36,7 @@ public class WechatPayConfiguration extends WXPayConfig {
     private String refundCallbackAddress;
     private String certPath;
     private String hostIp;
-    private Boolean useSandBox = true;
+    private Boolean useSandBox = false;
 
     /**
      * Implements the app id getter.

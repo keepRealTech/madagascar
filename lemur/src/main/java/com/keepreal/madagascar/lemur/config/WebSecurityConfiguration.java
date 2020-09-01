@@ -42,6 +42,7 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                 .antMatchers(
                         "/s/**",
                         "/api/v1/login**",
+                        "/api/v1/mobile/otp**",
                         "/api/v1/login/generate**",
                         "/api/v1/login/polling**",
                         "/api/v1/refreshToken**",

@@ -12,9 +12,9 @@ import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.OAuthWechatLoginPayload;
 import com.keepreal.madagascar.baobob.PasswordLoginPayload;
 import com.keepreal.madagascar.baobob.TokenRefreshPayload;
+import com.keepreal.madagascar.baobob.WebMobileLoginPayload;
 import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
-import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.LoginType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -144,6 +144,19 @@ public class LoginController implements LoginApi {
                                 .setUsername(body.getData().getUsername())
                                 .setPassword(body.getData().getPassword()))
                         .setLoginType(LoginType.LOGIN_PASSWORD)
+                        .build();
+                break;
+            case MOBILE:
+                if (StringUtils.isEmpty(body.getData().getMobile())
+                        || StringUtils.isEmpty(body.getData().getOtp())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
+                loginRequest = LoginRequest.newBuilder()
+                        .setWebMobilePayload(WebMobileLoginPayload.newBuilder()
+                                .setMobile(body.getData().getMobile())
+                                .setOtp(body.getData().getOtp()))
+                        .setLoginType(LoginType.LOGIN_WEB_MOBILE)
                         .build();
                 break;
             case JWT_IOS:
@@ -346,8 +359,10 @@ public class LoginController implements LoginApi {
      * @return {@link DummyResponse}
      */
     @Override
-    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest) {
-        this.userService.checkUserMobileIsExisted(postOTPRequest.getMobile());
+    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest,  @Valid Boolean login) {
+        if (!login) {
+            this.userService.checkUserMobileIsExisted(postOTPRequest.getMobile());
+        }
         this.userService.sendOtpToMobile(postOTPRequest.getMobile());
 
         DummyResponse response = new DummyResponse();

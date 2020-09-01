@@ -100,6 +100,13 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
                                 this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()),
                         this.imageService,
                         this.redissonClient);
+            case LOGIN_WEB_MOBILE:
+                return new WebMobileLoginExecutor(this.userService,
+                        new LocalTokenGranter(
+                                this.endpoints.getEndpointsConfigurer().getTokenServices(),
+                                this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
+                                this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()),
+                        this.redissonClient);
             case UNRECOGNIZED:
             default:
                 return new DummyLoginExecutorImpl();
