@@ -28,6 +28,13 @@ rocketmq:
     topic: feed-event
     tag: event
     nameSrvAddr: 127.0.0.1:9876
+  transaction:
+    accessKey: 1
+    secretKey: 2
+    nameSrvAddr: 127.0.0.1:9876
+    topic: transaction-event
+    groupId: GID-fossa-transaction
+    tag: event
 
 grpc:
   coua:

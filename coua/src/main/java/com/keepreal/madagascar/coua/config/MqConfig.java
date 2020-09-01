@@ -14,7 +14,7 @@ import java.util.Properties;
  **/
 
 @Configuration
-@ConfigurationProperties(prefix = "rocketmq")
+@ConfigurationProperties(prefix = "rocketmq.notification")
 @Data
 public class MqConfig {
 

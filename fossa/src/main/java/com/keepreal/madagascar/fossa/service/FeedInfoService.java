@@ -14,12 +14,14 @@ import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -44,6 +46,7 @@ public class FeedInfoService {
     private final FeedInfoRepository feedInfoRepository;
     private final ReactionRepository reactionRepository;
     private final SubscribeMembershipService subscribeMembershipService;
+    private final BoxInfoService boxInfoService;
 
     /**
      * Constructs the feed service
@@ -58,12 +61,14 @@ public class FeedInfoService {
                            CommentService commentService,
                            FeedInfoRepository feedInfoRepository,
                            ReactionRepository reactionRepository,
-                           SubscribeMembershipService subscribeMembershipService) {
+                           SubscribeMembershipService subscribeMembershipService,
+                           BoxInfoService boxInfoService) {
         this.mongoTemplate = mongoTemplate;
         this.commentService = commentService;
         this.feedInfoRepository = feedInfoRepository;
         this.reactionRepository = reactionRepository;
         this.subscribeMembershipService = subscribeMembershipService;
+        this.boxInfoService = boxInfoService;
     }
 
     /**
@@ -312,6 +317,26 @@ public class FeedInfoService {
      */
     public FeedInfo findToppedFeedByIslandId(String islandId) {
         return this.feedInfoRepository.findTopByIslandIdAndIsTopIsTrueAndDeletedIsFalse(islandId);
+    }
+
+    /**
+     * 将H5手机用户的提问箱信息合并到微信用户
+     *
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   web mobile user id
+     */
+    @Transactional
+    public void mergeUserBoxInfo(String wechatUserId, String webMobileUserId) throws RuntimeException{
+        int page = 0;
+        int pageSize = 50;
+        Query query = this.boxInfoService.retrieveAnswerMeQuestion(webMobileUserId);
+        long totalCount = mongoTemplate.count(query, FeedInfo.class);
+        do {
+            List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
+            feedInfoList.forEach(feedInfo -> feedInfo.setUserId(wechatUserId));
+            this.feedInfoRepository.saveAll(feedInfoList);
+            ++ page;
+        } while (totalCount / pageSize > page);
     }
 
     /**

@@ -34,4 +34,6 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
            nativeQuery = true)
     Page<Payment> findAllValidPaymentsByUserId(String userId, Pageable pageable);
 
+    Page<Payment> findAllByUserId(String userId, Pageable pageable);
+
 }

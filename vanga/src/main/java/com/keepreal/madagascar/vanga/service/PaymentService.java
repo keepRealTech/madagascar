@@ -303,4 +303,15 @@ public class PaymentService {
         return this.paymentRepository.findAllValidPaymentsByUserId(userId, pageable);
     }
 
+    /**
+     * Retrieves all user payments.
+     *
+     * @param userId   User id.
+     * @param pageable {@link Pageable}.
+     * @return {@link Payment}.
+     */
+    public Page<Payment> retrieveAllPaymentsByUserId(String userId, Pageable pageable) {
+        return this.paymentRepository.findAllByUserId(userId, pageable);
+    }
+
 }
