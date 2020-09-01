@@ -57,6 +57,10 @@ public class UserInfoService {
     public UserInfo createUser(UserInfo userInfo) {
         userInfo.setId(String.valueOf(idGenerator.nextId()));
         userInfo.setDisplayId(displayIdGenerator.nextDisplayId());
+        if (StringUtils.isEmpty(userInfo.getNickName()) && !StringUtils.isEmpty(userInfo.getMobile())
+                && StringUtils.isEmpty(userInfo.getUnionId())) {
+            userInfo.setNickName("用户" + userInfo.getDisplayId());
+        }
         userInfo = userInfoRepository.save(userInfo);
 
         this.balanceService.createBalanceByUserId(userInfo.getId());
@@ -195,6 +199,15 @@ public class UserInfoService {
      */
     public UserInfo findUserInfoByMobile(String mobile) {
         return this.userInfoRepository.findTopByMobileAndDeletedIsFalse(mobile);
+    }
+
+    /**
+     * 根据手机号查找微信用户(unionId不为空)
+     * @param mobile 手机号
+     * @return {@link UserInfo}
+     */
+    public UserInfo findUserInfoByMobileAndUnionIdIsNotNul(String mobile) {
+        return this.userInfoRepository.findTopByUnionIdNotAndMobileEqualsAndDeletedIsFalse("", mobile);
     }
 
 }

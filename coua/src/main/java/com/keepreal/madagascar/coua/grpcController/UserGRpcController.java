@@ -93,6 +93,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                 .city(request.getCity().getValue())
                 .description(request.getDescription().getValue())
                 .unionId(request.getUnionId())
+                .mobile(request.getMobile().getValue())
                 .build();
 
         if (request.hasBirthday()) {
@@ -131,6 +132,10 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         if (queryUserCondition.hasUsername()) {
             condition = queryUserCondition.getUsername().getValue();
             userInfo = userInfoService.findUserInfoByUserNameAndDeletedIsFalse(condition);
+        }
+        if (queryUserCondition.hasMobile()) {
+            condition = queryUserCondition.getMobile().getValue();
+            userInfo = this.userInfoService.findUserInfoByMobile(condition);
         }
         if (userInfo == null) {
             log.error("[retrieveSingleUser] user not found error! condition is [{}]", condition);
@@ -344,7 +349,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
         String mobile = request.getMobile();
-        UserInfo userInfo = this.userInfoService.findUserInfoByMobile(mobile);
+        UserInfo userInfo = this.userInfoService.findUserInfoByMobileAndUnionIdIsNotNul(mobile);
         if (Objects.nonNull(userInfo)) {
             responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());

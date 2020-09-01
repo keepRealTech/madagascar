@@ -20,6 +20,7 @@ message NewUserRequest {
     GenderValue gender = 6;
     google.protobuf.StringValue birthday = 7;
     repeated IdentityType identities = 8;
+    google.protobuf.StringValue mobile = 9;
 }
 
 message UpdateUserByIdRequest {
@@ -39,6 +40,7 @@ message QueryUserCondition {
     google.protobuf.StringValue unionId = 2;
     google.protobuf.StringValue displayId = 3;
     google.protobuf.StringValue username = 4;
+    google.protobuf.StringValue mobile = 5;
 }
 
 message RetrieveSingleUserRequest {
