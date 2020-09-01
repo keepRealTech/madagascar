@@ -141,7 +141,8 @@ public class WechatPayService {
             wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
             wechatOrder = this.wechatOrderService.insert(wechatOrder);
 
-            wechatOrder.setPrepayId(request.get("prepay_id"));
+
+            wechatOrder.setPrepayId(request.get("prepayid"));
             wechatOrder.setSignature(request.get("sign"));
             wechatOrder.setNonceStr(request.get("noncestr"));
 
