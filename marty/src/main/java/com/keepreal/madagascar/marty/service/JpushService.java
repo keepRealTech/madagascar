@@ -8,6 +8,7 @@ import cn.jpush.api.push.model.Options;
 import cn.jpush.api.push.model.Platform;
 import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
+import cn.jpush.api.push.model.notification.Notification;
 import com.keepreal.madagascar.marty.config.JPushConfig;
 import com.keepreal.madagascar.marty.model.PushType;
 import lombok.extern.slf4j.Slf4j;
@@ -94,7 +95,16 @@ public class JpushService {
         if (registrationIds.length == 0)
             return;
         try {
-            jPushClient.sendIosNotificationWithRegistrationID(alert, extras, registrationIds);
+            PushPayload payload = PushPayload.newBuilder()
+                    .setPlatform(Platform.ios())
+                    .setAudience(Audience.registrationId(registrationIds))
+                    .setNotification(Notification.ios(alert, extras))
+                    .setOptions(Options.newBuilder()
+                            .setApnsProduction(isProduction)
+                            .build())
+                    .build();
+            this.jPushClient.sendPush(payload);
+
         } catch (APIConnectionException | APIRequestException e) {
             e.printStackTrace();
         }
