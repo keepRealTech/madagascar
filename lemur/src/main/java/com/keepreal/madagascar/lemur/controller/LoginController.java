@@ -360,7 +360,6 @@ public class LoginController implements LoginApi {
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest,  @Valid Boolean login) {
-
         if (!login) {
             this.userService.checkUserMobileIsExisted(postOTPRequest.getMobile());
         }
