@@ -201,21 +201,19 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         }
 
         switch (WechatOrderType.fromValue(wechatOrder.getType())) {
-            case PAYMEMBERSHIP: {
+            case PAYMEMBERSHIP:
+            case PAYMEMBERSHIPH5:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
                 this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
                 break;
-            }
-            case PAYSHELL: {
+            case PAYSHELL:
                 wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
                 this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
                 break;
-            }
-            case PAYQUESTION: {
+            case PAYQUESTION:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 break;
-            }
             default:
         }
 
@@ -245,18 +243,16 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         }
 
         switch (WechatOrderType.fromValue(wechatOrder.getType())) {
-            case PAYMEMBERSHIP: {
+            case PAYMEMBERSHIP:
+            case PAYMEMBERSHIPH5:
                 this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
                 break;
-            }
-            case PAYSHELL: {
+            case PAYSHELL:
                 this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
                 break;
-            }
-            case PAYQUESTION: {
+            case PAYQUESTION:
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 break;
-            }
             default:
         }
 
