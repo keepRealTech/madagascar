@@ -213,13 +213,12 @@ public class UserInfoService {
     }
 
     /**
-     * 根据手机号查询用户信息 unionId不为null和空
-     *
+     * 根据手机号查找微信用户(unionId不为空)
      * @param mobile 手机号
      * @return {@link UserInfo}
      */
     public UserInfo findUserInfoByMobileAndUnionIdIsNotNul(String mobile) {
-        return this.userInfoRepository.findTopByMobileAndUnionIdIsNotNullAndDeletedIsFalse(mobile);
+        return this.userInfoRepository.findTopByUnionIdNotAndMobileEqualsAndDeletedIsFalse("", mobile);
     }
 
     /**
@@ -238,15 +237,6 @@ public class UserInfoService {
         mobileUserInfo.setDeleted(true);
         this.userInfoRepository.save(wechatUserInfo);
         this.userInfoRepository.save(mobileUserInfo);
-    }
-
-    /**
-     * 根据手机号查找微信用户(unionId不为空)
-     * @param mobile 手机号
-     * @return {@link UserInfo}
-     */
-    public UserInfo findUserInfoByMobileAndUnionIdIsNotNul(String mobile) {
-        return this.userInfoRepository.findTopByUnionIdNotAndMobileEqualsAndDeletedIsFalse("", mobile);
     }
 
 }
