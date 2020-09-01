@@ -27,9 +27,9 @@ import java.util.UUID;
 @Slf4j
 public class WechatPayService {
 
-    private static final String IOS_SCENE_INFO = "";
-    private static final String ANDROID_SCENE_INFO = "";
-    private static final String WAP_SCENE_INFO = "{\"h5_info\": {\"type\":\"Wap\",\"wap_url\": \"https://tiaodaoapp.com\",\"wap_name\": \"跳岛首页\"}}";
+    private static final String IOS_SCENE_INFO = "{\"h5_info\": {\"type\":\"IOS\",\"app_name\":\"tiaodao\",\"bundle_id\":\"cn.keepreal.feeds\"}}";
+    private static final String ANDROID_SCENE_INFO = "{\"h5_info\": {\"type\":\"Android\",\"app_name\":\"tiaodao\",\"package_name\":\"com.bcfg.client\"}}";
+    private static final String WAP_SCENE_INFO = "{\"h5_info\": {\"type\":\"Wap\",\"wap_url\":\"https://tiaodaoapp.com\",\"wap_name\":\"跳岛首页\"}}";
     private final WXPay client;
     private final WechatPayConfiguration wechatPayConfiguration;
     private final WechatOrderService wechatOrderService;
