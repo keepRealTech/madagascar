@@ -205,7 +205,7 @@ public class UserInfoService {
      * @return {@link UserInfo}
      */
     public UserInfo findH5UserInfoByMobile(String mobile) {
-        return this.userInfoRepository.findH5MobileUserInfo(mobile);
+        return this.userInfoRepository.findTopByMobileAndUnionIdEqualsAndDeletedIsFalse(mobile, "");
     }
 
     /**
