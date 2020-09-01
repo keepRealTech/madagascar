@@ -44,9 +44,6 @@ public class IslandDTOFactory {
             "来获得粉丝的支持吧！";
 
     private final ChatService chatService;
-    private final RepostService repostService;
-    private final FeedService feedService;
-    private final MembershipService membershipService;
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final GeneralConfiguration generalConfiguration;
@@ -55,24 +52,15 @@ public class IslandDTOFactory {
      * Constructs the island dto factory.
      *
      * @param chatService          {@link ChatService}.
-     * @param repostService        {@link RepostService}.
-     * @param feedService          {@link FeedService}.
-     * @param membershipService    {@link MembershipService}.
      * @param userService          {@link UserService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
      */
     public IslandDTOFactory(ChatService chatService,
-                            RepostService repostService,
-                            FeedService feedService,
-                            MembershipService membershipService,
                             UserService userService,
                             UserDTOFactory userDTOFactory,
                             GeneralConfiguration generalConfiguration) {
         this.chatService = chatService;
-        this.repostService = repostService;
-        this.feedService = feedService;
-        this.membershipService = membershipService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.generalConfiguration = generalConfiguration;
