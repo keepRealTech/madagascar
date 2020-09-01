@@ -1819,18 +1819,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
-  /api/v1/boxes/skus:
-    get:
-      tags:
-        - Sku
-      summary: 获得提问箱付费商品
-      responses:
-        '200':
-          description: question skus response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/QuestionSkusResponse'
   /api/v1/islands/{id}/boxes/paidQuestions/wechatPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -4629,29 +4617,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/CommentDTO'
-    QuestionSkuDTO:
-      type: object
-      properties:
-        id:
-          type: string
-        description:
-          type: string
-        isDefault:
-          type: boolean
-        priceInCents:
-          type: integer
-          format: int64
-        appleSkuId:
-          type: string
-    QuestionSkusResponse:
-      allOf:
-        - $ref: '#/components/schemas/CommonResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: '#/components/schemas/QuestionSkuDTO'
     PostQuestionRequest:
       type: object
       properties:
