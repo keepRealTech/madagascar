@@ -34,5 +34,5 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
            nativeQuery = true)
     Page<Payment> findAllValidPaymentsByUserId(String userId, Pageable pageable);
 
-    Integer countByPayeeIdAndState(String userId, int state);
+    Integer countByPayeeIdAndStateAndType(String userId, int state, int type);
 }

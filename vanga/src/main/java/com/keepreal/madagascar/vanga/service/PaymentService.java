@@ -137,11 +137,11 @@ public class PaymentService {
     }
 
     @Transactional
-    public Payment createNewWechatSupportPayment(WechatOrder wechatOrder, String payeeId, long priceIncents) {
+    public Payment createNewWechatSupportPayment(WechatOrder wechatOrder, String payeeId, long priceInCents) {
         Payment payment = Payment.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
-                .type(PaymentType.WECHATPAY.getValue())
-                .amountInCents(priceIncents)
+                .type(PaymentType.SUPPORT.getValue())
+                .amountInCents(priceInCents)
                 .userId(wechatOrder.getUserId())
                 .state(PaymentState.DRAFTED.getValue())
                 .payeeId(payeeId)
@@ -320,7 +320,7 @@ public class PaymentService {
     }
 
     public int supportCount(String userId) {
-        Integer count = this.paymentRepository.countByPayeeIdAndState(userId, PaymentState.CLOSED.getValue());
+        Integer count = this.paymentRepository.countByPayeeIdAndStateAndType(userId, PaymentState.CLOSED.getValue(), PaymentType.SUPPORT.getValue());
         return count == null ? 0 : count;
     }
 
