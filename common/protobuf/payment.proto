@@ -91,11 +91,16 @@ message ActivatePendingFeedPaymentRequest {
   string userId = 2;
 }
 
+message RedirectResponse {
+  CommonStatus status = 1;
+  string redirectUrl = 2;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
   rpc SubmitSubscribeMembershipWithWechatPay (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
-  rpc SubmitSubscribeMembershipWithWechatPayH5 (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
+  rpc SubmitSubscribeMembershipWithWechatPayH5 (SubscribeMembershipRequest) returns (RedirectResponse) {};
   rpc RetrieveWechatOrderById (RetrieveWechatOrderByIdRequest) returns (WechatOrderResponse) {};
   rpc WechatPayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
   rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};

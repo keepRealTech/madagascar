@@ -46,8 +46,11 @@ public class SkuService {
      * @param hostId         host id.
      * @param islandId       island id.
      */
-    public void createMembershipSkusByMembershipId(String membershipId, String membershipName,
-                                                   Integer pricePerMonth, String hostId, String islandId) {
+    public void createMembershipSkusByMembershipId(String membershipId,
+                                                   String membershipName,
+                                                   Integer pricePerMonth,
+                                                   String hostId,
+                                                   String islandId) {
         SkuServiceGrpc.SkuServiceBlockingStub stub = SkuServiceGrpc.newBlockingStub(this.channel);
 
         CreateMembershipSkusRequest request = CreateMembershipSkusRequest.newBuilder()

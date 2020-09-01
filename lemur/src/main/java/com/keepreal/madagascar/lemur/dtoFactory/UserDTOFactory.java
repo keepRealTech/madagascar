@@ -28,17 +28,6 @@ import java.util.stream.Collectors;
 @Component
 public class UserDTOFactory {
 
-    private final IslandService islandService;
-
-    /**
-     * Constructs the user dto factory.
-     *
-     * @param islandService {@link IslandService}.
-     */
-    public UserDTOFactory(IslandService islandService) {
-        this.islandService = islandService;
-    }
-
     /**
      * Converts {@link UserMessage} to {@link UserDTO}.
      *
@@ -90,7 +79,7 @@ public class UserDTOFactory {
      * @param shouldMaskMobile Whether should mask user mobile.
      * @return {@link FullUserDTO}.
      */
-    public FullUserDTO fullValueOf(UserMessage user, Boolean shouldMaskMobile) {
+    public FullUserDTO fullValueOf(UserMessage user, Boolean shouldMaskMobile, List<BriefIslandDTO> createdIslands) {
         if (Objects.isNull(user)) {
             return null;
         }
@@ -115,20 +104,7 @@ public class UserDTOFactory {
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
 
-        fullUserDTO.setCreatedIslands(
-                this.islandService.retrieveIslands(null, fullUserDTO.getId(), null, 0, Integer.MAX_VALUE)
-                        .getIslandsList()
-                        .stream()
-                        .map(islandMessage -> {
-                            BriefIslandDTO briefIslandDTO = new BriefIslandDTO();
-                            briefIslandDTO.setId(islandMessage.getId());
-                            briefIslandDTO.setName(islandMessage.getName());
-                            briefIslandDTO.setDescription(islandMessage.getDescription());
-                            briefIslandDTO.setHostId(islandMessage.getHostId());
-                            briefIslandDTO.setPortraitImageUri(islandMessage.getPortraitImageUri());
-                            return briefIslandDTO;
-                        })
-                        .collect(Collectors.toList()));
+        fullUserDTO.setCreatedIslands(createdIslands);
 
         return fullUserDTO;
     }

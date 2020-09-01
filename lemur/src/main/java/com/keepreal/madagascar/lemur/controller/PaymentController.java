@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.MembershipMessage;
+import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.PaymentDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.WechatOrderDTOFactory;
 import com.keepreal.madagascar.lemur.service.MembershipService;
@@ -13,18 +14,26 @@ import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.PaymentApi;
+import swagger.model.ConfigurationDTO;
 import swagger.model.DummyResponse;
+import swagger.model.H5RedirectDTO;
+import swagger.model.H5RedirectResponse;
 import swagger.model.SceneType;
 import swagger.model.SubscribeMemberRequest;
 import swagger.model.UserPaymentsResponse;
 import swagger.model.WechatOrderResponse;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -37,6 +46,10 @@ import java.util.stream.Collectors;
 @RestController
 public class PaymentController implements PaymentApi {
 
+    private Set<String> auditUserIds = new HashSet<>(Collections.singleton("484"));
+    private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
+
+    private final IOSClientConfiguration iosClientConfiguration;
     private final PaymentService paymentService;
     private final UserService userService;
     private final MembershipService membershipService;
@@ -46,22 +59,26 @@ public class PaymentController implements PaymentApi {
     /**
      * Constructs the payment controller.
      *
-     * @param paymentService        {@link PaymentService}.
-     * @param userService
-     * @param membershipService
-     * @param wechatOrderDTOFactory {@link WechatOrderDTOFactory}.
-     * @param paymentDTOFactory
+     * @param paymentService         {@link PaymentService}.
+     * @param userService            {@link UserService}.
+     * @param membershipService      {@link MembershipService}.
+     * @param wechatOrderDTOFactory  {@link WechatOrderDTOFactory}.
+     * @param paymentDTOFactory      {@link PaymentDTOFactory}.
+     * @param iosClientConfiguration {@link IOSClientConfiguration}.
      */
     public PaymentController(PaymentService paymentService,
                              UserService userService,
                              MembershipService membershipService,
                              WechatOrderDTOFactory wechatOrderDTOFactory,
-                             PaymentDTOFactory paymentDTOFactory) {
+                             PaymentDTOFactory paymentDTOFactory,
+                             IOSClientConfiguration iosClientConfiguration) {
         this.paymentService = paymentService;
         this.userService = userService;
         this.membershipService = membershipService;
         this.wechatOrderDTOFactory = wechatOrderDTOFactory;
         this.paymentDTOFactory = paymentDTOFactory;
+        this.iosClientConfiguration = iosClientConfiguration;
+        this.iOSConfigVersionMap.putAll(iosClientConfiguration.getVersionInfoMap());
     }
 
     /**
@@ -113,25 +130,25 @@ public class PaymentController implements PaymentApi {
      * @param id                     id (required) Island id.
      * @param sceneType              (required) Scene type.
      * @param subscribeMemberRequest (required) {@link SubscribeMemberRequest}.
-     * @return {@link WechatOrderResponse}.
+     * @return {@link DummyResponse}.
      */
+    @CrossOrigin
     @Override
-    public ResponseEntity<WechatOrderResponse> apiV1IslandsIdMemberSubscriptionWechatPayHtml5Post(String id,
-                                                                                                  SceneType sceneType,
-                                                                                                  SubscribeMemberRequest subscribeMemberRequest) {
+    public ResponseEntity<DummyResponse> apiV1IslandsIdMemberSubscriptionWechatPayHtml5Post(String id,
+                                                                                            SceneType sceneType,
+                                                                                            SubscribeMemberRequest subscribeMemberRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
 
-        WechatOrderMessage wechatOrderMessage = this.paymentService.submitSubscribeMembershipWithWechatPayH5(userId,
+        String redirectUrl = this.paymentService.submitSubscribeMembershipWithWechatPayH5(userId,
                 remoteAddress,
                 subscribeMemberRequest.getMembershipSkuId(),
                 this.convertType(sceneType));
 
-        WechatOrderResponse response = new WechatOrderResponse();
-        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
-        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
-        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(redirectUrl));
+
+        return new ResponseEntity<>(null, headers, HttpStatus.FOUND);
     }
 
     /**
@@ -180,6 +197,60 @@ public class PaymentController implements PaymentApi {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(userPaymentsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the membership subscription pay ios redirect url.
+     *
+     * @param id      id (required) Island id.
+     * @param version (required) IOS client version.
+     * @return {@link H5RedirectResponse}.
+     */
+    @Override
+    public ResponseEntity<H5RedirectResponse> apiV1IslandsIdMemberSubscriptionIosPayGet(String id,
+                                                                                        Integer version) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
+
+        H5RedirectDTO data = new H5RedirectDTO();
+        if (this.auditUserIds.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+            data.setUrl(this.iosClientConfiguration.getMembershipAuditUrl());
+        } else {
+            data.setUrl(this.iosClientConfiguration.getMembershipPayUrl());
+        }
+
+        H5RedirectResponse response = new H5RedirectResponse();
+        response.setData(data);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the membership subscription pay ios redirect url.
+     *
+     * @param id      id (required) Island id.
+     * @param version (required) IOS client version.
+     * @return {@link H5RedirectResponse}.
+     */
+    @Override
+    public ResponseEntity<H5RedirectResponse> apiV1IslandsIdSupportIosPayGet(String id,
+                                                                             Integer version) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
+
+        H5RedirectDTO data = new H5RedirectDTO();
+        if (this.auditUserIds.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+            data.setUrl(this.iosClientConfiguration.getSponsorAuditUrl());
+        } else {
+            data.setUrl(this.iosClientConfiguration.getSponsorPayUrl());
+        }
+
+        H5RedirectResponse response = new H5RedirectResponse();
+        response.setData(data);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

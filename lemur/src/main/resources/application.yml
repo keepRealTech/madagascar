@@ -124,6 +124,10 @@ client:
       100:
         currentVersion: 100
         nextVersion: 100
+    membershipAuditUrl:
+    membershipPayUrl:
+    sponsorAuditUrl:
+    sponsorPayUrl:
 
 aliyun-oss:
   access-key: 123

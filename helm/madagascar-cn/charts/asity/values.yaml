@@ -15,6 +15,10 @@ rocketmq:
     topic: chat-event
     tag: event
 
+coua:
+  host: coua
+  port: 6565
+
 deploy:
   opentracing:
     enable_jaeger: false

@@ -3,6 +3,8 @@ package com.keepreal.madagascar.asity.service;
 import com.keepreal.madagascar.asity.config.RongCloudConfiguration;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.MembershipMessage;
+import com.keepreal.madagascar.coua.CreateIslandEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import io.rong.RongCloud;
 import io.rong.messages.TxtMessage;
@@ -17,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Objects;
+
 /**
  * Represents the rong cloud service.
  */
@@ -26,6 +30,7 @@ public class RongCloudService {
 
     private static final String HOST_TEMPLATE = "我刚刚支持了你的「%s」会员（¥%.2f x %d个月）。创作加油！";
     private static final String MEMBER_TEMPLATE = "感谢你的支持！\n更多信息可前往「我的 - 订单中心」中查看。";
+    private final static String OFFICIAL_USER_ID = "4";
     private final RongCloud client;
 
     /**
@@ -147,16 +152,17 @@ public class RongCloudService {
     /**
      * Sends a private thank you message.
      *
-     * @param event {@link NotificationEvent}.
+     * @param event      {@link NotificationEvent}.
+     * @param membership {@link MembershipMessage}.
      */
     @SneakyThrows
-    public void sendThanks(NotificationEvent event) {
+    public void sendThanks(NotificationEvent event, MembershipMessage membership) {
         TxtMessage hostTextMessage = new TxtMessage(
                 String.format(RongCloudService.HOST_TEMPLATE,
                         event.getMemberEvent().getMembershipName(),
                         Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100,
-                        event.getMemberEvent().getTimeInMonths())
-                , "");
+                        event.getMemberEvent().getTimeInMonths()),
+                "");
         PrivateMessage hostMessage = new PrivateMessage()
                 .setSenderId(event.getMemberEvent().getMemberId())
                 .setTargetId(new String[]{event.getUserId()})
@@ -168,10 +174,19 @@ public class RongCloudService {
                 .setIsIncludeSender(1);
         this.client.message.msgPrivate.send(hostMessage);
 
-        TxtMessage memberTextMessage = new TxtMessage(
-                String.format(RongCloudService.MEMBER_TEMPLATE,
-                        event.getMemberEvent().getMembershipName())
-                , "");
+
+        TxtMessage memberTextMessage;
+        if (Objects.isNull(membership) || !membership.getUseCustomMessage()) {
+            memberTextMessage = new TxtMessage(
+                    String.format(RongCloudService.MEMBER_TEMPLATE,
+                            event.getMemberEvent().getMembershipName()),
+                    "");
+        } else {
+            memberTextMessage = new TxtMessage(
+                    membership.getMessage(),
+                    "");
+        }
+
         PrivateMessage memberMessage = new PrivateMessage()
                 .setSenderId(event.getUserId())
                 .setTargetId(new String[]{event.getMemberEvent().getMemberId()})
@@ -182,6 +197,22 @@ public class RongCloudService {
                 .setIsCounted(0)
                 .setIsIncludeSender(1);
         this.client.message.msgPrivate.send(memberMessage);
+    }
+
+    @SneakyThrows
+    public void sentCreateIslandNotice(CreateIslandEvent createIslandEvent) {
+        TxtMessage txtMessage = new TxtMessage("", "");
+
+        PrivateMessage message = new PrivateMessage()
+                .setSenderId(OFFICIAL_USER_ID)
+                .setTargetId(new String[]{createIslandEvent.getHostId()})
+                .setObjectName(txtMessage.getType())
+                .setContent(txtMessage)
+                .setVerifyBlacklist(0)
+                .setIsPersisted(0)
+                .setIsCounted(0)
+                .setIsIncludeSender(1);
+        this.client.message.msgPrivate.send(message);
     }
 
 }

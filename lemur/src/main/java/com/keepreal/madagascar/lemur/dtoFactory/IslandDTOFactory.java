@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
@@ -8,18 +9,19 @@ import com.keepreal.madagascar.lemur.service.ChatService;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.RepostService;
+import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
 import swagger.model.FullIslandDTO;
 import swagger.model.HostIntroductionDTO;
-import swagger.model.IdentityType;
 import swagger.model.IntroPrerequestsDTO;
+import swagger.model.IntroductionDTO;
 import swagger.model.IslandAccessType;
 import swagger.model.IslandDTO;
 import swagger.model.IslandIdentityDTO;
 import swagger.model.IslandProfileDTO;
-import swagger.model.SubscriberIntroductionDTO;
+import swagger.model.RecommendIslandDTO;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -33,23 +35,28 @@ public class IslandDTOFactory {
     private static final int DEFAULT_OFFICIAL_ISLAND_MEMBER_COUNT = 99_999_999;
     private static final String SUBSCRIBER_INTRODUCTION_TITLE = "欢迎加入我的岛！在这里你可以：";
     private static final String SUBSCRIBER_INTRODUCTION_CONTENT =
-            "1.支持我更好创作\r\n" +
-            "2.支持后享受专属权益\r\n" +
-            "3.最快看到我的动态，或向我提问";
+                    "1.支持我更好创作\r\n" +
+                    "2.支持后享受专属权益\r\n" +
+                    "3.最快看到我的动态，或向我提问";
+    private static final String HOST_INTRODUCTION_TITLE = "你成为了一名创作者！";
+    private static final String HOST_INTRODUCTION_CONTENT = "现在去分享你的创作主页来获得粉丝的支持吧！";
 
     private final ChatService chatService;
     private final RepostService repostService;
     private final FeedService feedService;
     private final MembershipService membershipService;
+    private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final GeneralConfiguration generalConfiguration;
 
     /**
      * Constructs the island dto factory.
+     *
      * @param chatService          {@link ChatService}.
      * @param repostService        {@link RepostService}.
      * @param feedService          {@link FeedService}.
      * @param membershipService    {@link MembershipService}.
+     * @param userService          {@link UserService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
      */
@@ -57,12 +64,14 @@ public class IslandDTOFactory {
                             RepostService repostService,
                             FeedService feedService,
                             MembershipService membershipService,
+                            UserService userService,
                             UserDTOFactory userDTOFactory,
                             GeneralConfiguration generalConfiguration) {
         this.chatService = chatService;
         this.repostService = repostService;
         this.feedService = feedService;
         this.membershipService = membershipService;
+        this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.generalConfiguration = generalConfiguration;
     }
@@ -90,6 +99,8 @@ public class IslandDTOFactory {
         islandDTO.setPortraitImageUri(island.getPortraitImageUri());
         islandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
+        islandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
+
         return islandDTO;
     }
 
@@ -113,6 +124,31 @@ public class IslandDTOFactory {
         briefIslandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
         return briefIslandDTO;
+    }
+
+    /**
+     * Converts the {@link DiscoverIslandMessage} into {@link RecommendIslandDTO}.
+     *
+     * @param discoverIsland {@link DiscoverIslandMessage}.
+     * @return {@link RecommendIslandDTO}.
+     */
+    public RecommendIslandDTO valueOf(DiscoverIslandMessage discoverIsland) {
+        if (Objects.isNull(discoverIsland)) {
+            return null;
+        }
+
+        RecommendIslandDTO recommendIslandDTO = new RecommendIslandDTO();
+        recommendIslandDTO.setId(discoverIsland.getIsland().getId());
+        recommendIslandDTO.setName(discoverIsland.getIsland().getName());
+        recommendIslandDTO.setDescription(discoverIsland.getIsland().getDescription());
+        recommendIslandDTO.setHostId(discoverIsland.getIsland().getHostId());
+        recommendIslandDTO.setPortraitImageUri(discoverIsland.getIsland().getPortraitImageUri());
+        recommendIslandDTO.setAccessType(this.convertAccessType(discoverIsland.getIsland().getIslandAccessType()));
+
+        recommendIslandDTO.setRecommendation(discoverIsland.getRecommendation());
+        recommendIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(discoverIsland.getIsland().getHostId())));
+
+        return recommendIslandDTO;
     }
 
     /**
@@ -141,6 +177,8 @@ public class IslandDTOFactory {
         fullIslandDTO.setMemberCount(memberCount);
         fullIslandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
 
+        fullIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
+
         return fullIslandDTO;
     }
 
@@ -168,18 +206,16 @@ public class IslandDTOFactory {
         islandProfileDTO.setHasGroupchatAccess(this.chatService.retrieveChatAccessByIslandId(islandProfileResponse
                 .getIsland().getId()).getChatAccess().getHasAccess());
 
+        // Deprecated fields
+        islandProfileDTO.setHostIntroduction(this.buildHostIntroduction());
+        islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(false));
+
         if (userId.equals(islandProfileDTO.getHost().getId())) {
-            islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(false));
-            islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(islandProfileResponse.getIsland().getId(),
-                    userId, islandProfileResponse.getHostShouldIntroduce()));
+            islandProfileDTO.setIntroduction(this.buildHostIntroduction(islandProfileResponse.getHostShouldIntroduce()));
         } else if (this.generalConfiguration.getOfficialIslandIdList().contains(islandProfileResponse.getIsland().getId())) {
-            islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(false));
-            islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(islandProfileResponse.getIsland().getId(),
-                    userId, false));
+            islandProfileDTO.setIntroduction(this.buildSubscriberIntroduction(false));
         } else {
-            islandProfileDTO.setSubscriberIntroduction(this.buildSubscriberIntroduction(islandProfileResponse.getUserShouldIntroduce()));
-            islandProfileDTO.setHostIntroduction(this.buildHostIntroduction(islandProfileResponse.getIsland().getId(),
-                    userId, false));
+            islandProfileDTO.setIntroduction(this.buildSubscriberIntroduction(islandProfileResponse.getUserShouldIntroduce()));
         }
 
         return islandProfileDTO;
@@ -210,10 +246,10 @@ public class IslandDTOFactory {
      * Builds the subscriber introduction dto.
      *
      * @param shouldIntroduce Whether should pop up the intro.
-     * @return {@link SubscriberIntroductionDTO}
+     * @return {@link IntroductionDTO}
      */
-    private SubscriberIntroductionDTO buildSubscriberIntroduction(Boolean shouldIntroduce) {
-        SubscriberIntroductionDTO subscriberIntroductionDTO = new SubscriberIntroductionDTO();
+    private IntroductionDTO buildSubscriberIntroduction(Boolean shouldIntroduce) {
+        IntroductionDTO subscriberIntroductionDTO = new IntroductionDTO();
 
         if (Objects.isNull(shouldIntroduce) || !shouldIntroduce) {
             subscriberIntroductionDTO.setShouldPopup(false);
@@ -231,30 +267,37 @@ public class IslandDTOFactory {
      * Builds the host introduction dto.
      *
      * @param shouldIntroduce Whether should pip up the intro.
+     * @return {@link IntroductionDTO}.
+     */
+    private IntroductionDTO buildHostIntroduction(Boolean shouldIntroduce) {
+        IntroductionDTO hostIntroductionDTO = new IntroductionDTO();
+
+        if (Objects.isNull(shouldIntroduce) || !shouldIntroduce) {
+            hostIntroductionDTO.setShouldPopup(false);
+            return hostIntroductionDTO;
+        }
+
+        hostIntroductionDTO.setShouldPopup(true);
+        hostIntroductionDTO.setTitle(IslandDTOFactory.HOST_INTRODUCTION_TITLE);
+        hostIntroductionDTO.setContent(IslandDTOFactory.HOST_INTRODUCTION_CONTENT);
+
+        return hostIntroductionDTO;
+    }
+
+    /**
+     * Builds the host introduction dto.
+     *
      * @return {@link HostIntroductionDTO}.
      */
-    private HostIntroductionDTO buildHostIntroduction(String islandId, String hostId, Boolean shouldIntroduce) {
+    @Deprecated
+    private HostIntroductionDTO buildHostIntroduction() {
         HostIntroductionDTO hostIntroductionDTO = new HostIntroductionDTO();
         IntroPrerequestsDTO introPrerequestsDTO = new IntroPrerequestsDTO();
         introPrerequestsDTO.setHasFeeds(true);
         introPrerequestsDTO.setHasMemberships(true);
         introPrerequestsDTO.setHasReposts(true);
-
-        if (Objects.isNull(shouldIntroduce) || !shouldIntroduce) {
-            hostIntroductionDTO.setShouldPopup(false);
-            hostIntroductionDTO.setPres(introPrerequestsDTO);
-            return hostIntroductionDTO;
-        }
-
-        introPrerequestsDTO.setHasReposts(this.repostService.retrieveRepostIslandById(islandId, 0, 1).getIslandRepostsCount() > 0);
-        introPrerequestsDTO.setHasFeeds(this.feedService.retrieveIslandFeeds(islandId, true, hostId, null, null, 0, 2, false).getFeedCount() > 1);
-        introPrerequestsDTO.setHasMemberships(this.membershipService.retrieveMembershipsByIslandId(islandId, false).size() > 0);
-
+        hostIntroductionDTO.setShouldPopup(false);
         hostIntroductionDTO.setPres(introPrerequestsDTO);
-        hostIntroductionDTO.setShouldPopup(!introPrerequestsDTO.getHasFeeds()
-                || !introPrerequestsDTO.getHasReposts()
-                || !introPrerequestsDTO.getHasMemberships());
-
         return hostIntroductionDTO;
     }
 

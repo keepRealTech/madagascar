@@ -47,6 +47,8 @@ tags:
     description: 作品集 controller
   - name: Box
     description: 提问箱 controller
+  - name: Support
+    description: 支持一下 controller
 
 paths:
   /api/healthcheck:
@@ -1018,6 +1020,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
       tags:
         - Payment
       summary: 会员订购H5跳转
@@ -1049,7 +1053,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WechatOrderResponse'
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/islands/{id}/memberSubscription/shellPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1182,6 +1186,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipSkusResponse'
+  /api/v1/islands/{id}/support/skus:
+    parameters:
+      - $ref: "#/components/parameters/idInPath"
+    get:
+      tags:
+        - Sku
+      summary: 获得支持一下商品信息
+      responses:
+        '200':
+          description: skus
+          content:
+            applicaiton/json:
+              schema:
+                $ref: '#/components/schemas/SupportSkusResponse'
   /api/v1/islands/{id}/memberships:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1616,6 +1634,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PostOTPRequest'
+      parameters:
+        - $ref: '#/components/parameters/forLoginInQuery'
       tags:
         - Login
       summary: 向指定手机号发送验证码
@@ -1803,18 +1823,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
-  /api/v1/boxes/skus:
-    get:
-      tags:
-        - Sku
-      summary: 获得提问箱付费商品
-      responses:
-        '200':
-          description: question skus response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/QuestionSkusResponse'
   /api/v1/islands/{id}/boxes/paidQuestions/wechatPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2034,7 +2042,7 @@ paths:
       - $ref: '#/components/parameters/idInPath'
     get:
       tags:
-        - Sku
+        - Support
       summary: 获得支持商品信息
       responses:
         '200':
@@ -2047,6 +2055,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
       tags:
         - Payment
       summary: 支持一下 H5跳转地址
@@ -2098,7 +2108,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WechatOrderResponse'
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/islands/discovery:
     get:
       tags:
@@ -2134,6 +2144,13 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
+    forLoginInQuery:
+      in: query
+      name: login
+      required: false
+      schema:
+        type: boolean
+        default: false
     idInPath:
       in: path
       name: id
@@ -2649,7 +2666,7 @@ components:
           type: boolean
         hasMemberships:
           type: boolean
-    SubscriberIntroductionDTO:
+    IntroductionDTO:
       type: object
       properties:
         shouldPopup:
@@ -2677,7 +2694,9 @@ components:
         hostIntroduction:
           $ref: '#/components/schemas/HostIntroductionDTO'
         subscriberIntroduction:
-          $ref: '#/components/schemas/SubscriberIntroductionDTO'
+          $ref: '#/components/schemas/IntroductionDTO'
+        introduction:
+          $ref: '#/components/schemas/IntroductionDTO'
     CheckIslandDTO:
       type: object
       properties:
@@ -3598,7 +3617,7 @@ components:
         mobile:
           type: string
         otp:
-          type: string
+          type: integer
     LoginPayload:
       oneOf:
         - $ref: '#/components/schemas/WechatOAuthLoginPayload'
@@ -4613,29 +4632,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/CommentDTO'
-    QuestionSkuDTO:
-      type: object
-      properties:
-        id:
-          type: string
-        description:
-          type: string
-        isDefault:
-          type: boolean
-        priceInCents:
-          type: integer
-          format: int64
-        appleSkuId:
-          type: string
-    QuestionSkusResponse:
-      allOf:
-        - $ref: '#/components/schemas/CommonResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: '#/components/schemas/QuestionSkuDTO'
     PostQuestionRequest:
       type: object
       properties:
@@ -4729,15 +4725,27 @@ components:
           format: int64
         isDefault:
           type: boolean
-    SponsorDTO:
+    SupportSkusDTO:
       type: object
       properties:
         sponsorSkus:
           type: array
           items:
             $ref: '#/components/schemas/SponsorSkuDTO'
-        customSku:
+        customizedSku:
           $ref: '#/components/schemas/SponsorSkuDTO'
+    SupportSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportSkusDTO'
+    SponsorDTO:
+      type: object
+      properties:
+        text:
+          type: string
         count:
           type: integer
     SupportDTO:

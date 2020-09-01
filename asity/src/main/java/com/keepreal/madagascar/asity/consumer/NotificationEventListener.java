@@ -6,7 +6,9 @@ import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.MessageListener;
 import com.aliyun.openservices.ons.api.order.ConsumeOrderContext;
 import com.keepreal.madagascar.asity.service.ChatgroupService;
+import com.keepreal.madagascar.asity.service.MembershipService;
 import com.keepreal.madagascar.asity.service.RongCloudService;
+import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,17 +24,20 @@ import java.util.Objects;
 public class NotificationEventListener implements MessageListener {
 
     private final ChatgroupService chatgroupService;
+    private final MembershipService membershipService;
     private final RongCloudService rongCloudService;
 
     /**
      * Constructs the notification event listener.
      *
      * @param chatgroupService  {@link ChatgroupService}.
+     * @param membershipService {@link MembershipService}.
      * @param rongCloudService  {@link RongCloudService}.
      */
     public NotificationEventListener(ChatgroupService chatgroupService,
-                                     RongCloudService rongCloudService) {
+                                     MembershipService membershipService, RongCloudService rongCloudService) {
         this.chatgroupService = chatgroupService;
+        this.membershipService = membershipService;
         this.rongCloudService = rongCloudService;
     }
 
@@ -70,7 +75,10 @@ public class NotificationEventListener implements MessageListener {
                             || StringUtils.isEmpty(event.getUserId())) {
                         break;
                     }
-                    this.rongCloudService.sendThanks(event);
+
+                    MembershipMessage membership = this.membershipService.retrieveMembershipById(event.getMemberEvent().getMembershipId());
+
+                    this.rongCloudService.sendThanks(event, membership);
                     break;
                 case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
                 default:

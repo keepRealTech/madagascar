@@ -2,12 +2,12 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
-import com.keepreal.madagascar.common.IdentityType;
 import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
+import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
@@ -27,18 +27,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import swagger.api.ApiUtil;
 import swagger.api.IslandApi;
 import swagger.model.BriefIslandResponse;
 import swagger.model.BriefIslandsResponse;
 import swagger.model.CheckIslandDTO;
 import swagger.model.CheckIslandResponse;
 import swagger.model.DummyResponse;
+import swagger.model.IslandDiscoveryResponse;
 import swagger.model.IslandIdentityResponse;
 import swagger.model.IslandPosterResponse;
 import swagger.model.IslandProfileDTO;
@@ -46,6 +49,7 @@ import swagger.model.IslandProfileResponse;
 import swagger.model.IslandProfilesResponse;
 import swagger.model.IslandResponse;
 import swagger.model.PostIslandPayload;
+import swagger.model.PostIslandPayloadV2;
 import swagger.model.PosterFeedDTO;
 import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
@@ -226,12 +230,6 @@ public class IslandController implements IslandApi {
         IslandProfileResponse response = new IslandProfileResponse();
         IslandProfileDTO islandProfileDTO = this.islandDTOFactory.valueOf(islandProfileResponse, userId);
 
-        if (userId.equals(islandProfileResponse.getHost().getId())
-                && islandProfileResponse.getHostShouldIntroduce()
-                && !islandProfileDTO.getHostIntroduction().getShouldPopup()) {
-            this.islandService.dismissIslandIntroduction(id, userId, true);
-        }
-
         response.setData(islandProfileDTO);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
@@ -357,7 +355,8 @@ public class IslandController implements IslandApi {
                 payload.getSecret(),
                 payload.getIdentityId(),
                 userId,
-                accessType);
+                accessType,
+                null);
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -515,10 +514,72 @@ public class IslandController implements IslandApi {
     public ResponseEntity<DummyResponse> apiV1IslandsIdIntroductionDismissPost(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        this.islandService.dismissIslandIntroduction(id, userId, false);
+        IslandMessage island = this.islandService.retrieveIslandById(id);
+
+        this.islandService.dismissIslandIntroduction(id, userId, userId.equals(island.getHostId()));
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<BriefIslandResponse> apiV11IslandsPost(PostIslandPayloadV2 payload, @Valid MultipartFile portraitImage) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (Objects.isNull(payload)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        IslandAccessType accessType = this.convertIslandAccessType(payload.getIslandAccessType());
+        accessType = Objects.isNull(accessType) ? IslandAccessType.ISLAND_ACCESS_PRIVATE : accessType;
+
+        if (StringUtils.isEmpty(payload.getName())
+                || (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(payload.getSecret()))) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.textContentFilter.isDisallowed(payload.getName())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
+        }
+
+        String portraitImageUri = null;
+        if (Objects.nonNull(portraitImage) && portraitImage.getSize() > 0) {
+            portraitImageUri = this.imageService.uploadSingleImage(portraitImage);
+        }
+
+        IslandMessage islandMessage = this.islandService.createIsland(
+                payload.getName(),
+                portraitImageUri,
+                payload.getSecret(),
+                payload.getIdentityId(),
+                userId,
+                accessType,
+                payload.getDescription());
+
+        BriefIslandResponse response = new BriefIslandResponse();
+        response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the get discovery islands api.
+     *
+     * @return {@link IslandDiscoveryResponse}.
+     */
+    @Override
+    public ResponseEntity<IslandDiscoveryResponse> apiV1IslandsDiscoveryGet() {
+        List<DiscoverIslandMessage> discoverIslandMessageList = this.islandService.retrieveIslandsInDiscovery();
+
+        IslandDiscoveryResponse response = new IslandDiscoveryResponse();
+        response.setData(discoverIslandMessageList.stream()
+                .filter(Objects::nonNull)
+                .map(this.islandDTOFactory::valueOf)
+                .collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

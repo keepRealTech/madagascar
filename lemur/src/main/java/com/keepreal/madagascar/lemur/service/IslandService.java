@@ -13,6 +13,8 @@ import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
 import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
+import com.keepreal.madagascar.coua.DiscoverIslandMessage;
+import com.keepreal.madagascar.coua.DiscoverIslandsResponse;
 import com.keepreal.madagascar.coua.DismissIntroductionRequest;
 import com.keepreal.madagascar.coua.IslandIdentitiesResponse;
 import com.keepreal.madagascar.coua.IslandIdentityMessage;
@@ -242,7 +244,8 @@ public class IslandService {
                                       String secret,
                                       String identityId,
                                       String userId,
-                                      IslandAccessType islandAccessType) {
+                                      IslandAccessType islandAccessType,
+                                      String description) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         if (Objects.isNull(identityId)) {
@@ -265,6 +268,10 @@ public class IslandService {
 
         if (!StringUtils.isEmpty(portraitImageUri)) {
             requestBuilder.setPortraitImageUri(StringValue.of(portraitImageUri));
+        }
+
+        if (!StringUtils.isEmpty(description)) {
+            requestBuilder.setDescription(StringValue.of(description));
         }
 
         IslandResponse islandResponse;
@@ -595,8 +602,9 @@ public class IslandService {
     /**
      * Dismisses the island host introduction once and for all.
      *
-     * @param islandId Island id.
-     * @param userId   User id.
+     * @param islandId     Island id.
+     * @param userId       User id.
+     * @param isIslandHost Whether it is the host.
      */
     public void dismissIslandIntroduction(String islandId, String userId, Boolean isIslandHost) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
@@ -690,6 +698,34 @@ public class IslandService {
         }
 
         return response.getPortraitUrlList();
+    }
+
+    /**
+     * Retrieves islands discovery.
+     *
+     * @return {@link DiscoverIslandMessage}.
+     */
+    public List<DiscoverIslandMessage> retrieveIslandsInDiscovery() {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        DiscoverIslandsResponse response;
+        try {
+            response = stub.discoverIslands(Empty.getDefaultInstance());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve islands discovery returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getDicoverIslandsList();
     }
 
     /**

@@ -27,9 +27,9 @@ import java.util.UUID;
 @Slf4j
 public class WechatPayService {
 
-    private static final String IOS_SCENE_INFO = "";
-    private static final String ANDROID_SCENE_INFO = "";
-    private static final String WAP_SCENE_INFO = "{\"h5_info\": {\"type\":\"Wap\",\"wap_url\": \"https://tiaodaoapp.com\",\"wap_name\": \"跳岛首页\"}}";
+    private static final String IOS_SCENE_INFO = "{\"h5_info\": {\"type\":\"IOS\",\"app_name\":\"tiaodao\",\"bundle_id\":\"cn.keepreal.feeds\"}}";
+    private static final String ANDROID_SCENE_INFO = "{\"h5_info\": {\"type\":\"Android\",\"app_name\":\"tiaodao\",\"package_name\":\"com.bcfg.client\"}}";
+    private static final String WAP_SCENE_INFO = "{\"h5_info\": {\"type\":\"Wap\",\"wap_url\":\"https://tiaodaoapp.com\",\"wap_name\":\"跳岛首页\"}}";
     private final WXPay client;
     private final WechatPayConfiguration wechatPayConfiguration;
     private final WechatOrderService wechatOrderService;
@@ -117,6 +117,8 @@ public class WechatPayService {
 
             response = this.client.unifiedOrder(requestBody);
 
+            log.info(response.toString());
+
             if (response.get("return_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
                 wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());
@@ -139,11 +141,12 @@ public class WechatPayService {
             wechatOrder.setCreatedTime(Integer.parseInt(request.get("timestamp")) * 1000L);
             wechatOrder = this.wechatOrderService.insert(wechatOrder);
 
-            wechatOrder.setPrepayId(response.get("prepay_id"));
+
+            wechatOrder.setPrepayId(request.get("prepayid"));
             wechatOrder.setSignature(request.get("sign"));
             wechatOrder.setNonceStr(request.get("noncestr"));
 
-            wechatOrder.setMwebUrl(request.getOrDefault("mweb_url", ""));
+            wechatOrder.setMwebUrl(response.getOrDefault("mweb_url", ""));
 
             return wechatOrder;
         } catch (Exception e) {
