@@ -1020,6 +1020,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
       tags:
         - Payment
       summary: 会员订购H5跳转
@@ -2051,6 +2053,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
       tags:
         - Payment
       summary: 支持一下 H5跳转地址
