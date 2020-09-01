@@ -62,7 +62,7 @@ public class MembershipService {
                 membershipInfo.getName(),
                 membershipInfo.getPricePerMonth(),
                 membershipInfo.getHostId(),
-                membershipInfo.getIslandId(),);
+                membershipInfo.getIslandId());
 
         return repository.save(membershipInfo);
     }
