@@ -39,7 +39,9 @@ public class IslandDTOFactory {
                     "2.支持后享受专属权益\r\n" +
                     "3.最快看到我的动态，或向我提问";
     private static final String HOST_INTRODUCTION_TITLE = "你成为了一名创作者！";
-    private static final String HOST_INTRODUCTION_CONTENT = "现在去分享你的创作主页来获得粉丝的支持吧！";
+    private static final String HOST_INTRODUCTION_CONTENT =
+            "现在去分享你的创作主页\r\n" +
+            "来获得粉丝的支持吧！";
 
     private final ChatService chatService;
     private final RepostService repostService;
