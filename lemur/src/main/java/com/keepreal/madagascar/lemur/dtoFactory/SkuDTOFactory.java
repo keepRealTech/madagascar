@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Service
 public class SkuDTOFactory {
 
-    private final static String CUSTOMIZED_SUPPORT_SKU_ID = "";
+    private final static String CUSTOMIZED_SUPPORT_SKU_ID = "888";
 
     /**
      * Converts {@link ShellSkuMessage} into {@link IOSShellSkuDTO}.

@@ -231,7 +231,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             case PAYSUPPORT:
             case PAYSUPPORTH5: {
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
-
+                this.supportService.supportWithWechatOrder(wechatOrder);
                 break;
             }
             default:
