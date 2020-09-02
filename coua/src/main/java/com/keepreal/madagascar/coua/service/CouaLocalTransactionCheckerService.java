@@ -56,6 +56,7 @@ public class CouaLocalTransactionCheckerService implements LocalTransactionCheck
                     String wechatUserId = mergeUserAccountsEvent.getWechatUserId();
                     String webMobileUserId = mergeUserAccountsEvent.getWebMobileUserId();
                     this.userInfoService.mergeUserAccounts(wechatUserId, webMobileUserId);
+                    return TransactionStatus.CommitTransaction;
                 }
                 return TransactionStatus.CommitTransaction;
             }
