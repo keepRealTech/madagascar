@@ -12,7 +12,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
-import java.util.concurrent.TimeUnit;
 
 /**
  *  Represents coua local transaction checker service.

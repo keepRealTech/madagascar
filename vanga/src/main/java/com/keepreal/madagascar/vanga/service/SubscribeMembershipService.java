@@ -252,12 +252,14 @@ public class SubscribeMembershipService {
         return this.subscriptionMemberRepository.getMembershipIdListByUserId(userId, this.getStartOfDayTime());
     }
 
-    public Page<SubscribeMembership> retrieveSubscribeMembershipByUserIdPageable(String userId, PageRequest pageRequest) {
-        return this.subscriptionMemberRepository.findAllByUserId(userId, pageRequest);
-    }
-
-    public void updateAll(List<SubscribeMembership> SubscribeMemberships) {
-        this.subscriptionMemberRepository.saveAll(SubscribeMemberships);
+    /**
+     * merge user subscribed membership
+     *
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   mobile user id
+     */
+    public void mergeUserSubscribeMembership(String wechatUserId, String webMobileUserId) {
+        this.subscriptionMemberRepository.mergeUserSubscribeMembership(wechatUserId, webMobileUserId);
     }
 
     /**

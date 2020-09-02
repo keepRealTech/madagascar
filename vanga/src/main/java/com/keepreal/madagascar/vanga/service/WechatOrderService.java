@@ -73,12 +73,14 @@ public class WechatOrderService {
         return this.wechatOrderRepository.findByPropertyIdAndTypeAndDeletedIsFalse(feedId, WechatOrderType.PAYQUESTION.getValue());
     }
 
-    public Page<WechatOrder> retrieveByUserIdPageable(String userId, Pageable pageable) {
-        return this.wechatOrderRepository.findAllByUserId(userId, pageable);
-    }
-
-    public void updateAll(List<WechatOrder> orders) {
-        this.wechatOrderRepository.saveAll(orders);
+    /**
+     * merge user wechat order
+     *
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   mobile user id
+     */
+    public void mergeUserWechatOrder(String wechatUserId, String webMobileUserId) {
+        this.wechatOrderRepository.mergeUserWechatOrder(wechatUserId, webMobileUserId);
     }
 
 }

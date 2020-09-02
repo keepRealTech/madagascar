@@ -304,14 +304,13 @@ public class PaymentService {
     }
 
     /**
-     * Retrieves all user payments.
+     * merge user payment
      *
-     * @param userId   User id.
-     * @param pageable {@link Pageable}.
-     * @return {@link Payment}.
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   mobile user id
      */
-    public Page<Payment> retrieveAllPaymentsByUserId(String userId, Pageable pageable) {
-        return this.paymentRepository.findAllByUserId(userId, pageable);
-    }
+   public void mergeUserPayment(String wechatUserId, String webMobileUserId) {
+        this.paymentRepository.mergeUserPayment(wechatUserId, webMobileUserId);
+   }
 
 }

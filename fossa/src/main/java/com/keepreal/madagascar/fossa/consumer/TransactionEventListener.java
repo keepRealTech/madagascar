@@ -46,7 +46,7 @@ public class TransactionEventListener implements MessageListener {
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {
             log.warn("Bad formatted transaction event, skipped.");
-            return Action.CommitMessage;
+            return Action.ReconsumeLater;
         } catch (Exception e) {
             return Action.ReconsumeLater;
         }

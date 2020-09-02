@@ -58,7 +58,7 @@ public class TransactionEventListener implements MessageListener {
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {
             log.warn("Bad formatted transaction event, skipped.");
-            return Action.CommitMessage;
+            return Action.ReconsumeLater;
         } catch (Exception e) {
             return Action.ReconsumeLater;
         }
@@ -66,72 +66,9 @@ public class TransactionEventListener implements MessageListener {
 
     @Transactional
     public void mergeUserAccounts(String wechatUserId, String webMobileUserId) {
-        this.mergeUserMembership(wechatUserId, webMobileUserId);
-        this.mergeUserWechatOrder(wechatUserId, webMobileUserId);
-        this.mergeUserPayment(wechatUserId, webMobileUserId);
-    }
-
-    /**
-     * 合并会员
-     *
-     * @param wechatUserId      wechat user id
-     * @param webMobileUserId   web mobile user id
-     */
-    @Transactional
-    public void mergeUserMembership(String wechatUserId, String webMobileUserId) {
-        int page = 0;
-        int pageSize = 50;
-        Page<SubscribeMembership> memberships = this.subscribeMembershipService.retrieveSubscribeMembershipByUserIdPageable(webMobileUserId, PageRequest.of(page, pageSize));
-        int totalPages = memberships.getTotalPages();
-
-        do {
-            Page<SubscribeMembership> subscribeMemberships = this.subscribeMembershipService.retrieveSubscribeMembershipByUserIdPageable(webMobileUserId, PageRequest.of(page, pageSize));
-            subscribeMemberships.getContent().forEach(membership -> membership.setUserId(wechatUserId));
-            this.subscribeMembershipService.updateAll(subscribeMemberships.getContent());
-            ++ page;
-        } while (page < totalPages);
-    }
-
-    /**
-     * 合并微信订单
-     *
-     * @param wechatUserId      wechat user id
-     * @param webMobileUserId   web mobile user id
-     */
-    @Transactional
-    public void mergeUserWechatOrder(String wechatUserId, String webMobileUserId) {
-        int page = 0;
-        int pageSize = 50;
-        Page<WechatOrder> wechatOrders = this.wechatOrderService.retrieveByUserIdPageable(webMobileUserId, PageRequest.of(page, pageSize));
-        int totalPages = wechatOrders.getTotalPages();
-
-        do {
-            Page<WechatOrder> orders = this.wechatOrderService.retrieveByUserIdPageable(webMobileUserId, PageRequest.of(page, pageSize));
-            orders.getContent().forEach(wechatOrder -> wechatOrder.setUserId(wechatUserId));
-            this.wechatOrderService.updateAll(orders.getContent());
-            ++ page;
-        } while (page < totalPages);
-    }
-
-    /**
-     * 合并payment
-     *
-     * @param wechatUserId      wechat user id
-     * @param webMobileUserId   web mobile user id
-     */
-    @Transactional
-    public void mergeUserPayment(String wechatUserId, String webMobileUserId) {
-        int page = 0;
-        int pageSize = 50;
-        Page<Payment> payment = this.paymentService.retrieveAllPaymentsByUserId(webMobileUserId, PageRequest.of(page, pageSize));
-        int totalPages = payment.getTotalPages();
-
-        do {
-            Page<Payment> payments = this.paymentService.retrieveAllPaymentsByUserId(webMobileUserId, PageRequest.of(page, pageSize));
-            payments.getContent().forEach(p -> p.setUserId(wechatUserId));
-            this.paymentService.updateAll(payments.getContent());
-            ++ page;
-        } while (page < totalPages);
+        this.subscribeMembershipService.mergeUserSubscribeMembership(wechatUserId, webMobileUserId);
+        this.wechatOrderService.mergeUserWechatOrder(wechatUserId, webMobileUserId);
+        this.paymentService.mergeUserPayment(wechatUserId, webMobileUserId);
     }
 
 }
