@@ -325,7 +325,7 @@ public class FeedInfoService {
     @Transactional
     public void mergeUserBoxInfo(String wechatUserId, String webMobileUserId) throws RuntimeException{
         int page = 0;
-        int pageSize = 50;
+        int pageSize = 100;
 
         Query query = new Query();
         query.addCriteria(Criteria.where("userId").is(webMobileUserId));
@@ -337,7 +337,7 @@ public class FeedInfoService {
             feedInfoList.forEach(feedInfo -> feedInfo.setUserId(wechatUserId));
             this.feedInfoRepository.saveAll(feedInfoList);
             ++ page;
-        } while (totalCount / pageSize > page);
+        } while (totalCount / pageSize >= page);
     }
 
     /**
