@@ -130,11 +130,11 @@ public class PaymentController implements PaymentApi {
      * @param id                     id (required) Island id.
      * @param sceneType              (required) Scene type.
      * @param subscribeMemberRequest (required) {@link SubscribeMemberRequest}.
-     * @return {@link DummyResponse}.
+     * @return {@link H5RedirectResponse}.
      */
     @CrossOrigin
     @Override
-    public ResponseEntity<DummyResponse> apiV1IslandsIdMemberSubscriptionWechatPayHtml5Post(String id,
+    public ResponseEntity<H5RedirectResponse> apiV1IslandsIdMemberSubscriptionWechatPayHtml5Post(String id,
                                                                                             SceneType sceneType,
                                                                                             SubscribeMemberRequest subscribeMemberRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -146,11 +146,14 @@ public class PaymentController implements PaymentApi {
                 remoteAddresses[remoteAddresses.length - 1].trim(),
                 subscribeMemberRequest.getMembershipSkuId(),
                 this.convertType(sceneType));
+        H5RedirectDTO data = new H5RedirectDTO();
+        data.setUrl(redirectUrl);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create(redirectUrl));
-
-        return new ResponseEntity<>(null, headers, HttpStatus.FOUND);
+        H5RedirectResponse response = new H5RedirectResponse();
+        response.setData(data);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**
