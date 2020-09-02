@@ -138,10 +138,12 @@ public class PaymentController implements PaymentApi {
                                                                                             SceneType sceneType,
                                                                                             SubscribeMemberRequest subscribeMemberRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
+        String[] remoteAddresses = HttpContextUtils.getRemoteIpFromContext().split(",");
+
+        System.out.println(remoteAddresses[remoteAddresses.length - 1].trim());
 
         String redirectUrl = this.paymentService.submitSubscribeMembershipWithWechatPayH5(userId,
-                remoteAddress,
+                remoteAddresses[remoteAddresses.length - 1].trim(),
                 subscribeMemberRequest.getMembershipSkuId(),
                 this.convertType(sceneType));
 

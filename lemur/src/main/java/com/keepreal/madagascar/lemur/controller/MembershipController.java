@@ -165,7 +165,7 @@ public class MembershipController implements MembershipApi {
     @Override
     public ResponseEntity<MembershipResponse> apiV1MembershipsIdPut(String id, PutMembershipRequest putMembershipRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        MembershipMessage membershipMessage = membershipService.updateMembershipById(id,
+        MembershipMessage membershipMessage = this.membershipService.updateMembershipById(id,
                 putMembershipRequest.getName(),
                 putMembershipRequest.getDescription(),
                 putMembershipRequest.getChargePerMonth(),
