@@ -3378,6 +3378,8 @@ components:
           $ref: '#/components/schemas/BriefUserDTO'
         membership:
           $ref: '#/components/schemas/SkuMembershipDTO'
+        content:
+          type: string
     SkuMembershipDTO:
       allOf:
         - $ref: '#/components/schemas/BriefMembershipDTO'

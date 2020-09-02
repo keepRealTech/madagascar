@@ -16,11 +16,14 @@ public class SupportService {
 
     private final PaymentService paymentService;
     private final BalanceService balanceService;
+    private final NotificationEventProducerService notificationEventProducerService;
 
     public SupportService(PaymentService paymentService,
-                          BalanceService balanceService) {
+                          BalanceService balanceService,
+                          NotificationEventProducerService notificationEventProducerService) {
         this.paymentService = paymentService;
         this.balanceService = balanceService;
+        this.notificationEventProducerService = notificationEventProducerService;
     }
 
     @Transactional
@@ -41,6 +44,11 @@ public class SupportService {
         Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payment.getPayeeId());
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
+        this.sendAsyncMessage(payment.getUserId(), payment.getPayeeId(), payment.getAmountInCents());
+    }
+
+    private void sendAsyncMessage(String userId, String payeeId, Long priceInCents) {
+        this.notificationEventProducerService.produceNewSupportNotificationEventAsync(userId, payeeId, priceInCents);
     }
 
     private Long calculateAmount(Long amount, int ratio) {

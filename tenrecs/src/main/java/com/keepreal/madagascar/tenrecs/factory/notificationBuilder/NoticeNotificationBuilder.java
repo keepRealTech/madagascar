@@ -119,6 +119,24 @@ public class NoticeNotificationBuilder implements NotificationBuilder {
                 noticeBuilder.memberNotice(memberNotice);
 
                 return noticeBuilder.build();
+            case NOTIFICATION_EVENT_NEW_SUPPORT:
+                noticeBuilder.type(NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER);
+
+                if (Objects.isNull(this.event.getMemberEvent())) {
+                    return noticeBuilder.build();
+                }
+
+                MemberNotice support = MemberNotice.builder()
+                        .islandId("")
+                        .memberId(this.event.getSupportEvent().getUserId())
+                        .membershipId("")
+                        .membershipName("")
+                        .priceInCents(this.event.getSupportEvent().getPriceInCents())
+                        .timeInMonths(0)
+                        .build();
+                noticeBuilder.memberNotice(support);
+
+                return noticeBuilder.build();
             default:
         }
 
