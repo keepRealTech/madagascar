@@ -319,6 +319,16 @@ public class PaymentService {
         return this.paymentRepository.findAllValidPaymentsByUserId(userId, pageable);
     }
 
+    /**
+     * merge user payment
+     *
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   mobile user id
+     */
+   public void mergeUserPayment(String wechatUserId, String webMobileUserId) {
+        this.paymentRepository.mergeUserPayment(wechatUserId, webMobileUserId);
+   }
+
     public int supportCount(String userId) {
         Integer count = this.paymentRepository.countByPayeeIdAndStateAndType(userId, PaymentState.CLOSED.getValue(), PaymentType.SUPPORT.getValue());
         return count == null ? 0 : count;

@@ -28,6 +28,7 @@ import com.keepreal.madagascar.coua.UsersReponse;
 import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.service.AliyunSmsService;
+import com.keepreal.madagascar.coua.service.TransactionProducerService;
 import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
 import com.keepreal.madagascar.coua.service.UserIdentityService;
 import com.keepreal.madagascar.coua.service.UserInfoService;
@@ -57,6 +58,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     private final UserIdentityService userIdentityService;
     private final AliyunSmsService aliyunSmsService;
     private final RedissonClient redissonClient;
+    private final TransactionProducerService transactionProducerService;
 
     /**
      * Constructs user grpc controller.
@@ -70,12 +72,14 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                               UserDeviceInfoService userDeviceInfoService,
                               UserIdentityService userIdentityService,
                               AliyunSmsService aliyunSmsService,
-                              RedissonClient redissonClient) {
+                              RedissonClient redissonClient,
+                              TransactionProducerService transactionProducerService) {
         this.userInfoService = userInfoService;
         this.userDeviceInfoService = userDeviceInfoService;
         this.userIdentityService = userIdentityService;
         this.aliyunSmsService = aliyunSmsService;
         this.redissonClient = redissonClient;
+        this.transactionProducerService = transactionProducerService;
     }
 
     /**
@@ -311,7 +315,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     }
 
     /**
-     * 更新当前用户手机号
+     * 更新当前用户手机号 (如果手机号有H5注册登录信息则进行账号合并)
      *
      * @param request {@link UpdateUserMobileRequest}
      * @param responseObserver {@link StreamObserver}
@@ -325,9 +329,14 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
 
         RBucket<Integer> redisOtp = this.redissonClient.getBucket(AliyunSmsService.MOBILE_PHONE_OTP + mobile);
         Integer intOtp = redisOtp.get();
+
         if (Objects.isNull(intOtp) || !otp.equals(intOtp)) {
             builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
         } else {
+            UserInfo webUserInfo = this.userInfoService.findH5UserInfoByMobile(mobile);
+            if (Objects.nonNull(webUserInfo)) {
+                this.mergeUserAccounts(userId, webUserInfo.getId());
+            }
             UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
             userInfo.setMobile(mobile);
             UserInfo userInfoNew = this.userInfoService.updateUser(userInfo);
@@ -358,6 +367,16 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                     .setStatus(CommonStatusUtils.getSuccStatus()).build());
         }
         responseObserver.onCompleted();
+    }
+
+    /**
+     * 合并用户账户信息
+     *
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   web user id
+     */
+    private void mergeUserAccounts(String wechatUserId, String webMobileUserId) {
+        this.transactionProducerService.produceMergeUserAccountsTransactionEventAsync(wechatUserId, webMobileUserId);
     }
 
     /**

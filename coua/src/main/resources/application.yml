@@ -23,6 +23,12 @@ rocketmq:
     topic: notification-event
     tag: event
     nameSrvAddr: 127.0.0.1:9876
+  transaction:
+    accessKey: xxx
+    secretKey: xxx
+    topic: transaction-event
+    tag: event
+    nameSrvAddr: 127.0.0.1:9876
 
 grpc:
   fossa:

@@ -1,9 +1,13 @@
 package com.keepreal.madagascar.vanga.repository;
 
 import com.keepreal.madagascar.vanga.model.SubscribeMembership;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,4 +27,12 @@ public interface SubscribeMembershipRepository extends JpaRepository<SubscribeMe
 
     @Query(value = "SELECT membership_id FROM subscribe_membership WHERE user_id = ?1 AND is_deleted = FALSE AND expire_time > ?2", nativeQuery = true)
     List<String> getMembershipIdListByUserId(String userId, long current_time);
+
+    Page<SubscribeMembership> findAllByUserId(String userId, Pageable pageable);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE subscribe_membership SET user_id = ?1 WHERE user_id = ?2", nativeQuery = true)
+    void mergeUserSubscribeMembership(String wechatUserId, String webMobileUserId);
+
 }
