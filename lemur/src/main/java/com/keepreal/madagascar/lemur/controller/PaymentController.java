@@ -271,7 +271,7 @@ public class PaymentController implements PaymentApi {
     }
 
     @Override
-    public ResponseEntity<DummyResponse> apiV1IslandsIdSupportWechatPayHtml5Post(String id, @NotNull @Valid SceneType sceneType, @Valid PostSupportRequest postSupportRequest) {
+    public ResponseEntity<H5RedirectResponse> apiV1IslandsIdSupportWechatPayHtml5Post(String id, @NotNull @Valid SceneType sceneType, @Valid PostSupportRequest postSupportRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
 
@@ -285,10 +285,14 @@ public class PaymentController implements PaymentApi {
                 remoteAddress,
                 this.convertType(sceneType));
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create(redirectUrl));
+        H5RedirectDTO data = new H5RedirectDTO();
+        data.setUrl(redirectUrl);
 
-        return new ResponseEntity<>(null, headers, HttpStatus.FOUND);
+        H5RedirectResponse response = new H5RedirectResponse();
+        response.setData(data);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override
