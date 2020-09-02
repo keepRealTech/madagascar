@@ -228,6 +228,7 @@ public class LoginController implements LoginApi {
      *
      * @return {@link UserResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<UserResponse> apiV1UserInfoGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -336,8 +337,8 @@ public class LoginController implements LoginApi {
      * @param sceneId (required) unique scene id.
      * @return {@link LoginResponse}.
      */
-    @Override
     @CrossOrigin
+    @Override
     public ResponseEntity<LoginResponse> apiV1LoginPollingGet(String sceneId) {
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.checkWechatMpAccountLogin(sceneId);
 
@@ -358,6 +359,7 @@ public class LoginController implements LoginApi {
      * @param postOTPRequest  (required) {@link PostOTPRequest}
      * @return {@link DummyResponse}
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest,  @Valid Boolean login) {
         if (!login) {

@@ -355,6 +355,7 @@ public class FeedController implements FeedApi {
      * @param pageSize     size of a page (optional, default to 10).
      * @return {@link swagger.model.FeedsResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<FeedsResponseV2> apiV12IslandsIdFeedsGet(String id,
                                                                    Boolean fromHost,

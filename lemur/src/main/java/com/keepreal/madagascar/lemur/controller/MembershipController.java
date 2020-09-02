@@ -21,6 +21,7 @@ import swagger.model.PutMembershipRequest;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -94,8 +95,8 @@ public class MembershipController implements MembershipApi {
                 postMembershipRequest.getDescription(),
                 id,
                 userId,
-                postMembershipRequest.getUseCustomMessage(),
-                postMembershipRequest.getMessage());
+                Objects.nonNull(postMembershipRequest.getUseCustomMessage()) ? postMembershipRequest.getUseCustomMessage() : false,
+                Objects.nonNull(postMembershipRequest.getMessage()) ? postMembershipRequest.getMessage() : "");
 
         MembershipResponse response = new MembershipResponse();
         response.data(membershipDTOFactory.briefValueOf(membershipMessage));
@@ -142,6 +143,7 @@ public class MembershipController implements MembershipApi {
      * @param id membership id.
      * @return {@link MembershipResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<MembershipResponse> apiV1MembershipsIdGet(String id) {
         MembershipMessage membershipMessage = membershipService.retrieveMembershipById(id);
@@ -161,9 +163,9 @@ public class MembershipController implements MembershipApi {
      * @return {@link MembershipResponse}.
      */
     @Override
-    public ResponseEntity<MembershipResponse> apiV1MembershipsIdPut(String id, @Valid PutMembershipRequest putMembershipRequest) {
+    public ResponseEntity<MembershipResponse> apiV1MembershipsIdPut(String id, PutMembershipRequest putMembershipRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        MembershipMessage membershipMessage = membershipService.updateMembershipById(id,
+        MembershipMessage membershipMessage = this.membershipService.updateMembershipById(id,
                 putMembershipRequest.getName(),
                 putMembershipRequest.getDescription(),
                 putMembershipRequest.getChargePerMonth(),
@@ -186,7 +188,7 @@ public class MembershipController implements MembershipApi {
      * @return {@link DummyResponse}.
      */
     @Override
-    public ResponseEntity<DummyResponse> apiV1MembershipsIdTopPost(String id, @Valid Boolean isRevoke) {
+    public ResponseEntity<DummyResponse> apiV1MembershipsIdTopPost(String id, Boolean isRevoke) {
         String userId = HttpContextUtils.getUserIdFromContext();
         membershipService.topMembershipById(id, isRevoke, userId);
 

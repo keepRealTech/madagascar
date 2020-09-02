@@ -59,6 +59,9 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.keepreal.madagascar.vanga.model.WechatOrderType.PAYSUPPORT;
+import static com.keepreal.madagascar.vanga.model.WechatOrderType.PAYSUPPORTH5;
+
 /**
  * Represents the payment grpc controller.
  */
@@ -212,21 +215,19 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         }
 
         switch (WechatOrderType.fromValue(wechatOrder.getType())) {
-            case PAYMEMBERSHIP: {
+            case PAYMEMBERSHIP:
+            case PAYMEMBERSHIPH5:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
                 this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
                 break;
-            }
-            case PAYSHELL: {
+            case PAYSHELL:
                 wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
                 this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
                 break;
-            }
-            case PAYQUESTION: {
+            case PAYQUESTION:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 break;
-            }
             case PAYSUPPORT:
             case PAYSUPPORTH5: {
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
@@ -262,18 +263,16 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         }
 
         switch (WechatOrderType.fromValue(wechatOrder.getType())) {
-            case PAYMEMBERSHIP: {
+            case PAYMEMBERSHIP:
+            case PAYMEMBERSHIPH5:
                 this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
                 break;
-            }
-            case PAYSHELL: {
+            case PAYSHELL:
                 this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
                 break;
-            }
-            case PAYQUESTION: {
+            case PAYQUESTION:
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 break;
-            }
             case PAYSUPPORT:
             case PAYSUPPORTH5: {
                 this.supportService.supportWithWechatOrder(wechatOrder);

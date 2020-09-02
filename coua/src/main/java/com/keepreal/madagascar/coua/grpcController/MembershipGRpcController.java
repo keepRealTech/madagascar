@@ -172,8 +172,17 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             return;
         }
 
-        if (!request.hasName() && !request.hasPricePerMonth() && request.hasDescription()) {
-            membership.setDescription(request.getDescription().getValue());
+        if (!request.hasName() && !request.hasPricePerMonth()) {
+            if (request.hasDescription()) {
+                membership.setDescription(request.getDescription().getValue());
+            }
+            if (request.hasUseCustomMessage()) {
+                membership.setUseCustomMessage(request.getUseCustomMessage().getValue());
+                if (request.hasMessage()) {
+                    membership.setMessage(request.getMessage().getValue());
+                }
+            }
+
             membership = this.membershipService.updateMembership(membership);
         } else {
             membership = this.membershipService.updateMembershipWithSku(membership, request);
