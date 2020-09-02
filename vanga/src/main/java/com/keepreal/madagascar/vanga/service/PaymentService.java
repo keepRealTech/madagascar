@@ -303,4 +303,14 @@ public class PaymentService {
         return this.paymentRepository.findAllValidPaymentsByUserId(userId, pageable);
     }
 
+    /**
+     * merge user payment
+     *
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   mobile user id
+     */
+   public void mergeUserPayment(String wechatUserId, String webMobileUserId) {
+        this.paymentRepository.mergeUserPayment(wechatUserId, webMobileUserId);
+   }
+
 }

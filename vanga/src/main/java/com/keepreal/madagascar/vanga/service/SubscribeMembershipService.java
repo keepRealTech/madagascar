@@ -14,6 +14,8 @@ import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.repository.SubscribeMembershipRepository;
 import com.keepreal.madagascar.vanga.util.AutoRedisLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -248,6 +250,16 @@ public class SubscribeMembershipService {
      */
     public List<String> getMembershipIdListByUserId(String userId) {
         return this.subscriptionMemberRepository.getMembershipIdListByUserId(userId, this.getStartOfDayTime());
+    }
+
+    /**
+     * merge user subscribed membership
+     *
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   mobile user id
+     */
+    public void mergeUserSubscribeMembership(String wechatUserId, String webMobileUserId) {
+        this.subscriptionMemberRepository.mergeUserSubscribeMembership(wechatUserId, webMobileUserId);
     }
 
     /**
