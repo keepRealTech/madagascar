@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import swagger.api.ApiUtil;
 import swagger.api.IslandApi;
 import swagger.model.BriefIslandResponse;
 import swagger.model.BriefIslandsResponse;
@@ -220,6 +219,7 @@ public class IslandController implements IslandApi {
      * @param id Island id.
      * @return {@link IslandProfileResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<IslandProfileResponse> apiV1IslandsIdProfileGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();

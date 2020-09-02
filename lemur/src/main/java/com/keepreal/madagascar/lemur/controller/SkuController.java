@@ -83,6 +83,7 @@ public class SkuController implements SkuApi {
      *
      * @return {@link MembershipSkusResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<MembershipSkusResponse> apiV1MembershipIdSkusGet(String id) {
         List<MembershipSkuMessage> shellSkuMessageList = this.skuService.retrieveMembershipSkusByMembershipIds(id);

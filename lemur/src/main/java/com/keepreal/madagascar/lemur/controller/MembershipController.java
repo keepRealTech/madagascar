@@ -143,6 +143,7 @@ public class MembershipController implements MembershipApi {
      * @param id membership id.
      * @return {@link MembershipResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<MembershipResponse> apiV1MembershipsIdGet(String id) {
         MembershipMessage membershipMessage = membershipService.retrieveMembershipById(id);
