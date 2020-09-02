@@ -39,12 +39,11 @@ public class IslandDTOFactory {
                     "2.支持后享受专属权益\r\n" +
                     "3.最快看到我的动态，或向我提问";
     private static final String HOST_INTRODUCTION_TITLE = "你成为了一名创作者！";
-    private static final String HOST_INTRODUCTION_CONTENT = "现在去分享你的创作主页来获得粉丝的支持吧！";
+    private static final String HOST_INTRODUCTION_CONTENT =
+            "现在去分享你的创作主页\r\n" +
+            "来获得粉丝的支持吧！";
 
     private final ChatService chatService;
-    private final RepostService repostService;
-    private final FeedService feedService;
-    private final MembershipService membershipService;
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final GeneralConfiguration generalConfiguration;
@@ -53,24 +52,15 @@ public class IslandDTOFactory {
      * Constructs the island dto factory.
      *
      * @param chatService          {@link ChatService}.
-     * @param repostService        {@link RepostService}.
-     * @param feedService          {@link FeedService}.
-     * @param membershipService    {@link MembershipService}.
      * @param userService          {@link UserService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
      */
     public IslandDTOFactory(ChatService chatService,
-                            RepostService repostService,
-                            FeedService feedService,
-                            MembershipService membershipService,
                             UserService userService,
                             UserDTOFactory userDTOFactory,
                             GeneralConfiguration generalConfiguration) {
         this.chatService = chatService;
-        this.repostService = repostService;
-        this.feedService = feedService;
-        this.membershipService = membershipService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.generalConfiguration = generalConfiguration;
@@ -144,6 +134,7 @@ public class IslandDTOFactory {
         recommendIslandDTO.setHostId(discoverIsland.getIsland().getHostId());
         recommendIslandDTO.setPortraitImageUri(discoverIsland.getIsland().getPortraitImageUri());
         recommendIslandDTO.setAccessType(this.convertAccessType(discoverIsland.getIsland().getIslandAccessType()));
+        recommendIslandDTO.setMemberCount(discoverIsland.getIsland().getMemberCount());
 
         recommendIslandDTO.setRecommendation(discoverIsland.getRecommendation());
         recommendIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(discoverIsland.getIsland().getHostId())));

@@ -20,6 +20,7 @@ import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.BoxApi;
 import swagger.model.BoxDTO;
@@ -177,6 +178,7 @@ public class BoxController implements BoxApi {
      * @param postQuestionRequest  (required) {@link PostQuestionRequest}.
      * @return  {@link DummyResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<DummyResponse> apiV1IslandsIdBoxesFreeQuestionsPost(String id,
                                                                               PostQuestionRequest postQuestionRequest) {
@@ -199,6 +201,7 @@ public class BoxController implements BoxApi {
      * @param id islandId (required)
      * @return  {@link IslandBoxResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<IslandBoxResponse> apiV1IslandsIdBoxesGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();

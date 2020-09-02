@@ -9,6 +9,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ConfigApi;
 import swagger.model.AndroidSetupInfoResponse;
@@ -136,6 +137,7 @@ public class ConfigurationController implements ConfigApi {
      *
      * @return {@link AndroidSetupInfoResponse}.
      */
+    @CrossOrigin
     @Cacheable(value = "setupInfo-android")
     @Override
     public ResponseEntity<AndroidSetupInfoResponse> apiV1SetupInfoAndroidGet() {

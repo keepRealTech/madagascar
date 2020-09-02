@@ -158,6 +158,7 @@ public class PaymentController implements PaymentApi {
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link UserPaymentsResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<UserPaymentsResponse> apiV1PaymentsGet(Integer page, Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
