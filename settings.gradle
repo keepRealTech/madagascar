@@ -17,7 +17,5 @@ include 'marty'
 include 'vanga'
 include 'workflow:settler'
 include 'workflow:reconciliation'
-include 'asity'
 include 'workflow:statistics'
-findProject(':workflow:statistics')?.name = 'statistics'
-
+include 'asity'

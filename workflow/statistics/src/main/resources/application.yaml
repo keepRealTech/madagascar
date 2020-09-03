@@ -2,17 +2,26 @@ spring:
   application:
     name: settler
   datasource:
-    url: jdbc:mysql://root:pass@host:port
+    url:
     driver-class-name: com.mysql.jdbc.Driver
   jpa:
     show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
+  main:
+    web-application-type: none
+  data:
+    mongodb:
+      database: workflow
+      uri: 
 
 lark:
-  webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73
+  webhook: https://open.feishu.cn/open-apis/bot/hook/d42eb11f-8804-4836-9ce8-881074c4077e
 
 executor:
   threads: 20
+
+statistics:
+  incre-islander-threshold: 5
 
 workflow:
   type: statistics-daily

@@ -37,10 +37,9 @@ public class LarkService {
     public void sendMessage(String text) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        String requestBody = String.format("{\"title\":\"昨日新增用户的岛\", \"text\":\"%s\"}", text);
+        String requestBody = String.format("{\"title\":\"昨日新增用户超过10人的岛有哪些？\", \"text\":\"%s\"}", text);
         HttpEntity<String> requst = new HttpEntity<>(requestBody, headers);
         this.restTemplate.exchange(this.larkConfiguration.getWebhook(), HttpMethod.POST, requst, String.class);
-
     }
 
 }
