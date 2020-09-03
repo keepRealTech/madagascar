@@ -6,4 +6,3 @@ metadata:
 data:
   aliyun_logs_madagascar-prod: stdout
   SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
-  LARK_WEBHOOK: {{ .Values.global.common_configs.lark.webhook }}
