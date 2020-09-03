@@ -49,6 +49,12 @@ public class UserDeviceInfoService {
             userDeviceInfo.setDeviceType(deviceType);
             userDeviceInfo.setUpdatedTime(System.currentTimeMillis());
         }
+
+        List<UserDeviceInfo> deviceInfos = this.userDeviceInfoRepository.findAllByDeviceTokenAndDeletedIsFalse(deviceToken);
+        deviceInfos.forEach(info -> info.setBinded(false));
+
+        this.userDeviceInfoRepository.saveAll(deviceInfos);
+
         userDeviceInfoRepository.save(userDeviceInfo);
     }
 
