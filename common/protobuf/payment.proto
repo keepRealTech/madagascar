@@ -104,6 +104,7 @@ message ActivatePendingFeedPaymentRequest {
 message RedirectResponse {
   CommonStatus status = 1;
   string redirectUrl = 2;
+  string orderId = 3;
 }
 
 message RetrieveSupportInfoRequest {
