@@ -51,7 +51,14 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                         "/api/v1/orders/wechat/callback**",
                         "/api/v1/orders/wechat/refund/callback**",
                         "/api/v1/events/wechatMp/callback**",
-                        "/api/v1/islands/{\\d+}/poster**").permitAll()
+                        "/api/v1/islands/{\\d+}/poster**",
+                        "/api/v1/islands/{\\d+}/profile**",
+                        "/api/v1/islands/{\\d+}/memberships**",
+                        "/api/v1/memberships/{\\d+}**",
+                        "/api/v1/membership/{\\d+}/skus**",
+                        "/api/v1/islands/{\\d+}/support**",
+                        "/api/v1/islands/{\\d+}/boxes**"
+                        ).permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated();
 
