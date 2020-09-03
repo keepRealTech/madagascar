@@ -38,7 +38,7 @@ public class WechatOrderMessageFactory {
             wechatOrder.setSignature("");
         }
 
-        if (!StringUtils.isEmpty(wechatOrder.getMwebUrl())) {
+        if (StringUtils.isEmpty(wechatOrder.getMwebUrl())) {
             wechatOrder.setMwebUrl("");
         }
 

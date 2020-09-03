@@ -14,6 +14,7 @@ enum NotificationEventType {
     NOTIFICATION_EVENT_NEW_UNSUBSCRIBE = 5;
     NOTIFICATION_EVENT_NEW_QUESTION = 6;
     NOTIFICATION_EVENT_NEW_REPLY = 7;
+    NOTIFICATION_EVENT_NEW_SUPPORT = 8;
 }
 
 message SubscribeEvent {
@@ -45,6 +46,11 @@ message ReactionEvent {
     FeedMessage feed = 2;
 }
 
+message SupportEvent {
+    string userId = 1;
+    uint64 priceInCents = 2;
+}
+
 message NotificationEvent {
     NotificationEventType type = 1;
     string userId = 2;
@@ -54,7 +60,8 @@ message NotificationEvent {
         CommentEvent commentEvent = 5;
         ReactionEvent reactionEvent = 6;
         MemberEvent memberEvent = 7;
+        SupportEvent supportEvent = 8;
     }
-    uint64 timestamp = 8;
-    string eventId = 9;
+    uint64 timestamp = 9;
+    string eventId = 10;
 }

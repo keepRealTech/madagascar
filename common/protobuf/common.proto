@@ -55,6 +55,7 @@ enum NoticeType {
     NOTICE_TYPE_ISLAND_NEW_MEMBER = 2;
     NOTICE_TYPE_BOX_NEW_QUESTION = 3;
     NOTICE_TYPE_BOX_NEW_ANSWER = 4;
+    NOTICE_TYPE_ISLAND_NEW_SUPPORT = 5;
 }
 
 message NoticeTypeValue {

@@ -19,6 +19,16 @@ message SubscribeMembershipRequest {
   string ipAddress = 4;
 }
 
+message SupportRequest {
+  string userId = 1;
+  string payeeId = 2;
+  string sponsorSkuId = 3;
+  int64 priceInCents = 4;
+  int64 priceInShells = 5;
+  SceneType sceneType = 6;
+  string ipAddress = 7;
+}
+
 message WechatOrderResponse {
   CommonStatus status = 1;
   WechatOrderMessage wechatOrder = 2;
@@ -96,11 +106,27 @@ message RedirectResponse {
   string redirectUrl = 2;
 }
 
+message RetrieveSupportInfoRequest {
+  string hostId = 1;
+}
+
+message RetrieveSupportInfoResponse {
+  CommonStatus status = 1;
+  SupportMessage message = 2;
+}
+
+message SupportMessage {
+  int32 count = 1;
+  string text = 2;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
   rpc SubmitSubscribeMembershipWithWechatPay (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
   rpc SubmitSubscribeMembershipWithWechatPayH5 (SubscribeMembershipRequest) returns (RedirectResponse) {};
+  rpc SubmitSupportWithWechatPay (SupportRequest) returns (WechatOrderResponse) {};
+  rpc SubmitSupportWithWechatPayH5 (SupportRequest) returns (RedirectResponse) {};
   rpc RetrieveWechatOrderById (RetrieveWechatOrderByIdRequest) returns (WechatOrderResponse) {};
   rpc WechatPayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
   rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};
@@ -111,4 +137,5 @@ service PaymentService {
   rpc RefundWechatPaidFeed (RefundWechatFeedRequest) returns (CommonStatus) {};
   rpc ActivateFeedPayment (ActivatePendingFeedPaymentRequest) returns (CommonStatus) {};
   rpc WechatRefundCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
+  rpc RetrieveSupportInfo (RetrieveSupportInfoRequest) returns (RetrieveSupportInfoResponse) {};
 }

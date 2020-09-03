@@ -5,6 +5,7 @@ import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.tenrecs.MemberEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
+import com.keepreal.madagascar.tenrecs.SupportEvent;
 import com.keepreal.madagascar.vanga.config.NotificationEventProducerConfiguration;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.SubscribeMembership;
@@ -61,6 +62,11 @@ public class NotificationEventProducerService {
         this.sendAsync(message);
     }
 
+    public void produceNewSupportNotificationEventAsync(String userId, String payeeId, Long priceInCents) {
+        Message message = this.createNewSupportEventMessage(userId, payeeId, priceInCents);
+        this.sendAsync(message);
+    }
+
     /**
      * Sends a message in async manner.
      *
@@ -112,4 +118,22 @@ public class NotificationEventProducerService {
                 this.notificationEventProducerConfiguration.getTag(), uuid, event.toByteArray());
     }
 
+    private Message createNewSupportEventMessage(String userId, String payeeId, Long priceInCents) {
+        SupportEvent supportEvent = SupportEvent.newBuilder()
+                .setUserId(userId)
+                .setPriceInCents(priceInCents)
+                .build();
+
+        String uuid = UUID.randomUUID().toString();
+        NotificationEvent event = NotificationEvent.newBuilder()
+                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_SUPPORT)
+                .setUserId(payeeId)
+                .setSupportEvent(supportEvent)
+                .setTimestamp(System.currentTimeMillis())
+                .setEventId(uuid)
+                .build();
+
+        return new Message(this.notificationEventProducerConfiguration.getTopic(),
+                this.notificationEventProducerConfiguration.getTag(), uuid, event.toByteArray());
+    }
 }
