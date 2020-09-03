@@ -74,6 +74,21 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: name-server
+            - name: ROCKETMQ_TRANSACTION_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-key
+            - name: ROCKETMQ_TRANSACTION_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-secret
+            - name: ROCKETMQ_TRANSACTION_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
             - name: SPRING_DATA_MONGODB_URI
               valueFrom:
                 secretKeyRef:
