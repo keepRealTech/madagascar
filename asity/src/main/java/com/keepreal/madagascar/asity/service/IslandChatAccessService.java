@@ -3,6 +3,7 @@ package com.keepreal.madagascar.asity.service;
 import com.keepreal.madagascar.asity.model.IslandChatAccess;
 import com.keepreal.madagascar.asity.repository.IslandChatAccessRepository;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,7 +46,11 @@ public class IslandChatAccessService {
             return islandChatAccess;
         }
 
-        return this.createIslandChatAccess(islandId);
+        try {
+            return this.createIslandChatAccess(islandId);
+        } catch (DuplicateKeyException exception) {
+            return this.islandChatAccessRepository.findByIslandIdAndDeletedIsFalse(islandId);
+        }
     }
 
     /**
