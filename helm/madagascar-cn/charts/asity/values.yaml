@@ -11,6 +11,10 @@ rocketmq:
     topic: notification-event
     group_id: GID-asity-notification-default
     tag: event
+  island:
+    topic: island-event
+    group_id: GID-asity-island-default
+    tag: event
   chat:
     topic: chat-event
     tag: event
