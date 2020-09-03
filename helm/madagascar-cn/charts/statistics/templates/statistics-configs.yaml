@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: statistics
+  namespace: {{ .Values.global.common_configs.namespace }}
+data:
+  aliyun_logs_madagascar-prod: stdout
+  SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
+  LARK_WEBHOOK: {{ .Values.global.common_configs.lark.webhook }}

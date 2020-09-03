@@ -12,10 +12,10 @@ spring:
   data:
     mongodb:
       database: workflow
-      uri: 
+      uri:
 
 lark:
-  webhook: https://open.feishu.cn/open-apis/bot/hook/d42eb11f-8804-4836-9ce8-881074c4077e
+  webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73
 
 executor:
   threads: 20
