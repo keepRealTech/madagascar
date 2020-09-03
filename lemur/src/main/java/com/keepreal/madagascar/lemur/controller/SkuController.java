@@ -99,6 +99,13 @@ public class SkuController implements SkuApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements island support skus get api.
+     *
+     * @param id id (required) Island id.
+     * @return {@link SupportSkusResponse}.
+     */
+    @CrossOrigin
     @Override
     public ResponseEntity<SupportSkusResponse> apiV1IslandsIdSupportSkusGet(String id) {
         SupportSkusResponse response = new SupportSkusResponse();
@@ -107,4 +114,5 @@ public class SkuController implements SkuApi {
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }

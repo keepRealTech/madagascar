@@ -151,9 +151,9 @@ public class PaymentService {
      * @param remoteAddress   Remote address ip.
      * @param membershipSkuId Membership sku id.
      * @param sceneType       Scene type.
-     * @return Redirect url.
+     * @return {@link RedirectResponse}.
      */
-    public String submitSubscribeMembershipWithWechatPayH5(String userId, String remoteAddress, String membershipSkuId, SceneType sceneType) {
+    public RedirectResponse submitSubscribeMembershipWithWechatPayH5(String userId, String remoteAddress, String membershipSkuId, SceneType sceneType) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         SubscribeMembershipRequest request = SubscribeMembershipRequest.newBuilder()
@@ -180,7 +180,7 @@ public class PaymentService {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
-        return response.getRedirectUrl();
+        return response;
     }
 
     public WechatOrderMessage submitSupportWithWechatPay(String userId, String payeeId, String sponsorSkuId, Long priceInCents, Long priceInShells, String ipAddress) {
@@ -216,7 +216,7 @@ public class PaymentService {
         return response.getWechatOrder();
     }
 
-    public String submitSupportWithWechatPayH5(String userId, String payeeId, String sponsorSkuId, Long priceInCents, Long priceInShells, String ipAddress, SceneType sceneType) {
+    public RedirectResponse submitSupportWithWechatPayH5(String userId, String payeeId, String sponsorSkuId, Long priceInCents, Long priceInShells, String ipAddress, SceneType sceneType) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         SupportRequest request = SupportRequest.newBuilder()
@@ -230,7 +230,6 @@ public class PaymentService {
                 .build();
 
         RedirectResponse response;
-
         try {
             response = stub.submitSupportWithWechatPayH5(request);
         } catch (StatusRuntimeException exception) {
@@ -247,7 +246,7 @@ public class PaymentService {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
-        return response.getRedirectUrl();
+        return response;
     }
 
     /**

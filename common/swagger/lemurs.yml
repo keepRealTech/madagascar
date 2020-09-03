@@ -1053,7 +1053,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/H5RedirectResponse'
+                $ref: '#/components/schemas/H5WechatOrderResponse'
   /api/v1/islands/{id}/memberSubscription/shellPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2108,7 +2108,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/H5RedirectResponse'
+                $ref: '#/components/schemas/H5WechatOrderResponse'
   /api/v1/islands/discovery:
     get:
       tags:
@@ -4784,6 +4784,20 @@ components:
       properties:
         url:
           type: string
+    H5WechatOrderDTO:
+      type: object
+      properties:
+        url:
+          type: string
+        orderId:
+          type: string
+    H5WechatOrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/H5WechatOrderDTO'
     H5RedirectResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

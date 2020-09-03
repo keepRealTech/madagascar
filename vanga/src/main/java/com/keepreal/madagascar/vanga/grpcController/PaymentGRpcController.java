@@ -593,6 +593,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setRedirectUrl(wechatOrder.getMwebUrl())
+                    .setOrderId(wechatOrder.getId())
                     .build();
             this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
         } else {
@@ -660,6 +661,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setRedirectUrl(wechatOrder.getMwebUrl())
+                    .setOrderId(wechatOrder.getId())
                     .build();
             this.paymentService.createNewWechatSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
         } else {

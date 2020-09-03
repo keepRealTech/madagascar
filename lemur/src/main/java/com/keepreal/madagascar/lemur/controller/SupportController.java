@@ -8,6 +8,7 @@ import com.keepreal.madagascar.lemur.service.PaymentService;
 import com.keepreal.madagascar.vanga.SupportMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.SupportApi;
 import swagger.model.SupportsResponse;
@@ -27,6 +28,7 @@ public class SupportController implements SupportApi {
         this.supportDTOFactory = supportDTOFactory;
     }
 
+    @CrossOrigin
     @Override
     public ResponseEntity<SupportsResponse> apiV1IslandsIdSupportGet(String id) {
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
@@ -38,4 +40,5 @@ public class SupportController implements SupportApi {
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }

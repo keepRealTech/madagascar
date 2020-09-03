@@ -15,6 +15,7 @@ import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
+import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,8 @@ import swagger.api.PaymentApi;
 import swagger.model.ConfigurationDTO;
 import swagger.model.DummyResponse;
 import swagger.model.H5RedirectResponse;
+import swagger.model.H5WechatOrderDTO;
+import swagger.model.H5WechatOrderResponse;
 import swagger.model.PostSupportRequest;
 import swagger.model.H5RedirectDTO;
 import swagger.model.SceneType;
@@ -138,26 +141,27 @@ public class PaymentController implements PaymentApi {
      * @param id                     id (required) Island id.
      * @param sceneType              (required) Scene type.
      * @param subscribeMemberRequest (required) {@link SubscribeMemberRequest}.
-     * @return {@link H5RedirectResponse}.
+     * @return {@link H5WechatOrderResponse}.
      */
     @CrossOrigin
     @Override
-    public ResponseEntity<H5RedirectResponse> apiV1IslandsIdMemberSubscriptionWechatPayHtml5Post(String id,
-                                                                                            SceneType sceneType,
-                                                                                            SubscribeMemberRequest subscribeMemberRequest) {
+    public ResponseEntity<H5WechatOrderResponse> apiV1IslandsIdMemberSubscriptionWechatPayHtml5Post(String id,
+                                                                                                    SceneType sceneType,
+                                                                                                    SubscribeMemberRequest subscribeMemberRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         String[] remoteAddresses = HttpContextUtils.getRemoteIpFromContext().split(",");
 
         System.out.println(remoteAddresses[remoteAddresses.length - 1].trim());
 
-        String redirectUrl = this.paymentService.submitSubscribeMembershipWithWechatPayH5(userId,
+        RedirectResponse redirectResponse = this.paymentService.submitSubscribeMembershipWithWechatPayH5(userId,
                 remoteAddresses[remoteAddresses.length - 1].trim(),
                 subscribeMemberRequest.getMembershipSkuId(),
                 this.convertType(sceneType));
-        H5RedirectDTO data = new H5RedirectDTO();
-        data.setUrl(redirectUrl);
+        H5WechatOrderDTO data = new H5WechatOrderDTO();
+        data.setUrl(redirectResponse.getRedirectUrl());
+        data.setOrderId(redirectResponse.getOrderId());
 
-        H5RedirectResponse response = new H5RedirectResponse();
+        H5WechatOrderResponse response = new H5WechatOrderResponse();
         response.setData(data);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
@@ -270,14 +274,25 @@ public class PaymentController implements PaymentApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the support h5 wechat pay api.
+     *
+     * @param id id (required) Island id.
+     * @param sceneType  (required) Scene type.
+     * @param postSupportRequest  (required) {@link PostSupportRequest}.
+     * @return {@link H5WechatOrderResponse}.
+     */
+    @CrossOrigin
     @Override
-    public ResponseEntity<H5RedirectResponse> apiV1IslandsIdSupportWechatPayHtml5Post(String id, @NotNull @Valid SceneType sceneType, @Valid PostSupportRequest postSupportRequest) {
+    public ResponseEntity<H5WechatOrderResponse> apiV1IslandsIdSupportWechatPayHtml5Post(String id,
+                                                                                         SceneType sceneType,
+                                                                                         PostSupportRequest postSupportRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
 
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
 
-        String redirectUrl = this.paymentService.submitSupportWithWechatPayH5(userId,
+        RedirectResponse redirectResponse = this.paymentService.submitSupportWithWechatPayH5(userId,
                 islandMessage.getHostId(),
                 postSupportRequest.getSponsorSkuId(),
                 postSupportRequest.getPriceInCents(),
@@ -285,10 +300,11 @@ public class PaymentController implements PaymentApi {
                 remoteAddress,
                 this.convertType(sceneType));
 
-        H5RedirectDTO data = new H5RedirectDTO();
-        data.setUrl(redirectUrl);
+        H5WechatOrderDTO data = new H5WechatOrderDTO();
+        data.setUrl(redirectResponse.getRedirectUrl());
+        data.setOrderId(redirectResponse.getOrderId());
 
-        H5RedirectResponse response = new H5RedirectResponse();
+        H5WechatOrderResponse response = new H5WechatOrderResponse();
         response.setData(data);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());

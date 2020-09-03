@@ -40,7 +40,7 @@ public class Payment {
     @Builder.Default
     private Long amountInShells = 0L;
     @Builder.Default
-    private Integer withdrawPercent = 88;
+    private Integer withdrawPercent = 99;
     @Builder.Default
     private String membershipSkuId = "";
     @Builder.Default
