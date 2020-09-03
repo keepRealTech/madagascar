@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: settler
+  datasource:
+    url: jdbc:mysql://root:pass@host:port
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+lark:
+  webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73
+
+executor:
+  threads: 20
+
+workflow:
+  type: statistics-daily
