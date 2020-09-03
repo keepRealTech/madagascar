@@ -1,0 +1,47 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: statistics
+  namespace: {{ .Values.global.common_configs.namespace }}
+spec:
+  schedule: "45 15 */1 * *"
+  jobTemplate:
+    metadata:
+      annotations:
+        config.linkerd.io/init-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy-init
+        config.linkerd.io/init-image-version: v1.3.2
+        config.linkerd.io/proxy-image: registry-vpc.cn-beijing.aliyuncs.com/keepreal/linkerd-proxy
+        config.linkerd.io/proxy-image-version: stable-2.7.1
+        linkerd.io/inject: disabled
+      labels:
+        app: statistics
+    spec:
+      template:
+        spec:
+          imagePullSecrets:
+            - name: {{ .Values.global.acr.acr_secret_name }}
+          restartPolicy: Never
+          containers:
+            - name: settler
+              image: {{ .Values.global.images.statistics.name }}:{{ .Values.global.images.statistics.tag }}
+              imagePullPolicy: {{ .Values.global.images.statistics.imagePullPolicy }}
+              envFrom:
+                - configMapRef:
+                    name: statistics
+              env:
+                - name: SPRING_DATA_MONGODB_URI
+                  valueFrom:
+                    secretKeyRef:
+                      name: aliyun-mongo
+                      key: connection-string
+                - name: SPRING_DATASOURCE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: aliyun-rdb
+                      key: coua-connection-string
+              resources:
+                limits:
+                  memory: {{ .Values.common_configs.memory }}
+                requests:
+                  cpu: {{ .Values.common_configs.cpu }}
+                  memory: {{ .Values.common_configs.memory }}
