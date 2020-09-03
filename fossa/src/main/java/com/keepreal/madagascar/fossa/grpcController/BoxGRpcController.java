@@ -166,7 +166,6 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
             newBox.setAnsweredQuestionCount(0);
             newBox.setHostId(request.getHostId());
             newBox.setMembershipIds("");
-            boxInfo = this.boxInfoService.createOrUpdate(newBox);
         }
 
         responseObserver.onNext(RetrieveBoxInfoResponse.newBuilder()
