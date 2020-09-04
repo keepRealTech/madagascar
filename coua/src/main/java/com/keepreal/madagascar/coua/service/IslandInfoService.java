@@ -300,11 +300,14 @@ public class IslandInfoService {
 
         List<IslandInfo> islandInfoList = this.retrieveByIslandIds(islandDiscoveryList.stream().map(IslandDiscovery::getIslandId).collect(Collectors.toList()));
 
-        return islandInfoList.stream()
-                .map(islandInfo ->
+        Map<String, IslandInfo> islandInfoMap = islandInfoList
+                .stream().collect(Collectors.toMap(IslandInfo::getId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
+
+        return islandDiscoveryList.stream()
+                .map(islandDiscovery ->
                      DiscoverIslandMessage.newBuilder()
-                            .setIsland(this.getIslandMessage(islandInfo))
-                            .setRecommendation(islandDiscoveryMap.get(islandInfo.getId()).getRecommendation())
+                            .setIsland(this.getIslandMessage(islandInfoMap.get(islandDiscovery.getIslandId())))
+                            .setRecommendation(islandDiscoveryMap.get(islandDiscovery.getIslandId()).getRecommendation())
                             .build()
                 ).collect(Collectors.toList());
     }
