@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.mantella.service.distributor;
 
-import com.aliyun.openservices.ons.api.order.OrderAction;
 import com.keepreal.madagascar.mantella.FeedCreateEvent;
 import com.keepreal.madagascar.mantella.factory.TimelineFactory;
 import com.keepreal.madagascar.mantella.model.Timeline;
