@@ -32,13 +32,12 @@ public class RongCloudService {
     private static final String HOST_TEMPLATE = "我刚刚支持了你的「%s」会员（¥%.2f x %d个月）。创作加油！";
     private static final String MEMBER_TEMPLATE = "感谢你的支持！\n更多信息可前往「我的 - 订单中心」中查看。";
     private static final String OFFICIAL_USER_ID = "4";
-    private static final String CREATE_ISLAND_CONTENT = "恭喜你成功创建了你的主页！现在可以在手机端发布动态、网页端上传作品或分享主页链接获取支持了。\n" +
+    private static final String CREATE_ISLAND_CONTENT = "创作者你好，恭喜成功创建了你的跳岛主页！\n" +
+            "你可以在手机端发布图文动态、创建群组、管理提问箱，在网页端上传文章、高清大图、音频和视频，或分享主页链接来获取支持了。\n" +
             "\n" +
-            "你还可以：\n" +
-            "1. 前往「我的-创作者认证」申请认证。认证可以防止你被冒充，获得跳岛首页推荐的机会，以及不定期的创作鼓励补贴。\n" +
-            "2. 阅读《创作者指南》，以便更好的使用跳岛。\n" +
+            "你也可以阅读《创作者指南》，以便更好的使用跳岛。\n" +
             "\n" +
-            "欢迎来官方微博给我留言跟我互动哦～如遇到问题可在设置内-咨询跳岛小客服。";
+            "欢迎来官方微博给我留言跟我互动哦～如遇到问题可在【设置】-【反馈与帮助】内咨询跳岛小客服。";
 
     private static final String CREATE_USER_CONTENT = "欢迎登岛！我是跳岛管理员“岛蛋”！跳岛是帮助创作者获取支持以维持创作的平台。\n" +
             "\n" +

@@ -43,6 +43,10 @@ public class DefaultFeedDistributor implements FeedDistributor {
         Flux<Timeline> subscriberFlux = this.islandService.retrieveSubscriberIdsByIslandId(feedCreateEvent.getIslandId())
                 .map(userId -> this.timelineFactory.valueOf(feedCreateEvent, userId, eventId));
 
+        if (!feedCreateEvent.getFromHost()) {
+            return subscriberFlux;
+        }
+
         Mono<Timeline> publicMono = this.islandService.checkPublicInboxEligibility(feedCreateEvent.getIslandId())
                 .filter(Boolean.TRUE::equals)
                 .map(signal -> this.timelineFactory.valueOf(feedCreateEvent, DefaultFeedDistributor.PUBLIC_INBOX_USER_ID, eventId));
