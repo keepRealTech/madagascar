@@ -69,8 +69,9 @@ public class WechatPayService {
 
         String description = String.format("Type:[%s], Id:[%s]", wechatOrderType.name(), propertyId);
 
-        if (WechatOrderType.PAYMEMBERSHIPH5.equals(wechatOrderType)
-                && (Objects.isNull(sceneType) || SceneType.SCENE_NONE.equals(sceneType))) {
+        boolean isH5 = this.isH5Pay(wechatOrderType);
+
+        if (isH5 && (Objects.isNull(sceneType) || SceneType.SCENE_NONE.equals(sceneType))) {
             log.error("Invalid scene type for h5 wechat pay.");
             return null;
         }
@@ -88,16 +89,16 @@ public class WechatPayService {
                 .build();
 
         Map<String, String> response;
-        String tradeType = WechatOrderType.PAYMEMBERSHIPH5.equals(wechatOrderType) ? "MWEB" : "APP";
+        String tradeType = isH5 ? "MWEB" : "APP";
         try {
             Map<String, String> requestBody = new HashMap<>();
             requestBody.put("trade_type", tradeType);
             requestBody.put("out_trade_no", tradeNum);
             requestBody.put("total_fee", feeInCents);
-            requestBody.put("body", description);
+            requestBody.put("body", "测测变了吗");
             requestBody.put("spbill_create_ip", remoteIp);
 
-            if (WechatOrderType.PAYMEMBERSHIPH5.equals(wechatOrderType)) {
+            if (isH5) {
                 String sceneInfo;
                 switch (sceneType) {
                     case SCENE_IOS:
@@ -343,6 +344,10 @@ public class WechatPayService {
         }
 
         return wechatOrder;
+    }
+
+    private boolean isH5Pay(WechatOrderType type) {
+        return WechatOrderType.PAYMEMBERSHIPH5.equals(type) || WechatOrderType.PAYSUPPORTH5.equals(type);
     }
 
 }
