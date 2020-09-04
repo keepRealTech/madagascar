@@ -58,22 +58,6 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
     }
 
     /**
-     * Configures the default cors behavior.
-     *
-     * @return {@link CorsConfigurationSource}.
-     */
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("*"));
-        configuration.setAllowedMethods(Collections.singletonList("*"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/v1/setupInfo/android**", configuration);
-        source.registerCorsConfiguration("/api/v1/islands/{\\d+}/poster**", configuration);
-        return source;
-    }
-
-    /**
      * Overrides the error handling logic.
      *
      * @param config {@link ResourceServerConfigurer}.
