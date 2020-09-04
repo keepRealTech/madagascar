@@ -161,6 +161,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         BoxInfo boxInfo = this.boxInfoService.getBoxInfoByIslandId(islandId);
         if (boxInfo == null) {
             boxInfo = new BoxInfo();
+            boxInfo.setId("0");
             boxInfo.setIslandId(islandId);
             boxInfo.setEnabled(true);
             boxInfo.setAnsweredQuestionCount(0);
