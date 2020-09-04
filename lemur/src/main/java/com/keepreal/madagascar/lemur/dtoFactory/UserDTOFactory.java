@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import swagger.model.AvatarDTO;
 import swagger.model.BriefIslandDTO;
 import swagger.model.BriefMembershipDTO;
@@ -57,7 +58,7 @@ public class UserDTOFactory {
         userDTO.setCity(user.getCity());
         userDTO.setBirthday(Date.valueOf(user.getBirthday()));
         userDTO.setDescription(user.getDescription());
-        userDTO.setPortraitImageUri(user.getPortraitImageUri());
+        userDTO.setPortraitImageUri(this.generatePortraitImageUri(user));
         userDTO.setGender(this.convertGender(user.getGender()));
         userDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
         userDTO.setCreatedAt(user.getCreatedAt());
@@ -91,7 +92,7 @@ public class UserDTOFactory {
         fullUserDTO.setCity(user.getCity());
         fullUserDTO.setBirthday(Date.valueOf(user.getBirthday()));
         fullUserDTO.setDescription(user.getDescription());
-        fullUserDTO.setPortraitImageUri(user.getPortraitImageUri());
+        fullUserDTO.setPortraitImageUri(this.generatePortraitImageUri(user));
         fullUserDTO.setGender(this.convertGender(user.getGender()));
         fullUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
         fullUserDTO.setCreatedAt(user.getCreatedAt());
@@ -124,7 +125,7 @@ public class UserDTOFactory {
         briefUserDTO.setId(user.getId());
         briefUserDTO.setDisplayId(user.getDisplayId());
         briefUserDTO.setName(user.getName());
-        briefUserDTO.setPortraitImageUri(user.getPortraitImageUri());
+        briefUserDTO.setPortraitImageUri(this.generatePortraitImageUri(user));
         briefUserDTO.setGender(this.convertGender(user.getGender()));
         briefUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
         briefUserDTO.setIdentityTypes(user.getIdentitiesList()
@@ -149,7 +150,7 @@ public class UserDTOFactory {
 
         AvatarDTO avatarDTO = new AvatarDTO();
         avatarDTO.setUserId(user.getId());
-        avatarDTO.setPortraitUrl(user.getPortraitImageUri());
+        avatarDTO.setPortraitUrl(this.generatePortraitImageUri(user));
 
         return avatarDTO;
     }
@@ -174,7 +175,7 @@ public class UserDTOFactory {
         chatUserDTO.setId(user.getId());
         chatUserDTO.setDisplayId(user.getDisplayId());
         chatUserDTO.setName(user.getName());
-        chatUserDTO.setPortraitImageUri(user.getPortraitImageUri());
+        chatUserDTO.setPortraitImageUri(this.generatePortraitImageUri(user));
         chatUserDTO.setGender(this.convertGender(user.getGender()));
         chatUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
 
@@ -194,7 +195,7 @@ public class UserDTOFactory {
      */
     private GenderType convertGender(Gender gender) {
         if (Objects.isNull(gender)) {
-            return null;
+            return GenderType.NUMBER_0;
         }
 
         switch (gender) {
@@ -204,8 +205,9 @@ public class UserDTOFactory {
                 return GenderType.NUMBER_1;
             case FEMALE:
                 return GenderType.NUMBER_2;
+            case UNSET:
             default:
-                return null;
+                return GenderType.NUMBER_3;
         }
     }
 
@@ -250,6 +252,30 @@ public class UserDTOFactory {
             case IDENTITY_OTHERS:
             default:
                 return IdentityType.OTHERS;
+        }
+    }
+
+    /**
+     * Configures default user portrait if none set.
+     *
+     * @param user {@link UserMessage}.
+     * @return Image url.
+     */
+    private String generatePortraitImageUri(UserMessage user) {
+        if (!StringUtils.isEmpty(user.getPortraitImageUri())) {
+            return user.getPortraitImageUri();
+        }
+
+        int hash = user.getId().hashCode() % 5 + 1;
+        switch (Objects.requireNonNull(this.convertGender(user.getGender()))) {
+            case NUMBER_1:
+                return String.format("md-%d.png", hash);
+            case NUMBER_2:
+                return String.format("fd-%d.png", hash);
+            case NUMBER_0:
+            case NUMBER_3:
+            default:
+                return String.format("ud-%d.png", hash);
         }
     }
 

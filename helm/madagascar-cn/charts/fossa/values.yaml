@@ -13,6 +13,10 @@ rocketmq:
   feed:
     topic: feed-event
     tag: event
+  transaction:
+    topic: transaction-event
+    group_id: GID-fossa-transaction-default
+    tag: event
 
 jpa:
   show_sql: false

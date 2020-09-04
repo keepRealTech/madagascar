@@ -108,6 +108,11 @@ spec:
                 secretKeyRef:
                   name: jpush
                   key: app-secret
+            - name: JPUSH_JPUSHPRODUCTION
+              valueFrom:
+                secretKeyRef:
+                  name: jpush
+                  key: app-production
             - name: SPRING_REDIS_HOST
               valueFrom:
                 secretKeyRef:

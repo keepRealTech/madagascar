@@ -70,6 +70,8 @@ import static com.keepreal.madagascar.vanga.model.WechatOrderType.PAYSUPPORTH5;
 public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImplBase {
 
     private final static String SUPPORT_TEXT = "";
+    private final static String MEMBERSHIP_TEMPLATE = "支持创作者 ¥%.2f（¥%.2f x %d个月）";
+    private final static String SPONSOR_TEMPLATE = "支持一下创作者 ¥%.2f";
 
     private final FeedService feedService;
     private final PaymentService paymentService;
@@ -176,7 +178,11 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 sku.getId(),
                 WechatOrderType.PAYMEMBERSHIP,
                 null,
-                request.getIpAddress());
+                request.getIpAddress(),
+                String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
+                        sku.getPriceInCents().doubleValue() / 100,
+                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100,
+                        sku.getTimeInMonths()).replace(".00", ""));
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -501,7 +507,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 request.getFeedId(),
                 WechatOrderType.PAYQUESTION,
                 null,
-                request.getIpAddress());
+                request.getIpAddress(),
+                "");
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -586,7 +593,11 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 sku.getId(),
                 WechatOrderType.PAYMEMBERSHIPH5,
                 request.getSceneType(),
-                request.getIpAddress());
+                request.getIpAddress(),
+                String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
+                        sku.getPriceInCents().doubleValue() / 100,
+                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100,
+                        sku.getTimeInMonths()).replace(".00", ""));
 
         RedirectResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -628,7 +639,9 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 request.getSponsorSkuId(),
                 WechatOrderType.PAYSUPPORT,
                 null,
-                request.getIpAddress());
+                request.getIpAddress(),
+                String.format(PaymentGRpcController.SPONSOR_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""));
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -654,7 +667,9 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 request.getSponsorSkuId(),
                 WechatOrderType.PAYSUPPORTH5,
                 request.getSceneType(),
-                request.getIpAddress());
+                request.getIpAddress(),
+                String.format(PaymentGRpcController.SPONSOR_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""));
 
         RedirectResponse response;
         if (Objects.nonNull(wechatOrder)) {

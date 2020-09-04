@@ -15,6 +15,9 @@ data:
   ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
   ROCKETMQ_FEED_TOPIC: {{ .Values.rocketmq.feed.topic }}
   ROCKETMQ_FEED_TAG: {{ .Values.rocketmq.feed.tag }}
+  ROCKETMQ_TRANSACTION_TOPIC: {{ .Values.rocketmq.transaction.topic }}
+  ROCKETMQ_TRANSACTION_GROUPID: {{ .Values.rocketmq.transaction.group_id }}
+  ROCKETMQ_TRANSACTION_TAG: {{ .Values.rocketmq.transaction.tag }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   MADAGASCAR_SHORTCODEBASE: {{ .Values.global.common_configs.short_code_base }}

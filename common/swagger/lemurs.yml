@@ -3828,6 +3828,8 @@ components:
       properties:
         membershipSkuId:
           type: string
+      required:
+        - membershipSkuId
     BalanceDTO:
       type: object
       properties:
@@ -4779,6 +4781,8 @@ components:
           format: int64
       required:
         - sponsorSkuId
+        - priceInCents
+        - priceInShells
     H5RedirectDTO:
       type: object
       properties:

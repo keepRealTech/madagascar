@@ -64,13 +64,15 @@ public class WechatPayService {
                                      String propertyId,
                                      WechatOrderType wechatOrderType,
                                      SceneType sceneType,
-                                     String remoteIp) {
+                                     String remoteIp,
+                                     String description) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
 
-        String description = String.format("Type:[%s], Id:[%s]", wechatOrderType.name(), propertyId);
+        description = StringUtils.isEmpty(description) ? String.format("Type:[%s], Id:[%s]", wechatOrderType.name(), propertyId) : description;
 
-        if (WechatOrderType.PAYMEMBERSHIPH5.equals(wechatOrderType)
-                && (Objects.isNull(sceneType) || SceneType.SCENE_NONE.equals(sceneType))) {
+        boolean isH5 = this.isH5Pay(wechatOrderType);
+
+        if (isH5 && (Objects.isNull(sceneType) || SceneType.SCENE_NONE.equals(sceneType))) {
             log.error("Invalid scene type for h5 wechat pay.");
             return null;
         }
@@ -88,7 +90,7 @@ public class WechatPayService {
                 .build();
 
         Map<String, String> response;
-        String tradeType = WechatOrderType.PAYMEMBERSHIPH5.equals(wechatOrderType) ? "MWEB" : "APP";
+        String tradeType = isH5 ? "MWEB" : "APP";
         try {
             Map<String, String> requestBody = new HashMap<>();
             requestBody.put("trade_type", tradeType);
@@ -97,7 +99,7 @@ public class WechatPayService {
             requestBody.put("body", description);
             requestBody.put("spbill_create_ip", remoteIp);
 
-            if (WechatOrderType.PAYMEMBERSHIPH5.equals(wechatOrderType)) {
+            if (isH5) {
                 String sceneInfo;
                 switch (sceneType) {
                     case SCENE_IOS:
@@ -343,6 +345,16 @@ public class WechatPayService {
         }
 
         return wechatOrder;
+    }
+
+    /**
+     * Checks if it is H5 pay.
+     *
+     * @param type {@link WechatOrderType}.
+     * @return True if it is h5 payment.
+     */
+    private boolean isH5Pay(WechatOrderType type) {
+        return WechatOrderType.PAYMEMBERSHIPH5.equals(type) || WechatOrderType.PAYSUPPORTH5.equals(type);
     }
 
 }

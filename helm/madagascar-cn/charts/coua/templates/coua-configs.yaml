@@ -18,3 +18,5 @@ data:
   SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
   ROCKETMQ_ISLAND_TOPIC: {{ .Values.rocketmq.island.topic }}
   ROCKETMQ_ISLAND_TAG: {{ .Values.rocketmq.island.tag }}
+  ROCKETMQ_TRANSACTION_TOPIC: {{ .Values.rocketmq.transaction.topic }}
+  ROCKETMQ_TRANSACTION_TAG: {{ .Values.rocketmq.transaction.tag }}
