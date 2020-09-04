@@ -79,6 +79,8 @@ spec:
                 secretKeyRef:
                   name: aliyun-mongo
                   key: connection-string
+            - name: RESTART
+              value: "1"
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}
