@@ -2,10 +2,10 @@ package com.keepreal.madagascar.coua.service;
 
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
-import com.keepreal.madagascar.coua.CreateIslandEvent;
-import com.keepreal.madagascar.coua.IslandEvent;
-import com.keepreal.madagascar.coua.IslandEventType;
-import com.keepreal.madagascar.coua.config.IslandEventProducerConfiguration;
+import com.keepreal.madagascar.coua.CreateUserEvent;
+import com.keepreal.madagascar.coua.UserEvent;
+import com.keepreal.madagascar.coua.UserEventType;
+import com.keepreal.madagascar.coua.config.UserEventProducerConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
@@ -21,46 +21,46 @@ import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-public class IslandEventProducerService {
+public class UserEventProducerService {
 
     private final ProducerBean producerBean;
-    private final IslandEventProducerConfiguration islandEventProducerConfiguration;
+    private final UserEventProducerConfiguration userEventProducerConfiguration;
     private final ExecutorService executorService;
 
-    public IslandEventProducerService(@Qualifier("island-event-producer") ProducerBean producerBean,
-                                      IslandEventProducerConfiguration islandEventProducerConfiguration) {
+    public UserEventProducerService(@Qualifier("user-event-producer") ProducerBean producerBean,
+                                      UserEventProducerConfiguration userEventProducerConfiguration) {
         this.producerBean = producerBean;
-        this.islandEventProducerConfiguration = islandEventProducerConfiguration;
+        this.userEventProducerConfiguration = userEventProducerConfiguration;
         this.executorService = new ThreadPoolExecutor(
                 10,
                 20,
                 1L,
                 TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(500000),
-                new CustomizableThreadFactory("island-event-producer-"));
+                new CustomizableThreadFactory("user-event-producer-"));
     }
 
-    public void produceCreateIslandEventAsync(String hostId) {
-        Message message = this.createIslandEventMessage(hostId);
+    public void produceCreateUserEventAsync(String userId) {
+        Message message = this.createUserEventMessage(userId);
         this.sendAsync(message);
     }
 
-    private Message createIslandEventMessage(String hostId) {
+    private Message createUserEventMessage(String userId) {
         String uuid = UUID.randomUUID().toString();
 
-        CreateIslandEvent createIslandEvent = CreateIslandEvent.newBuilder()
-                .setHostId(hostId)
+        CreateUserEvent createIslandEvent = CreateUserEvent.newBuilder()
+                .setUserId(userId)
                 .build();
 
-        IslandEvent event = IslandEvent.newBuilder()
-                .setType(IslandEventType.ISLAND_EVENT_CREATE)
+        UserEvent event = UserEvent.newBuilder()
+                .setType(UserEventType.USER_EVENT_CREATE)
                 .setEventId(uuid)
                 .setTimestamp(System.currentTimeMillis())
-                .setCreateIslandEvent(createIslandEvent)
+                .setCreateUserEvent(createIslandEvent)
                 .build();
 
-        return new Message(this.islandEventProducerConfiguration.getTopic(),
-                this.islandEventProducerConfiguration.getTag(), uuid, event.toByteArray());
+        return new Message(this.userEventProducerConfiguration.getTopic(),
+                this.userEventProducerConfiguration.getTag(), uuid, event.toByteArray());
     }
 
     private void sendAsync(Message message) {

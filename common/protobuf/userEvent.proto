@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.coua";
+
+import "common.proto";
+
+enum UserEventType {
+    USER_EVENT_NONE = 0;
+    USER_EVENT_CREATE = 1;
+}
+
+message CreateUserEvent {
+    string userId = 1;
+}
+
+message UserEvent {
+    UserEventType type = 1;
+    uint64 timestamp = 2;
+    string eventId = 3;
+    oneof event {
+        CreateUserEvent createUserEvent = 4;
+    }
+}
