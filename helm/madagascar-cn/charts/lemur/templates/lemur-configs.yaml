@@ -36,6 +36,7 @@ data:
   GENERAL_ANDROIDUPGRADERATIO: '{{ .Values.release.ratio }}'
   CLIENT_ANDROID_SETUPINFO_VERSION: '{{ .Values.client.android.setup_info.version }}'
   CLIENT_ANDROID_SETUPINFO_ADDRESS: {{ .Values.client.android.setup_info.address }}
+  CLIENT_IOS_HTMLHOSTNAME: {{ .Values.global.common_configs.html_host }}
 
   CLIENT_ANDROID_VERSIONINFOMAP_1_A360: 'false'
   CLIENT_ANDROID_VERSIONINFOMAP_1_OPPO: 'false'
