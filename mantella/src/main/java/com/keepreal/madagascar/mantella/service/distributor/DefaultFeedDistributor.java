@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.mantella.service.distributor;
 
+import com.aliyun.openservices.ons.api.order.OrderAction;
 import com.keepreal.madagascar.mantella.FeedCreateEvent;
 import com.keepreal.madagascar.mantella.factory.TimelineFactory;
 import com.keepreal.madagascar.mantella.model.Timeline;
@@ -42,6 +43,10 @@ public class DefaultFeedDistributor implements FeedDistributor {
     public Flux<Timeline> distribute(FeedCreateEvent feedCreateEvent, String eventId) {
         Flux<Timeline> subscriberFlux = this.islandService.retrieveSubscriberIdsByIslandId(feedCreateEvent.getIslandId())
                 .map(userId -> this.timelineFactory.valueOf(feedCreateEvent, userId, eventId));
+
+        if (!feedCreateEvent.getFromHost()) {
+            return subscriberFlux;
+        }
 
         Mono<Timeline> publicMono = this.islandService.checkPublicInboxEligibility(feedCreateEvent.getIslandId())
                 .filter(Boolean.TRUE::equals)
