@@ -57,20 +57,15 @@ public class ChatService {
     public void updateRongCloudUserInfo(String userId, String userName, String portraitImageUri) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
 
-        UpdateRongCloudUserRequest.Builder requestBuilder = UpdateRongCloudUserRequest
+        UpdateRongCloudUserRequest request = UpdateRongCloudUserRequest
                 .newBuilder()
-                .setUserId(userId);
-
-        if (Objects.nonNull(userName)) {
-            requestBuilder.setName(StringValue.of(userName));
-        }
-
-        if (Objects.nonNull(portraitImageUri)) {
-            requestBuilder.setPortraitImageUri(StringValue.of(portraitImageUri));
-        }
+                .setUserId(userId)
+                .setName(userName)
+                .setPortraitImageUri(portraitImageUri)
+                .build();
 
         try {
-            stub.updateRongCloudUser(requestBuilder.build());
+            stub.updateRongCloudUser(request);
         } catch (Exception e) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }

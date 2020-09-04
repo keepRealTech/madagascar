@@ -97,15 +97,10 @@ public class RongCloudService {
     @SneakyThrows
     public void updateUser(String userId, String userName, String portraitUrl) {
         UserModel userModel = new UserModel()
-                .setId(userId);
+                .setId(userId)
+                .setName(userName)
+                .setPortrait(portraitUrl);
 
-        if (Objects.nonNull(userName)) {
-            userModel.setName(userName);
-        }
-
-        if (Objects.nonNull(portraitUrl)) {
-            userModel.setPortrait(portraitUrl);
-        }
         Result refreshResult = this.client.user.update(userModel);
 
         if (!refreshResult.getCode().equals(200)) {

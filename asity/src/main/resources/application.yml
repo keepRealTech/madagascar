@@ -16,7 +16,7 @@ grpc:
 rongcloud:
   app-key: 123
   app-secret: 456
-  image-host: images.keepreal.cn
+  image-host: https://images.keepreal.cn
 
 rocketmq:
   notification:

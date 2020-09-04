@@ -109,7 +109,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         RegisterResponse response;
         try {
             String token = this.rongCloudService.register(request.getUserId(), request.getUserName(),
-                    String.format("https://%s/%s", this.rongCloudConfiguration.getImageHost(), request.getPortraitUri()));
+                    String.format("%s/%s", this.rongCloudConfiguration.getImageHost(), request.getPortraitUri()));
             response = RegisterResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setToken(token)
@@ -479,9 +479,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     public void updateRongCloudUser(UpdateRongCloudUserRequest request,
                                     StreamObserver<CommonStatus> responseObserver) {
         this.rongCloudService.updateUser(request.getUserId(),
-                request.hasName() ? request.getName().getValue() : null,
-                request.hasPortraitImageUri() ?
-                        String.format("https://%s/%s", this.rongCloudConfiguration.getImageHost(), request.getPortraitImageUri().getValue()) : null);
+                request.getName(),
+                String.format("%s/%s", this.rongCloudConfiguration.getImageHost(), request.getPortraitImageUri()));
 
         CommonStatus response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         responseObserver.onNext(response);

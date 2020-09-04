@@ -129,8 +129,8 @@ message DeleteChatgroupMembershipByMembershipIdRequest {
 
 message UpdateRongCloudUserRequest {
   string userId = 1;
-  google.protobuf.StringValue name = 2;
-  google.protobuf.StringValue portraitImageUri = 3;
+  string name = 2;
+  string portraitImageUri = 3;
 }
 
 service ChatService {

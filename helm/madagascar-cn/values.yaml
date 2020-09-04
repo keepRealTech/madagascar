@@ -22,7 +22,7 @@ global:
       vanga: 2
       asity: 2
     short_code_base: https://islands.keepreal.cn/s/%s
-    image_host: images.keepreal.cn
+    image_host: https://images.keepreal.cn
     wechat_pay:
       callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/callback
       refund_callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/refund/callback

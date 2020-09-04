@@ -219,8 +219,8 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
 
         if (request.hasName() || request.hasPortraitImageUri()) {
             this.chatService.updateRongCloudUserInfo(request.getId(),
-                    request.hasName() ? request.getName().getValue() : null,
-                    request.hasPortraitImageUri() ? request.getPortraitImageUri().getValue() : null);
+                    userInfo.getNickName(),
+                    userInfo.getPortraitImageUri());
         }
     }
 
