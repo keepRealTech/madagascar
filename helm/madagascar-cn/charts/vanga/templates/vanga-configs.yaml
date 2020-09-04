@@ -20,3 +20,6 @@ data:
   SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
+  ROCKETMQ_TRANSACTION_TOPIC: {{ .Values.rocketmq.transaction.topic }}
+  ROCKETMQ_TRANSACTION_TAG: {{ .Values.rocketmq.transaction.tag }}
+  ROCKETMQ_TRANSACTION_GROUPID: {{ .Values.rocketmq.transaction.group_id }}

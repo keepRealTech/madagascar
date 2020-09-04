@@ -10,10 +10,13 @@ spring:
 
 grpc:
   port: 12007
-
+  coua:
+    host: coua
+    port: 12002
 rongcloud:
   app-key: 123
   app-secret: 456
+  image-host: https://images.keepreal.cn
 
 rocketmq:
   notification:
@@ -22,6 +25,20 @@ rocketmq:
     nameSrvAddr: localhost:9876
     topic: notification-event
     groupId: GID-asity-default
+    tag: event
+  island:
+    accessKey: 1
+    secretKey: 2
+    nameSrvAddr: localhost:9876
+    topic: island-event
+    groupId: GID-asity-island-default
+    tag: event
+  user:
+    accessKey: 1
+    secretKey: 2
+    nameSrvAddr: localhost:9876
+    topic: user-event
+    groupId: GID-asity-user-default
     tag: event
   chat:
     accessKey: 1

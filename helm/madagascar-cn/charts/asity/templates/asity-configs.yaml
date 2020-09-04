@@ -10,5 +10,14 @@ data:
   ROCKETMQ_NOTIFICATION_TOPIC: {{ .Values.rocketmq.notification.topic }}
   ROCKETMQ_NOTIFICATION_GROUPID: {{ .Values.rocketmq.notification.group_id }}
   ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
+  ROCKETMQ_ISLAND_TOPIC: {{ .Values.rocketmq.island.topic }}
+  ROCKETMQ_ISLAND_GROUPID: {{ .Values.rocketmq.island.group_id }}
+  ROCKETMQ_ISLAND_TAG: {{ .Values.rocketmq.island.tag }}
+  ROCKETMQ_USER_TOPIC: {{ .Values.rocketmq.user.topic }}
+  ROCKETMQ_USER_GROUPID: {{ .Values.rocketmq.user.group_id }}
+  ROCKETMQ_USER_TAG: {{ .Values.rocketmq.user.tag }}
   ROCKETMQ_CHAT_TOPIC: {{ .Values.rocketmq.chat.topic }}
   ROCKETMQ_CHAT_TAG: {{ .Values.rocketmq.chat.tag }}
+  GRPC_COUA_HOST: {{ .Values.coua.host }}
+  GRPC_COUA_PORT: '{{ .Values.coua.port }}'
+  RONGCLOUD_IMAGEHOST: {{ .Values.global.common_configs.image_host }}

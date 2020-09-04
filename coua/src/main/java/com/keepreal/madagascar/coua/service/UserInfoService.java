@@ -8,6 +8,7 @@ import com.keepreal.madagascar.coua.common.DisplayIdGenerator;
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
@@ -57,6 +58,10 @@ public class UserInfoService {
     public UserInfo createUser(UserInfo userInfo) {
         userInfo.setId(String.valueOf(idGenerator.nextId()));
         userInfo.setDisplayId(displayIdGenerator.nextDisplayId());
+        if (StringUtils.isEmpty(userInfo.getNickName()) && !StringUtils.isEmpty(userInfo.getMobile())
+                && StringUtils.isEmpty(userInfo.getUnionId())) {
+            userInfo.setNickName("用户" + userInfo.getDisplayId());
+        }
         userInfo = userInfoRepository.save(userInfo);
 
         this.balanceService.createBalanceByUserId(userInfo.getId());
@@ -195,6 +200,44 @@ public class UserInfoService {
      */
     public UserInfo findUserInfoByMobile(String mobile) {
         return this.userInfoRepository.findTopByMobileAndDeletedIsFalse(mobile);
+    }
+
+    /**
+     * 根据手机号查询H5 用户信息(unionId 为null 或 空)
+     *
+     * @param mobile 手机号
+     * @return {@link UserInfo}
+     */
+    public UserInfo findH5UserInfoByMobile(String mobile) {
+        return this.userInfoRepository.findTopByMobileAndUnionIdEqualsAndDeletedIsFalse(mobile, "");
+    }
+
+    /**
+     * 根据手机号查找微信用户(unionId不为空)
+     *
+     * @param mobile 手机号
+     * @return {@link UserInfo}
+     */
+    public UserInfo findUserInfoByMobileAndUnionIdIsNotNul(String mobile) {
+        return this.userInfoRepository.findTopByUnionIdNotAndMobileEqualsAndDeletedIsFalse("", mobile);
+    }
+
+    /**
+     * 合并user表信息
+     *
+     * @param wechatUserId    wechat user id
+     * @param webMobileUserId mobile user id
+     */
+    @Transactional
+    public void mergeUserAccounts(String wechatUserId, String webMobileUserId) {
+        UserInfo wechatUserInfo = this.userInfoRepository.findUserInfoByIdAndDeletedIsFalse(wechatUserId);
+        UserInfo mobileUserInfo = this.userInfoRepository.findUserInfoByIdAndDeletedIsFalse(webMobileUserId);
+        if (mobileUserInfo.getCreatedTime() < wechatUserInfo.getCreatedTime()) {
+            wechatUserInfo.setDisplayId(mobileUserInfo.getDisplayId());
+        }
+        mobileUserInfo.setDeleted(true);
+        this.userInfoRepository.save(wechatUserInfo);
+        this.userInfoRepository.save(mobileUserInfo);
     }
 
 }

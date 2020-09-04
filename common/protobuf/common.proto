@@ -33,6 +33,7 @@ enum LoginType {
     LOGIN_JWT_IOS = 4;
     LOGIN_OAUTH_MP_WECHAT = 5;
     LOGIN_WEB_MP_WECHAT = 6;
+    LOGIN_WEB_MOBILE = 7;
 }
 
 enum NotificationType {
@@ -54,6 +55,7 @@ enum NoticeType {
     NOTICE_TYPE_ISLAND_NEW_MEMBER = 2;
     NOTICE_TYPE_BOX_NEW_QUESTION = 3;
     NOTICE_TYPE_BOX_NEW_ANSWER = 4;
+    NOTICE_TYPE_ISLAND_NEW_SUPPORT = 5;
 }
 
 message NoticeTypeValue {
@@ -81,6 +83,13 @@ enum IdentityType {
     IDENTITY_FASHION = 12;
     IDENTITY_COMIC = 13;
     IDENTITY_OTHERS = 14;
+}
+
+enum SceneType {
+    SCENE_NONE = 0;
+    SCENE_IOS = 1;
+    SCENE_ANDROID = 2;
+    SCENE_WAP = 3;
 }
 
 enum Gender {
@@ -235,6 +244,7 @@ message WechatOrderMessage {
     uint64 feeInCents = 9;
     uint64 timestamp = 10;
     WechatOrderState state = 11;
+    string mwebUrl = 12;
 }
 
 enum WechatOrderState {

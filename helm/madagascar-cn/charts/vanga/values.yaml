@@ -10,6 +10,10 @@ rocketmq:
   notification:
     topic: notification-event
     tag: event
+  transaction:
+    topic: transaction-event
+    tag: event
+    group_id: GID-vanga-transaction-default
 
 wechat_pay:
   cert_path: /app/apiclient_cert.p12

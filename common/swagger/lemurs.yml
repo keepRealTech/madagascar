@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.4.0"
+  version: "1.5.0"
   title: Keep Real API
 
 security:
@@ -47,6 +47,8 @@ tags:
     description: 作品集 controller
   - name: Box
     description: 提问箱 controller
+  - name: Support
+    description: 支持一下 controller
 
 paths:
   /api/healthcheck:
@@ -234,6 +236,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandsResponse'
+  /api/v1.1/islands:
+    post:
+      tags:
+        - Island
+      summary: 创建新的创作首页
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostIslandRequestV2'
+      responses:
+        '200':
+          description: brief island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandResponse'
   /api/v1/islands/checkName:
     get:
       parameters:
@@ -996,11 +1016,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/iosPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
+        - $ref: '#/components/parameters/membershipIdInQuery'
+      tags:
+        - Payment
+      summary: 会员订购H5跳转
+      responses:
+        '200':
+          description: H5 跳转地址
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5RedirectResponse'
   /api/v1/islands/{id}/memberSubscription/wechatPay/html5:
     parameters:
       - $ref: '#/components/parameters/idInPath'
-      - $ref: '#/components/parameters/sceneTypeInQuery'
     post:
+      parameters:
+        - $ref: '#/components/parameters/sceneTypeInQuery'
       tags:
         - Payment
       summary: 微信h5会员订阅支付
@@ -1016,7 +1054,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WechatOrderResponse'
+                $ref: '#/components/schemas/H5WechatOrderResponse'
   /api/v1/islands/{id}/memberSubscription/shellPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1149,6 +1187,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipSkusResponse'
+  /api/v1/islands/{id}/support/skus:
+    parameters:
+      - $ref: "#/components/parameters/idInPath"
+    get:
+      tags:
+        - Sku
+      summary: 获得支持一下商品信息
+      responses:
+        '200':
+          description: skus
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportSkusResponse'
   /api/v1/islands/{id}/memberships:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1530,9 +1582,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResolveIslandRepostCodeResponse'
   /api/v1/islands/{id}/introduction/dismiss:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
     post:
-      parameters:
-        - $ref: '#/components/parameters/idInPath'
       tags:
         - Island
       summary: 关闭加入岛成功引导文案
@@ -1583,6 +1635,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PostOTPRequest'
+      parameters:
+        - $ref: '#/components/parameters/forLoginInQuery'
       tags:
         - Login
       summary: 向指定手机号发送验证码
@@ -1770,18 +1824,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
-  /api/v1/boxes/skus:
-    get:
-      tags:
-        - Sku
-      summary: 获得提问箱付费商品
-      responses:
-        '200':
-          description: question skus response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/QuestionSkusResponse'
   /api/v1/islands/{id}/boxes/paidQuestions/wechatPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1996,6 +2038,106 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandFeedSnapshotResponse'
+  /api/v1/islands/{id}/support:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Support
+      summary: 获得支持商品信息
+      responses:
+        '200':
+          description: retrieve video/audio url
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportsResponse'
+  /api/v1/islands/{id}/support/iosPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
+      tags:
+        - Payment
+      summary: 支持一下 H5跳转地址
+      responses:
+        '200':
+          description: H5 跳转地址
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5RedirectResponse'
+  /api/v1/islands/{id}/support/wechatPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下微信支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSupportRequest'
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/islands/{id}/support/wechatPay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/sceneTypeInQuery'
+      tags:
+        - Payment
+      summary: 支持一下h5微信支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSupportRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v1/islands/discovery:
+    get:
+      tags:
+        - Island
+      summary: 发现创作者
+      responses:
+        '200':
+          description: island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IslandDiscoveryResponse'
+  /api/v1/feeds/public:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Feed
+      summary: 获得所有公开岛的岛主动态
+      responses:
+        '200':
+          description: feeds response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinesResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2003,6 +2145,13 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
+    forLoginInQuery:
+      in: query
+      name: login
+      required: false
+      schema:
+        type: boolean
+        default: false
     idInPath:
       in: path
       name: id
@@ -2171,6 +2320,12 @@ components:
     videoIdInQuery:
       in: query
       name: videoId
+      required: true
+      schema:
+        type: string
+    membershipIdInQuery:
+      in: query
+      name: membershipId
       required: true
       schema:
         type: string
@@ -2480,8 +2635,21 @@ components:
         - $ref: '#/components/schemas/BriefIslandDTO'
         - type: object
           properties:
+            host:
+              $ref: '#/components/schemas/BriefUserDTO'
             memberCount:
               type: integer
+    RecommendIslandDTO:
+      allOf:
+        - $ref: '#/components/schemas/IslandDTO'
+        - type: object
+          properties:
+            host:
+              $ref: '#/components/schemas/BriefUserDTO'
+            memberCount:
+              type: integer
+            recommendation:
+              type: string
     FullIslandDTO:
       allOf:
         - $ref: '#/components/schemas/IslandDTO'
@@ -2505,7 +2673,7 @@ components:
           type: boolean
         hasMemberships:
           type: boolean
-    SubscriberIntroductionDTO:
+    IntroductionDTO:
       type: object
       properties:
         shouldPopup:
@@ -2533,7 +2701,9 @@ components:
         hostIntroduction:
           $ref: '#/components/schemas/HostIntroductionDTO'
         subscriberIntroduction:
-          $ref: '#/components/schemas/SubscriberIntroductionDTO'
+          $ref: '#/components/schemas/IntroductionDTO'
+        introduction:
+          $ref: '#/components/schemas/IntroductionDTO'
     CheckIslandDTO:
       type: object
       properties:
@@ -2568,6 +2738,24 @@ components:
           $ref: "#/components/schemas/IslandAccessType"
       required:
         - name
+    PostIslandPayloadV2:
+      type: object
+      properties:
+        name:
+          type: string
+          description: island name
+        secret:
+          type: string
+          description: secrets for joining island
+        identityId:
+          type: string
+        description:
+          type: string
+        islandAccessType:
+          $ref: "#/components/schemas/IslandAccessType"
+      required:
+        - name
+        - description
     PutIslandRequest:
       type: object
       properties:
@@ -2582,6 +2770,17 @@ components:
       properties:
         payload:
           $ref: '#/components/schemas/PostIslandPayload'
+        portraitImage:
+          type: string
+          description: portrait image
+          format: binary
+      required:
+        - payload
+    PostIslandRequestV2:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/PostIslandPayloadV2'
         portraitImage:
           type: string
           description: portrait image
@@ -3186,6 +3385,8 @@ components:
           $ref: '#/components/schemas/BriefUserDTO'
         membership:
           $ref: '#/components/schemas/SkuMembershipDTO'
+        content:
+          type: string
     SkuMembershipDTO:
       allOf:
         - $ref: '#/components/schemas/BriefMembershipDTO'
@@ -3425,7 +3626,7 @@ components:
         mobile:
           type: string
         otp:
-          type: string
+          type: integer
     LoginPayload:
       oneOf:
         - $ref: '#/components/schemas/WechatOAuthLoginPayload'
@@ -3634,6 +3835,8 @@ components:
       properties:
         membershipSkuId:
           type: string
+      required:
+        - membershipSkuId
     BalanceDTO:
       type: object
       properties:
@@ -3835,6 +4038,10 @@ components:
           type: integer
         colorType:
           type: integer
+        useCustomMessage:
+          type: boolean
+        message:
+          type: string
     MembershipDTO:
       allOf:
         - $ref: '#/components/schemas/BriefMembershipDTO'
@@ -3857,6 +4064,10 @@ components:
           maximum: 1000000000
         name:
           type: string
+        useCustomMessage:
+          type: boolean
+        message:
+          type: string
     PutMembershipRequest:
       type: object
       properties:
@@ -3869,6 +4080,10 @@ components:
           minimum: 100
           description: can only increase
         name:
+          type: string
+        useCustomMessage:
+          type: boolean
+        message:
           type: string
     MembershipResponse:
       allOf:
@@ -4428,29 +4643,6 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/CommentDTO'
-    QuestionSkuDTO:
-      type: object
-      properties:
-        id:
-          type: string
-        description:
-          type: string
-        isDefault:
-          type: boolean
-        priceInCents:
-          type: integer
-          format: int64
-        appleSkuId:
-          type: string
-    QuestionSkusResponse:
-      allOf:
-        - $ref: '#/components/schemas/CommonResponse'
-        - type: object
-          properties:
-            data:
-              type: array
-              items:
-                $ref: '#/components/schemas/QuestionSkuDTO'
     PostQuestionRequest:
       type: object
       properties:
@@ -4531,3 +4723,105 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/IslandFeedSnapshotDTO'
+    SponsorSkuDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        priceInShells:
+          type: integer
+          format: int64
+        priceInCents:
+          type: integer
+          format: int64
+        isDefault:
+          type: boolean
+    SupportSkusDTO:
+      type: object
+      properties:
+        sponsorSkus:
+          type: array
+          items:
+            $ref: '#/components/schemas/SponsorSkuDTO'
+        customizedSku:
+          $ref: '#/components/schemas/SponsorSkuDTO'
+    SupportSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportSkusDTO'
+    SponsorDTO:
+      type: object
+      properties:
+        text:
+          type: string
+        count:
+          type: integer
+    SupportDTO:
+      type: object
+      properties:
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/MembershipDTO'
+        sponsors:
+          $ref: '#/components/schemas/SponsorDTO'
+    SupportsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportDTO'
+    PostSupportRequest:
+      type: object
+      properties:
+        sponsorSkuId:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
+        priceInShells:
+          type: integer
+          format: int64
+      required:
+        - sponsorSkuId
+        - priceInCents
+        - priceInShells
+    H5RedirectDTO:
+      type: object
+      properties:
+        url:
+          type: string
+    H5WechatOrderDTO:
+      type: object
+      properties:
+        url:
+          type: string
+        orderId:
+          type: string
+    H5WechatOrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/H5WechatOrderDTO'
+    H5RedirectResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/H5RedirectDTO'
+    IslandDiscoveryResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/RecommendIslandDTO'

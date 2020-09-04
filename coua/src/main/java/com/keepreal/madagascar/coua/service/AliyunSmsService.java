@@ -25,7 +25,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Represents the aliyun sms service service.
+ * Represents the aliyun sms service.
  */
 @Slf4j
 @Service

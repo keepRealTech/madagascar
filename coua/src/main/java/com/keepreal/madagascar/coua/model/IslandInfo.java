@@ -31,6 +31,7 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class IslandInfo {
+
     @Id
     private String id;
     private String hostId;
@@ -60,4 +61,5 @@ public class IslandInfo {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }

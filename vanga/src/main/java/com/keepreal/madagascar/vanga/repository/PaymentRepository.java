@@ -1,16 +1,14 @@
 package com.keepreal.madagascar.vanga.repository;
 
 import com.keepreal.madagascar.vanga.model.Payment;
-import lombok.Builder;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Column;
 import java.util.List;
 
 /**
@@ -33,5 +31,11 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
                    "AND is_deleted=0 AND user_id=?1 GROUP BY trade_num) AS groups",
            nativeQuery = true)
     Page<Payment> findAllValidPaymentsByUserId(String userId, Pageable pageable);
+
+    Integer countByPayeeIdAndStateAndType(String userId, int state, int type);
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE balance_log SET user_id = ?1 WHERE user_id = ?2", nativeQuery = true)
+    void mergeUserPayment(String wechatUserId, String webMobileUserId);
 
 }

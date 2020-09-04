@@ -74,6 +74,36 @@ spec:
                 secretKeyRef:
                   name: aliyun-rmq
                   key: name-server
+            - name: ROCKETMQ_ISLAND_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-key
+            - name: ROCKETMQ_ISLAND_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-secret
+            - name: ROCKETMQ_ISLAND_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
+            - name: ROCKETMQ_USER_ACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-key
+            - name: ROCKETMQ_USER_SECRETKEY
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: access-secret
+            - name: ROCKETMQ_USER_NAMESRVADDR
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-rmq
+                  key: name-server
             - name: ROCKETMQ_CHAT_ACCESSKEY
               valueFrom:
                 secretKeyRef:

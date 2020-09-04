@@ -4,7 +4,11 @@ import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderType;
 import com.keepreal.madagascar.vanga.repository.WechatOrderRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class WechatOrderService {
@@ -67,6 +71,16 @@ public class WechatOrderService {
      */
     public WechatOrder retrieveByQuestionId(String feedId) {
         return this.wechatOrderRepository.findByPropertyIdAndTypeAndDeletedIsFalse(feedId, WechatOrderType.PAYQUESTION.getValue());
+    }
+
+    /**
+     * merge user wechat order
+     *
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   mobile user id
+     */
+    public void mergeUserWechatOrder(String wechatUserId, String webMobileUserId) {
+        this.wechatOrderRepository.mergeUserWechatOrder(wechatUserId, webMobileUserId);
     }
 
 }

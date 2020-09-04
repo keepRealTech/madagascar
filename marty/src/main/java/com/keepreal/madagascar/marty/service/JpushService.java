@@ -12,6 +12,7 @@ import cn.jpush.api.push.model.notification.Notification;
 import com.keepreal.madagascar.marty.config.JPushConfig;
 import com.keepreal.madagascar.marty.model.PushType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;

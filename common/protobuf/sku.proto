@@ -63,9 +63,25 @@ message DeleteMembershipSkusByIdRequest {
   string membershipId = 1;
 }
 
+message RetrieveSupportSkusRequest {
+}
+
+message RetrieveSupportSkusResponse {
+  CommonStatus status = 1;
+  repeated SupportSkuMessage supportSkus = 2;
+}
+
+message SupportSkuMessage {
+  string id = 1;
+  bool defaulted = 2;
+  int64 priceInCents = 3;
+  int64 priceInShells = 4;
+}
+
 service SkuService {
   rpc RetrieveActiveShellSkus (RetrieveShellSkusRequest) returns (ShellSkusResponse) {};
   rpc RetrieveActiveMembershipSkusByMembershipId (RetrieveMembershipSkusByMembershipIdRequest) returns (MembershipSkusResponse) {};
+  rpc RetrieveActiveSupportSkus (RetrieveSupportSkusRequest) returns (RetrieveSupportSkusResponse) {};
   rpc CreateMembershipSkusByMembershipId (CreateMembershipSkusRequest) returns (MembershipSkusResponse) {};
   rpc UpdateMembershipSkusByMembershipId (UpdateMembershipSkusByIdRequest) returns (MembershipSkusResponse) {};
   rpc DeleteMembershipSkusByMembershipId (DeleteMembershipSkusByIdRequest) returns (CommonStatus) {};

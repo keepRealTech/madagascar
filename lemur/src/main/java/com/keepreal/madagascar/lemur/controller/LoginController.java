@@ -12,9 +12,9 @@ import com.keepreal.madagascar.baobob.LoginRequest;
 import com.keepreal.madagascar.baobob.OAuthWechatLoginPayload;
 import com.keepreal.madagascar.baobob.PasswordLoginPayload;
 import com.keepreal.madagascar.baobob.TokenRefreshPayload;
+import com.keepreal.madagascar.baobob.WebMobileLoginPayload;
 import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
-import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.LoginType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -146,6 +146,19 @@ public class LoginController implements LoginApi {
                         .setLoginType(LoginType.LOGIN_PASSWORD)
                         .build();
                 break;
+            case MOBILE:
+                if (StringUtils.isEmpty(body.getData().getMobile())
+                        || StringUtils.isEmpty(body.getData().getOtp())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
+                loginRequest = LoginRequest.newBuilder()
+                        .setWebMobilePayload(WebMobileLoginPayload.newBuilder()
+                                .setMobile(body.getData().getMobile())
+                                .setOtp(body.getData().getOtp()))
+                        .setLoginType(LoginType.LOGIN_WEB_MOBILE)
+                        .build();
+                break;
             case JWT_IOS:
                 if (StringUtils.isEmpty(body.getData().getCode())) {
                     throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
@@ -215,6 +228,7 @@ public class LoginController implements LoginApi {
      *
      * @return {@link UserResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<UserResponse> apiV1UserInfoGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -323,8 +337,8 @@ public class LoginController implements LoginApi {
      * @param sceneId (required) unique scene id.
      * @return {@link LoginResponse}.
      */
-    @Override
     @CrossOrigin
+    @Override
     public ResponseEntity<LoginResponse> apiV1LoginPollingGet(String sceneId) {
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.checkWechatMpAccountLogin(sceneId);
 
@@ -345,9 +359,12 @@ public class LoginController implements LoginApi {
      * @param postOTPRequest  (required) {@link PostOTPRequest}
      * @return {@link DummyResponse}
      */
+    @CrossOrigin
     @Override
-    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest) {
-        this.userService.checkUserMobileIsExisted(postOTPRequest.getMobile());
+    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest,  @Valid Boolean login) {
+        if (!login) {
+            this.userService.checkUserMobileIsExisted(postOTPRequest.getMobile());
+        }
         this.userService.sendOtpToMobile(postOTPRequest.getMobile());
 
         DummyResponse response = new DummyResponse();

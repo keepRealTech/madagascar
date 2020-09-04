@@ -16,7 +16,7 @@ message ChatAccessMessage {
 message RegisterRequest {
   string userId = 1;
   string userName = 2;
-  string portraitUrl = 3;
+  string portraitUri = 3;
 }
 
 message RegisterResponse {
@@ -127,6 +127,12 @@ message DeleteChatgroupMembershipByMembershipIdRequest {
   string memberhsipId = 1;
 }
 
+message UpdateRongCloudUserRequest {
+  string userId = 1;
+  string name = 2;
+  string portraitImageUri = 3;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
@@ -140,4 +146,5 @@ service ChatService {
   rpc RetrieveChatgroupsByUserId(RetrieveChatgroupsByUserIdRequest) returns (UserChatgroupsResponse) {};
   rpc RetrieveChatgroupMembersById(RetrieveChatgroupMembersByGroupIdRequest) returns (ChatgroupMembersResponse) {};
   rpc DeleteChatgroupMembershipByMembershipId(DeleteChatgroupMembershipByMembershipIdRequest) returns (CommonStatus) {};
+  rpc UpdateRongCloudUser (UpdateRongCloudUserRequest) returns (CommonStatus) {};
 }

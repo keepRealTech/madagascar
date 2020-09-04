@@ -5,8 +5,8 @@ metadata:
   namespace: {{ .Values.global.common_configs.namespace }}
 data:
   aliyun_logs_madagascar-prod: stdout
-  ROCKETMQ_TOPIC: {{ .Values.rocketmq.topic }}
-  ROCKETMQ_TAG: {{ .Values.rocketmq.tag }}
+  ROCKETMQ_NOTIFICATION_TOPIC: {{ .Values.rocketmq.notification.topic }}
+  ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   GRPC_FOSSA_HOST: {{ .Values.fossa.host }}
@@ -16,3 +16,9 @@ data:
   GRPC_ASITY_HOST: {{ .Values.asity.host }}
   GRPC_ASITY_PORT: '{{ .Values.asity.port }}'
   SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
+  ROCKETMQ_ISLAND_TOPIC: {{ .Values.rocketmq.island.topic }}
+  ROCKETMQ_ISLAND_TAG: {{ .Values.rocketmq.island.tag }}
+  ROCKETMQ_USER_TOPIC: {{ .Values.rocketmq.user.topic }}
+  ROCKETMQ_USER_TAG: {{ .Values.rocketmq.user.tag }}
+  ROCKETMQ_TRANSACTION_TOPIC: {{ .Values.rocketmq.transaction.topic }}
+  ROCKETMQ_TRANSACTION_TAG: {{ .Values.rocketmq.transaction.tag }}

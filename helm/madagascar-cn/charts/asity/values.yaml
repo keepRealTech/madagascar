@@ -11,9 +11,21 @@ rocketmq:
     topic: notification-event
     group_id: GID-asity-notification-default
     tag: event
+  island:
+    topic: island-event
+    group_id: GID-asity-island-default
+    tag: event
+  user:
+    topic: user-event
+    group_id: GID-asity-user-default
+    tag: event
   chat:
     topic: chat-event
     tag: event
+
+coua:
+  host: coua
+  port: 6565
 
 deploy:
   opentracing:

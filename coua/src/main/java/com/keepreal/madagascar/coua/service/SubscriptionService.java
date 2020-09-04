@@ -9,7 +9,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.common.SubscriptionState;
-import com.keepreal.madagascar.coua.config.MqConfig;
+import com.keepreal.madagascar.coua.config.NotificationEventProducerConfiguration;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
 import com.keepreal.madagascar.coua.dao.SubscriptionRepository;
 import com.keepreal.madagascar.coua.model.Subscription;
@@ -18,6 +18,7 @@ import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import com.keepreal.madagascar.tenrecs.SubscribeEvent;
 import com.keepreal.madagascar.tenrecs.UnsubscribeEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,7 +42,7 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final LongIdGenerator idGenerator;
     private final ProducerBean producerBean;
-    private final MqConfig mqConfig;
+    private final NotificationEventProducerConfiguration notificationEventProducerConfiguration;
     private final IslandInfoRepository islandInfoRepository;
 
     /**
@@ -50,14 +51,18 @@ public class SubscriptionService {
      * @param subscriptionRepository {@link SubscriptionRepository}.
      * @param idGenerator            {@link LongIdGenerator}.
      * @param producerBean           {@link ProducerBean}.
-     * @param mqConfig               {@link MqConfig}.
+     * @param notificationEventProducerConfiguration               {@link NotificationEventProducerConfiguration}.
      * @param islandInfoRepository   {@link IslandInfoRepository}.
      */
-    public SubscriptionService(SubscriptionRepository subscriptionRepository, LongIdGenerator idGenerator, ProducerBean producerBean, MqConfig mqConfig, IslandInfoRepository islandInfoRepository) {
+    public SubscriptionService(SubscriptionRepository subscriptionRepository,
+                               LongIdGenerator idGenerator,
+                               @Qualifier("notification-event-producer") ProducerBean producerBean,
+                               NotificationEventProducerConfiguration notificationEventProducerConfiguration,
+                               IslandInfoRepository islandInfoRepository) {
         this.subscriptionRepository = subscriptionRepository;
         this.idGenerator = idGenerator;
         this.producerBean = producerBean;
-        this.mqConfig = mqConfig;
+        this.notificationEventProducerConfiguration = notificationEventProducerConfiguration;
         this.islandInfoRepository = islandInfoRepository;
     }
 
@@ -216,7 +221,7 @@ public class SubscriptionService {
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
                 .build();
-        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
+        Message message = new Message(notificationEventProducerConfiguration.getTopic(), notificationEventProducerConfiguration.getTag(), event.toByteArray());
         message.setKey(uuid);
         producerBean.sendAsync(message, new SendCallback() {
             @Override
@@ -257,7 +262,7 @@ public class SubscriptionService {
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
                 .build();
-        Message message = new Message(mqConfig.getTopic(), mqConfig.getTag(), event.toByteArray());
+        Message message = new Message(notificationEventProducerConfiguration.getTopic(), notificationEventProducerConfiguration.getTag(), event.toByteArray());
         message.setKey(uuid);
         producerBean.sendAsync(message, new SendCallback() {
             @Override
@@ -294,6 +299,10 @@ public class SubscriptionService {
 
         subscription.setShouldIntroduce(false);
         this.subscriptionRepository.save(subscription);
+    }
+
+    public Page<String> getIslandIdsByUsername(String username, Pageable pageable) {
+        return this.subscriptionRepository.getIslandIdsByUsername(username, pageable);
     }
 
     private void insertSubscription(Subscription subscription) {

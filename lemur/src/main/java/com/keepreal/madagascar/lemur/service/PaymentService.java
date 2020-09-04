@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.service;
 
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.SceneType;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -9,8 +10,13 @@ import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
+import com.keepreal.madagascar.vanga.RedirectResponse;
+import com.keepreal.madagascar.vanga.RetrieveSupportInfoRequest;
+import com.keepreal.madagascar.vanga.RetrieveSupportInfoResponse;
 import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
+import com.keepreal.madagascar.vanga.SupportMessage;
+import com.keepreal.madagascar.vanga.SupportRequest;
 import com.keepreal.madagascar.vanga.UserPaymentsResponse;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
 import io.grpc.Channel;
@@ -106,13 +112,15 @@ public class PaymentService {
      * Submit a membership subscription request for a given user with wechat pay.
      *
      * @param userId          User id.
+     * @param remoteAddress   Remote address ip.
      * @param membershipSkuId Membership sku id.
      */
-    public WechatOrderMessage submitSubscribeMembershipWithWechatPay(String userId, String membershipSkuId) {
+    public WechatOrderMessage submitSubscribeMembershipWithWechatPay(String userId, String remoteAddress, String membershipSkuId) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         SubscribeMembershipRequest request = SubscribeMembershipRequest.newBuilder()
                 .setUserId(userId)
+                .setIpAddress(remoteAddress)
                 .setMembershipSkuId(membershipSkuId)
                 .build();
 
@@ -134,6 +142,111 @@ public class PaymentService {
         }
 
         return response.getWechatOrder();
+    }
+
+    /**
+     * Submit a membership subscription request for a given user with wechat pay.
+     *
+     * @param userId          User id.
+     * @param remoteAddress   Remote address ip.
+     * @param membershipSkuId Membership sku id.
+     * @param sceneType       Scene type.
+     * @return {@link RedirectResponse}.
+     */
+    public RedirectResponse submitSubscribeMembershipWithWechatPayH5(String userId, String remoteAddress, String membershipSkuId, SceneType sceneType) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        SubscribeMembershipRequest request = SubscribeMembershipRequest.newBuilder()
+                .setUserId(userId)
+                .setIpAddress(remoteAddress)
+                .setMembershipSkuId(membershipSkuId)
+                .setSceneType(sceneType)
+                .build();
+
+        RedirectResponse response;
+        try {
+            response = stub.submitSubscribeMembershipWithWechatPayH5(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create wechat h5 order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
+    }
+
+    public WechatOrderMessage submitSupportWithWechatPay(String userId, String payeeId, String sponsorSkuId, Long priceInCents, Long priceInShells, String ipAddress) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        SupportRequest request = SupportRequest.newBuilder()
+                .setUserId(userId)
+                .setPayeeId(payeeId)
+                .setSponsorSkuId(sponsorSkuId)
+                .setPriceInCents(priceInCents)
+                .setPriceInShells(priceInShells)
+                .setIpAddress(ipAddress)
+                .build();
+
+        WechatOrderResponse response;
+
+        try {
+            response = stub.submitSupportWithWechatPay(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create wechat order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getWechatOrder();
+    }
+
+    public RedirectResponse submitSupportWithWechatPayH5(String userId, String payeeId, String sponsorSkuId, Long priceInCents, Long priceInShells, String ipAddress, SceneType sceneType) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        SupportRequest request = SupportRequest.newBuilder()
+                .setUserId(userId)
+                .setPayeeId(payeeId)
+                .setSponsorSkuId(sponsorSkuId)
+                .setPriceInCents(priceInCents)
+                .setPriceInShells(priceInShells)
+                .setIpAddress(ipAddress)
+                .setSceneType(sceneType)
+                .build();
+
+        RedirectResponse response;
+        try {
+            response = stub.submitSupportWithWechatPayH5(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create wechat h5 order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
     }
 
     /**
@@ -172,4 +285,31 @@ public class PaymentService {
         return response;
     }
 
+    public SupportMessage retrieveSupportInfo(String userId) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveSupportInfoRequest request = RetrieveSupportInfoRequest.newBuilder()
+                .setHostId(userId)
+                .build();
+
+        RetrieveSupportInfoResponse response;
+
+        try {
+            response = stub.retrieveSupportInfo(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve support info returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getMessage();
+    }
 }

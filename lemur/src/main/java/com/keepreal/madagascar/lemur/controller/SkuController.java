@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import swagger.api.SkuApi;
 import swagger.model.IOSShellSkusResponse;
 import swagger.model.MembershipSkusResponse;
+import swagger.model.SupportSkusResponse;
 import swagger.model.WechatShellSkusResponse;
 
 import java.util.List;
@@ -83,6 +84,7 @@ public class SkuController implements SkuApi {
      *
      * @return {@link MembershipSkusResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<MembershipSkusResponse> apiV1MembershipIdSkusGet(String id) {
         List<MembershipSkuMessage> shellSkuMessageList = this.skuService.retrieveMembershipSkusByMembershipIds(id);
@@ -92,6 +94,22 @@ public class SkuController implements SkuApi {
                 .map(this.skuDTOFactory::valueOf)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements island support skus get api.
+     *
+     * @param id id (required) Island id.
+     * @return {@link SupportSkusResponse}.
+     */
+    @CrossOrigin
+    @Override
+    public ResponseEntity<SupportSkusResponse> apiV1IslandsIdSupportSkusGet(String id) {
+        SupportSkusResponse response = new SupportSkusResponse();
+        response.setData(this.skuDTOFactory.valueOf(this.skuService.retrieveSupportSkus()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

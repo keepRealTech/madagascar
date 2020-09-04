@@ -160,13 +160,13 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         String islandId = request.getIslandId();
         BoxInfo boxInfo = this.boxInfoService.getBoxInfoByIslandId(islandId);
         if (boxInfo == null) {
-            BoxInfo newBox = new BoxInfo();
-            newBox.setIslandId(islandId);
-            newBox.setEnabled(true);
-            newBox.setAnsweredQuestionCount(0);
-            newBox.setHostId(request.getHostId());
-            newBox.setMembershipIds("");
-            boxInfo = this.boxInfoService.createOrUpdate(newBox);
+            boxInfo = new BoxInfo();
+            boxInfo.setId("0");
+            boxInfo.setIslandId(islandId);
+            boxInfo.setEnabled(true);
+            boxInfo.setAnsweredQuestionCount(0);
+            boxInfo.setHostId(request.getHostId());
+            boxInfo.setMembershipIds("");
         }
 
         responseObserver.onNext(RetrieveBoxInfoResponse.newBuilder()

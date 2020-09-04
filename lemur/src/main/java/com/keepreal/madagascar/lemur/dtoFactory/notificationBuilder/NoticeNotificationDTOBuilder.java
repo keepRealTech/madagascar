@@ -6,6 +6,7 @@ import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.tenrecs.NoticeNotificationMessage;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
+import org.springframework.util.StringUtils;
 import swagger.model.NoticeDTO;
 import swagger.model.NoticeType;
 import swagger.model.NotificationDTO;
@@ -18,6 +19,9 @@ import java.util.Objects;
  * Represents the island notice notification dto builder.
  */
 public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
+
+    private final static String SUPPORT_CONTENT = "支持了你";
+    private final static String MEMBER_CONTENT = "支持了%d个月%s";
 
     private NotificationMessage notificationMessage;
     private IslandService islandService;
@@ -139,14 +143,23 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                     return noticeDTO;
                 }
 
-                noticeDTO.setIsland(
-                        this.islandDTOFactory.briefValueOf(
-                                this.islandService.retrieveIslandById(
-                                        noticeMessage.getMemberNotice().getIslandId())));
                 noticeDTO.setMember(
                         this.userDTOFactory.briefValueOf(
                                 this.userService.retrieveUserById(
                                         noticeMessage.getMemberNotice().getMemberId())));
+
+                if (StringUtils.isEmpty(noticeMessage.getMemberNotice().getIslandId())) { // process support message
+                    SkuMembershipDTO skuMembershipDTO = new SkuMembershipDTO();
+                    skuMembershipDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
+                    noticeDTO.setMembership(skuMembershipDTO);
+                    noticeDTO.setContent(SUPPORT_CONTENT);
+                    return noticeDTO;
+                }
+
+                noticeDTO.setIsland(
+                        this.islandDTOFactory.briefValueOf(
+                                this.islandService.retrieveIslandById(
+                                        noticeMessage.getMemberNotice().getIslandId())));
                 
                 SkuMembershipDTO skuMembershipDTO = new SkuMembershipDTO();
                 skuMembershipDTO.setId(noticeMessage.getMemberNotice().getMembershipId());
@@ -154,6 +167,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                 skuMembershipDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
                 skuMembershipDTO.setTimeInMonths(noticeMessage.getMemberNotice().getTimeInMonths());
                 noticeDTO.setMembership(skuMembershipDTO);
+                noticeDTO.setContent(String.format(MEMBER_CONTENT, noticeMessage.getMemberNotice().getTimeInMonths(), noticeMessage.getMemberNotice().getMembershipName()));
                 return noticeDTO;
 
             default:

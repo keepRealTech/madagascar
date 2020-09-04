@@ -136,6 +136,22 @@ public class PaymentService {
         return this.paymentRepository.save(payment);
     }
 
+    @Transactional
+    public Payment createNewWechatSupportPayment(WechatOrder wechatOrder, String payeeId, long priceInCents) {
+        Payment payment = Payment.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .type(PaymentType.SUPPORT.getValue())
+                .amountInCents(priceInCents)
+                .userId(wechatOrder.getUserId())
+                .state(PaymentState.DRAFTED.getValue())
+                .payeeId(payeeId)
+                .orderId(wechatOrder.getId())
+                .tradeNum(wechatOrder.getTradeNumber())
+                .build();
+
+        return this.paymentRepository.save(payment);
+    }
+
     /**
      * Creates new shell payments.
      *
@@ -301,6 +317,21 @@ public class PaymentService {
      */
     public Page<Payment> retrievePaymentsByUserId(String userId, Pageable pageable) {
         return this.paymentRepository.findAllValidPaymentsByUserId(userId, pageable);
+    }
+
+    /**
+     * merge user payment
+     *
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   mobile user id
+     */
+   public void mergeUserPayment(String wechatUserId, String webMobileUserId) {
+        this.paymentRepository.mergeUserPayment(wechatUserId, webMobileUserId);
+   }
+
+    public int supportCount(String userId) {
+        Integer count = this.paymentRepository.countByPayeeIdAndStateAndType(userId, PaymentState.CLOSED.getValue(), PaymentType.SUPPORT.getValue());
+        return count == null ? 0 : count;
     }
 
 }

@@ -36,6 +36,7 @@ public class WechatPayConfiguration extends WXPayConfig {
     private String refundCallbackAddress;
     private String certPath;
     private String hostIp;
+    private Boolean useSandBox = false;
 
     /**
      * Implements the app id getter.
@@ -109,7 +110,7 @@ public class WechatPayConfiguration extends WXPayConfig {
     @Bean(name = "wechatpay")
     @SneakyThrows
     public WXPay getWechatPayClient() {
-        return new WXPay(this, this.callbackAddress, this.refundCallbackAddress, false);
+        return new WXPay(this, this.callbackAddress, this.refundCallbackAddress, false, this.useSandBox);
     }
 
 }

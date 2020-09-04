@@ -19,8 +19,18 @@ asity:
   port: 6565
 
 rocketmq:
-  topic: notification-event
-  tag: event
+  notification:
+    topic: notification-event
+    tag: event
+  island:
+    topic: island-event
+    tag: event
+  user:
+    topic: user-event
+    tag: event
+  transaction:
+    topic: transaction-event
+    tag: event
 
 redis:
   port: 6379

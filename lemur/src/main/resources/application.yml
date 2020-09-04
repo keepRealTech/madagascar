@@ -124,6 +124,7 @@ client:
       100:
         currentVersion: 100
         nextVersion: 100
+    htmlHostName: http://test.keepreal.cn
 
 aliyun-oss:
   access-key: 123

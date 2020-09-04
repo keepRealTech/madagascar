@@ -22,13 +22,15 @@ global:
       vanga: 1
       asity: 1
     short_code_base: https://staging.keepreal.cn/s/%s
+    image_host: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com
+    html_host: http://test.keepreal.cn
     wechat_pay:
       callback_address: https://staging.keepreal.cn/api/v1/orders/wechat/callback
       refund_callback_address: https://staging.keepreal.cn/api/v1/orders/wechat/refund/callback
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.2.3-staging
+      tag: 1.2.4-staging
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
@@ -40,7 +42,7 @@ global:
       imagePullPolicy: Always
     coua:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-      tag: 1.0.9-staging
+      tag: 1.0.10-staging
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa

@@ -19,4 +19,6 @@ public class IOSClientConfiguration {
     private Map<Integer, ConfigurationDTO> versionInfoMap;
     private Map<Integer, UpdateInfoDTO> updateInfoMap;
 
+    private String htmlHostName;
+
 }

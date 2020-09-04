@@ -137,6 +137,7 @@ public class ConfigurationController implements ConfigApi {
      *
      * @return {@link AndroidSetupInfoResponse}.
      */
+    @CrossOrigin
     @Cacheable(value = "setupInfo-android")
     @CrossOrigin
     @Override
