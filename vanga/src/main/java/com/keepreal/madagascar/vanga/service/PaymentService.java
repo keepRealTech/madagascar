@@ -331,7 +331,7 @@ public class PaymentService {
    }
 
     public int supportCount(String userId) {
-        Integer count = this.paymentRepository.countByPayeeIdAndTypeAndStateIn(userId, PaymentType.SUPPORT.getValue(), Arrays.asList(PaymentState.OPEN.getValue(), PaymentState.CLOSED.getValue()));
+        Integer count = this.paymentRepository.countByPayeeIdAndTypeAndStateInAndDeletedIsFalse(userId, PaymentType.SUPPORT.getValue(), Arrays.asList(PaymentState.OPEN.getValue(), PaymentState.CLOSED.getValue()));
         return count == null ? 0 : count;
     }
 

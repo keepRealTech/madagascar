@@ -32,7 +32,7 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
            nativeQuery = true)
     Page<Payment> findAllValidPaymentsByUserId(String userId, Pageable pageable);
 
-    Integer countByPayeeIdAndTypeAndStateIn(String userId, int type, List<Integer> state);
+    Integer countByPayeeIdAndTypeAndStateInAndDeletedIsFalse(String userId, int type, List<Integer> state);
     @Modifying
     @Transactional
     @Query(value = "UPDATE balance_log SET user_id = ?1 WHERE user_id = ?2", nativeQuery = true)
