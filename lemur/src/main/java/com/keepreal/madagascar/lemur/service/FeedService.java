@@ -55,6 +55,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FeedService {
 
+    private static final String PUBLIC_INBOX_USER_ID = "00000000";
+
     private final Channel fossaChannel;
     private final Channel mantellaChannel;
     private final IslandService islandService;
@@ -366,15 +368,35 @@ public class FeedService {
     /**
      * Retrieves feeds.
      *
-     * @param userId         User id.
-     * @param timestampAfter Timestamp filter.
-     * @param pageSize       Page size.
+     * @param userId          User id.
+     * @param timestampAfter  Timestamp filter.
+     * @param timestampBefore Timestamp before.
+     * @param pageSize        Page size.
      * @return {@link FeedsResponse}.
      */
     public AbstractMap.SimpleEntry<Boolean, FeedsResponse> retrieveUserFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
         Assert.hasText(userId, "User id is null.");
 
         TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(userId, timestampAfter, timestampBefore, pageSize);
+
+        return new AbstractMap.SimpleEntry<>(timelinesResponse.getHasMore(),
+                this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
+                        .stream()
+                        .map(TimelineMessage::getFeedId)
+                        .collect(Collectors.toList()), userId));
+    }
+
+    /**
+     * Retrieves public feeds.
+     *
+     * @param userId          User id.
+     * @param timestampAfter  Timestamp filter.
+     * @param timestampBefore Timestamp before.
+     * @param pageSize        Page size.
+     * @return {@link FeedsResponse}.
+     */
+    public AbstractMap.SimpleEntry<Boolean, FeedsResponse> retrievePublicFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
+        TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(FeedService.PUBLIC_INBOX_USER_ID, timestampAfter, timestampBefore, pageSize);
 
         return new AbstractMap.SimpleEntry<>(timelinesResponse.getHasMore(),
                 this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()

@@ -71,7 +71,6 @@ public class FeedController implements FeedApi {
     private static final String POSTING_INSTRUCTION_CONTENT = "1.在电脑端打开跳岛官网 tiaodaoapp.com\r\n" +
             "2.微信扫码登录\r\n" +
             "3.点击\"发布\"按钮";
-    private static final String PUBLIC_INBOX_USER_ID = "00000000";
 
     private final ImageService imageService;
     private final FeedService feedService;
@@ -268,8 +267,10 @@ public class FeedController implements FeedApi {
      */
     @Override
     public ResponseEntity<TimelinesResponse> apiV1FeedsPublicGet(Long minTimestamp, Long maxTimestamp, Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
         AbstractMap.SimpleEntry<Boolean, FeedsResponse> entry =
-                this.feedService.retrieveUserFeeds(FeedController.PUBLIC_INBOX_USER_ID, minTimestamp, maxTimestamp, pageSize);
+                this.feedService.retrievePublicFeeds(userId, minTimestamp, maxTimestamp, pageSize);
 
         TimelinesResponse response = new TimelinesResponse();
         response.setData(entry.getValue().getFeedList()
