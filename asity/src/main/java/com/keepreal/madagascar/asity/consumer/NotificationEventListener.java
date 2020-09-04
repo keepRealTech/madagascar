@@ -35,7 +35,8 @@ public class NotificationEventListener implements MessageListener {
      * @param rongCloudService  {@link RongCloudService}.
      */
     public NotificationEventListener(ChatgroupService chatgroupService,
-                                     MembershipService membershipService, RongCloudService rongCloudService) {
+                                     MembershipService membershipService,
+                                     RongCloudService rongCloudService) {
         this.chatgroupService = chatgroupService;
         this.membershipService = membershipService;
         this.rongCloudService = rongCloudService;

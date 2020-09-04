@@ -6,8 +6,8 @@ import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.MessageListener;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.keepreal.madagascar.asity.service.RongCloudService;
-import com.keepreal.madagascar.coua.IslandEvent;
-import com.keepreal.madagascar.coua.IslandEventType;
+import com.keepreal.madagascar.coua.UserEvent;
+import com.keepreal.madagascar.coua.UserEventType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +15,11 @@ import java.util.Objects;
 
 @Component
 @Slf4j
-public class IslandEventListener implements MessageListener {
+public class UserEventListener implements MessageListener {
 
     private final RongCloudService rongCloudService;
 
-    public IslandEventListener(RongCloudService rongCloudService) {
+    public UserEventListener(RongCloudService rongCloudService) {
         this.rongCloudService = rongCloudService;
     }
 
@@ -29,16 +29,16 @@ public class IslandEventListener implements MessageListener {
             if (Objects.isNull(message) || Objects.isNull(message.getBody())) {
                 return Action.CommitMessage;
             }
-            IslandEvent islandEvent = IslandEvent.parseFrom(message.getBody());
+            UserEvent userEvent = UserEvent.parseFrom(message.getBody());
 
-            if (IslandEventType.ISLAND_EVENT_CREATE.equals(islandEvent.getType())) {
-                this.rongCloudService.sentCreateIslandNotice(islandEvent.getCreateIslandEvent());
+            if (UserEventType.USER_EVENT_CREATE.equals(userEvent.getType())) {
+                this.rongCloudService.sentCreateUserNotice(userEvent.getCreateUserEvent());
                 return Action.CommitMessage;
             }
 
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {
-            log.warn("Bad formatted island event, skipped.");
+            log.warn("Bad formatted user event, skipped.");
             return Action.CommitMessage;
         } catch (Exception e) {
             return Action.ReconsumeLater;
