@@ -5,11 +5,12 @@ import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.fossa.dao.BoxInfoRepository;
 import com.keepreal.madagascar.fossa.model.BoxInfo;
+import com.keepreal.madagascar.fossa.model.FeedInfo;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
@@ -20,11 +21,14 @@ public class BoxInfoService {
 
     private final BoxInfoRepository boxInfoRepository;
     private final LongIdGenerator idGenerator;
+    private final MongoTemplate mongoTemplate;
 
     public BoxInfoService(BoxInfoRepository boxInfoRepository,
-                          LongIdGenerator idGenerator) {
+                          LongIdGenerator idGenerator,
+                          MongoTemplate mongoTemplate) {
         this.boxInfoRepository = boxInfoRepository;
         this.idGenerator = idGenerator;
+        this.mongoTemplate = mongoTemplate;
     }
 
     public BoxInfo createOrUpdate(BoxInfo boxInfo) {
@@ -102,6 +106,8 @@ public class BoxInfoService {
             return null;
         }
 
+        long totalCount = mongoTemplate.count(this.retrieveAnswerAndVisibleQuestion(boxInfo.getIslandId()), FeedInfo.class);
+
         return BoxMessage.newBuilder()
                 .setId(boxInfo.getId())
                 .setIsland(boxInfo.getIslandId())
@@ -109,7 +115,7 @@ public class BoxInfoService {
                 .addAllMembershipIds(StringUtils.isEmpty(boxInfo.getMembershipIds()) ?
                         Collections.emptyList() :
                         Arrays.asList(boxInfo.getMembershipIds().split(",")))
-                .setAnsweredQuestionCount(boxInfo.getAnsweredQuestionCount())
+                .setAnsweredQuestionCount((int) totalCount)
                 .setHostId(boxInfo.getHostId())
                 .build();
     }
