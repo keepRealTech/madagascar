@@ -330,7 +330,7 @@ public class PaymentService {
    }
 
     public int supportCount(String userId) {
-        Integer count = this.paymentRepository.countByPayeeIdAndStateAndType(userId, PaymentState.CLOSED.getValue(), PaymentType.SUPPORT.getValue());
+        Integer count = this.paymentRepository.countByPayeeIdAndStateAndType(userId, PaymentState.OPEN.getValue(), PaymentType.SUPPORT.getValue());
         return count == null ? 0 : count;
     }
 
