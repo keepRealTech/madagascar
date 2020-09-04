@@ -109,7 +109,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         RegisterResponse response;
         try {
             String token = this.rongCloudService.register(request.getUserId(), request.getUserName(),
-                    String.format("https://%s/%s", this.rongCloudConfiguration.getImageHost(), request.getPortraitUrl()));
+                    String.format("https://%s/%s", this.rongCloudConfiguration.getImageHost(), request.getPortraitUri()));
             response = RegisterResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setToken(token)

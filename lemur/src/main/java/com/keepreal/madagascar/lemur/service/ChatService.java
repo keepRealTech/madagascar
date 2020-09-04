@@ -74,7 +74,7 @@ public class ChatService {
         RegisterRequest request = RegisterRequest.newBuilder()
                 .setUserId(user.getId())
                 .setUserName(user.getName())
-                .setPortraitUrl(String.format("https://images.keepreal.cn/%s", user.getPortraitImageUri()))
+                .setPortraitUri(user.getPortraitImageUri())
                 .build();
 
         RegisterResponse response;

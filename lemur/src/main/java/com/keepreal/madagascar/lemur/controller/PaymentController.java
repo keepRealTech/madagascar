@@ -236,9 +236,9 @@ public class PaymentController implements PaymentApi {
 
         H5RedirectDTO data = new H5RedirectDTO();
         if (this.auditUserIds.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
-            data.setUrl(String.format("%s/pay-ios?sid=%s&id=%s", this.iosClientConfiguration.getMembershipAuditUrl(), membershipId, id));
+            data.setUrl(String.format("%s/pay-ios?sid=%s&id=%s", this.iosClientConfiguration.getHtmlHostName(), membershipId, id));
         } else {
-            data.setUrl(String.format("%s/pay?sid=%s&id=%s", this.iosClientConfiguration.getMembershipPayUrl(), membershipId, id));
+            data.setUrl(String.format("%s/pay?sid=%s&id=%s", this.iosClientConfiguration.getHtmlHostName(), membershipId, id));
         }
 
         H5RedirectResponse response = new H5RedirectResponse();
@@ -263,9 +263,9 @@ public class PaymentController implements PaymentApi {
 
         H5RedirectDTO data = new H5RedirectDTO();
         if (this.auditUserIds.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
-            data.setUrl(String.format("%s/pay-ta?id=%s", this.iosClientConfiguration.getMembershipAuditUrl(), id));
+            data.setUrl(String.format("%s/pay-ta-ios?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
         } else {
-            data.setUrl(String.format("%s/pay-ta-ios?id=%s", this.iosClientConfiguration.getMembershipPayUrl(), id));
+            data.setUrl(String.format("%s/pay-ta?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
         }
 
         H5RedirectResponse response = new H5RedirectResponse();

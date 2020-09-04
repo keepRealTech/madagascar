@@ -16,7 +16,7 @@ message ChatAccessMessage {
 message RegisterRequest {
   string userId = 1;
   string userName = 2;
-  string portraitUrl = 3;
+  string portraitUri = 3;
 }
 
 message RegisterResponse {
