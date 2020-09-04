@@ -198,6 +198,7 @@ public class IslandController implements IslandApi {
      * @param refererId user id.
      * @return {@link IslandPosterResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<IslandPosterResponse> apiV1IslandsIdPosterGet(String id, @NotNull @Valid String refererId) {
         PosterIslandDTO posterIslandDTO = new PosterIslandDTO();
