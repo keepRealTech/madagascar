@@ -59,9 +59,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.keepreal.madagascar.vanga.model.WechatOrderType.PAYSUPPORT;
-import static com.keepreal.madagascar.vanga.model.WechatOrderType.PAYSUPPORTH5;
-
 /**
  * Represents the payment grpc controller.
  */
@@ -69,7 +66,7 @@ import static com.keepreal.madagascar.vanga.model.WechatOrderType.PAYSUPPORTH5;
 @Slf4j
 public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImplBase {
 
-    private final static String SUPPORT_TEXT = "";
+    private final static String SUPPORT_TEXT = "夏日炎炎，请TA吃个椰子吧";
     private final static String MEMBERSHIP_TEMPLATE = "支持创作者 ¥%.2f（¥%.2f x %d个月）";
     private final static String SPONSOR_TEMPLATE = "支持一下创作者 ¥%.2f";
 

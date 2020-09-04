@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -330,7 +331,7 @@ public class PaymentService {
    }
 
     public int supportCount(String userId) {
-        Integer count = this.paymentRepository.countByPayeeIdAndStateAndType(userId, PaymentState.CLOSED.getValue(), PaymentType.SUPPORT.getValue());
+        Integer count = this.paymentRepository.countByPayeeIdAndTypeAndStateInAndDeletedIsFalse(userId, PaymentType.SUPPORT.getValue(), Arrays.asList(PaymentState.OPEN.getValue(), PaymentState.CLOSED.getValue()));
         return count == null ? 0 : count;
     }
 
