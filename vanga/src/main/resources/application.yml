@@ -50,7 +50,9 @@ rocketmq:
     topic: transaction-event
     groupId: GID-vanga-transaction
     tag: event
+
 snowflake:
   nodeId: 0
+
 server:
   port: 8000

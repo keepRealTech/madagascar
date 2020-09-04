@@ -64,10 +64,11 @@ public class WechatPayService {
                                      String propertyId,
                                      WechatOrderType wechatOrderType,
                                      SceneType sceneType,
-                                     String remoteIp) {
+                                     String remoteIp,
+                                     String description) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
 
-        String description = String.format("Type:[%s], Id:[%s]", wechatOrderType.name(), propertyId);
+        description = StringUtils.isEmpty(description) ? String.format("Type:[%s], Id:[%s]", wechatOrderType.name(), propertyId) : description;
 
         boolean isH5 = this.isH5Pay(wechatOrderType);
 
@@ -95,7 +96,7 @@ public class WechatPayService {
             requestBody.put("trade_type", tradeType);
             requestBody.put("out_trade_no", tradeNum);
             requestBody.put("total_fee", feeInCents);
-            requestBody.put("body", "测测变了吗");
+            requestBody.put("body", description);
             requestBody.put("spbill_create_ip", remoteIp);
 
             if (isH5) {
@@ -346,6 +347,12 @@ public class WechatPayService {
         return wechatOrder;
     }
 
+    /**
+     * Checks if it is H5 pay.
+     *
+     * @param type {@link WechatOrderType}.
+     * @return True if it is h5 payment.
+     */
     private boolean isH5Pay(WechatOrderType type) {
         return WechatOrderType.PAYMEMBERSHIPH5.equals(type) || WechatOrderType.PAYSUPPORTH5.equals(type);
     }
