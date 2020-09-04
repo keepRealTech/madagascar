@@ -18,4 +18,6 @@ public interface UserDeviceInfoRepository extends JpaRepository<UserDeviceInfo, 
 
     @Query(value = "SELECT device_token AS deviceToken, device_type AS deviceType FROM user_device WHERE user_id = ?1 AND is_binded = TRUE AND is_deleted = FALSE", nativeQuery = true)
     List<SimpleDeviceToken> findDeviceTokensByUserId(String userId);
+
+    List<UserDeviceInfo> findAllByDeviceTokenAndDeletedIsFalse(String deviceToken);
 }
