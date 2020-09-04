@@ -30,6 +30,7 @@ import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.service.AliyunSmsService;
 import com.keepreal.madagascar.coua.service.TransactionProducerService;
 import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
+import com.keepreal.madagascar.coua.service.UserEventProducerService;
 import com.keepreal.madagascar.coua.service.UserIdentityService;
 import com.keepreal.madagascar.coua.service.UserInfoService;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
@@ -59,27 +60,31 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     private final AliyunSmsService aliyunSmsService;
     private final RedissonClient redissonClient;
     private final TransactionProducerService transactionProducerService;
+    private final UserEventProducerService userEventProducerService;
 
     /**
      * Constructs user grpc controller.
      *
-     * @param userInfoService       {@link UserInfoService}.
-     * @param userDeviceInfoService {@link UserDeviceInfoService}.
-     * @param userIdentityService   {@link UserIdentityService}.
-     * @param aliyunSmsService      {@link AliyunSmsService}
+     * @param userInfoService          {@link UserInfoService}.
+     * @param userDeviceInfoService    {@link UserDeviceInfoService}.
+     * @param userIdentityService      {@link UserIdentityService}.
+     * @param aliyunSmsService         {@link AliyunSmsService}
+     * @param userEventProducerService {@link UserEventProducerService}.
      */
     public UserGRpcController(UserInfoService userInfoService,
                               UserDeviceInfoService userDeviceInfoService,
                               UserIdentityService userIdentityService,
                               AliyunSmsService aliyunSmsService,
                               RedissonClient redissonClient,
-                              TransactionProducerService transactionProducerService) {
+                              TransactionProducerService transactionProducerService,
+                              UserEventProducerService userEventProducerService) {
         this.userInfoService = userInfoService;
         this.userDeviceInfoService = userDeviceInfoService;
         this.userIdentityService = userIdentityService;
         this.aliyunSmsService = aliyunSmsService;
         this.redissonClient = redissonClient;
         this.transactionProducerService = transactionProducerService;
+        this.userEventProducerService = userEventProducerService;
     }
 
     /**
@@ -106,7 +111,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                 userInfo.setBirthday(Date.valueOf(birthdayStr));
             }
         }
-        basicResponse(responseObserver, userInfoService.createUser(userInfo));
+        UserInfo user = userInfoService.createUser(userInfo);
+        this.userEventProducerService.produceCreateUserEventAsync(user.getId());
+        basicResponse(responseObserver, user);
     }
 
     /**
@@ -317,7 +324,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     /**
      * 更新当前用户手机号 (如果手机号有H5注册登录信息则进行账号合并)
      *
-     * @param request {@link UpdateUserMobileRequest}
+     * @param request          {@link UpdateUserMobileRequest}
      * @param responseObserver {@link StreamObserver}
      */
     @Override
@@ -352,7 +359,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     /**
      * 判断手机号是否已经被绑定
      *
-     * @param request {@link CheckUserMobileIsExistedRequest}
+     * @param request          {@link CheckUserMobileIsExistedRequest}
      * @param responseObserver {@link StreamObserver}
      */
     @Override
@@ -372,8 +379,8 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     /**
      * 合并用户账户信息
      *
-     * @param wechatUserId      wechat user id
-     * @param webMobileUserId   web user id
+     * @param wechatUserId    wechat user id
+     * @param webMobileUserId web user id
      */
     private void mergeUserAccounts(String wechatUserId, String webMobileUserId) {
         this.transactionProducerService.produceMergeUserAccountsTransactionEventAsync(wechatUserId, webMobileUserId);
