@@ -20,3 +20,4 @@ data:
   ROCKETMQ_CHAT_TAG: {{ .Values.rocketmq.chat.tag }}
   GRPC_COUA_HOST: {{ .Values.coua.host }}
   GRPC_COUA_PORT: '{{ .Values.coua.port }}'
+  RONGCLOUD_IMAGEHOST: {{ .Values.global.common_configs.image_host }}

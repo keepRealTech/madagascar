@@ -88,6 +88,32 @@ public class RongCloudService {
     }
 
     /**
+     * Tries to update the user info in rong cloud.
+     *
+     * @param userId        User id.
+     * @param userName      User name.
+     * @param portraitUrl   Portrait url.
+     */
+    @SneakyThrows
+    public void updateUser(String userId, String userName, String portraitUrl) {
+        UserModel userModel = new UserModel()
+                .setId(userId);
+
+        if (Objects.nonNull(userName)) {
+            userModel.setName(userName);
+        }
+
+        if (Objects.nonNull(portraitUrl)) {
+            userModel.setPortrait(portraitUrl);
+        }
+        Result refreshResult = this.client.user.update(userModel);
+
+        if (!refreshResult.getCode().equals(200)) {
+            log.warn("Failed to update user info for {}", userId);
+        }
+    }
+
+    /**
      * Creates a new group chat.
      *
      * @param id     Group id.

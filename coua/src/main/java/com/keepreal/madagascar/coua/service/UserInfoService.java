@@ -214,6 +214,7 @@ public class UserInfoService {
 
     /**
      * 根据手机号查找微信用户(unionId不为空)
+     *
      * @param mobile 手机号
      * @return {@link UserInfo}
      */
@@ -224,8 +225,8 @@ public class UserInfoService {
     /**
      * 合并user表信息
      *
-     * @param wechatUserId      wechat user id
-     * @param webMobileUserId   mobile user id
+     * @param wechatUserId    wechat user id
+     * @param webMobileUserId mobile user id
      */
     @Transactional
     public void mergeUserAccounts(String wechatUserId, String webMobileUserId) {

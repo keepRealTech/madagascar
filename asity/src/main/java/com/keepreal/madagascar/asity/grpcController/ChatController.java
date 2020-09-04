@@ -18,7 +18,9 @@ import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
+import com.keepreal.madagascar.asity.UpdateRongCloudUserRequest;
 import com.keepreal.madagascar.asity.UserChatgroupsResponse;
+import com.keepreal.madagascar.asity.config.RongCloudConfiguration;
 import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
 import com.keepreal.madagascar.asity.factory.IslandChatAccessMessageFactory;
 import com.keepreal.madagascar.asity.model.Chatgroup;
@@ -66,6 +68,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     private final ChatgroupMessageFactory chatgroupMessageFactory;
     private final IslandChatAccessMessageFactory islandChatAccessMessageFactory;
 
+    private final RongCloudConfiguration rongCloudConfiguration;
+
     /**
      * Constructs the chat controller.
      *
@@ -75,19 +79,22 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
      * @param chatEventProducerService       {@link ChatEventProducerService}.
      * @param chatgroupMessageFactory        {@link IslandChatAccessService}.
      * @param islandChatAccessMessageFactory {@link IslandChatAccessMessageFactory}.
+     * @param rongCloudConfiguration         {@link RongCloudConfiguration}.
      */
     public ChatController(ChatgroupService chatgroupService,
                           RongCloudService rongCloudService,
                           IslandChatAccessService islandChatAccessService,
                           ChatEventProducerService chatEventProducerService,
                           ChatgroupMessageFactory chatgroupMessageFactory,
-                          IslandChatAccessMessageFactory islandChatAccessMessageFactory) {
+                          IslandChatAccessMessageFactory islandChatAccessMessageFactory,
+                          RongCloudConfiguration rongCloudConfiguration) {
         this.chatgroupService = chatgroupService;
         this.rongCloudService = rongCloudService;
         this.islandChatAccessService = islandChatAccessService;
         this.chatEventProducerService = chatEventProducerService;
         this.chatgroupMessageFactory = chatgroupMessageFactory;
         this.islandChatAccessMessageFactory = islandChatAccessMessageFactory;
+        this.rongCloudConfiguration = rongCloudConfiguration;
     }
 
     /**
@@ -102,7 +109,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         RegisterResponse response;
         try {
             String token = this.rongCloudService.register(request.getUserId(), request.getUserName(),
-                    String.format("https://images.keepreal.cn/%s", request.getPortraitUrl()));
+                    String.format("https://%s/%s", this.rongCloudConfiguration.getImageHost(), request.getPortraitUrl()));
             response = RegisterResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setToken(token)
@@ -456,6 +463,25 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     public void deleteChatgroupMembershipByMembershipId(DeleteChatgroupMembershipByMembershipIdRequest request,
                                                         StreamObserver<CommonStatus> responseObserver) {
         this.chatgroupService.deleteChatgroupMembershipsByMembershipId(request.getMemberhsipId());
+
+        CommonStatus response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Updates the user info for rong cloud.
+     *
+     * @param request {@link UpdateRongCloudUserRequest}.
+     * @param responseObserver {@link CommonStatus}.
+     */
+    @Override
+    public void updateRongCloudUser(UpdateRongCloudUserRequest request,
+                                    StreamObserver<CommonStatus> responseObserver) {
+        this.rongCloudService.updateUser(request.getUserId(),
+                request.hasName() ? request.getName().getValue() : null,
+                request.hasPortraitImageUri() ?
+                        String.format("https://%s/%s", this.rongCloudConfiguration.getImageHost(), request.getPortraitImageUri().getValue()) : null);
 
         CommonStatus response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         responseObserver.onNext(response);

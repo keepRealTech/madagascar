@@ -14,5 +14,6 @@ public class RongCloudConfiguration {
 
     private String appKey;
     private String appSecret;
+    private String imageHost;
 
 }
