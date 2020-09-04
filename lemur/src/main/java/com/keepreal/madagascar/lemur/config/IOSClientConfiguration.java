@@ -19,9 +19,6 @@ public class IOSClientConfiguration {
     private Map<Integer, ConfigurationDTO> versionInfoMap;
     private Map<Integer, UpdateInfoDTO> updateInfoMap;
 
-    private String membershipAuditUrl;
-    private String membershipPayUrl;
-    private String sponsorAuditUrl;
-    private String sponsorPayUrl;
+    private String htmlHostName;
 
 }

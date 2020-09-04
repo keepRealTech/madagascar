@@ -1022,6 +1022,7 @@ paths:
     get:
       parameters:
         - $ref: '#/components/parameters/versionInQuery'
+        - $ref: '#/components/parameters/membershipIdInQuery'
       tags:
         - Payment
       summary: 会员订购H5跳转
@@ -2319,6 +2320,12 @@ components:
     videoIdInQuery:
       in: query
       name: videoId
+      required: true
+      schema:
+        type: string
+    membershipIdInQuery:
+      in: query
+      name: membershipId
       required: true
       schema:
         type: string

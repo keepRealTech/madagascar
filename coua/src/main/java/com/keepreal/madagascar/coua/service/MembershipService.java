@@ -26,7 +26,7 @@ public class MembershipService {
     private final SubscribeMembershipService subscribeMembershipService;
     private final SubscriptionService subscriptionService;
     private final SkuService skuService;
-    private final ChatgroupService chatgroupService;
+    private final ChatService chatService;
 
     /**
      * Constructor the membership service.
@@ -36,19 +36,19 @@ public class MembershipService {
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param subscriptionService        {@link SubscriptionService}.
      * @param skuService                 {@link SkuService}.
-     * @param chatgroupService           {@link ChatgroupService}.
+     * @param chatService                {@link ChatService}.
      */
     public MembershipService(MembershipInfoRepository repository,
                              LongIdGenerator idGenerator,
                              SubscribeMembershipService subscribeMembershipService,
                              SubscriptionService subscriptionService,
-                             SkuService skuService, ChatgroupService chatgroupService) {
+                             SkuService skuService, ChatService chatService) {
         this.repository = repository;
         this.idGenerator = idGenerator;
         this.subscribeMembershipService = subscribeMembershipService;
         this.subscriptionService = subscriptionService;
         this.skuService = skuService;
-        this.chatgroupService = chatgroupService;
+        this.chatService = chatService;
     }
 
     public MembershipInfo createMembership(MembershipInfo membershipInfo) {
@@ -152,7 +152,7 @@ public class MembershipService {
         membership.setDeleted(true);
         this.skuService.deleteMembershipSkusByMembershipId(membership.getId());
         this.updateMembership(membership);
-        this.chatgroupService.deleteChatgroupMembershipByMembershipId(membership.getId());
+        this.chatService.deleteChatgroupMembershipByMembershipId(membership.getId());
     }
 
     /**

@@ -124,10 +124,7 @@ client:
       100:
         currentVersion: 100
         nextVersion: 100
-    membershipAuditUrl: http://test.keepreal.cn/
-    membershipPayUrl: http://test.keepreal.cn/
-    sponsorAuditUrl: http://test.keepreal.cn/
-    sponsorPayUrl: http://test.keepreal.cn/
+    htmlHostName: http://test.keepreal.cn
 
 aliyun-oss:
   access-key: 123

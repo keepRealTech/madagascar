@@ -28,6 +28,7 @@ import com.keepreal.madagascar.coua.UsersReponse;
 import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.service.AliyunSmsService;
+import com.keepreal.madagascar.coua.service.ChatService;
 import com.keepreal.madagascar.coua.service.TransactionProducerService;
 import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
 import com.keepreal.madagascar.coua.service.UserEventProducerService;
@@ -54,6 +55,7 @@ import java.util.stream.Collectors;
 @GRpcService
 public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
 
+    private final ChatService chatService;
     private final UserInfoService userInfoService;
     private final UserDeviceInfoService userDeviceInfoService;
     private final UserIdentityService userIdentityService;
@@ -65,19 +67,23 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     /**
      * Constructs user grpc controller.
      *
-     * @param userInfoService          {@link UserInfoService}.
-     * @param userDeviceInfoService    {@link UserDeviceInfoService}.
-     * @param userIdentityService      {@link UserIdentityService}.
-     * @param aliyunSmsService         {@link AliyunSmsService}
-     * @param userEventProducerService {@link UserEventProducerService}.
+     * @param chatService                {@link ChatService}.
+     * @param userInfoService            {@link UserInfoService}.
+     * @param userDeviceInfoService      {@link UserDeviceInfoService}.
+     * @param userIdentityService        {@link UserIdentityService}.
+     * @param aliyunSmsService           {@link AliyunSmsService}
+     * @param redissonClient             {@link RedissonClient}.
+     * @param transactionProducerService {@link TransactionProducerService}.
      */
-    public UserGRpcController(UserInfoService userInfoService,
+    public UserGRpcController(ChatService chatService,
+                              UserInfoService userInfoService,
                               UserDeviceInfoService userDeviceInfoService,
                               UserIdentityService userIdentityService,
                               AliyunSmsService aliyunSmsService,
                               RedissonClient redissonClient,
                               TransactionProducerService transactionProducerService,
                               UserEventProducerService userEventProducerService) {
+        this.chatService = chatService;
         this.userInfoService = userInfoService;
         this.userDeviceInfoService = userDeviceInfoService;
         this.userIdentityService = userIdentityService;
@@ -210,6 +216,12 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         }
 
         basicResponse(responseObserver, userInfoService.updateUser(userInfo));
+
+        if (request.hasName() || request.hasPortraitImageUri()) {
+            this.chatService.updateRongCloudUserInfo(request.getId(),
+                    userInfo.getNickName(),
+                    userInfo.getPortraitImageUri());
+        }
     }
 
     /**

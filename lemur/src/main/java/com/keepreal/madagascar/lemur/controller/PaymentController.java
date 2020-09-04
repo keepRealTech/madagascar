@@ -229,15 +229,16 @@ public class PaymentController implements PaymentApi {
      */
     @Override
     public ResponseEntity<H5RedirectResponse> apiV1IslandsIdMemberSubscriptionIosPayGet(String id,
-                                                                                        Integer version) {
+                                                                                        Integer version,
+                                                                                        String membershipId) {
         String userId = HttpContextUtils.getUserIdFromContext();
         ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
 
         H5RedirectDTO data = new H5RedirectDTO();
         if (this.auditUserIds.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
-            data.setUrl(this.iosClientConfiguration.getMembershipAuditUrl());
+            data.setUrl(String.format("%s/pay-ios?sid=%s&id=%s", this.iosClientConfiguration.getHtmlHostName(), membershipId, id));
         } else {
-            data.setUrl(this.iosClientConfiguration.getMembershipPayUrl());
+            data.setUrl(String.format("%s/pay?sid=%s&id=%s", this.iosClientConfiguration.getHtmlHostName(), membershipId, id));
         }
 
         H5RedirectResponse response = new H5RedirectResponse();
@@ -262,9 +263,9 @@ public class PaymentController implements PaymentApi {
 
         H5RedirectDTO data = new H5RedirectDTO();
         if (this.auditUserIds.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
-            data.setUrl(this.iosClientConfiguration.getSponsorAuditUrl());
+            data.setUrl(String.format("%s/pay-ta-ios?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
         } else {
-            data.setUrl(this.iosClientConfiguration.getSponsorPayUrl());
+            data.setUrl(String.format("%s/pay-ta?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
         }
 
         H5RedirectResponse response = new H5RedirectResponse();
@@ -342,10 +343,9 @@ public class PaymentController implements PaymentApi {
         switch (sceneType) {
             case IOS:
                 return com.keepreal.madagascar.common.SceneType.SCENE_IOS;
-            case WAP:
-                return com.keepreal.madagascar.common.SceneType.SCENE_WAP;
             case ANDROID:
                 return com.keepreal.madagascar.common.SceneType.SCENE_ANDROID;
+            case WAP:
             default:
                 return com.keepreal.madagascar.common.SceneType.SCENE_WAP;
         }

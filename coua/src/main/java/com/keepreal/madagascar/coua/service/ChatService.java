@@ -1,18 +1,22 @@
 package com.keepreal.madagascar.coua.service;
 
+import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.DeleteChatgroupMembershipByMembershipIdRequest;
+import com.keepreal.madagascar.asity.UpdateRongCloudUserRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import io.grpc.Channel;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 /**
  * Represents the chatgroup service.
  */
 @Service
-public class ChatgroupService {
+public class ChatService {
 
     private final Channel channel;
 
@@ -21,7 +25,7 @@ public class ChatgroupService {
      *
      * @param channel GRpc managed channel connection to service Vanga.
      */
-    public ChatgroupService(@Qualifier("asityChannel") Channel channel) {
+    public ChatService(@Qualifier("asityChannel") Channel channel) {
         this.channel = channel;
     }
 
@@ -38,6 +42,30 @@ public class ChatgroupService {
 
         try {
             stub.deleteChatgroupMembershipByMembershipId(request);
+        } catch (Exception e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+    }
+
+    /**
+     * Updates the rong cloud user info.
+     *
+     * @param userId           User id.
+     * @param userName         User name.
+     * @param portraitImageUri User portrait.
+     */
+    public void updateRongCloudUserInfo(String userId, String userName, String portraitImageUri) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        UpdateRongCloudUserRequest request = UpdateRongCloudUserRequest
+                .newBuilder()
+                .setUserId(userId)
+                .setName(userName)
+                .setPortraitImageUri(portraitImageUri)
+                .build();
+
+        try {
+            stub.updateRongCloudUser(request);
         } catch (Exception e) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
