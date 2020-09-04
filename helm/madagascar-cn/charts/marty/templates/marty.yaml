@@ -108,7 +108,7 @@ spec:
                 secretKeyRef:
                   name: jpush
                   key: app-secret
-            - name: JPUSH_JPUSHPRODUCTION
+            - name: JPUSH_ISPRODUCTION
               valueFrom:
                 secretKeyRef:
                   name: jpush
@@ -124,7 +124,7 @@ spec:
                   key: password
                   name: aliyun-redis
             - name: RESTART
-              value: "1"
+              value: "2"
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}

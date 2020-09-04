@@ -139,6 +139,7 @@ public class ConfigurationController implements ConfigApi {
      */
     @CrossOrigin
     @Cacheable(value = "setupInfo-android")
+    @CrossOrigin
     @Override
     public ResponseEntity<AndroidSetupInfoResponse> apiV1SetupInfoAndroidGet() {
         AndroidSetupInfoResponse response = new AndroidSetupInfoResponse();
