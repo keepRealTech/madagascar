@@ -53,6 +53,12 @@ public class StatisticsService {
         WorkflowLog workflowLog = this.workflowService.initialize("daily increment report");
 
         List<IslandIncrement> islandIncrements = this.subscriptionService.retrieveIslandIds();
+        if (islandIncrements.isEmpty()) {
+            this.larkService.sendMessage("没有哦");
+            this.workflowService.succeed(workflowLog);
+            return;
+        }
+
         Map<String, BigInteger> islandIncrementMap = islandIncrements.stream()
                 .collect(Collectors.toMap(IslandIncrement::getIslandId, IslandIncrement::getIncrement, (mem1, mem2) -> mem1, HashMap::new));
 

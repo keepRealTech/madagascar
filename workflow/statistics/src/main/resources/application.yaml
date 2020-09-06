@@ -21,7 +21,7 @@ executor:
   threads: 20
 
 statistics:
-  incre-islander-threshold: 5
+  incre-islander-threshold: 10
 
 workflow:
   type: statistics-daily
