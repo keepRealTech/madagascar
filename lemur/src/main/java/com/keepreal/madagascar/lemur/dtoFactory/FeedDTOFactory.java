@@ -109,7 +109,6 @@ public class FeedDTOFactory {
             feedDTO.setRepostCount(feed.getRepostCount());
             feedDTO.setCreatedAt(feed.getCreatedAt());
             feedDTO.setIsLiked(feed.getIsLiked());
-            feedDTO.setIsAccess(feed.getIsAccess());
             feedDTO.setIsMembership(feed.getIsMembership());
             feedDTO.setIsTop(feed.getIsTop());
             feedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
@@ -124,13 +123,18 @@ public class FeedDTOFactory {
                 feedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
             }
 
+            feedDTO.setIsAccess(true);
             if (!CollectionUtils.isEmpty(feed.getMembershipIdList())) {
                 List<MembershipMessage> membershipMessages = this.membershipService.retrieveMembershipsByIds(feed.getMembershipIdList());
                 feedDTO.setIsMembership(!CollectionUtils.isEmpty(membershipMessages));
+                feedDTO.setIsAccess(feed.getIsAccess() || membershipMessages.isEmpty());
 
-                feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
-                feedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
+                if (!membershipMessages.isEmpty()) {
+                    feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
+                    feedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
+                }
             }
+
             feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
             feedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
 
@@ -207,8 +211,9 @@ public class FeedDTOFactory {
         snapshotFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
         snapshotFeedDTO.setCreatedAt(feed.getCreatedAt());
         snapshotFeedDTO.setIsDeleted(this.ehcacheService.checkFeedDeleted(feed.getId()));
-        snapshotFeedDTO.setIsAccess(feed.getIsAccess());
         snapshotFeedDTO.setPriceInCents(feed.getPriceInCents());
+
+        snapshotFeedDTO.setIsAccess(feed.getIsAccess());
 
         snapshotFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
         snapshotFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
@@ -299,7 +304,6 @@ public class FeedDTOFactory {
             fullFeedDTO.setRepostCount(feed.getRepostCount());
             fullFeedDTO.setCreatedAt(feed.getCreatedAt());
             fullFeedDTO.setIsLiked(feed.getIsLiked());
-            fullFeedDTO.setIsAccess(feed.getIsAccess());
             fullFeedDTO.setIsMembership(feed.getIsMembership());
             fullFeedDTO.setIsTop(feed.getIsTop());
             fullFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
@@ -324,12 +328,16 @@ public class FeedDTOFactory {
                 fullFeedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
             }
 
+            fullFeedDTO.setIsAccess(true);
             if (!CollectionUtils.isEmpty(feed.getMembershipIdList())) {
                 List<MembershipMessage> membershipMessages = this.membershipService.retrieveMembershipsByIds(feed.getMembershipIdList());
                 fullFeedDTO.setIsMembership(!CollectionUtils.isEmpty(membershipMessages));
+                fullFeedDTO.setIsAccess(feed.getIsAccess() || membershipMessages.isEmpty());
 
-                fullFeedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
-                fullFeedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
+                if (!membershipMessages.isEmpty()) {
+                    fullFeedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
+                    fullFeedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
+                }
             }
             fullFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
             fullFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));

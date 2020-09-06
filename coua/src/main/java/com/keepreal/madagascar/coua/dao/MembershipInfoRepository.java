@@ -24,4 +24,7 @@ public interface MembershipInfoRepository extends JpaRepository<MembershipInfo, 
     MembershipInfo findMembershipInfoByIslandIdAndTopIsTrueAndActiveIsTrueAndDeletedIsFalse(String islandId);
 
     Integer countByIslandIdAndDeletedIsFalse(String islandId);
+
+    List<MembershipInfo> findAllByIdInAndDeletedIsFalse(Iterable<String> ids);
+
 }
