@@ -84,7 +84,7 @@ public class MembershipService {
     }
 
     public List<MembershipInfo> getMembershipListByIds(Iterable<String> ids) {
-        return this.repository.findAllById(ids);
+        return this.repository.findAllByIdInAndDeletedIsFalse(ids);
     }
 
     public MembershipInfo updateMembership(MembershipInfo membershipInfo) {
