@@ -28,8 +28,7 @@ data:
   SYSTEMNOTIFICATION_PORTRAITIMAGEURI: {{ .Values.system_notification.portrait_image_uri }}
   ROCKETMQ_STATSEVENT_TOPIC: {{ .Values.rocketmq.topic }}
   ROCKETMQ_STATSEVENT_TAG: {{ .Values.rocketmq.tag }}
-#  OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
-  OPENTRACING_JAEGER_PROBABILISTICSAMPLER_SAMPLINGRATE: '0.1'
+  OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   SECURITY_OAUTH2_RESOURCE_TOKENINFOURI: {{ .Values.security.oauth2.resource.token_info_uri }}
   SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
   ALIYUNOSS_EXPIRETIMEINSECONDS: '{{ .Values.aliyun_oss.expire_time_in_seconds }}'
