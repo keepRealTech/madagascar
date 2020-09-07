@@ -3,7 +3,7 @@ import json
 
 class TestSet(TaskSet):
 
-    token = ""
+    token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2MDAwNzY0ODksInVzZXJfbmFtZSI6IjY2NzEwNzAzMDcyNzg2NTEzOTIiLCJhdXRob3JpdGllcyI6WyJ1c2VyXzY2NzEwNzAzMDcyNzg2NTEzOTIiXSwianRpIjoiNWM3YTZhN2MtMWExMy00MzU0LTgzNzAtMjZhZjc4M2JlMDYxIiwiY2xpZW50X2lkIjoibGVtdXIiLCJzY29wZSI6WyJhbGwiXX0.bHC8CDsuVK6uyW-W1IwlDJfoSbKMnPyzhICgZ12dJn8"
 
   #  def on_start(self):
       #  headers = {
@@ -36,11 +36,11 @@ class TestSet(TaskSet):
     @task
     def getFeed(self):
         headers = {
-            "Authorization": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1OTA0MDk4NTQsInVzZXJfbmFtZSI6IjAiLCJhdXRob3JpdGllcyI6WyJ1c2VyXzAiXSwianRpIjoiMzIyOGZlNTMtMjc5NC00ODRjLWJmM2MtMTAyMDMwZTRjODhmIiwiY2xpZW50X2lkIjoibGVtdXIiLCJzY29wZSI6WyJhbGwiXX0.uL0WiXW-1UHQaAaK20QEFnKXB6ShP8-_LI1GPUD3hos",
+            "Authorization": "bearer " + self.token,
             "Content-Type": "application/json"
         }
    
-        with self.client.get("/api/v1/feeds?islandId=6665811262355542016&fromHost=true", headers = headers, catch_response=True) as response:
+        with self.client.get("/api/v1/feeds/public", headers = headers, catch_response=True) as response:
             if json.loads(response.content)['rtn'] != 0:
                 response.failure("failed")
 
