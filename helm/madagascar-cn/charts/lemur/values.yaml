@@ -46,9 +46,9 @@ file:
   max_request_size: 20MB
 
 system_notification:
-  name: 岛蛋
+  name: 跳岛小客服
   content: 你好呀～我是岛蛋！有什么问题都可以来问我喔～(●′ω`●)
-  portrait_image_uri: keepreal-helper.jpg
+  portrait_image_uri: keepreal-helper.png
 
 rocketmq:
   topic: stats-event
