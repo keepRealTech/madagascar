@@ -91,7 +91,7 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
                                     this.notificationMessage.getUserId()
                             )));
             notificationDTO.setComment(
-                    this.commentDTOFactory.valueOf(this.notificationMessage.getCommentNotification().getComment()));
+                    this.commentDTOFactory.valueOfWithDeleted(this.notificationMessage.getCommentNotification().getComment()));
         }
 
         return notificationDTO;
