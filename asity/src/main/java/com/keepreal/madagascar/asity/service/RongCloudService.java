@@ -35,7 +35,7 @@ public class RongCloudService {
     private static final String CREATE_ISLAND_CONTENT = "创作者你好，恭喜成功创建了你的跳岛主页！\n" +
             "你可以在手机端发布图文动态、创建群组、管理提问箱，在网页端上传文章、高清大图、音频和视频，或分享主页链接来获取支持了。\n" +
             "\n" +
-            "你也可以阅读《创作者指南》，以便更好的使用跳岛。\n" +
+            "你也可以阅读《创作者指南》，以便更好的使用跳岛： https://mp.weixin.qq.com/s/7uarq2vJOnt0VPVWfHCb_g\n" +
             "\n" +
             "欢迎来官方微博给我留言跟我互动哦～如遇到问题可在【设置】-【反馈与帮助】内咨询跳岛小客服。";
 
