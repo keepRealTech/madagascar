@@ -40,7 +40,7 @@ class TestSet(TaskSet):
             "Content-Type": "application/json"
         }
    
-        with self.client.get("/api/v1/feeds/public", headers = headers, catch_response=True) as response:
+        with self.client.get("/api/v1/notifications?type=COMMENTS", headers = headers, catch_response=True) as response:
             if json.loads(response.content)['rtn'] != 0:
                 response.failure("failed")
 
@@ -48,4 +48,4 @@ class TestSet(TaskSet):
 class Run(HttpLocust):
     task_set = TestSet
     host = "https://islands.keepreal.cn"
-    wait_time = between(1,5)
+    wait_time = between(0,0)
