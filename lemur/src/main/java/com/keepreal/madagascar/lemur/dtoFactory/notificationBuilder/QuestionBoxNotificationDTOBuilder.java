@@ -1,7 +1,6 @@
 package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
 import com.keepreal.madagascar.common.FeedMessage;
-import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.tenrecs.NoticeNotificationMessage;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import swagger.model.NoticeDTO;
@@ -16,8 +15,9 @@ import java.util.Objects;
  * Represents the question box notice notification dto builder.
  */
 public class QuestionBoxNotificationDTOBuilder implements NotificationDTOBuilder {
+
+    private FeedMessage feedMessage;
     private NotificationMessage notificationMessage;
-    private FeedService feedService;
 
     /**
      * Sets the notification message.
@@ -32,13 +32,13 @@ public class QuestionBoxNotificationDTOBuilder implements NotificationDTOBuilder
     }
 
     /**
-     * Sets the {@link FeedService}.
+     * Sets the {@link FeedMessage}.
      *
-     * @param feedService {@link FeedService}.
+     * @param feedMessage {@link FeedMessage}.
      * @return {@link NoticeNotificationDTOBuilder}.
      */
-    public QuestionBoxNotificationDTOBuilder setFeedService(FeedService feedService) {
-        this.feedService = feedService;
+    public QuestionBoxNotificationDTOBuilder setFeedMessage(FeedMessage feedMessage) {
+        this.feedMessage = feedMessage;
         return this;
     }
 
@@ -74,8 +74,6 @@ public class QuestionBoxNotificationDTOBuilder implements NotificationDTOBuilder
             return null;
         }
 
-        FeedMessage feedMessage;
-
         SimpleQuestionBoxDTO questionDTO = new SimpleQuestionBoxDTO();
 
         switch (message.getType()) {
@@ -83,22 +81,18 @@ public class QuestionBoxNotificationDTOBuilder implements NotificationDTOBuilder
                 if (Objects.isNull(message.getNewQuestionNotice())) {
                     return questionDTO;
                 }
-                feedMessage = this.feedService.retrieveFeedById(message.getNewQuestionNotice().getFeedId(),
-                        message.getNewQuestionNotice().getAuthorId());
                 questionDTO.setNoticeType(NoticeType.BOX_NOTICE_NEW_QUESTION);
                 questionDTO.setFeedId(message.getNewQuestionNotice().getFeedId());
-                questionDTO.setText(feedMessage.getText());
-                questionDTO.setPriceInCents(feedMessage.getPriceInCents());
+                questionDTO.setText(this.feedMessage.getText());
+                questionDTO.setPriceInCents(this.feedMessage.getPriceInCents());
                 return questionDTO;
             case NOTICE_TYPE_BOX_NEW_ANSWER:
                 if (Objects.isNull(message.getNewAnswerNotice())) {
                     return questionDTO;
                 }
-                feedMessage = this.feedService.retrieveFeedById(message.getNewAnswerNotice().getFeedId(),
-                        message.getNewAnswerNotice().getAuthorId());
                 questionDTO.setNoticeType(NoticeType.BOX_NOTICE_NEW_ANSWER);
                 questionDTO.setFeedId(message.getNewAnswerNotice().getFeedId());
-                questionDTO.setText(feedMessage.getText());
+                questionDTO.setText(this.feedMessage.getText());
                 return questionDTO;
             default:
         }

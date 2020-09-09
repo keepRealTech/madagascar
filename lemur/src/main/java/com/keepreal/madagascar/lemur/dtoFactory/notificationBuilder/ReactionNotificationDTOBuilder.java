@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.ReactionDTOFactory;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
@@ -13,6 +14,8 @@ import java.util.Objects;
  */
 public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
 
+    private FeedMessage feedMessage;
+    private boolean islandSubscribed;
     private NotificationMessage notificationMessage;
     private ReactionDTOFactory reactionDTOFactory;
     private FeedDTOFactory feedDTOFactory;
@@ -25,6 +28,28 @@ public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
      */
     public ReactionNotificationDTOBuilder setReactionDTOFactory(ReactionDTOFactory reactionDTOFactory) {
         this.reactionDTOFactory = reactionDTOFactory;
+        return this;
+    }
+
+    /**
+     * Sets the {@link FeedMessage}.
+     *
+     * @param islandSubscribed Whether island subscribed.
+     * @return {@link NoticeNotificationDTOBuilder}.
+     */
+    public ReactionNotificationDTOBuilder setIslandSubscribed(boolean islandSubscribed) {
+        this.islandSubscribed = islandSubscribed;
+        return this;
+    }
+
+    /**
+     * Sets the {@link FeedMessage}.
+     *
+     * @param feedMessage {@link FeedMessage}.
+     * @return {@link NoticeNotificationDTOBuilder}.
+     */
+    public ReactionNotificationDTOBuilder setFeedMessage(FeedMessage feedMessage) {
+        this.feedMessage = feedMessage;
         return this;
     }
 
@@ -72,7 +97,7 @@ public class ReactionNotificationDTOBuilder implements NotificationDTOBuilder {
 
         if (Objects.nonNull(this.notificationMessage.getReactionNotification())) {
             notificationDTO.setFeed(
-                    this.feedDTOFactory.snapshotValueOf(this.notificationMessage.getReactionNotification().getFeed()));
+                    this.feedDTOFactory.snapshotValueOf(this.feedMessage, this.islandSubscribed));
             notificationDTO.setReactions(
                     this.reactionDTOFactory.valueOf(this.notificationMessage.getReactionNotification().getReaction()));
         }

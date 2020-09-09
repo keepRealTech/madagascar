@@ -1,9 +1,14 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.CommentMessage;
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.NoticeType;
 import com.keepreal.madagascar.common.NotificationType;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.dtoFactory.NotificationDTOFactory;
+import com.keepreal.madagascar.lemur.service.CommentService;
+import com.keepreal.madagascar.lemur.service.FeedService;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.NotificationService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -18,7 +23,11 @@ import swagger.model.NotificationsCountResponse;
 import swagger.model.NotificationsCountResponseV2;
 import swagger.model.NotificationsResponse;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -27,17 +36,29 @@ import java.util.stream.Collectors;
 @RestController
 public class NotificationController implements NotificationApi {
 
+    private final IslandService islandService;
+    private final FeedService feedService;
+    private final CommentService commentService;
     private final NotificationService notificationService;
     private final NotificationDTOFactory notificationDTOFactory;
 
     /**
      * Constructs the notification controller.
      *
+     * @param islandService          {@link IslandService}.
+     * @param feedService            {@link FeedService}.
+     * @param commentService         {@link CommentService}.
      * @param notificationService    {@link NotificationService}.
      * @param notificationDTOFactory {@link NotificationDTOFactory}.
      */
-    public NotificationController(NotificationService notificationService,
+    public NotificationController(IslandService islandService,
+                                  FeedService feedService,
+                                  CommentService commentService,
+                                  NotificationService notificationService,
                                   NotificationDTOFactory notificationDTOFactory) {
+        this.islandService = islandService;
+        this.feedService = feedService;
+        this.commentService = commentService;
         this.notificationService = notificationService;
         this.notificationDTOFactory = notificationDTOFactory;
     }
@@ -105,10 +126,51 @@ public class NotificationController implements NotificationApi {
                             this.convertNoticeType(noticeType), page, pageSize);
         }
 
+        Set<String> feedIdSet = notificationsResponse.getNotificationsList()
+                .stream()
+                .map(this::collectFeedId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Map<String, FeedMessage> feedMap = new HashMap<>();
+
+        if (!feedIdSet.isEmpty()) {
+            feedMap = this.feedService.retrieveFeedsByIds(feedIdSet, userId)
+                    .getFeedList()
+                    .stream()
+                    .collect(Collectors.toMap(FeedMessage::getId, Function.identity(), (feed1, feed2) -> feed1, HashMap::new));
+        }
+
+        Set<String> islandIdSet = notificationsResponse.getNotificationsList()
+                .stream()
+                .map(this::collectIslandId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<String, Boolean> subscriptionMap = new HashMap<>();
+        if (!islandIdSet.isEmpty()) {
+            subscriptionMap = this.islandService.retrieveIslandSubscribeStateByUserId(userId, islandIdSet);
+        }
+
+        Set<String> commentIdSet = notificationsResponse.getNotificationsList()
+                .stream()
+                .map(this::collectCommentId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<String, CommentMessage> commentMap = new HashMap<>();
+        if (!islandIdSet.isEmpty()) {
+            commentMap = this.commentService.retrieveCommentByIds(commentIdSet)
+                    .stream()
+                    .collect(Collectors.toMap(CommentMessage::getId, Function.identity(), (comment1, comment2) -> comment1, HashMap::new));
+        }
+
         NotificationsResponse response = new NotificationsResponse();
+        Map<String, FeedMessage> finalFeedMap = feedMap;
+        Map<String, Boolean> finalSubscriptionMap = subscriptionMap;
+        Map<String, CommentMessage> finalCommentMap = commentMap;
         response.setData(notificationsResponse.getNotificationsList()
                 .stream()
-                .map(this.notificationDTOFactory::valueOf)
+                .map(notificationMessage -> this.notificationDTOFactory.valueOf(notificationMessage, finalFeedMap, finalSubscriptionMap, finalCommentMap))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(notificationsResponse.getPageResponse()));
@@ -178,6 +240,76 @@ public class NotificationController implements NotificationApi {
         return NotificationMessage.newBuilder()
                 .setType(NotificationType.NOTIFICATION_SYSTEM_NOTICE)
                 .build();
+    }
+
+    /**
+     * Extracts the feed id from notification message.
+     *
+     * @param notification {@link NotificationMessage}.
+     * @return Feed id.
+     */
+    private String collectFeedId(NotificationMessage notification) {
+        if (Objects.isNull(notification)) {
+            return null;
+        }
+
+        switch (notification.getType()) {
+            case NOTIFICATION_COMMENTS:
+                return notification.getCommentNotification().getFeed().getId();
+            case NOTIFICATION_REACTIONS:
+                return notification.getReactionNotification().getFeed().getId();
+            case NOTIFICATION_BOX_NOTICE:
+                switch (notification.getNoticeNotification().getType()) {
+                    case NOTICE_TYPE_BOX_NEW_QUESTION:
+                        return notification.getNoticeNotification().getNewQuestionNotice().getFeedId();
+                    case NOTICE_TYPE_BOX_NEW_ANSWER:
+                        return notification.getNoticeNotification().getNewAnswerNotice().getFeedId();
+                    default:
+                        return null;
+                }
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Extracts the island id from notification message.
+     *
+     * @param notification {@link NotificationMessage}.
+     * @return Island id.
+     */
+    private String collectIslandId(NotificationMessage notification) {
+        if (Objects.isNull(notification)) {
+            return null;
+        }
+
+        switch (notification.getType()) {
+            case NOTIFICATION_COMMENTS:
+                return notification.getCommentNotification().getFeed().getIslandId();
+            case NOTIFICATION_REACTIONS:
+                return notification.getReactionNotification().getFeed().getIslandId();
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Extracts the comment id from notification message.
+     *
+     * @param notification {@link NotificationMessage}.
+     * @return Island id.
+     */
+    private String collectCommentId(NotificationMessage notification) {
+        if (Objects.isNull(notification)) {
+            return null;
+        }
+
+        switch (notification.getType()) {
+            case NOTIFICATION_COMMENTS:
+                return notification.getCommentNotification().getComment().getId();
+            default:
+                return null;
+        }
     }
 
 }

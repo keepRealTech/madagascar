@@ -17,21 +17,17 @@ public class CommentDTOFactory {
 
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
-    private final EhcacheService ehcacheService;
 
     /**
      * Constructs the comment dto factory.
      *
      * @param userService    {@link UserService}.
      * @param userDTOFactory {@link UserDTOFactory}.
-     * @param ehcacheService {@link EhcacheService}.
      */
     public CommentDTOFactory(UserService userService,
-                             UserDTOFactory userDTOFactory,
-                             EhcacheService ehcacheService) {
+                             UserDTOFactory userDTOFactory) {
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
-        this.ehcacheService = ehcacheService;
     }
 
     /**
@@ -68,7 +64,7 @@ public class CommentDTOFactory {
      * @param comment {@link CommentMessage}.
      * @return {@link CommentDTO}.
      */
-    public CommentDTO valueOfWithDeleted(CommentMessage comment) {
+    public CommentDTO valueOfWithDeleted(CommentMessage comment, boolean isDeleted) {
         if (Objects.isNull(comment)) {
             return null;
         }
@@ -79,12 +75,11 @@ public class CommentDTOFactory {
         commentDTO.setContent(comment.getContent());
         commentDTO.setCreatedAt(comment.getCreatedAt());
 
-        boolean deleted = this.ehcacheService.checkCommentDeleted(comment.getId());
-        if (deleted) {
+        if (isDeleted) {
             commentDTO.setContent("该评论已被删除！");
         }
 
-        if (!StringUtils.isEmpty(comment.getReplyToId()) && !deleted) {
+        if (!StringUtils.isEmpty(comment.getReplyToId()) && !isDeleted) {
             commentDTO.setReplyTo(this.userDTOFactory.briefValueOf(
                     this.userService.retrieveUserById(comment.getReplyToId())));
         }

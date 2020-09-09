@@ -12,6 +12,7 @@ import com.keepreal.madagascar.fossa.DeleteCommentByIdResponse;
 import com.keepreal.madagascar.fossa.NewCommentRequest;
 import com.keepreal.madagascar.fossa.RetrieveCommentByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveCommentsByFeedIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveCommentsByIdsRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.Objects;
+import java.util.List;
 
 /**
  * Represents the comment service.
@@ -62,7 +64,7 @@ public class CommentService {
 
         if (Objects.isNull(commentResponse)
                 || !commentResponse.hasStatus()) {
-            log.error(Objects.isNull(commentResponse) ? "Retrieve feed returned null." : commentResponse.toString());
+            log.error(Objects.isNull(commentResponse) ? "Retrieve comment returned null." : commentResponse.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
@@ -71,6 +73,39 @@ public class CommentService {
         }
 
         return commentResponse.getComment();
+    }
+
+    /**
+     * Retrieves comments by ids.
+     *
+     * @param ids Comment ids.
+     * @return {@link CommentMessage}.
+     */
+    public List<CommentMessage> retrieveCommentByIds(Iterable<String> ids) {
+        CommentServiceGrpc.CommentServiceBlockingStub stub = CommentServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveCommentsByIdsRequest request = RetrieveCommentsByIdsRequest.newBuilder()
+                .addAllIds(ids)
+                .build();
+
+        CommentsResponse commentsResponse;
+        try {
+            commentsResponse = stub.retrieveCommentsByIds(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(commentsResponse)
+                || !commentsResponse.hasStatus()) {
+            log.error(Objects.isNull(commentsResponse) ? "Retrieve comments returned null." : commentsResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != commentsResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(commentsResponse.getStatus());
+        }
+
+        return commentsResponse.getCommentsList();
     }
 
     /**

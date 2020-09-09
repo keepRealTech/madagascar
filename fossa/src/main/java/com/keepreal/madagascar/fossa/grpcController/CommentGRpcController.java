@@ -13,6 +13,7 @@ import com.keepreal.madagascar.fossa.DeleteCommentByIdResponse;
 import com.keepreal.madagascar.fossa.NewCommentRequest;
 import com.keepreal.madagascar.fossa.RetrieveCommentByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveCommentsByFeedIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveCommentsByIdsRequest;
 import com.keepreal.madagascar.fossa.common.FeedCountType;
 import com.keepreal.madagascar.fossa.config.NotificationEventProducerConfiguration;
 import com.keepreal.madagascar.fossa.model.CommentInfo;
@@ -111,6 +112,24 @@ public class CommentGRpcController extends CommentServiceGrpc.CommentServiceImpl
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_COMMENT_NOT_FOUND_ERROR);
             responseBuilder.setStatus(commonStatus);
         }
+
+        responseObserver.onNext(responseBuilder.build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Retrieves comment by id.
+     *
+     * @param request          {@link RetrieveCommentsByIdsRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void retrieveCommentsByIds(RetrieveCommentsByIdsRequest request, StreamObserver<CommentsResponse> responseObserver) {
+        CommentsResponse.Builder responseBuilder = CommentsResponse.newBuilder();
+        List<CommentInfo> commentInfo = commentService.findByIdsAndDeletedIsFalse(request.getIdsList());
+
+        responseBuilder.addAllComments(commentInfo.stream().map(this.commentService::getCommentMessage).collect(Collectors.toList()))
+                .setStatus(CommonStatusUtils.getSuccStatus());
 
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();

@@ -50,7 +50,7 @@ public class RedirectService {
      */
     public void insertRedirectUrl(String shortCode, String linkUrl) {
         if (Objects.isNull(this.redirectCache.get(shortCode))
-                || !this.redirectCache.fastPut(shortCode, linkUrl, 300L, TimeUnit.DAYS)) {
+                && !this.redirectCache.fastPut(shortCode, linkUrl, 300L, TimeUnit.DAYS)) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_REDIS_FAILED_PUT_ERROR);
         }
     }

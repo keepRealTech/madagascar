@@ -93,6 +93,16 @@ public class CommentService {
     }
 
     /**
+     * Retrieves comments by ids.
+     *
+     * @param ids   ids.
+     * @return  {@link CommentInfo}.
+     */
+    public List<CommentInfo> findByIdsAndDeletedIsFalse(Iterable<String> ids) {
+        return this.commentInfoRepository.findByIdInAndDeletedIsFalse(ids);
+    }
+
+    /**
      * Retrieves pageabel comment by feed id order by create time desc.
      *
      * @param feedId    feed id.

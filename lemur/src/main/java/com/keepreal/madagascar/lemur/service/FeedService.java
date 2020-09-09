@@ -43,6 +43,7 @@ import swagger.model.TopFeedRequest;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -406,52 +407,12 @@ public class FeedService {
     }
 
     /**
-     * Retrieves timelines by user id.
-     *
-     * @param userId         User id.
-     * @param timestampAfter Timestamp after.
-     * @param pageSize       Page size.
-     * @return {@link TimelinesResponse}.
-     */
-    private TimelinesResponse retrieveTimelinesByUserId(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
-        TimelineServiceGrpc.TimelineServiceBlockingStub mantellaStub = TimelineServiceGrpc.newBlockingStub(this.mantellaChannel);
-
-        RetrieveMultipleTimelinesRequest.Builder builder = RetrieveMultipleTimelinesRequest.newBuilder()
-                .setUserId(userId)
-                .setPageRequest(PaginationUtils.buildPageRequest(0, pageSize));
-        if (timestampBefore != null) {
-            builder.setTimestampBefore(UInt64Value.of(timestampBefore));
-        } else {
-            builder.setTimestampAfter(timestampAfter == null ? UInt64Value.of(0L) : UInt64Value.of(timestampAfter));
-        }
-
-        TimelinesResponse timelinesResponse;
-        try {
-            timelinesResponse = mantellaStub.retrieveMultipleTimelines(builder.build());
-        } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
-        }
-
-        if (Objects.isNull(timelinesResponse)
-                || !timelinesResponse.hasStatus()) {
-            log.error(Objects.isNull(timelinesResponse) ? "Retrieve timelines returned null." : timelinesResponse.toString());
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
-        }
-
-        if (ErrorCode.REQUEST_SUCC_VALUE != timelinesResponse.getStatus().getRtn()) {
-            throw new KeepRealBusinessException(timelinesResponse.getStatus());
-        }
-
-        return timelinesResponse;
-    }
-
-    /**
      * Retrieves feeds by ids.
      *
      * @param feedIds Feed ids.
      * @return {@link FeedsResponse}.
      */
-    private FeedsResponse retrieveFeedsByIds(List<String> feedIds, String userId) {
+    public FeedsResponse retrieveFeedsByIds(Collection<String> feedIds, String userId) {
         if (feedIds.isEmpty()) {
             return FeedsResponse.newBuilder().build();
         }
@@ -571,6 +532,46 @@ public class FeedService {
         }
 
         return response.getFeedCount();
+    }
+
+    /**
+     * Retrieves timelines by user id.
+     *
+     * @param userId         User id.
+     * @param timestampAfter Timestamp after.
+     * @param pageSize       Page size.
+     * @return {@link TimelinesResponse}.
+     */
+    private TimelinesResponse retrieveTimelinesByUserId(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
+        TimelineServiceGrpc.TimelineServiceBlockingStub mantellaStub = TimelineServiceGrpc.newBlockingStub(this.mantellaChannel);
+
+        RetrieveMultipleTimelinesRequest.Builder builder = RetrieveMultipleTimelinesRequest.newBuilder()
+                .setUserId(userId)
+                .setPageRequest(PaginationUtils.buildPageRequest(0, pageSize));
+        if (timestampBefore != null) {
+            builder.setTimestampBefore(UInt64Value.of(timestampBefore));
+        } else {
+            builder.setTimestampAfter(timestampAfter == null ? UInt64Value.of(0L) : UInt64Value.of(timestampAfter));
+        }
+
+        TimelinesResponse timelinesResponse;
+        try {
+            timelinesResponse = mantellaStub.retrieveMultipleTimelines(builder.build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(timelinesResponse)
+                || !timelinesResponse.hasStatus()) {
+            log.error(Objects.isNull(timelinesResponse) ? "Retrieve timelines returned null." : timelinesResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != timelinesResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(timelinesResponse.getStatus());
+        }
+
+        return timelinesResponse;
     }
 
     private void buildMediaMessage(NewFeedsRequestV2.Builder builder, MediaType mediaType, List<MultiMediaDTO> multiMediaDTOList, String text) {

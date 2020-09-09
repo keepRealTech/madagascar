@@ -1,8 +1,8 @@
 package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.CommentDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
-import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import swagger.model.NotificationDTO;
 import swagger.model.NotificationType;
@@ -14,9 +14,11 @@ import java.util.Objects;
  */
 public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
 
+    private FeedMessage feedMessage;
+    private boolean islandSubscribed = true;
+    private boolean isDeleted = false;
     private NotificationMessage notificationMessage;
     private CommentDTOFactory commentDTOFactory;
-    private FeedService feedService;
     private FeedDTOFactory feedDTOFactory;
 
     /**
@@ -31,13 +33,35 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
     }
 
     /**
-     * Sets the {@link FeedService}.
+     * Sets the {@link FeedMessage}.
      *
-     * @param feedService {@link CommentDTOFactory}.
-     * @return {@link CommentNotificationDTOBuilder}.
+     * @param islandSubscribed Whether island subscribed.
+     * @return {@link NoticeNotificationDTOBuilder}.
      */
-    public CommentNotificationDTOBuilder setFeedService(FeedService feedService) {
-        this.feedService = feedService;
+    public CommentNotificationDTOBuilder setIslandSubscribed(boolean islandSubscribed) {
+        this.islandSubscribed = islandSubscribed;
+        return this;
+    }
+
+    /**
+     * Sets the {@link FeedMessage}.
+     *
+     * @param isDeleted Whether comment deleted.
+     * @return {@link NoticeNotificationDTOBuilder}.
+     */
+    public CommentNotificationDTOBuilder setCommentDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
+        return this;
+    }
+
+    /**
+     * Sets the {@link FeedMessage}.
+     *
+     * @param feedMessage {@link FeedMessage}.
+     * @return {@link NoticeNotificationDTOBuilder}.
+     */
+    public CommentNotificationDTOBuilder setFeedMessage(FeedMessage feedMessage) {
+        this.feedMessage = feedMessage;
         return this;
     }
 
@@ -85,13 +109,9 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
 
         if (Objects.nonNull(this.notificationMessage.getCommentNotification())) {
             notificationDTO.setFeed(
-                    this.feedDTOFactory.snapshotValueOf(
-                            this.feedService.retrieveFeedById(
-                                    this.notificationMessage.getCommentNotification().getFeed().getId(),
-                                    this.notificationMessage.getUserId()
-                            )));
+                    this.feedDTOFactory.snapshotValueOf(this.feedMessage, this.islandSubscribed));
             notificationDTO.setComment(
-                    this.commentDTOFactory.valueOfWithDeleted(this.notificationMessage.getCommentNotification().getComment()));
+                    this.commentDTOFactory.valueOfWithDeleted(this.notificationMessage.getCommentNotification().getComment(), this.isDeleted));
         }
 
         return notificationDTO;

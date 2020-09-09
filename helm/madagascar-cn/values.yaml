@@ -30,7 +30,7 @@ global:
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.2.6
+      tag: 1.2.6-hf3
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
@@ -46,7 +46,7 @@ global:
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-      tag: 1.1.0
+      tag: 1.1.1
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
