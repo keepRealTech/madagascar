@@ -191,10 +191,11 @@ public class FeedDTOFactory {
      *
      * @param feed       {@link FeedMessage}.
      * @param subscribed Whether island subscribed.
+     * @param hasAccess  Whether has access.
      * @param isDeleted  Whether feed deleted.
      * @return {@link SnapshotFeedDTO}.
      */
-    public SnapshotFeedDTO snapshotValueOf(FeedMessage feed, boolean subscribed, boolean isDeleted) {
+    public SnapshotFeedDTO snapshotValueOf(FeedMessage feed, boolean subscribed, boolean hasAccess, boolean isDeleted) {
         if (Objects.isNull(feed)) {
             return null;
         }
@@ -211,7 +212,7 @@ public class FeedDTOFactory {
         snapshotFeedDTO.setIsDeleted(isDeleted);
         snapshotFeedDTO.setPriceInCents(feed.getPriceInCents());
 
-        snapshotFeedDTO.setIsAccess(feed.getIsAccess());
+        snapshotFeedDTO.setIsAccess(hasAccess);
 
         snapshotFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
         snapshotFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
