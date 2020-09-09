@@ -109,7 +109,10 @@ public class CommentNotificationDTOBuilder implements NotificationDTOBuilder {
 
         if (Objects.nonNull(this.notificationMessage.getCommentNotification())) {
             notificationDTO.setFeed(
-                    this.feedDTOFactory.snapshotValueOf(this.notificationMessage.getCommentNotification().getFeed(), this.islandSubscribed, Objects.isNull(this.feedMessage)));
+                    this.feedDTOFactory.snapshotValueOf(this.notificationMessage.getCommentNotification().getFeed(),
+                            this.islandSubscribed,
+                            Objects.isNull(this.feedMessage) || this.feedMessage.getIsAccess(),
+                            Objects.isNull(this.feedMessage)));
             notificationDTO.setComment(
                     this.commentDTOFactory.valueOfWithDeleted(this.notificationMessage.getCommentNotification().getComment(), this.isDeleted));
         }
