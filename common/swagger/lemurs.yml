@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.5.0"
+  version: "1.6.0"
   title: Keep Real API
 
 security:
@@ -49,6 +49,8 @@ tags:
     description: 提问箱 controller
   - name: Support
     description: 支持一下 controller
+  - name: Activity
+    description: 活动 controller
 
 paths:
   /api/healthcheck:
@@ -203,23 +205,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserResponse'
   /api/v1/islands:
-    post:
-      tags:
-        - Island
-      summary: creates a new island
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PostIslandRequest'
-      responses:
-        '200':
-          description: brief island response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BriefIslandResponse'
     get:
       parameters:
         - $ref: '#/components/parameters/nameInQueryOptional'
@@ -354,43 +339,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BriefIslandResponse'
-  /api/v1/islands/{id}/feeds:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    get:
-      parameters:
-        - $ref: '#/components/parameters/fromHostInQuery'
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/pageSize'
-      tags:
-        - Feed
-      summary: retrieves a list of feeds with pagination
-      responses:
-        '200':
-          description: feeds response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FeedsResponse'
-  /api/v1.1/islands/{id}/feeds:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    get:
-      parameters:
-        - $ref: '#/components/parameters/fromHostInQuery'
-        - $ref: '#/components/parameters/timestampAfter'
-        - $ref: '#/components/parameters/timestampBefore'
-        - $ref: '#/components/parameters/pageSize'
-      tags:
-        - Feed
-      summary: retrieves a list of feeds with pagination
-      responses:
-        '200':
-          description: feeds response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TimelinesResponse'
   /api/v1.2/islands/{id}/feeds:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -564,42 +512,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReportResponse'
-  /api/v1/feeds:
-    get:
-      parameters:
-        - $ref: '#/components/parameters/islandidInPath'
-        - $ref: '#/components/parameters/fromHostInQuery'
-        - $ref: '#/components/parameters/vInQuery'
-        - $ref: '#/components/parameters/osnInQuery'
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/pageSize'
-      tags:
-        - Feed
-      summary: retrieves a list of feeds with pagination
-      responses:
-        '200':
-          description: feeds response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FeedsResponse'
-    post:
-      tags:
-        - Feed
-      summary: creates a new feed
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PostFeedRequest'
-      responses:
-        '200':
-          description: brief feed response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DummyResponse'
   /api/v1.1/feeds:
     get:
       parameters:
@@ -847,18 +759,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NotificationsResponse'
-  /api/v1/notifications/count:
-    get:
-      tags:
-        - Notification
-      summary: retrieves the count of unread notifications
-      responses:
-        '200':
-          description: notifications count response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NotificationsCountResponse'
   /api/v1.1/notifications/count:
     get:
       tags:
@@ -1090,6 +990,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserPaymentsResponse'
+  /api/v1/payments/withdraws:
+    get:
+      tags:
+        - Payment
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      summary: 获得用户提现记录
+      responses:
+        '200':
+          description: payments response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserWithdrawsResponse'
   /api/v1/balances/myWallet:
     get:
       tags:
@@ -1149,6 +1064,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BillingInfoResponse'
+  /api/v1.1/billingInfo:
+    get:
+      tags:
+        - Billing
+      summary: get current user's billing info
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingInfoResponseV11'
+    put:
+      tags:
+        - Billing
+      summary: post current user's billing info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutBillingInfoRequestV11'
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingInfoResponseV11'
   /api/v1/balances/skus:
     get:
       tags:
@@ -2138,6 +2082,127 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimelinesResponse'
+  /api/v1/memberships/templates:
+    get:
+      tags:
+        - Membership
+      summary: 获得订阅权益模版
+      responses:
+        '200':
+          description: membership templates response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipTemplatesResponse'
+  /api/v1/users/qualifications/channels:
+    get:
+      tags:
+        - User
+      summary: 获得所有用户认证平台品类
+      responses:
+        '200':
+          description: qualification channels response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualificationChannelsResponse'
+  /api/v1/users/qualifications:
+    get:
+      tags:
+        - User
+      summary: 获得当前用户提交的认证信息
+      responses:
+        '200':
+          description: qualification channels response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserQualificationsResponse'
+    put:
+      tags:
+        - User
+      summary: 更新当前用户的认证信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUserQualificationsRequest'
+      responses:
+        '200':
+          description: qualification channels response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserQualificationsResponse'
+  /api/v1/activities/banners:
+    get:
+      tags:
+        - Activity
+      summary: 获得创作活动banner
+      responses:
+        '200':
+          description: bonues activity response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivitiesResponse'
+  /api/v1/activities/bonus:
+    get:
+      tags:
+        - Activity
+      summary: 获得当前创作奖励金活动奖励
+      responses:
+        '200':
+          description: bonues activity response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BonusResponse'
+  /api/v1/feeds/{id}/wechatPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 单独解锁动态APP微信支付
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/feeds/{id}/wechatPay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 单独解锁动态APP微信支付
+      responses:
+        '200':
+          description: dummy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v1/feeds/{id}/iosPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
+      tags:
+        - Payment
+      summary: 单独解锁动态IOS跳转
+      responses:
+        '200':
+          description: H5 跳转地址
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5RedirectResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2374,6 +2439,7 @@ components:
         - LOGIN_PASSWORD
         - LOGIN_JWT_IOS
         - LOGIN_MOBILE
+        - LOGIN_MOBILE_APP
     SceneType:
       type: string
       enum:
@@ -2428,6 +2494,11 @@ components:
         - IDENTITY_FASHION
         - IDENTITY_COMIC
         - IDENTITY_OTHERS
+    WithdrawState:
+      type: string
+      enum:
+        - STATE_PROCESSING
+        - STATE_SETTLED
     OrderState:
       type: string
       enum:
@@ -3089,6 +3160,8 @@ components:
               type: boolean
             isMembership:
               type: boolean
+            isChargable:
+              type: boolean
             isTop:
               type: boolean
             membership:
@@ -3151,6 +3224,9 @@ components:
           type: array
           items:
             type: string
+        priceInCents:
+          type: integer
+          format: int64
         text:
           type: string
         mediaType:
@@ -3881,6 +3957,21 @@ components:
           type: string
         verified:
           type: boolean
+    BillingInfoV11DTO:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        mobile:
+          type: string
+        alipayAccount:
+          type: string
+        verified:
+          type: boolean
     PutBillingInfoRequest:
       type: object
       properties:
@@ -3908,6 +3999,26 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BillingInfoDTO'
+    PutBillingInfoRequestV11:
+      type: object
+      properties:
+        name:
+          type: string
+        mobile:
+          type: string
+        alipayAccount:
+          type: string
+      required:
+        - name
+        - mobile
+        - alipayAccount
+    BillingInfoResponseV11:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BillingInfoV11DTO'
     IOSShellSkuDTO:
       type: object
       properties:
@@ -4825,3 +4936,130 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/RecommendIslandDTO'
+    MembershipTemplateDTO:
+      type: object
+      properties:
+        text:
+          type: string
+    MembershipTemplatesResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/MembershipTemplateDTO'
+    UserWithdrawDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        amountInCents:
+          type: integer
+          format: int64
+        hasSettled:
+          $ref: '#/components/schemas/WithdrawState'
+        createdAt:
+          type: integer
+          format: int64
+    UserWithdrawsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserWithdrawDTO'
+    QualificationChannelDTO:
+      type: object
+      properties:
+        name:
+          type: string
+    QualificationChannelsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/QualificationChannelDTO'
+    UserQualificationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        hostUrl:
+          type: string
+    PutUserQualificationsRequest:
+      type: object
+      properties:
+        userQualifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserQualificationDTO'
+    UserQualificationsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserQualificationDTO'
+    LabelDTO:
+      type: object
+      properties:
+        text:
+          type: string
+    BannerDTO:
+      type: object
+      properties:
+        imageUri:
+          type: string
+        redirectUrl:
+          type: string
+    ActivityDTO:
+      type: object
+      properties:
+        label:
+          $ref: '#/components/schemas/LabelDTO'
+        banners:
+          type: array
+          items:
+            $ref: '#/components/schemas/BannerDTO'
+    ActivitiesResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ActivityDTO'
+    BonusDTO:
+      type: object
+      properties:
+        userId:
+          type: string
+        ratio:
+          type: integer
+        toGain:
+          type: integer
+        gained:
+          type: integer
+    BonusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BonusDTO'

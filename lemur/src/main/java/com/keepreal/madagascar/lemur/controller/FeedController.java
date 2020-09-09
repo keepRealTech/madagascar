@@ -106,7 +106,7 @@ public class FeedController implements FeedApi {
      * @param images  (optional) Images.
      * @return {@link DummyResponse}.
      */
-    @Override
+    @Deprecated
     @HttpStatsEventTrigger(
             category = StatsEventCategory.STATS_CAT_FEED,
             action = StatsEventAction.STATS_ACT_CREATE,
@@ -199,7 +199,6 @@ public class FeedController implements FeedApi {
      * @return {@link FeedsResponse}.
      */
     @Deprecated
-    @Override
     public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedsGet(String islandId,
                                                                      Boolean fromHost,
                                                                      String v,
@@ -293,7 +292,7 @@ public class FeedController implements FeedApi {
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link swagger.model.FeedsResponse}.
      */
-    @Override
+    @Deprecated
     public ResponseEntity<swagger.model.FeedsResponse> apiV1IslandsIdFeedsGet(String id,
                                                                               Boolean fromHost,
                                                                               Integer page,
@@ -324,7 +323,7 @@ public class FeedController implements FeedApi {
      * @param pageSize     size of a page (optional, default to 10).
      * @return {@link FeedsResponse}.
      */
-    @Override
+    @Deprecated
     public ResponseEntity<TimelinesResponse> apiV11IslandsIdFeedsGet(String id,
                                                                      Boolean fromHost,
                                                                      Long minTimestamp,
