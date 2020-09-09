@@ -8,10 +8,13 @@ import org.springframework.stereotype.Component;
 import swagger.model.BriefMembershipDTO;
 import swagger.model.FeedMembershipDTO;
 import swagger.model.MembershipDTO;
+import swagger.model.MembershipTemplateDTO;
 import swagger.model.SimpleMembershipDTO;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the membership dto factory.
@@ -19,6 +22,15 @@ import java.util.Objects;
 @Component
 @Slf4j
 public class MembershipDTOFactory {
+
+    private final List<String> membershipTemplateList = Arrays.asList("最新作品抢先看",
+            "解锁我的日常动态",
+            "解锁独家番外、花絮和福利",
+            "解锁专属群聊",
+            "解锁提问箱",
+            "为你私人订制角色、歌曲、视频",
+            "在我的下期内容里感谢你",
+            "获得实物折扣或特权（门票、明信片、优先购买权");
 
     public SimpleMembershipDTO simpleValueOf(MembershipMessage membershipMessage) {
         if (Objects.isNull(membershipMessage)) {
@@ -82,5 +94,13 @@ public class MembershipDTOFactory {
         dto.setUseCustomMessage(membershipMessage.getUseCustomMessage());
         dto.setMessage(membershipMessage.getMessage());
         return dto;
+    }
+
+    public List<MembershipTemplateDTO> listValueOf() {
+        return membershipTemplateList.stream().map(template -> {
+            MembershipTemplateDTO dto = new MembershipTemplateDTO();
+            dto.setText(template);
+            return dto;
+        }).collect(Collectors.toList());
     }
 }
