@@ -323,7 +323,7 @@ public class IslandController implements IslandApi {
      * @param portraitImage Portrait image.
      * @return {@link BriefIslandResponse}.
      */
-    @Override
+    @Deprecated
     public ResponseEntity<BriefIslandResponse> apiV1IslandsPost(
             PostIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
