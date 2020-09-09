@@ -988,6 +988,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserPaymentsResponse'
+  /api/v1/payments/withdraws:
+    get:
+      tags:
+        - Payment
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      summary: 获得用户提现记录
+      responses:
+        '200':
+          description: payments response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserWithdrawsResponse'
   /api/v1/balances/myWallet:
     get:
       tags:
@@ -2367,6 +2382,11 @@ components:
         - IDENTITY_FASHION
         - IDENTITY_COMIC
         - IDENTITY_OTHERS
+    WithdrawState:
+      type: string
+      enum:
+        - STATE_PROCESSING
+        - STATE_SETTLED
     OrderState:
       type: string
       enum:
@@ -4813,3 +4833,28 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/MembershipTemplateDTO'
+    UserWithdrawDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        amountInCents:
+          type: integer
+          format: int64
+        hasSettled:
+          $ref: '#/components/schemas/WithdrawState'
+        createdAt:
+          type: integer
+          format: int64
+    UserWithdrawsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserWithdrawDTO'
+    
