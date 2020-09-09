@@ -3,6 +3,7 @@ package com.keepreal.madagascar.coua.grpcController;
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.DeviceType;
+import com.keepreal.madagascar.common.EmptyMessage;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -10,6 +11,7 @@ import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
 import com.keepreal.madagascar.coua.DeviceTokenResponse;
+import com.keepreal.madagascar.coua.MergeUserAccountsRequest;
 import com.keepreal.madagascar.coua.NewUserRequest;
 import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.RetreiveMultipleUsersByIdsRequest;
@@ -117,6 +119,11 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                 userInfo.setBirthday(Date.valueOf(birthdayStr));
             }
         }
+
+        if (request.hasState()) {
+            userInfo.setState(request.getState().getValue());
+        }
+
         UserInfo user = userInfoService.createUser(userInfo);
         this.userEventProducerService.produceCreateUserEventAsync(user.getId());
         basicResponse(responseObserver, user);
@@ -150,9 +157,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
             condition = queryUserCondition.getUsername().getValue();
             userInfo = userInfoService.findUserInfoByUserNameAndDeletedIsFalse(condition);
         }
-        if (queryUserCondition.hasMobile()) {
+        if (queryUserCondition.hasMobile() && queryUserCondition.hasState()) {
             condition = queryUserCondition.getMobile().getValue();
-            userInfo = this.userInfoService.findUserInfoByMobile(condition);
+            userInfo = this.userInfoService.findUserByMobileAndState(condition, queryUserCondition.getState().getValue());
         }
         if (userInfo == null) {
             log.error("[retrieveSingleUser] user not found error! condition is [{}]", condition);
@@ -352,9 +359,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         if (Objects.isNull(intOtp) || !otp.equals(intOtp)) {
             builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
         } else {
-            UserInfo webUserInfo = this.userInfoService.findH5UserInfoByMobile(mobile);
-            if (Objects.nonNull(webUserInfo)) {
-                this.mergeUserAccounts(userId, webUserInfo.getId());
+            UserInfo h5UserInfo = this.userInfoService.findH5UserInfoByMobile(mobile);
+            if (Objects.nonNull(h5UserInfo)) {
+                this.mergeUserAccounts(userId, h5UserInfo.getId());
             }
             UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
             userInfo.setMobile(mobile);
@@ -377,10 +384,14 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
         String mobile = request.getMobile();
-        UserInfo userInfo = this.userInfoService.findUserInfoByMobileAndUnionIdIsNotNul(mobile);
-        if (Objects.nonNull(userInfo)) {
+        UserInfo wechatUserInfo = this.userInfoService.findWechatUserInfoByMobile(mobile);
+        UserInfo appMobileUserInfo = this.userInfoService.findAppMobileUserInfoByMobile(mobile);
+        if (Objects.nonNull(wechatUserInfo)) {
             responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
+        } else if (Objects.nonNull(appMobileUserInfo)) {
+            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_REGISTERED)).build());
         } else {
             responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
                     .setStatus(CommonStatusUtils.getSuccStatus()).build());
@@ -389,10 +400,21 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     }
 
     /**
+     * 合并用户账号信息
+     *
+     * @param request           {@link MergeUserAccountsRequest}
+     * @param responseObserver  {@link StreamObserver}
+     */
+    @Override
+    public void mergeUserAccounts(MergeUserAccountsRequest request, StreamObserver<EmptyMessage> responseObserver) {
+        this.mergeUserAccounts(request.getAppMobileUserId(), request.getH5MobileUserId());
+    }
+
+    /**
      * 合并用户账户信息
      *
-     * @param wechatUserId    wechat user id
-     * @param webMobileUserId web user id
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   web user id
      */
     private void mergeUserAccounts(String wechatUserId, String webMobileUserId) {
         this.transactionProducerService.produceMergeUserAccountsTransactionEventAsync(wechatUserId, webMobileUserId);

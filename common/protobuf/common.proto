@@ -34,6 +34,7 @@ enum LoginType {
     LOGIN_OAUTH_MP_WECHAT = 5;
     LOGIN_WEB_MP_WECHAT = 6;
     LOGIN_WEB_MOBILE = 7;
+    LOGIN_APP_MOBILE = 8;
 }
 
 enum NotificationType {

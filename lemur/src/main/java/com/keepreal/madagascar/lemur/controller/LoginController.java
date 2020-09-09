@@ -5,6 +5,7 @@ import com.aliyuncs.auth.sts.AssumeRoleRequest;
 import com.aliyuncs.auth.sts.AssumeRoleResponse;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.http.MethodType;
+import com.keepreal.madagascar.baobob.AppMobileLoginPayload;
 import com.keepreal.madagascar.baobob.CheckSignatureRequest;
 import com.keepreal.madagascar.baobob.GenerateQrcodeResponse;
 import com.keepreal.madagascar.baobob.JWTISOLoginPayload;
@@ -157,6 +158,19 @@ public class LoginController implements LoginApi {
                                 .setMobile(body.getData().getMobile())
                                 .setOtp(body.getData().getOtp()))
                         .setLoginType(LoginType.LOGIN_WEB_MOBILE)
+                        .build();
+                break;
+            case MOBILE_APP:
+                if (StringUtils.isEmpty(body.getData().getMobile())
+                        || StringUtils.isEmpty(body.getData().getOtp())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
+                loginRequest = LoginRequest.newBuilder()
+                        .setAppMobilePayload(AppMobileLoginPayload.newBuilder()
+                                .setMobile(body.getData().getMobile())
+                                .setOtp(body.getData().getOtp()))
+                        .setLoginType(LoginType.LOGIN_APP_MOBILE)
                         .build();
                 break;
             case JWT_IOS:

@@ -6,6 +6,12 @@ option java_package = "com.keepreal.madagascar.coua";
 import "common.proto";
 import "google/protobuf/wrappers.proto";
 
+enum UserState {
+    USER_WECHAT = 0;
+    USER_H5_MOBILE = 1;
+    USER_APP_MOBILE = 2;
+}
+
 message UserResponse {
     CommonStatus status = 1;
     UserMessage user = 2;
@@ -21,6 +27,7 @@ message NewUserRequest {
     google.protobuf.StringValue birthday = 7;
     repeated IdentityType identities = 8;
     google.protobuf.StringValue mobile = 9;
+    google.protobuf.Int32Value state = 10;
 }
 
 message UpdateUserByIdRequest {
@@ -41,6 +48,7 @@ message QueryUserCondition {
     google.protobuf.StringValue displayId = 3;
     google.protobuf.StringValue username = 4;
     google.protobuf.StringValue mobile = 5;
+    google.protobuf.Int32Value state = 6;
 }
 
 message RetrieveSingleUserRequest {
@@ -109,6 +117,11 @@ message CheckUserMobileIsExistedResponse {
     CommonStatus status = 1;
 }
 
+message MergeUserAccountsRequest {
+    string appMobileUserId = 1;
+    string h5MobileUserId = 2;
+}
+
 service UserService {
     rpc CreateUser(NewUserRequest) returns (UserResponse) {};
     rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
@@ -120,4 +133,5 @@ service UserService {
     rpc SendOtpToMobile(SendOtpToMobileRequest) returns (SendOtpToMobileResponse) {};
     rpc UpdateUserMobile(UpdateUserMobileRequest) returns (UserResponse) {};
     rpc CheckUserMobileIsExisted(CheckUserMobileIsExistedRequest) returns (CheckUserMobileIsExistedResponse) {};
+    rpc MergeUserAccounts(MergeUserAccountsRequest) returns (EmptyMessage) {};
 }

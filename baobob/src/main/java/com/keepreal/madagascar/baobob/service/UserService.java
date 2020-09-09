@@ -1,17 +1,26 @@
 package com.keepreal.madagascar.baobob.service;
 
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.baobob.loginExecutor.model.IOSLoginInfo;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
 import com.keepreal.madagascar.common.GenderValue;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.coua.*;
+import com.keepreal.madagascar.coua.MergeUserAccountsRequest;
+import com.keepreal.madagascar.coua.NewUserRequest;
+import com.keepreal.madagascar.coua.QueryUserCondition;
+import com.keepreal.madagascar.coua.ReactorUserServiceGrpc;
+import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
+import com.keepreal.madagascar.coua.UserResponse;
+import com.keepreal.madagascar.coua.UserState;
 import io.grpc.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 /**
  * Represents the user service.
@@ -115,15 +124,19 @@ public class UserService {
     }
 
     /**
-     * Retrieves the user by mobile phone.
+     * Retrieves the user by mobile phone and state.
      *
      * @param mobile Mobile.
+     * @param state  {@link UserState}
      * @return {@link UserMessage}.
      */
-    public Mono<UserMessage> retrieveUserByMobileMono(String mobile) {
+    public Mono<UserMessage> retrieveUserByMobileAndStateMono(String mobile, Integer state) {
         ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
 
-        QueryUserCondition condition = QueryUserCondition.newBuilder().setMobile(StringValue.of(mobile)).build();
+        QueryUserCondition condition = QueryUserCondition.newBuilder()
+                .setMobile(StringValue.of(mobile))
+                .setState(Int32Value.of(state))
+                .build();
         RetrieveSingleUserRequest request = RetrieveSingleUserRequest.newBuilder().setCondition(condition).build();
 
         return stub.retrieveSingleUser(request)
@@ -135,14 +148,35 @@ public class UserService {
      * 根据手机号创建新用户 (默认昵称, 默认头像)
      *
      * @param mobile 手机号
+     * @param state  {@link UserState}
      * @return {@link UserMessage}
      */
-    public Mono<UserMessage> createUserByMobileMono(String mobile) {
+    public Mono<UserMessage> createUserByMobileAndStateMono(String mobile, Integer state) {
         ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
         NewUserRequest request = NewUserRequest.newBuilder()
                 .setMobile(StringValue.of(mobile))
+                .setState(Int32Value.of(state))
                 .build();
         return stub.createUser(request).map(UserResponse::getUser);
+    }
+
+    /**
+     * 如果有该手机号的H5登录信息 则进行合并
+     *
+     * @param userMessage {@link UserMessage}
+     */
+    public void checkH5UserAccount(UserMessage userMessage) {
+        this.retrieveUserByMobileAndStateMono(userMessage.getMobile(), UserState.USER_H5_MOBILE_VALUE)
+                .doOnNext(userMessageH5 -> {
+                    if (Objects.nonNull(userMessageH5)) {
+                        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
+                        MergeUserAccountsRequest request = MergeUserAccountsRequest.newBuilder()
+                                .setAppMobileUserId(userMessage.getId())
+                                .setH5MobileUserId(userMessageH5.getId())
+                                .build();
+                        stub.mergeUserAccounts(request);
+                    }
+                });
     }
 
 }

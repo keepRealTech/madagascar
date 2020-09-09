@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.IdentityType;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import com.keepreal.madagascar.coua.UserState;
 import com.keepreal.madagascar.coua.common.DisplayIdGenerator;
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
 import com.keepreal.madagascar.coua.model.UserInfo;
@@ -59,7 +60,7 @@ public class UserInfoService {
         userInfo.setId(String.valueOf(idGenerator.nextId()));
         userInfo.setDisplayId(displayIdGenerator.nextDisplayId());
         if (StringUtils.isEmpty(userInfo.getNickName()) && !StringUtils.isEmpty(userInfo.getMobile())
-                && StringUtils.isEmpty(userInfo.getUnionId())) {
+                && StringUtils.isEmpty(userInfo.getUnionId()) && userInfo.getState() != 0) {
             userInfo.setNickName("用户" + userInfo.getDisplayId());
         }
         userInfo = userInfoRepository.save(userInfo);
@@ -203,23 +204,44 @@ public class UserInfoService {
     }
 
     /**
-     * 根据手机号查询H5 用户信息(unionId 为null 或 空)
+     * 根据手机号和state查询用户信息
      *
-     * @param mobile 手机号
-     * @return {@link UserInfo}
+     * @param mobile    手机号
+     * @param state     用户类型
+     * @return          {@link UserInfo}
      */
-    public UserInfo findH5UserInfoByMobile(String mobile) {
-        return this.userInfoRepository.findTopByMobileAndUnionIdEqualsAndDeletedIsFalse(mobile, "");
+    public UserInfo findUserByMobileAndState(String mobile, Integer state) {
+        return this.userInfoRepository.findTopByMobileAndStateEqualsAndDeletedIsFalse(mobile, state);
     }
 
     /**
-     * 根据手机号查找微信用户(unionId不为空)
+     * 根据手机号查询H5 用户(state为1)
      *
-     * @param mobile 手机号
-     * @return {@link UserInfo}
+     * @param mobile    手机号
+     * @return          {@link UserInfo}
      */
-    public UserInfo findUserInfoByMobileAndUnionIdIsNotNul(String mobile) {
-        return this.userInfoRepository.findTopByUnionIdNotAndMobileEqualsAndDeletedIsFalse("", mobile);
+    public UserInfo findH5UserInfoByMobile(String mobile) {
+        return this.userInfoRepository.findTopByMobileAndStateEqualsAndDeletedIsFalse(mobile, UserState.USER_H5_MOBILE_VALUE);
+    }
+
+    /**
+     * 根据手机号查找微信用户(state为0)
+     *
+     * @param mobile    手机号
+     * @return          {@link UserInfo}
+     */
+    public UserInfo findWechatUserInfoByMobile(String mobile) {
+        return this.userInfoRepository.findTopByMobileAndStateEqualsAndDeletedIsFalse(mobile, UserState.USER_WECHAT_VALUE);
+    }
+
+    /**
+     * 根据手机号查询 app/官网手机号用户(state为2)
+     *
+     * @param mobile    手机号
+     * @return          {@link UserInfo}
+     */
+    public UserInfo findAppMobileUserInfoByMobile(String mobile) {
+        return this.userInfoRepository.findTopByMobileAndStateEqualsAndDeletedIsFalse(mobile, UserState.USER_APP_MOBILE_VALUE);
     }
 
     /**
