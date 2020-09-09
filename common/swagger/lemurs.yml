@@ -1075,7 +1075,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BillingInfoV11Response'
+                $ref: '#/components/schemas/BillingInfoResponseV11'
     put:
       tags:
         - Billing
@@ -1085,14 +1085,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PutBillingInfoV11Request'
+              $ref: '#/components/schemas/PutBillingInfoRequestV11'
       responses:
         '200':
           description: billing info
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/BillingInfoV11Response'
+                $ref: '#/components/schemas/BillingInfoResponseV11'
   /api/v1/balances/skus:
     get:
       tags:
@@ -2159,6 +2159,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BonusResponse'
+  /api/v1/feeds/{id}/wechatPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 单独解锁动态APP微信支付
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v1/feeds/{id}/wechatPay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 单独解锁动态APP微信支付
+      responses:
+        '200':
+          description: dummy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v1/feeds/{id}/iosPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
+      tags:
+        - Payment
+      summary: 单独解锁动态IOS跳转
+      responses:
+        '200':
+          description: H5 跳转地址
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5RedirectResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -3116,6 +3160,8 @@ components:
               type: boolean
             isMembership:
               type: boolean
+            isChargable:
+              type: boolean
             isTop:
               type: boolean
             membership:
@@ -3178,6 +3224,9 @@ components:
           type: array
           items:
             type: string
+        priceInCents:
+          type: integer
+          format: int64
         text:
           type: string
         mediaType:
@@ -3950,7 +3999,7 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BillingInfoDTO'
-    PutBillingInfoV11Request:
+    PutBillingInfoRequestV11:
       type: object
       properties:
         name:
@@ -3963,7 +4012,7 @@ components:
         - name
         - mobile
         - alipayAccount
-    BillingInfoV11Response:
+    BillingInfoResponseV11:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
