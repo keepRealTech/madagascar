@@ -384,12 +384,18 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
         String mobile = request.getMobile();
+
         UserInfo wechatUserInfo = this.userInfoService.findWechatUserInfoByMobile(mobile);
-        UserInfo appMobileUserInfo = this.userInfoService.findAppMobileUserInfoByMobile(mobile);
+
         if (Objects.nonNull(wechatUserInfo)) {
             responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
-        } else if (Objects.nonNull(appMobileUserInfo)) {
+            responseObserver.onCompleted();
+        }
+
+        UserInfo appMobileUserInfo = this.userInfoService.findAppMobileUserInfoByMobile(mobile);
+
+        if (Objects.nonNull(appMobileUserInfo)) {
             responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_REGISTERED)).build());
         } else {
