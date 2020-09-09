@@ -56,7 +56,7 @@ rocketmq:
 
 deploy:
   opentracing:
-    enable_jaeger: false
+    enable_jaeger: true
 
 release:
   strategy: Stochastic

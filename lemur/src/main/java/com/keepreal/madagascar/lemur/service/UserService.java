@@ -64,7 +64,7 @@ public class UserService {
      * @param id User id.
      * @return {@link UserMessage}.
      */
-    @Cacheable(value = "UserMesaage", key = "#id", cacheManager = "redisCacheManager")
+    @Cacheable(value = "UserMessage", key = "#id", cacheManager = "redisCacheManager")
     public UserMessage retrieveUserById(String id) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
@@ -109,7 +109,7 @@ public class UserService {
      * @param identityTypes    Identity types.
      * @return {@link UserResponse}.
      */
-    @CachePut(value = "UserMesaage", key = "#id", cacheManager = "redisCacheManager")
+    @CachePut(value = "UserMessage", key = "#id", cacheManager = "redisCacheManager")
     public UserMessage updateUser(String id,
                                   String name,
                                   String portraitImageUri,
@@ -271,7 +271,6 @@ public class UserService {
      * @param otp       One time password.
      * @return {@link UserMessage}
      */
-    @CachePut(value = "UserMesaage", key = "#userId", cacheManager = "redisCacheManager")
     public UserMessage updateUserMobilePhone(String userId, String mobile, Integer otp) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 

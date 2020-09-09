@@ -1,6 +1,8 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 
+import com.keepreal.madagascar.common.CommentMessage;
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.config.SystemNotificationConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder.CommentNotificationDTOBuilder;
@@ -14,6 +16,7 @@ import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.UnreadNotificationsCountMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import swagger.model.NoticeType;
 import swagger.model.NotificationDTO;
 import swagger.model.NotificationType;
 import swagger.model.SystemNoticeDTO;
@@ -22,6 +25,7 @@ import swagger.model.UnreadNotificationCountDTO;
 import swagger.model.UnreadNotificationCountDTOV2;
 import swagger.model.UnreadQuestsionNoticesCountDTO;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -138,7 +142,10 @@ public class NotificationDTOFactory {
      * @param notification {@link NotificationMessage}.
      * @return {@link NotificationDTO}.
      */
-    public NotificationDTO valueOf(NotificationMessage notification) {
+    public NotificationDTO valueOf(NotificationMessage notification,
+                                   Map<String, FeedMessage> feedMap,
+                                   Map<String, Boolean> subscriptionMap,
+                                   Map<String, CommentMessage> commentMessageMap) {
         if (Objects.isNull(notification)) {
             return null;
         }
@@ -156,21 +163,35 @@ public class NotificationDTOFactory {
                 case NOTIFICATION_COMMENTS:
                     return new CommentNotificationDTOBuilder()
                             .setNotificationMessage(notification)
+                            .setFeedMessage(feedMap.get(notification.getCommentNotification().getFeed().getId()))
+                            .setIslandSubscribed(subscriptionMap.getOrDefault(notification.getCommentNotification().getFeed().getIslandId(), true))
+                            .setCommentDeleted(!commentMessageMap.containsKey(notification.getCommentNotification().getComment().getId()))
                             .setFeedDTOFactory(this.feedDTOFactory)
-                            .setFeedService(this.feedService)
                             .setCommentDTOFactory(this.commentDTOFactory)
                             .build();
                 case NOTIFICATION_REACTIONS:
                     return new ReactionNotificationDTOBuilder()
                             .setNotificationMessage(notification)
+                            .setFeedMessage(feedMap.get(notification.getReactionNotification().getFeed().getId()))
+                            .setIslandSubscribed(subscriptionMap.getOrDefault(notification.getReactionNotification().getFeed().getIslandId(), true))
                             .setFeedDTOFactory(this.feedDTOFactory)
                             .setReactionDTOFactory(this.reactionDTOFactory)
                             .build();
                 case NOTIFICATION_BOX_NOTICE:
-                    return new QuestionBoxNotificationDTOBuilder()
-                            .setFeedService(this.feedService)
-                            .setNotificationMessage(notification)
-                            .build();
+                    switch (notification.getNoticeNotification().getType()) {
+                        case NOTICE_TYPE_BOX_NEW_QUESTION:
+                            return new QuestionBoxNotificationDTOBuilder()
+                                    .setNotificationMessage(notification)
+                                    .setFeedMessage(feedMap.get(notification.getNoticeNotification().getNewQuestionNotice().getFeedId()))
+                                    .build();
+                        case NOTICE_TYPE_BOX_NEW_ANSWER:
+                            return new QuestionBoxNotificationDTOBuilder()
+                                    .setNotificationMessage(notification)
+                                    .setFeedMessage(feedMap.get(notification.getNoticeNotification().getNewAnswerNotice().getFeedId()))
+                                    .build();
+                        default:
+                            return null;
+                    }
                 case NOTIFICATION_SYSTEM_NOTICE:
                     SystemNoticeDTO systemNotice = new SystemNoticeDTO();
                     systemNotice.setName(this.systemNotificationConfiguration.getName());

@@ -266,7 +266,7 @@ public class UserDTOFactory {
             return user.getPortraitImageUri();
         }
 
-        int hash = user.getId().hashCode() % 5 + 1;
+        int hash = Math.abs(user.getId().hashCode() % 5) + 1;
         switch (Objects.requireNonNull(this.convertGender(user.getGender()))) {
             case NUMBER_1:
                 return String.format("md-%d.png", hash);

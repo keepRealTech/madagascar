@@ -33,6 +33,7 @@ public class UserEventListener implements MessageListener {
 
             if (UserEventType.USER_EVENT_CREATE.equals(userEvent.getType())) {
                 this.rongCloudService.sentCreateUserNotice(userEvent.getCreateUserEvent());
+                this.rongCloudService.sentCreateUserNoticeTemp(userEvent.getCreateUserEvent());
                 return Action.CommitMessage;
             }
 

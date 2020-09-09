@@ -49,6 +49,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -543,7 +544,7 @@ public class IslandService {
      * @param islandIdList Island ids.
      * @return True if subscribed.
      */
-    public Map<String, Boolean> retrieveIslandSubscribeStateByUserId(String userId, List<String> islandIdList) {
+    public Map<String, Boolean> retrieveIslandSubscribeStateByUserId(String userId, Collection<String> islandIdList) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveUserSubscriptionStateRequest request = RetrieveUserSubscriptionStateRequest.newBuilder()

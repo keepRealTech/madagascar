@@ -26,9 +26,7 @@ import swagger.model.FullFeedDTO;
 import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -191,18 +189,17 @@ public class FeedDTOFactory {
     /**
      * Converts the {@link FeedMessage} into {@link SnapshotFeedDTO}.
      *
-     * @param feed {@link FeedMessage}.
+     * @param feed       {@link FeedMessage}.
+     * @param subscribed Whether island subscribed.
      * @return {@link SnapshotFeedDTO}.
      */
-    public SnapshotFeedDTO snapshotValueOf(FeedMessage feed) {
+    public SnapshotFeedDTO snapshotValueOf(FeedMessage feed, boolean subscribed) {
         if (Objects.isNull(feed)) {
             return null;
         }
 
         IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
         UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
-        Map<String, Boolean> stateMap = this.islandService.retrieveIslandSubscribeStateByUserId(
-                feed.getUserId(), Collections.singletonList(feed.getIslandId()));
 
         SnapshotFeedDTO snapshotFeedDTO = new SnapshotFeedDTO();
         snapshotFeedDTO.setId(feed.getId());
@@ -210,7 +207,7 @@ public class FeedDTOFactory {
         snapshotFeedDTO.setImagesUris(feed.getImageUrisList());
         snapshotFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
         snapshotFeedDTO.setCreatedAt(feed.getCreatedAt());
-        snapshotFeedDTO.setIsDeleted(this.ehcacheService.checkFeedDeleted(feed.getId()));
+        snapshotFeedDTO.setIsDeleted(feed.getIsDeleted());
         snapshotFeedDTO.setPriceInCents(feed.getPriceInCents());
 
         snapshotFeedDTO.setIsAccess(feed.getIsAccess());
@@ -229,8 +226,7 @@ public class FeedDTOFactory {
 
         snapshotFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
         snapshotFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
-        Boolean isSubscribed = stateMap.get(feed.getIslandId());
-        snapshotFeedDTO.setIsSubscribed(isSubscribed == null ? false : isSubscribed);
+        snapshotFeedDTO.setIsSubscribed(subscribed);
 
         return snapshotFeedDTO;
     }

@@ -8,7 +8,7 @@ global:
   common_configs:
     namespace: keepreal-prod
     lark:
-      webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73
+      webhook: https://open.feishu.cn/open-apis/bot/hook/d42eb11f-8804-4836-9ce8-881074c4077e
     replicas:
       lemur: 2
       baobob: 2
@@ -23,14 +23,14 @@ global:
       asity: 2
     short_code_base: https://islands.keepreal.cn/s/%s
     image_host: https://images.keepreal.cn
-    html_host: https://tiaodaoapp.com
+    html_host: https://h5.tiaodaoapp.com
     wechat_pay:
       callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/callback
       refund_callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/refund/callback
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.2.6
+      tag: 1.2.6-hf3
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
@@ -46,7 +46,7 @@ global:
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-      tag: 1.1.0
+      tag: 1.1.1
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri

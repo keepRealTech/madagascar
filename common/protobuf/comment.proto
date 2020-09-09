@@ -23,6 +23,10 @@ message RetrieveCommentByIdRequest {
     string id = 1;
 }
 
+message RetrieveCommentsByIdsRequest {
+    repeated string ids = 1;
+}
+
 message CommentsResponse {
     CommonStatus status = 1;
     PageResponse pageResponse = 2;
@@ -44,6 +48,7 @@ message CommentResponse {
 service CommentService {
     rpc CreateComment(NewCommentRequest) returns (CommentResponse) {};
     rpc RetrieveCommentById(RetrieveCommentByIdRequest) returns (CommentResponse) {};
+    rpc RetrieveCommentsByIds(RetrieveCommentsByIdsRequest) returns (CommentsResponse) {};
     rpc RetrieveCommentsByFeedId(RetrieveCommentsByFeedIdRequest) returns (CommentsResponse) {};
     rpc DeleteCommentById(DeleteCommentByIdRequest) returns (DeleteCommentByIdResponse) {};
 }
