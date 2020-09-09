@@ -2092,6 +2092,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MembershipTemplatesResponse'
+  /api/v1/users/qualifications/channels:
+    get:
+      tags:
+        - User
+      summary: 获得所有用户认证平台品类
+      responses:
+        '200':
+          description: qualification channels response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QualificationChannelsResponse'
+  /api/v1/users/qualifications:
+    get:
+      tags:
+        - User
+      summary: 获得当前用户提交的认证信息
+      responses:
+        '200':
+          description: qualification channels response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserQualificationsResponse'
+    put:
+      tags:
+        - User
+      summary: 更新当前用户的认证信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUserQualificationsRequest'
+      responses:
+        '200':
+          description: qualification channels response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserQualificationsResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -4857,4 +4898,42 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/UserWithdrawDTO'
-    
+    QualificationChannelDTO:
+      type: object
+      properties:
+        name:
+          type: string
+    QualificationChannelsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/QualificationChannelDTO'
+    UserQualificationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        hostUrl:
+          type: string
+    PutUserQualificationsRequest:
+      type: object
+      properties:
+        userQualifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserQualificationDTO'
+    UserQualificationsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserQualificationDTO'
