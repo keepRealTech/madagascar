@@ -1047,6 +1047,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BillingInfoResponse'
+  /api/v1.1/billingInfo:
+    get:
+      tags:
+        - Billing
+      summary: get current user's billing info
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingInfoV11Response'
+    put:
+      tags:
+        - Billing
+      summary: post current user's billing info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutBillingInfoV11Request'
+      responses:
+        '200':
+          description: billing info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingInfoV11Response'
   /api/v1/balances/skus:
     get:
       tags:
@@ -2036,6 +2065,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimelinesResponse'
+  /api/v1/memberships/templates:
+    get:
+      tags:
+        - Membership
+      summary: 获得订阅权益模版
+      responses:
+        '200':
+          description: membership templates response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MembershipTemplatesResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -3779,6 +3820,21 @@ components:
           type: string
         verified:
           type: boolean
+    BillingInfoV11DTO:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        name:
+          type: string
+        mobile:
+          type: string
+        alipayAccount:
+          type: string
+        verified:
+          type: boolean
     PutBillingInfoRequest:
       type: object
       properties:
@@ -3806,6 +3862,26 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/BillingInfoDTO'
+    PutBillingInfoV11Request:
+      type: object
+      properties:
+        name:
+          type: string
+        mobile:
+          type: string
+        alipayAccount:
+          type: string
+      required:
+        - name
+        - mobile
+        - alipayAccount
+    BillingInfoV11Response:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/BillingInfoV11DTO'
     IOSShellSkuDTO:
       type: object
       properties:
@@ -4723,3 +4799,17 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/RecommendIslandDTO'
+    MembershipTemplateDTO:
+      type: object
+      properties:
+        text:
+          type: string
+    MembershipTemplatesResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/MembershipTemplateDTO'
