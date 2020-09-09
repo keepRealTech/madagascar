@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.5.0"
+  version: "1.6.0"
   title: Keep Real API
 
 security:
@@ -49,6 +49,8 @@ tags:
     description: 提问箱 controller
   - name: Support
     description: 支持一下 controller
+  - name: Activity
+    description: 活动 controller
 
 paths:
   /api/healthcheck:
@@ -2133,6 +2135,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserQualificationsResponse'
+  /api/v1/activities/banners:
+    get:
+      tags:
+        - Activity
+      summary: 获得创作活动banner
+      responses:
+        '200':
+          description: bonues activity response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivitiesResponse'
+  /api/v1/activities/bonus:
+    get:
+      tags:
+        - Activity
+      summary: 获得当前创作奖励金活动奖励
+      responses:
+        '200':
+          description: bonues activity response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BonusResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2369,6 +2395,7 @@ components:
         - LOGIN_PASSWORD
         - LOGIN_JWT_IOS
         - LOGIN_MOBILE
+        - LOGIN_MOBILE_APP
     SceneType:
       type: string
       enum:
@@ -4937,3 +4964,53 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/UserQualificationDTO'
+    LabelDTO:
+      type: object
+      properties:
+        text:
+          type: string
+    BannerDTO:
+      type: object
+      properties:
+        imageUri:
+          type: string
+        redirectUrl:
+          type: string
+    ActivityDTO:
+      type: object
+      properties:
+        label:
+          $ref: '#/components/schemas/LabelDTO'
+        banners:
+          type: array
+          items:
+            $ref: '#/components/schemas/BannerDTO'
+    ActivitiesResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/ActivityDTO'
+    BonusDTO:
+      type: object
+      properties:
+        userId:
+          type: string
+        ratio:
+          type: integer
+        toGain:
+          type: integer
+        gained:
+          type: integer
+    BonusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BonusDTO'
