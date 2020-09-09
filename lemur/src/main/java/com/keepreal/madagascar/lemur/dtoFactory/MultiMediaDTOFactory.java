@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.HtmlMessage;
 import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.VideoMessage;
 import com.keepreal.madagascar.lemur.service.UserService;
+import org.springframework.util.StringUtils;
 import swagger.model.MultiMediaDTO;
 
 import java.util.Collections;
@@ -18,6 +19,8 @@ public class MultiMediaDTOFactory {
 
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+
+    private final static String DEFAULT_AUDIO_IMG = "https://images.keepreal.cn/20200908-144314.png";
 
     public MultiMediaDTOFactory(UserService userService,
                                 UserDTOFactory userDTOFactory) {
@@ -102,7 +105,7 @@ public class MultiMediaDTOFactory {
         MultiMediaDTO dto = new MultiMediaDTO();
         dto.setUrl(audioMessage.getUrl());
         dto.setTitle(audioMessage.getTitle());
-        dto.setThumbnailUrl(audioMessage.getThumbnailUrl());
+        dto.setThumbnailUrl(StringUtils.isEmpty(audioMessage.getThumbnailUrl()) ? DEFAULT_AUDIO_IMG : audioMessage.getThumbnailUrl());
         dto.setLength((int) audioMessage.getDuration());
         dto.setVideoId(audioMessage.getVideoId());
 
