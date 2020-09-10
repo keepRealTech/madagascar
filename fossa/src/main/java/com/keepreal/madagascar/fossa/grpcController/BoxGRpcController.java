@@ -87,7 +87,7 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         AnswerInfo answerInfo;
         List<MediaInfo> mediaInfos = feedInfo.getMediaInfos();
         if (mediaInfos.isEmpty()) {
-            this.boxInfoService.addAnsweredQuestionCount(feedInfo.getIslandId());
+            this.boxInfoService.addAnsweredQuestionCount(feedInfo.getIslandId(), feedInfo.getHostId());
             answerInfo = new AnswerInfo();
             answerInfo.setIgnored(false);
             mediaInfos.add(answerInfo);
