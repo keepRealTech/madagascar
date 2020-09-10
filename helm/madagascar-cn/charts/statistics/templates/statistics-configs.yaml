@@ -5,4 +5,5 @@ metadata:
   namespace: {{ .Values.global.common_configs.namespace }}
 data:
   aliyun_logs_madagascar-prod: stdout
+  LARK_WEBHOOK: {{ .Values.global.common_configs.lark.webhook }}
   SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
