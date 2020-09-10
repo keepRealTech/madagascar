@@ -4,6 +4,7 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.baobob.loginExecutor.model.IOSLoginInfo;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
+import com.keepreal.madagascar.common.EmptyMessage;
 import com.keepreal.madagascar.common.GenderValue;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -13,6 +14,7 @@ import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.ReactorUserServiceGrpc;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UserResponse;
+import com.keepreal.madagascar.coua.UserServiceGrpc;
 import com.keepreal.madagascar.coua.UserState;
 import io.grpc.Channel;
 import lombok.extern.slf4j.Slf4j;
@@ -161,22 +163,19 @@ public class UserService {
     }
 
     /**
-     * 如果有该手机号的H5登录信息 则进行合并
+     * 合并用户信息
      *
-     * @param userMessage {@link UserMessage}
+     * @param appMobileUserId   app/官网登录的用户id
+     * @param h5MobileUserId    h5用户信息
+     * @return                  {@link EmptyMessage}
      */
-    public void checkH5UserAccount(UserMessage userMessage) {
-        this.retrieveUserByMobileAndStateMono(userMessage.getMobile(), UserState.USER_H5_MOBILE_VALUE)
-                .doOnNext(userMessageH5 -> {
-                    if (Objects.nonNull(userMessageH5)) {
-                        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
-                        MergeUserAccountsRequest request = MergeUserAccountsRequest.newBuilder()
-                                .setAppMobileUserId(userMessage.getId())
-                                .setH5MobileUserId(userMessageH5.getId())
-                                .build();
-                        stub.mergeUserAccounts(request);
-                    }
-                });
+    public Mono<EmptyMessage> mergeUserAccounts(String appMobileUserId, String h5MobileUserId) {
+        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
+        MergeUserAccountsRequest request = MergeUserAccountsRequest.newBuilder()
+                .setAppMobileUserId(appMobileUserId)
+                .setH5MobileUserId(h5MobileUserId)
+                .build();
+        return stub.mergeUserAccounts(request);
     }
 
 }

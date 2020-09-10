@@ -9,10 +9,13 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.UserState;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 import static com.keepreal.madagascar.baobob.loginExecutor.WebMobileLoginExecutor.MOBILE_PHONE_OTP;
 
@@ -20,6 +23,7 @@ import static com.keepreal.madagascar.baobob.loginExecutor.WebMobileLoginExecuto
 /**
  * Represents a login executor working with mobile phone (app / official website).
  */
+@Slf4j
 public class AppMobileLoginExecutor implements LoginExecutor {
 
     private final LocalTokenGranter tokenGranter;
@@ -88,25 +92,24 @@ public class AppMobileLoginExecutor implements LoginExecutor {
      */
     private Mono<UserMessage> retrieveOrCreateUserByMobile(String mobile) {
         assert !StringUtils.isEmpty(mobile);
-        return this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_WECHAT_VALUE)
-                .map(this::checkLocked)
-                .switchIfEmpty(this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE))
-                .map(this::checkLocked)
+        return this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE)
+                .switchIfEmpty(this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_WECHAT_VALUE))
+                .map(userMessage -> {
+                    log.info("判断账户是否被冻结 mobile : {}", mobile);
+                    if (userMessage.getLocked()) {
+                        throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
+                    }
+                    return userMessage;
+                })
                 .switchIfEmpty(this.userService.createUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE))
-                .doOnNext(this.userService::checkH5UserAccount);
-    }
-
-    /**
-     * 检查用户是否被锁定 如果被锁定则抛出异常
-     *
-     * @param userMessage   {@link UserMessage}
-     * @return              {@link UserMessage}
-     */
-    private UserMessage checkLocked(UserMessage userMessage) {
-        if (userMessage.getLocked()) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
-        }
-        return userMessage;
+                .doOnNext(userMessage -> {
+                    this.userService.retrieveUserByMobileAndStateMono(userMessage.getMobile(), UserState.USER_H5_MOBILE_VALUE)
+                            .subscribe(userMessageH5 -> {
+                                if (Objects.nonNull(userMessageH5)) {
+                                this.userService.mergeUserAccounts(userMessage.getId(), userMessageH5.getId()).subscribe();
+                                }
+                            });
+                });
     }
 
 }

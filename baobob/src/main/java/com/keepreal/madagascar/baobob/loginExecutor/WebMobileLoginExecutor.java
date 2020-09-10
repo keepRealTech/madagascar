@@ -89,25 +89,15 @@ public class WebMobileLoginExecutor implements LoginExecutor{
     private Mono<UserMessage> retrieveOrCreateUserByMobile(String mobile) {
         assert !StringUtils.isEmpty(mobile);
         return this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_WECHAT_VALUE)
-                .map(this::checkLocked)
                 .switchIfEmpty(this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE))
-                .map(this::checkLocked)
                 .switchIfEmpty(this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_H5_MOBILE_VALUE))
-                .map(this::checkLocked)
+                .map(userMessage -> {
+                    if (userMessage.getLocked()) {
+                        throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
+                    }
+                    return userMessage;
+                })
                 .switchIfEmpty(this.userService.createUserByMobileAndStateMono(mobile, UserState.USER_H5_MOBILE_VALUE));
-    }
-
-    /**
-     * 检查用户是否被锁定 如果被锁定则抛出异常
-     *
-     * @param userMessage   {@link UserMessage}
-     * @return              {@link UserMessage}
-     */
-    private UserMessage checkLocked(UserMessage userMessage) {
-        if (userMessage.getLocked()) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
-        }
-        return userMessage;
     }
 
 }
