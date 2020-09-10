@@ -99,6 +99,8 @@ spec:
                 secretKeyRef:
                   name: aliyun-rdb
                   key: fossa-connection-string
+            - name: RESTART
+              value: "1"
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}
