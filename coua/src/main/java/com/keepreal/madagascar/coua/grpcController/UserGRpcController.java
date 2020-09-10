@@ -450,7 +450,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
 
         responseObserver.onNext(CreateOrUpdateUserQualificationsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
-                .addAllMessage(qualifications.stream().map(this.userQualificationService::getMessage).collect(Collectors.toList()))
+                .addAllMessage(qualifications.stream().filter(userQualification -> !userQualification.getDeleted()).map(this.userQualificationService::getMessage).collect(Collectors.toList()))
                 .build());
         responseObserver.onCompleted();
     }
