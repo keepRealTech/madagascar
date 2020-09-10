@@ -95,7 +95,6 @@ public class AppMobileLoginExecutor implements LoginExecutor {
         return this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE)
                 .switchIfEmpty(this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_WECHAT_VALUE))
                 .map(userMessage -> {
-                    log.info("判断账户是否被冻结 mobile : {}", mobile);
                     if (userMessage.getLocked()) {
                         throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
                     }
