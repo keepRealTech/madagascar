@@ -50,12 +50,10 @@ public class BillingInfoDTOFactory {
             return null;
         }
 
-        String name = !StringUtils.isEmpty(billingInfo.getName()) ? billingInfo.getName().charAt(0) + this.paddingMask(billingInfo.getName()) : "";
-
         BillingInfoDTOV11 billingInfoDTO = new BillingInfoDTOV11();
         billingInfoDTO.setId(billingInfo.getId());
         billingInfoDTO.setMobile(billingInfo.getMobile());
-        billingInfoDTO.setName(name);
+        billingInfoDTO.setName(billingInfo.getName());
         billingInfoDTO.setUserId(billingInfo.getUserId());
         billingInfoDTO.setAlipayAccount(billingInfo.getAliPayAccount());
 
@@ -64,20 +62,6 @@ public class BillingInfoDTOFactory {
                 && !StringUtils.isEmpty(billingInfo.getMobile()));
 
         return billingInfoDTO;
-    }
-
-    /**
-     * Padding name with asterisks.
-     *
-     * @param name Name.
-     * @return ******.
-     */
-    private String paddingMask(String name) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < name.length() - 1; i++) {
-            sb.append("*");
-        }
-        return sb.toString();
     }
 
 }
