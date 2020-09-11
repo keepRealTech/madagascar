@@ -1,7 +1,6 @@
 package com.keepreal.madagascar.workflow.supportActivity.service;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.workflow.supportActivity.model.MaxAmount;
 import com.keepreal.madagascar.workflow.supportActivity.model.SupportActivity;
 import com.keepreal.madagascar.workflow.supportActivity.repository.SupportActivityRepository;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,8 @@ public class SupportActivityService {
     public void process() {
         List<String> payeeIdList = this.supportActivityRepository.findAllPayeeId();
         payeeIdList.forEach(payeeId -> {
-            List<MaxAmount> maxAmounts = this.supportActivityRepository.findByUserId(payeeId);
-            long sum = maxAmounts.stream().mapToLong(amount -> amount.getAmount() > MAX_CENTS ? MAX_CENTS : amount.getAmount()).sum();
+            List<Long> maxAmounts = this.supportActivityRepository.findByUserId(payeeId);
+            long sum = maxAmounts.stream().mapToLong(amount -> amount > MAX_CENTS ? MAX_CENTS : amount).sum();
             this.save(payeeId, sum);
         });
     }
@@ -34,6 +33,7 @@ public class SupportActivityService {
     private void save(String userId, Long amount) {
         SupportActivity supportActivity = this.supportActivityRepository.findSupportActivityByUserIdAndDeletedIsFalse(userId);
         if (supportActivity == null) {
+            supportActivity = new SupportActivity();
             supportActivity.setId(String.valueOf(idGenerator.nextId()));
             supportActivity.setUserId(userId);
         }
