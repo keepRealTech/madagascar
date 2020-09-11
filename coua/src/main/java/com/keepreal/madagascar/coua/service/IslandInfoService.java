@@ -10,6 +10,7 @@ import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.coua.dao.IslandDiscoveryRepository;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
+import com.keepreal.madagascar.coua.dao.UserInfoRepository;
 import com.keepreal.madagascar.coua.model.IslandDiscovery;
 import com.keepreal.madagascar.coua.model.IslandInfo;
 import com.keepreal.madagascar.coua.util.PageResponseUtil;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ public class IslandInfoService {
     private final IslandInfoRepository islandInfoRepository;
     private final SubscriptionService subscriptionService;
     private final LongIdGenerator idGenerator;
+    private final UserInfoRepository userInfoRepository;
 
     /**
      * Constructs the island service.
@@ -47,15 +50,18 @@ public class IslandInfoService {
      * @param islandInfoRepository      {@link IslandInfoRepository}.
      * @param subscriptionService       {@link SubscriptionService}.
      * @param idGenerator               {@link LongIdGenerator}.
+     * @param userInfoRepository        {@link UserInfoRepository}.
      */
     public IslandInfoService(IslandDiscoveryRepository islandDiscoveryRepository,
                              IslandInfoRepository islandInfoRepository,
                              SubscriptionService subscriptionService,
-                             LongIdGenerator idGenerator) {
+                             LongIdGenerator idGenerator,
+                             UserInfoRepository userInfoRepository) {
         this.islandDiscoveryRepository = islandDiscoveryRepository;
         this.islandInfoRepository = islandInfoRepository;
         this.subscriptionService = subscriptionService;
         this.idGenerator = idGenerator;
+        this.userInfoRepository = userInfoRepository;
     }
 
     /**
@@ -149,28 +155,34 @@ public class IslandInfoService {
 
     /**
      * Retrieve islandList by islandName.
+     * 根据用户名或者岛名前缀查询，查询结果根据该用户是否加V排序，如果同加V，比较岛民人数
      *
-     * @param islandName islandName.
+     * @param name islandName or username.
      * @param pageable   {@link Pageable}.
      * @param builder    {@link com.keepreal.madagascar.coua.IslandResponse.Builder}.
      * @return {@link IslandInfo}.
      */
-    public List<IslandInfo> getIslandByName(String islandName, Pageable pageable, IslandsResponse.Builder builder) {
-        Page<IslandInfo> islandListPageable = islandInfoRepository.findByIslandNameStartingWithAndDeletedIsFalse(islandName, pageable);
+    public List<IslandInfo> getIslandByName(String name, Pageable pageable, IslandsResponse.Builder builder) {
+        Page<String> userIdListPageable = this.userInfoRepository.findUserIdByNameOrderByIdentity(name, pageable);
+        List<IslandInfo> islandInfosWithV = this.islandInfoRepository.findIslandInfosByHostIdIn(userIdListPageable.getContent());
+        List<IslandInfo> sortedIslandWithV = islandInfosWithV.stream().sorted(Comparator.comparing(IslandInfo::getIslanderNumber).reversed()).collect(Collectors.toList());
 
-        Page<String> islandIdsPageable = this.subscriptionService.getIslandIdsByUsername(islandName, pageable);
-        Set<String> islandIds = new HashSet<>(islandIdsPageable.getContent());
-        islandIds.removeAll(islandListPageable.getContent().stream().map(IslandInfo::getId).collect(Collectors.toList()));
-        List<IslandInfo> islandInfos = this.islandInfoRepository.findByIdInAndDeletedIsFalse(islandIds);
-        islandInfos.addAll(islandListPageable.getContent());
+        Page<IslandInfo> islandListPageable = islandInfoRepository.findByIslandNameStartingWithAndDeletedIsFalse(name, pageable);
+        List<IslandInfo> sortedIsland = islandListPageable.stream().sorted(Comparator.comparing(IslandInfo::getIslanderNumber).reversed()).collect(Collectors.toList());
 
         if (islandListPageable.hasContent()) {
             builder.setPageResponse(PageResponseUtil.buildResponse(islandListPageable));
         } else {
-            builder.setPageResponse(PageResponseUtil.buildResponse(islandIdsPageable));
+            builder.setPageResponse(PageResponseUtil.buildResponse(userIdListPageable));
         }
 
-        return islandInfos.stream().sorted(Comparator.comparing((IslandInfo island) -> island.getIdentityId().length()).thenComparing(IslandInfo::getIslanderNumber).reversed()).collect(Collectors.toList());
+        for (IslandInfo islandInfo : sortedIsland) {
+            if (!sortedIslandWithV.contains(islandInfo)) {
+                sortedIslandWithV.add(islandInfo);
+            }
+        }
+
+        return sortedIslandWithV;
     }
 
     /**
