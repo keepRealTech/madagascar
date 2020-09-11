@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: hoopoe
+  datasource:
+    url: jdbc:mysql://root:123456@localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+snowflake:
+  nodeId: 0
+
+grpc:
+  coua:
+    host: 127.0.0.1
+    port: 12002
+  port: 12008
+
+server:
+  port: 8090
+
+activity:
+  showLabel: true
+  text: "领8888创作鼓励金"
+  isPublic: false

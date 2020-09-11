@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.hoopoe";
+
+import "common.proto";
+
+message RetrieveActiveBannerRequest {
+  string userId = 1;
+}
+
+message RetrieveActiveBannerResponse {
+  CommonStatus status = 1;
+  repeated ActiveBannerMessage activeBanners = 2;
+}
+
+message ActiveBannerMessage {
+  string label = 1;
+  repeated SingleBannerMessage banners = 2;
+}
+
+message SingleBannerMessage {
+  string imageUri = 1;
+  string redirectUrl = 2;
+}
+
+service ActivityService {
+  rpc RetrieveActiveBanner(RetrieveActiveBannerRequest) returns(RetrieveActiveBannerResponse) {};
+}
