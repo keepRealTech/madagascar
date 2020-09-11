@@ -12,6 +12,7 @@ public class SupportActivityService {
 
     private final static int TOTAL_CENTS = 888800;
     private final static int CREATE_FEED_CENTS = 880;
+    private final static int DEFAULT_RATIO = 10;
 
     public SupportActivityService(SupportActivityRepository supportActivityRepository) {
         this.supportActivityRepository = supportActivityRepository;
@@ -22,7 +23,7 @@ public class SupportActivityService {
 
         if (supportActivity == null) {
             return ActivityMessage.newBuilder()
-                    .setRatio(10)
+                    .setRatio(DEFAULT_RATIO)
                     .setGained(0L)
                     .setToGain(TOTAL_CENTS)
                     .build();
