@@ -157,6 +157,7 @@ public class PaymentService {
                 .payeeId(payeeId)
                 .orderId(order.getId())
                 .tradeNum(order.getTradeNumber())
+                .withdrawPercent()
                 .build();
 
         return this.paymentRepository.save(payment);
