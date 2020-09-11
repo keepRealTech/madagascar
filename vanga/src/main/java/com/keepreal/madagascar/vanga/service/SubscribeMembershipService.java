@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.IosOrder;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
+import com.keepreal.madagascar.vanga.model.Order;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.SubscribeMembership;
@@ -94,27 +95,27 @@ public class SubscribeMembershipService {
     /**
      * Subscribe member for a newly succeed wechat pay order.
      *
-     * @param wechatOrder {@link WechatOrder}.
+     * @param order {@link WechatOrder}.
      */
     @Transactional
-    public void subscribeMembershipWithWechatOrder(WechatOrder wechatOrder) {
-        if (Objects.isNull(wechatOrder) || OrderState.SUCCESS.getValue() != wechatOrder.getState()) {
+    public void subscribeMembershipWithOrder(Order order) {
+        if (Objects.isNull(order) || OrderState.SUCCESS.getValue() != order.getState()) {
             return;
         }
 
-        List<Payment> paymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
+        List<Payment> paymentList = this.paymentService.retrievePaymentsByOrderId(order.getId());
 
         if (paymentList.stream().allMatch(payment -> PaymentState.DRAFTED.getValue() != payment.getState())) {
             return;
         }
 
-        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", wechatOrder.getUserId()))) {
-            List<Payment> innerPaymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", order.getUserId()))) {
+            List<Payment> innerPaymentList = this.paymentService.retrievePaymentsByOrderId(order.getId());
 
-            MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(wechatOrder.getPropertyId());
+            MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(order.getPropertyId());
 
             if (innerPaymentList.isEmpty()) {
-                innerPaymentList = this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
+                innerPaymentList = this.paymentService.createNewWechatMembershipPayments(order, sku);
             } else if (innerPaymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
                 return;
             }
@@ -122,7 +123,7 @@ public class SubscribeMembershipService {
             Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
 
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
-                    wechatOrder.getUserId(), sku.getMembershipId());
+                    order.getUserId(), sku.getMembershipId());
 
             Instant instant = Objects.isNull(currentSubscribeMembership) ?
                     Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
@@ -140,7 +141,7 @@ public class SubscribeMembershipService {
 
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.updateAll(innerPaymentList);
-            this.createOrRenewSubscriptionMember(wechatOrder.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
+            this.createOrRenewSubscriptionMember(order.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
         }
     }
 

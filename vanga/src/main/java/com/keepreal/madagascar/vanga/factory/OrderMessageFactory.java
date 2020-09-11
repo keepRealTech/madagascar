@@ -1,8 +1,10 @@
 package com.keepreal.madagascar.vanga.factory;
 
+import com.keepreal.madagascar.common.AlipayOrderMessage;
+import com.keepreal.madagascar.common.OrderState;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.WechatOrderState;
-import com.keepreal.madagascar.vanga.config.WechatPayConfiguration;
+import com.keepreal.madagascar.vanga.model.AlipayOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -10,10 +12,10 @@ import org.springframework.util.StringUtils;
 import java.util.Objects;
 
 /**
- * Represents the wechat order message factory.
+ * Represents the order message factory.
  */
 @Component
-public class WechatOrderMessageFactory {
+public class OrderMessageFactory {
 
     /**
      * Converts {@link WechatOrder} into {@link WechatOrderMessage}.
@@ -45,6 +47,7 @@ public class WechatOrderMessageFactory {
         return  WechatOrderMessage.newBuilder()
                 .setId(wechatOrder.getId())
                 .setAppId(wechatOrder.getAppId())
+                .setTradeNumber(wechatOrder.getTradeNumber())
                 .setPartnerId(wechatOrder.getMchId())
                 .setTimestamp(wechatOrder.getCreatedTime())
                 .setNonceStr(wechatOrder.getNonceStr())
@@ -58,36 +61,67 @@ public class WechatOrderMessageFactory {
     }
 
     /**
-     * Converts the value of {@link WechatOrderState} into {@link WechatOrderState}.
+     * Converts {@link AlipayOrder} into {@link AlipayOrderMessage}.
+     *
+     * @param alipayOrder {@link AlipayOrder}.
+     * @return {@link AlipayOrderMessage}.
+     */
+    public AlipayOrderMessage valueOf(AlipayOrder alipayOrder) {
+        if (Objects.isNull(alipayOrder)) {
+            return null;
+        }
+
+        if (StringUtils.isEmpty(alipayOrder.getOrderString())) {
+            alipayOrder.setOrderString("");
+        }
+
+        if (StringUtils.isEmpty(alipayOrder.getMwebUrl())) {
+            alipayOrder.setMwebUrl("");
+        }
+
+        return  AlipayOrderMessage.newBuilder()
+                .setId(alipayOrder.getId())
+                .setTradeNumber(alipayOrder.getTradeNumber())
+                .setTimestamp(alipayOrder.getCreatedTime())
+                .setUserId(alipayOrder.getUserId())
+                .setFeeInCents(Long.parseLong(alipayOrder.getFeeInCents()))
+                .setState(this.convert(alipayOrder.getState()))
+                .setMwebUrl(alipayOrder.getMwebUrl())
+                .setOrderString(alipayOrder.getOrderString())
+                .build();
+    }
+
+    /**
+     * Converts the value of {@link WechatOrderState} into {@link OrderState}.
      *
      * @param wechatOrderState Value of {@link WechatOrderState}.
-     * @return {@link WechatOrderState}.
+     * @return {@link OrderState}.
      */
-    private WechatOrderState convert(Integer wechatOrderState) {
+    private OrderState convert(Integer wechatOrderState) {
         if (Objects.isNull(wechatOrderState)) {
             return null;
         }
 
         switch (wechatOrderState) {
             case 1:
-                return WechatOrderState.WECHAT_ORDER_STATE_NOTPAY;
+                return OrderState.ORDER_STATE_NOTPAY;
             case 2:
-                return WechatOrderState.WECHAT_ORDER_STATE_USERPAYING;
+                return OrderState.ORDER_STATE_USERPAYING;
             case 3:
-                return WechatOrderState.WECHAT_ORDER_STATE_SUCCESS;
+                return OrderState.ORDER_STATE_SUCCESS;
             case 4:
-                return WechatOrderState.WECHAT_ORDER_STATE_CLOSED;
+                return OrderState.ORDER_STATE_CLOSED;
             case 5:
-                return WechatOrderState.WECHAT_ORDER_STATE_REFUND;
+                return OrderState.ORDER_STATE_REFUND;
             case 6:
-                return WechatOrderState.WECHAT_ORDER_STATE_PAYERROR;
+                return OrderState.ORDER_STATE_PAYERROR;
             case 7:
-                return WechatOrderState.WECHAT_ORDER_STATE_REVOKED;
+                return OrderState.ORDER_STATE_REVOKED;
             case 8:
-                return WechatOrderState.WECHAT_ORDER_STATE_REFUNDED;
+                return OrderState.ORDER_STATE_REFUNDED;
             case 0:
             default:
-                return WechatOrderState.WECHAT_ORDER_STATE_UNKNOWN;
+                return OrderState.ORDER_STATE_UNKNOWN;
         }
     }
 

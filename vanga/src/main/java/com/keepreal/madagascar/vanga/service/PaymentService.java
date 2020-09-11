@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.IosOrder;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
+import com.keepreal.madagascar.vanga.model.Order;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.PaymentType;
@@ -89,24 +90,24 @@ public class PaymentService {
     /**
      * Creates new wechat payments for given order.
      *
-     * @param wechatOrder {@link WechatOrder}.
-     * @param sku         {@link MembershipSku}.
+     * @param order     {@link Order}.
+     * @param sku       {@link MembershipSku}.
      * @return {@link Payment}.
      */
     @Transactional
-    public List<Payment> createNewWechatMembershipPayments(WechatOrder wechatOrder, MembershipSku sku) {
+    public List<Payment> createNewWechatMembershipPayments(Order order, MembershipSku sku) {
         List<Payment> payments =
                 IntStream.range(0, sku.getTimeInMonths())
                         .mapToObj(i -> Payment.builder()
                                 .id(String.valueOf(this.idGenerator.nextId()))
                                 .type(PaymentType.WECHATPAY.getValue())
                                 .amountInCents(sku.getPriceInCents() / sku.getTimeInMonths())
-                                .userId(wechatOrder.getUserId())
+                                .userId(order.getUserId())
                                 .state(PaymentState.DRAFTED.getValue())
                                 .payeeId(sku.getHostId())
-                                .orderId(wechatOrder.getId())
-                                .tradeNum(wechatOrder.getTradeNumber())
-                                .membershipSkuId(wechatOrder.getPropertyId())
+                                .orderId(order.getId())
+                                .tradeNum(order.getTradeNumber())
+                                .membershipSkuId(order.getPropertyId())
                                 .build())
                         .collect(Collectors.toList());
 
@@ -137,17 +138,25 @@ public class PaymentService {
         return this.paymentRepository.save(payment);
     }
 
+    /**
+     * Creates the payments for one time support.
+     *
+     * @param order         {@link Order}.
+     * @param payeeId       Payee id.
+     * @param priceInCents  Price in cents.
+     * @return  {@link Payment}.
+     */
     @Transactional
-    public Payment createNewWechatSupportPayment(WechatOrder wechatOrder, String payeeId, long priceInCents) {
+    public Payment createNewWechatSupportPayment(Order order, String payeeId, long priceInCents) {
         Payment payment = Payment.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .type(PaymentType.SUPPORT.getValue())
                 .amountInCents(priceInCents)
-                .userId(wechatOrder.getUserId())
+                .userId(order.getUserId())
                 .state(PaymentState.DRAFTED.getValue())
                 .payeeId(payeeId)
-                .orderId(wechatOrder.getId())
-                .tradeNum(wechatOrder.getTradeNumber())
+                .orderId(order.getId())
+                .tradeNum(order.getTradeNumber())
                 .build();
 
         return this.paymentRepository.save(payment);

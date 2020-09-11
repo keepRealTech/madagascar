@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.vanga.service;
 
 import com.keepreal.madagascar.vanga.model.Balance;
+import com.keepreal.madagascar.vanga.model.Order;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
@@ -26,13 +27,18 @@ public class SupportService {
         this.notificationEventProducerService = notificationEventProducerService;
     }
 
+    /**
+     * Supports with order.
+     *
+     * @param order {@link Order}.
+     */
     @Transactional
-    public void supportWithWechatOrder(WechatOrder wechatOrder) {
-        if (Objects.isNull(wechatOrder) || OrderState.SUCCESS.getValue() != wechatOrder.getState()) {
+    public void supportWithOrder(Order order) {
+        if (Objects.isNull(order) || OrderState.SUCCESS.getValue() != order.getState()) {
             return;
         }
 
-        List<Payment> paymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
+        List<Payment> paymentList = this.paymentService.retrievePaymentsByOrderId(order.getId());
 
         if (paymentList.stream().allMatch(payment -> PaymentState.DRAFTED.getValue() != payment.getState())) {
             return;

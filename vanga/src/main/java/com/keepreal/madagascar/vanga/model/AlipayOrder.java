@@ -21,7 +21,7 @@ import javax.persistence.Transient;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
-public class AliPayOrder {
+public class AlipayOrder implements Order {
 
     @Id
     private String id;

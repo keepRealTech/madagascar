@@ -17,6 +17,7 @@ import java.io.BufferedOutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Represents the wechat pay order callback controller.
@@ -91,8 +92,32 @@ public class OrderCallbackController {
      * @param request {@link HttpServletRequest}.
      */
     @RequestMapping(value = "/api/v1/orders/alipay/callback", method = RequestMethod.POST)
-    public String apiV1OrdersWechatCallback(HttpServletRequest request) {
-        String payload = this.gson.toJson(request.getParameterMap());
+    public String apiV1OrdersAlipayCallback(HttpServletRequest request) {
+        Map<String, String> retMap = new HashMap<>();
+        Set<Map.Entry<String, String[]>> entrySet = request.getParameterMap().entrySet();
+
+        for (Map.Entry<String, String[]> entry : entrySet) {
+            String name = entry.getKey();
+            String[] values = entry.getValue();
+            int valLen = values.length;
+
+            if (valLen == 1) {
+                retMap.put(name, values[0]);
+            } else if (valLen > 1) {
+                StringBuilder sb = new StringBuilder();
+                for (String val : values) {
+                    sb.append(",").append(val);
+                }
+                retMap.put(name, sb.toString().substring(1));
+            } else {
+                retMap.put(name, "");
+            }
+        }
+
+        String payload = this.gson.toJson(retMap);
+
+        log.warn(payload);
+
         this.orderService.alipayOrderCallback(payload);
 
         return "success";
