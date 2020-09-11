@@ -6,14 +6,12 @@ import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
-import com.keepreal.madagascar.coua.FeedMembershipMessage;
 import com.keepreal.madagascar.fossa.BoxMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.BoxDTOFactory;
-import com.keepreal.madagascar.lemur.dtoFactory.WechatOrderDTOFactory;
+import com.keepreal.madagascar.lemur.dtoFactory.OrderDTOFactory;
 import com.keepreal.madagascar.lemur.service.BoxService;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.IslandService;
-import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -46,18 +44,18 @@ public class BoxController implements BoxApi {
     private final FeedService feedService;
     private final IslandService islandService;
     private final BoxDTOFactory boxDTOFactory;
-    private final WechatOrderDTOFactory wechatOrderDTOFactory;
+    private final OrderDTOFactory orderDTOFactory;
 
     public BoxController(BoxService boxService,
                          FeedService feedService,
                          IslandService islandService,
                          BoxDTOFactory boxDTOFactory,
-                         WechatOrderDTOFactory wechatOrderDTOFactory) {
+                         OrderDTOFactory orderDTOFactory) {
         this.boxService = boxService;
         this.feedService = feedService;
         this.islandService = islandService;
         this.boxDTOFactory = boxDTOFactory;
-        this.wechatOrderDTOFactory = wechatOrderDTOFactory;
+        this.orderDTOFactory = orderDTOFactory;
     }
 
     /**
@@ -241,7 +239,7 @@ public class BoxController implements BoxApi {
 
         WechatOrderResponse response = new WechatOrderResponse();
 
-        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
+        response.setData(this.orderDTOFactory.wechatOrderValueOf(wechatOrderMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

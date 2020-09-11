@@ -1,13 +1,14 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.AlipayOrderMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
+import com.keepreal.madagascar.lemur.dtoFactory.OrderDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.PaymentDTOFactory;
-import com.keepreal.madagascar.lemur.dtoFactory.WechatOrderDTOFactory;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.PaymentService;
@@ -17,27 +18,24 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.PaymentApi;
+import swagger.model.AlipayOrderResponse;
 import swagger.model.ConfigurationDTO;
 import swagger.model.DummyResponse;
+import swagger.model.H5RedirectDTO;
 import swagger.model.H5RedirectResponse;
 import swagger.model.H5WechatOrderDTO;
 import swagger.model.H5WechatOrderResponse;
 import swagger.model.PostSupportRequest;
-import swagger.model.H5RedirectDTO;
 import swagger.model.SceneType;
 import swagger.model.SubscribeMemberRequest;
 import swagger.model.UserPaymentsResponse;
 import swagger.model.WechatOrderResponse;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,16 +52,15 @@ import java.util.stream.Collectors;
 @RestController
 public class PaymentController implements PaymentApi {
 
-    private Set<String> auditUserIds = new HashSet<>(Collections.singleton("484"));
     private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
-
     private final IOSClientConfiguration iosClientConfiguration;
     private final PaymentService paymentService;
     private final UserService userService;
     private final MembershipService membershipService;
-    private final WechatOrderDTOFactory wechatOrderDTOFactory;
+    private final OrderDTOFactory orderDTOFactory;
     private final PaymentDTOFactory paymentDTOFactory;
     private final IslandService islandService;
+    private final Set<String> auditUserIds = new HashSet<>(Collections.singleton("484"));
 
     /**
      * Constructs the payment controller.
@@ -71,21 +68,21 @@ public class PaymentController implements PaymentApi {
      * @param paymentService         {@link PaymentService}.
      * @param userService            {@link UserService}.
      * @param membershipService      {@link MembershipService}.
-     * @param wechatOrderDTOFactory  {@link WechatOrderDTOFactory}.
+     * @param orderDTOFactory        {@link OrderDTOFactory}.
      * @param paymentDTOFactory      {@link PaymentDTOFactory}.
      * @param iosClientConfiguration {@link IOSClientConfiguration}.
      */
     public PaymentController(PaymentService paymentService,
                              UserService userService,
                              MembershipService membershipService,
-                             WechatOrderDTOFactory wechatOrderDTOFactory,
+                             OrderDTOFactory orderDTOFactory,
                              PaymentDTOFactory paymentDTOFactory,
                              IOSClientConfiguration iosClientConfiguration,
                              IslandService islandService) {
         this.paymentService = paymentService;
         this.userService = userService;
         this.membershipService = membershipService;
-        this.wechatOrderDTOFactory = wechatOrderDTOFactory;
+        this.orderDTOFactory = orderDTOFactory;
         this.paymentDTOFactory = paymentDTOFactory;
         this.islandService = islandService;
         this.iosClientConfiguration = iosClientConfiguration;
@@ -129,7 +126,7 @@ public class PaymentController implements PaymentApi {
                 subscribeMemberRequest.getMembershipSkuId());
 
         WechatOrderResponse response = new WechatOrderResponse();
-        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
+        response.setData(this.orderDTOFactory.wechatOrderValueOf(wechatOrderMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -177,7 +174,8 @@ public class PaymentController implements PaymentApi {
      */
     @CrossOrigin
     @Override
-    public ResponseEntity<UserPaymentsResponse> apiV1PaymentsGet(Integer page, Integer pageSize) {
+    public ResponseEntity<UserPaymentsResponse> apiV1PaymentsGet(Integer page,
+                                                                 Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         com.keepreal.madagascar.vanga.UserPaymentsResponse userPaymentsResponse =
@@ -278,9 +276,9 @@ public class PaymentController implements PaymentApi {
     /**
      * Implements the support h5 wechat pay api.
      *
-     * @param id id (required) Island id.
-     * @param sceneType  (required) Scene type.
-     * @param postSupportRequest  (required) {@link PostSupportRequest}.
+     * @param id                 id (required) Island id.
+     * @param sceneType          (required) Scene type.
+     * @param postSupportRequest (required) {@link PostSupportRequest}.
      * @return {@link H5WechatOrderResponse}.
      */
     @CrossOrigin
@@ -313,7 +311,8 @@ public class PaymentController implements PaymentApi {
     }
 
     @Override
-    public ResponseEntity<WechatOrderResponse> apiV1IslandsIdSupportWechatPayPost(String id, @Valid PostSupportRequest postSupportRequest) {
+    public ResponseEntity<WechatOrderResponse> apiV1IslandsIdSupportWechatPayPost(String id,
+                                                                                  PostSupportRequest postSupportRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
 
@@ -327,7 +326,57 @@ public class PaymentController implements PaymentApi {
                 remoteAddress);
 
         WechatOrderResponse response = new WechatOrderResponse();
-        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
+        response.setData(this.orderDTOFactory.wechatOrderValueOf(wechatOrderMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the one time support with alipay api.
+     *
+     * @param id                 id (required) Island id.
+     * @param postSupportRequest (required)    {@link PostSupportRequest}.
+     * @return {@link AlipayOrderResponse}.
+     */
+    @Override
+    public ResponseEntity<AlipayOrderResponse> apiV1IslandsIdSupportAlipayPost(String id,
+                                                                               PostSupportRequest postSupportRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+
+        AlipayOrderMessage alipayOrderMessage = this.paymentService.submitSupportWithAlipay(
+                userId,
+                islandMessage.getHostId(),
+                postSupportRequest.getSponsorSkuId(),
+                postSupportRequest.getPriceInCents());
+
+        AlipayOrderResponse response = new AlipayOrderResponse();
+        response.setData(this.orderDTOFactory.alipayOrderValueOf(alipayOrderMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the membership subscription with alipay api.
+     *
+     * @param id                     id (required) Island id.
+     * @param subscribeMemberRequest (required)    {@link SubscribeMemberRequest}.
+     * @return {@link AlipayOrderResponse}.
+     */
+    @Override
+    public ResponseEntity<AlipayOrderResponse> apiV1IslandsIdMemberSubscriptionAlipayPost(String id,
+                                                                                          SubscribeMemberRequest subscribeMemberRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        AlipayOrderMessage alipayOrderMessage = this.paymentService.submitSubscribeMembershipWithAlipay(
+                userId,
+                subscribeMemberRequest.getMembershipSkuId());
+
+        AlipayOrderResponse response = new AlipayOrderResponse();
+        response.setData(this.orderDTOFactory.alipayOrderValueOf(alipayOrderMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -350,4 +399,5 @@ public class PaymentController implements PaymentApi {
                 return com.keepreal.madagascar.common.SceneType.SCENE_WAP;
         }
     }
+
 }

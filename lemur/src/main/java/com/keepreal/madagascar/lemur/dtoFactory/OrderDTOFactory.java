@@ -1,8 +1,10 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.keepreal.madagascar.common.AlipayOrderMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.WechatOrderState;
 import org.springframework.stereotype.Component;
+import swagger.model.AlipayOrderDTO;
 import swagger.model.OrderState;
 import swagger.model.WechatOrderDTO;
 
@@ -12,7 +14,7 @@ import java.util.Objects;
  * Represents the wechat order dto factory.
  */
 @Component
-public class WechatOrderDTOFactory {
+public class OrderDTOFactory {
 
     /**
      * Converts {@link WechatOrderMessage} into {@link WechatOrderDTO}.
@@ -20,7 +22,7 @@ public class WechatOrderDTOFactory {
      * @param wechatOrder {@link WechatOrderMessage}.
      * @return {@link WechatOrderDTO}.
      */
-    public WechatOrderDTO valueOf(WechatOrderMessage wechatOrder) {
+    public WechatOrderDTO wechatOrderValueOf(WechatOrderMessage wechatOrder) {
         if (Objects.isNull(wechatOrder)) {
             return null;
         }
@@ -39,6 +41,27 @@ public class WechatOrderDTOFactory {
         wechatOrderDTO.setMwebUrl("");
 
         return wechatOrderDTO;
+    }
+
+    /**
+     * Converts {@link AlipayOrderMessage} into {@link AlipayOrderDTO}.
+     *
+     * @param alipayOrder {@link AlipayOrderMessage}.
+     * @return {@link AlipayOrderDTO}.
+     */
+    public AlipayOrderDTO alipayOrderValueOf(AlipayOrderMessage alipayOrder) {
+        if (Objects.isNull(alipayOrder)) {
+            return null;
+        }
+
+        AlipayOrderDTO alipayOrderDTO = new AlipayOrderDTO();
+        alipayOrderDTO.setId(alipayOrder.getId());
+        alipayOrderDTO.setFeeInCents(alipayOrder.getFeeInCents());
+        alipayOrderDTO.setState(this.convert(alipayOrder.getState()));
+        alipayOrderDTO.setOrderString(alipayOrder.getOrderString());
+        alipayOrderDTO.setMwebUrl("");
+
+        return alipayOrderDTO;
     }
 
     /**

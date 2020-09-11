@@ -43,7 +43,7 @@ message RetrieveOrderByIdRequest {
   string id = 1;
 }
 
-message WechatOrderCallbackRequest {
+message OrderCallbackRequest {
   string payload = 1;
 }
 
@@ -134,11 +134,11 @@ service PaymentService {
   rpc SubmitSubscribeMembershipWithAlipay (SubscribeMembershipRequest) returns (AlipayOrderResponse) {};
   rpc SubmitSupportWithWechatPay (SupportRequest) returns (WechatOrderResponse) {};
   rpc SubmitSupportWithWechatPayH5 (SupportRequest) returns (RedirectResponse) {};
-  rpc SubmitSupportWithAlipay (SupportRequest) returns (WechatOrderResponse) {};
+  rpc SubmitSupportWithAlipay (SupportRequest) returns (AlipayOrderResponse) {};
   rpc RetrieveWechatOrderById (RetrieveOrderByIdRequest) returns (WechatOrderResponse) {};
   rpc RetrieveAlipayOrderById (RetrieveOrderByIdRequest) returns (AlipayOrderResponse) {};
-  rpc WechatPayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
-  rpc AlipayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
+  rpc WechatPayCallback (OrderCallbackRequest) returns (CommonStatus) {};
+  rpc AlipayCallback (OrderCallbackRequest) returns (CommonStatus) {};
   rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};
   rpc IOSSubscribeMembership (IOSOrderSubscribeRequest) returns (CommonStatus) {};
   rpc WechatBuyShell (WechatOrderBuyShellRequest) returns (WechatOrderResponse) {};
@@ -146,6 +146,6 @@ service PaymentService {
   rpc RetrieveUserPayments (RetrieveUserPaymentsRequest) returns (UserPaymentsResponse) {};
   rpc RefundWechatPaidFeed (RefundWechatFeedRequest) returns (CommonStatus) {};
   rpc ActivateFeedPayment (ActivatePendingFeedPaymentRequest) returns (CommonStatus) {};
-  rpc WechatRefundCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
+  rpc WechatRefundCallback (OrderCallbackRequest) returns (CommonStatus) {};
   rpc RetrieveSupportInfo (RetrieveSupportInfoRequest) returns (RetrieveSupportInfoResponse) {};
 }

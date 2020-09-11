@@ -1,11 +1,13 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.keepreal.madagascar.common.AlipayOrderMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.SceneType;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
+import com.keepreal.madagascar.vanga.AlipayOrderResponse;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
@@ -183,6 +185,17 @@ public class PaymentService {
         return response;
     }
 
+    /**
+     * Submit one time support with wechat pay.
+     *
+     * @param userId        Payer id.
+     * @param payeeId       Payee id.
+     * @param sponsorSkuId  Sponsor sku id.
+     * @param priceInCents  Price in cents.
+     * @param priceInShells Price in shells.
+     * @param ipAddress     Payer ip address.
+     * @return {@link WechatOrderMessage}.
+     */
     public WechatOrderMessage submitSupportWithWechatPay(String userId, String payeeId, String sponsorSkuId, Long priceInCents, Long priceInShells, String ipAddress) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
@@ -312,4 +325,77 @@ public class PaymentService {
 
         return response.getMessage();
     }
+
+    /**
+     * Submit a membership subscription request for a given user with ali pay.
+     *
+     * @param userId          User id.
+     * @param membershipSkuId Membership sku id.
+     */
+    public AlipayOrderMessage submitSubscribeMembershipWithAlipay(String userId, String membershipSkuId) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        SubscribeMembershipRequest request = SubscribeMembershipRequest.newBuilder()
+                .setUserId(userId)
+                .setMembershipSkuId(membershipSkuId)
+                .build();
+
+        AlipayOrderResponse response;
+        try {
+            response = stub.submitSubscribeMembershipWithAlipay(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create ali pay order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getAlipayOrder();
+    }
+
+    /**
+     * Submit a one time support request for a given user with ali pay.
+     *
+     * @param userId        User id.
+     * @param payeeId       Membership sku id.
+     * @param priceInCents  Price in cents.
+     * @param sponsorSkuId  Sponsor sku id.
+     */
+    public AlipayOrderMessage submitSupportWithAlipay(String userId, String payeeId, String sponsorSkuId, Long priceInCents) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        SupportRequest request = SupportRequest.newBuilder()
+                .setUserId(userId)
+                .setPayeeId(payeeId)
+                .setSponsorSkuId(sponsorSkuId)
+                .setPriceInCents(priceInCents)
+                .build();
+
+        AlipayOrderResponse response;
+        try {
+            response = stub.submitSupportWithAlipay(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create alipay order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getAlipayOrder();
+    }
+
 }

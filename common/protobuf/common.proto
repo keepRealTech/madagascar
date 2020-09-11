@@ -253,6 +253,9 @@ message AlipayOrderMessage {
     uint64 feeInCents = 3;
     OrderState state = 4;
     string mwebUrl = 5;
+    string userId = 6;
+    uint64 timestamp = 7;
+    string orderString = 8;
 }
 
 enum OrderState {

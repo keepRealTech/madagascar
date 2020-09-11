@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.google.gson.Gson;
 import com.keepreal.madagascar.lemur.service.OrderService;
 import com.keepreal.madagascar.lemur.util.WXPayConstants;
 import com.keepreal.madagascar.lemur.util.WXPayUtil;
@@ -22,10 +23,11 @@ import java.util.Map;
  */
 @Controller
 @Slf4j
-public class WechatPayCallbackController {
+public class OrderCallbackController {
 
     private final String successResponseXml;
     private final OrderService orderService;
+    private final Gson gson = new Gson();
 
     /**
      * Constructs the wechat pay callback controller.
@@ -33,7 +35,7 @@ public class WechatPayCallbackController {
      * @param orderService {@link OrderService}.
      */
     @SneakyThrows
-    public WechatPayCallbackController(OrderService orderService) {
+    public OrderCallbackController(OrderService orderService) {
         this.orderService = orderService;
         Map<String, String> response = new HashMap<>();
         response.put("return_code", WXPayConstants.SUCCESS);
@@ -81,6 +83,19 @@ public class WechatPayCallbackController {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
+    }
+
+    /**
+     * Implements the alipay order callback api.
+     *
+     * @param request {@link HttpServletRequest}.
+     */
+    @RequestMapping(value = "/api/v1/orders/alipay/callback", method = RequestMethod.POST)
+    public String apiV1OrdersWechatCallback(HttpServletRequest request) {
+        String payload = this.gson.toJson(request.getParameterMap());
+        this.orderService.alipayOrderCallback(payload);
+
+        return "success";
     }
 
 }
