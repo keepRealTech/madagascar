@@ -69,7 +69,7 @@ public class NotificationEventProducerService {
             message = this.createNewCommentEventMessage(commentMessage, feedMessage, replyToId);
             this.sendAsync(message);
         }
-        if (feedMessage.getType().equals(MediaType.MEDIA_QUESTION)) {
+        if (feedMessage.getType().equals(MediaType.MEDIA_QUESTION) && !replyToId.equals(feedMessage.getHostId())) {
             message = this.createNewCommentEventMessage(commentMessage, feedMessage, feedMessage.getHostId());
             this.sendAsync(message);
         }
