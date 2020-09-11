@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum  QualificationState {
     UNKNOWN(0),
-    UNAUTHENTICATED(1),
+    REJECTED(1),
     PROCESSING(2),
     AUTHENTICATED(3),
     ;

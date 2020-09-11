@@ -441,6 +441,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                 if (!userQualification.getHostUrl().equals(message.getUrl())) {
                     userQualification.setState(QualificationState.PROCESSING.getValue());
                     userQualification.setHostUrl(message.getUrl());
+                    userQualification.setName(message.getName());
                 }
                 userQualification.setDeleted(false);
             }

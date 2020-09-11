@@ -391,7 +391,7 @@ public class UserController implements UserApi {
 
     private QualificationMessage convertToMessage(UserQualificationDTO dto) {
         return QualificationMessage.newBuilder()
-                .setId(dto.getId())
+                .setId(dto.getId() == null ? "" : dto.getId())
                 .setName(dto.getName())
                 .setUrl(dto.getHostUrl())
                 .build();
