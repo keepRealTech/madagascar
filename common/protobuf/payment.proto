@@ -34,7 +34,12 @@ message WechatOrderResponse {
   WechatOrderMessage wechatOrder = 2;
 }
 
-message RetrieveWechatOrderByIdRequest {
+message AlipayOrderResponse {
+  CommonStatus status = 1;
+  AlipayOrderMessage alipayOrder = 2;
+}
+
+message RetrieveOrderByIdRequest {
   string id = 1;
 }
 
@@ -126,10 +131,14 @@ service PaymentService {
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
   rpc SubmitSubscribeMembershipWithWechatPay (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
   rpc SubmitSubscribeMembershipWithWechatPayH5 (SubscribeMembershipRequest) returns (RedirectResponse) {};
+  rpc SubmitSubscribeMembershipWithAlipay (SubscribeMembershipRequest) returns (AlipayOrderResponse) {};
   rpc SubmitSupportWithWechatPay (SupportRequest) returns (WechatOrderResponse) {};
   rpc SubmitSupportWithWechatPayH5 (SupportRequest) returns (RedirectResponse) {};
-  rpc RetrieveWechatOrderById (RetrieveWechatOrderByIdRequest) returns (WechatOrderResponse) {};
+  rpc SubmitSupportWithAlipay (SupportRequest) returns (WechatOrderResponse) {};
+  rpc RetrieveWechatOrderById (RetrieveOrderByIdRequest) returns (WechatOrderResponse) {};
+  rpc RetrieveAlipayOrderById (RetrieveOrderByIdRequest) returns (AlipayOrderResponse) {};
   rpc WechatPayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
+  rpc AlipayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
   rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};
   rpc IOSSubscribeMembership (IOSOrderSubscribeRequest) returns (CommonStatus) {};
   rpc WechatBuyShell (WechatOrderBuyShellRequest) returns (WechatOrderResponse) {};

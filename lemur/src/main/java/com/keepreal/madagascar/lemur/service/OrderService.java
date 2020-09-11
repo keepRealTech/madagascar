@@ -9,7 +9,7 @@ import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
-import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
+import com.keepreal.madagascar.vanga.RetrieveOrderByIdRequest;
 import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
@@ -48,7 +48,7 @@ public class OrderService {
     public WechatOrderMessage retrieveWechatOrderById(String id) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
-        RetrieveWechatOrderByIdRequest request = RetrieveWechatOrderByIdRequest.newBuilder()
+        RetrieveOrderByIdRequest request = RetrieveOrderByIdRequest.newBuilder()
                 .setId(id)
                 .build();
 

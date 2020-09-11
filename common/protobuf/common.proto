@@ -243,20 +243,28 @@ message WechatOrderMessage {
     string userId = 8;
     uint64 feeInCents = 9;
     uint64 timestamp = 10;
-    WechatOrderState state = 11;
+    OrderState state = 11;
     string mwebUrl = 12;
 }
 
-enum WechatOrderState {
-    WECHAT_ORDER_STATE_UNKNOWN = 0;
-    WECHAT_ORDER_STATE_NOTPAY = 1;
-    WECHAT_ORDER_STATE_USERPAYING = 2;
-    WECHAT_ORDER_STATE_SUCCESS = 3;
-    WECHAT_ORDER_STATE_CLOSED = 4;
-    WECHAT_ORDER_STATE_REFUND = 5;
-    WECHAT_ORDER_STATE_PAYERROR = 6;
-    WECHAT_ORDER_STATE_REVOKED = 7;
-    WECHAT_ORDER_STATE_REFUNDED = 8;
+message AlipayOrderMessage {
+    string id = 1;
+    string tradeNumber = 2;
+    uint64 feeInCents = 3;
+    OrderState state = 4;
+    string mwebUrl = 5;
+}
+
+enum OrderState {
+    ORDER_STATE_UNKNOWN = 0;
+    ORDER_STATE_NOTPAY = 1;
+    ORDER_STATE_USERPAYING = 2;
+    ORDER_STATE_SUCCESS = 3;
+    ORDER_STATE_CLOSED = 4;
+    ORDER_STATE_REFUND = 5;
+    ORDER_STATE_PAYERROR = 6;
+    ORDER_STATE_REVOKED = 7;
+    ORDER_STATE_REFUNDED = 8;
 }
 
 message FeedGroupMessage {

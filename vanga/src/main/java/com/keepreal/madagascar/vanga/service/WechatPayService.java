@@ -3,8 +3,8 @@ package com.keepreal.madagascar.vanga.service;
 import com.keepreal.madagascar.common.SceneType;
 import com.keepreal.madagascar.vanga.config.WechatPayConfiguration;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
-import com.keepreal.madagascar.vanga.model.WechatOrderState;
-import com.keepreal.madagascar.vanga.model.WechatOrderType;
+import com.keepreal.madagascar.vanga.model.OrderState;
+import com.keepreal.madagascar.vanga.model.OrderType;
 import com.keepreal.madagascar.common.wechat_pay.WXPay;
 import com.keepreal.madagascar.common.wechat_pay.WXPayConstants;
 import com.keepreal.madagascar.common.wechat_pay.WXPayUtil;
@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -55,22 +54,22 @@ public class WechatPayService {
      * @param userId          User id.
      * @param feeInCents      Cost in cents.
      * @param propertyId      Property id.
-     * @param wechatOrderType {@link WechatOrderType}.
+     * @param orderType {@link OrderType}.
      * @param sceneType       {@link SceneType}.
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryPlaceOrder(String userId,
                                      String feeInCents,
                                      String propertyId,
-                                     WechatOrderType wechatOrderType,
+                                     OrderType orderType,
                                      SceneType sceneType,
                                      String remoteIp,
                                      String description) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
 
-        description = StringUtils.isEmpty(description) ? String.format("Type:[%s], Id:[%s]", wechatOrderType.name(), propertyId) : description;
+        description = StringUtils.isEmpty(description) ? String.format("Type:[%s], Id:[%s]", orderType.name(), propertyId) : description;
 
-        boolean isH5 = this.isH5Pay(wechatOrderType);
+        boolean isH5 = this.isH5Pay(orderType);
 
         if (isH5 && (Objects.isNull(sceneType) || SceneType.SCENE_NONE.equals(sceneType))) {
             log.error("Invalid scene type for h5 wechat pay.");
@@ -78,7 +77,7 @@ public class WechatPayService {
         }
 
         WechatOrder wechatOrder = WechatOrder.builder()
-                .state(WechatOrderState.NOTPAY.getValue())
+                .state(OrderState.NOTPAY.getValue())
                 .userId(userId)
                 .appId(this.wechatPayConfiguration.getAppId())
                 .mchId(this.wechatPayConfiguration.getMchId())
@@ -86,7 +85,7 @@ public class WechatPayService {
                 .propertyId(propertyId)
                 .description(description)
                 .feeInCents(feeInCents)
-                .type(wechatOrderType.getValue())
+                .type(orderType.getValue())
                 .build();
 
         Map<String, String> response;
@@ -167,7 +166,7 @@ public class WechatPayService {
      */
     public void tryCloseOrder(WechatOrder wechatOrder) {
         if (Objects.isNull(wechatOrder)
-                || WechatOrderState.CLOSED.getValue() == wechatOrder.getState()) {
+                || OrderState.CLOSED.getValue() == wechatOrder.getState()) {
             return;
         }
 
@@ -182,7 +181,7 @@ public class WechatPayService {
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
-                wechatOrder.setState(WechatOrderState.CLOSED.getValue());
+                wechatOrder.setState(OrderState.CLOSED.getValue());
             }
             this.wechatOrderService.update(wechatOrder);
         } catch (Exception ignored) {
@@ -197,8 +196,8 @@ public class WechatPayService {
      */
     public WechatOrder tryUpdateOrder(WechatOrder wechatOrder) {
         if (Objects.isNull(wechatOrder)
-                || (WechatOrderState.NOTPAY.getValue() != wechatOrder.getState()
-                && WechatOrderState.USERPAYING.getValue() != wechatOrder.getState())) {
+                || (OrderState.NOTPAY.getValue() != wechatOrder.getState()
+                && OrderState.USERPAYING.getValue() != wechatOrder.getState())) {
             return wechatOrder;
         }
 
@@ -215,7 +214,7 @@ public class WechatPayService {
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else if (response.get("trade_state").equals(WXPayConstants.SUCCESS)){
-                wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
+                wechatOrder.setState(OrderState.valueOf(response.get("trade_state")).getValue());
                 wechatOrder.setTransactionId(response.get("transaction_id"));
             }
             return this.wechatOrderService.update(wechatOrder);
@@ -246,15 +245,15 @@ public class WechatPayService {
             WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
 
             if (Objects.isNull(wechatOrder)
-                    || wechatOrder.getState() != WechatOrderState.REFUNDING.getValue()) {
+                    || wechatOrder.getState() != OrderState.REFUNDING.getValue()) {
                 return null;
             }
 
             if (response.get("result_code").equals(WXPayConstants.FAIL)) {
-                wechatOrder.setState(WechatOrderState.PAYERROR.getValue());
+                wechatOrder.setState(OrderState.PAYERROR.getValue());
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
-                wechatOrder.setState(WechatOrderState.SUCCESS.getValue());
+                wechatOrder.setState(OrderState.SUCCESS.getValue());
                 wechatOrder.setTransactionId(response.get("transaction_id"));
             }
             return this.wechatOrderService.update(wechatOrder);
@@ -285,16 +284,16 @@ public class WechatPayService {
             WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
 
             if (Objects.isNull(wechatOrder)
-                    || wechatOrder.getState() != WechatOrderState.REFUNDING.getValue()) {
+                    || wechatOrder.getState() != OrderState.REFUNDING.getValue()) {
                 return null;
             }
 
             if (WXPayConstants.FAIL.equals(response.get("result_code"))
                     || !WXPayConstants.SUCCESS.equals(response.get("refund_status"))) {
-                wechatOrder.setState(WechatOrderState.PAYERROR.getValue());
+                wechatOrder.setState(OrderState.PAYERROR.getValue());
                 wechatOrder.setErrorMessage(response.get("refund_status"));
             } else {
-                wechatOrder.setState(WechatOrderState.REFUNDED.getValue());
+                wechatOrder.setState(OrderState.REFUNDED.getValue());
                 wechatOrder.setTransactionId(response.get("transaction_id"));
             }
             return this.wechatOrderService.update(wechatOrder);
@@ -336,7 +335,7 @@ public class WechatPayService {
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
-                wechatOrder.setState(WechatOrderState.REFUNDING.getValue());
+                wechatOrder.setState(OrderState.REFUNDING.getValue());
             }
         } catch (Exception e) {
             wechatOrder.setErrorMessage(e.getMessage());
@@ -350,11 +349,11 @@ public class WechatPayService {
     /**
      * Checks if it is H5 pay.
      *
-     * @param type {@link WechatOrderType}.
+     * @param type {@link OrderType}.
      * @return True if it is h5 payment.
      */
-    private boolean isH5Pay(WechatOrderType type) {
-        return WechatOrderType.PAYMEMBERSHIPH5.equals(type) || WechatOrderType.PAYSUPPORTH5.equals(type);
+    private boolean isH5Pay(OrderType type) {
+        return OrderType.PAYMEMBERSHIPH5.equals(type) || OrderType.PAYSUPPORTH5.equals(type);
     }
 
 }

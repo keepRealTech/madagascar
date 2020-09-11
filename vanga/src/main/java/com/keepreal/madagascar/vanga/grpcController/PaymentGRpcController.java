@@ -32,8 +32,8 @@ import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
-import com.keepreal.madagascar.vanga.model.WechatOrderState;
-import com.keepreal.madagascar.vanga.model.WechatOrderType;
+import com.keepreal.madagascar.vanga.model.OrderState;
+import com.keepreal.madagascar.vanga.model.OrderType;
 import com.keepreal.madagascar.vanga.service.FeedService;
 import com.keepreal.madagascar.vanga.service.MpWechatPayService;
 import com.keepreal.madagascar.vanga.service.PaymentService;
@@ -173,7 +173,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId(),
-                WechatOrderType.PAYMEMBERSHIP,
+                OrderType.PAYMEMBERSHIP,
                 null,
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
@@ -217,7 +217,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             responseObserver.onCompleted();
         }
 
-        switch (WechatOrderType.fromValue(wechatOrder.getType())) {
+        switch (OrderType.fromValue(wechatOrder.getType())) {
             case PAYMEMBERSHIP:
             case PAYMEMBERSHIPH5:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
@@ -259,13 +259,13 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                   StreamObserver<CommonStatus> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
 
-        if (Objects.isNull(wechatOrder) || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()) {
+        if (Objects.isNull(wechatOrder) || OrderState.SUCCESS.getValue() != wechatOrder.getState()) {
             responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
             responseObserver.onCompleted();
             return;
         }
 
-        switch (WechatOrderType.fromValue(wechatOrder.getType())) {
+        switch (OrderType.fromValue(wechatOrder.getType())) {
             case PAYMEMBERSHIP:
             case PAYMEMBERSHIPH5:
                 this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
@@ -299,13 +299,13 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                      StreamObserver<CommonStatus> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.refundCallback(request.getPayload());
 
-        if (Objects.isNull(wechatOrder) || WechatOrderState.REFUNDED.getValue() != wechatOrder.getState()) {
+        if (Objects.isNull(wechatOrder) || OrderState.REFUNDED.getValue() != wechatOrder.getState()) {
             responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
             responseObserver.onCompleted();
             return;
         }
 
-        switch (WechatOrderType.fromValue(wechatOrder.getType())) {
+        switch (OrderType.fromValue(wechatOrder.getType())) {
             case PAYQUESTION: {
                 Payment payment = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId()).stream().findFirst().orElse(null);
                 if (Objects.isNull(payment)) {
@@ -502,7 +502,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(request.getPriceInCents()),
                 request.getFeedId(),
-                WechatOrderType.PAYQUESTION,
+                OrderType.PAYQUESTION,
                 null,
                 request.getIpAddress(),
                 "");
@@ -588,7 +588,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId(),
-                WechatOrderType.PAYMEMBERSHIPH5,
+                OrderType.PAYMEMBERSHIPH5,
                 request.getSceneType(),
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
@@ -634,7 +634,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(request.getPriceInCents()),
                 request.getSponsorSkuId(),
-                WechatOrderType.PAYSUPPORT,
+                OrderType.PAYSUPPORT,
                 null,
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.SPONSOR_TEMPLATE,
@@ -662,7 +662,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(request.getPriceInCents()),
                 request.getSponsorSkuId(),
-                WechatOrderType.PAYSUPPORTH5,
+                OrderType.PAYSUPPORTH5,
                 request.getSceneType(),
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.SPONSOR_TEMPLATE,
