@@ -3,6 +3,9 @@ package com.keepreal.madagascar.workflow.supportActivity.service;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.workflow.supportActivity.model.SupportActivity;
 import com.keepreal.madagascar.workflow.supportActivity.repository.SupportActivityRepository;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,13 +15,15 @@ public class SupportActivityService {
 
     private final SupportActivityRepository supportActivityRepository;
     private final LongIdGenerator idGenerator;
+    private final MongoTemplate mongoTemplate;
 
     private final static int MAX_CENTS = 5000;
 
     public SupportActivityService(SupportActivityRepository supportActivityRepository,
-                                  LongIdGenerator idGenerator) {
+                                  LongIdGenerator idGenerator, MongoTemplate mongoTemplate) {
         this.supportActivityRepository = supportActivityRepository;
         this.idGenerator = idGenerator;
+        this.mongoTemplate = mongoTemplate;
     }
 
     public void process() {
@@ -26,16 +31,28 @@ public class SupportActivityService {
         payeeIdList.forEach(payeeId -> {
             List<Long> maxAmounts = this.supportActivityRepository.findByUserId(payeeId);
             long sum = maxAmounts.stream().mapToLong(amount -> amount > MAX_CENTS ? MAX_CENTS : amount).sum();
-            this.save(payeeId, sum);
+            this.save(payeeId, sum, this.isCreateFeed(payeeId));
         });
     }
 
-    private void save(String userId, Long amount) {
+    private boolean isCreateFeed(String userId) {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("userId").is(userId));
+        query.addCriteria(Criteria.where("fromHost").is(true));
+        long count = mongoTemplate.count(query, "feedInfo");
+        return count > 2;
+    }
+
+    private void save(String userId, Long amount, Boolean createFeed) {
         SupportActivity supportActivity = this.supportActivityRepository.findSupportActivityByUserIdAndDeletedIsFalse(userId);
         if (supportActivity == null) {
             supportActivity = new SupportActivity();
             supportActivity.setId(String.valueOf(idGenerator.nextId()));
             supportActivity.setUserId(userId);
+        }
+
+        if (createFeed && !supportActivity.getCreateFeed()) {
+            supportActivity.setCreateFeed(true);
         }
 
         supportActivity.setAmount(amount);
