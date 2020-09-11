@@ -8,6 +8,9 @@ import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -39,9 +42,16 @@ public class SupportService {
         }
 
         Payment payment = paymentList.get(0);
+        Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payment.getPayeeId());
+
+        payment.setWithdrawPercent(hostBalance.getWithdrawPercent());
         payment.setState(PaymentState.OPEN.getValue());
 
-        Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payment.getPayeeId());
+        Instant instant = Instant.now();
+        ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+
+        payment.setValidAfter(currentExpireTime.plusMonths(1).toInstant().toEpochMilli());
+
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
         this.sendAsyncMessage(payment.getUserId(), payment.getPayeeId(), payment.getAmountInCents());
