@@ -104,6 +104,16 @@ spec:
                 secretKeyRef:
                   name: wechat-pay
                   key: mch-key
+            - name: ALIPAY_APPID
+              valueFrom:
+                secretKeyRef:
+                  name: ali-pay
+                  key: app-id
+            - name: ALIPAY_MECHANTKEY
+              valueFrom:
+                secretKeyRef:
+                  name: ali-pay
+                  key: mch-key
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:

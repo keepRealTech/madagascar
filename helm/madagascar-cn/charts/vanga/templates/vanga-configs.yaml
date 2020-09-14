@@ -23,3 +23,4 @@ data:
   ROCKETMQ_TRANSACTION_TOPIC: {{ .Values.rocketmq.transaction.topic }}
   ROCKETMQ_TRANSACTION_TAG: {{ .Values.rocketmq.transaction.tag }}
   ROCKETMQ_TRANSACTION_GROUPID: {{ .Values.rocketmq.transaction.group_id }}
+  ALIPAY_CALLBACKADDRESS: {{ .Values.global.common_configs.ali_pay.callback_address }}
