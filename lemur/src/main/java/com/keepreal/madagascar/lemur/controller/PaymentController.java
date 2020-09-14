@@ -19,12 +19,18 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
+import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import swagger.api.ApiUtil;
 import swagger.api.PaymentApi;
+import swagger.model.AlipayH5PostSupportRequest;
+import swagger.model.AlipayH5SubscribeMemberRequest;
 import swagger.model.AlipayOrderResponse;
 import swagger.model.ConfigurationDTO;
 import swagger.model.DummyResponse;
@@ -38,6 +44,7 @@ import swagger.model.SubscribeMemberRequest;
 import swagger.model.UserPaymentsResponse;
 import swagger.model.WechatOrderResponse;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -162,6 +169,31 @@ public class PaymentController implements PaymentApi {
 
         H5WechatOrderResponse response = new H5WechatOrderResponse();
         response.setData(data);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the member subscription with alipay html5 api.
+     *
+     * @param id                             id (required)  Island id.
+     * @param alipayH5SubscribeMemberRequest (required) {@link AlipayH5SubscribeMemberRequest}.
+     * @return {@link AlipayOrderResponse}.
+     */
+    @CrossOrigin
+    @Override
+    public ResponseEntity<AlipayOrderResponse> apiV1IslandsIdMemberSubscriptionAlipayHtml5Post(String id,
+                                                                                               AlipayH5SubscribeMemberRequest alipayH5SubscribeMemberRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        AlipayOrderMessage alipayOrderMessage = this.paymentService.submitSubscribeMembershipWithAlipayH5(userId,
+                alipayH5SubscribeMemberRequest.getMembershipSkuId(),
+                alipayH5SubscribeMemberRequest.getReturnUrl(),
+                alipayH5SubscribeMemberRequest.getQuitUrl());
+
+        AlipayOrderResponse response = new AlipayOrderResponse();
+        response.setData(this.orderDTOFactory.alipayOrderValueOf(alipayOrderMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -312,6 +344,42 @@ public class PaymentController implements PaymentApi {
 
         H5WechatOrderResponse response = new H5WechatOrderResponse();
         response.setData(data);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the ali pay one time support api.
+     *
+     * @param id id (required)  Island id.
+     * @param alipayH5PostSupportRequest  (required) {@link AlipayH5PostSupportRequest}.
+     * @return  {@link AlipayOrderResponse}.
+     */
+    @CrossOrigin
+    @Override
+    public ResponseEntity<AlipayOrderResponse> apiV1IslandsIdSupportAlipayHtml5Post(String id,
+                                                                                    AlipayH5PostSupportRequest alipayH5PostSupportRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+
+        if (SkuDTOFactory.CUSTOMIZED_SUPPORT_SKU_ID.equals(alipayH5PostSupportRequest.getSponsorSkuId())
+                && Objects.isNull(alipayH5PostSupportRequest.getPriceInCents())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        AlipayOrderMessage alipayOrderMessage = this.paymentService.submitSupportWithAlipayH5(
+                userId,
+                islandMessage.getHostId(),
+                alipayH5PostSupportRequest.getSponsorSkuId(),
+                Objects.isNull(alipayH5PostSupportRequest.getPriceInCents()) ? 0L : alipayH5PostSupportRequest.getPriceInCents(),
+                Objects.isNull(alipayH5PostSupportRequest.getPriceInShells()) ? 0L : alipayH5PostSupportRequest.getPriceInShells(),
+                alipayH5PostSupportRequest.getReturnUrl(),
+                alipayH5PostSupportRequest.getQuitUrl());
+        
+        AlipayOrderResponse response = new AlipayOrderResponse();
+        response.setData(this.orderDTOFactory.alipayOrderValueOf(alipayOrderMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -18,6 +18,8 @@ message SubscribeMembershipRequest {
   string membershipSkuId = 2;
   SceneType sceneType = 3;
   string ipAddress = 4;
+  string quitUrl = 5;
+  string returnUrl = 6;
 }
 
 message SupportRequest {
@@ -28,6 +30,8 @@ message SupportRequest {
   int64 priceInShells = 5;
   SceneType sceneType = 6;
   string ipAddress = 7;
+  string quitUrl = 8;
+  string returnUrl = 9;
 }
 
 message WechatOrderResponse {
@@ -134,9 +138,11 @@ service PaymentService {
   rpc SubmitSubscribeMembershipWithWechatPay (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
   rpc SubmitSubscribeMembershipWithWechatPayH5 (SubscribeMembershipRequest) returns (RedirectResponse) {};
   rpc SubmitSubscribeMembershipWithAlipay (SubscribeMembershipRequest) returns (AlipayOrderResponse) {};
+  rpc SubmitSubscribeMembershipWithAlipayH5 (SubscribeMembershipRequest) returns (AlipayOrderResponse) {};
   rpc SubmitSupportWithWechatPay (SupportRequest) returns (WechatOrderResponse) {};
   rpc SubmitSupportWithWechatPayH5 (SupportRequest) returns (RedirectResponse) {};
   rpc SubmitSupportWithAlipay (SupportRequest) returns (AlipayOrderResponse) {};
+  rpc SubmitSupportWithAlipayH5 (SupportRequest) returns (AlipayOrderResponse) {};
   rpc RetrieveWechatOrderById (RetrieveOrderByIdRequest) returns (WechatOrderResponse) {};
   rpc RetrieveAlipayOrderById (RetrieveOrderByIdRequest) returns (AlipayOrderResponse) {};
   rpc WechatPayCallback (OrderCallbackRequest) returns (CommonStatus) {};

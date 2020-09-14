@@ -4038,6 +4038,8 @@ components:
           type: string
       required:
         - membershipSkuId
+        - quit_url
+        - return_url
     BalanceDTO:
       type: object
       properties:
@@ -5041,6 +5043,8 @@ components:
           type: string
       required:
         - sponsorSkuId
+        - quitUrl
+        - returnUrl
     H5RedirectDTO:
       type: object
       properties:
