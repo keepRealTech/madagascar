@@ -9,6 +9,7 @@ import com.keepreal.madagascar.vanga.config.AlipayConfiguration;
 import com.keepreal.madagascar.vanga.model.AlipayOrder;
 import com.keepreal.madagascar.vanga.model.OrderState;
 import com.keepreal.madagascar.vanga.model.OrderType;
+import com.keepreal.madagascar.vanga.model.WechatOrder;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -16,6 +17,7 @@ import org.springframework.util.StringUtils;
 import java.lang.reflect.Type;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -107,7 +109,31 @@ public class AlipayService {
 
         Boolean verified = Factory.Payment.Common().verifyNotify(paramMap);
 
+        if (!Boolean.TRUE.equals(verified)) {
+            return null;
+        }
+
+        AlipayOrder alipayOrder = this.alipayOrderService.retrieveByTradeNumber(paramMap.get("out_trade_no"));
+
+        if (Objects.isNull(alipayOrder) || alipayOrder.getState())
+
     }
 
-
 }
+
+
+    WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
+
+            if (Objects.isNull(wechatOrder)
+                    || wechatOrder.getState() != OrderState.REFUNDING.getValue()) {
+                    return null;
+                    }
+
+                    if (response.get("result_code").equals(WXPayConstants.FAIL)) {
+                    wechatOrder.setState(OrderState.PAYERROR.getValue());
+                    wechatOrder.setErrorMessage(response.get("err_code_des"));
+                    } else {
+                    wechatOrder.setState(OrderState.SUCCESS.getValue());
+                    wechatOrder.setTransactionId(response.get("transaction_id"));
+                    }
+                    return this.wechatOrderService.update(wechatOrder);
