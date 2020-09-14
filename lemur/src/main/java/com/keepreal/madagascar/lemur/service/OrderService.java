@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.AlipayOrderMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.WechatOrderMessage;
@@ -238,14 +239,16 @@ public class OrderService {
     public AlipayOrderMessage retrieveAlipayOrderById(String id, String receipt) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
-        RetrieveOrderByIdRequest request = RetrieveOrderByIdRequest.newBuilder()
-                .setId(id)
-                .setAlipayReceipt(receipt)
-                .build();
+        RetrieveOrderByIdRequest.Builder requestBuilder = RetrieveOrderByIdRequest.newBuilder()
+                .setId(id);
+
+        if (Objects.nonNull(receipt)) {
+            requestBuilder.setAlipayReceipt(StringValue.of(receipt));
+        }
 
         AlipayOrderResponse response;
         try {
-            response = stub.retrieveAlipayOrderById(request);
+            response = stub.retrieveAlipayOrderById(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

@@ -322,27 +322,32 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     @Override
     public void retrieveAlipayOrderById(RetrieveOrderByIdRequest request,
                                         StreamObserver<AlipayOrderResponse> responseObserver) {
-        log.warn("retrieve alipay with receipt...");
+        AlipayOrder alipayOrder;
+        if (request.hasAlipayReceipt()) {
+            log.warn("retrieve alipay with receipt...");
 
-        Type type = new TypeToken<Map<String, String>>(){}.getType();
-        Map<String, String> paramMap = this.gson.fromJson(request.getAlipayReceipt(), type);
+            Type type = new TypeToken<Map<String, String>>() {
+            }.getType();
+            Map<String, String> paramMap = this.gson.fromJson(request.getAlipayReceipt().getValue(), type);
 
-        log.warn(paramMap.toString());
+            log.warn(paramMap.toString());
 
-        AlipayOrder alipayOrder = this.alipayOrderService.retrieveByTradeNumber(paramMap.get("out_trade_no"));
+            alipayOrder = this.alipayOrderService.retrieveByTradeNumber(paramMap.get("out_trade_no"));
 
-        if (Objects.isNull(alipayOrder)
-                || !alipayOrder.getId().equals(request.getId())) {
-            AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ALIPAY_ORDER_NOT_FOUND_ERROR))
-                    .build();
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+            if (Objects.isNull(alipayOrder)
+                    || !alipayOrder.getId().equals(request.getId())) {
+                AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ALIPAY_ORDER_NOT_FOUND_ERROR))
+                        .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            }
+
+            alipayOrder = this.alipayService.orderCallback(request.getAlipayReceipt().getValue());
+            log.warn("signature verified...");
+        } else {
+            alipayOrder = this.alipayOrderService.retrieveById(request.getId());
         }
-
-        alipayOrder = this.alipayService.orderCallback(request.getAlipayReceipt());
-
-        log.warn("signature verified...");
 
         switch (OrderType.fromValue(alipayOrder.getType())) {
             case PAYMEMBERSHIP:

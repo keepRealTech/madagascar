@@ -17,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
@@ -90,15 +91,12 @@ public class AlipayService {
                 .build();
 
         try {
-            StringBuilder feeInYuansBuilder = new StringBuilder(feeInCents);
-            feeInYuansBuilder.insert(feeInCents.length() - 2, '.');
-
-            AlipayTradeAppPayResponse response = Factory.Payment.App().pay(description, tradeNum, feeInYuansBuilder.toString());
+            AlipayTradeAppPayResponse response = Factory.Payment.App().pay(description, tradeNum, this.convertCentsToYuan(feeInCents));
 
             alipayOrder = this.alipayOrderService.insert(alipayOrder);
             alipayOrder.setOrderString(response.body);
         } catch (Exception exception) {
-            alipayOrder.setErrorMessage(exception.getMessage());
+            alipayOrder.setErrorMessage(exception.toString());
             alipayOrder.setState(OrderState.CLOSED.getValue());
             this.alipayOrderService.insert(alipayOrder);
             return null;
@@ -194,5 +192,14 @@ public class AlipayService {
         return this.alipayOrderService.update(alipayOrder);
     }
 
+    /**
+     * Converts the price in cents into yuans.
+     *
+     * @param priceInCents Price in cents.
+     * @return Price in yuans.
+     */
+    private String convertCentsToYuan(String priceInCents) {
+        return BigDecimal.valueOf(Long.parseLong(priceInCents)).divide(new BigDecimal(100), RoundingMode.FLOOR).toString();
+    }
 
 }

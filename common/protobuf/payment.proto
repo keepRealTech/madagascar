@@ -6,6 +6,7 @@ option java_package = "com.keepreal.madagascar.vanga";
 import "common.proto";
 import "balance.proto";
 import "sku.proto";
+import "google/protobuf/wrappers.proto";
 
 message CreateWithdrawRequest {
   string userId = 1;
@@ -41,7 +42,7 @@ message AlipayOrderResponse {
 
 message RetrieveOrderByIdRequest {
   string id = 1;
-  string alipayReceipt = 2;
+  google.protobuf.StringValue alipayReceipt = 2;
 }
 
 message OrderCallbackRequest {
