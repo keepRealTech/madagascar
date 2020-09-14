@@ -80,6 +80,7 @@ public class PaymentService {
                 .state(PaymentState.OPEN.getValue())
                 .amountInCents(amountInCents)
                 .type(PaymentType.WITHDRAW.getValue())
+                .withdrawPercent(100)
                 .build();
 
         this.paymentRepository.save(payment);
@@ -90,17 +91,19 @@ public class PaymentService {
     /**
      * Creates new wechat payments for given order.
      *
-     * @param order     {@link Order}.
-     * @param sku       {@link MembershipSku}.
+     * @param order         {@link Order}.
+     * @param sku           {@link MembershipSku}.
+     * @param paymentType   {@link PaymentType}.
      * @return {@link Payment}.
      */
     @Transactional
-    public List<Payment> createNewWechatMembershipPayments(Order order, MembershipSku sku) {
+    public List<Payment> createNewWechatMembershipPayments(Order order, MembershipSku sku, PaymentType paymentType) {
+        Balance payeeBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
         List<Payment> payments =
                 IntStream.range(0, sku.getTimeInMonths())
                         .mapToObj(i -> Payment.builder()
                                 .id(String.valueOf(this.idGenerator.nextId()))
-                                .type(PaymentType.WECHATPAY.getValue())
+                                .type(paymentType.getValue())
                                 .amountInCents(sku.getPriceInCents() / sku.getTimeInMonths())
                                 .userId(order.getUserId())
                                 .state(PaymentState.DRAFTED.getValue())
@@ -108,6 +111,7 @@ public class PaymentService {
                                 .orderId(order.getId())
                                 .tradeNum(order.getTradeNumber())
                                 .membershipSkuId(order.getPropertyId())
+                                .withdrawPercent(payeeBalance.getWithdrawPercent())
                                 .build())
                         .collect(Collectors.toList());
 
@@ -124,6 +128,7 @@ public class PaymentService {
      */
     @Transactional
     public Payment createNewWechatQuestionFeedPayment(WechatOrder wechatOrder, String hostId, long priceIncents) {
+        Balance payeeBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(hostId);
         Payment payment = Payment.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .type(PaymentType.WECHATPAY.getValue())
@@ -133,6 +138,7 @@ public class PaymentService {
                 .payeeId(hostId)
                 .orderId(wechatOrder.getId())
                 .tradeNum(wechatOrder.getTradeNumber())
+                .withdrawPercent(payeeBalance.getWithdrawPercent())
                 .build();
 
         return this.paymentRepository.save(payment);
@@ -148,6 +154,7 @@ public class PaymentService {
      */
     @Transactional
     public Payment createNewWechatSupportPayment(Order order, String payeeId, long priceInCents) {
+        Balance payeeBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payeeId);
         Payment payment = Payment.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .type(PaymentType.SUPPORT.getValue())
@@ -157,7 +164,7 @@ public class PaymentService {
                 .payeeId(payeeId)
                 .orderId(order.getId())
                 .tradeNum(order.getTradeNumber())
-                .withdrawPercent()
+                .withdrawPercent(payeeBalance.getWithdrawPercent())
                 .build();
 
         return this.paymentRepository.save(payment);

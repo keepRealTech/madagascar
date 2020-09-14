@@ -6,31 +6,39 @@ import com.alipay.easysdk.payment.app.models.AlipayTradeAppPayResponse;
 import com.alipay.easysdk.payment.common.models.AlipayTradeQueryResponse;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.keepreal.madagascar.common.wechat_pay.WXPayConstants;
 import com.keepreal.madagascar.vanga.config.AlipayConfiguration;
 import com.keepreal.madagascar.vanga.model.AlipayOrder;
 import com.keepreal.madagascar.vanga.model.OrderState;
 import com.keepreal.madagascar.vanga.model.OrderType;
-import com.keepreal.madagascar.vanga.model.WechatOrder;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Represents the alipay service.
+ */
 @Service
+@Slf4j
 public class AlipayService {
 
     private final AlipayConfiguration alipayConfiguration;
     private final AlipayOrderService alipayOrderService;
     private final Gson gson;
 
+    /**
+     * Constructs the alipay service.
+     *
+     * @param alipayConfiguration   {@link AlipayConfiguration}.
+     * @param alipayOrderService    {@link AlipayOrderService}.
+     */
     public AlipayService(AlipayConfiguration alipayConfiguration,
                          AlipayOrderService alipayOrderService) {
         this.alipayOrderService = alipayOrderService;
@@ -111,7 +119,7 @@ public class AlipayService {
         Type type = new TypeToken<Map<String, String>>(){}.getType();
         Map<String, String> paramMap = this.gson.fromJson(callbackPayload, type);
 
-        AlipayOrder alipayOrder = this.verifyReceipt(paramMap);
+        AlipayOrder alipayOrder = this.verifySignature(paramMap);
 
         long total_amount = new BigDecimal(paramMap.get("total_amount")).multiply(new BigDecimal(100)).longValue();
 
@@ -141,7 +149,7 @@ public class AlipayService {
      * @return {@link AlipayOrder}.
      */
     @SneakyThrows
-    public AlipayOrder verifyReceipt(Map<String, String> paramMap) {
+    public AlipayOrder verifySignature(Map<String, String> paramMap) {
         Boolean verified = Factory.Payment.Common().verifyNotify(paramMap);
 
         if (!Boolean.TRUE.equals(verified)) {
@@ -168,6 +176,8 @@ public class AlipayService {
         }
 
         AlipayTradeQueryResponse response = Factory.Payment.Common().query(alipayOrder.getTradeNumber());
+
+        log.warn("query res: {}", response.toString());
 
         if (!"10000".equals(response.code)) {
             alipayOrder.setErrorMessage(response.msg + ";" + response.subCode + ";" + response.subMsg);

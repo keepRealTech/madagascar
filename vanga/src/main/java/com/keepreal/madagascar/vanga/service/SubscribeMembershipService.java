@@ -9,6 +9,7 @@ import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Order;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
+import com.keepreal.madagascar.vanga.model.PaymentType;
 import com.keepreal.madagascar.vanga.model.SubscribeMembership;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.OrderState;
@@ -95,10 +96,11 @@ public class SubscribeMembershipService {
     /**
      * Subscribe member for a newly succeed wechat pay order.
      *
-     * @param order {@link WechatOrder}.
+     * @param order         {@link Order}.
+     * @param paymentType   {@link PaymentType}.
      */
     @Transactional
-    public void subscribeMembershipWithOrder(Order order) {
+    public void subscribeMembershipWithOrder(Order order, PaymentType paymentType) {
         if (Objects.isNull(order) || OrderState.SUCCESS.getValue() != order.getState()) {
             return;
         }
@@ -115,7 +117,7 @@ public class SubscribeMembershipService {
             MembershipSku sku = this.membershipSkuService.retrieveMembershipSkuById(order.getPropertyId());
 
             if (innerPaymentList.isEmpty()) {
-                innerPaymentList = this.paymentService.createNewWechatMembershipPayments(order, sku);
+                innerPaymentList = this.paymentService.createNewWechatMembershipPayments(order, sku, paymentType);
             } else if (innerPaymentList.stream().allMatch(payment -> PaymentState.OPEN.getValue() == payment.getState())) {
                 return;
             }

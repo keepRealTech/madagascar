@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.vanga.grpcController;
 
-import com.alipay.easysdk.factory.Factory;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.keepreal.madagascar.common.CommonStatus;
@@ -37,6 +36,7 @@ import com.keepreal.madagascar.vanga.model.OrderState;
 import com.keepreal.madagascar.vanga.model.OrderType;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
+import com.keepreal.madagascar.vanga.model.PaymentType;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.service.AlipayOrderService;
@@ -206,7 +206,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
                     .build();
-            this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
+            this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku, PaymentType.WECHATPAY);
         } else {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
@@ -252,7 +252,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
                     .build();
-            this.paymentService.createNewWechatMembershipPayments(alipayOrder, sku);
+            this.paymentService.createNewWechatMembershipPayments(alipayOrder, sku, PaymentType.ALIPAY);
         } else {
             response = AlipayOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
@@ -286,7 +286,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             case PAYMEMBERSHIP:
             case PAYMEMBERSHIPH5:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
-                this.subscribeMembershipService.subscribeMembershipWithOrder(wechatOrder);
+                this.subscribeMembershipService.subscribeMembershipWithOrder(wechatOrder, PaymentType.WECHATPAY);
                 break;
             case PAYSHELL:
                 wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
@@ -322,10 +322,14 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     @Override
     public void retrieveAlipayOrderById(RetrieveOrderByIdRequest request,
                                         StreamObserver<AlipayOrderResponse> responseObserver) {
+        log.warn("retrieve alipay with receipt...");
+
         Type type = new TypeToken<Map<String, String>>(){}.getType();
         Map<String, String> paramMap = this.gson.fromJson(request.getAlipayReceipt(), type);
 
-        AlipayOrder alipayOrder = this.alipayService.verifyReceipt(paramMap);
+        log.warn(paramMap.toString());
+
+        AlipayOrder alipayOrder = this.alipayOrderService.retrieveByTradeNumber(paramMap.get("out_trade_no"));
 
         if (Objects.isNull(alipayOrder)
                 || !alipayOrder.getId().equals(request.getId())) {
@@ -338,11 +342,13 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
 
         alipayOrder = this.alipayService.orderCallback(request.getAlipayReceipt());
 
+        log.warn("signature verified...");
+
         switch (OrderType.fromValue(alipayOrder.getType())) {
             case PAYMEMBERSHIP:
             case PAYMEMBERSHIPH5:
                 alipayOrder = this.alipayService.tryUpdateOrder(alipayOrder);
-                this.subscribeMembershipService.subscribeMembershipWithOrder(alipayOrder);
+                this.subscribeMembershipService.subscribeMembershipWithOrder(alipayOrder, PaymentType.ALIPAY);
                 break;
             case PAYSUPPORT:
             case PAYSUPPORTH5: {
@@ -381,7 +387,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         switch (OrderType.fromValue(wechatOrder.getType())) {
             case PAYMEMBERSHIP:
             case PAYMEMBERSHIPH5:
-                this.subscribeMembershipService.subscribeMembershipWithOrder(wechatOrder);
+                this.subscribeMembershipService.subscribeMembershipWithOrder(wechatOrder, PaymentType.WECHATPAY);
                 break;
             case PAYSHELL:
                 this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
@@ -421,7 +427,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         switch (OrderType.fromValue(alipayOrder.getType())) {
             case PAYMEMBERSHIP:
             case PAYMEMBERSHIPH5:
-                this.subscribeMembershipService.subscribeMembershipWithOrder(alipayOrder);
+                this.subscribeMembershipService.subscribeMembershipWithOrder(alipayOrder, PaymentType.ALIPAY);
                 break;
             case PAYSUPPORT:
             case PAYSUPPORTH5: {
@@ -750,7 +756,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setRedirectUrl(wechatOrder.getMwebUrl())
                     .setOrderId(wechatOrder.getId())
                     .build();
-            this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
+            this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku, PaymentType.WECHATPAY);
         } else {
             response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
