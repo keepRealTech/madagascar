@@ -59,7 +59,6 @@ public class OrderDTOFactory {
         alipayOrderDTO.setFeeInCents(alipayOrder.getFeeInCents());
         alipayOrderDTO.setState(this.convert(alipayOrder.getState()));
         alipayOrderDTO.setOrderString(alipayOrder.getOrderString());
-        alipayOrderDTO.setMwebUrl("");
 
         return alipayOrderDTO;
     }

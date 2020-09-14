@@ -199,7 +199,9 @@ public class AlipayService {
      * @return Price in yuans.
      */
     private String convertCentsToYuan(String priceInCents) {
-        return BigDecimal.valueOf(Long.parseLong(priceInCents)).divide(new BigDecimal(100), RoundingMode.FLOOR).toString();
+        return BigDecimal.valueOf(Long.parseLong(priceInCents))
+                .setScale(2, BigDecimal.ROUND_DOWN)
+                .divide(new BigDecimal(100), RoundingMode.FLOOR).toString();
     }
 
 }

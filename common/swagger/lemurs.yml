@@ -995,6 +995,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/alipay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支付宝h5会员订阅支付
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayH5SubscribeMemberRequest'
+      responses:
+        '200':
+          description: dummy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayOrderResponse'
   /api/v1/islands/{id}/memberSubscription/shellPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2114,6 +2134,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v1/islands/{id}/support/alipay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下h5微信支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayH5PostSupportRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayOrderResponse'
   /api/v1/islands/discovery:
     get:
       tags:
@@ -3987,6 +4027,17 @@ components:
           type: string
       required:
         - membershipSkuId
+    AlipayH5SubscribeMemberRequest:
+      type: object
+      properties:
+        membershipSkuId:
+          type: string
+        quit_url:
+          type: string
+        return_url:
+          type: string
+      required:
+        - membershipSkuId
     BalanceDTO:
       type: object
       properties:
@@ -4973,8 +5024,23 @@ components:
           format: int64
       required:
         - sponsorSkuId
-        - priceInCents
-        - priceInShells
+    AlipayH5PostSupportRequest:
+      type: object
+      properties:
+        sponsorSkuId:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
+        priceInShells:
+          type: integer
+          format: int64
+        quitUrl:
+          type: string
+        returnUrl:
+          type: string
+      required:
+        - sponsorSkuId
     H5RedirectDTO:
       type: object
       properties:
@@ -5148,8 +5214,6 @@ components:
         id:
           type: string
         orderString:
-          type: string
-        mwebUrl:
           type: string
         feeInCents:
           type: integer

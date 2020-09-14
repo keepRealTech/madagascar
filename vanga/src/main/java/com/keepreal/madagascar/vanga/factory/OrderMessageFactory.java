@@ -75,10 +75,6 @@ public class OrderMessageFactory {
             alipayOrder.setOrderString("");
         }
 
-        if (StringUtils.isEmpty(alipayOrder.getMwebUrl())) {
-            alipayOrder.setMwebUrl("");
-        }
-
         return  AlipayOrderMessage.newBuilder()
                 .setId(alipayOrder.getId())
                 .setTradeNumber(alipayOrder.getTradeNumber())
@@ -86,7 +82,6 @@ public class OrderMessageFactory {
                 .setUserId(alipayOrder.getUserId())
                 .setFeeInCents(Long.parseLong(alipayOrder.getFeeInCents()))
                 .setState(this.convert(alipayOrder.getState()))
-                .setMwebUrl(alipayOrder.getMwebUrl())
                 .setOrderString(alipayOrder.getOrderString())
                 .build();
     }

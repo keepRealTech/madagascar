@@ -40,8 +40,6 @@ public class AlipayOrder implements Order {
     private String appId;
     @Transient
     private String orderString;
-    @Transient
-    private String mwebUrl;
     @Builder.Default
     private String transactionId = "";
     @Builder.Default

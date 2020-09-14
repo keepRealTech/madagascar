@@ -229,7 +229,13 @@ public class PaymentService {
         return response.getWechatOrder();
     }
 
-    public RedirectResponse submitSupportWithWechatPayH5(String userId, String payeeId, String sponsorSkuId, Long priceInCents, Long priceInShells, String ipAddress, SceneType sceneType) {
+    public RedirectResponse submitSupportWithWechatPayH5(String userId,
+                                                         String payeeId,
+                                                         String sponsorSkuId,
+                                                         Long priceInCents,
+                                                         Long priceInShells,
+                                                         String ipAddress,
+                                                         SceneType sceneType) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         SupportRequest request = SupportRequest.newBuilder()

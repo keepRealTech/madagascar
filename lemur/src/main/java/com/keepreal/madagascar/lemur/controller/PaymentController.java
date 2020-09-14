@@ -9,6 +9,7 @@ import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.OrderDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.PaymentDTOFactory;
+import com.keepreal.madagascar.lemur.dtoFactory.SkuDTOFactory;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.PaymentService;
@@ -20,6 +21,7 @@ import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.PaymentApi;
@@ -291,11 +293,16 @@ public class PaymentController implements PaymentApi {
 
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
 
+        if (SkuDTOFactory.CUSTOMIZED_SUPPORT_SKU_ID.equals(postSupportRequest.getSponsorSkuId())
+                && Objects.isNull(postSupportRequest.getPriceInCents())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
         RedirectResponse redirectResponse = this.paymentService.submitSupportWithWechatPayH5(userId,
                 islandMessage.getHostId(),
                 postSupportRequest.getSponsorSkuId(),
-                postSupportRequest.getPriceInCents(),
-                postSupportRequest.getPriceInShells(),
+                Objects.isNull(postSupportRequest.getPriceInCents()) ? 0L : postSupportRequest.getPriceInCents(),
+                Objects.isNull(postSupportRequest.getPriceInShells()) ? 0L : postSupportRequest.getPriceInShells(),
                 remoteAddress,
                 this.convertType(sceneType));
 
@@ -321,8 +328,8 @@ public class PaymentController implements PaymentApi {
         WechatOrderMessage wechatOrderMessage = this.paymentService.submitSupportWithWechatPay(userId,
                 islandMessage.getHostId(),
                 postSupportRequest.getSponsorSkuId(),
-                postSupportRequest.getPriceInCents(),
-                postSupportRequest.getPriceInShells(),
+                Objects.isNull(postSupportRequest.getPriceInCents()) ? 0L : postSupportRequest.getPriceInCents(),
+                Objects.isNull(postSupportRequest.getPriceInShells()) ? 0L : postSupportRequest.getPriceInShells(),
                 remoteAddress);
 
         WechatOrderResponse response = new WechatOrderResponse();
