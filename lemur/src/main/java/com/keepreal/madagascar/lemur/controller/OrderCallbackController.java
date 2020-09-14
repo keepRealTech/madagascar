@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -92,7 +93,7 @@ public class OrderCallbackController {
      * @param request {@link HttpServletRequest}.
      */
     @RequestMapping(value = "/api/v1/orders/alipay/callback", method = RequestMethod.POST)
-    public String apiV1OrdersAlipayCallback(HttpServletRequest request) {
+    public void apiV1OrdersAlipayCallback(HttpServletRequest request, HttpServletResponse response) {
         Map<String, String> retMap = new HashMap<>();
         Set<Map.Entry<String, String[]>> entrySet = request.getParameterMap().entrySet();
 
@@ -120,7 +121,14 @@ public class OrderCallbackController {
 
         this.orderService.alipayOrderCallback(payload);
 
-        return "success";
+        try {
+            BufferedOutputStream out = new BufferedOutputStream(response.getOutputStream());
+            out.write("success".getBytes());
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
     }
 
 }
