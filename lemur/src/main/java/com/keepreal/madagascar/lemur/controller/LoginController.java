@@ -173,6 +173,19 @@ public class LoginController implements LoginApi {
                         .setLoginType(LoginType.LOGIN_APP_MOBILE)
                         .build();
                 break;
+            case MOBILE_HOME:
+                if (StringUtils.isEmpty(body.getData().getMobile())
+                        || StringUtils.isEmpty(body.getData().getOtp())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+
+                loginRequest = LoginRequest.newBuilder()
+                        .setAppMobilePayload(AppMobileLoginPayload.newBuilder()
+                                .setMobile(body.getData().getMobile())
+                                .setOtp(body.getData().getOtp()))
+                        .setLoginType(LoginType.LOGIN_APP_MOBILE)
+                        .build();
+                break;
             case JWT_IOS:
                 if (StringUtils.isEmpty(body.getData().getCode())) {
                     throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
