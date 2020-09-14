@@ -1,5 +1,8 @@
 package com.keepreal.madagascar.vanga.grpcController;
 
+import com.alipay.easysdk.factory.Factory;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -55,6 +58,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +92,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final BalanceMessageFactory balanceMessageFactory;
     private final PaymentMessageFactory paymentMessageFactory;
     private final SupportService supportService;
+
+    private final Gson gson;
 
     /**
      * Constructs the payment grpc controller.
@@ -135,6 +141,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         this.subscribeMembershipService = subscribeMembershipService;
         this.paymentMessageFactory = paymentMessageFactory;
         this.supportService = supportService;
+        this.gson = new Gson();
     }
 
     /**
@@ -315,9 +322,13 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     @Override
     public void retrieveAlipayOrderById(RetrieveOrderByIdRequest request,
                                         StreamObserver<AlipayOrderResponse> responseObserver) {
-        AlipayOrder alipayOrder = this.alipayOrderService.retrieveById(request.getId());
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> paramMap = this.gson.fromJson(request.getAlipayReceipt(), type);
 
-        if (Objects.isNull(alipayOrder)) {
+        AlipayOrder alipayOrder = this.alipayService.verifyReceipt(paramMap);
+
+        if (Objects.isNull(alipayOrder)
+                || !alipayOrder.getId().equals(request.getId())) {
             AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ALIPAY_ORDER_NOT_FOUND_ERROR))
                     .build();
@@ -325,32 +336,26 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             responseObserver.onCompleted();
         }
 
-        switch (OrderType.fromValue(wechatOrder.getType())) {
+        alipayOrder = this.alipayService.orderCallback(request.getAlipayReceipt());
+
+        switch (OrderType.fromValue(alipayOrder.getType())) {
             case PAYMEMBERSHIP:
             case PAYMEMBERSHIPH5:
-                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
-                this.subscribeMembershipService.subscribeMembershipWithOrder(wechatOrder);
-                break;
-            case PAYSHELL:
-                wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
-                this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
-                break;
-            case PAYQUESTION:
-                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
-                this.feedService.confirmQuestionPaid(wechatOrder);
+                alipayOrder = this.alipayService.tryUpdateOrder(alipayOrder);
+                this.subscribeMembershipService.subscribeMembershipWithOrder(alipayOrder);
                 break;
             case PAYSUPPORT:
             case PAYSUPPORTH5: {
-                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
-                this.supportService.supportWithOrder(wechatOrder);
+                alipayOrder = this.alipayService.tryUpdateOrder(alipayOrder);
+                this.supportService.supportWithOrder(alipayOrder);
                 break;
             }
             default:
         }
 
-        WechatOrderResponse response = WechatOrderResponse.newBuilder()
+        AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
+                .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
                 .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();

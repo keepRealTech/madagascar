@@ -111,13 +111,7 @@ public class AlipayService {
         Type type = new TypeToken<Map<String, String>>(){}.getType();
         Map<String, String> paramMap = this.gson.fromJson(callbackPayload, type);
 
-        Boolean verified = Factory.Payment.Common().verifyNotify(paramMap);
-
-        if (!Boolean.TRUE.equals(verified)) {
-            return null;
-        }
-
-        AlipayOrder alipayOrder = this.alipayOrderService.retrieveByTradeNumber(paramMap.get("out_trade_no"));
+        AlipayOrder alipayOrder = this.verifyReceipt(paramMap);
 
         long total_amount = new BigDecimal(paramMap.get("total_amount")).multiply(new BigDecimal(100)).longValue();
 
@@ -138,6 +132,23 @@ public class AlipayService {
         }
 
         return this.alipayOrderService.update(alipayOrder);
+    }
+
+    /**
+     * Verifies the payload and get related order.
+     *
+     * @param paramMap Returned payload with signature.
+     * @return {@link AlipayOrder}.
+     */
+    @SneakyThrows
+    public AlipayOrder verifyReceipt(Map<String, String> paramMap) {
+        Boolean verified = Factory.Payment.Common().verifyNotify(paramMap);
+
+        if (!Boolean.TRUE.equals(verified)) {
+            return null;
+        }
+
+        return this.alipayOrderService.retrieveByTradeNumber(paramMap.get("out_trade_no"));
     }
 
     /**
