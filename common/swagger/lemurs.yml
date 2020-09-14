@@ -849,6 +849,12 @@ paths:
       tags:
         - Order
       summary: get the wechat order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayCheckRequest'
       responses:
         '200':
           description: wechat order
@@ -5131,6 +5137,11 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/BonusDTO'
+    AlipayCheckRequest:
+      type: object
+      properties:
+        receipt:
+          type: string
     AlipayOrderDTO:
       type: object
       properties:

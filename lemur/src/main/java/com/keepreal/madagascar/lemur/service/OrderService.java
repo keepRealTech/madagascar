@@ -235,11 +235,12 @@ public class OrderService {
      * @param id Order id.
      * @return {@link AlipayOrderMessage}.
      */
-    public AlipayOrderMessage retrieveAlipayOrderById(String id) {
+    public AlipayOrderMessage retrieveAlipayOrderById(String id, String receipt) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveOrderByIdRequest request = RetrieveOrderByIdRequest.newBuilder()
                 .setId(id)
+                .setAlipayReceipt(receipt)
                 .build();
 
         AlipayOrderResponse response;

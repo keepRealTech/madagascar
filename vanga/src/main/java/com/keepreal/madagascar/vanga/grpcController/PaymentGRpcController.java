@@ -36,6 +36,7 @@ import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
+import com.keepreal.madagascar.vanga.service.AlipayOrderService;
 import com.keepreal.madagascar.vanga.service.AlipayService;
 import com.keepreal.madagascar.vanga.service.FeedService;
 import com.keepreal.madagascar.vanga.service.MpWechatPayService;
@@ -78,6 +79,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final WechatOrderService wechatOrderService;
     private final WechatPayService wechatPayService;
     private final MpWechatPayService mpWechatPayService;
+    private final AlipayOrderService alipayOrderService;
     private final AlipayService alipayService;
     private final SkuService skuService;
     private final ShellService shellService;
@@ -95,7 +97,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param wechatOrderService         {@link WechatOrderService}.
      * @param wechatPayService           {@link WechatPayService}.
      * @param mpWechatPayService         {@link MpWechatPayService}.
-     * @param alipayService
+     * @param alipayOrderService         {@link AlipayOrderService}.
+     * @param alipayService              {@link AlipayService}.
      * @param balanceMessageFactory      {@link BalanceMessageFactory}.
      * @param skuService                 {@link SkuService}.
      * @param shellService               {@link ShellService}.
@@ -109,6 +112,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                  WechatOrderService wechatOrderService,
                                  WechatPayService wechatPayService,
                                  MpWechatPayService mpWechatPayService,
+                                 AlipayOrderService alipayOrderService,
                                  AlipayService alipayService,
                                  BalanceMessageFactory balanceMessageFactory,
                                  SkuService skuService,
@@ -122,6 +126,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         this.wechatOrderService = wechatOrderService;
         this.wechatPayService = wechatPayService;
         this.mpWechatPayService = mpWechatPayService;
+        this.alipayOrderService = alipayOrderService;
         this.alipayService = alipayService;
         this.balanceMessageFactory = balanceMessageFactory;
         this.skuService = skuService;
@@ -255,7 +260,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * Implements the wechat order check and retrieve.
      *
      * @param request          {@link RetrieveOrderByIdRequest}.
-     * @param responseObserver {@link StreamObserver}.
+     * @param responseObserver {@link WechatOrderResponse}.
      */
     @Override
     public void retrieveWechatOrderById(RetrieveOrderByIdRequest request,
@@ -265,6 +270,56 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         if (Objects.isNull(wechatOrder)) {
             WechatOrderResponse response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WECHAT_ORDER_NOT_FOUND_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        }
+
+        switch (OrderType.fromValue(wechatOrder.getType())) {
+            case PAYMEMBERSHIP:
+            case PAYMEMBERSHIPH5:
+                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+                this.subscribeMembershipService.subscribeMembershipWithOrder(wechatOrder);
+                break;
+            case PAYSHELL:
+                wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
+                this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
+                break;
+            case PAYQUESTION:
+                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+                this.feedService.confirmQuestionPaid(wechatOrder);
+                break;
+            case PAYSUPPORT:
+            case PAYSUPPORTH5: {
+                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+                this.supportService.supportWithOrder(wechatOrder);
+                break;
+            }
+            default:
+        }
+
+        WechatOrderResponse response = WechatOrderResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the alipay order check and retrieve.
+     *
+     * @param request          {@link RetrieveOrderByIdRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
+     */
+    @Override
+    public void retrieveAlipayOrderById(RetrieveOrderByIdRequest request,
+                                        StreamObserver<AlipayOrderResponse> responseObserver) {
+        AlipayOrder alipayOrder = this.alipayOrderService.retrieveById(request.getId());
+
+        if (Objects.isNull(alipayOrder)) {
+            AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ALIPAY_ORDER_NOT_FOUND_ERROR))
                     .build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();

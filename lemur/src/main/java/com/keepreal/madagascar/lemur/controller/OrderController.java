@@ -11,9 +11,11 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.OrderApi;
+import swagger.model.AlipayCheckRequest;
 import swagger.model.AlipayOrderResponse;
 import swagger.model.BalanceResponse;
 import swagger.model.DummyResponse;
@@ -114,8 +116,13 @@ public class OrderController implements OrderApi {
      */
     @CrossOrigin
     @Override
-    public ResponseEntity<AlipayOrderResponse> apiV1OrdersAlipayIdCheckPost(String id) {
-        AlipayOrderMessage alipayOrder = this.orderService.retrieveAlipayOrderById(id);
+    public ResponseEntity<AlipayOrderResponse> apiV1OrdersAlipayIdCheckPost(String id,
+                                                                            AlipayCheckRequest alipayCheckRequest) {
+        if (StringUtils.isEmpty(alipayCheckRequest.getReceipt())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        AlipayOrderMessage alipayOrder = this.orderService.retrieveAlipayOrderById(id, alipayCheckRequest.getReceipt());
 
         AlipayOrderResponse response = new AlipayOrderResponse();
         response.setData(this.orderDTOFactory.alipayOrderValueOf(alipayOrder));
