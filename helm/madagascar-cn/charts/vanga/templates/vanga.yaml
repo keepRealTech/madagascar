@@ -109,7 +109,7 @@ spec:
                 secretKeyRef:
                   name: ali-pay
                   key: app-id
-            - name: ALIPAY_MECHANTKEY
+            - name: ALIPAY_MERCHANTKEY
               valueFrom:
                 secretKeyRef:
                   name: ali-pay

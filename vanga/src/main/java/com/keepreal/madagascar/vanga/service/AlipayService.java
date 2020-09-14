@@ -85,6 +85,7 @@ public class AlipayService {
                 .description(description)
                 .feeInCents(feeInCents)
                 .type(orderType.getValue())
+                .appId(this.alipayConfiguration.getAppId())
                 .createdTime(Instant.now().toEpochMilli())
                 .build();
 
