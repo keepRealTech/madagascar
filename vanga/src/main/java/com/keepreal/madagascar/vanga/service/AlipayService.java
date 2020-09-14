@@ -99,6 +99,7 @@ public class AlipayService {
             alipayOrder.setOrderString(response.body);
         } catch (Exception exception) {
             alipayOrder.setErrorMessage(exception.getMessage());
+            alipayOrder.setState(OrderState.CLOSED.getValue());
             this.alipayOrderService.insert(alipayOrder);
             return null;
         }

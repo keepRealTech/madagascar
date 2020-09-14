@@ -152,6 +152,7 @@ public class WechatPayService {
         } catch (Exception e) {
             wechatOrder.setErrorMessage(e.getMessage());
             wechatOrder.setCreatedTime(WXPayUtil.getCurrentTimestampMs());
+            wechatOrder.setState(OrderState.CLOSED.getValue());
             this.wechatOrderService.insert(wechatOrder);
             return null;
         }

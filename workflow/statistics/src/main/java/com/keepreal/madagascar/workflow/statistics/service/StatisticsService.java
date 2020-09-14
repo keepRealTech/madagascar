@@ -83,6 +83,7 @@ public class StatisticsService {
                                 island.getIslanderNumber(),
                                 islandIncrementMap.getOrDefault(island.getId(), new BigInteger("0")).longValue());
                         sb.append(text);
+                        sb.append(System.getProperty("line.separator"));
                     });
 
             this.larkService.sendMessage(sb.toString());
