@@ -244,7 +244,8 @@ public class WechatPayService {
             WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
 
             if (Objects.isNull(wechatOrder)
-                    || wechatOrder.getState() != OrderState.REFUNDING.getValue()) {
+                    || wechatOrder.getState() == OrderState.SUCCESS.getValue()
+                    || wechatOrder.getState() == OrderState.PAYERROR.getValue()) {
                 return null;
             }
 

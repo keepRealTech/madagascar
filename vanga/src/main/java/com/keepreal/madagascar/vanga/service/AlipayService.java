@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
@@ -115,25 +116,25 @@ public class AlipayService {
 
         AlipayOrder alipayOrder = this.alipayOrderService.retrieveByTradeNumber(paramMap.get("out_trade_no"));
 
-        if (Objects.isNull(alipayOrder) || alipayOrder.getState())
+        long total_amount = new BigDecimal(paramMap.get("total_amount")).multiply(new BigDecimal(100)).longValue();
 
+        if (Objects.isNull(alipayOrder)
+                || OrderState.SUCCESS.getValue() == alipayOrder.getState()
+                || OrderState.CLOSED.getValue() == alipayOrder.getState()
+                || !alipayOrder.getFeeInCents().equals(String.valueOf(total_amount))
+                || !this.alipayConfiguration.getAppId().equals(paramMap.get("app_id"))) {
+            return null;
+        }
+
+        if ("TRADE_SUCCESS".equals(paramMap.get("trade_status"))
+                || "TRADE_FINISHED".equals(paramMap.get("trade_status"))) {
+            alipayOrder.setState(OrderState.SUCCESS.getValue());
+            alipayOrder.setTransactionId(paramMap.get("trade_no"));
+        } else if ("TRADE_CLOSED".equals(paramMap.get("trade_status"))){
+            alipayOrder.setState(OrderState.CLOSED.getValue());
+        }
+
+        return this.alipayOrderService.update(alipayOrder);
     }
 
 }
-
-
-    WechatOrder wechatOrder = this.wechatOrderService.retrieveByTradeNumber(response.get("out_trade_no"));
-
-            if (Objects.isNull(wechatOrder)
-                    || wechatOrder.getState() != OrderState.REFUNDING.getValue()) {
-                    return null;
-                    }
-
-                    if (response.get("result_code").equals(WXPayConstants.FAIL)) {
-                    wechatOrder.setState(OrderState.PAYERROR.getValue());
-                    wechatOrder.setErrorMessage(response.get("err_code_des"));
-                    } else {
-                    wechatOrder.setState(OrderState.SUCCESS.getValue());
-                    wechatOrder.setTransactionId(response.get("transaction_id"));
-                    }
-                    return this.wechatOrderService.update(wechatOrder);
