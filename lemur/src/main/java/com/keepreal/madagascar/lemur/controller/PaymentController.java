@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
@@ -8,6 +9,7 @@ import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.PaymentDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.WechatOrderDTOFactory;
+import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.PaymentService;
@@ -17,7 +19,6 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -36,8 +37,6 @@ import swagger.model.UserPaymentsResponse;
 import swagger.model.WechatOrderResponse;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,6 +63,7 @@ public class PaymentController implements PaymentApi {
     private final WechatOrderDTOFactory wechatOrderDTOFactory;
     private final PaymentDTOFactory paymentDTOFactory;
     private final IslandService islandService;
+    private final FeedService feedService;
 
     /**
      * Constructs the payment controller.
@@ -74,6 +74,7 @@ public class PaymentController implements PaymentApi {
      * @param wechatOrderDTOFactory  {@link WechatOrderDTOFactory}.
      * @param paymentDTOFactory      {@link PaymentDTOFactory}.
      * @param iosClientConfiguration {@link IOSClientConfiguration}.
+     * @param feedService            {@link FeedService}.
      */
     public PaymentController(PaymentService paymentService,
                              UserService userService,
@@ -81,7 +82,8 @@ public class PaymentController implements PaymentApi {
                              WechatOrderDTOFactory wechatOrderDTOFactory,
                              PaymentDTOFactory paymentDTOFactory,
                              IOSClientConfiguration iosClientConfiguration,
-                             IslandService islandService) {
+                             IslandService islandService,
+                             FeedService feedService) {
         this.paymentService = paymentService;
         this.userService = userService;
         this.membershipService = membershipService;
@@ -89,6 +91,7 @@ public class PaymentController implements PaymentApi {
         this.paymentDTOFactory = paymentDTOFactory;
         this.islandService = islandService;
         this.iosClientConfiguration = iosClientConfiguration;
+        this.feedService = feedService;
         this.iOSConfigVersionMap.putAll(iosClientConfiguration.getVersionInfoMap());
     }
 
@@ -325,6 +328,22 @@ public class PaymentController implements PaymentApi {
                 postSupportRequest.getPriceInCents(),
                 postSupportRequest.getPriceInShells(),
                 remoteAddress);
+
+        WechatOrderResponse response = new WechatOrderResponse();
+        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<WechatOrderResponse> apiV1FeedsIdWechatPayPost(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        String ipAddress = HttpContextUtils.getRemoteIpFromContext();
+
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+
+        WechatOrderMessage wechatOrderMessage = this.paymentService.submitFeedWithWechatPay(userId, id, feedMessage.getPriceInCents(), feedMessage.getHostId(), ipAddress);
 
         WechatOrderResponse response = new WechatOrderResponse();
         response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));

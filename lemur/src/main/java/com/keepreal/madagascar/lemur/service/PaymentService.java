@@ -9,6 +9,7 @@ import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
+import com.keepreal.madagascar.vanga.FeedRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.RetrieveSupportInfoRequest;
@@ -311,5 +312,35 @@ public class PaymentService {
         }
 
         return response.getMessage();
+    }
+
+    public WechatOrderMessage submitFeedWithWechatPay(String userId, String feedId, Long priceInCents, String payeeId, String ipAddress) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        WechatOrderResponse response;
+
+        try {
+            response = stub.submitFeedWithWechatPay(FeedRequest.newBuilder()
+                    .setUserId(userId)
+                    .setFeedId(feedId)
+                    .setPriceInCents(priceInCents)
+                    .setPayeeId(payeeId)
+                    .setIpAddress(ipAddress)
+                    .build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create feed wechat order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getWechatOrder();
     }
 }

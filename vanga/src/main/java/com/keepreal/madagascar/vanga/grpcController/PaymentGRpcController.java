@@ -7,6 +7,7 @@ import com.keepreal.madagascar.vanga.ActivatePendingFeedPaymentRequest;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreatePaidFeedRequest;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
+import com.keepreal.madagascar.vanga.FeedRequest;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
@@ -34,6 +35,7 @@ import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
 import com.keepreal.madagascar.vanga.model.WechatOrderType;
+import com.keepreal.madagascar.vanga.service.FeedChargeService;
 import com.keepreal.madagascar.vanga.service.FeedService;
 import com.keepreal.madagascar.vanga.service.MpWechatPayService;
 import com.keepreal.madagascar.vanga.service.PaymentService;
@@ -69,6 +71,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final static String SUPPORT_TEXT = "夏日炎炎，请TA吃个椰子吧";
     private final static String MEMBERSHIP_TEMPLATE = "支持创作者 ¥%.2f（¥%.2f x %d个月）";
     private final static String SPONSOR_TEMPLATE = "支持一下创作者 ¥%.2f";
+    private final static String FEED_CHARGE_TEMPLATE = "单独解锁动态 ￥%.2f";
 
     private final FeedService feedService;
     private final PaymentService paymentService;
@@ -82,6 +85,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final BalanceMessageFactory balanceMessageFactory;
     private final PaymentMessageFactory paymentMessageFactory;
     private final SupportService supportService;
+    private final FeedChargeService feedChargeService;
 
     /**
      * Constructs the payment grpc controller.
@@ -98,6 +102,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param paymentMessageFactory      {@link PaymentMessageFactory}.
      * @param supportService             {@link SupportService}.
+     * @param feedChargeService          {@link FeedChargeService}.
      */
     public PaymentGRpcController(FeedService feedService,
                                  PaymentService paymentService,
@@ -110,7 +115,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                  WechatOrderMessageFactory wechatOrderMessageFactory,
                                  SubscribeMembershipService subscribeMembershipService,
                                  PaymentMessageFactory paymentMessageFactory,
-                                 SupportService supportService) {
+                                 SupportService supportService,
+                                 FeedChargeService feedChargeService) {
         this.feedService = feedService;
         this.paymentService = paymentService;
         this.wechatOrderService = wechatOrderService;
@@ -123,6 +129,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         this.subscribeMembershipService = subscribeMembershipService;
         this.paymentMessageFactory = paymentMessageFactory;
         this.supportService = supportService;
+        this.feedChargeService = feedChargeService;
     }
 
     /**
@@ -237,6 +244,10 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.supportService.supportWithWechatOrder(wechatOrder);
                 break;
             }
+            case FEEDCHARGE:
+                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+                this.feedChargeService.feedChargeWithWechatOrder(wechatOrder);
+                break;
             default:
         }
 
@@ -281,6 +292,9 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.supportService.supportWithWechatOrder(wechatOrder);
                 break;
             }
+            case FEEDCHARGE:
+                this.feedChargeService.feedChargeWithWechatOrder(wechatOrder);
+                break;
             default:
         }
 
@@ -569,7 +583,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     /**
      * Implements the H5 payment api.
      *
-     * @param request {@link SubscribeMembershipRequest}.
+     * @param request          {@link SubscribeMembershipRequest}.
      * @param responseObserver {@link RedirectResponse}.
      */
     @Override
@@ -678,6 +692,39 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             this.paymentService.createNewWechatSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
         } else {
             response = RedirectResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void submitFeedWithWechatPay(FeedRequest request, StreamObserver<WechatOrderResponse> responseObserver) {
+        String userId = request.getUserId();
+        String feedId = request.getFeedId();
+        long priceInCents = request.getPriceInCents();
+        String payeeId = request.getPayeeId();
+
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(userId,
+                String.valueOf(priceInCents),
+                feedId,
+                WechatOrderType.FEEDCHARGE,
+                null,
+                request.getIpAddress(),
+                String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
+                        Long.valueOf(priceInCents).doubleValue() / 100).replace(".00", ""));
+
+        WechatOrderResponse response;
+        if (Objects.nonNull(wechatOrder)) {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .build();
+            this.paymentService.createNewWechatFeedChargePayment(wechatOrder, payeeId, priceInCents);
+        } else {
+            response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
                     .build();
         }
