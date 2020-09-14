@@ -12,8 +12,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
+/**
+ * Represents the alipay order entity.
+ */
 @Builder
 @Data
 @Entity
@@ -21,6 +25,7 @@ import javax.persistence.Transient;
 @EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "alipay_order")
 public class AlipayOrder implements Order {
 
     @Id
