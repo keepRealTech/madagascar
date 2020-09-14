@@ -438,7 +438,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                 list.add(userQualification);
             } else {
                 UserQualification userQualification = userQualificationMap.get(message.getId());
-                if (!userQualification.getHostUrl().equals(message.getUrl())) {
+                if (!userQualification.getHostUrl().equals(message.getUrl()) || !userQualification.getName().equals(message.getName())) {
                     userQualification.setState(QualificationState.PROCESSING.getValue());
                     userQualification.setHostUrl(message.getUrl());
                     userQualification.setName(message.getName());
