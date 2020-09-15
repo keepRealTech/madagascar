@@ -30,36 +30,32 @@ public class ActivityGRpcController extends ActivityServiceGrpc.ActivityServiceI
     /**
      * Constructs the activity grpc controller.
      *
-     * @param activityService   {@link ActivityService}
+     * @param activityService {@link ActivityService}
      */
     public ActivityGRpcController(ActivityService activityService,
                                   ActivityConfiguration activityConfiguration) {
         this.activityService = activityService;
-        this.activityConfiguration =activityConfiguration;
+        this.activityConfiguration = activityConfiguration;
     }
 
     /**
      * 获取可用的banner
      *
-     * @param request           {@link RetrieveActiveBannerRequest}
-     * @param responseObserver  {@link RetrieveActiveBannerResponse}
+     * @param request          {@link RetrieveActiveBannerRequest}
+     * @param responseObserver {@link RetrieveActiveBannerResponse}
      */
     @Override
     public void retrieveActiveBanner(RetrieveActiveBannerRequest request, StreamObserver<RetrieveActiveBannerResponse> responseObserver) {
-        boolean isIslandHost = request.getIsIslandHost();
-        Boolean showLabel = this.activityConfiguration.getShowLabel();
-        String text = this.activityConfiguration.getText();
-
         RetrieveActiveBannerResponse.Builder responseBuilder = RetrieveActiveBannerResponse.newBuilder();
         ActiveBannerMessage.Builder builder = ActiveBannerMessage.newBuilder();
 
-        if (showLabel) {
-            builder.setLabel(text);
+        if (Boolean.TRUE.equals(this.activityConfiguration.getShowLabel())) {
+            builder.setLabel(this.activityConfiguration.getText());
         }
 
         List<Activity> activities = this.activityService.findAllAccessActivities()
                 .stream()
-                .filter(activity -> this.isVisible(activity, isIslandHost))
+                .filter(activity -> this.isVisible(activity, request.getIsIslandHost()))
                 .collect(Collectors.toList());
 
         this.convertBanners(builder, activities);
@@ -75,9 +71,9 @@ public class ActivityGRpcController extends ActivityServiceGrpc.ActivityServiceI
     /**
      * 过滤banner
      *
-     * @param activity      {@link Activity}
-     * @param isIslandHost  是否是创作者(岛主)
-     * @return              有权限浏览banner则返回true
+     * @param activity     {@link Activity}
+     * @param isIslandHost 是否是创作者(岛主)
+     * @return 有权限浏览banner则返回true
      */
     private Boolean isVisible(Activity activity, Boolean isIslandHost) {
         if (!activity.getIsPublic()) {
@@ -89,8 +85,8 @@ public class ActivityGRpcController extends ActivityServiceGrpc.ActivityServiceI
     /**
      * convert {@link Activity} to {@link SingleBannerMessage}
      *
-     * @param builder       {@link ActiveBannerMessage.Builder}
-     * @param activities    {@link List<Activity>}
+     * @param builder    {@link ActiveBannerMessage.Builder}
+     * @param activities {@link List<Activity>}
      */
     private void convertBanners(ActiveBannerMessage.Builder builder, List<Activity> activities) {
         builder.addAllBanners(activities.stream()

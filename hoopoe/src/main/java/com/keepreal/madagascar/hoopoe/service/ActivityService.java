@@ -20,7 +20,7 @@ public class ActivityService {
     /**
      * 获取可用的活动banner
      *
-     * @return  {@link List<Activity>}
+     * @return {@link List<Activity>}
      */
     public List<Activity> findAllAccessActivities() {
         return this.activityRepository.findAllByActiveIsTrueAndDeletedIsFalse();

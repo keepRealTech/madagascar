@@ -21,6 +21,8 @@ data:
   GRPC_MANTELLA_PORT: '{{ .Values.mantella.port }}'
   GRPC_ASITY_HOST: {{ .Values.asity.host }}
   GRPC_ASITY_PORT: '{{ .Values.asity.port }}'
+  GRPC_HOOPOE_HOST: {{ .Values.hoopoe.host }}
+  GRPC_HOOPOE_PORT: '{{ .Values.hoopoe.port }}'
   SPRING_SERVLET_MULTIPART_MAXFILESIZE: {{ .Values.file.max_file_size }}
   SPRING_SERVLET_MULTIPART_MAXREQUESTSIZE: {{ .Values.file.max_request_size }}
   SYSTEMNOTIFICATION_NAME: {{ .Values.system_notification.name }}

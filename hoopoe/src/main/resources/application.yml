@@ -11,9 +11,6 @@ snowflake:
   nodeId: 0
 
 grpc:
-  coua:
-    host: 127.0.0.1
-    port: 12002
   port: 12008
 
 server:
