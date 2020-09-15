@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.coua.QualificationMessage;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -13,11 +14,14 @@ import swagger.model.ChatUserDTO;
 import swagger.model.FullUserDTO;
 import swagger.model.GenderType;
 import swagger.model.IdentityType;
+import swagger.model.QualificationChannelDTO;
 import swagger.model.UserDTO;
+import swagger.model.UserQualificationDTO;
 
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +32,8 @@ import java.util.stream.Collectors;
  */
 @Component
 public class UserDTOFactory {
+
+    private final List<String> channelList = Arrays.asList("微博", "抖音", "哔哩哔哩", "快手", "Lofter", "快看漫画", "晋江", "阅文", "起点读书", "网易云音乐", "喜马拉雅", "小宇宙", "荔枝");
 
     /**
      * Converts {@link UserMessage} to {@link UserDTO}.
@@ -185,6 +191,22 @@ public class UserDTOFactory {
                 .collect(Collectors.toList()));
 
         return chatUserDTO;
+    }
+
+    public List<QualificationChannelDTO> listValueOf() {
+        return channelList.stream().map(channel -> {
+            QualificationChannelDTO dto = new QualificationChannelDTO();
+            dto.setName(channel);
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+    public UserQualificationDTO valueOf(QualificationMessage message) {
+        UserQualificationDTO dto = new UserQualificationDTO();
+        dto.setId(message.getId());
+        dto.setName(message.getName());
+        dto.setHostUrl(message.getUrl());
+        return dto;
     }
 
     /**

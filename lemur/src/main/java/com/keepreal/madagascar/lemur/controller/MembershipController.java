@@ -15,6 +15,7 @@ import swagger.api.MembershipApi;
 import swagger.model.DummyResponse;
 import swagger.model.FeedMembershipsResponse;
 import swagger.model.MembershipResponse;
+import swagger.model.MembershipTemplatesResponse;
 import swagger.model.MembershipsResponse;
 import swagger.model.PostMembershipRequest;
 import swagger.model.PutMembershipRequest;
@@ -197,4 +198,12 @@ public class MembershipController implements MembershipApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<MembershipTemplatesResponse> apiV1MembershipsTemplatesGet() {
+        MembershipTemplatesResponse response = new MembershipTemplatesResponse();
+        response.setData(this.membershipDTOFactory.listValueOf());
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
