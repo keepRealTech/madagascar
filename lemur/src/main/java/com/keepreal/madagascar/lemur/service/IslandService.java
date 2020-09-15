@@ -5,6 +5,7 @@ import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckIslandSubscriptionRequest;
@@ -727,6 +728,16 @@ public class IslandService {
         }
 
         return response.getDicoverIslandsList();
+    }
+
+    /**
+     * 根据hostId 获取创建的岛
+     *
+     * @param hostId    host id
+     * @return          {@link List<IslandMessage>}
+     */
+    public List<IslandMessage> retrieveIslandsByHostId(String hostId) {
+        return this.retrieveIslands(null, hostId, null, 0, 10).getIslandsList();
     }
 
     /**

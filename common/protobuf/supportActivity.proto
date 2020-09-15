@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.vanga";
+
+import "common.proto";
+
+message RetrieveActivityBonusRequest {
+    string userId = 1;
+}
+
+message RetrieveActivityBonusResponse {
+    CommonStatus status = 1;
+    ActivityMessage message = 2;
+}
+
+message ActivityMessage {
+    uint32 ratio = 2;
+    uint64 toGain = 3;
+    uint64 gained = 4;
+}
+
+service SupportActivity {
+    rpc RetrieveActivityBonus(RetrieveActivityBonusRequest) returns (RetrieveActivityBonusResponse) {};
+}

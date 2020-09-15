@@ -23,6 +23,9 @@ grpc:
   asity:
     host: asity
     port: 12007
+  hoopoe:
+    host: 127.0.0.1
+    port: 12008
 
 system-notification:
   name: test-user
