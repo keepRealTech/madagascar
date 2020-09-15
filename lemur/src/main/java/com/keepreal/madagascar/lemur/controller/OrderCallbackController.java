@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -93,7 +94,8 @@ public class OrderCallbackController {
      * @param request {@link HttpServletRequest}.
      */
     @RequestMapping(value = "/api/v1/orders/alipay/callback", method = RequestMethod.POST)
-    public void apiV1OrdersAlipayCallback(HttpServletRequest request, HttpServletResponse response) {
+    @ResponseBody
+    public String apiV1OrdersAlipayCallback(HttpServletRequest request) {
         log.warn("GETTTTTTING ALIPAY ASYNC CALLBACK");
 
         Map<String, String> retMap = new HashMap<>();
@@ -123,14 +125,7 @@ public class OrderCallbackController {
 
         this.orderService.alipayOrderCallback(payload);
 
-        try {
-            BufferedOutputStream out = new BufferedOutputStream(response.getOutputStream());
-            out.write("success".getBytes());
-            out.flush();
-            out.close();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
+        return "success";
     }
 
 }
