@@ -51,6 +51,7 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                         "/api/v1/orders/wechat/callback**",
                         "/api/v1/orders/wechat/refund/callback**",
                         "/api/v1/events/wechatMp/callback**",
+                        "/api/v1/orders/alipay/callback**",
                         "/api/v1/islands/{\\d+}/poster**",
                         "/api/v1/islands/{\\d+}/profile**",
                         "/api/v1/islands/{\\d+}/memberships**",
