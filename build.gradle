@@ -173,6 +173,9 @@ subprojects {
             dependency "io.opentracing.contrib:opentracing-grpc:0.2.1"
             dependency "cn.rongcloud.im:server-sdk-java:${ext['rongcloud.version']}"
             dependency "com.alipay.sdk:alipay-easysdk:${ext['alipay.version']}"
+            dependency "com.squareup.okhttp3:okhttp:4.8.1"
+            dependency "com.squareup.okio:okio:2.2.2"
+            dependency "org.jetbrains.kotlin:kotlin-stdlib:1.4.10"
         }
     }
 }
