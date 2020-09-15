@@ -144,11 +144,6 @@ message CreateOrUpdateUserQualificationsResponse {
     repeated QualificationMessage message = 2;
 }
 
-message MergeUserAccountsRequest {
-    string appMobileUserId = 1;
-    string h5MobileUserId = 2;
-}
-
 service UserService {
     rpc CreateUser(NewUserRequest) returns (UserResponse) {};
     rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
@@ -160,7 +155,6 @@ service UserService {
     rpc SendOtpToMobile(SendOtpToMobileRequest) returns (SendOtpToMobileResponse) {};
     rpc UpdateUserMobile(UpdateUserMobileRequest) returns (UserResponse) {};
     rpc CheckUserMobileIsExisted(CheckUserMobileIsExistedRequest) returns (CheckUserMobileIsExistedResponse) {};
-    rpc MergeUserAccounts(MergeUserAccountsRequest) returns (EmptyMessage) {};
     rpc RetrieveUserQualifications (RetrieveUserQualificationsRequest) returns (RetrieveUserQualificationsResponse) {};
     rpc CreateOrUpdateUserQualifications (CreateOrUpdateUserQualificationsRequest) returns (CreateOrUpdateUserQualificationsResponse) {};
 }

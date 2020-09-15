@@ -3,7 +3,6 @@ package com.keepreal.madagascar.coua.grpcController;
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.DeviceType;
-import com.keepreal.madagascar.common.EmptyMessage;
 import com.keepreal.madagascar.common.Gender;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -13,7 +12,6 @@ import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsRequest;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
 import com.keepreal.madagascar.coua.DeviceTokenResponse;
-import com.keepreal.madagascar.coua.MergeUserAccountsRequest;
 import com.keepreal.madagascar.coua.NewUserRequest;
 import com.keepreal.madagascar.coua.QualificationMessage;
 import com.keepreal.madagascar.coua.QueryUserCondition;
@@ -51,7 +49,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Date;
@@ -491,21 +488,10 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     }
 
     /**
-     * 合并用户账号信息
-     *
-     * @param request           {@link MergeUserAccountsRequest}
-     * @param responseObserver  {@link StreamObserver}
-     */
-    @Override
-    public void mergeUserAccounts(MergeUserAccountsRequest request, StreamObserver<EmptyMessage> responseObserver) {
-        this.mergeUserAccounts(request.getAppMobileUserId(), request.getH5MobileUserId());
-    }
-
-    /**
      * 合并用户账户信息
      *
-     * @param wechatUserId      wechat user id
-     * @param webMobileUserId   web user id
+     * @param wechatUserId    wechat user id
+     * @param webMobileUserId web user id
      */
     private void mergeUserAccounts(String wechatUserId, String webMobileUserId) {
         this.transactionProducerService.produceMergeUserAccountsTransactionEventAsync(wechatUserId, webMobileUserId);

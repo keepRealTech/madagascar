@@ -4,11 +4,9 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.baobob.loginExecutor.model.IOSLoginInfo;
 import com.keepreal.madagascar.baobob.loginExecutor.model.WechatUserInfo;
-import com.keepreal.madagascar.common.EmptyMessage;
 import com.keepreal.madagascar.common.GenderValue;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.coua.MergeUserAccountsRequest;
 import com.keepreal.madagascar.coua.NewUserRequest;
 import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.ReactorUserServiceGrpc;
@@ -21,8 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
 
 
 /**
@@ -112,8 +108,8 @@ public class UserService {
     /**
      * Creates a new user by {@link IOSLoginInfo}.
      *
-     * @param iosLoginInfo  {@link IOSLoginInfo}.
-     * @return  {@link UserMessage}.
+     * @param iosLoginInfo {@link IOSLoginInfo}.
+     * @return {@link UserMessage}.
      */
     public Mono<UserMessage> createUserByIOSUserInfoMono(IOSLoginInfo iosLoginInfo) {
         ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
@@ -129,8 +125,8 @@ public class UserService {
     /**
      * update user state
      *
-     * @param state     {@link UserState}
-     * @return          {@link UserMessage}
+     * @param state {@link UserState}
+     * @return {@link UserMessage}
      */
     public Mono<UserMessage> updateUserStateMono(String userId, Integer state) {
         ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
@@ -148,8 +144,8 @@ public class UserService {
     /**
      * Retrieves the user by mobile phone
      *
-     * @param mobile    mobile
-     * @return          {@link UserMessage}
+     * @param mobile mobile
+     * @return {@link UserMessage}
      */
     public Mono<UserMessage> retrieveUserByMobileMono(String mobile) {
         ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
