@@ -20,6 +20,9 @@ dependencies {
 
     implementation 'org.apache.httpcomponents:httpclient:4.5.3'
     implementation 'com.alipay.sdk:alipay-easysdk'
+    implementation 'com.squareup.okhttp3:okhttp:4.8.1'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.10'
+    implementation 'com.squareup.okio:okio:2.2.2'
 
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

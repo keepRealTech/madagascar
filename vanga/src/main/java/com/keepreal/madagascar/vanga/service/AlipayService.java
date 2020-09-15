@@ -2,6 +2,7 @@ package com.keepreal.madagascar.vanga.service;
 
 import com.alipay.easysdk.factory.Factory;
 import com.alipay.easysdk.kernel.Config;
+import com.alipay.easysdk.kernel.util.Signer;
 import com.alipay.easysdk.payment.app.models.AlipayTradeAppPayResponse;
 import com.alipay.easysdk.payment.common.models.AlipayTradeQueryResponse;
 import com.google.gson.Gson;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -133,11 +135,46 @@ public class AlipayService {
 
         if ("TRADE_SUCCESS".equals(paramMap.get("trade_status"))
             || "TRADE_FINISHED".equals(paramMap.get("trade_status"))) {
-            alipayOrder.setState(OrderState.SUCCESS.getValue());
             alipayOrder.setTransactionId(paramMap.get("trade_no"));
+            alipayOrder.setState(OrderState.SUCCESS.getValue());
         } else if ("TRADE_CLOSED".equals(paramMap.get("trade_status"))){
             alipayOrder.setState(OrderState.CLOSED.getValue());
         }
+
+        return this.alipayOrderService.update(alipayOrder);
+    }
+
+    /**
+     * Verifies the sync notification.
+     *
+     * @param content   Content to sign.
+     * @param sign      Sign.
+     * @param paramMap  Params.
+     * @return {@link AlipayOrder}.
+     */
+    @SneakyThrows
+    public AlipayOrder verifySyncNotification(String content, String sign, Map<String, String> paramMap, AlipayOrder alipayOrder) {
+        boolean verified;
+        if (Factory.Payment.Common()._kernel.isCertMode()) {
+            verified = Signer.verify(content, sign, Factory.Payment.Common()._kernel.extractAlipayPublicKey(""));
+        } else {
+            verified = Signer.verify(content, sign, Factory.Payment.Common()._kernel.getConfig("alipayPublicKey"));
+        }
+
+        if (!verified) {
+            return null;
+        }
+
+        long total_amount = new BigDecimal(paramMap.get("total_amount")).multiply(new BigDecimal(100)).longValue();
+
+        if (Objects.isNull(alipayOrder)
+                || !alipayOrder.getFeeInCents().equals(String.valueOf(total_amount))
+                || !this.alipayConfiguration.getAppId().equals(paramMap.get("app_id"))) {
+            return null;
+        }
+
+        alipayOrder.setTransactionId(paramMap.get("trade_no"));
+        alipayOrder.setState(OrderState.SUCCESS.getValue());
 
         return this.alipayOrderService.update(alipayOrder);
     }
@@ -176,8 +213,6 @@ public class AlipayService {
         }
 
         AlipayTradeQueryResponse response = Factory.Payment.Common().query(alipayOrder.getTradeNumber());
-
-        log.warn("query res: {}", response.toString());
 
         if (!"10000".equals(response.code)) {
             alipayOrder.setErrorMessage(response.msg + ";" + response.subCode + ";" + response.subMsg);
