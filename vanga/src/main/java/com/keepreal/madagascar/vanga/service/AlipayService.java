@@ -5,6 +5,7 @@ import com.alipay.easysdk.kernel.Config;
 import com.alipay.easysdk.kernel.util.Signer;
 import com.alipay.easysdk.payment.app.models.AlipayTradeAppPayResponse;
 import com.alipay.easysdk.payment.common.models.AlipayTradeQueryResponse;
+import com.alipay.easysdk.payment.wap.models.AlipayTradeWapPayResponse;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.keepreal.madagascar.vanga.config.AlipayConfiguration;
@@ -16,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -39,8 +39,8 @@ public class AlipayService {
     /**
      * Constructs the alipay service.
      *
-     * @param alipayConfiguration   {@link AlipayConfiguration}.
-     * @param alipayOrderService    {@link AlipayOrderService}.
+     * @param alipayConfiguration {@link AlipayConfiguration}.
+     * @param alipayOrderService  {@link AlipayOrderService}.
      */
     public AlipayService(AlipayConfiguration alipayConfiguration,
                          AlipayOrderService alipayOrderService) {
@@ -65,12 +65,12 @@ public class AlipayService {
     /**
      * Tries to generate an order string for alipay.
      *
-     * @param userId        User id.
-     * @param propertyId    Property id.
-     * @param feeInCents    Fee in cents.
-     * @param description   Description.
-     * @param orderType     Order type.
-     * @return  {@link AlipayOrder}.
+     * @param userId      User id.
+     * @param propertyId  Property id.
+     * @param feeInCents  Fee in cents.
+     * @param description Description.
+     * @param orderType   Order type.
+     * @return {@link AlipayOrder}.
      */
     @SneakyThrows
     public AlipayOrder tryPlaceOrderApp(String userId,
@@ -108,6 +108,58 @@ public class AlipayService {
     }
 
     /**
+     * Tries to generate an order string for alipay.
+     *
+     * @param userId      User id.
+     * @param propertyId  Property id.
+     * @param feeInCents  Fee in cents.
+     * @param description Description.
+     * @param orderType   Order type.
+     * @return {@link AlipayOrder}.
+     */
+    @SneakyThrows
+    public AlipayOrder tryPlaceOrderH5(String userId,
+                                       String propertyId,
+                                       String feeInCents,
+                                       String description,
+                                       OrderType orderType,
+                                       String returnUrl,
+                                       String quitUrl) {
+        String tradeNum = UUID.randomUUID().toString().replace("-", "");
+
+        AlipayOrder alipayOrder = AlipayOrder.builder()
+                .state(OrderState.NOTPAY.getValue())
+                .userId(userId)
+                .tradeNumber(tradeNum)
+                .propertyId(propertyId)
+                .description(description)
+                .feeInCents(feeInCents)
+                .type(orderType.getValue())
+                .appId(this.alipayConfiguration.getAppId())
+                .createdTime(Instant.now().toEpochMilli())
+                .build();
+
+        try {
+            AlipayTradeWapPayResponse response = Factory.Payment.Wap().pay(
+                    description,
+                    tradeNum,
+                    this.convertCentsToYuan(feeInCents),
+                    quitUrl,
+                    returnUrl);
+
+            alipayOrder = this.alipayOrderService.insert(alipayOrder);
+            alipayOrder.setOrderString(response.body);
+        } catch (Exception exception) {
+            alipayOrder.setErrorMessage(exception.toString());
+            alipayOrder.setState(OrderState.CLOSED.getValue());
+            this.alipayOrderService.insert(alipayOrder);
+            return null;
+        }
+
+        return alipayOrder;
+    }
+
+    /**
      * Verifies the callback.
      *
      * @param callbackPayload Callback payload.
@@ -118,7 +170,8 @@ public class AlipayService {
         if (StringUtils.isEmpty(callbackPayload)) {
             return null;
         }
-        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Type type = new TypeToken<Map<String, String>>() {
+        }.getType();
         Map<String, String> paramMap = this.gson.fromJson(callbackPayload, type);
 
         AlipayOrder alipayOrder = this.verifySignature(paramMap);
@@ -134,10 +187,10 @@ public class AlipayService {
         }
 
         if ("TRADE_SUCCESS".equals(paramMap.get("trade_status"))
-            || "TRADE_FINISHED".equals(paramMap.get("trade_status"))) {
+                || "TRADE_FINISHED".equals(paramMap.get("trade_status"))) {
             alipayOrder.setTransactionId(paramMap.get("trade_no"));
             alipayOrder.setState(OrderState.SUCCESS.getValue());
-        } else if ("TRADE_CLOSED".equals(paramMap.get("trade_status"))){
+        } else if ("TRADE_CLOSED".equals(paramMap.get("trade_status"))) {
             alipayOrder.setState(OrderState.CLOSED.getValue());
         }
 
@@ -147,9 +200,9 @@ public class AlipayService {
     /**
      * Verifies the sync notification.
      *
-     * @param content   Content to sign.
-     * @param sign      Sign.
-     * @param paramMap  Params.
+     * @param content  Content to sign.
+     * @param sign     Sign.
+     * @param paramMap Params.
      * @return {@link AlipayOrder}.
      */
     @SneakyThrows
@@ -220,7 +273,7 @@ public class AlipayService {
                 || "TRADE_FINISHED".equals(response.tradeStatus)) {
             alipayOrder.setState(OrderState.SUCCESS.getValue());
             alipayOrder.setTransactionId(response.tradeNo);
-        } else if ("TRADE_CLOSED".equals(response.tradeStatus)){
+        } else if ("TRADE_CLOSED".equals(response.tradeStatus)) {
             alipayOrder.setState(OrderState.CLOSED.getValue());
         }
 

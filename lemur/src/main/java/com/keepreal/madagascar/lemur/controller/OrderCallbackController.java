@@ -94,6 +94,8 @@ public class OrderCallbackController {
      */
     @RequestMapping(value = "/api/v1/orders/alipay/callback", method = RequestMethod.POST)
     public void apiV1OrdersAlipayCallback(HttpServletRequest request, HttpServletResponse response) {
+        log.warn("GETTTTTTING ALIPAY ASYNC CALLBACK");
+
         Map<String, String> retMap = new HashMap<>();
         Set<Map.Entry<String, String[]>> entrySet = request.getParameterMap().entrySet();
 

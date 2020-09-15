@@ -19,15 +19,10 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
-import io.swagger.annotations.ApiParam;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import swagger.api.ApiUtil;
 import swagger.api.PaymentApi;
 import swagger.model.AlipayH5PostSupportRequest;
 import swagger.model.AlipayH5SubscribeMemberRequest;
@@ -44,7 +39,6 @@ import swagger.model.SubscribeMemberRequest;
 import swagger.model.UserPaymentsResponse;
 import swagger.model.WechatOrderResponse;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -352,9 +346,9 @@ public class PaymentController implements PaymentApi {
     /**
      * Implements the ali pay one time support api.
      *
-     * @param id id (required)  Island id.
-     * @param alipayH5PostSupportRequest  (required) {@link AlipayH5PostSupportRequest}.
-     * @return  {@link AlipayOrderResponse}.
+     * @param id                         id (required)  Island id.
+     * @param alipayH5PostSupportRequest (required) {@link AlipayH5PostSupportRequest}.
+     * @return {@link AlipayOrderResponse}.
      */
     @CrossOrigin
     @Override
@@ -377,7 +371,7 @@ public class PaymentController implements PaymentApi {
                 Objects.isNull(alipayH5PostSupportRequest.getPriceInShells()) ? 0L : alipayH5PostSupportRequest.getPriceInShells(),
                 alipayH5PostSupportRequest.getReturnUrl(),
                 alipayH5PostSupportRequest.getQuitUrl());
-        
+
         AlipayOrderResponse response = new AlipayOrderResponse();
         response.setData(this.orderDTOFactory.alipayOrderValueOf(alipayOrderMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());

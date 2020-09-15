@@ -67,6 +67,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
+
 /**
  * Represents the payment grpc controller.
  */
@@ -782,6 +784,57 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onCompleted();
     }
 
+    /**
+     * Implements the H5 alipay member subscription.
+     *
+     * @param request           {@link SubscribeMembershipRequest}.
+     * @param responseObserver  {@link AlipayOrderResponse}.
+     */
+    @Override
+    public void submitSubscribeMembershipWithAlipayH5(SubscribeMembershipRequest request,
+                                                      StreamObserver<AlipayOrderResponse> responseObserver) {
+        MembershipSku sku = this.skuService.retrieveMembershipSkuById(request.getMembershipSkuId());
+        if (Objects.isNull(sku)) {
+            AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        AlipayOrder alipayOrder = this.alipayService.tryPlaceOrderH5(
+                request.getUserId(),
+                sku.getId(),
+                String.valueOf(sku.getPriceInCents()),
+                String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
+                        sku.getPriceInCents().doubleValue() / 100,
+                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100,
+                        sku.getTimeInMonths()).replace(".00", ""),
+                OrderType.PAYMEMBERSHIP,
+                request.getReturnUrl(),
+                request.getQuitUrl());
+
+        AlipayOrderResponse response;
+        if (Objects.nonNull(alipayOrder)) {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
+                    .build();
+            this.paymentService.createNewWechatMembershipPayments(alipayOrder, sku, PaymentType.ALIPAY);
+        } else {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
     @Override
     public void retrieveSupportInfo(RetrieveSupportInfoRequest request, StreamObserver<RetrieveSupportInfoResponse> responseObserver) {
         String hostId = request.getHostId();
@@ -841,6 +894,42 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 String.format(PaymentGRpcController.SPONSOR_TEMPLATE,
                         Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""),
                 OrderType.PAYSUPPORT);
+
+        AlipayOrderResponse response;
+        if (Objects.nonNull(alipayOrder)) {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
+                    .build();
+            this.paymentService.createNewWechatSupportPayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Submits an one time support with alipay H5.
+     *
+     * @param request          {@link SupportRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
+     */
+    @Override
+    public void submitSupportWithAlipayH5(SupportRequest request,
+                                          StreamObserver<AlipayOrderResponse> responseObserver) {
+        AlipayOrder alipayOrder = this.alipayService.tryPlaceOrderH5(
+                request.getUserId(),
+                request.getSponsorSkuId(),
+                String.valueOf(request.getPriceInCents()),
+                String.format(PaymentGRpcController.SPONSOR_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""),
+                OrderType.PAYSUPPORT,
+                request.getReturnUrl(),
+                request.getQuitUrl());
 
         AlipayOrderResponse response;
         if (Objects.nonNull(alipayOrder)) {
