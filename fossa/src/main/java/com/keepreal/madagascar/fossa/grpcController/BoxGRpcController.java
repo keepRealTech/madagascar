@@ -25,15 +25,14 @@ import com.keepreal.madagascar.fossa.service.BoxInfoService;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.PaymentService;
+import com.keepreal.madagascar.fossa.service.SubscribeMembershipService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 
 import java.util.List;
 import java.util.Objects;
@@ -47,17 +46,20 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
     private final FeedEventProducerService feedEventProducerService;
     private final MongoTemplate mongoTemplate;
     private final PaymentService paymentService;
+    private final SubscribeMembershipService subscribeMembershipService;
 
     public BoxGRpcController(FeedInfoService feedInfoService,
                              BoxInfoService boxInfoService,
                              FeedEventProducerService feedEventProducerService,
                              MongoTemplate mongoTemplate,
-                             PaymentService paymentService) {
+                             PaymentService paymentService,
+                             SubscribeMembershipService subscribeMembershipService) {
         this.feedInfoService = feedInfoService;
         this.boxInfoService = boxInfoService;
         this.feedEventProducerService = feedEventProducerService;
         this.mongoTemplate = mongoTemplate;
         this.paymentService = paymentService;
+        this.subscribeMembershipService = subscribeMembershipService;
     }
 
     @Override
@@ -223,8 +225,10 @@ public class BoxGRpcController extends BoxServiceGrpc.BoxServiceImplBase {
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
 
+        List<String> myMembershipIds = this.subscribeMembershipService.retrieveMembershipIds(userId, null);
+
         List<FeedMessage> feedMessageList = feedInfoList.stream()
-                .map(info -> feedInfoService.getFeedMessage(info, userId))
+                .map(info -> feedInfoService.getFeedMessage(info, userId, myMembershipIds))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 

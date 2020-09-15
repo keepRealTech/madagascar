@@ -16,6 +16,7 @@ import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.service.FeedGroupService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
+import com.keepreal.madagascar.fossa.service.SubscribeMembershipService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -35,17 +37,21 @@ public class FeedGroupGRpcController extends FeedGroupServiceGrpc.FeedGroupServi
 
     private final FeedGroupService feedGroupService;
     private final FeedInfoService feedInfoService;
+    private final SubscribeMembershipService subscribeMembershipService;
 
     /**
      * Constructs the feed group grpc controller.
      *
-     * @param feedGroupService {@link FeedGroupService}.
-     * @param feedInfoService  {@link FeedInfoService}.
+     * @param feedGroupService           {@link FeedGroupService}.
+     * @param feedInfoService            {@link FeedInfoService}.
+     * @param subscribeMembershipService {@link SubscribeMembershipService}.
      */
     public FeedGroupGRpcController(FeedGroupService feedGroupService,
-                                   FeedInfoService feedInfoService) {
+                                   FeedInfoService feedInfoService,
+                                   SubscribeMembershipService subscribeMembershipService) {
         this.feedGroupService = feedGroupService;
         this.feedInfoService = feedInfoService;
+        this.subscribeMembershipService = subscribeMembershipService;
     }
 
     /**
@@ -186,9 +192,11 @@ public class FeedGroupGRpcController extends FeedGroupServiceGrpc.FeedGroupServi
         Page<FeedInfo> feedInfoPage = this.feedInfoService.retrieveFeedsByFeedGroupId(request.getId(),
                 PageRequest.of(request.getPageRequest().getPage(), request.getPageRequest().getPageSize()));
 
+        List<String> myMembershipIds = this.subscribeMembershipService.retrieveMembershipIds(request.getUserId(), null);
+
         FeedGroupFeedsResponse feedsResponse = FeedGroupFeedsResponse.newBuilder()
                 .addAllFeed(feedInfoPage.getContent().stream()
-                        .map(feed -> this.feedInfoService.getFeedMessage(feed, request.getUserId()))
+                        .map(feed -> this.feedInfoService.getFeedMessage(feed, request.getUserId(), myMembershipIds))
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()))
                 .setPageResponse(PageRequestResponseUtils.buildPageResponse(feedInfoPage))
@@ -201,8 +209,8 @@ public class FeedGroupGRpcController extends FeedGroupServiceGrpc.FeedGroupServi
     /**
      * Implements the get feed group by id.
      *
-     * @param request           {@link RetrieveFeedGroupByIdRequest}.
-     * @param responseObserver  {@link FeedGroupResponse}.
+     * @param request          {@link RetrieveFeedGroupByIdRequest}.
+     * @param responseObserver {@link FeedGroupResponse}.
      */
     @Override
     public void retrieveFeedGroupById(RetrieveFeedGroupByIdRequest request,
