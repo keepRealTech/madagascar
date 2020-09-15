@@ -20,5 +20,3 @@ include 'workflow:reconciliation'
 include 'workflow:statistics'
 include 'asity'
 include 'workflow:updatePayment'
-findProject(':workflow:updatePayment')?.name = 'updatePayment'
-
