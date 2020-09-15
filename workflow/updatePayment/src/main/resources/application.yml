@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: coua
+  datasource:
+    url: jdbc:mysql://root:123456@localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
+    driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+
+login:
+  username: test1
+  password: tiaodaoapp
+  host: http://127.0.0.1:8081
+  path: /api/v1/login
+
+order:
+  host: http://127.0.0.1:8081
+  pathTemplate: /api/v1/orders/wechat/%s/check
+
+lark:
+  webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73

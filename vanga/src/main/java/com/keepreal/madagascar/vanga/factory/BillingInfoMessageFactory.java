@@ -33,6 +33,7 @@ public class BillingInfoMessageFactory {
                 .setIsVerified(billingInfo.getVerified())
                 .setIdFrontUrl(billingInfo.getIdFrontUrl())
                 .setIdBackUrl(billingInfo.getIdBackUrl())
+                .setAliPayAccount(billingInfo.getAliPayAccount())
                 .build();
     }
 

@@ -3,7 +3,7 @@ package com.keepreal.madagascar.marty.model;
 import lombok.Getter;
 
 @Getter
-public enum  PushType {
+public enum PushType {
 
     PUSH_FEED(1001L),
     PUSH_COMMENT(1002L),

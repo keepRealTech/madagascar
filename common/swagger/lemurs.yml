@@ -4025,7 +4025,7 @@ components:
           type: string
         verified:
           type: boolean
-    BillingInfoV11DTO:
+    BillingInfoDTOV11:
       type: object
       properties:
         id:
@@ -4076,17 +4076,13 @@ components:
           type: string
         alipayAccount:
           type: string
-      required:
-        - name
-        - mobile
-        - alipayAccount
     BillingInfoResponseV11:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/BillingInfoV11DTO'
+              $ref: '#/components/schemas/BillingInfoDTOV11'
     IOSShellSkuDTO:
       type: object
       properties:
@@ -5026,7 +5022,7 @@ components:
         amountInCents:
           type: integer
           format: int64
-        hasSettled:
+        state:
           $ref: '#/components/schemas/WithdrawState'
         createdAt:
           type: integer
