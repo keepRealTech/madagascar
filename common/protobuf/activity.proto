@@ -6,7 +6,7 @@ option java_package = "com.keepreal.madagascar.hoopoe";
 import "common.proto";
 
 message RetrieveActiveBannerRequest {
-  string userId = 1;
+  bool isIslandHost = 1;
 }
 
 message RetrieveActiveBannerResponse {

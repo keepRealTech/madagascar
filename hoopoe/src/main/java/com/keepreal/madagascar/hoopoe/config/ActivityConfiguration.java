@@ -11,6 +11,5 @@ public class ActivityConfiguration {
 
     private Boolean showLabel;
     private String  text;
-    private Boolean isPublic;
 
 }

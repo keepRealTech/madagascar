@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.hoopoe.grpcController;
 
-import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.hoopoe.ActiveBannerMessage;
 import com.keepreal.madagascar.hoopoe.ActivityServiceGrpc;
 import com.keepreal.madagascar.hoopoe.RetrieveActiveBannerRequest;
@@ -9,12 +8,10 @@ import com.keepreal.madagascar.hoopoe.SingleBannerMessage;
 import com.keepreal.madagascar.hoopoe.config.ActivityConfiguration;
 import com.keepreal.madagascar.hoopoe.model.Activity;
 import com.keepreal.madagascar.hoopoe.service.ActivityService;
-import com.keepreal.madagascar.hoopoe.service.IslandService;
 import com.keepreal.madagascar.hoopoe.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
-import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +25,6 @@ import java.util.stream.Collectors;
 public class ActivityGRpcController extends ActivityServiceGrpc.ActivityServiceImplBase {
 
     private final ActivityService activityService;
-    private final IslandService islandService;
     private final ActivityConfiguration activityConfiguration;
 
     /**
@@ -37,10 +33,8 @@ public class ActivityGRpcController extends ActivityServiceGrpc.ActivityServiceI
      * @param activityService   {@link ActivityService}
      */
     public ActivityGRpcController(ActivityService activityService,
-                                  IslandService islandService,
                                   ActivityConfiguration activityConfiguration) {
         this.activityService = activityService;
-        this.islandService = islandService;
         this.activityConfiguration =activityConfiguration;
     }
 
@@ -52,9 +46,8 @@ public class ActivityGRpcController extends ActivityServiceGrpc.ActivityServiceI
      */
     @Override
     public void retrieveActiveBanner(RetrieveActiveBannerRequest request, StreamObserver<RetrieveActiveBannerResponse> responseObserver) {
-        String userId = request.getUserId();
+        boolean isIslandHost = request.getIsIslandHost();
         Boolean showLabel = this.activityConfiguration.getShowLabel();
-        Boolean isPublic = this.activityConfiguration.getIsPublic();
         String text = this.activityConfiguration.getText();
 
         RetrieveActiveBannerResponse.Builder responseBuilder = RetrieveActiveBannerResponse.newBuilder();
@@ -64,16 +57,12 @@ public class ActivityGRpcController extends ActivityServiceGrpc.ActivityServiceI
             builder.setLabel(text);
         }
 
-        if (!isPublic) {
-            List<IslandMessage> islandMessages = this.islandService.retrieveIslandsByHostId(userId);
-            if (!CollectionUtils.isEmpty(islandMessages)) {
-                List<Activity> activities = this.activityService.findAllAccessActivities();
-                this.convertBanners(builder, activities);
-            }
-        } else {
-            List<Activity> activities = this.activityService.findAllAccessActivities();
-            this.convertBanners(builder, activities);
-        }
+        List<Activity> activities = this.activityService.findAllAccessActivities()
+                .stream()
+                .filter(activity -> this.isVisible(activity, isIslandHost))
+                .collect(Collectors.toList());
+
+        this.convertBanners(builder, activities);
 
         ArrayList<ActiveBannerMessage> list = new ArrayList<>();
         list.add(builder.build());
@@ -81,6 +70,20 @@ public class ActivityGRpcController extends ActivityServiceGrpc.ActivityServiceI
         responseBuilder.setStatus(CommonStatusUtils.getSuccStatus());
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
+    }
+
+    /**
+     * 过滤banner
+     *
+     * @param activity      {@link Activity}
+     * @param isIslandHost  是否是创作者(岛主)
+     * @return              有权限浏览banner则返回true
+     */
+    private Boolean isVisible(Activity activity, Boolean isIslandHost) {
+        if (!activity.getIsPublic()) {
+            return isIslandHost;
+        }
+        return true;
     }
 
     /**

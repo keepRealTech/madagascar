@@ -39,6 +39,8 @@ public class Activity {
     @Column(name = "is_active")
     @Builder.Default
     private Boolean active = true;
+    @Builder.Default
+    private Boolean isPublic = true;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate

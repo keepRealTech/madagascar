@@ -35,13 +35,13 @@ public class ActivityService {
 
     /**
      * 获取活动banner
-     * @param userId    用户 id
-     * @return          {@link ActiveBannerMessage}
+     *
+     * @return  {@link ActiveBannerMessage}
      */
-    public List<ActiveBannerMessage> retrieveActiveBanner(String userId) {
+    public List<ActiveBannerMessage> retrieveActiveBanner(Boolean isIslandHost) {
         ActivityServiceGrpc.ActivityServiceBlockingStub stub = ActivityServiceGrpc.newBlockingStub(this.channel);
         RetrieveActiveBannerRequest request = RetrieveActiveBannerRequest.newBuilder()
-                .setUserId(userId)
+                .setIsIslandHost(isIslandHost)
                 .build();
         RetrieveActiveBannerResponse response;
 
