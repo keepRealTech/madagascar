@@ -22,6 +22,7 @@ public class GrpcChannelFactory {
     private final GrpcConfiguration tenrecsConfiguration;
     private final GrpcConfiguration mantellaConfiguration;
     private final GrpcConfiguration vangaConfiguration;
+    private final GrpcConfiguration hoopoeConfiguration;
     private final TracingClientInterceptor interceptor;
 
     /**
@@ -45,6 +46,7 @@ public class GrpcChannelFactory {
                               @Qualifier("tenrecsConfiguration") GrpcConfiguration tenrecsConfiguration,
                               @Qualifier("mantellaConfiguration") GrpcConfiguration mantellaConfiguration,
                               @Qualifier("vangaConfiguration") GrpcConfiguration vangaConfiguration,
+                              @Qualifier("hoopoeConfiguration") GrpcConfiguration hoopoeConfiguration,
                               Tracer tracer) {
         this.asityConfiguration = asityConfiguration;
         this.couaConfiguration = couaConfiguration;
@@ -54,6 +56,7 @@ public class GrpcChannelFactory {
         this.tenrecsConfiguration = tenrecsConfiguration;
         this.mantellaConfiguration = mantellaConfiguration;
         this.vangaConfiguration = vangaConfiguration;
+        this.hoopoeConfiguration = hoopoeConfiguration;
         this.interceptor = TracingClientInterceptor
                 .newBuilder()
                 .withTracer(tracer)
@@ -162,6 +165,19 @@ public class GrpcChannelFactory {
     public Channel getAsityChannel() {
         return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.asityConfiguration.getHost(), this.asityConfiguration.getPort())
+                .usePlaintext()
+                .build());
+    }
+
+    /**
+     * Represents the coua grpc channel.
+     *
+     * @return Coua grpc channel.
+     */
+    @Bean(name = "hoopoeChannel")
+    public Channel getHoopoeChannel() {
+        return this.interceptor.intercept(ManagedChannelBuilder
+                .forAddress(this.hoopoeConfiguration.getHost(), this.hoopoeConfiguration.getPort())
                 .usePlaintext()
                 .build());
     }
