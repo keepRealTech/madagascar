@@ -1,10 +1,13 @@
 package com.keepreal.madagascar.vanga.service;
 
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.Balance;
+import com.keepreal.madagascar.vanga.model.FeedCharge;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrderState;
+import com.keepreal.madagascar.vanga.repository.FeedChargeRepository;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -19,11 +22,17 @@ public class FeedChargeService {
 
     private final PaymentService paymentService;
     private final BalanceService balanceService;
+    private final FeedChargeRepository feedChargeRepository;
+    private final LongIdGenerator idGenerator;
 
     public FeedChargeService(PaymentService paymentService,
-                             BalanceService balanceService) {
+                             BalanceService balanceService,
+                             FeedChargeRepository feedChargeRepository,
+                             LongIdGenerator idGenerator) {
         this.paymentService = paymentService;
         this.balanceService = balanceService;
+        this.feedChargeRepository = feedChargeRepository;
+        this.idGenerator = idGenerator;
     }
 
     @Transactional
@@ -48,6 +57,18 @@ public class FeedChargeService {
         Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payment.getPayeeId());
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
+        this.saveFeedCharge(wechatOrder.getUserId(), wechatOrder.getPropertyId());
+    }
+
+    private void saveFeedCharge(String userId, String feedId) {
+        FeedCharge feedCharge = this.feedChargeRepository.findFeedChargeByUserIdAndFeedIdAndDeletedIsFalse(userId, feedId);
+        if (feedCharge == null) {
+            feedCharge = new FeedCharge();
+            feedCharge.setId(String.valueOf(this.idGenerator.nextId()));
+            feedCharge.setUserId(userId);
+            feedCharge.setFeedId(feedId);
+            this.feedChargeRepository.save(feedCharge);
+        }
     }
 
     private Long calculateAmount(Long amount, int ratio) {
