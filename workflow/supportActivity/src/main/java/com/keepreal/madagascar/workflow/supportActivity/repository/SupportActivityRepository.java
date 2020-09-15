@@ -16,7 +16,7 @@ public interface SupportActivityRepository extends JpaRepository<SupportActivity
      */
     @Query(value = "SELECT DISTINCT payee_id " +
             "FROM balance_log " +
-            "WHERE membership_sku_id != '' AND created_time > 1599494400000 AND created_time < 1602086400000 AND (state = 2 OR state = 3)",
+            "WHERE created_time > 1599494400000 AND created_time < 1602086400000 AND (state = 2 OR state = 3) AND is_deleted = 0",
             nativeQuery = true)
     List<String> findAllPayeeId();
 
@@ -29,7 +29,7 @@ public interface SupportActivityRepository extends JpaRepository<SupportActivity
      */
     @Query(value = "SELECT max(amount_in_cents) AS amount " +
             "FROM balance_log " +
-            "WHERE membership_sku_id != '' AND payee_id = ?1 AND created_time > 1599494400000 AND created_time < 1602086400000 AND (state = 2 OR state = 3)" +
+            "WHERE payee_id = ?1 AND created_time > 1599494400000 AND created_time < 1602086400000 AND (state = 2 OR state = 3) AND is_deleted = 0" +
             "GROUP BY user_id",
             nativeQuery = true)
     List<Long> findByUserId(String userId);

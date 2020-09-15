@@ -6,3 +6,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
+  data:
+    mongodb:
+      database: fossa
+      uri: mongodb://localhost:27017
