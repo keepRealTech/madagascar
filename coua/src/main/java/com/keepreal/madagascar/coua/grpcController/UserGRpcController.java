@@ -396,7 +396,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         String userId = request.getUserId();
         CheckUserMobileIsExistedResponse.Builder builder = CheckUserMobileIsExistedResponse.newBuilder();
 
-        UserInfo userInfo = this.userInfoService.findUserByMobileAndState(mobile, UserState.USER_WECHAT_VALUE, UserState.USER_APP_MOBILE_VALUE);
+        UserInfo userInfo = this.userInfoService.findUserInfoByMobile(mobile);
 
         if (Objects.nonNull(userInfo)) {
             if (userInfo.getState() == UserState.USER_WECHAT_VALUE) {
@@ -407,9 +407,12 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                     responseObserver.onNext(builder
                             .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
                 }
-            } else {
+            } else if (userInfo.getState() == UserState.USER_APP_MOBILE_VALUE) {
                 responseObserver.onNext(builder
                         .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_REGISTERED)).build());
+            } else {
+                responseObserver.onNext(builder
+                        .setStatus(CommonStatusUtils.getSuccStatus()).build());
             }
             responseObserver.onCompleted();
         }

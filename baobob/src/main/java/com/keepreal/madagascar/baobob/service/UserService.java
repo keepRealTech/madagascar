@@ -179,20 +179,4 @@ public class UserService {
         return stub.createUser(request).map(UserResponse::getUser);
     }
 
-    /**
-     * 合并用户信息
-     *
-     * @param appMobileUserId   app/官网登录的用户id
-     * @param h5MobileUserId    h5用户信息
-     * @return                  {@link EmptyMessage}
-     */
-    public Mono<EmptyMessage> mergeUserAccounts(String appMobileUserId, String h5MobileUserId) {
-        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
-        MergeUserAccountsRequest request = MergeUserAccountsRequest.newBuilder()
-                .setAppMobileUserId(appMobileUserId)
-                .setH5MobileUserId(h5MobileUserId)
-                .build();
-        return stub.mergeUserAccounts(request);
-    }
-
 }

@@ -217,18 +217,6 @@ public class UserInfoService {
     }
 
     /**
-     * 根据手机号和可能的state查询用户信息
-     *
-     * @param mobile    手机号
-     * @param state1    用户类型1
-     * @param state2    用户类型2
-     * @return          {@link UserInfo}
-     */
-    public UserInfo findUserByMobileAndState(String mobile, Integer state1, Integer state2) {
-        return this.userInfoRepository.findTopByMobileAndTwoStatesAndDeletedIsFalse(mobile, state1, state2);
-    }
-
-    /**
      * 合并user表信息
      *
      * @param wechatUserId    wechat user id
