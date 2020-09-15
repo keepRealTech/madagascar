@@ -64,6 +64,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "该手机号已被绑定，请重新输入";
             case REQUEST_USER_MOBILE_REGISTERED:
                 return "该手机号已被注册，请直接使用手机号登录";
+            case REQUEST_USER_MOBILE_BOUND:
+                return "新手机号不可与当前已绑定号码相同";
             case REQUEST_MEMBERSHIP_NOT_FOUND_ERROR:
                 return "该订阅已经被岛主大人移除啦";
             default:

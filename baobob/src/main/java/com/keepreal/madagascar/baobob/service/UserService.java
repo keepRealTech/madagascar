@@ -14,7 +14,6 @@ import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.ReactorUserServiceGrpc;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
 import com.keepreal.madagascar.coua.UserResponse;
-import com.keepreal.madagascar.coua.UserServiceGrpc;
 import com.keepreal.madagascar.coua.UserState;
 import io.grpc.Channel;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +21,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
+import java.util.ArrayList;
+
 
 /**
  * Represents the user service.
@@ -129,8 +129,8 @@ public class UserService {
      * Retrieves the user by mobile phone and state.
      *
      * @param mobile Mobile.
-     * @param state  {@link UserState}
-     * @return {@link UserMessage}.
+     * @param state {@link UserState}
+     * @return      {@link UserMessage}.
      */
     public Mono<UserMessage> retrieveUserByMobileAndStateMono(String mobile, Integer state) {
         ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
@@ -138,6 +138,48 @@ public class UserService {
         QueryUserCondition condition = QueryUserCondition.newBuilder()
                 .setMobile(StringValue.of(mobile))
                 .setState(Int32Value.of(state))
+                .build();
+        RetrieveSingleUserRequest request = RetrieveSingleUserRequest.newBuilder().setCondition(condition).build();
+
+        return stub.retrieveSingleUser(request)
+                .filter(userResponse -> ErrorCode.REQUEST_SUCC_VALUE == (userResponse.getStatus().getRtn()))
+                .map(UserResponse::getUser);
+    }
+
+    /**
+     * Retrieves the user by mobile phone and state1 or state2.
+     *
+     * @param mobile    mobile
+     * @param state1    {@link UserState}
+     * @param state2    {@link UserState}
+     * @return          {@link UserMessage}
+     */
+    public Mono<UserMessage> retrieveUserByMobileAndStateMono(String mobile, Integer state1, Integer state2) {
+        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
+        ArrayList<Integer> list = new ArrayList<>();
+        list.add(state1);
+        list.add(state2);
+        QueryUserCondition condition = QueryUserCondition.newBuilder()
+                .setMobile(StringValue.of(mobile))
+                .addAllStates(list)
+                .build();
+        RetrieveSingleUserRequest request = RetrieveSingleUserRequest.newBuilder().setCondition(condition).build();
+
+        return stub.retrieveSingleUser(request)
+                .filter(userResponse -> ErrorCode.REQUEST_SUCC_VALUE == (userResponse.getStatus().getRtn()))
+                .map(UserResponse::getUser);
+    }
+
+    /**
+     * Retrieves the user by mobile phone
+     *
+     * @param mobile    mobile
+     * @return          {@link UserMessage}
+     */
+    public Mono<UserMessage> retrieveUserByMobileMono(String mobile) {
+        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
+        QueryUserCondition condition = QueryUserCondition.newBuilder()
+                .setMobile(StringValue.of(mobile))
                 .build();
         RetrieveSingleUserRequest request = RetrieveSingleUserRequest.newBuilder().setCondition(condition).build();
 

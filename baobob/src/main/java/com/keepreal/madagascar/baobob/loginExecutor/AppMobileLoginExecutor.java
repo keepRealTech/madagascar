@@ -48,7 +48,6 @@ public class AppMobileLoginExecutor implements LoginExecutor {
      */
     @Override
     public Mono<LoginResponse> login(LoginRequest loginRequest) {
-
         if (!loginRequest.hasAppMobilePayload()) {
             return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
         }
@@ -92,8 +91,7 @@ public class AppMobileLoginExecutor implements LoginExecutor {
      */
     private Mono<UserMessage> retrieveOrCreateUserByMobile(String mobile) {
         assert !StringUtils.isEmpty(mobile);
-        return this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE)
-                .switchIfEmpty(this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_WECHAT_VALUE))
+        return this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE, UserState.USER_WECHAT_VALUE)
                 .map(userMessage -> {
                     if (userMessage.getLocked()) {
                         throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);

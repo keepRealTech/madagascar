@@ -26,6 +26,7 @@ import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UpdateUserMobileRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
+import com.keepreal.madagascar.coua.UserState;
 import com.keepreal.madagascar.coua.UsersReponse;
 import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
 import com.keepreal.madagascar.coua.model.UserInfo;
@@ -42,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.sql.Date;
@@ -160,6 +162,18 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         if (queryUserCondition.hasMobile() && queryUserCondition.hasState()) {
             condition = queryUserCondition.getMobile().getValue();
             userInfo = this.userInfoService.findUserByMobileAndState(condition, queryUserCondition.getState().getValue());
+        }
+        if (queryUserCondition.hasMobile() && !queryUserCondition.hasState()) {
+            condition = queryUserCondition.getMobile().getValue();
+            userInfo = this.userInfoService.findUserInfoByMobile(condition);
+        }
+        if (queryUserCondition.hasMobile() && !CollectionUtils.isEmpty(queryUserCondition.getStatesList())) {
+            if (queryUserCondition.getStatesCount() == 2) {
+                condition = queryUserCondition.getMobile().getValue();
+                userInfo = this.userInfoService.findUserByMobileAndState(condition,
+                        queryUserCondition.getStatesList().get(0),
+                        queryUserCondition.getStatesList().get(1));
+            }
         }
         if (userInfo == null) {
             log.error("[retrieveSingleUser] user not found error! condition is [{}]", condition);
@@ -359,7 +373,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         if (Objects.isNull(intOtp) || !otp.equals(intOtp)) {
             builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
         } else {
-            UserInfo h5UserInfo = this.userInfoService.findH5UserInfoByMobile(mobile);
+            UserInfo h5UserInfo = this.userInfoService.findUserByMobileAndState(mobile, UserState.USER_H5_MOBILE_VALUE);
             if (Objects.nonNull(h5UserInfo)) {
                 this.mergeUserAccounts(userId, h5UserInfo.getId());
             }
@@ -384,24 +398,29 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
         String mobile = request.getMobile();
+        String userId = request.getUserId();
+        CheckUserMobileIsExistedResponse.Builder builder = CheckUserMobileIsExistedResponse.newBuilder();
 
-        UserInfo wechatUserInfo = this.userInfoService.findWechatUserInfoByMobile(mobile);
+        UserInfo userInfo = this.userInfoService.findUserByMobileAndState(mobile, UserState.USER_WECHAT_VALUE, UserState.USER_APP_MOBILE_VALUE);
 
-        if (Objects.nonNull(wechatUserInfo)) {
-            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
+        if (Objects.nonNull(userInfo)) {
+            if (userInfo.getState() == UserState.USER_WECHAT_VALUE) {
+                if (userId.equals(userInfo.getId())) {
+                    responseObserver.onNext(builder
+                            .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_BOUND)).build());
+                } else {
+                    responseObserver.onNext(builder
+                            .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
+                }
+            } else {
+                responseObserver.onNext(builder
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_REGISTERED)).build());
+            }
             responseObserver.onCompleted();
         }
 
-        UserInfo appMobileUserInfo = this.userInfoService.findAppMobileUserInfoByMobile(mobile);
-
-        if (Objects.nonNull(appMobileUserInfo)) {
-            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_REGISTERED)).build());
-        } else {
-            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.getSuccStatus()).build());
-        }
+        responseObserver.onNext(builder
+                .setStatus(CommonStatusUtils.getSuccStatus()).build());
         responseObserver.onCompleted();
     }
 

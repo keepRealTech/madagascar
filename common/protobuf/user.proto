@@ -49,6 +49,7 @@ message QueryUserCondition {
     google.protobuf.StringValue username = 4;
     google.protobuf.StringValue mobile = 5;
     google.protobuf.Int32Value state = 6;
+    repeated int32 states = 7;
 }
 
 message RetrieveSingleUserRequest {
@@ -110,7 +111,8 @@ message UpdateUserMobileRequest {
 }
 
 message CheckUserMobileIsExistedRequest {
-    string mobile = 1;
+    string userId = 1;
+    string mobile = 2;
 }
 
 message CheckUserMobileIsExistedResponse {

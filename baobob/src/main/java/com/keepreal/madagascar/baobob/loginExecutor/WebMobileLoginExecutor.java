@@ -88,9 +88,7 @@ public class WebMobileLoginExecutor implements LoginExecutor{
      */
     private Mono<UserMessage> retrieveOrCreateUserByMobile(String mobile) {
         assert !StringUtils.isEmpty(mobile);
-        return this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_WECHAT_VALUE)
-                .switchIfEmpty(this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE))
-                .switchIfEmpty(this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_H5_MOBILE_VALUE))
+        return this.userService.retrieveUserByMobileMono(mobile)
                 .map(userMessage -> {
                     if (userMessage.getLocked()) {
                         throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
