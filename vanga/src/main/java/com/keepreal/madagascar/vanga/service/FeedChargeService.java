@@ -60,6 +60,10 @@ public class FeedChargeService {
         this.saveFeedCharge(wechatOrder.getUserId(), wechatOrder.getPropertyId());
     }
 
+    public FeedCharge findFeedCharge(String userId, String feedId) {
+        return this.feedChargeRepository.findFeedChargeByUserIdAndFeedIdAndDeletedIsFalse(userId, feedId);
+    }
+
     private void saveFeedCharge(String userId, String feedId) {
         FeedCharge feedCharge = this.feedChargeRepository.findFeedChargeByUserIdAndFeedIdAndDeletedIsFalse(userId, feedId);
         if (feedCharge == null) {
