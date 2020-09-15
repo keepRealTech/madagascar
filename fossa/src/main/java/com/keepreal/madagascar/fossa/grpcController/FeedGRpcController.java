@@ -352,8 +352,10 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         Query query = buildQueryByRequest(request);
         long totalCount = mongoTemplate.count(query, FeedInfo.class);
         List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
+
+        List<String> myMembershipIds = this.subscribeMembershipService.retrieveMembershipIds(request.getUserId(), null);
         List<FeedMessage> feedMessageList = feedInfoList.stream()
-                .map(info -> feedInfoService.getFeedMessage(info, userId))
+                .map(info -> feedInfoService.getFeedMessage(info, userId, myMembershipIds))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -404,8 +406,10 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     @Override
     public void retrieveFeedsByIds(RetrieveFeedsByIdsRequest request, StreamObserver<FeedsResponse> responseObserver) {
         List<FeedInfo> feedInfoList = this.feedInfoService.findByIds(request.getIdsList());
+
+        List<String> myMembershipIds = this.subscribeMembershipService.retrieveMembershipIds(request.getUserId(), null);
         List<FeedMessage> feedMessageList = feedInfoList.stream()
-                .map(info -> this.feedInfoService.getFeedMessage(info, request.getUserId()))
+                .map(info -> this.feedInfoService.getFeedMessage(info, request.getUserId(), myMembershipIds))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -420,8 +424,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * Implements the retrieves multiple timeline feeds method.
      *
-     * @param request
-     * @param responseObserver
+     * @param request           {@link RetrieveMultipleFeedsRequest}.
+     * @param responseObserver  {@link TimelineFeedsResponse}.
      */
     @Override
     public void retrieveMultipleTimelineFeeds(RetrieveMultipleFeedsRequest request, StreamObserver<TimelineFeedsResponse> responseObserver) {

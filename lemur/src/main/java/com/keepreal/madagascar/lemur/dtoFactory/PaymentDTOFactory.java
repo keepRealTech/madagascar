@@ -1,11 +1,15 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.keepreal.madagascar.common.PaymentState;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
+import com.keepreal.madagascar.vanga.UserWithdrawMessage;
 import org.springframework.stereotype.Component;
 import swagger.model.UserPaymentDTO;
+import swagger.model.UserWithdrawDTO;
+import swagger.model.WithdrawState;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -66,6 +70,46 @@ public class PaymentDTOFactory {
         userPaymentDTO.setExpiration(expiration.with(ChronoField.SECOND_OF_DAY, 0).toInstant().toEpochMilli());
 
         return userPaymentDTO;
+    }
+
+    /**
+     * Converts {@link UserWithdrawMessage} into {@link UserWithdrawDTO}.
+     *
+     * @param userWithdrawMessage {@link UserWithdrawMessage}.
+     * @return {@link UserWithdrawDTO}.
+     */
+    public UserWithdrawDTO valueOf(UserWithdrawMessage userWithdrawMessage) {
+        if (Objects.isNull(userWithdrawMessage)) {
+            return null;
+        }
+
+        UserWithdrawDTO userWithdrawDTO = new UserWithdrawDTO();
+        userWithdrawDTO.setId(userWithdrawMessage.getId());
+        userWithdrawDTO.setAmountInCents(userWithdrawMessage.getAmountInCents());
+        userWithdrawDTO.setCreatedAt(userWithdrawMessage.getCreatedAt());
+        userWithdrawDTO.setState(this.convertState(userWithdrawMessage.getState()));
+        return userWithdrawDTO;
+    }
+
+    /**
+     * Converts the state into swagger model.
+     *
+     * @param state {@link PaymentState}.
+     * @return {@link WithdrawState}.
+     */
+    private WithdrawState convertState(PaymentState state) {
+        if (Objects.isNull(state)) {
+            return WithdrawState.PROCESSING;
+        }
+
+        switch (state) {
+            case PAYMENT_STATE_CLOSED:
+                return WithdrawState.SETTLED;
+            case PAYMENT_STATE_OPEN:
+            case UNRECOGNIZED:
+            default:
+                return WithdrawState.PROCESSING;
+        }
     }
 
 }

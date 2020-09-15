@@ -16,6 +16,7 @@ message BillingInfoMessage {
   bool isVerified = 7;
   string idFrontUrl = 8;
   string idBackUrl = 9;
+  string aliPayAccount = 10;
 }
 
 message RetrieveBillingInfoByUserIdRequest {
@@ -37,7 +38,15 @@ message UpdateBillingInfoByUserIdRequest {
   google.protobuf.StringValue idBackUrl = 7;
 }
 
+message UpdateBillingInfoByUserIdRequestV2 {
+  string userId = 1;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue mobile = 3;
+  google.protobuf.StringValue aliPayAccount = 4;
+}
+
 service BillingInfoService {
   rpc RetrieveBillingInfoByUserId (RetrieveBillingInfoByUserIdRequest) returns (BillingInfoResponse) {};
   rpc UpdateBillingInfoByUserId (UpdateBillingInfoByUserIdRequest) returns (BillingInfoResponse) {};
+  rpc UpdateBillingInfoByUserIdV2 (UpdateBillingInfoByUserIdRequestV2) returns (BillingInfoResponse) {};
 }

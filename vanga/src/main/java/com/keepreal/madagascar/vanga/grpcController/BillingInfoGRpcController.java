@@ -5,6 +5,7 @@ import com.keepreal.madagascar.vanga.BillingInfoResponse;
 import com.keepreal.madagascar.vanga.BillingInfoServiceGrpc;
 import com.keepreal.madagascar.vanga.RetrieveBillingInfoByUserIdRequest;
 import com.keepreal.madagascar.vanga.UpdateBillingInfoByUserIdRequest;
+import com.keepreal.madagascar.vanga.UpdateBillingInfoByUserIdRequestV2;
 import com.keepreal.madagascar.vanga.factory.BillingInfoMessageFactory;
 import com.keepreal.madagascar.vanga.model.BillingInfo;
 import com.keepreal.madagascar.vanga.service.BillingInfoService;
@@ -13,6 +14,8 @@ import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 
 import java.util.Objects;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the billing info grpc controller.
@@ -76,7 +79,42 @@ public class BillingInfoGRpcController extends BillingInfoServiceGrpc.BillingInf
                 request.hasAccountNumber() ? request.getAccountNumber().getValue() : null,
                 request.hasIdNumber() ? request.getIdNumber().getValue() : null,
                 request.hasIdFrontUrl() ? request.getIdFrontUrl().getValue() : null,
-                request.hasIdBackUrl() ? request.getIdBackUrl().getValue() : null);
+                request.hasIdBackUrl() ? request.getIdBackUrl().getValue() : null,
+                null);
+
+        BillingInfoResponse response;
+        if (Objects.nonNull(billingInfo)) {
+            response = BillingInfoResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setBillingInfo(this.billingInfoMessageFactory.valueOf(billingInfo))
+                    .build();
+        } else {
+            response = BillingInfoResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_BILLING_INFO_NOT_FOUND_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Updates the billing info for given user id with ali paaaay.
+     *
+     * @param request          {@link UpdateBillingInfoByUserIdRequestV2}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void updateBillingInfoByUserIdV2(UpdateBillingInfoByUserIdRequestV2 request,
+                                            StreamObserver<BillingInfoResponse> responseObserver) {
+        BillingInfo billingInfo = this.billingInfoService.updateBillingInfoByUserId(request.getUserId(),
+                request.hasName() ? request.getName().getValue() : null,
+                request.hasMobile() ? request.getMobile().getValue() : null,
+                null,
+                null,
+                null,
+                null,
+                request.hasAliPayAccount() ? request.getAliPayAccount().getValue() : null);
 
         BillingInfoResponse response;
         if (Objects.nonNull(billingInfo)) {
