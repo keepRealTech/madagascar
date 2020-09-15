@@ -328,6 +328,33 @@ public class PaymentController implements PaymentApi {
     }
 
     /**
+     * Implements the feed pay ios redirect url.
+     *
+     * @param id      id (required) Feed id.
+     * @param version (required) IOS client version.
+     * @return {@link H5RedirectResponse}.
+     */
+    @Override
+    public ResponseEntity<H5RedirectResponse> apiV1FeedsIdIosPayGet(String id,
+                                                                    Integer version) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
+
+        H5RedirectDTO data = new H5RedirectDTO();
+        if (this.auditUserIds.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+            data.setUrl(String.format("%s/pay-ta-ios?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
+        } else {
+            data.setUrl(String.format("%s/pay-ta?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
+        }
+
+        H5RedirectResponse response = new H5RedirectResponse();
+        response.setData(data);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Implements the support h5 wechat pay api.
      *
      * @param id                 id (required) Island id.
