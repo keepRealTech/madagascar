@@ -19,6 +19,11 @@ message WebMobileLoginPayload {
     int32 otp = 2;
 }
 
+message AppMobileLoginPayload {
+    string mobile = 1;
+    int32 otp = 2;
+}
+
 message JWTISOLoginPayload {
     string identifyToken = 1;
 }
@@ -32,6 +37,7 @@ message LoginRequest {
         JWTISOLoginPayload jwtIsoLoginPayload = 5;
         MpSceneLoginPayload mpScenePayload = 6;
         WebMobileLoginPayload webMobilePayload = 7;
+        AppMobileLoginPayload appMobilePayload = 8;
     }
 }
 

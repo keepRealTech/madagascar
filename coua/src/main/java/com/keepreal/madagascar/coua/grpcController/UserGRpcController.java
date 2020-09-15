@@ -29,6 +29,7 @@ import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UpdateUserMobileRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
+import com.keepreal.madagascar.coua.UserState;
 import com.keepreal.madagascar.coua.UsersReponse;
 import com.keepreal.madagascar.coua.model.QualificationState;
 import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
@@ -130,6 +131,11 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                 userInfo.setBirthday(Date.valueOf(birthdayStr));
             }
         }
+
+        if (request.hasState()) {
+            userInfo.setState(request.getState().getValue());
+        }
+
         UserInfo user = userInfoService.createUser(userInfo);
         this.userEventProducerService.produceCreateUserEventAsync(user.getId());
         basicResponse(responseObserver, user);
@@ -163,7 +169,11 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
             condition = queryUserCondition.getUsername().getValue();
             userInfo = userInfoService.findUserInfoByUserNameAndDeletedIsFalse(condition);
         }
-        if (queryUserCondition.hasMobile()) {
+        if (queryUserCondition.hasMobile() && queryUserCondition.hasState()) {
+            condition = queryUserCondition.getMobile().getValue();
+            userInfo = this.userInfoService.findUserByMobileAndState(condition, queryUserCondition.getState().getValue());
+        }
+        if (queryUserCondition.hasMobile() && !queryUserCondition.hasState()) {
             condition = queryUserCondition.getMobile().getValue();
             userInfo = this.userInfoService.findUserInfoByMobile(condition);
         }
@@ -226,6 +236,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         }
         if (request.hasDisplayId()) {
             userInfo.setDisplayId(request.getDisplayId().getValue());
+        }
+        if (request.hasState()) {
+            userInfo.setState(request.getState().getValue());
         }
 
         basicResponse(responseObserver, userInfoService.updateUser(userInfo));
@@ -365,9 +378,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         if (Objects.isNull(intOtp) || !otp.equals(intOtp)) {
             builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
         } else {
-            UserInfo webUserInfo = this.userInfoService.findH5UserInfoByMobile(mobile);
-            if (Objects.nonNull(webUserInfo)) {
-                this.mergeUserAccounts(userId, webUserInfo.getId());
+            UserInfo h5UserInfo = this.userInfoService.findUserByMobileAndState(mobile, UserState.USER_H5_MOBILE_VALUE);
+            if (Objects.nonNull(h5UserInfo)) {
+                this.mergeUserAccounts(userId, h5UserInfo.getId());
             }
             UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
             userInfo.setMobile(mobile);
@@ -390,14 +403,32 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
         String mobile = request.getMobile();
-        UserInfo userInfo = this.userInfoService.findUserInfoByMobileAndUnionIdIsNotNul(mobile);
+        String userId = request.getUserId();
+        CheckUserMobileIsExistedResponse.Builder builder = CheckUserMobileIsExistedResponse.newBuilder();
+
+        UserInfo userInfo = this.userInfoService.findUserInfoByMobile(mobile);
+
         if (Objects.nonNull(userInfo)) {
-            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
-        } else {
-            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.getSuccStatus()).build());
+            if (userInfo.getState() == UserState.USER_WECHAT_VALUE) {
+                if (userId.equals(userInfo.getId())) {
+                    responseObserver.onNext(builder
+                            .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_BOUND)).build());
+                } else {
+                    responseObserver.onNext(builder
+                            .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
+                }
+            } else if (userInfo.getState() == UserState.USER_APP_MOBILE_VALUE) {
+                responseObserver.onNext(builder
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_REGISTERED)).build());
+            } else {
+                responseObserver.onNext(builder
+                        .setStatus(CommonStatusUtils.getSuccStatus()).build());
+            }
+            responseObserver.onCompleted();
         }
+
+        responseObserver.onNext(builder
+                .setStatus(CommonStatusUtils.getSuccStatus()).build());
         responseObserver.onCompleted();
     }
 

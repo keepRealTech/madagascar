@@ -310,9 +310,12 @@ public class UserService {
      *
      * @param mobile 手机号
      */
-    public void checkUserMobileIsExisted(String mobile) {
+    public void checkUserMobileIsExisted(String userId, String mobile) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
-        CheckUserMobileIsExistedRequest request = CheckUserMobileIsExistedRequest.newBuilder().setMobile(mobile).build();
+        CheckUserMobileIsExistedRequest request = CheckUserMobileIsExistedRequest.newBuilder()
+                .setUserId(userId)
+                .setMobile(mobile)
+                .build();
         CheckUserMobileIsExistedResponse response;
 
         try {

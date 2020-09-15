@@ -6,6 +6,12 @@ option java_package = "com.keepreal.madagascar.coua";
 import "common.proto";
 import "google/protobuf/wrappers.proto";
 
+enum UserState {
+    USER_WECHAT = 0;
+    USER_H5_MOBILE = 1;
+    USER_APP_MOBILE = 2;
+}
+
 message UserResponse {
     CommonStatus status = 1;
     UserMessage user = 2;
@@ -21,6 +27,7 @@ message NewUserRequest {
     google.protobuf.StringValue birthday = 7;
     repeated IdentityType identities = 8;
     google.protobuf.StringValue mobile = 9;
+    google.protobuf.Int32Value state = 10;
 }
 
 message UpdateUserByIdRequest {
@@ -33,6 +40,7 @@ message UpdateUserByIdRequest {
     google.protobuf.StringValue birthday = 7;
     repeated IdentityType identities = 8;
     google.protobuf.StringValue displayId = 9;
+    google.protobuf.Int32Value state = 10;
 }
 
 message QueryUserCondition {
@@ -41,6 +49,7 @@ message QueryUserCondition {
     google.protobuf.StringValue displayId = 3;
     google.protobuf.StringValue username = 4;
     google.protobuf.StringValue mobile = 5;
+    google.protobuf.Int32Value state = 6;
 }
 
 message RetrieveSingleUserRequest {
@@ -102,7 +111,8 @@ message UpdateUserMobileRequest {
 }
 
 message CheckUserMobileIsExistedRequest {
-    string mobile = 1;
+    string userId = 1;
+    string mobile = 2;
 }
 
 message CheckUserMobileIsExistedResponse {
