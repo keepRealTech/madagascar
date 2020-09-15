@@ -125,6 +125,7 @@ public class UserInfoService {
                 .setPassword(StringUtils.isEmpty(userInfo.getPassword()) ? "" : userInfo.getPassword())
                 .setCreatedAt(userInfo.getCreatedTime())
                 .setLocked(Instant.now().toEpochMilli() <= userInfo.getLockedUntil())
+                .setState(userInfo.getState())
                 .build();
     }
 

@@ -91,22 +91,17 @@ public class AppMobileLoginExecutor implements LoginExecutor {
      */
     private Mono<UserMessage> retrieveOrCreateUserByMobile(String mobile) {
         assert !StringUtils.isEmpty(mobile);
-        return this.userService.retrieveUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE, UserState.USER_WECHAT_VALUE)
+        return this.userService.retrieveUserByMobileMono(mobile)
                 .map(userMessage -> {
                     if (userMessage.getLocked()) {
                         throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
                     }
+                    if (userMessage.getState() == UserState.USER_H5_MOBILE_VALUE) {
+                        this.userService.updateUserStateMono(userMessage.getId(), UserState.USER_APP_MOBILE_VALUE).subscribe();
+                    }
                     return userMessage;
                 })
-                .switchIfEmpty(this.userService.createUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE))
-                .doOnNext(userMessage -> {
-                    this.userService.retrieveUserByMobileAndStateMono(userMessage.getMobile(), UserState.USER_H5_MOBILE_VALUE)
-                            .subscribe(userMessageH5 -> {
-                                if (Objects.nonNull(userMessageH5)) {
-                                this.userService.mergeUserAccounts(userMessage.getId(), userMessageH5.getId()).subscribe();
-                                }
-                            });
-                });
+                .switchIfEmpty(this.userService.createUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE));
     }
 
 }

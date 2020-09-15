@@ -179,6 +179,7 @@ message UserMessage {
     string password = 14;
     bool locked = 15;
     string mobile = 16;
+    int32 state = 17;
 }
 
 message IslandMessage {

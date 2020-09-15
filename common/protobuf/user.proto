@@ -40,6 +40,7 @@ message UpdateUserByIdRequest {
     google.protobuf.StringValue birthday = 7;
     repeated IdentityType identities = 8;
     google.protobuf.StringValue displayId = 9;
+    google.protobuf.Int32Value state = 10;
 }
 
 message QueryUserCondition {
@@ -49,7 +50,6 @@ message QueryUserCondition {
     google.protobuf.StringValue username = 4;
     google.protobuf.StringValue mobile = 5;
     google.protobuf.Int32Value state = 6;
-    repeated int32 states = 7;
 }
 
 message RetrieveSingleUserRequest {

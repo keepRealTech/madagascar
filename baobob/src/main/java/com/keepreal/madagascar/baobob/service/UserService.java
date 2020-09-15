@@ -13,6 +13,7 @@ import com.keepreal.madagascar.coua.NewUserRequest;
 import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.ReactorUserServiceGrpc;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
+import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserState;
 import io.grpc.Channel;
@@ -126,46 +127,20 @@ public class UserService {
     }
 
     /**
-     * Retrieves the user by mobile phone and state.
+     * update user state
      *
-     * @param mobile Mobile.
-     * @param state {@link UserState}
-     * @return      {@link UserMessage}.
-     */
-    public Mono<UserMessage> retrieveUserByMobileAndStateMono(String mobile, Integer state) {
-        ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
-
-        QueryUserCondition condition = QueryUserCondition.newBuilder()
-                .setMobile(StringValue.of(mobile))
-                .setState(Int32Value.of(state))
-                .build();
-        RetrieveSingleUserRequest request = RetrieveSingleUserRequest.newBuilder().setCondition(condition).build();
-
-        return stub.retrieveSingleUser(request)
-                .filter(userResponse -> ErrorCode.REQUEST_SUCC_VALUE == (userResponse.getStatus().getRtn()))
-                .map(UserResponse::getUser);
-    }
-
-    /**
-     * Retrieves the user by mobile phone and state1 or state2.
-     *
-     * @param mobile    mobile
-     * @param state1    {@link UserState}
-     * @param state2    {@link UserState}
+     * @param state     {@link UserState}
      * @return          {@link UserMessage}
      */
-    public Mono<UserMessage> retrieveUserByMobileAndStateMono(String mobile, Integer state1, Integer state2) {
+    public Mono<UserMessage> updateUserStateMono(String userId, Integer state) {
         ReactorUserServiceGrpc.ReactorUserServiceStub stub = ReactorUserServiceGrpc.newReactorStub(this.channel);
-        ArrayList<Integer> list = new ArrayList<>();
-        list.add(state1);
-        list.add(state2);
-        QueryUserCondition condition = QueryUserCondition.newBuilder()
-                .setMobile(StringValue.of(mobile))
-                .addAllStates(list)
-                .build();
-        RetrieveSingleUserRequest request = RetrieveSingleUserRequest.newBuilder().setCondition(condition).build();
 
-        return stub.retrieveSingleUser(request)
+        UpdateUserByIdRequest request = UpdateUserByIdRequest.newBuilder()
+                .setId(userId)
+                .setState(Int32Value.of(state))
+                .build();
+
+        return stub.updateUserById(request)
                 .filter(userResponse -> ErrorCode.REQUEST_SUCC_VALUE == (userResponse.getStatus().getRtn()))
                 .map(UserResponse::getUser);
     }

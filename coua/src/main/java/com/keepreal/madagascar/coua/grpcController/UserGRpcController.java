@@ -167,14 +167,6 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
             condition = queryUserCondition.getMobile().getValue();
             userInfo = this.userInfoService.findUserInfoByMobile(condition);
         }
-        if (queryUserCondition.hasMobile() && !CollectionUtils.isEmpty(queryUserCondition.getStatesList())) {
-            if (queryUserCondition.getStatesCount() == 2) {
-                condition = queryUserCondition.getMobile().getValue();
-                userInfo = this.userInfoService.findUserByMobileAndState(condition,
-                        queryUserCondition.getStatesList().get(0),
-                        queryUserCondition.getStatesList().get(1));
-            }
-        }
         if (userInfo == null) {
             log.error("[retrieveSingleUser] user not found error! condition is [{}]", condition);
             CommonStatus commonStatus = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_NOT_FOUND_ERROR);
@@ -234,6 +226,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         }
         if (request.hasDisplayId()) {
             userInfo.setDisplayId(request.getDisplayId().getValue());
+        }
+        if (request.hasState()) {
+            userInfo.setState(request.getState().getValue());
         }
 
         basicResponse(responseObserver, userInfoService.updateUser(userInfo));
