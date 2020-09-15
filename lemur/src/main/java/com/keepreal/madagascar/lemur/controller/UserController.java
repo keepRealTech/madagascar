@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.MembershipMessage;
+import com.keepreal.madagascar.coua.QualificationMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.MembershipDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
@@ -34,8 +35,13 @@ import swagger.model.GenderType;
 import swagger.model.PostBatchGetUsersRequest;
 import swagger.model.PutUserMobileRequest;
 import swagger.model.PutUserPayload;
+import swagger.model.PutUserQualificationsRequest;
+import swagger.model.QualificationChannelsResponse;
+import swagger.model.UserQualificationDTO;
+import swagger.model.UserQualificationsResponse;
 import swagger.model.UserResponse;
 
+import javax.validation.Valid;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -282,6 +288,43 @@ public class UserController implements UserApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<QualificationChannelsResponse> apiV1UsersQualificationsChannelsGet() {
+        QualificationChannelsResponse response = new QualificationChannelsResponse();
+
+        response.setData(this.userDTOFactory.listValueOf());
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<UserQualificationsResponse> apiV1UsersQualificationsGet() {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        List<QualificationMessage> messageList = this.userService.retrieveUserQualifications(userId);
+
+        UserQualificationsResponse response = new UserQualificationsResponse();
+        response.setData(messageList.stream().map(this.userDTOFactory::valueOf).collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<UserQualificationsResponse> apiV1UsersQualificationsPut(@Valid PutUserQualificationsRequest putUserQualificationsRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        List<QualificationMessage> qualificationMessages = putUserQualificationsRequest.getUserQualifications().stream().map(this::convertToMessage).collect(Collectors.toList());
+        List<QualificationMessage> messageList = this.userService.createOrUpdateUserQualifications(userId, qualificationMessages);
+
+        UserQualificationsResponse response = new UserQualificationsResponse();
+        response.setData(messageList.stream().map(this.userDTOFactory::valueOf).collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     /**
      * Converts {@link GenderType} to {@link Gender}.
      *
@@ -346,4 +389,11 @@ public class UserController implements UserApi {
         }
     }
 
+    private QualificationMessage convertToMessage(UserQualificationDTO dto) {
+        return QualificationMessage.newBuilder()
+                .setId(dto.getId() == null ? "" : dto.getId())
+                .setName(dto.getName())
+                .setUrl(dto.getHostUrl())
+                .build();
+    }
 }

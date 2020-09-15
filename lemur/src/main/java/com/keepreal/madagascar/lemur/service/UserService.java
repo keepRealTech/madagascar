@@ -11,11 +11,16 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
+import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsRequest;
+import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
 import com.keepreal.madagascar.coua.DeviceTokenResponse;
+import com.keepreal.madagascar.coua.QualificationMessage;
 import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.RetreiveMultipleUsersByIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
+import com.keepreal.madagascar.coua.RetrieveUserQualificationsRequest;
+import com.keepreal.madagascar.coua.RetrieveUserQualificationsResponse;
 import com.keepreal.madagascar.coua.SendOtpToMobileRequest;
 import com.keepreal.madagascar.coua.SendOtpToMobileResponse;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
@@ -328,6 +333,56 @@ public class UserService {
         if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
             throw new KeepRealBusinessException(response.getStatus());
         }
+    }
+
+    public List<QualificationMessage> retrieveUserQualifications(String userId) {
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveUserQualificationsResponse response;
+
+        try {
+            response = stub.retrieveUserQualifications(RetrieveUserQualificationsRequest.newBuilder().setUserId(userId).build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "retrieve user qualifications returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getMessageList();
+    }
+
+    public List<QualificationMessage> createOrUpdateUserQualifications(String userId, List<QualificationMessage> qualificationMessages) {
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
+
+        CreateOrUpdateUserQualificationsResponse response;
+        try {
+            response = stub.createOrUpdateUserQualifications(CreateOrUpdateUserQualificationsRequest.newBuilder()
+                    .setUserId(userId)
+                    .addAllMessage(qualificationMessages)
+                    .build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "create or update user qualifications returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getMessageList();
     }
 
     /**

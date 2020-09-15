@@ -162,6 +162,12 @@ enum MediaType {
     MEDIA_QUESTION = 7;
 }
 
+enum PaymentState {
+    PAYMENT_STATE_NONE = 0;
+    PAYMENT_STATE_OPEN = 1;
+    PAYMENT_STATE_CLOSED = 2;
+}
+
 message UserMessage {
     string id = 1;
     string unionId = 2;

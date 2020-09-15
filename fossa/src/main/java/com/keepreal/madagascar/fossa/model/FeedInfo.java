@@ -32,6 +32,9 @@ public class FeedInfo {
     private Boolean fromHost;
     private List<String> imageUrls;
     private List<String> membershipIds;
+    /**
+     * Used by question. 提问者的用户状态.
+     */
     private List<String> userMembershipIds;
     private String duplicateTag;
     private String multiMediaType;

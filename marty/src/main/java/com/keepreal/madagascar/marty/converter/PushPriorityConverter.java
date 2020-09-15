@@ -69,8 +69,8 @@ public class PushPriorityConverter {
                 break;
             case PushPriority.NEW_PUBLIC_REPLY_VALUE:
                 pushPriorityInfo.setText("刚刚回答了一个问题，速来围观！");
-                pushPriorityInfo.setAndroidUrl("/flutter/notification_question_box");
-                pushPriorityInfo.setIosUrl("message://answer");
+                pushPriorityInfo.setAndroidUrl("/feed/detail");
+                pushPriorityInfo.setIosUrl("message://answerDetail");
                 extrasMap.put("notification_type", "NOTIFICATION_QUESTIONBOX");
                 extrasMap.put("notification_box_type", "REPLY");
                 pushPriorityInfo.setExtrasMap(extrasMap);
