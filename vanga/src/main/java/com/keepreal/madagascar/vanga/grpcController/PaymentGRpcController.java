@@ -26,6 +26,7 @@ import com.keepreal.madagascar.vanga.SupportRequest;
 import com.keepreal.madagascar.vanga.UserPaymentsResponse;
 import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
+import com.keepreal.madagascar.vanga.WithdrawPaymentsResponse;
 import com.keepreal.madagascar.vanga.factory.BalanceMessageFactory;
 import com.keepreal.madagascar.vanga.factory.OrderMessageFactory;
 import com.keepreal.madagascar.vanga.factory.PaymentMessageFactory;
@@ -647,6 +648,30 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         UserPaymentsResponse response = UserPaymentsResponse.newBuilder()
                 .addAllUserPayments(paymentPage.getContent().stream()
                         .map(payment -> this.paymentMessageFactory.valueOf(payment, membershipSkuMap.getOrDefault(payment.getMembershipSkuId(), null)))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setPageResponse(PaginationUtils.valueOf(paymentPage, request.getPageRequest()))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the user withdraw history.
+     *
+     * @param request           {@link RetrieveUserPaymentsRequest}.
+     * @param responseObserver  {@link WithdrawPaymentsResponse}.
+     */
+    @Override
+    public void retrieveUserWithdraws(RetrieveUserPaymentsRequest request,
+                                      StreamObserver<WithdrawPaymentsResponse> responseObserver) {
+        Page<Payment> paymentPage = this.paymentService.retrieveWithdrawsByUserId(request.getUserId(), PaginationUtils.valueOf(request.getPageRequest()));
+
+        WithdrawPaymentsResponse response = WithdrawPaymentsResponse.newBuilder()
+                .addAllUserWithdraws(paymentPage.getContent().stream()
+                        .map(this.paymentMessageFactory::withdrawValueOf)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()))
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))

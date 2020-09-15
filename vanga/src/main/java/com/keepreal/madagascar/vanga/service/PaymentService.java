@@ -338,6 +338,17 @@ public class PaymentService {
     }
 
     /**
+     * Retrieves valid user withdraws history.
+     *
+     * @param userId    User id.
+     * @param pageable  {@link Pageable}.
+     * @return {@link Payment}.
+     */
+    public Page<Payment> retrieveWithdrawsByUserId(String userId, Pageable pageable) {
+        return this.paymentRepository.findAllByTypeAndUserIdAndDeletedIsFalse(PaymentType.WITHDRAW.getValue(), userId, pageable);
+    }
+
+    /**
      * merge user payment
      *
      * @param wechatUserId      wechat user id

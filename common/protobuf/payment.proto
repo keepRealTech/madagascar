@@ -132,6 +132,19 @@ message SupportMessage {
   string text = 2;
 }
 
+message UserWithdrawMessage {
+  string id = 1;
+  uint64 amountInCents = 2;
+  PaymentState state = 3;
+  uint64 createdAt = 4;
+}
+
+message WithdrawPaymentsResponse {
+  CommonStatus status = 1;
+  PageResponse pageResponse = 2;
+  repeated UserWithdrawMessage userWithdraws = 3;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
@@ -152,6 +165,7 @@ service PaymentService {
   rpc WechatBuyShell (WechatOrderBuyShellRequest) returns (WechatOrderResponse) {};
   rpc WechatCreateFeed (CreatePaidFeedRequest) returns (WechatOrderResponse) {};
   rpc RetrieveUserPayments (RetrieveUserPaymentsRequest) returns (UserPaymentsResponse) {};
+  rpc RetrieveUserWithdraws (RetrieveUserPaymentsRequest) returns (WithdrawPaymentsResponse) {};
   rpc RefundWechatPaidFeed (RefundWechatFeedRequest) returns (CommonStatus) {};
   rpc ActivateFeedPayment (ActivatePendingFeedPaymentRequest) returns (CommonStatus) {};
   rpc WechatRefundCallback (OrderCallbackRequest) returns (CommonStatus) {};

@@ -19,6 +19,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
+import com.keepreal.madagascar.vanga.WithdrawPaymentsResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -37,6 +38,7 @@ import swagger.model.PostSupportRequest;
 import swagger.model.SceneType;
 import swagger.model.SubscribeMemberRequest;
 import swagger.model.UserPaymentsResponse;
+import swagger.model.UserWithdrawsResponse;
 import swagger.model.WechatOrderResponse;
 
 import java.util.ArrayList;
@@ -247,6 +249,30 @@ public class PaymentController implements PaymentApi {
     }
 
     /**
+     * Implements the get user withdraw history method.
+     *
+     * @param page page number (optional, default to 0).
+     * @param pageSize size of a page (optional, default to 10).
+     * @return {@link UserWithdrawsResponse}.
+     */
+    @Override
+    public ResponseEntity<UserWithdrawsResponse> apiV1PaymentsWithdrawsGet(Integer page, Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        WithdrawPaymentsResponse userWithdrawsResponse = this.paymentService.retrieveUserWithdraws(userId, page, pageSize);
+
+        UserWithdrawsResponse response = new UserWithdrawsResponse();
+        response.setData(userWithdrawsResponse.getUserWithdrawsList().stream()
+                .map(this.paymentDTOFactory::valueOf)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setPageInfo(PaginationUtils.getPageInfo(userWithdrawsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Implements the membership subscription pay ios redirect url.
      *
      * @param id      id (required) Island id.
@@ -379,6 +405,13 @@ public class PaymentController implements PaymentApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the island support through wechat.
+     *
+     * @param id                 id (required) Island id.
+     * @param postSupportRequest (required) {@link PostSupportRequest}.
+     * @return {@link WechatOrderResponse}.
+     */
     @Override
     public ResponseEntity<WechatOrderResponse> apiV1IslandsIdSupportWechatPayPost(String id,
                                                                                   PostSupportRequest postSupportRequest) {
