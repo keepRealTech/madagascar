@@ -737,38 +737,7 @@ public class IslandService {
      * @return          {@link List<IslandMessage>}
      */
     public List<IslandMessage> retrieveIslandsByHostId(String hostId) {
-
-        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
-
-        QueryIslandCondition.Builder conditionBuilder = QueryIslandCondition.newBuilder();
-
-        if (!StringUtils.isEmpty(hostId)) {
-            conditionBuilder.setHostId(StringValue.of(hostId));
-        }
-
-        RetrieveMultipleIslandsRequest request = RetrieveMultipleIslandsRequest.newBuilder()
-                .setCondition(conditionBuilder.build())
-                .setPageRequest(PageRequest.newBuilder().setPage(0).setPageSize(10).build())
-                .build();
-
-        IslandsResponse islandsResponse;
-        try {
-            islandsResponse = stub.retrieveIslandsByCondition(request);
-        } catch (StatusRuntimeException exception) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
-        }
-
-        if (Objects.isNull(islandsResponse)
-                || !islandsResponse.hasStatus()) {
-            log.error(Objects.isNull(islandsResponse) ? "Retrieve islands returned null." : islandsResponse.toString());
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
-        }
-
-        if (ErrorCode.REQUEST_SUCC_VALUE != islandsResponse.getStatus().getRtn()) {
-            throw new KeepRealBusinessException(islandsResponse.getStatus());
-        }
-
-        return islandsResponse.getIslandsList();
+        return this.retrieveIslands(null, hostId, null, 0, 10).getIslandsList();
     }
 
     /**
