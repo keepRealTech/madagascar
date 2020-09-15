@@ -153,7 +153,7 @@ public class PaymentService {
      * @return  {@link Payment}.
      */
     @Transactional
-    public Payment createNewWechatSupportPayment(Order order, String payeeId, long priceInCents) {
+    public Payment createNewSupportPayment(Order order, String payeeId, long priceInCents) {
         Balance payeeBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payeeId);
         Payment payment = Payment.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))

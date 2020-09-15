@@ -170,8 +170,7 @@ public class AlipayService {
         if (StringUtils.isEmpty(callbackPayload)) {
             return null;
         }
-        Type type = new TypeToken<Map<String, String>>() {
-        }.getType();
+        Type type = new TypeToken<Map<String, String>>() {}.getType();
         Map<String, String> paramMap = this.gson.fromJson(callbackPayload, type);
 
         AlipayOrder alipayOrder = this.verifySignature(paramMap);

@@ -67,8 +67,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
-
 /**
  * Represents the payment grpc controller.
  */
@@ -867,7 +865,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
                     .build();
-            this.paymentService.createNewWechatSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+            this.paymentService.createNewSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
         } else {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
@@ -901,7 +899,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
                     .build();
-            this.paymentService.createNewWechatSupportPayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
+            this.paymentService.createNewSupportPayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
         } else {
             response = AlipayOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
@@ -937,7 +935,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
                     .build();
-            this.paymentService.createNewWechatSupportPayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
+            this.paymentService.createNewSupportPayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
         } else {
             response = AlipayOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
@@ -966,7 +964,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setRedirectUrl(wechatOrder.getMwebUrl())
                     .setOrderId(wechatOrder.getId())
                     .build();
-            this.paymentService.createNewWechatSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+            this.paymentService.createNewSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
         } else {
             response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
