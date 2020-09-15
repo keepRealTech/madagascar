@@ -41,6 +41,12 @@ public class BillingInfo {
     private String accountNumber = "";
     @Builder.Default
     private Boolean verified = false;
+    @Builder.Default
+    private String idFrontUrl = "";
+    @Builder.Default
+    private String idBackUrl = "";
+    @Builder.Default
+    private String aliPayAccount = "";
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
@@ -48,9 +54,5 @@ public class BillingInfo {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
-    @Builder.Default
-    private String idFrontUrl = "";
-    @Builder.Default
-    private String idBackUrl = "";
 
 }

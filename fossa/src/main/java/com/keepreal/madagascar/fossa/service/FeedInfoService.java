@@ -150,6 +150,18 @@ public class FeedInfoService {
      * @return {@link FeedMessage}.
      */
     public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
+        List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(userId, feedInfo.getIslandId());
+        return this.getFeedMessage(feedInfo, userId, myMembershipIds);
+    }
+
+    /**
+     * Retrieves the feed message.
+     *
+     * @param feedInfo {@link FeedInfo}.
+     * @param userId   user id (decide is liked).
+     * @return {@link FeedMessage}.
+     */
+    public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId, List<String> myMembershipIds) {
         if (feedInfo == null) {
             return null;
         }
@@ -181,14 +193,11 @@ public class FeedInfoService {
             builder.setIsMembership(false);
         } else {
             builder.setIsMembership(true);
-            List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(userId, feedInfo.getIslandId());
+            builder.setIsAccess(false);
             if (userId.equals(feedInfo.getHostId()) || membershipIds.stream().anyMatch(myMembershipIds::contains)) {
                 builder.setIsAccess(true);
-                builder.addAllMembershipId(membershipIds);
-            } else {
-                builder.setIsAccess(false);
-                builder.addAllMembershipId(membershipIds);
             }
+            builder.addAllMembershipId(membershipIds);
         }
         this.processMedia(builder, feedInfo);
 

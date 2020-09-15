@@ -24,6 +24,7 @@ import com.keepreal.madagascar.vanga.UserPaymentsResponse;
 import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
+import com.keepreal.madagascar.vanga.WithdrawPaymentsResponse;
 import com.keepreal.madagascar.vanga.factory.BalanceMessageFactory;
 import com.keepreal.madagascar.vanga.factory.PaymentMessageFactory;
 import com.keepreal.madagascar.vanga.factory.WechatOrderMessageFactory;
@@ -504,6 +505,30 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     }
 
     /**
+     * Implements the user withdraw history.
+     *
+     * @param request           {@link RetrieveUserPaymentsRequest}.
+     * @param responseObserver  {@link WithdrawPaymentsResponse}.
+     */
+    @Override
+    public void retrieveUserWithdraws(RetrieveUserPaymentsRequest request,
+                                      StreamObserver<WithdrawPaymentsResponse> responseObserver) {
+        Page<Payment> paymentPage = this.paymentService.retrieveWithdrawsByUserId(request.getUserId(), PaginationUtils.valueOf(request.getPageRequest()));
+
+        WithdrawPaymentsResponse response = WithdrawPaymentsResponse.newBuilder()
+                .addAllUserWithdraws(paymentPage.getContent().stream()
+                        .map(this.paymentMessageFactory::withdrawValueOf)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setPageResponse(PaginationUtils.valueOf(paymentPage, request.getPageRequest()))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
      * Implements the feed creation with wechat pay.
      * Note: the creator pays with wechat in order to create successfully.
      *
@@ -732,4 +757,5 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
 }

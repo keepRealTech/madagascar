@@ -109,6 +109,31 @@ message CheckUserMobileIsExistedResponse {
     CommonStatus status = 1;
 }
 
+message QualificationMessage {
+    string id = 1;
+    string name = 2;
+    string url = 3;
+}
+
+message RetrieveUserQualificationsRequest {
+    string userId = 1;
+}
+
+message RetrieveUserQualificationsResponse {
+    CommonStatus status = 1;
+    repeated QualificationMessage message = 2;
+}
+
+message CreateOrUpdateUserQualificationsRequest {
+    string userId = 1;
+    repeated QualificationMessage message = 2;
+}
+
+message CreateOrUpdateUserQualificationsResponse {
+    CommonStatus status = 1;
+    repeated QualificationMessage message = 2;
+}
+
 service UserService {
     rpc CreateUser(NewUserRequest) returns (UserResponse) {};
     rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
@@ -120,4 +145,6 @@ service UserService {
     rpc SendOtpToMobile(SendOtpToMobileRequest) returns (SendOtpToMobileResponse) {};
     rpc UpdateUserMobile(UpdateUserMobileRequest) returns (UserResponse) {};
     rpc CheckUserMobileIsExisted(CheckUserMobileIsExistedRequest) returns (CheckUserMobileIsExistedResponse) {};
+    rpc RetrieveUserQualifications (RetrieveUserQualificationsRequest) returns (RetrieveUserQualificationsResponse) {};
+    rpc CreateOrUpdateUserQualifications (CreateOrUpdateUserQualificationsRequest) returns (CreateOrUpdateUserQualificationsResponse) {};
 }

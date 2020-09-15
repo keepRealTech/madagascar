@@ -20,6 +20,7 @@ import com.keepreal.madagascar.vanga.SupportMessage;
 import com.keepreal.madagascar.vanga.SupportRequest;
 import com.keepreal.madagascar.vanga.UserPaymentsResponse;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
+import com.keepreal.madagascar.vanga.WithdrawPaymentsResponse;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -286,6 +287,48 @@ public class PaymentService {
         return response;
     }
 
+    /**
+     * Retrieves the user withdraw history.
+     *
+     * @param userId   User id.
+     * @param page     Page index.
+     * @param pageSize Page size.
+     * @return {@link WithdrawPaymentsResponse}.
+     */
+    public WithdrawPaymentsResponse retrieveUserWithdraws(String userId, Integer page, Integer pageSize) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveUserPaymentsRequest request = RetrieveUserPaymentsRequest.newBuilder()
+                .setUserId(userId)
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
+                .build();
+
+        WithdrawPaymentsResponse response;
+        try {
+            response = stub.retrieveUserWithdraws(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve user withdraw history returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
+    }
+
+    /**
+     * Retrieves support stats infos.
+     *
+     * @param userId Host id.
+     * @return  {@link SupportMessage}.
+     */
     public SupportMessage retrieveSupportInfo(String userId) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 

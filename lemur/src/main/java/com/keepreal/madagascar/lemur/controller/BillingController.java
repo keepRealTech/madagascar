@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import swagger.api.BillingApi;
 import swagger.model.BalanceResponse;
 import swagger.model.BillingInfoResponse;
+import swagger.model.BillingInfoResponseV11;
 import swagger.model.PostWithdrawRequest;
 import swagger.model.PutBillingInfoRequest;
+import swagger.model.PutBillingInfoRequestV11;
 
 /**
  * Represents the billing controller.
@@ -86,6 +88,23 @@ public class BillingController implements BillingApi {
     }
 
     /**
+     * Implements the billing info get api.
+     *
+     * @return {@link BillingInfoResponseV11}.
+     */
+    @Override
+    public ResponseEntity<BillingInfoResponseV11> apiV11BillingInfoGet() {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        BillingInfoMessage billingInfoMessage = this.billingInfoService.retrieveBillingInfoByUserId(userId);
+
+        BillingInfoResponseV11 response = new BillingInfoResponseV11();
+        response.setData(this.billingInfoDTOFactory.v11ValueOf(billingInfoMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Implements the billing info put api.
      *
      * @return {@link BillingInfoResponse}.
@@ -95,12 +114,38 @@ public class BillingController implements BillingApi {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         BillingInfoMessage billingInfoMessage = this.billingInfoService.updateBillingInfoByUserId(
-                userId, putBillingInfoRequest.getName(), putBillingInfoRequest.getAccountNumber(),
-                putBillingInfoRequest.getIdentityNumber(), putBillingInfoRequest.getMobile(),
-                putBillingInfoRequest.getIdFrontUrl(), putBillingInfoRequest.getIdBackUrl());
+                userId,
+                putBillingInfoRequest.getName(),
+                putBillingInfoRequest.getAccountNumber(),
+                putBillingInfoRequest.getIdentityNumber(),
+                putBillingInfoRequest.getMobile(),
+                putBillingInfoRequest.getIdFrontUrl(),
+                putBillingInfoRequest.getIdBackUrl());
 
         BillingInfoResponse response = new BillingInfoResponse();
         response.setData(this.billingInfoDTOFactory.valueOf(billingInfoMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the billing info put api.
+     *
+     * @return {@link BillingInfoResponse}.
+     */
+    @Override
+    public ResponseEntity<BillingInfoResponseV11> apiV11BillingInfoPut(PutBillingInfoRequestV11 putBillingInfoRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        BillingInfoMessage billingInfoMessage = this.billingInfoService.updateBillingInfoByUserIdV2(
+                userId,
+                putBillingInfoRequest.getName(),
+                putBillingInfoRequest.getMobile(),
+                putBillingInfoRequest.getAlipayAccount());
+
+        BillingInfoResponseV11 response = new BillingInfoResponseV11();
+        response.setData(this.billingInfoDTOFactory.v11ValueOf(billingInfoMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

@@ -145,7 +145,7 @@ public class PushNotificationService {
             String islandId = this.feedService.retrieveFeedInfoById(feedId, userId).getFeed().getIslandId();
             String hostId = this.islandService.retrieveIslandById(islandId).getIsland().getHostId();
             title = this.redissonService.getNickname(hostId) + pushPriorityInfo.getText();
-        }else {
+        } else {
             pushPriorityInfo = PushPriorityConverter.convertTo(PushPriority.NEW_REPLY_VALUE);
             title = pushPriorityInfo.getText();
         }
@@ -178,7 +178,7 @@ public class PushNotificationService {
             String islandId = this.feedService.retrieveFeedInfoById(feedId, userId).getFeed().getIslandId();
             String hostId = this.islandService.retrieveIslandById(islandId).getIsland().getHostId();
             alert = this.redissonService.getNickname(hostId) + pushPriorityInfo.getText();
-        }else {
+        } else {
             pushPriorityInfo = PushPriorityConverter.convertTo(PushPriority.NEW_REPLY_VALUE);
             alert = pushPriorityInfo.getText();
         }
@@ -187,6 +187,7 @@ public class PushNotificationService {
 
         Map<String, String> extrasMap = new HashMap<>();
         extrasMap.put("URL", pushPriorityInfo.getIosUrl());
+        extrasMap.put("feed_id", feedId);
 
         this.jpushService.pushIosNotification(alert, extrasMap, tokenList.toArray(new String[0]));
     }
