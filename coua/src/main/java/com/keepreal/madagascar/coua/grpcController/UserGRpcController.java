@@ -429,7 +429,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
 
         List<UserQualification> list = new ArrayList<>();
         messageList.forEach(message -> {
-            if (StringUtils.isEmpty(message.getId())) {
+            if (StringUtils.isEmpty(message.getId()) && !StringUtils.isEmpty(message.getName()) && !StringUtils.isEmpty(message.getUrl())) {
                 UserQualification userQualification = new UserQualification();
                 userQualification.setUserId(userId);
                 userQualification.setName(message.getName());
