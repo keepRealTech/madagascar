@@ -193,7 +193,7 @@ public class FeedInfoService {
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
             if (Objects.nonNull(feedInfo.getPriceInCents()) && feedInfo.getPriceInCents() > 0L) {
-                builder.setIsAccess(feedInfo.getFromHost() || this.feedChargeService.retrieveFeedChargeAccess(userId, feedInfo.getId()));
+                builder.setIsAccess(feedInfo.getHostId().equals(userId) || this.feedChargeService.retrieveFeedChargeAccess(userId, feedInfo.getId()));
             } else {
                 builder.setIsAccess(true);
             }
