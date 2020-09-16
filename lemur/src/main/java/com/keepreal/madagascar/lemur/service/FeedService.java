@@ -131,7 +131,8 @@ public class FeedService {
                              MediaType mediaType,
                              List<MultiMediaDTO> multiMediaDTOList,
                              String text,
-                             String feedGroupId) {
+                             String feedGroupId,
+                             Long priceInCents) {
         if (Objects.isNull(islandIds) || islandIds.size() == 0) {
             log.error("param islandIds is invalid");
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
@@ -149,6 +150,10 @@ public class FeedService {
 
         if (!Objects.isNull(feedGroupId)) {
             builder.setFeedGroupId(StringValue.of(feedGroupId));
+        }
+
+        if (priceInCents != null && priceInCents > 0) {
+            builder.setPriceInCents(Int64Value.of(priceInCents));
         }
 
         this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text);

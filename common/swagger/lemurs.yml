@@ -2554,6 +2554,7 @@ components:
         - LOGIN_JWT_IOS
         - LOGIN_MOBILE
         - LOGIN_MOBILE_APP
+        - LOGIN_MOBILE_HOME
     SceneType:
       type: string
       enum:

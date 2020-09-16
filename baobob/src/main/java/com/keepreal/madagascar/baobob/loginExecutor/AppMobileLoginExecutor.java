@@ -15,20 +15,23 @@ import org.redisson.api.RedissonClient;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
+import static com.keepreal.madagascar.baobob.loginExecutor.WebMobileLoginExecutor.MOBILE_PHONE_OTP;
+
 
 /**
- * Represents a login executor working with mobile phone.
+ * Represents a login executor working with mobile phone (app / official website).
  */
 @Slf4j
-public class WebMobileLoginExecutor implements LoginExecutor{
+public class AppMobileLoginExecutor implements LoginExecutor {
 
-    public static final String MOBILE_PHONE_OTP = "otp_";
     private final LocalTokenGranter tokenGranter;
     private final UserService userService;
     private final GrpcResponseUtils grpcResponseUtils;
     private final RedissonClient redissonClient;
 
-    public WebMobileLoginExecutor(UserService userService,
+    public AppMobileLoginExecutor(UserService userService,
                                   LocalTokenGranter tokenGranter,
                                   RedissonClient redissonClient) {
         this.userService = userService;
@@ -45,12 +48,12 @@ public class WebMobileLoginExecutor implements LoginExecutor{
      */
     @Override
     public Mono<LoginResponse> login(LoginRequest loginRequest) {
-        if (!loginRequest.hasWebMobilePayload()) {
+        if (!loginRequest.hasAppMobilePayload()) {
             return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
         }
 
-        String mobile = loginRequest.getWebMobilePayload().getMobile();
-        Integer otp = loginRequest.getWebMobilePayload().getOtp();
+        String mobile = loginRequest.getAppMobilePayload().getMobile();
+        Integer otp = loginRequest.getAppMobilePayload().getOtp();
 
         if (!checkOtp(mobile, otp)) {
             return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
@@ -67,9 +70,9 @@ public class WebMobileLoginExecutor implements LoginExecutor{
     /**
      * 判断验证码是否正确
      *
-     * @param mobile 手机号
-     * @param otp    验证码
-     * @return 正确匹配返回true
+     * @param mobile    手机号
+     * @param otp       验证码
+     * @return          正确匹配返回true
      */
     private Boolean checkOtp(String mobile, Integer otp) {
         RBucket<Integer> redisOtp = this.redissonClient.getBucket(MOBILE_PHONE_OTP + mobile);
@@ -81,7 +84,7 @@ public class WebMobileLoginExecutor implements LoginExecutor{
     }
 
     /**
-     * 根据手机号获取或者创建 H5用户信息
+     * 根据手机号获取或者创建 APP/官网 用户信息
      *
      * @param mobile 手机号
      * @return {@link UserMessage}
@@ -93,9 +96,12 @@ public class WebMobileLoginExecutor implements LoginExecutor{
                     if (userMessage.getLocked()) {
                         throw new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN);
                     }
+                    if (userMessage.getState() == UserState.USER_H5_MOBILE_VALUE) {
+                        this.userService.updateUserStateMono(userMessage.getId(), UserState.USER_APP_MOBILE_VALUE).subscribe();
+                    }
                     return userMessage;
                 })
-                .switchIfEmpty(this.userService.createUserByMobileAndStateMono(mobile, UserState.USER_H5_MOBILE_VALUE));
+                .switchIfEmpty(this.userService.createUserByMobileAndStateMono(mobile, UserState.USER_APP_MOBILE_VALUE));
     }
 
 }

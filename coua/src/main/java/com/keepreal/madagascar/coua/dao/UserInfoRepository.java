@@ -41,9 +41,7 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
 
     UserInfo findTopByMobileAndDeletedIsFalse(String mobile);
 
-    UserInfo findTopByUnionIdNotAndMobileEqualsAndDeletedIsFalse(String unionId, String mobile);
-
-    UserInfo findTopByMobileAndUnionIdEqualsAndDeletedIsFalse(String mobile, String unionId);
+    UserInfo findTopByMobileAndStateEqualsAndDeletedIsFalse(String mobile, Integer state);
 
     @Query(value = "SELECT u.id FROM user u LEFT JOIN user_identity i ON u.id = i.user_id WHERE u.nick_name LIKE ?1% ORDER BY i.identity_type DESC", nativeQuery = true)
     Page<String> findUserIdByNameOrderByIdentity(String username, Pageable pageable);

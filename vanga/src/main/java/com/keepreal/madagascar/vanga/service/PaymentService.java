@@ -170,6 +170,22 @@ public class PaymentService {
         return this.paymentRepository.save(payment);
     }
 
+    @Transactional
+    public Payment createNewWechatFeedChargePayment(WechatOrder wechatOrder, String payeeId, long priceInCents) {
+        Payment payment = Payment.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .type(PaymentType.WECHATPAY.getValue())
+                .amountInCents(priceInCents)
+                .userId(wechatOrder.getUserId())
+                .state(PaymentState.DRAFTED.getValue())
+                .payeeId(payeeId)
+                .orderId(wechatOrder.getId())
+                .tradeNum(wechatOrder.getTradeNumber())
+                .build();
+
+        return this.paymentRepository.save(payment);
+    }
+
     /**
      * Creates new shell payments.
      *

@@ -145,6 +145,14 @@ message WithdrawPaymentsResponse {
   repeated UserWithdrawMessage userWithdraws = 3;
 }
 
+message FeedRequest {
+  string userId = 1;
+  string feedId = 2;
+  uint64 priceInCents = 3;
+  string payeeId = 4;
+  string ipAddress = 5;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
@@ -170,4 +178,5 @@ service PaymentService {
   rpc ActivateFeedPayment (ActivatePendingFeedPaymentRequest) returns (CommonStatus) {};
   rpc WechatRefundCallback (OrderCallbackRequest) returns (CommonStatus) {};
   rpc RetrieveSupportInfo (RetrieveSupportInfoRequest) returns (RetrieveSupportInfoResponse) {};
+  rpc SubmitFeedWithWechatPay(FeedRequest) returns (WechatOrderResponse) {};
 }

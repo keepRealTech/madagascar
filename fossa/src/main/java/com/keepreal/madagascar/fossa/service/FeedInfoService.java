@@ -46,6 +46,7 @@ public class FeedInfoService {
     private final FeedInfoRepository feedInfoRepository;
     private final ReactionRepository reactionRepository;
     private final SubscribeMembershipService subscribeMembershipService;
+    private final FeedChargeService feedChargeService;
 
     /**
      * Constructs the feed service
@@ -55,17 +56,20 @@ public class FeedInfoService {
      * @param feedInfoRepository         {@link FeedInfoRepository}.
      * @param reactionRepository         {@link ReactionRepository}.
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
+     * @param feedChargeService          {@link FeedChargeService}.
      */
     public FeedInfoService(MongoTemplate mongoTemplate,
                            CommentService commentService,
                            FeedInfoRepository feedInfoRepository,
                            ReactionRepository reactionRepository,
-                           SubscribeMembershipService subscribeMembershipService) {
+                           SubscribeMembershipService subscribeMembershipService,
+                           FeedChargeService feedChargeService) {
         this.mongoTemplate = mongoTemplate;
         this.commentService = commentService;
         this.feedInfoRepository = feedInfoRepository;
         this.reactionRepository = reactionRepository;
         this.subscribeMembershipService = subscribeMembershipService;
+        this.feedChargeService = feedChargeService;
     }
 
     /**
@@ -188,7 +192,11 @@ public class FeedInfoService {
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
-            builder.setIsAccess(true);
+            if (Objects.nonNull(feedInfo.getPriceInCents()) && feedInfo.getPriceInCents() > 0L) {
+                builder.setIsAccess(feedInfo.getFromHost() || this.feedChargeService.retrieveFeedChargeAccess(userId, feedInfo.getId()));
+            } else {
+                builder.setIsAccess(true);
+            }
             builder.addAllMembershipId(Collections.emptyList());
             builder.setIsMembership(false);
         } else {
