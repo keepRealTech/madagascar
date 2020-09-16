@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -53,7 +54,7 @@ public class StatisticsService {
         WorkflowLog workflowLog = this.workflowService.initialize("daily increment report");
 
         List<IslandIncrement> islandIncrements = this.subscriptionService.retrieveIslandIds();
-        if (islandIncrements.isEmpty()) {
+        if (Objects.isNull(islandIncrements) || islandIncrements.isEmpty()) {
             this.larkService.sendMessage("没有哦");
             this.workflowService.succeed(workflowLog);
             return;
@@ -83,6 +84,7 @@ public class StatisticsService {
                                 island.getIslanderNumber(),
                                 islandIncrementMap.getOrDefault(island.getId(), new BigInteger("0")).longValue());
                         sb.append(text);
+                        sb.append(System.getProperty("line.separator"));
                     });
 
             this.larkService.sendMessage(sb.toString());

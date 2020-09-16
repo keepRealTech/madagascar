@@ -27,10 +27,12 @@ global:
     wechat_pay:
       callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/callback
       refund_callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/refund/callback
+    ali_pay:
+      callback_address: https://islands.keepreal.cn/api/v1/orders/alipay/callback
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.2.6
+      tag: 1.3.0
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
@@ -66,7 +68,7 @@ global:
       imagePullPolicy: Always
     vanga:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
-      tag: 1.1.3
+      tag: 1.2.0
       imagePullPolicy: Always
     asity:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity

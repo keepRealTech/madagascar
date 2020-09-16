@@ -6,7 +6,7 @@ import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
-import com.keepreal.madagascar.vanga.model.WechatOrderState;
+import com.keepreal.madagascar.vanga.model.OrderState;
 import com.keepreal.madagascar.vanga.util.AutoRedisLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -73,7 +73,7 @@ public class ShellService {
     @Transactional
     public void buyShellWithWechat(WechatOrder wechatOrder, ShellSku sku) {
         if (Objects.isNull(wechatOrder)
-                || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()
+                || OrderState.SUCCESS.getValue() != wechatOrder.getState()
                 || Objects.isNull(sku)) {
             return;
         }

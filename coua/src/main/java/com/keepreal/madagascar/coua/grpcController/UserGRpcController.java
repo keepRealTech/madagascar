@@ -425,6 +425,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                         .setStatus(CommonStatusUtils.getSuccStatus()).build());
             }
             responseObserver.onCompleted();
+            return;
         }
 
         responseObserver.onNext(builder

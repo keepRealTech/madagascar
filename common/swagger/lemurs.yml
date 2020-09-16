@@ -842,20 +842,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
-  /api/v1/orders/aliPay/{id}/check:
+  /api/v1/orders/alipay/{id}/check:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
       tags:
         - Order
       summary: get the wechat order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayCheckRequest'
       responses:
         '200':
           description: wechat order
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WechatOrderResponse'
+                $ref: '#/components/schemas/AlipayOrderResponse'
   /api/v1/orders/ios:
     post:
       tags:
@@ -930,7 +936,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
-  /api/v1/islands/{id}/memberSubscription/aliPay:
+  /api/v1/islands/{id}/memberSubscription/alipay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
@@ -949,7 +955,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WechatOrderResponse'
+                $ref: '#/components/schemas/AlipayOrderResponse'
   /api/v1/islands/{id}/memberSubscription/iosPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -989,6 +995,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v1/islands/{id}/memberSubscription/alipay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支付宝h5会员订阅支付
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayH5SubscribeMemberRequest'
+      responses:
+        '200':
+          description: dummy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayOrderResponse'
   /api/v1/islands/{id}/memberSubscription/shellPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2066,7 +2092,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
-  /api/v1/islands/{id}/support/aliPay:
+  /api/v1/islands/{id}/support/alipay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
@@ -2085,7 +2111,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WechatOrderResponse'
+                $ref: '#/components/schemas/AlipayOrderResponse'
   /api/v1/islands/{id}/support/wechatPay/html5:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2108,6 +2134,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v1/islands/{id}/support/alipay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下h5微信支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayH5PostSupportRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayOrderResponse'
   /api/v1/islands/discovery:
     get:
       tags:
@@ -2227,24 +2273,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
-  /api/v1/feeds/{id}/aliPay:
+  /api/v1/feeds/{id}/alipay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
       tags:
         - Payment
-      summary: 单独解锁动态APP微信支付
+      summary: 单独解锁动态APP支付宝支付
       responses:
         '200':
           description: wechat order
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WechatOrderResponse'
+                $ref: '#/components/schemas/AlipayOrderResponse'
   /api/v1/feeds/{id}/wechatPay/html5:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
+      parameters:
+        - $ref: '#/components/parameters/sceneTypeInQuery'
       tags:
         - Payment
       summary: 单独解锁动态APP微信支付
@@ -2255,6 +2303,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v1/feeds/{id}/alipay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 单独解锁h5支付宝支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayH5PayFeedRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayOrderResponse'
   /api/v1/feeds/{id}/iosPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -3982,6 +4050,19 @@ components:
           type: string
       required:
         - membershipSkuId
+    AlipayH5SubscribeMemberRequest:
+      type: object
+      properties:
+        membershipSkuId:
+          type: string
+        quit_url:
+          type: string
+        return_url:
+          type: string
+      required:
+        - membershipSkuId
+        - quit_url
+        - return_url
     BalanceDTO:
       type: object
       properties:
@@ -4964,8 +5045,25 @@ components:
           format: int64
       required:
         - sponsorSkuId
-        - priceInCents
-        - priceInShells
+    AlipayH5PostSupportRequest:
+      type: object
+      properties:
+        sponsorSkuId:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
+        priceInShells:
+          type: integer
+          format: int64
+        quitUrl:
+          type: string
+        returnUrl:
+          type: string
+      required:
+        - sponsorSkuId
+        - quitUrl
+        - returnUrl
     H5RedirectDTO:
       type: object
       properties:
@@ -5128,3 +5226,37 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/BonusDTO'
+    AlipayH5PayFeedRequest:
+      type: object
+      properties:
+        quitUrl:
+          type: string
+        returnUrl:
+          type: string
+      required:
+        - quitUrl
+        - returnUrl
+    AlipayCheckRequest:
+      type: object
+      properties:
+        receipt:
+          type: string
+    AlipayOrderDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        orderString:
+          type: string
+        feeInCents:
+          type: integer
+          format: int64
+        state:
+          $ref: '#/components/schemas/OrderState'
+    AlipayOrderResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/AlipayOrderDTO'

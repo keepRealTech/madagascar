@@ -26,7 +26,7 @@ import javax.persistence.Transient;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Table(name = "wechat_order")
-public class WechatOrder {
+public class WechatOrder implements Order {
 
     @Id
     private String id;

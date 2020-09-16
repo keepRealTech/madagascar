@@ -276,6 +276,7 @@ public class UserService {
      * @param otp       One time password.
      * @return {@link UserMessage}
      */
+    @CachePut(value = "UserMessage", key = "#userId", cacheManager = "redisCacheManager")
     public UserMessage updateUserMobilePhone(String userId, String mobile, Integer otp) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
