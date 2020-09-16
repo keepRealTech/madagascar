@@ -201,7 +201,7 @@ public class PaymentService {
     public List<Payment> createPayShellPayments(String userId, Integer withdrawPercent, MembershipSku sku, ZonedDateTime currentExpireTime) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
         List<Payment> payments =
-                IntStream.range(0, sku.getTimeInMonths())1
+                IntStream.range(0, sku.getTimeInMonths())
                         .mapToObj(i -> Payment.builder()
                                 .id(String.valueOf(this.idGenerator.nextId()))
                                 .type(PaymentType.SHELLPAY.getValue())

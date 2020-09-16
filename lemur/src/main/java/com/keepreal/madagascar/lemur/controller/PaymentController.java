@@ -1,7 +1,7 @@
 package com.keepreal.madagascar.lemur.controller;
 
-import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.AlipayOrderMessage;
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
@@ -10,8 +10,8 @@ import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.OrderDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.PaymentDTOFactory;
-import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.dtoFactory.SkuDTOFactory;
+import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.service.PaymentService;
@@ -27,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.PaymentApi;
+import swagger.model.AlipayH5PayFeedRequest;
 import swagger.model.AlipayH5PostSupportRequest;
 import swagger.model.AlipayH5SubscribeMemberRequest;
 import swagger.model.AlipayOrderResponse;
@@ -257,7 +258,7 @@ public class PaymentController implements PaymentApi {
     /**
      * Implements the get user withdraw history method.
      *
-     * @param page page number (optional, default to 0).
+     * @param page     page number (optional, default to 0).
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link UserWithdrawsResponse}.
      */
@@ -467,17 +468,114 @@ public class PaymentController implements PaymentApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the feed wechat pay api.
+     *
+     * @param id id (required) Feed id.
+     * @return {@link WechatOrderResponse}.
+     */
     @Override
     public ResponseEntity<WechatOrderResponse> apiV1FeedsIdWechatPayPost(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        String ipAddress = HttpContextUtils.getRemoteIpFromContext();
+        String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
 
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
 
-        WechatOrderMessage wechatOrderMessage = this.paymentService.submitFeedWithWechatPay(userId, id, feedMessage.getPriceInCents(), feedMessage.getHostId(), ipAddress);
+        WechatOrderMessage wechatOrderMessage = this.paymentService.submitFeedWithWechatPay(
+                userId,
+                id,
+                feedMessage.getPriceInCents(),
+                feedMessage.getHostId(),
+                remoteAddress);
 
         WechatOrderResponse response = new WechatOrderResponse();
         response.setData(this.orderDTOFactory.wechatOrderValueOf(wechatOrderMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the feed wechat h5 pay api.
+     *
+     * @param id id (required) Feed id.
+     * @return {@link H5RedirectResponse}.
+     */
+    @Override
+    public ResponseEntity<H5WechatOrderResponse> apiV1FeedsIdWechatPayHtml5Post(String id, SceneType sceneType) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
+
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+
+        RedirectResponse redirectResponse = this.paymentService.submitFeedWithWechatPayH5(
+                userId,
+                id,
+                feedMessage.getPriceInCents(),
+                feedMessage.getHostId(),
+                remoteAddress,
+                this.convertType(sceneType));
+
+        H5WechatOrderDTO data = new H5WechatOrderDTO();
+        data.setUrl(redirectResponse.getRedirectUrl());
+        data.setOrderId(redirectResponse.getOrderId());
+
+        H5WechatOrderResponse response = new H5WechatOrderResponse();
+        response.setData(data);
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the feeds alipay api.
+     *
+     * @param id id (required) Feed id.
+     * @return {@link AlipayOrderResponse}.
+     */
+    @Override
+    public ResponseEntity<AlipayOrderResponse> apiV1FeedsIdAlipayPost(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+
+        AlipayOrderMessage alipayOrderMessage = this.paymentService.submitFeedWithAlipay(
+                userId,
+                id,
+                feedMessage.getPriceInCents(),
+                feedMessage.getHostId());
+
+        AlipayOrderResponse response = new AlipayOrderResponse();
+        response.setData(this.orderDTOFactory.alipayOrderValueOf(alipayOrderMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the feeds alipay html api.
+     *
+     * @param id id (required) Feed id.
+     * @return {@link AlipayOrderResponse}.
+     */
+    @CrossOrigin
+    @Override
+    public ResponseEntity<AlipayOrderResponse> apiV1FeedsIdAlipayHtml5Post(String id,
+                                                                           AlipayH5PayFeedRequest alipayH5PayFeedRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+
+        AlipayOrderMessage alipayOrderMessage = this.paymentService.submitFeedWithAlipayH5(
+                userId,
+                id,
+                feedMessage.getPriceInCents(),
+                feedMessage.getHostId(),
+                alipayH5PayFeedRequest.getReturnUrl(),
+                alipayH5PayFeedRequest.getQuitUrl());
+
+        AlipayOrderResponse response = new AlipayOrderResponse();
+        response.setData(this.orderDTOFactory.alipayOrderValueOf(alipayOrderMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

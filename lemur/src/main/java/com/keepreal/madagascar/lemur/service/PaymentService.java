@@ -358,7 +358,7 @@ public class PaymentService {
      * Retrieves support stats infos.
      *
      * @param userId Host id.
-     * @return  {@link SupportMessage}.
+     * @return {@link SupportMessage}.
      */
     public SupportMessage retrieveSupportInfo(String userId) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
@@ -388,19 +388,34 @@ public class PaymentService {
         return response.getMessage();
     }
 
-    public WechatOrderMessage submitFeedWithWechatPay(String userId, String feedId, Long priceInCents, String payeeId, String ipAddress) {
+    /**
+     * Submits the wechat pay for feed.
+     *
+     * @param userId       User id.
+     * @param feedId       Feed id.
+     * @param priceInCents Price in cents.
+     * @param payeeId      Payee id.
+     * @param ipAddress    Ip address.
+     * @return {@link WechatOrderResponse}.
+     */
+    public WechatOrderMessage submitFeedWithWechatPay(String userId,
+                                                      String feedId,
+                                                      Long priceInCents,
+                                                      String payeeId,
+                                                      String ipAddress) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
-        WechatOrderResponse response;
+        FeedRequest request = FeedRequest.newBuilder()
+                .setUserId(userId)
+                .setFeedId(feedId)
+                .setPriceInCents(priceInCents)
+                .setPayeeId(payeeId)
+                .setIpAddress(ipAddress)
+                .build();
 
+        WechatOrderResponse response;
         try {
-            response = stub.submitFeedWithWechatPay(FeedRequest.newBuilder()
-                    .setUserId(userId)
-                    .setFeedId(feedId)
-                    .setPriceInCents(priceInCents)
-                    .setPayeeId(payeeId)
-                    .setIpAddress(ipAddress)
-                    .build());
+            response = stub.submitFeedWithWechatPay(request);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
@@ -416,6 +431,54 @@ public class PaymentService {
         }
 
         return response.getWechatOrder();
+    }
+
+    /**
+     * Submits the wechat pay h5 for feed.
+     *
+     * @param userId       User id.
+     * @param feedId       Feed id.
+     * @param priceInCents Price in cents.
+     * @param payeeId      Payee id.
+     * @param ipAddress    Ip address.
+     * @param sceneType    {@link SceneType}.
+     * @return {@link RedirectResponse}.
+     */
+    public RedirectResponse submitFeedWithWechatPayH5(String userId,
+                                                      String feedId,
+                                                      Long priceInCents,
+                                                      String payeeId,
+                                                      String ipAddress,
+                                                      SceneType sceneType) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        FeedRequest request = FeedRequest.newBuilder()
+                .setUserId(userId)
+                .setFeedId(feedId)
+                .setPriceInCents(priceInCents)
+                .setPayeeId(payeeId)
+                .setIpAddress(ipAddress)
+                .setSceneType(sceneType)
+                .build();
+
+        RedirectResponse response;
+        try {
+            response = stub.submitFeedWithWechatPayH5(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create feed wechat order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
     }
 
     /**
@@ -575,6 +638,96 @@ public class PaymentService {
         if (Objects.isNull(response)
                 || !response.hasStatus()) {
             log.error(Objects.isNull(response) ? "Create alipay order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getAlipayOrder();
+    }
+
+    /**
+     * Submits the alipay for feed.
+     *
+     * @param userId       User id.
+     * @param feedId       Feed id.
+     * @param priceInCents Price in cents.
+     * @param payeeId      Payee id.
+     * @return {@link AlipayOrderMessage}.
+     */
+    public AlipayOrderMessage submitFeedWithAlipay(String userId,
+                                                   String feedId,
+                                                   Long priceInCents,
+                                                   String payeeId) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        FeedRequest request = FeedRequest.newBuilder()
+                .setUserId(userId)
+                .setFeedId(feedId)
+                .setPriceInCents(priceInCents)
+                .setPayeeId(payeeId)
+                .build();
+
+        AlipayOrderResponse response;
+        try {
+            response = stub.submitFeedWithAlipay(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create feed alipay order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getAlipayOrder();
+    }
+
+    /**
+     * Submits the alipay h5 for feed.
+     *
+     * @param userId       User id.
+     * @param feedId       Feed id.
+     * @param priceInCents Price in cents.
+     * @param payeeId      Payee id.
+     * @param returnUrl    Return url.
+     * @param quitUrl      Quit url.
+     * @return {@link AlipayOrderMessage}.
+     */
+    public AlipayOrderMessage submitFeedWithAlipayH5(String userId,
+                                                     String feedId,
+                                                     Long priceInCents,
+                                                     String payeeId,
+                                                     String returnUrl,
+                                                     String quitUrl) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        FeedRequest request = FeedRequest.newBuilder()
+                .setUserId(userId)
+                .setFeedId(feedId)
+                .setPriceInCents(priceInCents)
+                .setPayeeId(payeeId)
+                .setReturnUrl(returnUrl)
+                .setQuitUrl(quitUrl)
+                .build();
+
+        AlipayOrderResponse response;
+        try {
+            response = stub.submitFeedWithAlipayH5(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create feed alipay order returned null." : response.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 

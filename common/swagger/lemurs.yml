@@ -2279,7 +2279,7 @@ paths:
     post:
       tags:
         - Payment
-      summary: 单独解锁动态APP微信支付
+      summary: 单独解锁动态APP支付宝支付
       responses:
         '200':
           description: wechat order
@@ -2291,6 +2291,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
+      parameters:
+        - $ref: '#/components/parameters/sceneTypeInQuery'
       tags:
         - Payment
       summary: 单独解锁动态APP微信支付
@@ -2301,6 +2303,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v1/feeds/{id}/alipay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 单独解锁h5支付宝支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayH5PayFeedRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayOrderResponse'
   /api/v1/feeds/{id}/iosPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -5204,6 +5226,16 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/BonusDTO'
+    AlipayH5PayFeedRequest:
+      type: object
+      properties:
+        quitUrl:
+          type: string
+        returnUrl:
+          type: string
+      required:
+        - quitUrl
+        - returnUrl
     AlipayCheckRequest:
       type: object
       properties:

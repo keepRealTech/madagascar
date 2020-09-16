@@ -150,7 +150,10 @@ message FeedRequest {
   string feedId = 2;
   uint64 priceInCents = 3;
   string payeeId = 4;
-  string ipAddress = 5;
+  SceneType sceneType = 5;
+  string ipAddress = 6;
+  string quitUrl = 7;
+  string returnUrl = 8;
 }
 
 service PaymentService {
@@ -179,4 +182,8 @@ service PaymentService {
   rpc WechatRefundCallback (OrderCallbackRequest) returns (CommonStatus) {};
   rpc RetrieveSupportInfo (RetrieveSupportInfoRequest) returns (RetrieveSupportInfoResponse) {};
   rpc SubmitFeedWithWechatPay(FeedRequest) returns (WechatOrderResponse) {};
+  rpc SubmitFeedWithWechatPayH5 (FeedRequest) returns (RedirectResponse) {};
+  rpc SubmitFeedWithAlipay (FeedRequest) returns (AlipayOrderResponse) {};
+  rpc SubmitFeedWithAlipayH5 (FeedRequest) returns (AlipayOrderResponse) {};
+
 }
