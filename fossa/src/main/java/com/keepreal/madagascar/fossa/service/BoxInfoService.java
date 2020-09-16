@@ -39,8 +39,17 @@ public class BoxInfoService {
         return boxInfoRepository.save(boxInfo);
     }
 
-    public void addAnsweredQuestionCount(String islandId) {
+    public void addAnsweredQuestionCount(String islandId, String hostId) {
         BoxInfo boxInfo = this.boxInfoRepository.findBoxInfoByIslandId(islandId);
+        if (boxInfo == null) {
+            boxInfo = new BoxInfo();
+            boxInfo.setId(String.valueOf(idGenerator.nextId()));
+            boxInfo.setIslandId(islandId);
+            boxInfo.setEnabled(true);
+            boxInfo.setMembershipIds("");
+            boxInfo.setAnsweredQuestionCount(0);
+            boxInfo.setHostId(hostId);
+        }
         boxInfo.setAnsweredQuestionCount(boxInfo.getAnsweredQuestionCount() + 1);
         this.boxInfoRepository.save(boxInfo);
     }
