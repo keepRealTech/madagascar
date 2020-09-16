@@ -80,9 +80,9 @@ public class PaymentMessageFactory {
         }
 
         switch (state) {
-            case 1:
-                return PaymentState.PAYMENT_STATE_OPEN;
             case 2:
+                return PaymentState.PAYMENT_STATE_OPEN;
+            case 3:
                 return PaymentState.PAYMENT_STATE_CLOSED;
             default:
                 return PaymentState.UNRECOGNIZED;
