@@ -154,6 +154,9 @@ public class FeedInfoService {
      * @return {@link FeedMessage}.
      */
     public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
+        if (feedInfo == null) {
+            return null;
+        }
         List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(userId, feedInfo.getIslandId());
         return this.getFeedMessage(feedInfo, userId, myMembershipIds);
     }
