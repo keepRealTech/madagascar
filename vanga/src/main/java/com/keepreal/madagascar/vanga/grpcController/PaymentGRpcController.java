@@ -379,11 +379,13 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.subscribeMembershipService.subscribeMembershipWithOrder(alipayOrder, PaymentType.ALIPAY);
                 break;
             case PAYSUPPORT:
-            case PAYSUPPORTH5: {
+            case PAYSUPPORTH5:
                 alipayOrder = this.alipayService.tryUpdateOrder(alipayOrder);
                 this.supportService.supportWithOrder(alipayOrder);
                 break;
-            }
+            case PAYFEEDCHARGE:
+                alipayOrder = this.alipayService.tryUpdateOrder(alipayOrder);
+                this.feedChargeService.feedChargeWithWechatOrder(alipayOrder);
             default:
         }
 
@@ -1048,7 +1050,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
                     .build();
-            this.paymentService.createNewWechatFeedChargePayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+            this.paymentService.createNewFeedChargePayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
         } else {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
@@ -1085,10 +1087,80 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setRedirectUrl(wechatOrder.getMwebUrl())
                     .setOrderId(wechatOrder.getId())
                     .build();
-            this.paymentService.createNewWechatFeedChargePayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+            this.paymentService.createNewFeedChargePayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
         } else {
             response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Submits pay feed with ali app pay.
+     *
+     * @param request          {@link FeedRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
+     */
+    @Override
+    public void submitFeedWithAlipay(FeedRequest request,
+                                     StreamObserver<AlipayOrderResponse> responseObserver) {
+        AlipayOrder alipayOrder = this.alipayService.tryPlaceOrderApp(
+                request.getUserId(),
+                request.getFeedId(),
+                String.valueOf(request.getPriceInCents()),
+                String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""),
+                OrderType.PAYFEEDCHARGE);
+
+        AlipayOrderResponse response;
+        if (Objects.nonNull(alipayOrder)) {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
+                    .build();
+            this.paymentService.createNewFeedChargePayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Submits pay feed with ali html pay.
+     *
+     * @param request          {@link FeedRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
+     */
+    @Override
+    public void submitFeedWithAlipayH5(FeedRequest request,
+                                       StreamObserver<AlipayOrderResponse> responseObserver) {
+        AlipayOrder alipayOrder = this.alipayService.tryPlaceOrderH5(
+                request.getUserId(),
+                request.getFeedId(),
+                String.valueOf(request.getPriceInCents()),
+                String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""),
+                OrderType.PAYFEEDCHARGE,
+                request.getReturnUrl(),
+                request.getQuitUrl());
+
+        AlipayOrderResponse response;
+        if (Objects.nonNull(alipayOrder)) {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
+                    .build();
+            this.paymentService.createNewFeedChargePayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
                     .build();
         }
 

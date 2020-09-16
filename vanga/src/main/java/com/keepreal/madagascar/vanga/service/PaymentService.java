@@ -171,17 +171,17 @@ public class PaymentService {
     }
 
     @Transactional
-    public Payment createNewWechatFeedChargePayment(WechatOrder wechatOrder, String payeeId, long priceInCents) {
+    public Payment createNewFeedChargePayment(Order order, String payeeId, long priceInCents) {
         Balance payeeBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payeeId);
         Payment payment = Payment.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .type(PaymentType.WECHATPAY.getValue())
                 .amountInCents(priceInCents)
-                .userId(wechatOrder.getUserId())
+                .userId(order.getUserId())
                 .state(PaymentState.DRAFTED.getValue())
                 .payeeId(payeeId)
-                .orderId(wechatOrder.getId())
-                .tradeNum(wechatOrder.getTradeNumber())
+                .orderId(order.getId())
+                .tradeNum(order.getTradeNumber())
                 .withdrawPercent(payeeBalance.getWithdrawPercent())
                 .build();
 
