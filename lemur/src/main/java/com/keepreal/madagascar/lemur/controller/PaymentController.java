@@ -263,6 +263,7 @@ public class PaymentController implements PaymentApi {
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link UserWithdrawsResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<UserWithdrawsResponse> apiV1PaymentsWithdrawsGet(Integer page, Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -506,6 +507,7 @@ public class PaymentController implements PaymentApi {
      * @param id id (required) Feed id.
      * @return {@link H5RedirectResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<H5WechatOrderResponse> apiV1FeedsIdWechatPayHtml5Post(String id, SceneType sceneType) {
         String userId = HttpContextUtils.getUserIdFromContext();

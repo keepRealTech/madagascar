@@ -174,6 +174,7 @@ public class FeedController implements FeedApi {
      * @param id id (required) Feed id.
      * @return {@link FullFeedResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<FullFeedResponse> apiV1FeedsIdGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
