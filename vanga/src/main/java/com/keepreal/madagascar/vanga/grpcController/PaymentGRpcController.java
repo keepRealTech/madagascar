@@ -1075,7 +1075,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 String.valueOf(request.getPriceInCents()),
                 request.getFeedId(),
                 OrderType.PAYFEEDCHARGEH5,
-                null,
+                request.getSceneType(),
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
                         Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""));
