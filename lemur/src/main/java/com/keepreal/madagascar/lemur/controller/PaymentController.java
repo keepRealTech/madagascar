@@ -461,7 +461,7 @@ public class PaymentController implements PaymentApi {
                 remoteAddress);
 
         WechatOrderResponse response = new WechatOrderResponse();
-        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
+        response.setData(this.orderDTOFactory.wechatOrderValueOf(wechatOrderMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

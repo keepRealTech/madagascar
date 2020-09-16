@@ -2,7 +2,6 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.AlipayOrderMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
-import com.keepreal.madagascar.common.WechatOrderState;
 import org.springframework.stereotype.Component;
 import swagger.model.AlipayOrderDTO;
 import swagger.model.OrderState;
@@ -64,9 +63,9 @@ public class OrderDTOFactory {
     }
 
     /**
-     * Converts the {@link WechatOrderState} into {@link OrderState}.
+     * Converts the {@link OrderState} into {@link OrderState}.
      *
-     * @param wechatOrderState {@link WechatOrderState}.
+     * @param wechatOrderState {@link OrderState}.
      * @return {@link OrderState}.
      */
     private OrderState convert(com.keepreal.madagascar.common.OrderState wechatOrderState) {

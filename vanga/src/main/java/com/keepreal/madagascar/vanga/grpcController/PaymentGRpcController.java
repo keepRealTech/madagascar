@@ -41,11 +41,9 @@ import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.PaymentType;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
-import com.keepreal.madagascar.vanga.model.WechatOrderState;
-import com.keepreal.madagascar.vanga.model.WechatOrderType;
-import com.keepreal.madagascar.vanga.service.FeedChargeService;
 import com.keepreal.madagascar.vanga.service.AlipayOrderService;
 import com.keepreal.madagascar.vanga.service.AlipayService;
+import com.keepreal.madagascar.vanga.service.FeedChargeService;
 import com.keepreal.madagascar.vanga.service.FeedService;
 import com.keepreal.madagascar.vanga.service.MpWechatPayService;
 import com.keepreal.madagascar.vanga.service.PaymentService;
@@ -340,7 +338,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                                         StreamObserver<AlipayOrderResponse> responseObserver) {
         AlipayOrder alipayOrder;
         if (request.hasAlipayReceipt()) {
-            Type type = new TypeToken<Map<String, Object>>(){}.getType();
+            Type type = new TypeToken<Map<String, Object>>() {
+            }.getType();
             Map<String, Object> resultMap = this.gson.fromJson(request.getAlipayReceipt().getValue(), type);
 
             Map<String, String> paramMap = (Map) resultMap.get("alipay_trade_app_pay_response");
@@ -425,10 +424,12 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 break;
             case PAYSUPPORT:
-            case PAYSUPPORTH5: {
+            case PAYSUPPORTH5:
                 this.supportService.supportWithOrder(wechatOrder);
                 break;
-            }
+            case FEEDCHARGE:
+                this.feedChargeService.feedChargeWithWechatOrder(wechatOrder);
+                break;
             default:
         }
 
@@ -464,7 +465,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 break;
             }
             case FEEDCHARGE:
-                this.feedChargeService.feedChargeWithWechatOrder(wechatOrder);
+                this.feedChargeService.feedChargeWithWechatOrder(alipayOrder);
                 break;
             default:
         }
@@ -677,8 +678,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     /**
      * Implements the user withdraw history.
      *
-     * @param request           {@link RetrieveUserPaymentsRequest}.
-     * @param responseObserver  {@link WithdrawPaymentsResponse}.
+     * @param request          {@link RetrieveUserPaymentsRequest}.
+     * @param responseObserver {@link WithdrawPaymentsResponse}.
      */
     @Override
     public void retrieveUserWithdraws(RetrieveUserPaymentsRequest request,
@@ -826,8 +827,8 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     /**
      * Implements the H5 alipay member subscription.
      *
-     * @param request           {@link SubscribeMembershipRequest}.
-     * @param responseObserver  {@link AlipayOrderResponse}.
+     * @param request          {@link SubscribeMembershipRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
      */
     @Override
     public void submitSubscribeMembershipWithAlipayH5(SubscribeMembershipRequest request,
@@ -1026,7 +1027,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(userId,
                 String.valueOf(priceInCents),
                 feedId,
-                WechatOrderType.FEEDCHARGE,
+                OrderType.FEEDCHARGE,
                 null,
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
@@ -1036,7 +1037,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         if (Objects.nonNull(wechatOrder)) {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
                     .build();
             this.paymentService.createNewWechatFeedChargePayment(wechatOrder, payeeId, priceInCents);
         } else {

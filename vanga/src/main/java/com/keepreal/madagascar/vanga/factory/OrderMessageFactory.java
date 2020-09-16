@@ -3,7 +3,6 @@ package com.keepreal.madagascar.vanga.factory;
 import com.keepreal.madagascar.common.AlipayOrderMessage;
 import com.keepreal.madagascar.common.OrderState;
 import com.keepreal.madagascar.common.WechatOrderMessage;
-import com.keepreal.madagascar.common.WechatOrderState;
 import com.keepreal.madagascar.vanga.model.AlipayOrder;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import org.springframework.stereotype.Component;
@@ -87,9 +86,9 @@ public class OrderMessageFactory {
     }
 
     /**
-     * Converts the value of {@link WechatOrderState} into {@link OrderState}.
+     * Converts the value of {@link OrderState} into {@link OrderState}.
      *
-     * @param wechatOrderState Value of {@link WechatOrderState}.
+     * @param wechatOrderState Value of {@link OrderState}.
      * @return {@link OrderState}.
      */
     private OrderState convert(Integer wechatOrderState) {
