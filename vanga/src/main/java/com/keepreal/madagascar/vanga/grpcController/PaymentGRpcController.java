@@ -311,7 +311,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.supportService.supportWithOrder(wechatOrder);
                 break;
             }
-            case FEEDCHARGE:
+            case PAYFEEDCHARGE:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
                 this.feedChargeService.feedChargeWithWechatOrder(wechatOrder);
                 break;
@@ -427,7 +427,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
             case PAYSUPPORTH5:
                 this.supportService.supportWithOrder(wechatOrder);
                 break;
-            case FEEDCHARGE:
+            case PAYFEEDCHARGE:
                 this.feedChargeService.feedChargeWithWechatOrder(wechatOrder);
                 break;
             default:
@@ -464,7 +464,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.supportService.supportWithOrder(alipayOrder);
                 break;
             }
-            case FEEDCHARGE:
+            case PAYFEEDCHARGE:
                 this.feedChargeService.feedChargeWithWechatOrder(alipayOrder);
                 break;
             default:
@@ -988,8 +988,15 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onCompleted();
     }
 
+    /**
+     * Submits an one time support with wechat H5.
+     *
+     * @param request          {@link SupportRequest}.
+     * @param responseObserver {@link RedirectResponse}.
+     */
     @Override
-    public void submitSupportWithWechatPayH5(SupportRequest request, StreamObserver<RedirectResponse> responseObserver) {
+    public void submitSupportWithWechatPayH5(SupportRequest request,
+                                             StreamObserver<RedirectResponse> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(request.getPriceInCents()),
                 request.getSponsorSkuId(),
@@ -1017,21 +1024,23 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onCompleted();
     }
 
+    /**
+     * Submits pay feed with wechat app pay.
+     *
+     * @param request          {@link FeedRequest}.
+     * @param responseObserver {@link WechatOrderResponse}.
+     */
     @Override
     public void submitFeedWithWechatPay(FeedRequest request, StreamObserver<WechatOrderResponse> responseObserver) {
-        String userId = request.getUserId();
-        String feedId = request.getFeedId();
-        long priceInCents = request.getPriceInCents();
-        String payeeId = request.getPayeeId();
-
-        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(userId,
-                String.valueOf(priceInCents),
-                feedId,
-                OrderType.FEEDCHARGE,
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(
+                request.getUserId(),
+                String.valueOf(request.getPriceInCents()),
+                request.getFeedId(),
+                OrderType.PAYFEEDCHARGE,
                 null,
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
-                        Long.valueOf(priceInCents).doubleValue() / 100).replace(".00", ""));
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""));
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -1039,9 +1048,46 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                     .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
                     .build();
-            this.paymentService.createNewWechatFeedChargePayment(wechatOrder, payeeId, priceInCents);
+            this.paymentService.createNewWechatFeedChargePayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
         } else {
             response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Submits pay feed with wechat app pay.
+     *
+     * @param request          {@link FeedRequest}.
+     * @param responseObserver {@link RedirectResponse}.
+     */
+    @Override
+    public void submitFeedWithWechatPayH5(FeedRequest request,
+                                          StreamObserver<RedirectResponse> responseObserver) {
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(
+                request.getUserId(),
+                String.valueOf(request.getPriceInCents()),
+                request.getFeedId(),
+                OrderType.PAYFEEDCHARGEH5,
+                null,
+                request.getIpAddress(),
+                String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""));
+
+        RedirectResponse response;
+        if (Objects.nonNull(wechatOrder)) {
+            response = RedirectResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setRedirectUrl(wechatOrder.getMwebUrl())
+                    .setOrderId(wechatOrder.getId())
+                    .build();
+            this.paymentService.createNewWechatFeedChargePayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
                     .build();
         }

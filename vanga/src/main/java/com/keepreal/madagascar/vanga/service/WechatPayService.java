@@ -1,13 +1,13 @@
 package com.keepreal.madagascar.vanga.service;
 
 import com.keepreal.madagascar.common.SceneType;
-import com.keepreal.madagascar.vanga.config.WechatPayConfiguration;
-import com.keepreal.madagascar.vanga.model.WechatOrder;
-import com.keepreal.madagascar.vanga.model.OrderState;
-import com.keepreal.madagascar.vanga.model.OrderType;
 import com.keepreal.madagascar.common.wechat_pay.WXPay;
 import com.keepreal.madagascar.common.wechat_pay.WXPayConstants;
 import com.keepreal.madagascar.common.wechat_pay.WXPayUtil;
+import com.keepreal.madagascar.vanga.config.WechatPayConfiguration;
+import com.keepreal.madagascar.vanga.model.OrderState;
+import com.keepreal.madagascar.vanga.model.OrderType;
+import com.keepreal.madagascar.vanga.model.WechatOrder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -51,11 +51,11 @@ public class WechatPayService {
     /**
      * Places a new wechat payment order with given metadata.
      *
-     * @param userId          User id.
-     * @param feeInCents      Cost in cents.
-     * @param propertyId      Property id.
-     * @param orderType {@link OrderType}.
-     * @param sceneType       {@link SceneType}.
+     * @param userId     User id.
+     * @param feeInCents Cost in cents.
+     * @param propertyId Property id.
+     * @param orderType  {@link OrderType}.
+     * @param sceneType  {@link SceneType}.
      * @return {@link WechatOrder}.
      */
     public WechatOrder tryPlaceOrder(String userId,
@@ -213,7 +213,7 @@ public class WechatPayService {
                 wechatOrder.setErrorMessage(response.get("return_msg"));
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
-            } else if (response.get("trade_state").equals(WXPayConstants.SUCCESS)){
+            } else if (response.get("trade_state").equals(WXPayConstants.SUCCESS)) {
                 wechatOrder.setState(OrderState.valueOf(response.get("trade_state")).getValue());
                 wechatOrder.setTransactionId(response.get("transaction_id"));
             }
@@ -354,7 +354,9 @@ public class WechatPayService {
      * @return True if it is h5 payment.
      */
     private boolean isH5Pay(OrderType type) {
-        return OrderType.PAYMEMBERSHIPH5.equals(type) || OrderType.PAYSUPPORTH5.equals(type);
+        return OrderType.PAYMEMBERSHIPH5.equals(type)
+                || OrderType.PAYSUPPORTH5.equals(type)
+                || OrderType.PAYFEEDCHARGEH5.equals(type);
     }
 
 }

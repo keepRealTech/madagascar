@@ -15,7 +15,8 @@ public enum OrderType {
     PAYMEMBERSHIPH5(4),
     PAYSUPPORT(5),
     PAYSUPPORTH5(6),
-    FEEDCHARGE(7),
+    PAYFEEDCHARGE(7),
+    PAYFEEDCHARGEH5(8),
     ;
     private final int value;
 
