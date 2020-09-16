@@ -108,6 +108,7 @@ public class FeedDTOFactory {
             feedDTO.setCreatedAt(feed.getCreatedAt());
             feedDTO.setIsLiked(feed.getIsLiked());
             feedDTO.setIsMembership(feed.getIsMembership());
+            feedDTO.setIsChargable(feed.getPriceInCents() > 0L);
             feedDTO.setIsTop(feed.getIsTop());
             feedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             feedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
@@ -131,6 +132,8 @@ public class FeedDTOFactory {
                     feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
                     feedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
                 }
+            } else {
+                feedDTO.setIsAccess(feed.getIsAccess());
             }
 
             feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
@@ -303,6 +306,7 @@ public class FeedDTOFactory {
             fullFeedDTO.setCreatedAt(feed.getCreatedAt());
             fullFeedDTO.setIsLiked(feed.getIsLiked());
             fullFeedDTO.setIsMembership(feed.getIsMembership());
+            fullFeedDTO.setIsChargable(feed.getPriceInCents() > 0L);
             fullFeedDTO.setIsTop(feed.getIsTop());
             fullFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
@@ -336,6 +340,8 @@ public class FeedDTOFactory {
                     fullFeedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
                     fullFeedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
                 }
+            } else {
+                fullFeedDTO.setIsAccess(feed.getIsAccess());
             }
             fullFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
             fullFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));

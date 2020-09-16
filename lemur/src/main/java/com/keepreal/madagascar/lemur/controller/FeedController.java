@@ -545,13 +545,18 @@ public class FeedController implements FeedApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        if (!CollectionUtils.isEmpty(postFeedRequestV2.getMembershipIds()) && postFeedRequestV2.getPriceInCents() != null && postFeedRequestV2.getPriceInCents() > 0L) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
         this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(),
                 postFeedRequestV2.getMembershipIds(),
                 userId,
                 MediaTypeConverter.convertToMediaType(mediaType),
                 postFeedRequestV2.getMultimedia(),
                 postFeedRequestV2.getText(),
-                postFeedRequestV2.getFeedGroupId());
+                postFeedRequestV2.getFeedGroupId(),
+                postFeedRequestV2.getPriceInCents());
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
