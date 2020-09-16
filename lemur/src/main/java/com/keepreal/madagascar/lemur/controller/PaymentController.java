@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.OrderDTOFactory;
@@ -481,6 +482,10 @@ public class PaymentController implements PaymentApi {
 
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
 
+        if (!feedMessage.getMembershipIdList().isEmpty() || feedMessage.getPriceInCents() <= 0L) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FEED_NOT_PAYABLE_ERROR);
+        }
+
         WechatOrderMessage wechatOrderMessage = this.paymentService.submitFeedWithWechatPay(
                 userId,
                 id,
@@ -507,6 +512,10 @@ public class PaymentController implements PaymentApi {
         String remoteAddress = HttpContextUtils.getRemoteIpFromContext();
 
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+
+        if (!feedMessage.getMembershipIdList().isEmpty() || feedMessage.getPriceInCents() <= 0L) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FEED_NOT_PAYABLE_ERROR);
+        }
 
         RedirectResponse redirectResponse = this.paymentService.submitFeedWithWechatPayH5(
                 userId,
@@ -539,6 +548,10 @@ public class PaymentController implements PaymentApi {
 
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
 
+        if (!feedMessage.getMembershipIdList().isEmpty() || feedMessage.getPriceInCents() <= 0L) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FEED_NOT_PAYABLE_ERROR);
+        }
+
         AlipayOrderMessage alipayOrderMessage = this.paymentService.submitFeedWithAlipay(
                 userId,
                 id,
@@ -565,6 +578,10 @@ public class PaymentController implements PaymentApi {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+
+        if (!feedMessage.getMembershipIdList().isEmpty() || feedMessage.getPriceInCents() <= 0L) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FEED_NOT_PAYABLE_ERROR);
+        }
 
         AlipayOrderMessage alipayOrderMessage = this.paymentService.submitFeedWithAlipayH5(
                 userId,
