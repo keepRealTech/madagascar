@@ -310,6 +310,7 @@ public class FeedDTOFactory {
             fullFeedDTO.setIsTop(feed.getIsTop());
             fullFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            fullFeedDTO.setPriceInCents(feed.getPriceInCents());
             if (!StringUtils.isEmpty(feedGroup.getId())) {
                 FeedGroupInfo feedGroupInfo = new FeedGroupInfo();
                 feedGroupInfo.setId(feedGroup.getId());
