@@ -172,6 +172,7 @@ public class PaymentService {
 
     @Transactional
     public Payment createNewWechatFeedChargePayment(WechatOrder wechatOrder, String payeeId, long priceInCents) {
+        Balance payeeBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payeeId);
         Payment payment = Payment.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .type(PaymentType.WECHATPAY.getValue())
@@ -181,6 +182,7 @@ public class PaymentService {
                 .payeeId(payeeId)
                 .orderId(wechatOrder.getId())
                 .tradeNum(wechatOrder.getTradeNumber())
+                .withdrawPercent(payeeBalance.getWithdrawPercent())
                 .build();
 
         return this.paymentRepository.save(payment);
@@ -199,7 +201,7 @@ public class PaymentService {
     public List<Payment> createPayShellPayments(String userId, Integer withdrawPercent, MembershipSku sku, ZonedDateTime currentExpireTime) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
         List<Payment> payments =
-                IntStream.range(0, sku.getTimeInMonths())
+                IntStream.range(0, sku.getTimeInMonths())1
                         .mapToObj(i -> Payment.builder()
                                 .id(String.valueOf(this.idGenerator.nextId()))
                                 .type(PaymentType.SHELLPAY.getValue())
