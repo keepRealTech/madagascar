@@ -50,7 +50,7 @@ public class ActivityGRpcController extends ActivityServiceGrpc.ActivityServiceI
         ActiveBannerMessage.Builder builder = ActiveBannerMessage.newBuilder();
         Boolean isIslandHost = request.getIsIslandHost();
 
-        if (Boolean.TRUE.equals(this.activityConfiguration.getShowLabel()) && Boolean.TRUE.equals(isIslandHost)) {
+        if (Boolean.TRUE.equals(this.activityConfiguration.getShowLabel()) && Boolean.FALSE.equals(isIslandHost)) {
             builder.setLabel(this.activityConfiguration.getText());
         }
 
