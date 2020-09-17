@@ -118,10 +118,6 @@ public class OrderController implements OrderApi {
     @Override
     public ResponseEntity<AlipayOrderResponse> apiV1OrdersAlipayIdCheckPost(String id,
                                                                             AlipayCheckRequest alipayCheckRequest) {
-        if (StringUtils.isEmpty(alipayCheckRequest.getReceipt())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-
         AlipayOrderMessage alipayOrder = this.orderService.retrieveAlipayOrderById(id, alipayCheckRequest.getReceipt());
 
         AlipayOrderResponse response = new AlipayOrderResponse();
