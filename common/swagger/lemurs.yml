@@ -5215,8 +5215,10 @@ components:
           type: integer
         toGain:
           type: integer
+          format: int64
         gained:
           type: integer
+          format: int64
     BonusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
