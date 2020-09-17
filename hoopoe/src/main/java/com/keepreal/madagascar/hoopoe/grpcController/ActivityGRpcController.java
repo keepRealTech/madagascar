@@ -48,14 +48,15 @@ public class ActivityGRpcController extends ActivityServiceGrpc.ActivityServiceI
     public void retrieveActiveBanner(RetrieveActiveBannerRequest request, StreamObserver<RetrieveActiveBannerResponse> responseObserver) {
         RetrieveActiveBannerResponse.Builder responseBuilder = RetrieveActiveBannerResponse.newBuilder();
         ActiveBannerMessage.Builder builder = ActiveBannerMessage.newBuilder();
+        Boolean isIslandHost = request.getIsIslandHost();
 
-        if (Boolean.TRUE.equals(this.activityConfiguration.getShowLabel())) {
+        if (Boolean.TRUE.equals(this.activityConfiguration.getShowLabel()) && Boolean.TRUE.equals(isIslandHost)) {
             builder.setLabel(this.activityConfiguration.getText());
         }
 
         List<Activity> activities = this.activityService.findAllAccessActivities()
                 .stream()
-                .filter(activity -> this.isVisible(activity, request.getIsIslandHost()))
+                .filter(activity -> this.isVisible(activity, isIslandHost))
                 .collect(Collectors.toList());
 
         this.convertBanners(builder, activities);
