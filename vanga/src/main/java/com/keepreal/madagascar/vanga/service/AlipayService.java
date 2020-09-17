@@ -59,7 +59,7 @@ public class AlipayService {
         config.alipayCertPath = this.alipayConfiguration.getAlipayCertPath();
         config.alipayRootCertPath = this.alipayConfiguration.getAlipayRootPath();
 
-//        Factory.setOptions(config);
+        Factory.setOptions(config);
     }
 
     /**

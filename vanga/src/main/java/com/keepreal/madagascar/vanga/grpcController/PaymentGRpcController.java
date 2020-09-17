@@ -73,8 +73,8 @@ import java.util.stream.Collectors;
 /**
  * Represents the payment grpc controller.
  */
-//@GRpcService
-//@Slf4j
+@GRpcService
+@Slf4j
 public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImplBase {
 
     private final static String SUPPORT_TEXT = "夏日炎炎，请TA吃个椰子吧";
