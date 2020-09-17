@@ -2,9 +2,12 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.hoopoe.ActiveBannerMessage;
 import com.keepreal.madagascar.hoopoe.SingleBannerMessage;
+import com.keepreal.madagascar.vanga.ActivityMessage;
+import com.keepreal.madagascar.vanga.RetrieveActivityBonusResponse;
 import org.springframework.stereotype.Component;
 import swagger.model.ActivityDTO;
 import swagger.model.BannerDTO;
+import swagger.model.BonusDTO;
 import swagger.model.LabelDTO;
 
 import java.util.Objects;
@@ -33,6 +36,14 @@ public class ActivityDTOFactory {
         activityDTO.setLabel(labelDTO);
         activityDTO.setBanners(message.getBannersList().stream().map(this::valueOf).collect(Collectors.toList()));
         return activityDTO;
+    }
+
+    public BonusDTO valueOf(ActivityMessage message) {
+        BonusDTO dto = new BonusDTO();
+        dto.setRatio(message.getRatio());
+        dto.setGained((int) message.getGained());
+        dto.setToGain((int) message.getToGain());
+        return dto;
     }
 
     /**

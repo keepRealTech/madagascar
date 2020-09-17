@@ -5223,9 +5223,7 @@ components:
         - type: object
           properties:
             data:
-              type: array
-              items:
-                $ref: '#/components/schemas/BonusDTO'
+              $ref: '#/components/schemas/BonusDTO'
     AlipayH5PayFeedRequest:
       type: object
       properties:
