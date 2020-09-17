@@ -306,12 +306,12 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 break;
             case PAYSUPPORT:
-            case PAYSUPPORTH5: {
+            case PAYSUPPORTH5:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
                 this.supportService.supportWithOrder(wechatOrder);
                 break;
-            }
             case PAYFEEDCHARGE:
+            case PAYFEEDCHARGEH5:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
                 this.feedChargeService.feedChargeWithWechatOrder(wechatOrder);
                 break;
@@ -384,6 +384,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.supportService.supportWithOrder(alipayOrder);
                 break;
             case PAYFEEDCHARGE:
+            case PAYFEEDCHARGEH5:
                 alipayOrder = this.alipayService.tryUpdateOrder(alipayOrder);
                 this.feedChargeService.feedChargeWithWechatOrder(alipayOrder);
             default:
@@ -430,6 +431,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.supportService.supportWithOrder(wechatOrder);
                 break;
             case PAYFEEDCHARGE:
+            case PAYFEEDCHARGEH5:
                 this.feedChargeService.feedChargeWithWechatOrder(wechatOrder);
                 break;
             default:
@@ -467,6 +469,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 break;
             }
             case PAYFEEDCHARGE:
+            case PAYFEEDCHARGEH5:
                 this.feedChargeService.feedChargeWithWechatOrder(alipayOrder);
                 break;
             default:
@@ -1075,7 +1078,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 String.valueOf(request.getPriceInCents()),
                 request.getFeedId(),
                 OrderType.PAYFEEDCHARGEH5,
-                null,
+                request.getSceneType(),
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
                         Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""));

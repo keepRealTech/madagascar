@@ -11,6 +11,7 @@ import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BillingInfoMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.BillingApi;
 import swagger.model.BalanceResponse;
@@ -58,6 +59,7 @@ public class BillingController implements BillingApi {
      *
      * @return {@link BalanceResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<BalanceResponse> apiV1BalancesMyWalletGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -92,6 +94,7 @@ public class BillingController implements BillingApi {
      *
      * @return {@link BillingInfoResponseV11}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<BillingInfoResponseV11> apiV11BillingInfoGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -134,6 +137,7 @@ public class BillingController implements BillingApi {
      *
      * @return {@link BillingInfoResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<BillingInfoResponseV11> apiV11BillingInfoPut(PutBillingInfoRequestV11 putBillingInfoRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -157,6 +161,7 @@ public class BillingController implements BillingApi {
      * @param postWithdrawRequest (required) {@link PostWithdrawRequest}.
      * @return {@link BalanceResponse}.
      */
+    @CrossOrigin
     @Override
     public ResponseEntity<BalanceResponse> apiV1BalancesWithdrawPost(PostWithdrawRequest postWithdrawRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
