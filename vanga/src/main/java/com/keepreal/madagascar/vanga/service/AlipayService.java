@@ -144,7 +144,7 @@ public class AlipayService {
             AlipayTradeWapPayResponse response = Factory.Payment.Wap().pay(
                     description,
                     tradeNum,
-                    this.convertCentsToYuan(feeInCents)
+                    this.convertCentsToYuan(feeInCents),
                     quitUrl,
                     returnUrl + alipayOrder.getId());
 
