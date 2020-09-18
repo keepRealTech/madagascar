@@ -63,8 +63,8 @@ public class AppMobileLoginExecutor implements LoginExecutor {
                         return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
                     }
                     return bucket.get()
-                            .flatMap(reidOtp -> {
-                                if (!otp.equals(reidOtp)) {
+                            .flatMap(redisOtp -> {
+                                if (!otp.equals(redisOtp)) {
                                     return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
                                 }
                                 return bucket.delete()
