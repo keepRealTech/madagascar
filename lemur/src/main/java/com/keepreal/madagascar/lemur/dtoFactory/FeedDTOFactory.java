@@ -26,6 +26,7 @@ import swagger.model.FullFeedDTO;
 import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -42,7 +43,6 @@ public class FeedDTOFactory {
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final CommentDTOFactory commentDTOFactory;
-    private final EhcacheService ehcacheService;
     private final MembershipService membershipService;
     private final MembershipDTOFactory membershipDTOFactory;
     private final MultiMediaDTOFactory multiMediaDTOFactory;
@@ -55,7 +55,6 @@ public class FeedDTOFactory {
      * @param userService          {@link UserService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param commentDTOFactory    {@link CommentDTOFactory}.
-     * @param ehcacheService       {@link EhcacheService}.
      * @param membershipService    {@link MembershipService}.
      * @param membershipDTOFactory {@link MembershipDTOFactory}.
      */
@@ -72,7 +71,6 @@ public class FeedDTOFactory {
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.commentDTOFactory = commentDTOFactory;
-        this.ehcacheService = ehcacheService;
         this.membershipService = membershipService;
         this.membershipDTOFactory = membershipDTOFactory;
         this.multiMediaDTOFactory = new MultiMediaDTOFactory(userService, userDTOFactory);
@@ -85,7 +83,19 @@ public class FeedDTOFactory {
      * @return {@link FeedDTO}.
      */
     public FeedDTO valueOf(FeedMessage feed) {
-        if (Objects.isNull(feed)) {
+        return this.valueOf(feed, true);
+    }
+
+    /**
+     * Converts the {@link FeedMessage} into {@link FeedDTO}.
+     *
+     * @param feed {@link FeedMessage}.
+     * @param includeChargeable Whether includes the chargeable feeds.
+     * @return {@link FeedDTO}.
+     */
+    public FeedDTO valueOf(FeedMessage feed, Boolean includeChargeable) {
+        if (Objects.isNull(feed)
+                || (!includeChargeable && feed.getPriceInCents() > 0L)) {
             return null;
         }
 
@@ -108,7 +118,7 @@ public class FeedDTOFactory {
             feedDTO.setCreatedAt(feed.getCreatedAt());
             feedDTO.setIsLiked(feed.getIsLiked());
             feedDTO.setIsMembership(feed.getIsMembership());
-            feedDTO.setIsChargable(feed.getPriceInCents() > 0L);
+            feedDTO.setIsChargeable(feed.getPriceInCents() > 0L);
             feedDTO.setIsTop(feed.getIsTop());
             feedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             feedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
@@ -280,9 +290,14 @@ public class FeedDTOFactory {
      * @param feedGroup  {@link FeedGroupMessage}.
      * @param lastFeedId Last feed id.
      * @param nextFeedId Next feed id.
+     * @param includeChargeable Whether includes the chargeable.
      * @return {@link FullFeedDTO}.
      */
-    public FullFeedDTO valueOf(FeedMessage feed, FeedGroupMessage feedGroup, String lastFeedId, String nextFeedId) {
+    public FullFeedDTO valueOf(FeedMessage feed,
+                               FeedGroupMessage feedGroup,
+                               String lastFeedId,
+                               String nextFeedId,
+                               Boolean includeChargeable) {
         if (Objects.isNull(feed)) {
             return null;
         }
@@ -306,7 +321,7 @@ public class FeedDTOFactory {
             fullFeedDTO.setCreatedAt(feed.getCreatedAt());
             fullFeedDTO.setIsLiked(feed.getIsLiked());
             fullFeedDTO.setIsMembership(feed.getIsMembership());
-            fullFeedDTO.setIsChargable(feed.getPriceInCents() > 0L);
+            fullFeedDTO.setIsChargeable(feed.getPriceInCents() > 0L);
             fullFeedDTO.setIsTop(feed.getIsTop());
             fullFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
@@ -346,6 +361,11 @@ public class FeedDTOFactory {
             }
             fullFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
             fullFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
+
+            if (feed.getPriceInCents() > 0 && !includeChargeable) {
+                fullFeedDTO.setMultimedia(Collections.emptyList());
+                fullFeedDTO.setText("该版本不支持此动态，请升级试试喔");
+            }
 
             return fullFeedDTO;
         } catch (KeepRealBusinessException exception) {

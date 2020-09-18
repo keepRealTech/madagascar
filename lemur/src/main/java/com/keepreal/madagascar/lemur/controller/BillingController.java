@@ -35,12 +35,13 @@ import java.util.Objects;
 @RestController
 public class BillingController implements BillingApi {
 
+    private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
     private final BillingInfoService billingInfoService;
     private final BillingInfoDTOFactory billingInfoDTOFactory;
-    private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
     private final BalanceService balanceService;
     private final BalanceDTOFactory balanceDTOFactory;
     private final PaymentService paymentService;
+    private final IOSClientConfiguration iosClientConfiguration;
 
     /**
      * Constructs the billing controller.
@@ -51,18 +52,21 @@ public class BillingController implements BillingApi {
      * @param balanceService         {@link BalanceService}.
      * @param balanceDTOFactory      {@link BalanceDTOFactory}.
      * @param paymentService         {@link PaymentService}.
+     * @param iosClientConfiguration1 {@link IOSClientConfiguration}.
      */
     public BillingController(BillingInfoService billingInfoService,
                              BillingInfoDTOFactory billingInfoDTOFactory,
                              IOSClientConfiguration iosClientConfiguration,
                              BalanceService balanceService,
                              BalanceDTOFactory balanceDTOFactory,
-                             PaymentService paymentService) {
+                             PaymentService paymentService,
+                             IOSClientConfiguration iosClientConfiguration1) {
         this.billingInfoService = billingInfoService;
         this.billingInfoDTOFactory = billingInfoDTOFactory;
         this.balanceService = balanceService;
         this.balanceDTOFactory = balanceDTOFactory;
         this.paymentService = paymentService;
+        this.iosClientConfiguration = iosClientConfiguration1;
         this.iOSConfigVersionMap.putAll(iosClientConfiguration.getVersionInfoMap());
     }
 
@@ -201,9 +205,9 @@ public class BillingController implements BillingApi {
 
         H5RedirectDTO data = new H5RedirectDTO();
         if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
-            data.setUrl("http://tt.keepreal.cn/my/wallet/notsupport");
+            data.setUrl(String.format("%s/app/my/wallet/notsupport", this.iosClientConfiguration.getHtmlHostName()));
         } else {
-            data.setUrl("http://tt.keepreal.cn/my/wallet");
+            data.setUrl(String.format("%s/app/my/wallet", this.iosClientConfiguration.getHtmlHostName()));
         }
 
         H5RedirectResponse response = new H5RedirectResponse();

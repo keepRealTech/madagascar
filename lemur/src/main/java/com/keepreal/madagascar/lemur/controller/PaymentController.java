@@ -352,9 +352,9 @@ public class PaymentController implements PaymentApi {
 
         H5RedirectDTO data = new H5RedirectDTO();
         if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
-            data.setUrl(String.format("http://tt.keepreal.cn/feed/unlock/%s/notsupport", id));
+            data.setUrl(String.format("%s/app/feed/unlock/%s/notsupport", this.iosClientConfiguration.getHtmlHostName(), id));
         } else {
-            data.setUrl(String.format("http://tt.keepreal.cn/feed/unlock/%s", id));
+            data.setUrl(String.format("%s/app/feed/unlock/%s", this.iosClientConfiguration.getHtmlHostName(), id));
         }
 
         H5RedirectResponse response = new H5RedirectResponse();
