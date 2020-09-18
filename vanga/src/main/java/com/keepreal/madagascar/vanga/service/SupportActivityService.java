@@ -33,11 +33,11 @@ public class SupportActivityService {
         Long amount = supportActivity.getAmount();
         Boolean createFeed = supportActivity.getCreateFeed();
 
+        long gained = amount * activityPercent / 100;
         if (createFeed) {
-            amount += CREATE_FEED_CENTS;
+            gained += CREATE_FEED_CENTS;
         }
 
-        long gained = amount * activityPercent / 100;
         long toGain = TOTAL_CENTS - gained;
 
         return ActivityMessage.newBuilder()
