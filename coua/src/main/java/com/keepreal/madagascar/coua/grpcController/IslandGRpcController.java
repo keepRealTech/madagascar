@@ -553,8 +553,18 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         ProtocolStringList islandIdsList = request.getIslandIdsList();
         Map<String, Boolean> stateMap = new HashMap<>();
         islandIdsList.forEach(id -> stateMap.put(id, false));
+
+        // Updates by user subscription
         List<String> islandIdList = subscriptionService.getSubscribeIslandIdByUserId(userId, islandIdsList);
         islandIdList.forEach(id -> stateMap.put(id, true));
+
+        // Updates by island type
+        List<IslandInfo> islandInfos = this.islandInfoService.retrieveByIslandIds(islandIdsList);
+        islandInfos.stream()
+                .filter(islandInfo -> islandInfo.getIslandAccessType() == IslandAccessType.ISLAND_ACCESS_PUBLIC_VALUE)
+                .map(IslandInfo::getId)
+                .forEach(id -> stateMap.put(id, true));
+        
         RetrieveUserSubscriptionStateResponse response = RetrieveUserSubscriptionStateResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .putAllStateMap(stateMap)

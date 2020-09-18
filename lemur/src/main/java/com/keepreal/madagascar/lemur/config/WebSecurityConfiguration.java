@@ -59,7 +59,8 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                         "/api/v1/membership/{\\d+}/skus**",
                         "/api/v1/islands/{\\d+}/support**",
                         "/api/v1/islands/{\\d+}/boxes**",
-                        "/api/v1/islands/{\\d+}/reposts/generateCode**"
+                        "/api/v1/islands/{\\d+}/reposts/generateCode**",
+                        "/api/v1/islands/{\\d+}/feeds/snapshot"
                         ).permitAll()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .anyRequest().authenticated();
