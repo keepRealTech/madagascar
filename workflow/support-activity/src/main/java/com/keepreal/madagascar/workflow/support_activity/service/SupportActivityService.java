@@ -24,7 +24,7 @@ public class SupportActivityService {
     private final MongoTemplate mongoTemplate;
 
     private final static int MAX_CENTS = 5000;
-    private final static long STARTED_TIME = 1599494400000L;
+    private final static long STARTED_TIME = 1599494400000L; //2020-09-08 00:00:00
 
     public SupportActivityService(SupportActivityRepository supportActivityRepository,
                                   IslandRepository islandRepository,
