@@ -1,6 +1,6 @@
-package com.keepreal.madagascar.workflow.support_activity.repository;
+package com.keepreal.madagascar.workflow.support_activity.repository.vanga;
 
-import com.keepreal.madagascar.workflow.support_activity.model.SupportActivity;
+import com.keepreal.madagascar.workflow.support_activity.model.vanga.SupportActivity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
