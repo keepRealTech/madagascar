@@ -56,6 +56,9 @@ public class OrderCallbackController {
     public void apiV1OrdersWechatCallback(HttpServletRequest request, HttpServletResponse response) {
         try {
             String requestXml = IOUtils.toString(request.getInputStream(), Charset.forName(request.getCharacterEncoding()));
+
+            log.warn(requestXml);
+
             this.orderService.wechatOrderCallback(requestXml);
 
             BufferedOutputStream out = new BufferedOutputStream(response.getOutputStream());
@@ -96,8 +99,6 @@ public class OrderCallbackController {
     @RequestMapping(value = "/api/v1/orders/alipay/callback", method = RequestMethod.POST)
     @ResponseBody
     public String apiV1OrdersAlipayCallback(HttpServletRequest request) {
-        log.warn("GETTTTTTING ALIPAY ASYNC CALLBACK");
-
         Map<String, String> retMap = new HashMap<>();
         Set<Map.Entry<String, String[]>> entrySet = request.getParameterMap().entrySet();
 

@@ -204,7 +204,7 @@ public class RongCloudService {
         TxtMessage hostTextMessage = new TxtMessage(
                 String.format(RongCloudService.HOST_TEMPLATE,
                         event.getMemberEvent().getMembershipName(),
-                        Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100,
+                        Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths(),
                         event.getMemberEvent().getTimeInMonths()),
                 "");
         PrivateMessage hostMessage = new PrivateMessage()
