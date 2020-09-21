@@ -305,6 +305,7 @@ public class FeedDTOFactory {
         try {
             IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
             UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+            UserMessage hostMessage = this.userService.retrieveUserById(feed.getHostId());
 
             FullFeedDTO fullFeedDTO = new FullFeedDTO();
             fullFeedDTO.setId(feed.getId());
@@ -359,7 +360,9 @@ public class FeedDTOFactory {
             } else {
                 fullFeedDTO.setIsAccess(feed.getIsAccess());
             }
+
             fullFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
+            fullFeedDTO.setHost(this.userDTOFactory.briefValueOf(hostMessage));
             fullFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
 
             if (feed.getPriceInCents() > 0 && !includeChargeable) {

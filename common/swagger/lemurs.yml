@@ -3352,6 +3352,8 @@ components:
           properties:
             feedGroupInfo:
               $ref: '#/components/schemas/FeedGroupInfo'
+            host:
+              $ref: '#/components/schemas/BriefUserDTO'
     PostFeedPayload:
       type: object
       properties:
