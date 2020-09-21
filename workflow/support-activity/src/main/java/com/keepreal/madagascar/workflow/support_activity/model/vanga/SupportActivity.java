@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.workflow.support_activity.model;
+package com.keepreal.madagascar.workflow.support_activity.model.vanga;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
