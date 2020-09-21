@@ -80,20 +80,22 @@ public class FeedDTOFactory {
      * Converts the {@link FeedMessage} into {@link FeedDTO}.
      *
      * @param feed {@link FeedMessage}.
+     * @param memberships {@link MembershipMessage}.
      * @return {@link FeedDTO}.
      */
-    public FeedDTO valueOf(FeedMessage feed) {
-        return this.valueOf(feed, true);
+    public FeedDTO valueOf(FeedMessage feed, List<MembershipMessage> memberships) {
+        return this.valueOf(feed, memberships, true);
     }
 
     /**
      * Converts the {@link FeedMessage} into {@link FeedDTO}.
      *
      * @param feed {@link FeedMessage}.
+     * @param memberships {@link MembershipMessage}.
      * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link FeedDTO}.
      */
-    public FeedDTO valueOf(FeedMessage feed, Boolean includeChargeable) {
+    public FeedDTO valueOf(FeedMessage feed, List<MembershipMessage> memberships, Boolean includeChargeable) {
         if (Objects.isNull(feed)
                 || (!includeChargeable && feed.getPriceInCents() > 0L)) {
             return null;
@@ -132,18 +134,13 @@ public class FeedDTOFactory {
                 feedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
             }
 
-            feedDTO.setIsAccess(true);
-            if (!CollectionUtils.isEmpty(feed.getMembershipIdList())) {
-                List<MembershipMessage> membershipMessages = this.membershipService.retrieveMembershipsByIds(feed.getMembershipIdList());
-                feedDTO.setIsMembership(!CollectionUtils.isEmpty(membershipMessages));
-                feedDTO.setIsAccess(feed.getIsAccess() || membershipMessages.isEmpty());
-
-                if (!membershipMessages.isEmpty()) {
-                    feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
-                    feedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
-                }
-            } else {
-                feedDTO.setIsAccess(feed.getIsAccess());
+            feedDTO.setIsAccess(feed.getIsAccess());
+            if (!memberships.isEmpty()) {
+                feedDTO.setIsMembership(true);
+                feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(memberships.get(0)));
+                feedDTO.setMembershipList(memberships.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
+            } else if (!feed.getMembershipIdList().isEmpty()) {
+                feedDTO.setIsAccess(true);
             }
 
             feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
