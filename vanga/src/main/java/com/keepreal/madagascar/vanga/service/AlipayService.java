@@ -138,6 +138,7 @@ public class AlipayService {
                 .appId(this.alipayConfiguration.getAppId())
                 .createdTime(Instant.now().toEpochMilli())
                 .build();
+        alipayOrder = this.alipayOrderService.insert(alipayOrder);
 
         try {
             AlipayTradeWapPayResponse response = Factory.Payment.Wap().pay(
@@ -145,14 +146,13 @@ public class AlipayService {
                     tradeNum,
                     this.convertCentsToYuan(feeInCents),
                     quitUrl,
-                    returnUrl);
+                    returnUrl + alipayOrder.getId());
 
-            alipayOrder = this.alipayOrderService.insert(alipayOrder);
             alipayOrder.setOrderString(response.body);
         } catch (Exception exception) {
             alipayOrder.setErrorMessage(exception.toString());
             alipayOrder.setState(OrderState.CLOSED.getValue());
-            this.alipayOrderService.insert(alipayOrder);
+            this.alipayOrderService.update(alipayOrder);
             return null;
         }
 

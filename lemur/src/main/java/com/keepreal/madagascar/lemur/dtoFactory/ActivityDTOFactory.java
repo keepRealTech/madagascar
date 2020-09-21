@@ -39,10 +39,14 @@ public class ActivityDTOFactory {
     }
 
     public BonusDTO valueOf(ActivityMessage message) {
+        if (Objects.isNull(message)) {
+            return null;
+        }
+
         BonusDTO dto = new BonusDTO();
         dto.setRatio(message.getRatio());
-        dto.setGained((int) message.getGained());
-        dto.setToGain((int) message.getToGain());
+        dto.setGained(message.getGained());
+        dto.setToGain(message.getToGain());
         return dto;
     }
 

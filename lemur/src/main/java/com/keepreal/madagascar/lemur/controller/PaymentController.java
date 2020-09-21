@@ -61,6 +61,8 @@ import java.util.stream.Collectors;
 @RestController
 public class PaymentController implements PaymentApi {
 
+    public static final Set<String> AUDIT_USER_IDS = new HashSet<>(Collections.singleton("484"));
+
     private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
     private final IOSClientConfiguration iosClientConfiguration;
     private final PaymentService paymentService;
@@ -70,7 +72,6 @@ public class PaymentController implements PaymentApi {
     private final PaymentDTOFactory paymentDTOFactory;
     private final IslandService islandService;
     private final FeedService feedService;
-    private final Set<String> auditUserIds = new HashSet<>(Collections.singleton("484"));
 
     /**
      * Constructs the payment controller.
@@ -296,7 +297,7 @@ public class PaymentController implements PaymentApi {
         ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
 
         H5RedirectDTO data = new H5RedirectDTO();
-        if (this.auditUserIds.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+        if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
             data.setUrl(String.format("%s/pay-ios?sid=%s&id=%s", this.iosClientConfiguration.getHtmlHostName(), membershipId, id));
         } else {
             data.setUrl(String.format("%s/pay?sid=%s&id=%s", this.iosClientConfiguration.getHtmlHostName(), membershipId, id));
@@ -323,7 +324,7 @@ public class PaymentController implements PaymentApi {
         ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
 
         H5RedirectDTO data = new H5RedirectDTO();
-        if (this.auditUserIds.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+        if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
             data.setUrl(String.format("%s/pay-ta-ios?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
         } else {
             data.setUrl(String.format("%s/pay-ta?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
@@ -350,10 +351,10 @@ public class PaymentController implements PaymentApi {
         ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
 
         H5RedirectDTO data = new H5RedirectDTO();
-        if (this.auditUserIds.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
-            data.setUrl(String.format("%s/pay-ta-ios?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
+        if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+            data.setUrl(String.format("%s/app/feed/unlock/%s/notsupport", this.iosClientConfiguration.getHtmlHostName(), id));
         } else {
-            data.setUrl(String.format("%s/pay-ta?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
+            data.setUrl(String.format("%s/app/feed/unlock/%s", this.iosClientConfiguration.getHtmlHostName(), id));
         }
 
         H5RedirectResponse response = new H5RedirectResponse();

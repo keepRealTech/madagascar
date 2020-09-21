@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.BalanceDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.BillingInfoDTOFactory;
 import com.keepreal.madagascar.lemur.service.BalanceService;
@@ -17,9 +18,16 @@ import swagger.api.BillingApi;
 import swagger.model.BalanceResponse;
 import swagger.model.BillingInfoResponse;
 import swagger.model.BillingInfoResponseV11;
+import swagger.model.ConfigurationDTO;
+import swagger.model.H5RedirectDTO;
+import swagger.model.H5RedirectResponse;
 import swagger.model.PostWithdrawRequest;
 import swagger.model.PutBillingInfoRequest;
 import swagger.model.PutBillingInfoRequestV11;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents the billing controller.
@@ -27,31 +35,39 @@ import swagger.model.PutBillingInfoRequestV11;
 @RestController
 public class BillingController implements BillingApi {
 
+    private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
     private final BillingInfoService billingInfoService;
     private final BillingInfoDTOFactory billingInfoDTOFactory;
     private final BalanceService balanceService;
     private final BalanceDTOFactory balanceDTOFactory;
     private final PaymentService paymentService;
+    private final IOSClientConfiguration iosClientConfiguration;
 
     /**
      * Constructs the billing controller.
      *
-     * @param billingInfoService    {@link BillingInfoService}.
-     * @param billingInfoDTOFactory {@link BillingInfoDTOFactory}.
-     * @param balanceService        {@link BalanceService}.
-     * @param balanceDTOFactory     {@link BalanceDTOFactory}.
-     * @param paymentService        {@link PaymentService}.
+     * @param billingInfoService     {@link BillingInfoService}.
+     * @param billingInfoDTOFactory  {@link BillingInfoDTOFactory}.
+     * @param iosClientConfiguration {@link IOSClientConfiguration}.
+     * @param balanceService         {@link BalanceService}.
+     * @param balanceDTOFactory      {@link BalanceDTOFactory}.
+     * @param paymentService         {@link PaymentService}.
+     * @param iosClientConfiguration1 {@link IOSClientConfiguration}.
      */
     public BillingController(BillingInfoService billingInfoService,
                              BillingInfoDTOFactory billingInfoDTOFactory,
+                             IOSClientConfiguration iosClientConfiguration,
                              BalanceService balanceService,
                              BalanceDTOFactory balanceDTOFactory,
-                             PaymentService paymentService) {
+                             PaymentService paymentService,
+                             IOSClientConfiguration iosClientConfiguration1) {
         this.billingInfoService = billingInfoService;
         this.billingInfoDTOFactory = billingInfoDTOFactory;
         this.balanceService = balanceService;
         this.balanceDTOFactory = balanceDTOFactory;
         this.paymentService = paymentService;
+        this.iosClientConfiguration = iosClientConfiguration1;
+        this.iOSConfigVersionMap.putAll(iosClientConfiguration.getVersionInfoMap());
     }
 
     /**
@@ -170,6 +186,32 @@ public class BillingController implements BillingApi {
 
         BalanceResponse response = new BalanceResponse();
         response.setData(this.balanceDTOFactory.valueOf(balanceMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the ios get wallet h5 url.
+     *
+     * @param version (required) Version.
+     * @return {@link H5RedirectResponse}.
+     */
+    @CrossOrigin
+    @Override
+    public ResponseEntity<H5RedirectResponse> apiV1BalancesMyWalletIosGet(Integer version) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
+
+        H5RedirectDTO data = new H5RedirectDTO();
+        if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+            data.setUrl(String.format("%s/app/my/wallet/notsupport", this.iosClientConfiguration.getHtmlHostName()));
+        } else {
+            data.setUrl(String.format("%s/app/my/wallet", this.iosClientConfiguration.getHtmlHostName()));
+        }
+
+        H5RedirectResponse response = new H5RedirectResponse();
+        response.setData(data);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

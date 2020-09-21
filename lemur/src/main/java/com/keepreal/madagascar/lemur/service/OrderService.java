@@ -21,6 +21,7 @@ import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -242,7 +243,7 @@ public class OrderService {
         RetrieveOrderByIdRequest.Builder requestBuilder = RetrieveOrderByIdRequest.newBuilder()
                 .setId(id);
 
-        if (Objects.nonNull(receipt)) {
+        if (!StringUtils.isEmpty(receipt)) {
             requestBuilder.setAlipayReceipt(StringValue.of(receipt));
         }
 

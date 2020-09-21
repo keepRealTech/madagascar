@@ -172,11 +172,12 @@ public class FeedController implements FeedApi {
      * Implements retrieve feed by id api.
      *
      * @param id id (required) Feed id.
+     * @param includeChargeable Whether includes chargeable feeds.
      * @return {@link FullFeedResponse}.
      */
     @CrossOrigin
     @Override
-    public ResponseEntity<FullFeedResponse> apiV1FeedsIdGet(String id) {
+    public ResponseEntity<FullFeedResponse> apiV1FeedsIdGet(String id, Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedGroupFeedResponse feedGroupFeedResponse = this.feedService.retrieveFeedGroupFeedById(id, userId);
 
@@ -184,7 +185,8 @@ public class FeedController implements FeedApi {
         response.setData(this.feedDTOFactory.valueOf(feedGroupFeedResponse.getFeed(),
                 feedGroupFeedResponse.getFeedGroup(),
                 feedGroupFeedResponse.getLastFeedId(),
-                feedGroupFeedResponse.getNextFeedId()));
+                feedGroupFeedResponse.getNextFeedId(),
+                includeChargeable));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -235,12 +237,14 @@ public class FeedController implements FeedApi {
      * @param minTimestamp (optional, default to 0) minimal feed created timestamp.
      * @param maxTimestamp (optional, default to 0) maximal feed created timestamp.
      * @param pageSize     (optional, default to 10) size of a page .
+     * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link TimelinesResponse}.
      */
     @Override
     public ResponseEntity<TimelinesResponse> apiV11FeedsGet(Long minTimestamp,
                                                             Long maxTimestamp,
-                                                            Integer pageSize) {
+                                                            Integer pageSize,
+                                                            Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
         AbstractMap.SimpleEntry<Boolean, FeedsResponse> entry =
                 this.feedService.retrieveUserFeeds(userId, minTimestamp, maxTimestamp, pageSize);
@@ -248,7 +252,7 @@ public class FeedController implements FeedApi {
         TimelinesResponse response = new TimelinesResponse();
         response.setData(entry.getValue().getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed, includeChargeable))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().getFeedCount() > 0, entry.getKey(), pageSize));
@@ -263,10 +267,14 @@ public class FeedController implements FeedApi {
      * @param minTimestamp (optional, default to 0) minimal feed created timestamp.
      * @param maxTimestamp (optional, default to 0) maximal feed created timestamp.
      * @param pageSize     (optional, default to 10) size of a page .
+     * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link TimelinesResponse}.
      */
     @Override
-    public ResponseEntity<TimelinesResponse> apiV1FeedsPublicGet(Long minTimestamp, Long maxTimestamp, Integer pageSize) {
+    public ResponseEntity<TimelinesResponse> apiV1FeedsPublicGet(Long minTimestamp,
+                                                                 Long maxTimestamp,
+                                                                 Integer pageSize,
+                                                                 Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         AbstractMap.SimpleEntry<Boolean, FeedsResponse> entry =
@@ -275,7 +283,7 @@ public class FeedController implements FeedApi {
         TimelinesResponse response = new TimelinesResponse();
         response.setData(entry.getValue().getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed, includeChargeable))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().getFeedCount() > 0, entry.getKey(), pageSize));
@@ -354,6 +362,7 @@ public class FeedController implements FeedApi {
      * @param fromHost     (optional) Whether from host.
      * @param minTimestamp timestamp after (optional, default to 0).
      * @param pageSize     size of a page (optional, default to 10).
+     * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link swagger.model.FeedsResponse}.
      */
     @CrossOrigin
@@ -362,7 +371,8 @@ public class FeedController implements FeedApi {
                                                                    Boolean fromHost,
                                                                    Long minTimestamp,
                                                                    Long maxTimestamp,
-                                                                   Integer pageSize) {
+                                                                   Integer pageSize,
+                                                                   Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
 
@@ -379,7 +389,7 @@ public class FeedController implements FeedApi {
 
         dto.setFeeds(normalFeedsResponse.getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed, includeChargeable))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
 
@@ -478,19 +488,21 @@ public class FeedController implements FeedApi {
      * @param id       id (required) Feed group id.
      * @param page     page number (optional, default to 0) Page.
      * @param pageSize size of a page (optional, default to 10) Page size.
+     * @param includeChargeable Whether includes chargeable.
      * @return {@link FeedsResponse}.
      */
     @Override
     public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedgroupsIdFeedsGet(String id,
                                                                                  Integer page,
-                                                                                 Integer pageSize) {
+                                                                                 Integer pageSize,
+                                                                                 Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedGroupFeedsResponse feedGroupFeedsResponse = this.feedGroupService.retrieveFeedGroupFeeds(id, userId, page, pageSize);
 
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedGroupFeedsResponse.getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed, includeChargeable))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setCurrentTime(System.currentTimeMillis());
