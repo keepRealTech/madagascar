@@ -2944,6 +2944,8 @@ components:
       properties:
         isExisted:
           type: boolean
+        innerMsg:
+          type: string
     PutIslandPayload:
       type: object
       properties:
