@@ -52,28 +52,21 @@ public class WebMobileLoginExecutor implements LoginExecutor{
         }
 
         String mobile = loginRequest.getWebMobilePayload().getMobile();
-        Integer otp = loginRequest.getWebMobilePayload().getOtp();
+        int otp = loginRequest.getWebMobilePayload().getOtp();
         RBucketReactive<Integer> bucket = this.redissonReactiveClient.getBucket(MOBILE_PHONE_OTP + mobile);
 
         return bucket.isExists()
-                .flatMap(exist -> {
-                    if (!exist) {
-                        return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
-                    }
-                    return bucket.get()
-                            .flatMap(redisOtp -> {
-                                if (!otp.equals(redisOtp)) {
-                                    return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
-                                }
-                                return bucket.delete()
-                                        .then(this.retrieveOrCreateUserByMobile(mobile))
-                                        .map(this.tokenGranter::grant)
-                                        .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
-                                                        && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_GRPC_LOGIN_FROZEN,
-                                                this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN))
-                                        .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
-                            });
-                });
+                .filter(Boolean.TRUE::equals)
+                .flatMap(exist -> bucket.get())
+                .filter(redisOtp -> otp == redisOtp)
+                .flatMap(redisOtp -> bucket.delete()
+                        .then(this.retrieveOrCreateUserByMobile(mobile))
+                        .map(this.tokenGranter::grant)
+                        .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
+                                        && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_GRPC_LOGIN_FROZEN,
+                                this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN))
+                        .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)))
+                .switchIfEmpty(Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH)));
     }
 
     /**
