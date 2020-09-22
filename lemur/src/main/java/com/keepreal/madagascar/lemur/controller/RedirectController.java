@@ -35,7 +35,7 @@ public class RedirectController {
      */
     @GetMapping(value = "/s/{shortCode}")
     public String apiRedirectShortUrl(@PathVariable("shortCode") String shortCode) {
-        return String.format("redirect:%s/%s", this.iosClientConfiguration.getHtmlHostName(), this.redirectService.getRedirectUrl(shortCode));
+        return String.format("redirect:%s%s", this.iosClientConfiguration.getHtmlHostName(), this.redirectService.getRedirectUrl(shortCode));
     }
 
 }
