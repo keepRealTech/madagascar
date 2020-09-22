@@ -19,15 +19,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -305,23 +302,25 @@ public class IslandInfoService {
      * @return {@link DiscoverIslandMessage}.
      */
     public List<DiscoverIslandMessage> retrieveAllDiscoveredIslands() {
-        List<IslandDiscovery> islandDiscoveryList = this.islandDiscoveryRepository.findAllByDeletedIsFalseOrderByCreatedTimeDesc();
+        List<IslandDiscovery> islandDiscoveryList = this.islandDiscoveryRepository.findAllByDeletedIsFalseOrderByRankAsc();
 
-        Map<String, IslandDiscovery> islandDiscoveryMap = islandDiscoveryList
-                        .stream().collect(Collectors.toMap(IslandDiscovery::getIslandId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
+        Map<String, IslandDiscovery> islandDiscoveryMap = islandDiscoveryList.stream()
+                .collect(Collectors.toMap(IslandDiscovery::getIslandId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
 
-        List<IslandInfo> islandInfoList = this.retrieveByIslandIds(islandDiscoveryList.stream().map(IslandDiscovery::getIslandId).collect(Collectors.toList()));
+        List<IslandInfo> islandInfoList = this.retrieveByIslandIds(islandDiscoveryList.stream()
+                .map(IslandDiscovery::getIslandId)
+                .collect(Collectors.toList()));
 
-        Map<String, IslandInfo> islandInfoMap = islandInfoList
-                .stream().collect(Collectors.toMap(IslandInfo::getId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
+        Map<String, IslandInfo> islandInfoMap = islandInfoList.stream()
+                .collect(Collectors.toMap(IslandInfo::getId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));
 
         return islandDiscoveryList.stream()
                 .map(islandDiscovery ->
                      DiscoverIslandMessage.newBuilder()
                             .setIsland(this.getIslandMessage(islandInfoMap.get(islandDiscovery.getIslandId())))
                             .setRecommendation(islandDiscoveryMap.get(islandDiscovery.getIslandId()).getRecommendation())
-                            .build()
-                ).collect(Collectors.toList());
+                            .build())
+                .collect(Collectors.toList());
     }
 
 }
