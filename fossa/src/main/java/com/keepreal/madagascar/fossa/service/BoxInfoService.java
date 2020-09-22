@@ -107,7 +107,7 @@ public class BoxInfoService {
             }
         }
 
-        return query.with(Sort.by(Sort.Order.desc("mediaInfos.0.answeredAt"), Sort.Order.desc("createdTime")));
+        return query.with(Sort.by(Sort.Order.desc("createdTime")));
     }
 
     public BoxMessage getBoxMessage(BoxInfo boxInfo) {
