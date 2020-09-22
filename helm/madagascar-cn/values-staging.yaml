@@ -90,6 +90,10 @@ global:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/statistics
       tag: 1.0.0-staging
       imagePullPolicy: Always
+    support_activity:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/support-activity
+      tag: 1.0.0-staging
+      imagePullPolicy: Always
 
 deploy:
   enable_http: true
