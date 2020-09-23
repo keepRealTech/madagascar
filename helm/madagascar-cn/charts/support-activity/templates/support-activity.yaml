@@ -4,7 +4,7 @@ metadata:
   name: support-activity
   namespace: {{ .Values.global.common_configs.namespace }}
 spec:
-  schedule: "0/20 * * * *"
+  schedule: "0 5 * * *"
   jobTemplate:
     metadata:
       annotations:
