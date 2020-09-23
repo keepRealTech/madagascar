@@ -21,6 +21,7 @@ global:
       tenrecs: 2
       vanga: 2
       asity: 2
+      hoopoe: 1
     short_code_base: https://islands.keepreal.cn/s/%s
     image_host: https://images.keepreal.cn
     html_host: https://h5.tiaodaoapp.com

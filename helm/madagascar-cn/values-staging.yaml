@@ -21,6 +21,7 @@ global:
       tenrecs: 1
       vanga: 1
       asity: 1
+      hoopoe: 1
     short_code_base: https://staging.keepreal.cn/s/%s
     image_host: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com
     html_host: http://test.keepreal.cn
