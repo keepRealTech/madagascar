@@ -10,10 +10,10 @@ global:
     lark:
       webhook: https://open.feishu.cn/open-apis/bot/hook/d42eb11f-8804-4836-9ce8-881074c4077e
     replicas:
-      lemur: 2
+      lemur: 4
       baobob: 2
       brookesia: 2
-      coua: 2
+      coua: 4
       fossa: 2
       indri: 2
       mantella: 2
@@ -49,7 +49,7 @@ global:
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-      tag: 1.2.0
+      tag: 1.2.1
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri

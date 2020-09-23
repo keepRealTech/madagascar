@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.fossa.service;
 
 import com.keepreal.madagascar.common.DeviceType;
+import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.RepostMessage;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
@@ -121,18 +122,24 @@ public class RepostService {
     }
 
     public String generatorCode(IslandMessage islandMessage, String userId, String code, String shortCode) {
-        if (userId.equals(islandMessage.getHostId())) {
-            return String.format("2333邀请你加入［%s］\n" +
-                    "【复制】这段话$%s$打开跳岛App\n" +
-                    "输入暗号［%s］即刻登岛\n" +
-                    "或点击链接 %s",
-                    islandMessage.getName(), code, islandMessage.getSecret(), String.format(this.generalConfiguration.getShortCodeBase(), shortCode));
+        StringBuilder sb = new StringBuilder(String.format("2333邀请你加入［%s］\n" +
+                "【复制】这段话$%s$打开跳岛App\n" +
+                "或点击链接 %s",
+                islandMessage.getName(),
+                code,
+                String.format(this.generalConfiguration.getShortCodeBase(), shortCode)));
+
+        if (IslandAccessType.ISLAND_ACCESS_PUBLIC.equals(islandMessage.getIslandAccessType())) {
+            return sb.toString();
         }
 
-        return String.format("2333邀请你加入［%s］\n" +
-                "【复制】这段话$%s$打开跳岛App\n" +
-                "或点击链接 %s\n" +
-                "暗号接头，限时登岛", islandMessage.getName(), code, String.format(this.generalConfiguration.getShortCodeBase(), shortCode));
+        if (userId.equals(islandMessage.getHostId())) {
+            sb.append(String.format("\n输入暗号［%s］即刻登岛", islandMessage.getSecret()));
+        } else {
+            sb.append("\n暗号接头，限时登岛");
+        }
+
+        return sb.toString();
     }
 
     public String getRedirectUrlByDeviceType(DeviceType deviceType) {
