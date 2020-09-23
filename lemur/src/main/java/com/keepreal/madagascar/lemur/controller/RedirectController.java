@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import com.keepreal.madagascar.lemur.service.RedirectService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,14 +12,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class RedirectController {
 
+    private final IOSClientConfiguration iosClientConfiguration;
     private final RedirectService redirectService;
 
     /**
      * Constructs the redirect controller.
      *
-     * @param redirectService {@link RedirectService}.
+     * @param iosClientConfiguration    {@link IOSClientConfiguration}.
+     * @param redirectService           {@link RedirectService}.
      */
-    public RedirectController(RedirectService redirectService) {
+    public RedirectController(IOSClientConfiguration iosClientConfiguration,
+                              RedirectService redirectService) {
+        this.iosClientConfiguration = iosClientConfiguration;
         this.redirectService = redirectService;
     }
 
@@ -30,7 +35,7 @@ public class RedirectController {
      */
     @GetMapping(value = "/s/{shortCode}")
     public String apiRedirectShortUrl(@PathVariable("shortCode") String shortCode) {
-        return String.format("redirect:https://www.keepreal.cn/%s", this.redirectService.getRedirectUrl(shortCode));
+        return String.format("redirect:%s%s", this.iosClientConfiguration.getHtmlHostName(), this.redirectService.getRedirectUrl(shortCode));
     }
 
 }
