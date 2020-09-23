@@ -33,6 +33,7 @@ public class IslandDiscovery {
     private String id;
     private String islandId;
     private String recommendation;
+    private Integer rank;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

@@ -7,6 +7,7 @@ data:
   aliyun_logs_madagascar-prod: stdout
   ROCKETMQ_NOTIFICATION_TOPIC: {{ .Values.rocketmq.notification.topic }}
   ROCKETMQ_NOTIFICATION_TAG: {{ .Values.rocketmq.notification.tag }}
+  ROCKETMQ_NOTIFICATION_GROUPID: {{ .Values.rocketmq.notification.group_id }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   GRPC_FOSSA_HOST: {{ .Values.fossa.host }}

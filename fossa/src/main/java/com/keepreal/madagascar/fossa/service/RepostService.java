@@ -122,14 +122,14 @@ public class RepostService {
 
     public String generatorCode(IslandMessage islandMessage, String userId, String code, String shortCode) {
         if (userId.equals(islandMessage.getHostId())) {
-            return String.format("邀请你加入［%s］\n" +
+            return String.format("2333邀请你加入［%s］\n" +
                     "【复制】这段话$%s$打开跳岛App\n" +
                     "输入暗号［%s］即刻登岛\n" +
                     "或点击链接 %s",
                     islandMessage.getName(), code, islandMessage.getSecret(), String.format(this.generalConfiguration.getShortCodeBase(), shortCode));
         }
 
-        return String.format("邀请你加入［%s］\n" +
+        return String.format("2333邀请你加入［%s］\n" +
                 "【复制】这段话$%s$打开跳岛App\n" +
                 "或点击链接 %s\n" +
                 "暗号接头，限时登岛", islandMessage.getName(), code, String.format(this.generalConfiguration.getShortCodeBase(), shortCode));

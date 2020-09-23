@@ -65,7 +65,7 @@ public class BoxInfoService {
         query.addCriteria(Criteria.where("mediaInfos.publicVisible").is(true));
         query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
 
-        return query.with(Sort.by(Sort.Order.desc("createdTime")));
+        return query.with(Sort.by(Sort.Order.desc("mediaInfos.0.answeredAt"), Sort.Order.desc("createdTime")));
     }
 
     public Query retrieveAnswerMeQuestion(String userId) {
@@ -73,7 +73,7 @@ public class BoxInfoService {
         query.addCriteria(Criteria.where("userId").is(userId));
         query.addCriteria(new Criteria().andOperator(Criteria.where("mediaInfos").size(1), Criteria.where("mediaInfos.0.ignored").is(false)));
 
-        return query.with(Sort.by(Sort.Order.desc("createdTime")));
+        return query.with(Sort.by(Sort.Order.desc("mediaInfos.0.answeredAt"), Sort.Order.desc("createdTime")));
     }
 
     public Query retrieveQuestionByCondition(String userId, Boolean answered, Boolean paid, Boolean hasMembership) {
