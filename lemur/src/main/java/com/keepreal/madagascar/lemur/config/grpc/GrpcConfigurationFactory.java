@@ -98,4 +98,15 @@ public class GrpcConfigurationFactory {
         return new GrpcConfiguration();
     }
 
+    /**
+     * Represents configurations for hoopoe.
+     *
+     * @return Grpc configuration.
+     */
+    @Bean(name = "hoopoeConfiguration")
+    @ConfigurationProperties(prefix = "grpc.hoopoe", ignoreUnknownFields = false)
+    public GrpcConfiguration hoopoeConfiguration() {
+        return new GrpcConfiguration();
+    }
+
 }

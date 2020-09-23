@@ -2,20 +2,26 @@ package com.keepreal.madagascar.vanga.service;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
-import com.keepreal.madagascar.vanga.model.WechatOrderType;
+import com.keepreal.madagascar.vanga.model.OrderType;
+import com.keepreal.madagascar.vanga.repository.AlipayOrderRepository;
 import com.keepreal.madagascar.vanga.repository.WechatOrderRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+/**
+ * Represents the wechat order service.
+ */
 @Service
 public class WechatOrderService {
 
     private final LongIdGenerator idGenerator;
     private final WechatOrderRepository wechatOrderRepository;
 
+    /**
+     * Constructs the alipay order service.
+     *
+     * @param idGenerator           {@link LongIdGenerator}.
+     * @param wechatOrderRepository {@link WechatOrderRepository}.
+     */
     public WechatOrderService(LongIdGenerator idGenerator,
                               WechatOrderRepository wechatOrderRepository) {
         this.idGenerator = idGenerator;
@@ -70,7 +76,7 @@ public class WechatOrderService {
      * @return {@link WechatOrder}.
      */
     public WechatOrder retrieveByQuestionId(String feedId) {
-        return this.wechatOrderRepository.findByPropertyIdAndTypeAndDeletedIsFalse(feedId, WechatOrderType.PAYQUESTION.getValue());
+        return this.wechatOrderRepository.findByPropertyIdAndTypeAndDeletedIsFalse(feedId, OrderType.PAYQUESTION.getValue());
     }
 
     /**

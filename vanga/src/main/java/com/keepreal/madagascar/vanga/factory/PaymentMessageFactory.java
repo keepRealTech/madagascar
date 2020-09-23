@@ -1,6 +1,8 @@
 package com.keepreal.madagascar.vanga.factory;
 
+import com.keepreal.madagascar.common.PaymentState;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
+import com.keepreal.madagascar.vanga.UserWithdrawMessage;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Payment;
 import org.springframework.stereotype.Component;
@@ -45,6 +47,46 @@ public class PaymentMessageFactory {
                 .setExpiresAt(payment.getValidAfter())
                 .setCreatedAt(payment.getCreatedTime())
                 .build();
+    }
+
+    /**
+     * Builds the {@link UserWithdrawMessage}.
+     *
+     * @param payment       {@link Payment}.
+     * @return {@link UserWithdrawMessage}.
+     */
+    public UserWithdrawMessage withdrawValueOf(Payment payment) {
+        if (Objects.isNull(payment)) {
+            return null;
+        }
+
+        return UserWithdrawMessage.newBuilder()
+                .setId(payment.getId())
+                .setAmountInCents(payment.getAmountInCents())
+                .setCreatedAt(payment.getCreatedTime())
+                .setState(this.convertState(payment.getState()))
+                .build();
+    }
+
+    /**
+     * Converts the payment state.
+     *
+     * @param state {@link com.keepreal.madagascar.vanga.model.PaymentState}.
+     * @return {@link PaymentState}.
+     */
+    private PaymentState convertState(Integer state) {
+        if (Objects.isNull(state)) {
+            return PaymentState.UNRECOGNIZED;
+        }
+
+        switch (state) {
+            case 2:
+                return PaymentState.PAYMENT_STATE_OPEN;
+            case 3:
+                return PaymentState.PAYMENT_STATE_CLOSED;
+            default:
+                return PaymentState.UNRECOGNIZED;
+        }
     }
 
 }

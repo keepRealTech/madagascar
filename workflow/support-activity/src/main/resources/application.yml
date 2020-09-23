@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: vanga
+  datasource:
+    vanga:
+      jdbc-url: jdbc:mysql://kr_admin:gYvi89kGKJoqZbzk@rm-2ze0p9v29ef1p05us6o.mysql.rds.aliyuncs.com:3306/vanga?autoReconnect=true&useUnicode=true&characterEncoding=utf8&character_set_server=utf8mb4&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    coua:
+      jdbc-url: jdbc:mysql://kr_admin:gYvi89kGKJoqZbzk@rm-2ze0p9v29ef1p05us6o.mysql.rds.aliyuncs.com:3306/coua?autoReconnect=true&useUnicode=true&characterEncoding=utf8&character_set_server=utf8mb4&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
+      driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+  data:
+    mongodb:
+      database: fossa
+      uri: mongodb://root:05GEJ9k7heSCM3E@dds-2ze9a184c36df9441710-pub.mongodb.rds.aliyuncs.com:3717,dds-2ze9a184c36df9442530-pub.mongodb.rds.aliyuncs.com:3717/admin?authSource=admin&replicaSet=mgset-31197927&readPreference=primary&appname=MongoDB%20Compass&ssl=false

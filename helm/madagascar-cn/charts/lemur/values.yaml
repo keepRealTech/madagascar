@@ -38,6 +38,10 @@ asity:
   host: asity
   port: 6565
 
+hoopoe:
+  host: hoopoe
+  port: 6565
+
 redis:
   port: 6379
 

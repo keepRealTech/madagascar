@@ -53,15 +53,21 @@ public class BillingInfoService {
      * @return {@link BillingInfo}.
      */
     @Transactional
-    public BillingInfo updateBillingInfoByUserId(String userId, String name, String mobile, String accountNumber,
-                                                 String idNumber, String idFrontUrl, String idBackUrl) {
+    public BillingInfo updateBillingInfoByUserId(String userId,
+                                                 String name,
+                                                 String mobile,
+                                                 String accountNumber,
+                                                 String idNumber,
+                                                 String idFrontUrl,
+                                                 String idBackUrl,
+                                                 String aliPayAccount) {
         BillingInfo billingInfo = this.retrieveOrCreateBillingInfoIfNotExistsByUserId(userId);
 
-        if (!StringUtils.isEmpty(name)) {
+        if (Objects.nonNull(name)) {
             billingInfo.setName(name);
         }
 
-        if (!StringUtils.isEmpty(mobile)) {
+        if (Objects.nonNull(mobile)) {
             billingInfo.setMobile(mobile);
         }
 
@@ -79,6 +85,10 @@ public class BillingInfoService {
 
         if (!StringUtils.isEmpty(idBackUrl)) {
             billingInfo.setIdBackUrl(idBackUrl);
+        }
+
+        if (Objects.nonNull(aliPayAccount)) {
+            billingInfo.setAliPayAccount(aliPayAccount);
         }
 
         billingInfo.setVerified(!StringUtils.isEmpty(name)

@@ -68,7 +68,7 @@ public class NotificationController implements NotificationApi {
      *
      * @return {@link NotificationsCountResponse}.
      */
-    @Override
+    @Deprecated
     public ResponseEntity<NotificationsCountResponse> apiV1NotificationsCountGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
 

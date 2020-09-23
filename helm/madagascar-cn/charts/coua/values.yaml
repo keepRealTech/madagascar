@@ -22,6 +22,7 @@ rocketmq:
   notification:
     topic: notification-event
     tag: event
+    group_id: GID-coua-notification-default
   island:
     topic: island-event
     tag: event

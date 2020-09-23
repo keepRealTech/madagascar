@@ -6,6 +6,12 @@ option java_package = "com.keepreal.madagascar.coua";
 import "common.proto";
 import "google/protobuf/wrappers.proto";
 
+enum UserState {
+    USER_WECHAT = 0;
+    USER_H5_MOBILE = 1;
+    USER_APP_MOBILE = 2;
+}
+
 message UserResponse {
     CommonStatus status = 1;
     UserMessage user = 2;
@@ -21,6 +27,7 @@ message NewUserRequest {
     google.protobuf.StringValue birthday = 7;
     repeated IdentityType identities = 8;
     google.protobuf.StringValue mobile = 9;
+    google.protobuf.Int32Value state = 10;
 }
 
 message UpdateUserByIdRequest {
@@ -33,6 +40,7 @@ message UpdateUserByIdRequest {
     google.protobuf.StringValue birthday = 7;
     repeated IdentityType identities = 8;
     google.protobuf.StringValue displayId = 9;
+    google.protobuf.Int32Value state = 10;
 }
 
 message QueryUserCondition {
@@ -41,6 +49,7 @@ message QueryUserCondition {
     google.protobuf.StringValue displayId = 3;
     google.protobuf.StringValue username = 4;
     google.protobuf.StringValue mobile = 5;
+    google.protobuf.Int32Value state = 6;
 }
 
 message RetrieveSingleUserRequest {
@@ -102,11 +111,37 @@ message UpdateUserMobileRequest {
 }
 
 message CheckUserMobileIsExistedRequest {
-    string mobile = 1;
+    string userId = 1;
+    string mobile = 2;
 }
 
 message CheckUserMobileIsExistedResponse {
     CommonStatus status = 1;
+}
+
+message QualificationMessage {
+    string id = 1;
+    string name = 2;
+    string url = 3;
+}
+
+message RetrieveUserQualificationsRequest {
+    string userId = 1;
+}
+
+message RetrieveUserQualificationsResponse {
+    CommonStatus status = 1;
+    repeated QualificationMessage message = 2;
+}
+
+message CreateOrUpdateUserQualificationsRequest {
+    string userId = 1;
+    repeated QualificationMessage message = 2;
+}
+
+message CreateOrUpdateUserQualificationsResponse {
+    CommonStatus status = 1;
+    repeated QualificationMessage message = 2;
 }
 
 service UserService {
@@ -120,4 +155,6 @@ service UserService {
     rpc SendOtpToMobile(SendOtpToMobileRequest) returns (SendOtpToMobileResponse) {};
     rpc UpdateUserMobile(UpdateUserMobileRequest) returns (UserResponse) {};
     rpc CheckUserMobileIsExisted(CheckUserMobileIsExistedRequest) returns (CheckUserMobileIsExistedResponse) {};
+    rpc RetrieveUserQualifications (RetrieveUserQualificationsRequest) returns (RetrieveUserQualificationsResponse) {};
+    rpc CreateOrUpdateUserQualifications (CreateOrUpdateUserQualificationsRequest) returns (CreateOrUpdateUserQualificationsResponse) {};
 }

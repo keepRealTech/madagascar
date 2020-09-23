@@ -29,6 +29,7 @@ rocketmq:
     topic: notification-event
     tag: event
     nameSrvAddr: 127.0.0.1:9876
+    groupId: GID-coua-notification-default
   transaction:
     accessKey: xxx
     secretKey: xxx

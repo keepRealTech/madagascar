@@ -1,23 +1,27 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.google.protobuf.StringValue;
+import com.keepreal.madagascar.common.AlipayOrderMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.vanga.AlipayOrderResponse;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
-import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
+import com.keepreal.madagascar.vanga.RetrieveOrderByIdRequest;
 import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
-import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
+import com.keepreal.madagascar.vanga.OrderCallbackRequest;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
@@ -48,7 +52,7 @@ public class OrderService {
     public WechatOrderMessage retrieveWechatOrderById(String id) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
-        RetrieveWechatOrderByIdRequest request = RetrieveWechatOrderByIdRequest.newBuilder()
+        RetrieveOrderByIdRequest request = RetrieveOrderByIdRequest.newBuilder()
                 .setId(id)
                 .build();
 
@@ -80,11 +84,25 @@ public class OrderService {
     public void wechatOrderCallback(String payload) {
         PaymentServiceGrpc.PaymentServiceFutureStub stub = PaymentServiceGrpc.newFutureStub(this.channel);
 
-        WechatOrderCallbackRequest request = WechatOrderCallbackRequest.newBuilder()
+        OrderCallbackRequest request = OrderCallbackRequest.newBuilder()
                 .setPayload(payload)
                 .build();
 
         stub.wechatPayCallback(request);
+    }
+
+    /**
+     * Calls back on alipay order notification.
+     *
+     * @param payload Payload.
+     */
+    public void alipayOrderCallback(String payload) {
+        PaymentServiceGrpc.PaymentServiceFutureStub stub = PaymentServiceGrpc.newFutureStub(this.channel);
+        OrderCallbackRequest request = OrderCallbackRequest.newBuilder()
+                .setPayload(payload)
+                .build();
+
+        stub.alipayCallback(request);
     }
 
     /**
@@ -95,7 +113,7 @@ public class OrderService {
     public void wechatOrderRefundCallback(String payload) {
         PaymentServiceGrpc.PaymentServiceFutureStub stub = PaymentServiceGrpc.newFutureStub(this.channel);
 
-        WechatOrderCallbackRequest request = WechatOrderCallbackRequest.newBuilder()
+        OrderCallbackRequest request = OrderCallbackRequest.newBuilder()
                 .setPayload(payload)
                 .build();
 
@@ -211,6 +229,42 @@ public class OrderService {
         if (ErrorCode.REQUEST_SUCC_VALUE != response.getRtn()) {
             throw new KeepRealBusinessException(response);
         }
+    }
+
+    /**
+     * Retrieves alipay order by id.
+     *
+     * @param id Order id.
+     * @return {@link AlipayOrderMessage}.
+     */
+    public AlipayOrderMessage retrieveAlipayOrderById(String id, String receipt) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveOrderByIdRequest.Builder requestBuilder = RetrieveOrderByIdRequest.newBuilder()
+                .setId(id);
+
+        if (!StringUtils.isEmpty(receipt)) {
+            requestBuilder.setAlipayReceipt(StringValue.of(receipt));
+        }
+
+        AlipayOrderResponse response;
+        try {
+            response = stub.retrieveAlipayOrderById(requestBuilder.build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve alipay order returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getAlipayOrder();
     }
 
 }

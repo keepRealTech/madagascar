@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.workflow.model.WorkflowLog;
 import com.keepreal.madagascar.common.workflow.service.WorkflowService;
 import com.keepreal.madagascar.workflow.statistics.model.IslandIncrement;
 import com.keepreal.madagascar.workflow.statistics.model.IslandInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -11,6 +12,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -18,6 +20,7 @@ import java.util.stream.IntStream;
  * Represents the main logic entrance.
  */
 @Service
+@Slf4j
 public class StatisticsService {
 
     private final static int ITEMS_PER_MESSAGE = 20;
@@ -52,12 +55,16 @@ public class StatisticsService {
     public void run() {
         WorkflowLog workflowLog = this.workflowService.initialize("daily increment report");
 
+        log.info("Starting the workflow");
+
         List<IslandIncrement> islandIncrements = this.subscriptionService.retrieveIslandIds();
-        if (islandIncrements.isEmpty()) {
+        if (Objects.isNull(islandIncrements) || islandIncrements.isEmpty()) {
             this.larkService.sendMessage("没有哦");
             this.workflowService.succeed(workflowLog);
             return;
         }
+
+        log.info("Hit islands count: {}", islandIncrements.size());
 
         Map<String, BigInteger> islandIncrementMap = islandIncrements.stream()
                 .collect(Collectors.toMap(IslandIncrement::getIslandId, IslandIncrement::getIncrement, (mem1, mem2) -> mem1, HashMap::new));
@@ -76,7 +83,7 @@ public class StatisticsService {
             StringBuilder sb = new StringBuilder();
             islandList
                     .forEach(island -> {
-                        String text = String.format("岛id:%s, 岛名:%s, 岛创建时间:%s, 岛民数:%d, 昨日新增岛民数:%d\\n",
+                        String text = String.format("岛id:%s, 岛名:%s, 岛创建时间:%s, 岛民数:%d, 昨日新增岛民数:%d",
                                 island.getId(),
                                 island.getIslandName(),
                                 Instant.ofEpochMilli(island.getCreatedTime()).toString(),
@@ -85,10 +92,12 @@ public class StatisticsService {
                         sb.append(text);
                     });
 
+            log.info("Sending message {}", sb.toString());
             this.larkService.sendMessage(sb.toString());
         });
 
         this.workflowService.succeed(workflowLog);
+        log.info("Succeed");
     }
 
 }

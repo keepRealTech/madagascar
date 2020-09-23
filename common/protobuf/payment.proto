@@ -6,6 +6,7 @@ option java_package = "com.keepreal.madagascar.vanga";
 import "common.proto";
 import "balance.proto";
 import "sku.proto";
+import "google/protobuf/wrappers.proto";
 
 message CreateWithdrawRequest {
   string userId = 1;
@@ -17,6 +18,8 @@ message SubscribeMembershipRequest {
   string membershipSkuId = 2;
   SceneType sceneType = 3;
   string ipAddress = 4;
+  string quitUrl = 5;
+  string returnUrl = 6;
 }
 
 message SupportRequest {
@@ -27,6 +30,8 @@ message SupportRequest {
   int64 priceInShells = 5;
   SceneType sceneType = 6;
   string ipAddress = 7;
+  string quitUrl = 8;
+  string returnUrl = 9;
 }
 
 message WechatOrderResponse {
@@ -34,11 +39,17 @@ message WechatOrderResponse {
   WechatOrderMessage wechatOrder = 2;
 }
 
-message RetrieveWechatOrderByIdRequest {
-  string id = 1;
+message AlipayOrderResponse {
+  CommonStatus status = 1;
+  AlipayOrderMessage alipayOrder = 2;
 }
 
-message WechatOrderCallbackRequest {
+message RetrieveOrderByIdRequest {
+  string id = 1;
+  google.protobuf.StringValue alipayReceipt = 2;
+}
+
+message OrderCallbackRequest {
   string payload = 1;
 }
 
@@ -121,22 +132,58 @@ message SupportMessage {
   string text = 2;
 }
 
+message UserWithdrawMessage {
+  string id = 1;
+  uint64 amountInCents = 2;
+  PaymentState state = 3;
+  uint64 createdAt = 4;
+}
+
+message WithdrawPaymentsResponse {
+  CommonStatus status = 1;
+  PageResponse pageResponse = 2;
+  repeated UserWithdrawMessage userWithdraws = 3;
+}
+
+message FeedRequest {
+  string userId = 1;
+  string feedId = 2;
+  uint64 priceInCents = 3;
+  string payeeId = 4;
+  SceneType sceneType = 5;
+  string ipAddress = 6;
+  string quitUrl = 7;
+  string returnUrl = 8;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
   rpc SubmitSubscribeMembershipWithWechatPay (SubscribeMembershipRequest) returns (WechatOrderResponse) {};
   rpc SubmitSubscribeMembershipWithWechatPayH5 (SubscribeMembershipRequest) returns (RedirectResponse) {};
+  rpc SubmitSubscribeMembershipWithAlipay (SubscribeMembershipRequest) returns (AlipayOrderResponse) {};
+  rpc SubmitSubscribeMembershipWithAlipayH5 (SubscribeMembershipRequest) returns (AlipayOrderResponse) {};
   rpc SubmitSupportWithWechatPay (SupportRequest) returns (WechatOrderResponse) {};
   rpc SubmitSupportWithWechatPayH5 (SupportRequest) returns (RedirectResponse) {};
-  rpc RetrieveWechatOrderById (RetrieveWechatOrderByIdRequest) returns (WechatOrderResponse) {};
-  rpc WechatPayCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
+  rpc SubmitSupportWithAlipay (SupportRequest) returns (AlipayOrderResponse) {};
+  rpc SubmitSupportWithAlipayH5 (SupportRequest) returns (AlipayOrderResponse) {};
+  rpc RetrieveWechatOrderById (RetrieveOrderByIdRequest) returns (WechatOrderResponse) {};
+  rpc RetrieveAlipayOrderById (RetrieveOrderByIdRequest) returns (AlipayOrderResponse) {};
+  rpc WechatPayCallback (OrderCallbackRequest) returns (CommonStatus) {};
+  rpc AlipayCallback (OrderCallbackRequest) returns (CommonStatus) {};
   rpc IOSBuyShell (IOSOrderBuyShellRequest) returns (BalanceResponse) {};
   rpc IOSSubscribeMembership (IOSOrderSubscribeRequest) returns (CommonStatus) {};
   rpc WechatBuyShell (WechatOrderBuyShellRequest) returns (WechatOrderResponse) {};
   rpc WechatCreateFeed (CreatePaidFeedRequest) returns (WechatOrderResponse) {};
   rpc RetrieveUserPayments (RetrieveUserPaymentsRequest) returns (UserPaymentsResponse) {};
+  rpc RetrieveUserWithdraws (RetrieveUserPaymentsRequest) returns (WithdrawPaymentsResponse) {};
   rpc RefundWechatPaidFeed (RefundWechatFeedRequest) returns (CommonStatus) {};
   rpc ActivateFeedPayment (ActivatePendingFeedPaymentRequest) returns (CommonStatus) {};
-  rpc WechatRefundCallback (WechatOrderCallbackRequest) returns (CommonStatus) {};
+  rpc WechatRefundCallback (OrderCallbackRequest) returns (CommonStatus) {};
   rpc RetrieveSupportInfo (RetrieveSupportInfoRequest) returns (RetrieveSupportInfoResponse) {};
+  rpc SubmitFeedWithWechatPay(FeedRequest) returns (WechatOrderResponse) {};
+  rpc SubmitFeedWithWechatPayH5 (FeedRequest) returns (RedirectResponse) {};
+  rpc SubmitFeedWithAlipay (FeedRequest) returns (AlipayOrderResponse) {};
+  rpc SubmitFeedWithAlipayH5 (FeedRequest) returns (AlipayOrderResponse) {};
+
 }

@@ -34,6 +34,7 @@ enum LoginType {
     LOGIN_OAUTH_MP_WECHAT = 5;
     LOGIN_WEB_MP_WECHAT = 6;
     LOGIN_WEB_MOBILE = 7;
+    LOGIN_APP_MOBILE = 8;
 }
 
 enum NotificationType {
@@ -161,6 +162,12 @@ enum MediaType {
     MEDIA_QUESTION = 7;
 }
 
+enum PaymentState {
+    PAYMENT_STATE_NONE = 0;
+    PAYMENT_STATE_OPEN = 1;
+    PAYMENT_STATE_CLOSED = 2;
+}
+
 message UserMessage {
     string id = 1;
     string unionId = 2;
@@ -178,6 +185,7 @@ message UserMessage {
     string password = 14;
     bool locked = 15;
     string mobile = 16;
+    int32 state = 17;
 }
 
 message IslandMessage {
@@ -243,20 +251,30 @@ message WechatOrderMessage {
     string userId = 8;
     uint64 feeInCents = 9;
     uint64 timestamp = 10;
-    WechatOrderState state = 11;
+    OrderState state = 11;
     string mwebUrl = 12;
 }
 
-enum WechatOrderState {
-    WECHAT_ORDER_STATE_UNKNOWN = 0;
-    WECHAT_ORDER_STATE_NOTPAY = 1;
-    WECHAT_ORDER_STATE_USERPAYING = 2;
-    WECHAT_ORDER_STATE_SUCCESS = 3;
-    WECHAT_ORDER_STATE_CLOSED = 4;
-    WECHAT_ORDER_STATE_REFUND = 5;
-    WECHAT_ORDER_STATE_PAYERROR = 6;
-    WECHAT_ORDER_STATE_REVOKED = 7;
-    WECHAT_ORDER_STATE_REFUNDED = 8;
+message AlipayOrderMessage {
+    string id = 1;
+    string tradeNumber = 2;
+    uint64 feeInCents = 3;
+    OrderState state = 4;
+    string userId = 5;
+    uint64 timestamp = 6;
+    string orderString = 7;
+}
+
+enum OrderState {
+    ORDER_STATE_UNKNOWN = 0;
+    ORDER_STATE_NOTPAY = 1;
+    ORDER_STATE_USERPAYING = 2;
+    ORDER_STATE_SUCCESS = 3;
+    ORDER_STATE_CLOSED = 4;
+    ORDER_STATE_REFUND = 5;
+    ORDER_STATE_PAYERROR = 6;
+    ORDER_STATE_REVOKED = 7;
+    ORDER_STATE_REFUNDED = 8;
 }
 
 message FeedGroupMessage {

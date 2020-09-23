@@ -1,8 +1,9 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.keepreal.madagascar.common.AlipayOrderMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
-import com.keepreal.madagascar.common.WechatOrderState;
 import org.springframework.stereotype.Component;
+import swagger.model.AlipayOrderDTO;
 import swagger.model.OrderState;
 import swagger.model.WechatOrderDTO;
 
@@ -12,7 +13,7 @@ import java.util.Objects;
  * Represents the wechat order dto factory.
  */
 @Component
-public class WechatOrderDTOFactory {
+public class OrderDTOFactory {
 
     /**
      * Converts {@link WechatOrderMessage} into {@link WechatOrderDTO}.
@@ -20,7 +21,7 @@ public class WechatOrderDTOFactory {
      * @param wechatOrder {@link WechatOrderMessage}.
      * @return {@link WechatOrderDTO}.
      */
-    public WechatOrderDTO valueOf(WechatOrderMessage wechatOrder) {
+    public WechatOrderDTO wechatOrderValueOf(WechatOrderMessage wechatOrder) {
         if (Objects.isNull(wechatOrder)) {
             return null;
         }
@@ -42,32 +43,52 @@ public class WechatOrderDTOFactory {
     }
 
     /**
-     * Converts the {@link WechatOrderState} into {@link OrderState}.
+     * Converts {@link AlipayOrderMessage} into {@link AlipayOrderDTO}.
      *
-     * @param wechatOrderState {@link WechatOrderState}.
+     * @param alipayOrder {@link AlipayOrderMessage}.
+     * @return {@link AlipayOrderDTO}.
+     */
+    public AlipayOrderDTO alipayOrderValueOf(AlipayOrderMessage alipayOrder) {
+        if (Objects.isNull(alipayOrder)) {
+            return null;
+        }
+
+        AlipayOrderDTO alipayOrderDTO = new AlipayOrderDTO();
+        alipayOrderDTO.setId(alipayOrder.getId());
+        alipayOrderDTO.setFeeInCents(alipayOrder.getFeeInCents());
+        alipayOrderDTO.setState(this.convert(alipayOrder.getState()));
+        alipayOrderDTO.setOrderString(alipayOrder.getOrderString());
+
+        return alipayOrderDTO;
+    }
+
+    /**
+     * Converts the {@link OrderState} into {@link OrderState}.
+     *
+     * @param wechatOrderState {@link OrderState}.
      * @return {@link OrderState}.
      */
-    private OrderState convert(WechatOrderState wechatOrderState) {
+    private OrderState convert(com.keepreal.madagascar.common.OrderState wechatOrderState) {
         if (Objects.isNull(wechatOrderState)) {
             return null;
         }
 
         switch (wechatOrderState) {
-            case WECHAT_ORDER_STATE_NOTPAY:
+            case ORDER_STATE_NOTPAY:
                 return OrderState.NOTPAY;
-            case WECHAT_ORDER_STATE_USERPAYING:
+            case ORDER_STATE_USERPAYING:
                 return OrderState.USERPAYING;
-            case WECHAT_ORDER_STATE_PAYERROR:
+            case ORDER_STATE_PAYERROR:
                 return OrderState.PAYERROR;
-            case WECHAT_ORDER_STATE_REVOKED:
+            case ORDER_STATE_REVOKED:
                 return OrderState.REVOKED;
-            case WECHAT_ORDER_STATE_REFUND:
+            case ORDER_STATE_REFUND:
                 return OrderState.REFUND;
-            case WECHAT_ORDER_STATE_SUCCESS:
+            case ORDER_STATE_SUCCESS:
                 return OrderState.SUCCESS;
-            case WECHAT_ORDER_STATE_CLOSED:
+            case ORDER_STATE_CLOSED:
                 return OrderState.CLOSED;
-            case WECHAT_ORDER_STATE_UNKNOWN:
+            case ORDER_STATE_UNKNOWN:
             default:
                 return null;
         }

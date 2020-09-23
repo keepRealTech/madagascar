@@ -12,6 +12,6 @@ import java.util.List;
 @Repository
 public interface IslandDiscoveryRepository extends JpaRepository<IslandDiscovery, String> {
 
-    List<IslandDiscovery> findAllByDeletedIsFalseOrderByCreatedTimeDesc();
+    List<IslandDiscovery> findAllByDeletedIsFalseOrderByRankAsc();
 
 }

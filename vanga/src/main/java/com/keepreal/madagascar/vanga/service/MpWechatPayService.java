@@ -2,8 +2,8 @@ package com.keepreal.madagascar.vanga.service;
 
 import com.keepreal.madagascar.vanga.config.MpWechatPayConfiguration;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
-import com.keepreal.madagascar.vanga.model.WechatOrderState;
-import com.keepreal.madagascar.vanga.model.WechatOrderType;
+import com.keepreal.madagascar.vanga.model.OrderState;
+import com.keepreal.madagascar.vanga.model.OrderType;
 import com.keepreal.madagascar.common.wechat_pay.WXPay;
 import com.keepreal.madagascar.common.wechat_pay.WXPayConstants;
 import com.keepreal.madagascar.common.wechat_pay.WXPayUtil;
@@ -60,7 +60,7 @@ public class MpWechatPayService {
         String description = String.format("购买贝壳%s", shellSkuId);
 
         WechatOrder wechatOrder = WechatOrder.builder()
-                .state(WechatOrderState.NOTPAY.getValue())
+                .state(OrderState.NOTPAY.getValue())
                 .appId(this.mpWechatPayConfiguration.getAppId())
                 .mchId(this.mpWechatPayConfiguration.getMchId())
                 .userId(userId)
@@ -68,7 +68,7 @@ public class MpWechatPayService {
                 .propertyId(shellSkuId)
                 .description(description)
                 .feeInCents(feeInCents)
-                .type(WechatOrderType.PAYSHELL.getValue())
+                .type(OrderType.PAYSHELL.getValue())
                 .build();
 
         Map<String, String> response;
@@ -129,8 +129,8 @@ public class MpWechatPayService {
      */
     public WechatOrder tryUpdateOrder(WechatOrder wechatOrder) {
         if (Objects.isNull(wechatOrder)
-                || (WechatOrderState.NOTPAY.getValue() != wechatOrder.getState()
-                && WechatOrderState.USERPAYING.getValue() != wechatOrder.getState())) {
+                || (OrderState.NOTPAY.getValue() != wechatOrder.getState()
+                && OrderState.USERPAYING.getValue() != wechatOrder.getState())) {
             return wechatOrder;
         }
 
@@ -145,7 +145,7 @@ public class MpWechatPayService {
             } else if (response.get("result_code").equals(WXPayConstants.FAIL)) {
                 wechatOrder.setErrorMessage(response.get("err_code_des"));
             } else {
-                wechatOrder.setState(WechatOrderState.valueOf(response.get("trade_state")).getValue());
+                wechatOrder.setState(OrderState.valueOf(response.get("trade_state")).getValue());
                 wechatOrder.setTransactionId(response.get("transaction_id"));
             }
             return this.wechatOrderService.update(wechatOrder);

@@ -27,14 +27,16 @@ global:
     wechat_pay:
       callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/callback
       refund_callback_address: https://islands.keepreal.cn/api/v1/orders/wechat/refund/callback
+    ali_pay:
+      callback_address: https://islands.keepreal.cn/api/v1/orders/alipay/callback
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.2.6-hf4
+      tag: 1.3.0
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
-      tag: 1.1.0
+      tag: 1.2.0
       imagePullPolicy: Always
     brookesia:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/brookesia
@@ -42,11 +44,11 @@ global:
       imagePullPolicy: Always
     coua:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-      tag: 1.1.0
+      tag: 1.2.0
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-      tag: 1.1.1
+      tag: 1.2.0
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
@@ -66,7 +68,15 @@ global:
       imagePullPolicy: Always
     vanga:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
-      tag: 1.1.5
+      tag: 1.2.0
+      imagePullPolicy: Always
+    asity:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
+      tag: 1.0.4
+      imagePullPolicy: Always
+    hoopoe:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/hoopoe
+      tag: 1.0.0
       imagePullPolicy: Always
     settler:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/settler
@@ -76,12 +86,12 @@ global:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/reconciliation
       tag: 1.0.1
       imagePullPolicy: Always
-    asity:
-      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
-      tag: 1.0.4
-      imagePullPolicy: Always
     statistics:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/statistics
+      tag: 1.0.0
+      imagePullPolicy: Always
+    support_activity:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/support-activity
       tag: 1.0.0
       imagePullPolicy: Always
 

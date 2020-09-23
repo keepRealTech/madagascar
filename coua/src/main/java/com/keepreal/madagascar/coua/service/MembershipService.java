@@ -137,7 +137,7 @@ public class MembershipService {
                 .setName(membershipInfo.getName())
                 .setColorType(membershipInfo.getColorType())
                 .setIsTop(membershipInfo.getTop())
-                .setMemberCount(subscribeMembershipService.getMemberCountByMembershipId(membershipInfo.getId()))
+                .setMemberCount(membershipInfo.getMemberCount())
                 .setUseCustomMessage(membershipInfo.getUseCustomMessage())
                 .setMessage(membershipInfo.getMessage())
                 .build();
@@ -201,4 +201,7 @@ public class MembershipService {
         return this.updateMembership(membershipInfo);
     }
 
+    public void addMemberCount(String membershipId) {
+        this.repository.addMemberCountByMembershipId(membershipId);
+    }
 }

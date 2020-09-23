@@ -41,6 +41,8 @@ public class MembershipInfo {
     @Builder.Default
     private Boolean top = false;
     private Integer colorType;
+    @Builder.Default
+    private Integer memberCount = 0;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

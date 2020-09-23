@@ -8,9 +8,12 @@ import com.keepreal.madagascar.baobob.util.GrpcResponseUtils;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.UserState;
 import lombok.extern.slf4j.Slf4j;
-import org.redisson.api.RBucket;
+import org.redisson.Redisson;
+import org.redisson.api.RBucketReactive;
 import org.redisson.api.RedissonClient;
+import org.redisson.api.RedissonReactiveClient;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
@@ -21,18 +24,18 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class WebMobileLoginExecutor implements LoginExecutor{
 
-    private static final String MOBILE_PHONE_OTP = "otp_";
+    public static final String MOBILE_PHONE_OTP = "otp_";
     private final LocalTokenGranter tokenGranter;
     private final UserService userService;
     private final GrpcResponseUtils grpcResponseUtils;
-    private final RedissonClient redissonClient;
+    private final RedissonReactiveClient redissonReactiveClient;
 
     public WebMobileLoginExecutor(UserService userService,
                                   LocalTokenGranter tokenGranter,
                                   RedissonClient redissonClient) {
         this.userService = userService;
         this.tokenGranter = tokenGranter;
-        this.redissonClient = redissonClient;
+        this.redissonReactiveClient = Redisson.createReactive(redissonClient.getConfig());
         this.grpcResponseUtils = new GrpcResponseUtils();
     }
 
@@ -49,38 +52,25 @@ public class WebMobileLoginExecutor implements LoginExecutor{
         }
 
         String mobile = loginRequest.getWebMobilePayload().getMobile();
-        Integer otp = loginRequest.getWebMobilePayload().getOtp();
+        int otp = loginRequest.getWebMobilePayload().getOtp();
+        RBucketReactive<Integer> bucket = this.redissonReactiveClient.getBucket(MOBILE_PHONE_OTP + mobile);
 
-        if (!checkOtp(mobile, otp)) {
-            return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
-        }
-
-        return this.retrieveOrCreateUserByMobile(mobile)
-                .map(this.tokenGranter::grant)
-                .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
-                                && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_GRPC_LOGIN_FROZEN,
-                        this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN))
-                .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
+        return bucket.isExists()
+                .filter(Boolean.TRUE::equals)
+                .flatMap(exist -> bucket.get())
+                .filter(redisOtp -> otp == redisOtp)
+                .flatMap(redisOtp -> bucket.delete()
+                        .then(this.retrieveOrCreateUserByMobile(mobile))
+                        .map(this.tokenGranter::grant)
+                        .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
+                                        && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_GRPC_LOGIN_FROZEN,
+                                this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN))
+                        .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)))
+                .switchIfEmpty(Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH)));
     }
 
     /**
-     * 判断验证码是否正确
-     *
-     * @param mobile 手机号
-     * @param otp    验证码
-     * @return 正确匹配返回true
-     */
-    private Boolean checkOtp(String mobile, Integer otp) {
-        RBucket<Integer> redisOtp = this.redissonClient.getBucket(MOBILE_PHONE_OTP + mobile);
-        if (redisOtp.isExists() && otp.equals(redisOtp.get())) {
-            redisOtp.delete();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * 根据手机号获取或者创建用户信息
+     * 根据手机号获取或者创建 H5用户信息
      *
      * @param mobile 手机号
      * @return {@link UserMessage}
@@ -94,7 +84,7 @@ public class WebMobileLoginExecutor implements LoginExecutor{
                     }
                     return userMessage;
                 })
-                .switchIfEmpty(this.userService.createUserByMobileMono(mobile));
+                .switchIfEmpty(this.userService.createUserByMobileAndStateMono(mobile, UserState.USER_H5_MOBILE_VALUE));
     }
 
 }

@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represent the subscribe membership service.
@@ -34,14 +35,16 @@ public class SubscribeMembershipService {
     public List<String> retrieveMembershipIds(String userId, String islandId) {
         SubscribeMembershipServiceGrpc.SubscribeMembershipServiceBlockingStub stub = SubscribeMembershipServiceGrpc.newBlockingStub(this.channel);
 
-        RetrieveMembershipIdsRequest request = RetrieveMembershipIdsRequest.newBuilder()
-                .setUserId(userId)
-                .setIslandId(StringValue.of(islandId))
-                .build();
+        RetrieveMembershipIdsRequest.Builder requestBuilder = RetrieveMembershipIdsRequest.newBuilder()
+                .setUserId(userId);
+
+        if (Objects.nonNull(islandId)) {
+            requestBuilder.setIslandId(StringValue.of(islandId));
+        }
 
         RetrieveMembershipIdsResponse response;
         try {
-            response = stub.retrieveMembershipIdsByUserIdAndIslandId(request);
+            response = stub.retrieveMembershipIdsByUserIdAndIslandId(requestBuilder.build());
         } catch (Exception e) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }

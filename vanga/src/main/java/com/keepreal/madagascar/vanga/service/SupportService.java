@@ -1,10 +1,11 @@
 package com.keepreal.madagascar.vanga.service;
 
 import com.keepreal.madagascar.vanga.model.Balance;
+import com.keepreal.madagascar.vanga.model.Order;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
-import com.keepreal.madagascar.vanga.model.WechatOrderState;
+import com.keepreal.madagascar.vanga.model.OrderState;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -13,6 +14,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 @Service
 public class SupportService {
@@ -29,13 +31,18 @@ public class SupportService {
         this.notificationEventProducerService = notificationEventProducerService;
     }
 
+    /**
+     * Supports with order.
+     *
+     * @param order {@link Order}.
+     */
     @Transactional
-    public void supportWithWechatOrder(WechatOrder wechatOrder) {
-        if (Objects.isNull(wechatOrder) || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()) {
+    public void supportWithOrder(Order order) {
+        if (Objects.isNull(order) || OrderState.SUCCESS.getValue() != order.getState()) {
             return;
         }
 
-        List<Payment> paymentList = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId());
+        List<Payment> paymentList = this.paymentService.retrievePaymentsByOrderId(order.getId());
 
         if (paymentList.stream().allMatch(payment -> PaymentState.DRAFTED.getValue() != payment.getState())) {
             return;

@@ -6,7 +6,7 @@ import lombok.Getter;
  * Represents the wechat order states.
  */
 @Getter
-public enum WechatOrderState {
+public enum OrderState {
 
     UNKNOWN(0),
     NOTPAY(1),
@@ -21,7 +21,7 @@ public enum WechatOrderState {
 
     private final int value;
 
-    WechatOrderState(int value) {
+    OrderState(int value) {
         this.value = value;
     }
 

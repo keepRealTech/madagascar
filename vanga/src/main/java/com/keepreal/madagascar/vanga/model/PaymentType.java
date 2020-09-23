@@ -15,6 +15,7 @@ public enum PaymentType {
     WITHDRAW(4),
     IOSBUY(5),
     SUPPORT(6),
+    ALIPAY(7),
     ;
     private final int value;
 

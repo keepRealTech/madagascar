@@ -12,6 +12,7 @@ import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
+import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
@@ -27,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -77,6 +77,7 @@ public class IslandController implements IslandApi {
     private final FeedDTOFactory feedDTOFactory;
     private final GeneralConfiguration generalConfiguration;
     private final TextContentFilter textContentFilter;
+    private final DefaultErrorMessageTranslater translater;
 
     /**
      * Constructs the island controller.
@@ -109,6 +110,7 @@ public class IslandController implements IslandApi {
         this.feedDTOFactory = feedDTOFactory;
         this.generalConfiguration = generalConfiguration;
         this.textContentFilter = textContentFilter;
+        this.translater = new DefaultErrorMessageTranslater();
     }
 
     /**
@@ -120,12 +122,16 @@ public class IslandController implements IslandApi {
     @Override
     public ResponseEntity<CheckIslandResponse> apiV1IslandsCheckNameGet(String name) {
         boolean ifExists = this.textContentFilter.isDisallowed(name);
-        if (!ifExists) {
-            ifExists = this.islandService.checkName(name);
-        }
 
         CheckIslandDTO checkIslandDTO = new CheckIslandDTO();
-        checkIslandDTO.setIsExisted(ifExists);
+        checkIslandDTO.setIsExisted(false);
+        if (ifExists) {
+            checkIslandDTO.setIsExisted(true);
+            checkIslandDTO.setInnerMsg(this.translater.translate(ErrorCode.REQUEST_NAME_INVALID));
+        } else if (this.islandService.checkName(name)) {
+            checkIslandDTO.setIsExisted(true);
+            checkIslandDTO.setInnerMsg(this.translater.translate(ErrorCode.REQUEST_ISLAND_NAME_EXISTED_ERROR));
+        }
 
         CheckIslandResponse response = new CheckIslandResponse();
         response.setData(checkIslandDTO);
@@ -323,7 +329,7 @@ public class IslandController implements IslandApi {
      * @param portraitImage Portrait image.
      * @return {@link BriefIslandResponse}.
      */
-    @Override
+    @Deprecated
     public ResponseEntity<BriefIslandResponse> apiV1IslandsPost(
             PostIslandPayload payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {

@@ -1,18 +1,22 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.AlipayOrderMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.dtoFactory.BalanceDTOFactory;
-import com.keepreal.madagascar.lemur.dtoFactory.WechatOrderDTOFactory;
+import com.keepreal.madagascar.lemur.dtoFactory.OrderDTOFactory;
 import com.keepreal.madagascar.lemur.service.OrderService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.OrderApi;
+import swagger.model.AlipayCheckRequest;
+import swagger.model.AlipayOrderResponse;
 import swagger.model.BalanceResponse;
 import swagger.model.DummyResponse;
 import swagger.model.PostIOSMembershipSubscriptionRequest;
@@ -27,21 +31,21 @@ import swagger.model.WechatOrderResponse;
 public class OrderController implements OrderApi {
 
     private final OrderService orderService;
-    private final WechatOrderDTOFactory wechatOrderDTOFactory;
+    private final OrderDTOFactory orderDTOFactory;
     private final BalanceDTOFactory balanceDTOFactory;
 
     /**
      * Constructs the order controller.
      *
-     * @param orderService          {@link OrderService}.
-     * @param wechatOrderDTOFactory {@link WechatOrderDTOFactory}.
-     * @param balanceDTOFactory     {@link BalanceDTOFactory}.
+     * @param orderService      {@link OrderService}.
+     * @param orderDTOFactory   {@link OrderDTOFactory}.
+     * @param balanceDTOFactory {@link BalanceDTOFactory}.
      */
     public OrderController(OrderService orderService,
-                           WechatOrderDTOFactory wechatOrderDTOFactory,
+                           OrderDTOFactory orderDTOFactory,
                            BalanceDTOFactory balanceDTOFactory) {
         this.orderService = orderService;
-        this.wechatOrderDTOFactory = wechatOrderDTOFactory;
+        this.orderDTOFactory = orderDTOFactory;
         this.balanceDTOFactory = balanceDTOFactory;
     }
 
@@ -80,7 +84,7 @@ public class OrderController implements OrderApi {
                 postWechatOrderRequest.getOpenId(), postWechatOrderRequest.getShellSkuId());
 
         WechatOrderResponse response = new WechatOrderResponse();
-        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
+        response.setData(this.orderDTOFactory.wechatOrderValueOf(wechatOrderMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -98,7 +102,26 @@ public class OrderController implements OrderApi {
         WechatOrderMessage wechatOrderMessage = this.orderService.retrieveWechatOrderById(id);
 
         WechatOrderResponse response = new WechatOrderResponse();
-        response.setData(this.wechatOrderDTOFactory.valueOf(wechatOrderMessage));
+        response.setData(this.orderDTOFactory.wechatOrderValueOf(wechatOrderMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the alipay order check by order id api.
+     *
+     * @param id id (required) Order id.
+     * @return {@link AlipayOrderResponse}.
+     */
+    @CrossOrigin
+    @Override
+    public ResponseEntity<AlipayOrderResponse> apiV1OrdersAlipayIdCheckPost(String id,
+                                                                            AlipayCheckRequest alipayCheckRequest) {
+        AlipayOrderMessage alipayOrder = this.orderService.retrieveAlipayOrderById(id, alipayCheckRequest.getReceipt());
+
+        AlipayOrderResponse response = new AlipayOrderResponse();
+        response.setData(this.orderDTOFactory.alipayOrderValueOf(alipayOrder));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

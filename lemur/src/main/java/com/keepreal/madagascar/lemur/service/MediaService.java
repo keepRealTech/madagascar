@@ -105,7 +105,9 @@ public class MediaService {
     }
 
     private String processTitle(String title) {
-        return title.substring(0, title.lastIndexOf('.'));
+        int index = title.lastIndexOf('.');
+
+        return index == -1 ? title : title.substring(0, index);
     }
 
 }

@@ -26,6 +26,7 @@ import swagger.model.FullFeedDTO;
 import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -42,7 +43,6 @@ public class FeedDTOFactory {
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final CommentDTOFactory commentDTOFactory;
-    private final EhcacheService ehcacheService;
     private final MembershipService membershipService;
     private final MembershipDTOFactory membershipDTOFactory;
     private final MultiMediaDTOFactory multiMediaDTOFactory;
@@ -55,7 +55,6 @@ public class FeedDTOFactory {
      * @param userService          {@link UserService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param commentDTOFactory    {@link CommentDTOFactory}.
-     * @param ehcacheService       {@link EhcacheService}.
      * @param membershipService    {@link MembershipService}.
      * @param membershipDTOFactory {@link MembershipDTOFactory}.
      */
@@ -72,7 +71,6 @@ public class FeedDTOFactory {
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.commentDTOFactory = commentDTOFactory;
-        this.ehcacheService = ehcacheService;
         this.membershipService = membershipService;
         this.membershipDTOFactory = membershipDTOFactory;
         this.multiMediaDTOFactory = new MultiMediaDTOFactory(userService, userDTOFactory);
@@ -82,10 +80,24 @@ public class FeedDTOFactory {
      * Converts the {@link FeedMessage} into {@link FeedDTO}.
      *
      * @param feed {@link FeedMessage}.
+     * @param memberships {@link MembershipMessage}.
      * @return {@link FeedDTO}.
      */
-    public FeedDTO valueOf(FeedMessage feed) {
-        if (Objects.isNull(feed)) {
+    public FeedDTO valueOf(FeedMessage feed, List<MembershipMessage> memberships) {
+        return this.valueOf(feed, memberships, true);
+    }
+
+    /**
+     * Converts the {@link FeedMessage} into {@link FeedDTO}.
+     *
+     * @param feed {@link FeedMessage}.
+     * @param memberships {@link MembershipMessage}.
+     * @param includeChargeable Whether includes the chargeable feeds.
+     * @return {@link FeedDTO}.
+     */
+    public FeedDTO valueOf(FeedMessage feed, List<MembershipMessage> memberships, Boolean includeChargeable) {
+        if (Objects.isNull(feed)
+                || (!includeChargeable && feed.getPriceInCents() > 0L)) {
             return null;
         }
 
@@ -108,6 +120,7 @@ public class FeedDTOFactory {
             feedDTO.setCreatedAt(feed.getCreatedAt());
             feedDTO.setIsLiked(feed.getIsLiked());
             feedDTO.setIsMembership(feed.getIsMembership());
+            feedDTO.setIsChargeable(feed.getPriceInCents() > 0L);
             feedDTO.setIsTop(feed.getIsTop());
             feedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             feedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
@@ -121,16 +134,13 @@ public class FeedDTOFactory {
                 feedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
             }
 
-            feedDTO.setIsAccess(true);
-            if (!CollectionUtils.isEmpty(feed.getMembershipIdList())) {
-                List<MembershipMessage> membershipMessages = this.membershipService.retrieveMembershipsByIds(feed.getMembershipIdList());
-                feedDTO.setIsMembership(!CollectionUtils.isEmpty(membershipMessages));
-                feedDTO.setIsAccess(feed.getIsAccess() || membershipMessages.isEmpty());
-
-                if (!membershipMessages.isEmpty()) {
-                    feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
-                    feedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
-                }
+            feedDTO.setIsAccess(feed.getIsAccess());
+            if (!memberships.isEmpty()) {
+                feedDTO.setIsMembership(true);
+                feedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(memberships.get(0)));
+                feedDTO.setMembershipList(memberships.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
+            } else if (!feed.getMembershipIdList().isEmpty()) {
+                feedDTO.setIsAccess(true);
             }
 
             feedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
@@ -277,9 +287,14 @@ public class FeedDTOFactory {
      * @param feedGroup  {@link FeedGroupMessage}.
      * @param lastFeedId Last feed id.
      * @param nextFeedId Next feed id.
+     * @param includeChargeable Whether includes the chargeable.
      * @return {@link FullFeedDTO}.
      */
-    public FullFeedDTO valueOf(FeedMessage feed, FeedGroupMessage feedGroup, String lastFeedId, String nextFeedId) {
+    public FullFeedDTO valueOf(FeedMessage feed,
+                               FeedGroupMessage feedGroup,
+                               String lastFeedId,
+                               String nextFeedId,
+                               Boolean includeChargeable) {
         if (Objects.isNull(feed)) {
             return null;
         }
@@ -287,6 +302,7 @@ public class FeedDTOFactory {
         try {
             IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
             UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+            UserMessage hostMessage = this.userService.retrieveUserById(feed.getHostId());
 
             FullFeedDTO fullFeedDTO = new FullFeedDTO();
             fullFeedDTO.setId(feed.getId());
@@ -303,9 +319,11 @@ public class FeedDTOFactory {
             fullFeedDTO.setCreatedAt(feed.getCreatedAt());
             fullFeedDTO.setIsLiked(feed.getIsLiked());
             fullFeedDTO.setIsMembership(feed.getIsMembership());
+            fullFeedDTO.setIsChargeable(feed.getPriceInCents() > 0L);
             fullFeedDTO.setIsTop(feed.getIsTop());
             fullFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            fullFeedDTO.setPriceInCents(feed.getPriceInCents());
             if (!StringUtils.isEmpty(feedGroup.getId())) {
                 FeedGroupInfo feedGroupInfo = new FeedGroupInfo();
                 feedGroupInfo.setId(feedGroup.getId());
@@ -336,9 +354,18 @@ public class FeedDTOFactory {
                     fullFeedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(membershipMessages.get(0)));
                     fullFeedDTO.setMembershipList(membershipMessages.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
                 }
+            } else {
+                fullFeedDTO.setIsAccess(feed.getIsAccess());
             }
+
             fullFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
+            fullFeedDTO.setHost(this.userDTOFactory.briefValueOf(hostMessage));
             fullFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
+
+            if (feed.getPriceInCents() > 0 && !includeChargeable) {
+                fullFeedDTO.setMultimedia(Collections.emptyList());
+                fullFeedDTO.setText("该版本不支持此动态，请升级试试喔");
+            }
 
             return fullFeedDTO;
         } catch (KeepRealBusinessException exception) {

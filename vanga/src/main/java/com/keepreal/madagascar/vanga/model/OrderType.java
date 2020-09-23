@@ -3,10 +3,10 @@ package com.keepreal.madagascar.vanga.model;
 import lombok.Getter;
 
 /**
- * Represents the wechat order type.
+ * Represents the order type.
  */
 @Getter
-public enum WechatOrderType {
+public enum OrderType {
 
     UNKNOWN(0),
     PAYSHELL(1),
@@ -15,21 +15,23 @@ public enum WechatOrderType {
     PAYMEMBERSHIPH5(4),
     PAYSUPPORT(5),
     PAYSUPPORTH5(6),
+    PAYFEEDCHARGE(7),
+    PAYFEEDCHARGEH5(8),
     ;
     private final int value;
 
-    WechatOrderType(int value) {
+    OrderType(int value) {
         this.value = value;
     }
 
-    public static WechatOrderType fromValue(int value) {
-        for (WechatOrderType type : values()) {
+    public static OrderType fromValue(int value) {
+        for (OrderType type : values()) {
             if (value == type.getValue()) {
                 return type;
             }
         }
 
-        return WechatOrderType.UNKNOWN;
+        return OrderType.UNKNOWN;
     }
 
 }

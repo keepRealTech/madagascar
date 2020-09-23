@@ -1,39 +1,49 @@
 package com.keepreal.madagascar.vanga.grpcController;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.ActivatePendingFeedPaymentRequest;
+import com.keepreal.madagascar.vanga.AlipayOrderResponse;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreatePaidFeedRequest;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
+import com.keepreal.madagascar.vanga.FeedRequest;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
+import com.keepreal.madagascar.vanga.OrderCallbackRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.RefundWechatFeedRequest;
+import com.keepreal.madagascar.vanga.RetrieveOrderByIdRequest;
 import com.keepreal.madagascar.vanga.RetrieveSupportInfoRequest;
 import com.keepreal.madagascar.vanga.RetrieveSupportInfoResponse;
 import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
-import com.keepreal.madagascar.vanga.RetrieveWechatOrderByIdRequest;
 import com.keepreal.madagascar.vanga.SubscribeMembershipRequest;
 import com.keepreal.madagascar.vanga.SupportMessage;
 import com.keepreal.madagascar.vanga.SupportRequest;
 import com.keepreal.madagascar.vanga.UserPaymentsResponse;
 import com.keepreal.madagascar.vanga.WechatOrderBuyShellRequest;
-import com.keepreal.madagascar.vanga.WechatOrderCallbackRequest;
 import com.keepreal.madagascar.vanga.WechatOrderResponse;
+import com.keepreal.madagascar.vanga.WithdrawPaymentsResponse;
 import com.keepreal.madagascar.vanga.factory.BalanceMessageFactory;
+import com.keepreal.madagascar.vanga.factory.OrderMessageFactory;
 import com.keepreal.madagascar.vanga.factory.PaymentMessageFactory;
-import com.keepreal.madagascar.vanga.factory.WechatOrderMessageFactory;
+import com.keepreal.madagascar.vanga.model.AlipayOrder;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
+import com.keepreal.madagascar.vanga.model.OrderState;
+import com.keepreal.madagascar.vanga.model.OrderType;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
+import com.keepreal.madagascar.vanga.model.PaymentType;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
-import com.keepreal.madagascar.vanga.model.WechatOrderState;
-import com.keepreal.madagascar.vanga.model.WechatOrderType;
+import com.keepreal.madagascar.vanga.service.AlipayOrderService;
+import com.keepreal.madagascar.vanga.service.AlipayService;
+import com.keepreal.madagascar.vanga.service.FeedChargeService;
 import com.keepreal.madagascar.vanga.service.FeedService;
 import com.keepreal.madagascar.vanga.service.MpWechatPayService;
 import com.keepreal.madagascar.vanga.service.PaymentService;
@@ -51,6 +61,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
 import org.springframework.util.StringUtils;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -69,19 +80,25 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     private final static String SUPPORT_TEXT = "夏日炎炎，请TA吃个椰子吧";
     private final static String MEMBERSHIP_TEMPLATE = "支持创作者 ¥%.2f（¥%.2f x %d个月）";
     private final static String SPONSOR_TEMPLATE = "支持一下创作者 ¥%.2f";
+    private final static String FEED_CHARGE_TEMPLATE = "单独解锁动态 ￥%.2f";
 
     private final FeedService feedService;
     private final PaymentService paymentService;
     private final WechatOrderService wechatOrderService;
     private final WechatPayService wechatPayService;
     private final MpWechatPayService mpWechatPayService;
+    private final AlipayOrderService alipayOrderService;
+    private final AlipayService alipayService;
     private final SkuService skuService;
     private final ShellService shellService;
     private final SubscribeMembershipService subscribeMembershipService;
-    private final WechatOrderMessageFactory wechatOrderMessageFactory;
+    private final OrderMessageFactory orderMessageFactory;
     private final BalanceMessageFactory balanceMessageFactory;
     private final PaymentMessageFactory paymentMessageFactory;
     private final SupportService supportService;
+    private final FeedChargeService feedChargeService;
+
+    private final Gson gson;
 
     /**
      * Constructs the payment grpc controller.
@@ -91,38 +108,48 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param wechatOrderService         {@link WechatOrderService}.
      * @param wechatPayService           {@link WechatPayService}.
      * @param mpWechatPayService         {@link MpWechatPayService}.
+     * @param alipayOrderService         {@link AlipayOrderService}.
+     * @param alipayService              {@link AlipayService}.
      * @param balanceMessageFactory      {@link BalanceMessageFactory}.
      * @param skuService                 {@link SkuService}.
      * @param shellService               {@link ShellService}.
-     * @param wechatOrderMessageFactory  {@link WechatOrderMessageFactory}.
+     * @param orderMessageFactory        {@link OrderMessageFactory}.
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param paymentMessageFactory      {@link PaymentMessageFactory}.
      * @param supportService             {@link SupportService}.
+     * @param feedChargeService          {@link FeedChargeService}.
      */
     public PaymentGRpcController(FeedService feedService,
                                  PaymentService paymentService,
                                  WechatOrderService wechatOrderService,
                                  WechatPayService wechatPayService,
                                  MpWechatPayService mpWechatPayService,
+                                 AlipayOrderService alipayOrderService,
+                                 AlipayService alipayService,
                                  BalanceMessageFactory balanceMessageFactory,
                                  SkuService skuService,
                                  ShellService shellService,
-                                 WechatOrderMessageFactory wechatOrderMessageFactory,
+                                 OrderMessageFactory orderMessageFactory,
                                  SubscribeMembershipService subscribeMembershipService,
                                  PaymentMessageFactory paymentMessageFactory,
-                                 SupportService supportService) {
+                                 SupportService supportService,
+                                 FeedChargeService feedChargeService) {
         this.feedService = feedService;
         this.paymentService = paymentService;
         this.wechatOrderService = wechatOrderService;
         this.wechatPayService = wechatPayService;
         this.mpWechatPayService = mpWechatPayService;
+        this.alipayOrderService = alipayOrderService;
+        this.alipayService = alipayService;
         this.balanceMessageFactory = balanceMessageFactory;
         this.skuService = skuService;
         this.shellService = shellService;
-        this.wechatOrderMessageFactory = wechatOrderMessageFactory;
+        this.orderMessageFactory = orderMessageFactory;
         this.subscribeMembershipService = subscribeMembershipService;
         this.paymentMessageFactory = paymentMessageFactory;
         this.supportService = supportService;
+        this.feedChargeService = feedChargeService;
+        this.gson = new Gson();
     }
 
     /**
@@ -173,7 +200,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId(),
-                WechatOrderType.PAYMEMBERSHIP,
+                OrderType.PAYMEMBERSHIP,
                 null,
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
@@ -185,9 +212,9 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         if (Objects.nonNull(wechatOrder)) {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
                     .build();
-            this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
+            this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku, PaymentType.WECHATPAY);
         } else {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
@@ -199,13 +226,59 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     }
 
     /**
-     * Implements the wechat order check and retrieve.
+     * Implements the create ali pay request.
      *
-     * @param request          {@link RetrieveWechatOrderByIdRequest}.
-     * @param responseObserver {@link StreamObserver}.
+     * @param request          {@link SubscribeMembershipRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
      */
     @Override
-    public void retrieveWechatOrderById(RetrieveWechatOrderByIdRequest request,
+    public void submitSubscribeMembershipWithAlipay(SubscribeMembershipRequest request,
+                                                    StreamObserver<AlipayOrderResponse> responseObserver) {
+        MembershipSku sku = this.skuService.retrieveMembershipSkuById(request.getMembershipSkuId());
+        if (Objects.isNull(sku)) {
+            AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        AlipayOrder alipayOrder = this.alipayService.tryPlaceOrderApp(
+                request.getUserId(),
+                sku.getId(),
+                String.valueOf(sku.getPriceInCents()),
+                String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
+                        sku.getPriceInCents().doubleValue() / 100,
+                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100,
+                        sku.getTimeInMonths()).replace(".00", ""),
+                OrderType.PAYMEMBERSHIP);
+
+        AlipayOrderResponse response;
+        if (Objects.nonNull(alipayOrder)) {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
+                    .build();
+            this.paymentService.createNewWechatMembershipPayments(alipayOrder, sku, PaymentType.ALIPAY);
+        } else {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the wechat order check and retrieve.
+     *
+     * @param request          {@link RetrieveOrderByIdRequest}.
+     * @param responseObserver {@link WechatOrderResponse}.
+     */
+    @Override
+    public void retrieveWechatOrderById(RetrieveOrderByIdRequest request,
                                         StreamObserver<WechatOrderResponse> responseObserver) {
         WechatOrder wechatOrder = this.wechatOrderService.retrieveById(request.getId());
 
@@ -215,13 +288,14 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
+            return;
         }
 
-        switch (WechatOrderType.fromValue(wechatOrder.getType())) {
+        switch (OrderType.fromValue(wechatOrder.getType())) {
             case PAYMEMBERSHIP:
             case PAYMEMBERSHIPH5:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
-                this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
+                this.subscribeMembershipService.subscribeMembershipWithOrder(wechatOrder, PaymentType.WECHATPAY);
                 break;
             case PAYSHELL:
                 wechatOrder = this.mpWechatPayService.tryUpdateOrder(wechatOrder);
@@ -232,17 +306,93 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 break;
             case PAYSUPPORT:
-            case PAYSUPPORTH5: {
+            case PAYSUPPORTH5:
                 wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
-                this.supportService.supportWithWechatOrder(wechatOrder);
+                this.supportService.supportWithOrder(wechatOrder);
                 break;
-            }
+            case PAYFEEDCHARGE:
+            case PAYFEEDCHARGEH5:
+                wechatOrder = this.wechatPayService.tryUpdateOrder(wechatOrder);
+                this.feedChargeService.feedChargeWithWechatOrder(wechatOrder);
+                break;
             default:
         }
 
         WechatOrderResponse response = WechatOrderResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the alipay order check and retrieve.
+     *
+     * @param request          {@link RetrieveOrderByIdRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public void retrieveAlipayOrderById(RetrieveOrderByIdRequest request,
+                                        StreamObserver<AlipayOrderResponse> responseObserver) {
+        AlipayOrder alipayOrder;
+        if (request.hasAlipayReceipt()) {
+            Type type = new TypeToken<Map<String, Object>>() {
+            }.getType();
+            Map<String, Object> resultMap = this.gson.fromJson(request.getAlipayReceipt().getValue(), type);
+
+            Map<String, String> paramMap = (Map) resultMap.get("alipay_trade_app_pay_response");
+            String content = this.gson.toJson(paramMap);
+            String sign = resultMap.get("sign").toString();
+
+            alipayOrder = this.alipayOrderService.retrieveByTradeNumber(paramMap.get("out_trade_no"));
+
+            if (Objects.isNull(alipayOrder)
+                    || !alipayOrder.getId().equals(request.getId())) {
+                AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ALIPAY_ORDER_NOT_FOUND_ERROR))
+                        .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+                return;
+            }
+
+            alipayOrder = this.alipayService.verifySyncNotification(content, sign, paramMap, alipayOrder);
+        } else {
+            alipayOrder = this.alipayOrderService.retrieveById(request.getId());
+        }
+
+        if (Objects.isNull(alipayOrder)) {
+            AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ALIPAY_ORDER_VERIFY_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        switch (OrderType.fromValue(alipayOrder.getType())) {
+            case PAYMEMBERSHIP:
+            case PAYMEMBERSHIPH5:
+                alipayOrder = this.alipayService.tryUpdateOrder(alipayOrder);
+                this.subscribeMembershipService.subscribeMembershipWithOrder(alipayOrder, PaymentType.ALIPAY);
+                break;
+            case PAYSUPPORT:
+            case PAYSUPPORTH5:
+                alipayOrder = this.alipayService.tryUpdateOrder(alipayOrder);
+                this.supportService.supportWithOrder(alipayOrder);
+                break;
+            case PAYFEEDCHARGE:
+            case PAYFEEDCHARGEH5:
+                alipayOrder = this.alipayService.tryUpdateOrder(alipayOrder);
+                this.feedChargeService.feedChargeWithWechatOrder(alipayOrder);
+            default:
+        }
+
+        AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
                 .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -251,24 +401,24 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     /**
      * Implements the wechat order pay callback api.
      *
-     * @param request          {@link WechatOrderCallbackRequest}.
+     * @param request          {@link OrderCallbackRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
     @Override
-    public void wechatPayCallback(WechatOrderCallbackRequest request,
+    public void wechatPayCallback(OrderCallbackRequest request,
                                   StreamObserver<CommonStatus> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.orderCallback(request.getPayload());
 
-        if (Objects.isNull(wechatOrder) || WechatOrderState.SUCCESS.getValue() != wechatOrder.getState()) {
+        if (Objects.isNull(wechatOrder) || OrderState.SUCCESS.getValue() != wechatOrder.getState()) {
             responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
             responseObserver.onCompleted();
             return;
         }
 
-        switch (WechatOrderType.fromValue(wechatOrder.getType())) {
+        switch (OrderType.fromValue(wechatOrder.getType())) {
             case PAYMEMBERSHIP:
             case PAYMEMBERSHIPH5:
-                this.subscribeMembershipService.subscribeMembershipWithWechatOrder(wechatOrder);
+                this.subscribeMembershipService.subscribeMembershipWithOrder(wechatOrder, PaymentType.WECHATPAY);
                 break;
             case PAYSHELL:
                 this.shellService.buyShellWithWechat(wechatOrder, this.skuService.retrieveShellSkuById(wechatOrder.getPropertyId()));
@@ -277,10 +427,51 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 this.feedService.confirmQuestionPaid(wechatOrder);
                 break;
             case PAYSUPPORT:
+            case PAYSUPPORTH5:
+                this.supportService.supportWithOrder(wechatOrder);
+                break;
+            case PAYFEEDCHARGE:
+            case PAYFEEDCHARGEH5:
+                this.feedChargeService.feedChargeWithWechatOrder(wechatOrder);
+                break;
+            default:
+        }
+
+        responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the alipay order pay callback api.
+     *
+     * @param request          {@link OrderCallbackRequest}.
+     * @param responseObserver {@link StreamObserver}.
+     */
+    @Override
+    public void alipayCallback(OrderCallbackRequest request,
+                               StreamObserver<CommonStatus> responseObserver) {
+        AlipayOrder alipayOrder = this.alipayService.orderCallback(request.getPayload());
+
+        if (Objects.isNull(alipayOrder) || OrderState.SUCCESS.getValue() != alipayOrder.getState()) {
+            responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+            responseObserver.onCompleted();
+            return;
+        }
+
+        switch (OrderType.fromValue(alipayOrder.getType())) {
+            case PAYMEMBERSHIP:
+            case PAYMEMBERSHIPH5:
+                this.subscribeMembershipService.subscribeMembershipWithOrder(alipayOrder, PaymentType.ALIPAY);
+                break;
+            case PAYSUPPORT:
             case PAYSUPPORTH5: {
-                this.supportService.supportWithWechatOrder(wechatOrder);
+                this.supportService.supportWithOrder(alipayOrder);
                 break;
             }
+            case PAYFEEDCHARGE:
+            case PAYFEEDCHARGEH5:
+                this.feedChargeService.feedChargeWithWechatOrder(alipayOrder);
+                break;
             default:
         }
 
@@ -291,21 +482,21 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     /**
      * Implements the wechat order refund callback api.
      *
-     * @param request          {@link WechatOrderCallbackRequest}.
+     * @param request          {@link OrderCallbackRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
     @Override
-    public void wechatRefundCallback(WechatOrderCallbackRequest request,
+    public void wechatRefundCallback(OrderCallbackRequest request,
                                      StreamObserver<CommonStatus> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.refundCallback(request.getPayload());
 
-        if (Objects.isNull(wechatOrder) || WechatOrderState.REFUNDED.getValue() != wechatOrder.getState()) {
+        if (Objects.isNull(wechatOrder) || OrderState.REFUNDED.getValue() != wechatOrder.getState()) {
             responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
             responseObserver.onCompleted();
             return;
         }
 
-        switch (WechatOrderType.fromValue(wechatOrder.getType())) {
+        switch (OrderType.fromValue(wechatOrder.getType())) {
             case PAYQUESTION: {
                 Payment payment = this.paymentService.retrievePaymentsByOrderId(wechatOrder.getId()).stream().findFirst().orElse(null);
                 if (Objects.isNull(payment)) {
@@ -444,7 +635,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         if (Objects.nonNull(wechatOrder)) {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
                     .build();
             this.paymentService.createWechatBuyShellPayments(wechatOrder, sku);
         } else {
@@ -490,6 +681,30 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     }
 
     /**
+     * Implements the user withdraw history.
+     *
+     * @param request          {@link RetrieveUserPaymentsRequest}.
+     * @param responseObserver {@link WithdrawPaymentsResponse}.
+     */
+    @Override
+    public void retrieveUserWithdraws(RetrieveUserPaymentsRequest request,
+                                      StreamObserver<WithdrawPaymentsResponse> responseObserver) {
+        Page<Payment> paymentPage = this.paymentService.retrieveWithdrawsByUserId(request.getUserId(), PaginationUtils.valueOf(request.getPageRequest()));
+
+        WithdrawPaymentsResponse response = WithdrawPaymentsResponse.newBuilder()
+                .addAllUserWithdraws(paymentPage.getContent().stream()
+                        .map(this.paymentMessageFactory::withdrawValueOf)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()))
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setPageResponse(PaginationUtils.valueOf(paymentPage, request.getPageRequest()))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
      * Implements the feed creation with wechat pay.
      * Note: the creator pays with wechat in order to create successfully.
      *
@@ -502,7 +717,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(request.getPriceInCents()),
                 request.getFeedId(),
-                WechatOrderType.PAYQUESTION,
+                OrderType.PAYQUESTION,
                 null,
                 request.getIpAddress(),
                 "");
@@ -511,7 +726,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         if (Objects.nonNull(wechatOrder)) {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
                     .build();
             this.paymentService.createNewWechatQuestionFeedPayment(wechatOrder, request.getHostId(), request.getPriceInCents());
         } else {
@@ -569,7 +784,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
     /**
      * Implements the H5 payment api.
      *
-     * @param request {@link SubscribeMembershipRequest}.
+     * @param request          {@link SubscribeMembershipRequest}.
      * @param responseObserver {@link RedirectResponse}.
      */
     @Override
@@ -588,7 +803,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(sku.getPriceInCents()),
                 sku.getId(),
-                WechatOrderType.PAYMEMBERSHIPH5,
+                OrderType.PAYMEMBERSHIPH5,
                 request.getSceneType(),
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
@@ -603,12 +818,63 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setRedirectUrl(wechatOrder.getMwebUrl())
                     .setOrderId(wechatOrder.getId())
                     .build();
-            this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku);
+            this.paymentService.createNewWechatMembershipPayments(wechatOrder, sku, PaymentType.WECHATPAY);
         } else {
             response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
                     .build();
         }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the H5 alipay member subscription.
+     *
+     * @param request          {@link SubscribeMembershipRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
+     */
+    @Override
+    public void submitSubscribeMembershipWithAlipayH5(SubscribeMembershipRequest request,
+                                                      StreamObserver<AlipayOrderResponse> responseObserver) {
+        MembershipSku sku = this.skuService.retrieveMembershipSkuById(request.getMembershipSkuId());
+        if (Objects.isNull(sku)) {
+            AlipayOrderResponse response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        AlipayOrder alipayOrder = this.alipayService.tryPlaceOrderH5(
+                request.getUserId(),
+                sku.getId(),
+                String.valueOf(sku.getPriceInCents()),
+                String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
+                        sku.getPriceInCents().doubleValue() / 100,
+                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100,
+                        sku.getTimeInMonths()).replace(".00", ""),
+                OrderType.PAYMEMBERSHIP,
+                request.getReturnUrl(),
+                request.getQuitUrl());
+
+        AlipayOrderResponse response;
+        if (Objects.nonNull(alipayOrder)) {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
+                    .build();
+            this.paymentService.createNewWechatMembershipPayments(alipayOrder, sku, PaymentType.ALIPAY);
+        } else {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -634,7 +900,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(request.getPriceInCents()),
                 request.getSponsorSkuId(),
-                WechatOrderType.PAYSUPPORT,
+                OrderType.PAYSUPPORT,
                 null,
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.SPONSOR_TEMPLATE,
@@ -644,9 +910,9 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         if (Objects.nonNull(wechatOrder)) {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
-                    .setWechatOrder(this.wechatOrderMessageFactory.valueOf(wechatOrder))
+                    .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
                     .build();
-            this.paymentService.createNewWechatSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+            this.paymentService.createNewSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
         } else {
             response = WechatOrderResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
@@ -657,12 +923,89 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onCompleted();
     }
 
+    /**
+     * Submits an one time support with alipay.
+     *
+     * @param request          {@link SupportRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
+     */
     @Override
-    public void submitSupportWithWechatPayH5(SupportRequest request, StreamObserver<RedirectResponse> responseObserver) {
+    public void submitSupportWithAlipay(SupportRequest request,
+                                        StreamObserver<AlipayOrderResponse> responseObserver) {
+        AlipayOrder alipayOrder = this.alipayService.tryPlaceOrderApp(
+                request.getUserId(),
+                request.getSponsorSkuId(),
+                String.valueOf(request.getPriceInCents()),
+                String.format(PaymentGRpcController.SPONSOR_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""),
+                OrderType.PAYSUPPORT);
+
+        AlipayOrderResponse response;
+        if (Objects.nonNull(alipayOrder)) {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
+                    .build();
+            this.paymentService.createNewSupportPayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Submits an one time support with alipay H5.
+     *
+     * @param request          {@link SupportRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
+     */
+    @Override
+    public void submitSupportWithAlipayH5(SupportRequest request,
+                                          StreamObserver<AlipayOrderResponse> responseObserver) {
+        AlipayOrder alipayOrder = this.alipayService.tryPlaceOrderH5(
+                request.getUserId(),
+                request.getSponsorSkuId(),
+                String.valueOf(request.getPriceInCents()),
+                String.format(PaymentGRpcController.SPONSOR_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""),
+                OrderType.PAYSUPPORT,
+                request.getReturnUrl(),
+                request.getQuitUrl());
+
+        AlipayOrderResponse response;
+        if (Objects.nonNull(alipayOrder)) {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
+                    .build();
+            this.paymentService.createNewSupportPayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Submits an one time support with wechat H5.
+     *
+     * @param request          {@link SupportRequest}.
+     * @param responseObserver {@link RedirectResponse}.
+     */
+    @Override
+    public void submitSupportWithWechatPayH5(SupportRequest request,
+                                             StreamObserver<RedirectResponse> responseObserver) {
         WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(request.getUserId(),
                 String.valueOf(request.getPriceInCents()),
                 request.getSponsorSkuId(),
-                WechatOrderType.PAYSUPPORTH5,
+                OrderType.PAYSUPPORTH5,
                 request.getSceneType(),
                 request.getIpAddress(),
                 String.format(PaymentGRpcController.SPONSOR_TEMPLATE,
@@ -675,7 +1018,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                     .setRedirectUrl(wechatOrder.getMwebUrl())
                     .setOrderId(wechatOrder.getId())
                     .build();
-            this.paymentService.createNewWechatSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+            this.paymentService.createNewSupportPayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
         } else {
             response = RedirectResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
@@ -685,4 +1028,147 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
+
+    /**
+     * Submits pay feed with wechat app pay.
+     *
+     * @param request          {@link FeedRequest}.
+     * @param responseObserver {@link WechatOrderResponse}.
+     */
+    @Override
+    public void submitFeedWithWechatPay(FeedRequest request, StreamObserver<WechatOrderResponse> responseObserver) {
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(
+                request.getUserId(),
+                String.valueOf(request.getPriceInCents()),
+                request.getFeedId(),
+                OrderType.PAYFEEDCHARGE,
+                null,
+                request.getIpAddress(),
+                String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""));
+
+        WechatOrderResponse response;
+        if (Objects.nonNull(wechatOrder)) {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setWechatOrder(this.orderMessageFactory.valueOf(wechatOrder))
+                    .build();
+            this.paymentService.createNewFeedChargePayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = WechatOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Submits pay feed with wechat app pay.
+     *
+     * @param request          {@link FeedRequest}.
+     * @param responseObserver {@link RedirectResponse}.
+     */
+    @Override
+    public void submitFeedWithWechatPayH5(FeedRequest request,
+                                          StreamObserver<RedirectResponse> responseObserver) {
+        WechatOrder wechatOrder = this.wechatPayService.tryPlaceOrder(
+                request.getUserId(),
+                String.valueOf(request.getPriceInCents()),
+                request.getFeedId(),
+                OrderType.PAYFEEDCHARGEH5,
+                request.getSceneType(),
+                request.getIpAddress(),
+                String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""));
+
+        RedirectResponse response;
+        if (Objects.nonNull(wechatOrder)) {
+            response = RedirectResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setRedirectUrl(wechatOrder.getMwebUrl())
+                    .setOrderId(wechatOrder.getId())
+                    .build();
+            this.paymentService.createNewFeedChargePayment(wechatOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = RedirectResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_WECHAT_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Submits pay feed with ali app pay.
+     *
+     * @param request          {@link FeedRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
+     */
+    @Override
+    public void submitFeedWithAlipay(FeedRequest request,
+                                     StreamObserver<AlipayOrderResponse> responseObserver) {
+        AlipayOrder alipayOrder = this.alipayService.tryPlaceOrderApp(
+                request.getUserId(),
+                request.getFeedId(),
+                String.valueOf(request.getPriceInCents()),
+                String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""),
+                OrderType.PAYFEEDCHARGE);
+
+        AlipayOrderResponse response;
+        if (Objects.nonNull(alipayOrder)) {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
+                    .build();
+            this.paymentService.createNewFeedChargePayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Submits pay feed with ali html pay.
+     *
+     * @param request          {@link FeedRequest}.
+     * @param responseObserver {@link AlipayOrderResponse}.
+     */
+    @Override
+    public void submitFeedWithAlipayH5(FeedRequest request,
+                                       StreamObserver<AlipayOrderResponse> responseObserver) {
+        AlipayOrder alipayOrder = this.alipayService.tryPlaceOrderH5(
+                request.getUserId(),
+                request.getFeedId(),
+                String.valueOf(request.getPriceInCents()),
+                String.format(PaymentGRpcController.FEED_CHARGE_TEMPLATE,
+                        Long.valueOf(request.getPriceInCents()).doubleValue() / 100).replace(".00", ""),
+                OrderType.PAYFEEDCHARGE,
+                request.getReturnUrl(),
+                request.getQuitUrl());
+
+        AlipayOrderResponse response;
+        if (Objects.nonNull(alipayOrder)) {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                    .setAlipayOrder(this.orderMessageFactory.valueOf(alipayOrder))
+                    .build();
+            this.paymentService.createNewFeedChargePayment(alipayOrder, request.getPayeeId(), request.getPriceInCents());
+        } else {
+            response = AlipayOrderResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_ALIPAY_ORDER_PLACE_ERROR))
+                    .build();
+        }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
 }

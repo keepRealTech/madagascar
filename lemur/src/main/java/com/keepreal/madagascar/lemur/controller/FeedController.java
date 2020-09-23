@@ -9,6 +9,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
+import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.fossa.FeedGroupFeedResponse;
 import com.keepreal.madagascar.fossa.FeedGroupFeedsResponse;
 import com.keepreal.madagascar.fossa.FeedsResponse;
@@ -19,6 +20,7 @@ import com.keepreal.madagascar.lemur.service.FeedGroupService;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
 import com.keepreal.madagascar.lemur.service.IslandService;
+import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -55,8 +57,13 @@ import swagger.model.TutorialResponse;
 import javax.validation.Valid;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -73,28 +80,32 @@ public class FeedController implements FeedApi {
             "3.点击\"发布\"按钮";
 
     private final ImageService imageService;
-    private final FeedService feedService;
     private final IslandService islandService;
+    private final MembershipService membershipService;
+    private final FeedService feedService;
     private final FeedGroupService feedGroupService;
     private final FeedDTOFactory feedDTOFactory;
 
     /**
      * Constructs the feed controller.
      *
-     * @param imageService     {@link ImageService}.
-     * @param feedService      {@link FeedService}.
-     * @param islandService    {@link IslandService}.
-     * @param feedGroupService {@link FeedGroupService}.
-     * @param feedDTOFactory   {@link FeedDTOFactory}.
+     * @param imageService      {@link ImageService}.
+     * @param feedService       {@link FeedService}.
+     * @param islandService     {@link IslandService}.
+     * @param membershipService {@link MembershipService}.
+     * @param feedGroupService  {@link FeedGroupService}.
+     * @param feedDTOFactory    {@link FeedDTOFactory}.
      */
     public FeedController(ImageService imageService,
                           FeedService feedService,
                           IslandService islandService,
+                          MembershipService membershipService,
                           FeedGroupService feedGroupService,
                           FeedDTOFactory feedDTOFactory) {
         this.imageService = imageService;
         this.feedService = feedService;
         this.islandService = islandService;
+        this.membershipService = membershipService;
         this.feedGroupService = feedGroupService;
         this.feedDTOFactory = feedDTOFactory;
     }
@@ -106,7 +117,7 @@ public class FeedController implements FeedApi {
      * @param images  (optional) Images.
      * @return {@link DummyResponse}.
      */
-    @Override
+    @Deprecated
     @HttpStatsEventTrigger(
             category = StatsEventCategory.STATS_CAT_FEED,
             action = StatsEventAction.STATS_ACT_CREATE,
@@ -171,11 +182,13 @@ public class FeedController implements FeedApi {
     /**
      * Implements retrieve feed by id api.
      *
-     * @param id id (required) Feed id.
+     * @param id                id (required) Feed id.
+     * @param includeChargeable Whether includes chargeable feeds.
      * @return {@link FullFeedResponse}.
      */
+    @CrossOrigin
     @Override
-    public ResponseEntity<FullFeedResponse> apiV1FeedsIdGet(String id) {
+    public ResponseEntity<FullFeedResponse> apiV1FeedsIdGet(String id, Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedGroupFeedResponse feedGroupFeedResponse = this.feedService.retrieveFeedGroupFeedById(id, userId);
 
@@ -183,7 +196,8 @@ public class FeedController implements FeedApi {
         response.setData(this.feedDTOFactory.valueOf(feedGroupFeedResponse.getFeed(),
                 feedGroupFeedResponse.getFeedGroup(),
                 feedGroupFeedResponse.getLastFeedId(),
-                feedGroupFeedResponse.getNextFeedId()));
+                feedGroupFeedResponse.getNextFeedId(),
+                includeChargeable));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -199,7 +213,6 @@ public class FeedController implements FeedApi {
      * @return {@link FeedsResponse}.
      */
     @Deprecated
-    @Override
     public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedsGet(String islandId,
                                                                      Boolean fromHost,
                                                                      String v,
@@ -217,9 +230,12 @@ public class FeedController implements FeedApi {
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
                 this.feedService.retrieveIslandFeeds(islandId, fromHost, userId, null, null, page, pageSize, false);
 
+        Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(feedsResponse.getFeedList());
+
         response.setData(feedsResponse.getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed,
+                        feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setCurrentTime(System.currentTimeMillis());
@@ -232,23 +248,29 @@ public class FeedController implements FeedApi {
     /**
      * Implements the get feeds api.
      *
-     * @param minTimestamp (optional, default to 0) minimal feed created timestamp.
-     * @param maxTimestamp (optional, default to 0) maximal feed created timestamp.
-     * @param pageSize     (optional, default to 10) size of a page .
+     * @param minTimestamp      (optional, default to 0) minimal feed created timestamp.
+     * @param maxTimestamp      (optional, default to 0) maximal feed created timestamp.
+     * @param pageSize          (optional, default to 10) size of a page .
+     * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link TimelinesResponse}.
      */
     @Override
     public ResponseEntity<TimelinesResponse> apiV11FeedsGet(Long minTimestamp,
                                                             Long maxTimestamp,
-                                                            Integer pageSize) {
+                                                            Integer pageSize,
+                                                            Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
         AbstractMap.SimpleEntry<Boolean, FeedsResponse> entry =
                 this.feedService.retrieveUserFeeds(userId, minTimestamp, maxTimestamp, pageSize);
 
+        Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(entry.getValue().getFeedList());
+
         TimelinesResponse response = new TimelinesResponse();
         response.setData(entry.getValue().getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed,
+                        feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList()),
+                        includeChargeable))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().getFeedCount() > 0, entry.getKey(), pageSize));
@@ -260,22 +282,30 @@ public class FeedController implements FeedApi {
     /**
      * Implements the get public accessible feeds api.
      *
-     * @param minTimestamp (optional, default to 0) minimal feed created timestamp.
-     * @param maxTimestamp (optional, default to 0) maximal feed created timestamp.
-     * @param pageSize     (optional, default to 10) size of a page .
+     * @param minTimestamp      (optional, default to 0) minimal feed created timestamp.
+     * @param maxTimestamp      (optional, default to 0) maximal feed created timestamp.
+     * @param pageSize          (optional, default to 10) size of a page .
+     * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link TimelinesResponse}.
      */
     @Override
-    public ResponseEntity<TimelinesResponse> apiV1FeedsPublicGet(Long minTimestamp, Long maxTimestamp, Integer pageSize) {
+    public ResponseEntity<TimelinesResponse> apiV1FeedsPublicGet(Long minTimestamp,
+                                                                 Long maxTimestamp,
+                                                                 Integer pageSize,
+                                                                 Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         AbstractMap.SimpleEntry<Boolean, FeedsResponse> entry =
                 this.feedService.retrievePublicFeeds(userId, minTimestamp, maxTimestamp, pageSize);
 
+        Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(entry.getValue().getFeedList());
+
         TimelinesResponse response = new TimelinesResponse();
         response.setData(entry.getValue().getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed,
+                        feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList()),
+                        includeChargeable))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().getFeedCount() > 0, entry.getKey(), pageSize));
@@ -293,7 +323,7 @@ public class FeedController implements FeedApi {
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link swagger.model.FeedsResponse}.
      */
-    @Override
+    @Deprecated
     public ResponseEntity<swagger.model.FeedsResponse> apiV1IslandsIdFeedsGet(String id,
                                                                               Boolean fromHost,
                                                                               Integer page,
@@ -302,10 +332,13 @@ public class FeedController implements FeedApi {
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
                 this.feedService.retrieveIslandFeeds(id, fromHost, userId, null, null, page, pageSize, false);
 
+        Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(feedsResponse.getFeedList());
+
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedsResponse.getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed,
+                        feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setCurrentTime(System.currentTimeMillis());
@@ -324,7 +357,7 @@ public class FeedController implements FeedApi {
      * @param pageSize     size of a page (optional, default to 10).
      * @return {@link FeedsResponse}.
      */
-    @Override
+    @Deprecated
     public ResponseEntity<TimelinesResponse> apiV11IslandsIdFeedsGet(String id,
                                                                      Boolean fromHost,
                                                                      Long minTimestamp,
@@ -334,10 +367,13 @@ public class FeedController implements FeedApi {
         com.keepreal.madagascar.fossa.FeedsResponse feedsResponse =
                 this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize, false);
 
+        Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(feedsResponse.getFeedList());
+
         TimelinesResponse response = new TimelinesResponse();
         response.setData(feedsResponse.getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed,
+                        feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setCurrentTime(System.currentTimeMillis());
@@ -350,10 +386,11 @@ public class FeedController implements FeedApi {
     /**
      * Implements the island feeds get v1.1 api.
      *
-     * @param id           id (required) Island id.
-     * @param fromHost     (optional) Whether from host.
-     * @param minTimestamp timestamp after (optional, default to 0).
-     * @param pageSize     size of a page (optional, default to 10).
+     * @param id                id (required) Island id.
+     * @param fromHost          (optional) Whether from host.
+     * @param minTimestamp      timestamp after (optional, default to 0).
+     * @param pageSize          size of a page (optional, default to 10).
+     * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link swagger.model.FeedsResponse}.
      */
     @CrossOrigin
@@ -362,7 +399,8 @@ public class FeedController implements FeedApi {
                                                                    Boolean fromHost,
                                                                    Long minTimestamp,
                                                                    Long maxTimestamp,
-                                                                   Integer pageSize) {
+                                                                   Integer pageSize,
+                                                                   Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
 
@@ -374,20 +412,28 @@ public class FeedController implements FeedApi {
         com.keepreal.madagascar.fossa.FeedsResponse normalFeedsResponse =
                 this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize, true);
 
+        Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(normalFeedsResponse.getFeedList());
+
         FeedsResponseV2 response = new FeedsResponseV2();
         ToppedFeedsDTO dto = new ToppedFeedsDTO();
 
         dto.setFeeds(normalFeedsResponse.getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed,
+                        feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList()),
+                        includeChargeable))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
 
         List<FeedDTO> topFeeds = new ArrayList<>();
         if (minTimestamp == null && maxTimestamp == null) {
             com.keepreal.madagascar.fossa.FeedResponse toppedFeedResponse = this.feedService.retrieveIslandToppedFeeds(id, userId);
+
+            Map<String, List<MembershipMessage>> toppedfeedMembershipMap = this.generateFeedMembershipMap(Collections.singletonList(toppedFeedResponse.getFeed()));
+
             if (toppedFeedResponse.hasFeed()) {
-                FeedDTO feedDTO = this.feedDTOFactory.valueOf(toppedFeedResponse.getFeed());
+                FeedDTO feedDTO = this.feedDTOFactory.valueOf(toppedFeedResponse.getFeed(),
+                        toppedfeedMembershipMap.getOrDefault(toppedFeedResponse.getFeed().getId(), Collections.emptyList()));
                 topFeeds.add(feedDTO);
             }
         }
@@ -447,8 +493,10 @@ public class FeedController implements FeedApi {
 
         this.feedService.topFeedByRequest(topFeedRequest, id);
 
+        Map<String, List<MembershipMessage>> toppedfeedMembershipMap = this.generateFeedMembershipMap(Collections.singletonList(feedMessage));
+
         FeedResponse response = new FeedResponse();
-        response.setData(this.feedDTOFactory.valueOf(feedMessage));
+        response.setData(this.feedDTOFactory.valueOf(feedMessage, toppedfeedMembershipMap.getOrDefault(feedMessage.getId(), Collections.emptyList())));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -475,22 +523,28 @@ public class FeedController implements FeedApi {
     /**
      * Implements the feed group get feeds api.
      *
-     * @param id       id (required) Feed group id.
-     * @param page     page number (optional, default to 0) Page.
-     * @param pageSize size of a page (optional, default to 10) Page size.
+     * @param id                id (required) Feed group id.
+     * @param page              page number (optional, default to 0) Page.
+     * @param pageSize          size of a page (optional, default to 10) Page size.
+     * @param includeChargeable Whether includes chargeable.
      * @return {@link FeedsResponse}.
      */
     @Override
     public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedgroupsIdFeedsGet(String id,
                                                                                  Integer page,
-                                                                                 Integer pageSize) {
+                                                                                 Integer pageSize,
+                                                                                 Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedGroupFeedsResponse feedGroupFeedsResponse = this.feedGroupService.retrieveFeedGroupFeeds(id, userId, page, pageSize);
+
+        Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(feedGroupFeedsResponse.getFeedList());
 
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedGroupFeedsResponse.getFeedList()
                 .stream()
-                .map(this.feedDTOFactory::valueOf)
+                .map(feed -> this.feedDTOFactory.valueOf(feed,
+                        feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList()),
+                        includeChargeable))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setCurrentTime(System.currentTimeMillis());
@@ -546,13 +600,18 @@ public class FeedController implements FeedApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
+        if (!CollectionUtils.isEmpty(postFeedRequestV2.getMembershipIds()) && postFeedRequestV2.getPriceInCents() != null && postFeedRequestV2.getPriceInCents() > 0L) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
         this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(),
                 postFeedRequestV2.getMembershipIds(),
                 userId,
                 MediaTypeConverter.convertToMediaType(mediaType),
                 postFeedRequestV2.getMultimedia(),
                 postFeedRequestV2.getText(),
-                postFeedRequestV2.getFeedGroupId());
+                postFeedRequestV2.getFeedGroupId(),
+                postFeedRequestV2.getPriceInCents());
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -579,6 +638,38 @@ public class FeedController implements FeedApi {
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Generates the feed membership map.
+     *
+     * @param feeds {@link FeedMessage}.
+     * @return Feed id vs {@link MembershipMessage}.
+     */
+    private Map<String, List<MembershipMessage>> generateFeedMembershipMap(List<FeedMessage> feeds) {
+        Set<String> membershipIdSet = feeds.stream()
+                .map(FeedMessage::getMembershipIdList)
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
+
+        Map<String, MembershipMessage> membershipMap = new HashMap<>();
+        if (!membershipIdSet.isEmpty()) {
+            membershipMap = this.membershipService.retrieveMembershipsByIds(membershipIdSet).stream()
+                    .collect(Collectors.toMap(MembershipMessage::getId, Function.identity(), (feed1, feed2) -> feed1, HashMap::new));
+        }
+
+        Map<String, List<MembershipMessage>> feedMembershipMap = new HashMap<>();
+        if (!membershipIdSet.isEmpty()) {
+            Map<String, MembershipMessage> finalMembershipMap = membershipMap;
+            feedMembershipMap = feeds.stream()
+                    .collect(Collectors.toMap(
+                            FeedMessage::getId,
+                            feed -> feed.getMembershipIdList().stream().map(finalMembershipMap::get).filter(Objects::nonNull).collect(Collectors.toList()),
+                            (memberships1, memberships2) -> memberships1,
+                            HashMap::new));
+        }
+
+        return feedMembershipMap;
     }
 
 }

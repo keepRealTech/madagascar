@@ -46,6 +46,7 @@ public class FeedInfoService {
     private final FeedInfoRepository feedInfoRepository;
     private final ReactionRepository reactionRepository;
     private final SubscribeMembershipService subscribeMembershipService;
+    private final FeedChargeService feedChargeService;
 
     /**
      * Constructs the feed service
@@ -55,17 +56,20 @@ public class FeedInfoService {
      * @param feedInfoRepository         {@link FeedInfoRepository}.
      * @param reactionRepository         {@link ReactionRepository}.
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
+     * @param feedChargeService          {@link FeedChargeService}.
      */
     public FeedInfoService(MongoTemplate mongoTemplate,
                            CommentService commentService,
                            FeedInfoRepository feedInfoRepository,
                            ReactionRepository reactionRepository,
-                           SubscribeMembershipService subscribeMembershipService) {
+                           SubscribeMembershipService subscribeMembershipService,
+                           FeedChargeService feedChargeService) {
         this.mongoTemplate = mongoTemplate;
         this.commentService = commentService;
         this.feedInfoRepository = feedInfoRepository;
         this.reactionRepository = reactionRepository;
         this.subscribeMembershipService = subscribeMembershipService;
+        this.feedChargeService = feedChargeService;
     }
 
     /**
@@ -153,6 +157,21 @@ public class FeedInfoService {
         if (feedInfo == null) {
             return null;
         }
+        List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(userId, feedInfo.getIslandId());
+        return this.getFeedMessage(feedInfo, userId, myMembershipIds);
+    }
+
+    /**
+     * Retrieves the feed message.
+     *
+     * @param feedInfo {@link FeedInfo}.
+     * @param userId   user id (decide is liked).
+     * @return {@link FeedMessage}.
+     */
+    public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId, List<String> myMembershipIds) {
+        if (feedInfo == null) {
+            return null;
+        }
 
         List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
@@ -176,19 +195,20 @@ public class FeedInfoService {
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
-            builder.setIsAccess(true);
+            if (Objects.nonNull(feedInfo.getPriceInCents()) && feedInfo.getPriceInCents() > 0L) {
+                builder.setIsAccess(feedInfo.getHostId().equals(userId) || this.feedChargeService.retrieveFeedChargeAccess(userId, feedInfo.getId()));
+            } else {
+                builder.setIsAccess(true);
+            }
             builder.addAllMembershipId(Collections.emptyList());
             builder.setIsMembership(false);
         } else {
             builder.setIsMembership(true);
-            List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(userId, feedInfo.getIslandId());
+            builder.setIsAccess(false);
             if (userId.equals(feedInfo.getHostId()) || membershipIds.stream().anyMatch(myMembershipIds::contains)) {
                 builder.setIsAccess(true);
-                builder.addAllMembershipId(membershipIds);
-            } else {
-                builder.setIsAccess(false);
-                builder.addAllMembershipId(membershipIds);
             }
+            builder.addAllMembershipId(membershipIds);
         }
         this.processMedia(builder, feedInfo);
 

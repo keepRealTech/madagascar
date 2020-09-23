@@ -8,9 +8,12 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
+import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsRequest;
+import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
 import com.keepreal.madagascar.coua.DeviceTokenResponse;
 import com.keepreal.madagascar.coua.NewUserRequest;
+import com.keepreal.madagascar.coua.QualificationMessage;
 import com.keepreal.madagascar.coua.QueryUserCondition;
 import com.keepreal.madagascar.coua.RetreiveMultipleUsersByIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokenRequest;
@@ -18,15 +21,20 @@ import com.keepreal.madagascar.coua.RetrieveDeviceTokenResponse;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokensByUserIdListRequest;
 import com.keepreal.madagascar.coua.RetrieveDeviceTokensByUserIdListResponse;
 import com.keepreal.madagascar.coua.RetrieveSingleUserRequest;
+import com.keepreal.madagascar.coua.RetrieveUserQualificationsRequest;
+import com.keepreal.madagascar.coua.RetrieveUserQualificationsResponse;
 import com.keepreal.madagascar.coua.SendOtpToMobileRequest;
 import com.keepreal.madagascar.coua.SendOtpToMobileResponse;
 import com.keepreal.madagascar.coua.UpdateUserByIdRequest;
 import com.keepreal.madagascar.coua.UpdateUserMobileRequest;
 import com.keepreal.madagascar.coua.UserResponse;
 import com.keepreal.madagascar.coua.UserServiceGrpc;
+import com.keepreal.madagascar.coua.UserState;
 import com.keepreal.madagascar.coua.UsersReponse;
+import com.keepreal.madagascar.coua.model.QualificationState;
 import com.keepreal.madagascar.coua.model.SimpleDeviceToken;
 import com.keepreal.madagascar.coua.model.UserInfo;
+import com.keepreal.madagascar.coua.model.UserQualification;
 import com.keepreal.madagascar.coua.service.AliyunSmsService;
 import com.keepreal.madagascar.coua.service.ChatService;
 import com.keepreal.madagascar.coua.service.TransactionProducerService;
@@ -34,6 +42,7 @@ import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
 import com.keepreal.madagascar.coua.service.UserEventProducerService;
 import com.keepreal.madagascar.coua.service.UserIdentityService;
 import com.keepreal.madagascar.coua.service.UserInfoService;
+import com.keepreal.madagascar.coua.service.UserQualificationService;
 import com.keepreal.madagascar.coua.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +54,7 @@ import org.springframework.util.StringUtils;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -63,6 +73,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     private final RedissonClient redissonClient;
     private final TransactionProducerService transactionProducerService;
     private final UserEventProducerService userEventProducerService;
+    private final UserQualificationService userQualificationService;
 
     /**
      * Constructs user grpc controller.
@@ -74,6 +85,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
      * @param aliyunSmsService           {@link AliyunSmsService}
      * @param redissonClient             {@link RedissonClient}.
      * @param transactionProducerService {@link TransactionProducerService}.
+     * @param userQualificationService   {@link UserQualificationService}.
      */
     public UserGRpcController(ChatService chatService,
                               UserInfoService userInfoService,
@@ -82,7 +94,8 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                               AliyunSmsService aliyunSmsService,
                               RedissonClient redissonClient,
                               TransactionProducerService transactionProducerService,
-                              UserEventProducerService userEventProducerService) {
+                              UserEventProducerService userEventProducerService,
+                              UserQualificationService userQualificationService) {
         this.chatService = chatService;
         this.userInfoService = userInfoService;
         this.userDeviceInfoService = userDeviceInfoService;
@@ -91,6 +104,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         this.redissonClient = redissonClient;
         this.transactionProducerService = transactionProducerService;
         this.userEventProducerService = userEventProducerService;
+        this.userQualificationService = userQualificationService;
     }
 
     /**
@@ -117,6 +131,11 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                 userInfo.setBirthday(Date.valueOf(birthdayStr));
             }
         }
+
+        if (request.hasState()) {
+            userInfo.setState(request.getState().getValue());
+        }
+
         UserInfo user = userInfoService.createUser(userInfo);
         this.userEventProducerService.produceCreateUserEventAsync(user.getId());
         basicResponse(responseObserver, user);
@@ -150,7 +169,11 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
             condition = queryUserCondition.getUsername().getValue();
             userInfo = userInfoService.findUserInfoByUserNameAndDeletedIsFalse(condition);
         }
-        if (queryUserCondition.hasMobile()) {
+        if (queryUserCondition.hasMobile() && queryUserCondition.hasState()) {
+            condition = queryUserCondition.getMobile().getValue();
+            userInfo = this.userInfoService.findUserByMobileAndState(condition, queryUserCondition.getState().getValue());
+        }
+        if (queryUserCondition.hasMobile() && !queryUserCondition.hasState()) {
             condition = queryUserCondition.getMobile().getValue();
             userInfo = this.userInfoService.findUserInfoByMobile(condition);
         }
@@ -213,6 +236,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         }
         if (request.hasDisplayId()) {
             userInfo.setDisplayId(request.getDisplayId().getValue());
+        }
+        if (request.hasState()) {
+            userInfo.setState(request.getState().getValue());
         }
 
         basicResponse(responseObserver, userInfoService.updateUser(userInfo));
@@ -352,9 +378,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         if (Objects.isNull(intOtp) || !otp.equals(intOtp)) {
             builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
         } else {
-            UserInfo webUserInfo = this.userInfoService.findH5UserInfoByMobile(mobile);
-            if (Objects.nonNull(webUserInfo)) {
-                this.mergeUserAccounts(userId, webUserInfo.getId());
+            UserInfo h5UserInfo = this.userInfoService.findUserByMobileAndState(mobile, UserState.USER_H5_MOBILE_VALUE);
+            if (Objects.nonNull(h5UserInfo)) {
+                this.mergeUserAccounts(userId, h5UserInfo.getId());
             }
             UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
             userInfo.setMobile(mobile);
@@ -377,14 +403,88 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     @Override
     public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
         String mobile = request.getMobile();
-        UserInfo userInfo = this.userInfoService.findUserInfoByMobileAndUnionIdIsNotNul(mobile);
+        String userId = request.getUserId();
+        CheckUserMobileIsExistedResponse.Builder builder = CheckUserMobileIsExistedResponse.newBuilder();
+
+        UserInfo userInfo = this.userInfoService.findUserInfoByMobile(mobile);
+
         if (Objects.nonNull(userInfo)) {
-            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
-        } else {
-            responseObserver.onNext(CheckUserMobileIsExistedResponse.newBuilder()
-                    .setStatus(CommonStatusUtils.getSuccStatus()).build());
+            if (userInfo.getState() == UserState.USER_WECHAT_VALUE) {
+                if (userId.equals(userInfo.getId())) {
+                    responseObserver.onNext(builder
+                            .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_BOUND)).build());
+                } else {
+                    responseObserver.onNext(builder
+                            .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_EXISTED)).build());
+                }
+            } else if (userInfo.getState() == UserState.USER_APP_MOBILE_VALUE) {
+                responseObserver.onNext(builder
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_REGISTERED)).build());
+            } else {
+                responseObserver.onNext(builder
+                        .setStatus(CommonStatusUtils.getSuccStatus()).build());
+            }
+            responseObserver.onCompleted();
+            return;
         }
+
+        responseObserver.onNext(builder
+                .setStatus(CommonStatusUtils.getSuccStatus()).build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveUserQualifications(RetrieveUserQualificationsRequest request, StreamObserver<RetrieveUserQualificationsResponse> responseObserver) {
+        String userId = request.getUserId();
+        List<UserQualification> userQualifications = this.userQualificationService.retrieveUserQualificationsByUserId(userId);
+
+        responseObserver.onNext(RetrieveUserQualificationsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllMessage(userQualifications.stream().map(this.userQualificationService::getMessage).collect(Collectors.toList()))
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void createOrUpdateUserQualifications(CreateOrUpdateUserQualificationsRequest request, StreamObserver<CreateOrUpdateUserQualificationsResponse> responseObserver) {
+        String userId = request.getUserId();
+        List<QualificationMessage> messageList = request.getMessageList();
+
+        List<UserQualification> userQualifications = this.userQualificationService.retrieveUserQualificationsByUserId(userId);
+        Map<String, UserQualification> userQualificationMap = userQualifications.stream().collect(Collectors.toMap(
+                UserQualification::getId,
+                userQualification -> {
+                    userQualification.setDeleted(true);
+                    return userQualification;
+                },
+                (k1, k2) -> k1));
+
+        List<UserQualification> list = new ArrayList<>();
+        messageList.forEach(message -> {
+            if (StringUtils.isEmpty(message.getId()) && !StringUtils.isEmpty(message.getName()) && !StringUtils.isEmpty(message.getUrl())) {
+                UserQualification userQualification = new UserQualification();
+                userQualification.setUserId(userId);
+                userQualification.setName(message.getName());
+                userQualification.setHostUrl(message.getUrl());
+                userQualification.setState(QualificationState.PROCESSING.getValue());
+                list.add(userQualification);
+            } else {
+                UserQualification userQualification = userQualificationMap.get(message.getId());
+                if (!userQualification.getHostUrl().equals(message.getUrl()) || !userQualification.getName().equals(message.getName())) {
+                    userQualification.setState(QualificationState.PROCESSING.getValue());
+                    userQualification.setHostUrl(message.getUrl());
+                    userQualification.setName(message.getName());
+                }
+                userQualification.setDeleted(false);
+            }
+        });
+        list.addAll(userQualificationMap.values());
+        List<UserQualification> qualifications = this.userQualificationService.createOrUpdateQualifications(list);
+
+        responseObserver.onNext(CreateOrUpdateUserQualificationsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllMessage(qualifications.stream().filter(userQualification -> !userQualification.getDeleted()).map(this.userQualificationService::getMessage).collect(Collectors.toList()))
+                .build());
         responseObserver.onCompleted();
     }
 
