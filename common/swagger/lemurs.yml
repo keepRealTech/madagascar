@@ -4633,6 +4633,9 @@ components:
           $ref: '#/components/schemas/BriefMembershipDTO'
         membershipSku:
           $ref: '#/components/schemas/MembershipSkuDTO'
+        priceInCents:
+          type: integer
+          format: int64
         createdAt:
           type: integer
           format: int64
