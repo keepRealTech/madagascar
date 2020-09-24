@@ -1659,7 +1659,6 @@ paths:
               $ref: '#/components/schemas/PostOTPRequest'
       parameters:
         - $ref: '#/components/parameters/forLoginInQuery'
-        - $ref: '#/components/parameters/forInternationalInQuery'
       tags:
         - Login
       summary: 向指定手机号发送验证码
@@ -2370,13 +2369,6 @@ components:
     forLoginInQuery:
       in: query
       name: login
-      required: false
-      schema:
-        type: boolean
-        default: false
-    forInternationalInQuery:
-      in: query
-      name: international
       required: false
       schema:
         type: boolean
@@ -3875,6 +3867,8 @@ components:
     MobileLoginPayload:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
         otp:
@@ -4757,11 +4751,15 @@ components:
     PostOTPRequest:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
     PutUserMobileRequest:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
         otp:
