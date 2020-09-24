@@ -2410,13 +2410,6 @@ components:
       schema:
         type: boolean
         default: false
-    forInitInQuery:
-      in: query
-      name: init
-      required: false
-      schema:
-        type: boolean
-        default: false
     forAdminLoginInQuery:
       in: query
       name: admin
