@@ -2202,6 +2202,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimelinesResponse'
+  /api/v1/feeds/{id}/saveAuthority:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+      - $ref: '#/components/parameters/canSaveInQuery'
+    put:
+      tags:
+        - Feed
+      summary: 设置作品保存权限
+      responses:
+        '200':
+          description: feed save authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/memberships/templates:
     get:
       tags:
@@ -2510,6 +2525,14 @@ components:
       in: query
       name: isRevoke
       description: whether is revoking a reaction
+      required: false
+      schema:
+        type: boolean
+        default: false
+    canSaveInQuery:
+      in: query
+      name: canSave
+      description: can save feed content
       required: false
       schema:
         type: boolean
@@ -3329,6 +3352,8 @@ components:
             isChargeable:
               type: boolean
             isTop:
+              type: boolean
+            canSave:
               type: boolean
             membership:
               $ref: '#/components/schemas/SimpleMembershipDTO'
@@ -4332,6 +4357,8 @@ components:
           type: boolean
         message:
           type: string
+        isPermanent:
+          type: boolean
     MembershipDTO:
       allOf:
         - $ref: '#/components/schemas/BriefMembershipDTO'
@@ -4358,6 +4385,8 @@ components:
           type: boolean
         message:
           type: string
+        isPermanent:
+          type: boolean
     PutMembershipRequest:
       type: object
       properties:
@@ -4375,6 +4404,8 @@ components:
           type: boolean
         message:
           type: string
+        isPermanent:
+          type: boolean
     MembershipResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
