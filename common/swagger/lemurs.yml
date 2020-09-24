@@ -2202,6 +2202,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimelinesResponse'
+  /api/v1/feeds/{id}/saveAuthority:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Feed
+      summary: 设置作品保存权限
+      responses:
+        '200':
+          description: feed save authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/memberships/templates:
     get:
       tags:
@@ -3330,6 +3344,8 @@ components:
               type: boolean
             isTop:
               type: boolean
+            canSave:
+              type: boolean
             membership:
               $ref: '#/components/schemas/SimpleMembershipDTO'
             membershipList:
@@ -4330,6 +4346,8 @@ components:
           type: boolean
         message:
           type: string
+        forever:
+          type: boolean
     MembershipDTO:
       allOf:
         - $ref: '#/components/schemas/BriefMembershipDTO'
@@ -4356,6 +4374,8 @@ components:
           type: boolean
         message:
           type: string
+        forever:
+          type: boolean
     PutMembershipRequest:
       type: object
       properties:
@@ -4373,6 +4393,8 @@ components:
           type: boolean
         message:
           type: string
+        forever:
+          type: boolean
     MembershipResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
