@@ -4355,7 +4355,7 @@ components:
           type: boolean
         message:
           type: string
-        forever:
+        isPermanent:
           type: boolean
     MembershipDTO:
       allOf:
@@ -4383,7 +4383,7 @@ components:
           type: boolean
         message:
           type: string
-        forever:
+        isPermanent:
           type: boolean
     PutMembershipRequest:
       type: object
@@ -4402,7 +4402,7 @@ components:
           type: boolean
         message:
           type: string
-        forever:
+        isPermanent:
           type: boolean
     MembershipResponse:
       allOf:
