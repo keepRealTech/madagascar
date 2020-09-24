@@ -640,6 +640,21 @@ public class FeedController implements FeedApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<DummyResponse> apiV1FeedsIdSaveAuthorityPut(String id, @Valid Boolean canSave) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        DummyResponse response = new DummyResponse();
+
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+        if (!userId.equals(feedMessage.getHostId()) || !userId.equals(feedMessage.getUserId())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_FORBIDDEN);
+        }
+
+        this.feedService.updateFeedSaveAuthority(id, canSave);
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
     /**
      * Generates the feed membership map.
      *

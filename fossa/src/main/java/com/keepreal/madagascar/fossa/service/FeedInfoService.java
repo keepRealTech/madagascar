@@ -191,7 +191,8 @@ public class FeedInfoService {
                 .setPriceInCents(Objects.nonNull(feedInfo.getPriceInCents()) ? feedInfo.getPriceInCents() : 0L)
                 .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost())
                 .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop())
-                .setHostId(feedInfo.getHostId());
+                .setHostId(feedInfo.getHostId())
+                .setCanSave(feedInfo.getCanSave() == null ? false : feedInfo.getCanSave());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
