@@ -2270,7 +2270,7 @@ paths:
               $ref: '#/components/schemas/PostUserPasswordRequest'
       responses:
         '200':
-          description: update user password response
+          description: init user password response
           content:
             application/json:
               schema:
