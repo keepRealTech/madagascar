@@ -2257,7 +2257,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserQualificationsResponse'
-  /api/v1/users/paswword:
+  /api/v1/users/password:
     put:
       tags:
         - User
@@ -3095,6 +3095,12 @@ components:
     PutUserPasswordRequest:
       type: object
       properties:
+        code:
+          type: string
+        mobile:
+          type: string
+        otp:
+          type: string
         password:
           type: string
     CheckIslandResponse:
