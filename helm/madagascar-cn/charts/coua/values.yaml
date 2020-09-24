@@ -38,4 +38,4 @@ redis:
 
 deploy:
   opentracing:
-    enable_jaeger: false
+    enable_jaeger: true

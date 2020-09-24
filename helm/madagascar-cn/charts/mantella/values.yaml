@@ -27,7 +27,7 @@ fossa:
 mongodb:
   database: mantella
 
-public_inbox_threshold: 1
+public_inbox_threshold: 10
 
 deploy:
   opentracing:
