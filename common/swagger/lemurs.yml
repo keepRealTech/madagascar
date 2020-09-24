@@ -65,6 +65,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
   /api/v1/login:
+    parameters:
+      - $ref: '#/components/parameters/forAdminLoginInQuery'
     post:
       tags:
         - Login
@@ -2369,6 +2371,13 @@ components:
     forLoginInQuery:
       in: query
       name: login
+      required: false
+      schema:
+        type: boolean
+        default: false
+    forAdminLoginInQuery:
+      in: query
+      name: admin
       required: false
       schema:
         type: boolean
