@@ -63,6 +63,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
   /api/v1/login:
+    parameters:
+      - $ref: '#/components/parameters/forAdminLoginInQuery'
     post:
       tags:
         - Login
@@ -2363,6 +2365,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserQualificationsResponse'
+  /api/v1/users/password:
+    post:
+      tags:
+        - User
+      summary: 初始化用户密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUserPasswordRequest'
+      responses:
+        '200':
+          description: init user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+    put:
+      tags:
+        - User
+      summary: 更新当前用户的密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUserPasswordRequest'
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
   /api/v1/activities/banners:
     get:
       tags:
@@ -2477,6 +2514,13 @@ components:
     forLoginInQuery:
       in: query
       name: login
+      required: false
+      schema:
+        type: boolean
+        default: false
+    forAdminLoginInQuery:
+      in: query
+      name: admin
       required: false
       schema:
         type: boolean
@@ -2860,6 +2904,8 @@ components:
               format: date
             mobile:
               type: string
+            hasPassword:
+              type: boolean
     FullUserDTO:
       allOf:
         - $ref: '#/components/schemas/UserDTO'
@@ -3131,6 +3177,22 @@ components:
             type: string
       required:
         - fileNames
+    PutUserPasswordRequest:
+      type: object
+      properties:
+        code:
+          type: string
+        mobile:
+          type: string
+        otp:
+          type: string
+        password:
+          type: string
+    PostUserPasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
     CheckIslandResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -4008,6 +4070,8 @@ components:
           properties:
             user:
               $ref: '#/components/schemas/UserDTO'
+            initPassword:
+              type: boolean
     IOSConfigurationDTO:
       type: object
       properties:
