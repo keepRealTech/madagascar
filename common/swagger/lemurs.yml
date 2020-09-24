@@ -2258,8 +2258,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserQualificationsResponse'
   /api/v1/users/password:
-    parameters:
-      - $ref: '#/components/parameters/forInitInQuery'
+    post:
+      tags:
+        - User
+      summary: 初始化用户密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUserPasswordRequest'
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
     put:
       tags:
         - User
@@ -3086,6 +3101,11 @@ components:
           type: string
         otp:
           type: string
+        password:
+          type: string
+    PostUserPasswordRequest:
+      type: object
+      properties:
         password:
           type: string
     CheckIslandResponse:
@@ -3972,6 +3992,8 @@ components:
           properties:
             user:
               $ref: '#/components/schemas/UserDTO'
+            initPassword:
+              type: boolean
     IOSConfigurationDTO:
       type: object
       properties:
