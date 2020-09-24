@@ -66,6 +66,8 @@ paths:
                 $ref: '#/components/schemas/DummyResponse'
   /api/v1/login:
     post:
+      parameters:
+        - $ref: '#/components/parameters/forAdminLoginInQuery'
       tags:
         - Login
       summary: logs in
@@ -2374,6 +2376,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/H5RedirectResponse'
+  /api/v1/users/password:
+    post:
+      tags:
+        - User
+      summary: 初始化用户密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostUserPasswordRequest'
+      responses:
+        '200':
+          description: init user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
+    put:
+      tags:
+        - User
+      summary: 更新当前用户的密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUserPasswordRequest'
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2612,6 +2649,13 @@ components:
     includeChargeableInQuery:
       in: query
       name: includeChargeable
+      required: false
+      schema:
+        type: boolean
+        default: false
+    forAdminLoginInQuery:
+      in: query
+      name: admin
       required: false
       schema:
         type: boolean
@@ -3950,6 +3994,8 @@ components:
           properties:
             user:
               $ref: '#/components/schemas/UserDTO'
+            initPassword:
+              type: boolean
     IOSConfigurationDTO:
       type: object
       properties:
@@ -5328,3 +5374,19 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/AlipayOrderDTO'
+    PutUserPasswordRequest:
+      type: object
+      properties:
+        code:
+          type: string
+        mobile:
+          type: string
+        otp:
+          type: string
+        password:
+          type: string
+    PostUserPasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
