@@ -162,7 +162,7 @@ public class MembershipService {
      */
     public void deactivateMembership(MembershipInfo membership) {
         membership.setActive(false);
-        this.skuService.updateMembershipSkusByMembershipId(membership.getId(), null, null, true);
+        this.skuService.updateMembershipSkusByMembershipId(membership.getId(), null, null, true, false);
         this.updateMembership(membership);
     }
 
@@ -186,6 +186,12 @@ public class MembershipService {
             membershipInfo.setPricePerMonth(newPrice);
         }
 
+        Boolean permanent = null;
+        if (request.hasPermanent()) {
+            permanent = request.getPermanent().getValue();
+            membershipInfo.setPermanent(permanent);
+        }
+
         if (request.hasDescription()) {
             membershipInfo.setDescription(request.getDescription().getValue());
         }
@@ -197,7 +203,8 @@ public class MembershipService {
             }
         }
 
-        this.skuService.updateMembershipSkusByMembershipId(request.getId(), newName, newPrice, null);
+        // todo: add permanent
+        this.skuService.updateMembershipSkusByMembershipId(request.getId(), newName, newPrice, null, permanent);
         return this.updateMembership(membershipInfo);
     }
 

@@ -172,7 +172,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             return;
         }
 
-        if (!request.hasName() && !request.hasPricePerMonth()) {
+        if (!request.hasName() && !request.hasPricePerMonth() && !request.hasPermanent()) {
             if (request.hasDescription()) {
                 membership.setDescription(request.getDescription().getValue());
             }
@@ -221,6 +221,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         membershipInfo.setPricePerMonth(request.getPricePerMonth());
         membershipInfo.setUseCustomMessage(request.getUseCustomMessage());
         membershipInfo.setMessage(request.getMessage());
+        membershipInfo.setPermanent(request.getPermanent());
         MembershipInfo membership = membershipService.createMembership(membershipInfo);
 
         responseObserver.onNext(MembershipResponse.newBuilder()

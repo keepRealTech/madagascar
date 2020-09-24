@@ -57,6 +57,7 @@ message UpdateMembershipSkusByIdRequest {
   google.protobuf.StringValue membershipName = 2;
   google.protobuf.Int64Value pricePerMonth = 3;
   google.protobuf.BoolValue active = 4;
+  google.protobuf.BoolValue permanent = 5;
 }
 
 message DeleteMembershipSkusByIdRequest {

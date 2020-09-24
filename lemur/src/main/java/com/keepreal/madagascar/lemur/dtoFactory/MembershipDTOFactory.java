@@ -60,6 +60,7 @@ public class MembershipDTOFactory {
         dto.setChargePerMonth(membershipMessage.getPricePerMonth());
         dto.setUseCustomMessage(membershipMessage.getUseCustomMessage());
         dto.setMessage(membershipMessage.getMessage());
+        dto.setIsPermanent(membershipMessage.getPermanent());
         return dto;
     }
 
@@ -93,6 +94,7 @@ public class MembershipDTOFactory {
         dto.setMemberCount(membershipMessage.getMemberCount());
         dto.setUseCustomMessage(membershipMessage.getUseCustomMessage());
         dto.setMessage(membershipMessage.getMessage());
+        dto.setIsPermanent(membershipMessage.getPermanent());
         return dto;
     }
 

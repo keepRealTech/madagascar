@@ -101,7 +101,7 @@ public class LoginController implements LoginApi {
      * @param body {@link PostLoginRequest}.
      * @return {@link LoginResponse}.
      */
-    @Override
+//    @Override
     @HttpStatsEventTrigger(
             category = StatsEventCategory.STATS_CAT_LOGIN,
             action = StatsEventAction.STATS_ACT_NONE,

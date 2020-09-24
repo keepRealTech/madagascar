@@ -185,7 +185,7 @@ public class SubscribeMembershipService {
      * @param sku           Membership sku.
      */
     @Transactional
-    public void subscibeMembershipWithIOSOrder(String userId, String receipt, String transactionId, MembershipSku sku) {
+    public void subscribeMembershipWithIOSOrder(String userId, String receipt, String transactionId, MembershipSku sku) {
         IosOrder iosOrder = this.iosOrderService.verify(userId, receipt, sku.getDescription(), sku.getAppleSkuId(), sku.getId(), transactionId);
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", userId))) {
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(

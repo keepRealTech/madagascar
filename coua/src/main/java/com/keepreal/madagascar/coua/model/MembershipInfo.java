@@ -43,6 +43,8 @@ public class MembershipInfo {
     private Integer colorType;
     @Builder.Default
     private Integer memberCount = 0;
+    @Column(name = "is_permanent")
+    private Boolean permanent;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
