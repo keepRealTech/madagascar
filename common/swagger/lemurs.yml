@@ -2205,6 +2205,7 @@ paths:
   /api/v1/feeds/{id}/saveAuthority:
     parameters:
       - $ref: '#/components/parameters/idInPath'
+      - $ref: '#/components/parameters/canSaveInQuery'
     put:
       tags:
         - Feed
@@ -2524,6 +2525,14 @@ components:
       in: query
       name: isRevoke
       description: whether is revoking a reaction
+      required: false
+      schema:
+        type: boolean
+        default: false
+    canSaveInQuery:
+      in: query
+      name: canSave
+      description: can save feed content
       required: false
       schema:
         type: boolean
