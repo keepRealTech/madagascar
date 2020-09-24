@@ -1,5 +1,6 @@
 rootProject.name = 'madagascar'
 
+include 'common:constants'
 include 'common:exceptions'
 include 'common:id-generator-starter'
 include 'common:stats-event-producer-starter'
@@ -24,3 +25,5 @@ include 'workflow:reconciliation'
 include 'workflow:statistics'
 include 'workflow:update-payment'
 include 'workflow:support-activity'
+include 'common:constants'
+

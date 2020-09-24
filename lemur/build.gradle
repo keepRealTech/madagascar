@@ -27,6 +27,7 @@ compileJava.dependsOn swaggerSources.lemur.code
 sourceSets.main.java.srcDir 'build/swagger-code-lemur/src/main/java'
 
 dependencies {
+    implementation project(":common:constants")
     implementation project(":common:exceptions")
     implementation project(":common:stats-event-producer-starter")
 

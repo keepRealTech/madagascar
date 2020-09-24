@@ -6,6 +6,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.MediaType;
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
@@ -57,8 +58,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class FeedService {
-
-    private static final String PUBLIC_INBOX_USER_ID = "00000000";
 
     private final Channel fossaChannel;
     private final Channel mantellaChannel;
@@ -404,7 +403,7 @@ public class FeedService {
      * @return {@link FeedsResponse}.
      */
     public AbstractMap.SimpleEntry<Boolean, FeedsResponse> retrievePublicFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
-        TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(FeedService.PUBLIC_INBOX_USER_ID, timestampAfter, timestampBefore, pageSize);
+        TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(Constants.PUBLIC_INBOX_USER_ID, timestampAfter, timestampBefore, pageSize);
 
         return new AbstractMap.SimpleEntry<>(timelinesResponse.getHasMore(),
                 this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
