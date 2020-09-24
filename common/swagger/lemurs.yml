@@ -1689,7 +1689,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserResponse'
+                $ref: '#/components/schemas/UpdateMobileUserResponse'
   /api/v1/islands/{id}/feedgroups:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2257,6 +2257,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserQualificationsResponse'
+  /api/v1/users/paswword:
+    put:
+      tags:
+        - User
+      summary: 更新当前用户的密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUserPasswordRequest'
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
   /api/v1/activities/banners:
     get:
       tags:
@@ -2775,6 +2793,25 @@ components:
               format: date
             mobile:
               type: string
+    PasswordUserDTO:
+      allOf:
+        - $ref: '#/components/schemas/BriefUserDTO'
+        - type: object
+          properties:
+            description:
+              type: string
+            city:
+              type: string
+            createdAt:
+              type: integer
+              format: int64
+            birthday:
+              type: string
+              format: date
+            mobile:
+              type: string
+            hasPassword:
+              type: boolean
     FullUserDTO:
       allOf:
         - $ref: '#/components/schemas/UserDTO'
@@ -2817,6 +2854,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/UserDTO'
+    UpdateMobileUserResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/PasswordUserDTO'
     FullUserResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -3048,6 +3092,11 @@ components:
             type: string
       required:
         - fileNames
+    PutUserPasswordRequest:
+      type: object
+      properties:
+        password:
+          type: string
     CheckIslandResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -3932,6 +3981,8 @@ components:
           properties:
             user:
               $ref: '#/components/schemas/UserDTO'
+            hasPassword:
+              type: boolean
     IOSConfigurationDTO:
       type: object
       properties:
