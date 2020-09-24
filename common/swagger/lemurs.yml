@@ -2140,163 +2140,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimelinesResponse'
-  /api/v1/memberships/templates:
-    get:
-      tags:
-        - Membership
-      summary: 获得订阅权益模版
-      responses:
-        '200':
-          description: membership templates response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MembershipTemplatesResponse'
-  /api/v1/users/qualifications/channels:
-    get:
-      tags:
-        - User
-      summary: 获得所有用户认证平台品类
-      responses:
-        '200':
-          description: qualification channels response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/QualificationChannelsResponse'
-  /api/v1/users/qualifications:
-    get:
-      tags:
-        - User
-      summary: 获得当前用户提交的认证信息
-      responses:
-        '200':
-          description: qualification channels response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserQualificationsResponse'
-    put:
-      tags:
-        - User
-      summary: 更新当前用户的认证信息
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PutUserQualificationsRequest'
-      responses:
-        '200':
-          description: qualification channels response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserQualificationsResponse'
-  /api/v1/activities/banners:
-    get:
-      tags:
-        - Activity
-      summary: 获得创作活动banner
-      responses:
-        '200':
-          description: bonues activity response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ActivitiesResponse'
-  /api/v1/activities/bonus:
-    get:
-      tags:
-        - Activity
-      summary: 获得当前创作奖励金活动奖励
-      responses:
-        '200':
-          description: bonues activity response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BonusResponse'
-  /api/v1/feeds/{id}/wechatPay:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    post:
-      tags:
-        - Payment
-      summary: 单独解锁动态APP微信支付
-      responses:
-        '200':
-          description: wechat order
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/WechatOrderResponse'
-  /api/v1/feeds/{id}/alipay:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    post:
-      tags:
-        - Payment
-      summary: 单独解锁动态APP支付宝支付
-      responses:
-        '200':
-          description: wechat order
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AlipayOrderResponse'
-  /api/v1/feeds/{id}/wechatPay/html5:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    post:
-      parameters:
-        - $ref: '#/components/parameters/sceneTypeInQuery'
-      tags:
-        - Payment
-      summary: 单独解锁动态APP微信支付
-      responses:
-        '200':
-          description: dummy
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/H5WechatOrderResponse'
-  /api/v1/feeds/{id}/alipay/html5:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    post:
-      tags:
-        - Payment
-      summary: 单独解锁h5支付宝支付渠道
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AlipayH5PayFeedRequest'
-      responses:
-        '200':
-          description: dummy response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AlipayOrderResponse'
-  /api/v1/feeds/{id}/iosPay:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    get:
-      parameters:
-        - $ref: '#/components/parameters/versionInQuery'
-      tags:
-        - Payment
-      summary: 单独解锁动态IOS跳转
-      responses:
-        '200':
-          description: H5 跳转地址
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/H5RedirectResponse'
   /api/v1/feeds/{id}/saveAuthority:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -4014,6 +3857,8 @@ components:
     MobileLoginPayload:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
         otp:
@@ -4857,11 +4702,15 @@ components:
     PostOTPRequest:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
     PutUserMobileRequest:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
         otp:
