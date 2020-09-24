@@ -3867,6 +3867,8 @@ components:
     MobileLoginPayload:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
         otp:
@@ -4749,11 +4751,15 @@ components:
     PostOTPRequest:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
     PutUserMobileRequest:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
         otp:
