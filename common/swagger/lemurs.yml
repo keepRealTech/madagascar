@@ -2258,6 +2258,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserQualificationsResponse'
   /api/v1/users/password:
+    parameters:
+      - $ref: '#/components/parameters/forInitInQuery'
     put:
       tags:
         - User
@@ -2389,6 +2391,13 @@ components:
     forLoginInQuery:
       in: query
       name: login
+      required: false
+      schema:
+        type: boolean
+        default: false
+    forInitInQuery:
+      in: query
+      name: init
       required: false
       schema:
         type: boolean
@@ -2793,23 +2802,6 @@ components:
               format: date
             mobile:
               type: string
-    PasswordUserDTO:
-      allOf:
-        - $ref: '#/components/schemas/BriefUserDTO'
-        - type: object
-          properties:
-            description:
-              type: string
-            city:
-              type: string
-            createdAt:
-              type: integer
-              format: int64
-            birthday:
-              type: string
-              format: date
-            mobile:
-              type: string
             hasPassword:
               type: boolean
     FullUserDTO:
@@ -2860,7 +2852,7 @@ components:
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/PasswordUserDTO'
+              $ref: '#/components/schemas/UserDTO'
     FullUserResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -3987,8 +3979,6 @@ components:
           properties:
             user:
               $ref: '#/components/schemas/UserDTO'
-            hasPassword:
-              type: boolean
     IOSConfigurationDTO:
       type: object
       properties:
