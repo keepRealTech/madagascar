@@ -34,6 +34,7 @@ import java.util.stream.IntStream;
 public class SubscribeMembershipService {
 
     public static final long PAYMENT_SETTLE_IN_MONTH = 1L;
+    private static final long PERMANENT_TIMESTAMP = 4102329600000L;
     private final IOSOrderService iosOrderService;
     private final BalanceService balanceService;
     private final PaymentService paymentService;
@@ -214,7 +215,8 @@ public class SubscribeMembershipService {
                                                 MembershipSku sku,
                                                 SubscribeMembership subscribeMembership,
                                                 ZonedDateTime currentExpireTime) {
-        long expireTime = currentExpireTime.plusMonths(sku.getTimeInMonths()).toInstant().toEpochMilli();
+        long expireTime = sku.getPermanent() || currentExpireTime.toInstant().toEpochMilli() == PERMANENT_TIMESTAMP ?
+                PERMANENT_TIMESTAMP : currentExpireTime.plusMonths(sku.getTimeInMonths()).toInstant().toEpochMilli();
 
         if (Objects.nonNull(subscribeMembership)) {
             subscribeMembership.setExpireTime(expireTime);

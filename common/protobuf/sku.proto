@@ -33,6 +33,7 @@ message MembershipSkuMessage {
   int32 timeInMonths = 6;
   bool isDefault = 7;
   string appleSkuId = 8;
+  bool permanent = 9;
 }
 
 message RetrieveMembershipSkusByMembershipIdRequest {

@@ -4342,6 +4342,8 @@ components:
           format: int64
         appleSkuId:
           type: string
+        isPermanent:
+          type: boolean
     MembershipSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

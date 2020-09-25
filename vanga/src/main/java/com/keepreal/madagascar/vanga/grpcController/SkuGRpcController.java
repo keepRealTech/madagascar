@@ -149,21 +149,26 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
     public void updateMembershipSkusByMembershipId(UpdateMembershipSkusByIdRequest request,
                                                    StreamObserver<MembershipSkusResponse> responseObserver) {
         List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipId(request.getMembershipId());
-        if (request.hasPricePerMonth()) {
-            membershipSkus = this.skuService.obsoleteMembershipSkusWithNewPrice(request.getMembershipId(),
-                    membershipSkus, request.getPricePerMonth().getValue());
-        }
 
-        if (request.hasMembershipName()) {
-            membershipSkus = membershipSkus.stream()
-                    .peek(membershipSku -> membershipSku.setMembershipName(request.getMembershipName().getValue()))
-                    .collect(Collectors.toList());
-        }
+        if (request.hasPermanent()) {
+            membershipSkus = this.skuService.obsoleteMembershipSkusWithPermanent(request, membershipSkus);
+        } else {
+            if (request.hasPricePerMonth()) {
+                membershipSkus = this.skuService.obsoleteMembershipSkusWithNewPrice(request.getMembershipId(),
+                        membershipSkus, request.getPricePerMonth().getValue());
+            }
 
-        if (request.hasActive()) {
-            membershipSkus = membershipSkus.stream()
-                    .peek(membershipSku -> membershipSku.setActive(request.getActive().getValue()))
-                    .collect(Collectors.toList());
+            if (request.hasMembershipName()) {
+                membershipSkus = membershipSkus.stream()
+                        .peek(membershipSku -> membershipSku.setMembershipName(request.getMembershipName().getValue()))
+                        .collect(Collectors.toList());
+            }
+
+            if (request.hasActive()) {
+                membershipSkus = membershipSkus.stream()
+                        .peek(membershipSku -> membershipSku.setActive(request.getActive().getValue()))
+                        .collect(Collectors.toList());
+            }
         }
 
         List<MembershipSku> membershipSkuList = this.skuService.updateAll(membershipSkus);

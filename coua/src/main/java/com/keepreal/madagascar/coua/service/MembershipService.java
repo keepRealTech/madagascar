@@ -203,7 +203,6 @@ public class MembershipService {
             }
         }
 
-        // todo: add permanent
         this.skuService.updateMembershipSkusByMembershipId(request.getId(), newName, newPrice, null, permanent);
         return this.updateMembership(membershipInfo);
     }

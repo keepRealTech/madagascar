@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.vanga.service;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import com.keepreal.madagascar.vanga.UpdateMembershipSkusByIdRequest;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
 import com.keepreal.madagascar.vanga.model.SupportSku;
@@ -8,10 +9,13 @@ import com.keepreal.madagascar.vanga.repository.MembershipSkuRepository;
 import com.keepreal.madagascar.vanga.repository.ShellSkuRepository;
 import com.keepreal.madagascar.vanga.repository.SupportSkuRepository;
 import com.keepreal.madagascar.vanga.util.AutoRedisLock;
+import kotlin.collections.EmptyList;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import javax.transaction.Transactional;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -91,6 +95,31 @@ public class SkuService {
                             membershipSku.getIslandId(),
                             membershipSku.getTimeInMonths()))
                     .collect(Collectors.toList());
+            membershipSkus = membershipSkus.stream().peek(membershipSku -> membershipSku.setDeleted(true)).collect(Collectors.toList());
+            this.membershipSkuRepository.saveAll(membershipSkus);
+            return this.membershipSkuRepository.saveAll(newMembershipSkus);
+        }
+    }
+
+    @Transactional
+    public List<MembershipSku> obsoleteMembershipSkusWithPermanent(UpdateMembershipSkusByIdRequest request, List<MembershipSku> membershipSkus) {
+        if (CollectionUtils.isEmpty(membershipSkus)) {
+            return Collections.emptyList();
+        }
+
+        MembershipSku sku = membershipSkus.get(0);
+        String membershipId = request.getMembershipId();
+
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("obsolete-membershipsku-%s", membershipId))) {
+            List<MembershipSku> newMembershipSkus = Collections.singletonList(this.generatePermanentMembershipSku(
+                    membershipId,
+                    request.hasMembershipName() ? request.getMembershipName().getValue() : sku.getMembershipName(),
+                    request.hasPricePerMonth() ? request.getPricePerMonth().getValue() : sku.getPriceInCents(),
+                    sku.getHostId(),
+                    sku.getIslandId(),
+                    request.hasActive() ? request.getActive().getValue() : sku.getActive()
+            ));
+
             membershipSkus = membershipSkus.stream().peek(membershipSku -> membershipSku.setDeleted(true)).collect(Collectors.toList());
             this.membershipSkuRepository.saveAll(membershipSkus);
             return this.membershipSkuRepository.saveAll(newMembershipSkus);
@@ -223,6 +252,29 @@ public class SkuService {
                 .hostId(hostId)
                 .islandId(islandId)
                 .appleSkuId(String.format(SkuService.APPLE_SKU_TEMPLATE, costInCentsPerMonth * timeInMonths))
+                .build();
+    }
+
+    private MembershipSku generatePermanentMembershipSku(String membershipId,
+                                                         String membershipName,
+                                                         Long price,
+                                                         String hostId,
+                                                         String islandId,
+                                                         Boolean active) {
+        return MembershipSku.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .membershipId(membershipId)
+                .membershipName(membershipName)
+                .description("永久有效")
+                .timeInMonths(1)
+                .priceInCents(price)
+                .priceInShells(price)
+                .defaultSku(true)
+                .hostId(hostId)
+                .islandId(islandId)
+                .active(active)
+                .appleSkuId(String.format(SkuService.APPLE_SKU_TEMPLATE, price))
+                .permanent(true)
                 .build();
     }
 
