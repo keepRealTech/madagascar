@@ -2814,6 +2814,8 @@ components:
             birthday:
               type: string
               format: date
+            code:
+              type: string
             mobile:
               type: string
             hasPassword:
