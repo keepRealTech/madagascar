@@ -87,15 +87,16 @@ public class SkuService {
     @Transactional
     public List<MembershipSku> obsoleteMembershipSkusWithNewPrice(String membershipId, List<MembershipSku> membershipSkus, Long pricePerMonth) {
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("obsolete-membershipsku-%s", membershipId))) {
-            List<MembershipSku> newMembershipSkus = membershipSkus.stream()
-                    .map(membershipSku -> this.generateMembershipSku(membershipSku.getMembershipId(),
+            MembershipSku membershipSku = membershipSkus.get(0);
+            List<MembershipSku> newMembershipSkus = this.membershipPeriods.stream()
+                    .map(i -> this.generateMembershipSku(membershipSku.getMembershipId(),
                             membershipSku.getMembershipName(),
                             pricePerMonth,
                             membershipSku.getHostId(),
                             membershipSku.getIslandId(),
-                            membershipSku.getTimeInMonths()))
+                            i))
                     .collect(Collectors.toList());
-            membershipSkus = membershipSkus.stream().peek(membershipSku -> membershipSku.setDeleted(true)).collect(Collectors.toList());
+            membershipSkus = membershipSkus.stream().peek(sku -> sku.setDeleted(true)).collect(Collectors.toList());
             this.membershipSkuRepository.saveAll(membershipSkus);
             return this.membershipSkuRepository.saveAll(newMembershipSkus);
         }
@@ -172,15 +173,20 @@ public class SkuService {
                                                                                         String membershipName,
                                                                                         String hostId,
                                                                                         String islandId,
-                                                                                        Long costInCentsPerMonth) {
+                                                                                        Long costInCentsPerMonth,
+                                                                                        boolean permanent) {
         List<MembershipSku> membershipSkus = this.retrieveMembershipSkusByMembershipIdAndActiveIsTrue(membershipId);
         if (Objects.nonNull(membershipSkus) && !membershipSkus.isEmpty()) {
             return membershipSkus;
         }
 
-        membershipSkus = this.membershipPeriods.stream()
-                .map(i -> this.generateMembershipSku(membershipId, membershipName, costInCentsPerMonth, hostId, islandId, i))
-                .collect(Collectors.toList());
+        if (permanent) {
+            membershipSkus = Collections.singletonList(this.generatePermanentMembershipSku(membershipId, membershipName, costInCentsPerMonth, hostId, islandId, true));
+        } else {
+            membershipSkus = this.membershipPeriods.stream()
+                    .map(i -> this.generateMembershipSku(membershipId, membershipName, costInCentsPerMonth, hostId, islandId, i))
+                    .collect(Collectors.toList());
+        }
 
         return this.membershipSkuRepository.saveAll(membershipSkus);
     }

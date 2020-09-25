@@ -109,7 +109,8 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
                         request.getMembershipName(),
                         request.getHostId(),
                         request.getIslandId(),
-                        request.getPriceInCentsPerMonth());
+                        request.getPriceInCentsPerMonth(),
+                        request.getPermanent());
 
         MembershipSkusResponse response = MembershipSkusResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
@@ -150,7 +151,7 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
                                                    StreamObserver<MembershipSkusResponse> responseObserver) {
         List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipId(request.getMembershipId());
 
-        if (request.hasPermanent()) {
+        if (request.hasPermanent() && request.getPermanent().getValue()) {
             membershipSkus = this.skuService.obsoleteMembershipSkusWithPermanent(request, membershipSkus);
         } else {
             if (request.hasPricePerMonth()) {

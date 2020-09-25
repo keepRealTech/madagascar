@@ -54,7 +54,7 @@ public class MembershipService {
     public MembershipInfo createMembership(MembershipInfo membershipInfo) {
         membershipInfo.setId(String.valueOf(idGenerator.nextId()));
         List<Integer> colorTypeList = repository.getColorTypeListByIslandId(membershipInfo.getIslandId());
-        ArrayList<Integer> defaultColorList = new ArrayList<>(Arrays.asList(1, 2, 3, 1, 2));
+        ArrayList<Integer> defaultColorList = new ArrayList<>(Arrays.asList(1, 2, 3, 1, 2, 3, 1, 2, 3));
         colorTypeList.forEach(defaultColorList::remove);
         membershipInfo.setColorType(defaultColorList.get(0));
 
@@ -62,7 +62,8 @@ public class MembershipService {
                 membershipInfo.getName(),
                 membershipInfo.getPricePerMonth(),
                 membershipInfo.getHostId(),
-                membershipInfo.getIslandId());
+                membershipInfo.getIslandId(),
+                membershipInfo.getPermanent());
 
         return repository.save(membershipInfo);
     }
@@ -140,6 +141,7 @@ public class MembershipService {
                 .setMemberCount(membershipInfo.getMemberCount())
                 .setUseCustomMessage(membershipInfo.getUseCustomMessage())
                 .setMessage(membershipInfo.getMessage())
+                .setPermanent(membershipInfo.getPermanent())
                 .build();
     }
 

@@ -51,6 +51,7 @@ message CreateMembershipSkusRequest {
   uint64 priceInCentsPerMonth = 3;
   string hostId = 4;
   string islandId = 5;
+  bool permanent = 6;
 }
 
 message UpdateMembershipSkusByIdRequest {

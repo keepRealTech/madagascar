@@ -50,7 +50,8 @@ public class SkuService {
                                                    String membershipName,
                                                    Integer pricePerMonth,
                                                    String hostId,
-                                                   String islandId) {
+                                                   String islandId,
+                                                   boolean permanent) {
         SkuServiceGrpc.SkuServiceBlockingStub stub = SkuServiceGrpc.newBlockingStub(this.channel);
 
         CreateMembershipSkusRequest request = CreateMembershipSkusRequest.newBuilder()
@@ -59,6 +60,7 @@ public class SkuService {
                 .setPriceInCentsPerMonth(pricePerMonth)
                 .setHostId(hostId)
                 .setIslandId(islandId)
+                .setPermanent(permanent)
                 .build();
 
         MembershipSkusResponse response;
