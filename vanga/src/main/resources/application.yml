@@ -65,3 +65,9 @@ snowflake:
 
 server:
   port: 8000
+
+opentracing:
+  jaeger:
+    grpc-server-interceptor: false
+    const-sampler:
+      decision: false
