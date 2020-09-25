@@ -69,7 +69,7 @@ global:
       imagePullPolicy: Always
     vanga:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
-      tag: 1.2.0
+      tag: 1.2.1
       imagePullPolicy: Always
     asity:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
