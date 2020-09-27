@@ -392,7 +392,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
             }
             UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
             userInfo.setMobile(mobile);
-            userInfo.setUsername(mobile);
+            userInfo.setUsername(code + "-" + mobile);
             UserInfo userInfoNew = this.userInfoService.updateUser(userInfo);
             builder.setStatus(CommonStatusUtils.getSuccStatus());
             builder.setUser(this.userInfoService.getUserMessage(userInfoNew));
