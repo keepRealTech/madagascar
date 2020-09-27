@@ -2814,6 +2814,8 @@ components:
             birthday:
               type: string
               format: date
+            code:
+              type: string
             mobile:
               type: string
             hasPassword:
@@ -3914,6 +3916,8 @@ components:
     PasswordLoginPayload:
       type: object
       properties:
+        code:
+          type: string
         username:
           type: string
         password:
@@ -5365,6 +5369,6 @@ components:
         mobile:
           type: string
         otp:
-          type: string
+          type: integer
         password:
           type: string
