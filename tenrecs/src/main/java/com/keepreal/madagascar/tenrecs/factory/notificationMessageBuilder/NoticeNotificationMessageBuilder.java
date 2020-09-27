@@ -102,6 +102,7 @@ public class NoticeNotificationMessageBuilder implements NotificationMessageBuil
                         .setMembershipName(notice.getMemberNotice().getMembershipName())
                         .setPriceInCents(notice.getMemberNotice().getPriceInCents())
                         .setTimeInMonths(notice.getMemberNotice().getTimeInMonths())
+                        .setPermanent(notice.getMemberNotice().getPermanent())
                         .build();
                 noticeNotificationMessageBuilder.setMemberNotice(memberNotice);
                 return noticeNotificationMessageBuilder.build();
