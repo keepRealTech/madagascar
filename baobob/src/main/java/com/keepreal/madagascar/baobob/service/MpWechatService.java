@@ -56,9 +56,9 @@ public class MpWechatService {
      * @param redissonClient                {@link RedissonClient}.
      */
     public MpWechatService(@Qualifier("wechatMpConfiguration") OauthWechatLoginConfiguration oauthWechatLoginConfiguration,
-                           RedissonClient redissonClient) {
+                           RedissonReactiveClient redissonClient) {
         this.oauthWechatLoginConfiguration = oauthWechatLoginConfiguration;
-        this.redissonReactiveClient = Redisson.createReactive(redissonClient.getConfig());
+        this.redissonReactiveClient = redissonClient;
         this.gson = new Gson();
         this.grpcResponseUtils = new GrpcResponseUtils();
     }

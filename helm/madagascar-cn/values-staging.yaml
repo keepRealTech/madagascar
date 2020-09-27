@@ -21,6 +21,7 @@ global:
       tenrecs: 1
       vanga: 1
       asity: 1
+      hoopoe: 1
     short_code_base: https://staging.keepreal.cn/s/%s
     image_host: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com
     html_host: http://test.keepreal.cn
@@ -32,7 +33,7 @@ global:
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.3.0-staging
+      tag: 1.3.1-staging
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
@@ -48,7 +49,7 @@ global:
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-      tag: 1.2.0-staging
+      tag: 1.2.1-staging
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri

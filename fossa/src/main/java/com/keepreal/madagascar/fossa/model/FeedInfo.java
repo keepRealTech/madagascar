@@ -55,6 +55,8 @@ public class FeedInfo {
     private Boolean isTop = false;
     @Builder.Default
     private Boolean temped = false;
+    @Builder.Default
+    private Boolean canSave = false;
     @CreatedDate
     private Long createdTime;
     @CreatedDate

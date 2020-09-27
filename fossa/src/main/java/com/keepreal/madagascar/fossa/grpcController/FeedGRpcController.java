@@ -29,16 +29,20 @@ import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
-import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdResponse;
-import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdRequest;
+import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdResponse;
+import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
+import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityResponse;
+import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.MediaInfo;
+import com.keepreal.madagascar.fossa.model.ReactionInfo;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedGroupService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
 import com.keepreal.madagascar.fossa.service.IslandService;
 import com.keepreal.madagascar.fossa.service.PaymentService;
+import com.keepreal.madagascar.fossa.service.ReactionService;
 import com.keepreal.madagascar.fossa.service.SubscribeMembershipService;
 import com.keepreal.madagascar.fossa.util.CommonStatusUtils;
 import com.keepreal.madagascar.fossa.util.MediaMessageConvertUtils;
@@ -59,6 +63,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -79,18 +84,20 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     private final FeedEventProducerService feedEventProducerService;
     private final PaymentService paymentService;
     private final SubscribeMembershipService subscribeMembershipService;
+    private final ReactionService reactionService;
 
     /**
      * Constructs the feed grpc controller
      *
-     * @param idGenerator              {@link LongIdGenerator}
-     * @param islandService            {@link IslandService}
-     * @param feedInfoService          {@link FeedInfoService}
-     * @param feedGroupService         {@link FeedGroupService}.
-     * @param mongoTemplate            {@link MongoTemplate}
-     * @param feedEventProducerService {@link FeedEventProducerService}.
-     * @param paymentService           {@link PaymentService}.
-     * @param subscribeMembershipService
+     * @param idGenerator                {@link LongIdGenerator}
+     * @param islandService              {@link IslandService}
+     * @param feedInfoService            {@link FeedInfoService}
+     * @param feedGroupService           {@link FeedGroupService}.
+     * @param mongoTemplate              {@link MongoTemplate}
+     * @param feedEventProducerService   {@link FeedEventProducerService}.
+     * @param paymentService             {@link PaymentService}.
+     * @param subscribeMembershipService {@link SubscribeMembershipService}.
+     * @param reactionService            {@link ReactionService}.
      */
     public FeedGRpcController(LongIdGenerator idGenerator,
                               IslandService islandService,
@@ -99,7 +106,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                               MongoTemplate mongoTemplate,
                               FeedEventProducerService feedEventProducerService,
                               PaymentService paymentService,
-                              SubscribeMembershipService subscribeMembershipService) {
+                              SubscribeMembershipService subscribeMembershipService,
+                              ReactionService reactionService) {
         this.idGenerator = idGenerator;
         this.islandService = islandService;
         this.feedInfoService = feedInfoService;
@@ -108,6 +116,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         this.feedEventProducerService = feedEventProducerService;
         this.paymentService = paymentService;
         this.subscribeMembershipService = subscribeMembershipService;
+        this.reactionService = reactionService;
     }
 
     /**
@@ -408,8 +417,12 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         List<FeedInfo> feedInfoList = this.feedInfoService.findByIds(request.getIdsList());
 
         List<String> myMembershipIds = this.subscribeMembershipService.retrieveMembershipIds(request.getUserId(), null);
+
+        Set<String> likedFeedIds = this.reactionService.retrieveReactionsByFeedIdsAndUserId(feedInfoList.stream().map(FeedInfo::getId).collect(Collectors.toSet()), request.getUserId()).stream()
+                .map(ReactionInfo::getFeedId).collect(Collectors.toSet());
+
         List<FeedMessage> feedMessageList = feedInfoList.stream()
-                .map(info -> this.feedInfoService.getFeedMessage(info, request.getUserId(), myMembershipIds))
+                .map(info -> this.feedInfoService.getFeedMessage(info, request.getUserId(), myMembershipIds, likedFeedIds.contains(info.getId())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -424,8 +437,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * Implements the retrieves multiple timeline feeds method.
      *
-     * @param request           {@link RetrieveMultipleFeedsRequest}.
-     * @param responseObserver  {@link TimelineFeedsResponse}.
+     * @param request          {@link RetrieveMultipleFeedsRequest}.
+     * @param responseObserver {@link TimelineFeedsResponse}.
      */
     @Override
     public void retrieveMultipleTimelineFeeds(RetrieveMultipleFeedsRequest request, StreamObserver<TimelineFeedsResponse> responseObserver) {
@@ -604,6 +617,30 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onNext(RetrieveFeedCountResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .setFeedCount(Math.toIntExact(totalCount))
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void updateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest request, StreamObserver<UpdateFeedSaveAuthorityResponse> responseObserver) {
+        String feedId = request.getFeedId();
+        boolean canSave = request.getCanSave();
+
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(feedId, false);
+
+        if (feedInfo == null) {
+            responseObserver.onNext(UpdateFeedSaveAuthorityResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        feedInfo.setCanSave(canSave);
+        this.feedInfoService.update(feedInfo);
+
+        responseObserver.onNext(UpdateFeedSaveAuthorityResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
                 .build());
         responseObserver.onCompleted();
     }

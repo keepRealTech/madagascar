@@ -26,6 +26,8 @@ import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
+import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
+import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityResponse;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.mantella.RetrieveMultipleTimelinesRequest;
 import com.keepreal.madagascar.mantella.TimelineMessage;
@@ -537,6 +539,28 @@ public class FeedService {
         }
 
         return response.getFeedCount();
+    }
+
+    public void updateFeedSaveAuthority(String feedId, boolean canSave) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        UpdateFeedSaveAuthorityResponse response;
+        try {
+            response = stub.updateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest.newBuilder()
+                    .setFeedId(feedId)
+                    .setCanSave(canSave)
+                    .build());
+        } catch (StatusRuntimeException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, e.getMessage());
+        }
+
+        if (Objects.isNull(response) || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "update feed save authority returns null" : response.toString());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
     }
 
     /**

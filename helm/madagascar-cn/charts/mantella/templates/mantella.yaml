@@ -80,7 +80,7 @@ spec:
                   name: aliyun-mongo
                   key: connection-string
             - name: RESTART
-              value: "1"
+              value: "2"
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}

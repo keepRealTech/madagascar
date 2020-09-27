@@ -150,13 +150,15 @@ public class FeedInfoService {
      * Retrieves the feed message.
      *
      * @param feedInfo {@link FeedInfo}.
-     * @param userId   user id (decide is liked).
+     * @param userId   User id (decide is liked).
      * @return {@link FeedMessage}.
      */
-    public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId) {
-        if (feedInfo == null) {
+    public FeedMessage getFeedMessage(FeedInfo feedInfo,
+                                      String userId) {
+        if (Objects.isNull(feedInfo)) {
             return null;
         }
+
         List<String> myMembershipIds = subscribeMembershipService.retrieveMembershipIds(userId, feedInfo.getIslandId());
         return this.getFeedMessage(feedInfo, userId, myMembershipIds);
     }
@@ -164,17 +166,41 @@ public class FeedInfoService {
     /**
      * Retrieves the feed message.
      *
-     * @param feedInfo {@link FeedInfo}.
-     * @param userId   user id (decide is liked).
+     * @param feedInfo        {@link FeedInfo}.
+     * @param userId          User id (decide is liked).
+     * @param myMembershipIds User valid membership ids.
      * @return {@link FeedMessage}.
      */
-    public FeedMessage getFeedMessage(FeedInfo feedInfo, String userId, List<String> myMembershipIds) {
-        if (feedInfo == null) {
+    public FeedMessage getFeedMessage(FeedInfo feedInfo,
+                                      String userId,
+                                      List<String> myMembershipIds) {
+        if (Objects.isNull(feedInfo)) {
+            return null;
+        }
+
+        boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
+
+        return this.getFeedMessage(feedInfo, userId, myMembershipIds, isLiked);
+    }
+
+    /**
+     * Retrieves the feed message.
+     *
+     * @param feedInfo        {@link FeedInfo}.
+     * @param userId          User id (decide is liked).
+     * @param myMembershipIds User valid membership ids.
+     * @param isLiked         Feed liked by user or not.
+     * @return {@link FeedMessage}.
+     */
+    public FeedMessage getFeedMessage(FeedInfo feedInfo,
+                                      String userId,
+                                      List<String> myMembershipIds,
+                                      boolean isLiked) {
+        if (Objects.isNull(feedInfo)) {
             return null;
         }
 
         List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
-        boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
         FeedMessage.Builder builder = FeedMessage.newBuilder()
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
@@ -191,7 +217,8 @@ public class FeedInfoService {
                 .setPriceInCents(Objects.nonNull(feedInfo.getPriceInCents()) ? feedInfo.getPriceInCents() : 0L)
                 .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost())
                 .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop())
-                .setHostId(feedInfo.getHostId());
+                .setHostId(feedInfo.getHostId())
+                .setCanSave(feedInfo.getCanSave() == null ? false : feedInfo.getCanSave());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
@@ -229,8 +256,8 @@ public class FeedInfoService {
     /**
      * Update feed.
      *
-     * @param feedInfo  {@link FeedInfo}.
-     * @return  {@link FeedInfo}.
+     * @param feedInfo {@link FeedInfo}.
+     * @return {@link FeedInfo}.
      */
     public FeedInfo update(FeedInfo feedInfo) {
         return feedInfoRepository.save(feedInfo);
@@ -283,8 +310,8 @@ public class FeedInfoService {
     /**
      * Retrieves feeds by feed group id.
      *
-     * @param feedGroupId   Feed group id.
-     * @param pageable      {@link Pageable}.
+     * @param feedGroupId Feed group id.
+     * @param pageable    {@link Pageable}.
      * @return {@link FeedInfo}.
      */
     public Page<FeedInfo> retrieveFeedsByFeedGroupId(String feedGroupId, Pageable pageable) {
@@ -339,11 +366,11 @@ public class FeedInfoService {
     /**
      * 将H5手机用户的提问箱信息合并到微信用户
      *
-     * @param wechatUserId      wechat user id
-     * @param webMobileUserId   web mobile user id
+     * @param wechatUserId    wechat user id
+     * @param webMobileUserId web mobile user id
      */
     @Transactional
-    public void mergeUserBoxInfo(String wechatUserId, String webMobileUserId) throws RuntimeException{
+    public void mergeUserBoxInfo(String wechatUserId, String webMobileUserId) throws RuntimeException {
         int page = 0;
         int pageSize = 100;
 
@@ -356,15 +383,15 @@ public class FeedInfoService {
             List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
             feedInfoList.forEach(feedInfo -> feedInfo.setUserId(wechatUserId));
             this.feedInfoRepository.saveAll(feedInfoList);
-            ++ page;
+            ++page;
         } while (totalCount / pageSize >= page);
     }
 
     /**
      * Processes the multimedia.
      *
-     * @param builder   {@link FeedMessage.Builder}.
-     * @param feedInfo  {@link FeedInfo}.
+     * @param builder  {@link FeedMessage.Builder}.
+     * @param feedInfo {@link FeedInfo}.
      */
     private void processMedia(FeedMessage.Builder builder, FeedInfo feedInfo) {
         if (feedInfo.getMultiMediaType() == null) {
