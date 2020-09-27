@@ -125,6 +125,7 @@ public class FeedDTOFactory {
             feedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             feedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
             feedDTO.setPriceInCents(feed.getPriceInCents());
+            feedDTO.setCanSave(feed.getCanSave());
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
                 feedDTO.setImagesUris(feed.getImageUrisList());
@@ -324,6 +325,7 @@ public class FeedDTOFactory {
             fullFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
             fullFeedDTO.setPriceInCents(feed.getPriceInCents());
+            fullFeedDTO.setCanSave(feed.getCanSave());
             if (!StringUtils.isEmpty(feedGroup.getId())) {
                 FeedGroupInfo feedGroupInfo = new FeedGroupInfo();
                 feedGroupInfo.setId(feedGroup.getId());

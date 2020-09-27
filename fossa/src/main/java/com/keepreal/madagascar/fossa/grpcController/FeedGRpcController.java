@@ -31,6 +31,8 @@ import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdResponse;
+import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
+import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityResponse;
 import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.MediaInfo;
@@ -615,6 +617,30 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onNext(RetrieveFeedCountResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .setFeedCount(Math.toIntExact(totalCount))
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void updateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest request, StreamObserver<UpdateFeedSaveAuthorityResponse> responseObserver) {
+        String feedId = request.getFeedId();
+        boolean canSave = request.getCanSave();
+
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(feedId, false);
+
+        if (feedInfo == null) {
+            responseObserver.onNext(UpdateFeedSaveAuthorityResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        feedInfo.setCanSave(canSave);
+        this.feedInfoService.update(feedInfo);
+
+        responseObserver.onNext(UpdateFeedSaveAuthorityResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
                 .build());
         responseObserver.onCompleted();
     }
