@@ -34,10 +34,10 @@ public class AppMobileLoginExecutor implements LoginExecutor {
 
     public AppMobileLoginExecutor(UserService userService,
                                   LocalTokenGranter tokenGranter,
-                                  RedissonClient redissonClient) {
+                                  RedissonReactiveClient redissonClient) {
         this.userService = userService;
         this.tokenGranter = tokenGranter;
-        this.redissonReactiveClient = Redisson.createReactive(redissonClient.getConfig());
+        this.redissonReactiveClient = redissonClient;
         this.grpcResponseUtils = new GrpcResponseUtils();
     }
 
