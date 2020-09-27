@@ -18,4 +18,3 @@ data:
   SPRING_DATA_MONGODB_DATABASE: {{ .Values.mongodb.database }}
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'
-  DISTRIBUTOR_PUBLICINBOXTHRESHOLD: '{{ .Values.public_inbox_threshold }}'

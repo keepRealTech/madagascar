@@ -11,7 +11,4 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "distributor", ignoreUnknownFields = false)
 @Data
 public class DistributorConfiguration {
-
-    private Integer publicInboxThreshold;
-
 }

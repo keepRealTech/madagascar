@@ -57,7 +57,7 @@ global:
       imagePullPolicy: Always
     mantella:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/mantella
-      tag: 1.1.0
+      tag: 1.1.1
       imagePullPolicy: Always
     marty:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/marty
