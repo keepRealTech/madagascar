@@ -45,4 +45,6 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
 
     @Query(value = "SELECT u.id FROM user u LEFT JOIN user_identity i ON u.id = i.user_id WHERE u.nick_name LIKE ?1% ORDER BY i.identity_type DESC", nativeQuery = true)
     Page<String> findUserIdByNameOrderByIdentity(String username, Pageable pageable);
+
+    Page<UserInfo> findAllByDeletedIsFalse(Pageable pageable);
 }

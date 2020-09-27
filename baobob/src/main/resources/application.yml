@@ -5,7 +5,7 @@ spring:
     host: 127.0.0.1
     port: 6379
     #password: GcrkNYTcST4PzlV@
-    ssl: false
+    #ssl: false
 
 wechat:
   oauth:
@@ -39,3 +39,6 @@ opentracing:
     grpc-server-interceptor: false
     const-sampler:
       decision: false
+
+loginsetting:
+  enable-adminLogin: true

@@ -2377,23 +2377,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/H5RedirectResponse'
   /api/v1/users/password:
-    post:
-      tags:
-        - User
-      summary: 初始化用户密码
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PostUserPasswordRequest'
-      responses:
-        '200':
-          description: init user password response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CommonResponse'
     put:
       tags:
         - User
@@ -2831,6 +2814,8 @@ components:
             birthday:
               type: string
               format: date
+            code:
+              type: string
             mobile:
               type: string
             hasPassword:
@@ -3996,8 +3981,6 @@ components:
           properties:
             user:
               $ref: '#/components/schemas/UserDTO'
-            initPassword:
-              type: boolean
     IOSConfigurationDTO:
       type: object
       properties:
@@ -5384,11 +5367,6 @@ components:
         mobile:
           type: string
         otp:
-          type: string
-        password:
-          type: string
-    PostUserPasswordRequest:
-      type: object
-      properties:
+          type: integer
         password:
           type: string

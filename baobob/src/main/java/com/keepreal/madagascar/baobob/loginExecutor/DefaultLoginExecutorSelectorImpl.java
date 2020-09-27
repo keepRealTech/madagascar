@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.baobob.loginExecutor;
 
+import com.keepreal.madagascar.baobob.config.AdminLoginConfiguration;
 import com.keepreal.madagascar.baobob.config.wechat.OauthWechatLoginConfiguration;
 import com.keepreal.madagascar.baobob.service.ImageService;
 import com.keepreal.madagascar.baobob.service.UserService;
@@ -23,30 +24,33 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
     private final OauthWechatLoginConfiguration oauthMPWechatLoginConfiguration;
     private final AuthorizationServerEndpointsConfiguration endpoints;
     private final RedissonClient redissonClient;
+    private final AdminLoginConfiguration adminLoginConfiguration;
 
     /**
      * Constructs the {@link DefaultLoginExecutorSelectorImpl}.
      * Note that the endpoint will not be initialized in bean injection process.
-     *
-     * @param userService                     {@link UserService}.
+     *  @param userService                    {@link UserService}.
      * @param imageService                    {@link ImageService}.
      * @param oauthWechatLoginConfiguration   {@link OauthWechatLoginConfiguration}.
      * @param oauthMPWechatLoginConfiguration {@link OauthWechatLoginConfiguration}.
      * @param endpoints                       {@link AuthorizationServerEndpointsConfiguration}.
      * @param redissonClient                  {@link RedissonClient}.
+     * @param adminLoginConfiguration         {@link AdminLoginConfiguration}
      */
     public DefaultLoginExecutorSelectorImpl(UserService userService,
                                             ImageService imageService,
                                             @Qualifier("wechatAppConfiguration") OauthWechatLoginConfiguration oauthWechatLoginConfiguration,
                                             @Qualifier("wechatMpConfiguration") OauthWechatLoginConfiguration oauthMPWechatLoginConfiguration,
                                             AuthorizationServerEndpointsConfiguration endpoints,
-                                            RedissonClient redissonClient) {
+                                            RedissonClient redissonClient,
+                                            AdminLoginConfiguration adminLoginConfiguration) {
         this.userService = userService;
         this.imageService = imageService;
         this.oauthWechatLoginConfiguration = oauthWechatLoginConfiguration;
         this.oauthMPWechatLoginConfiguration = oauthMPWechatLoginConfiguration;
         this.endpoints = endpoints;
         this.redissonClient = redissonClient;
+        this.adminLoginConfiguration = adminLoginConfiguration;
     }
 
     /**
@@ -79,7 +83,8 @@ public class DefaultLoginExecutorSelectorImpl implements LoginExecutorSelector {
                         new LocalTokenGranter(
                                 this.endpoints.getEndpointsConfigurer().getTokenServices(),
                                 this.endpoints.getEndpointsConfigurer().getClientDetailsService(),
-                                this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()));
+                                this.endpoints.getEndpointsConfigurer().getOAuth2RequestFactory()),
+                        this.adminLoginConfiguration);
             case LOGIN_REFRESH_TOKEN:
                 return new RefreshLoginExecutor(
                         new RefreshTokenGranter(

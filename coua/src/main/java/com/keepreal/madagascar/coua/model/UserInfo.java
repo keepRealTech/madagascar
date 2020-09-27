@@ -40,6 +40,8 @@ public class UserInfo {
     @Builder.Default
     private String password = "";
     @Builder.Default
+    private String adminPassword = "";
+    @Builder.Default
     private Integer gender = 0;
     @Builder.Default
     private String description = "";

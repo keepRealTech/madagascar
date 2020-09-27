@@ -63,6 +63,7 @@ server:
 
 aliyun:
   sms:
-    access-key:
-    access-secret:
+    access-key: LTAI4GHdcKUjYLX5A54BucRS
+    access-secret: uWTGsaIBTWQ84PWl8LJCxseWMe6DgW
     template-id: SMS_200712472
+    international-template-id: SMS_201653094
