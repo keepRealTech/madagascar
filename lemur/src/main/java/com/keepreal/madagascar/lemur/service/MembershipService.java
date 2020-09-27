@@ -133,7 +133,8 @@ public class MembershipService {
                                               String islandId,
                                               String hostId,
                                               boolean useCustomMessage,
-                                              String message) {
+                                              String message,
+                                              boolean isPermanent) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         String descriptionStr = String.join(",", descriptions);
@@ -145,6 +146,7 @@ public class MembershipService {
                 .setDescription(descriptionStr)
                 .setUseCustomMessage(useCustomMessage)
                 .setMessage(message)
+                .setPermanent(isPermanent)
                 .build();
 
         MembershipResponse membershipResponse;
@@ -194,7 +196,8 @@ public class MembershipService {
                                                   Integer pricePerMonth,
                                                   String userId,
                                                   Boolean useCustomMessage,
-                                                  String messsage) {
+                                                  String message,
+                                                  Boolean isPermanent) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         UpdateMembershipRequest.Builder builder = UpdateMembershipRequest.newBuilder()
@@ -212,8 +215,11 @@ public class MembershipService {
         if (Objects.nonNull(useCustomMessage)) {
             builder.setUseCustomMessage(BoolValue.of(useCustomMessage));
         }
-        if (Boolean.TRUE.equals(useCustomMessage) && Objects.nonNull(messsage)) {
-            builder.setMessage(StringValue.of(messsage));
+        if (Boolean.TRUE.equals(useCustomMessage) && Objects.nonNull(message)) {
+            builder.setMessage(StringValue.of(message));
+        }
+        if (Objects.nonNull(isPermanent)) {
+            builder.setPermanent(BoolValue.of(isPermanent));
         }
 
         MembershipResponse membershipResponse;

@@ -25,6 +25,7 @@ message UpdateMembershipRequest {
     string userId = 5;
     google.protobuf.BoolValue useCustomMessage = 6;
     google.protobuf.StringValue message = 7;
+    google.protobuf.BoolValue permanent = 8;
 }
 
 message CreateMembershipRequest {
@@ -35,6 +36,7 @@ message CreateMembershipRequest {
     string hostId = 5;
     bool useCustomMessage = 6;
     string message = 7;
+    bool permanent = 8;
 }
 
 message RetrieveMembershipsRequest {
@@ -54,6 +56,7 @@ message MembershipMessage {
     int32 memberCount = 9;
     bool useCustomMessage = 10;
     string message = 11;
+    bool permanent = 12;
 }
 
 message MembershipResponse {
