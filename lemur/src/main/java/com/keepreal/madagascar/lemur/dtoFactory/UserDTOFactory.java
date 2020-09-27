@@ -57,6 +57,14 @@ public class UserDTOFactory {
             return null;
         }
 
+        String mobile = user.getMobile();
+        String code = "86";
+        String[] split = StringUtils.split(user.getMobile(), "-");
+        if (Objects.nonNull(split)) {
+            code = split[0];
+            mobile = split[1];
+        }
+
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
         userDTO.setDisplayId(user.getDisplayId());
@@ -68,7 +76,9 @@ public class UserDTOFactory {
         userDTO.setGender(this.convertGender(user.getGender()));
         userDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
         userDTO.setCreatedAt(user.getCreatedAt());
-        userDTO.setMobile(shouldMaskMobile ? "***********" : user.getMobile());
+        userDTO.setCode(code);
+        userDTO.setMobile(shouldMaskMobile ? "***********" : mobile);
+        userDTO.setHasPassword(!StringUtils.isEmpty(user.getPassword()));
 
         userDTO.setIdentityTypes(user.getIdentitiesList()
                 .stream()
@@ -91,6 +101,14 @@ public class UserDTOFactory {
             return null;
         }
 
+        String mobile = user.getMobile();
+        String code = "86";
+        String[] split = StringUtils.split(user.getMobile(), "-");
+        if (Objects.nonNull(split)) {
+            code = split[0];
+            mobile = split[1];
+        }
+
         FullUserDTO fullUserDTO = new FullUserDTO();
         fullUserDTO.setId(user.getId());
         fullUserDTO.setDisplayId(user.getDisplayId());
@@ -103,6 +121,9 @@ public class UserDTOFactory {
         fullUserDTO.setAge(LocalDate.now().getYear() - Date.valueOf(user.getBirthday()).toLocalDate().getYear());
         fullUserDTO.setCreatedAt(user.getCreatedAt());
         fullUserDTO.setMobile(shouldMaskMobile ? "***********" : user.getMobile());
+        fullUserDTO.setCode(code);
+        fullUserDTO.setMobile(shouldMaskMobile ? "***********" : mobile);
+        fullUserDTO.setHasPassword(!StringUtils.isEmpty(user.getPassword()));
 
         fullUserDTO.setIdentityTypes(
                 user.getIdentitiesList()

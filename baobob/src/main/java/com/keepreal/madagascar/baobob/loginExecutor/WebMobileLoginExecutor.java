@@ -51,7 +51,7 @@ public class WebMobileLoginExecutor implements LoginExecutor{
             return Mono.just(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
         }
 
-        String mobile = loginRequest.getWebMobilePayload().getMobile();
+        String mobile = loginRequest.getAppMobilePayload().getCode() + "-" + loginRequest.getWebMobilePayload().getMobile();
         int otp = loginRequest.getWebMobilePayload().getOtp();
         RBucketReactive<Integer> bucket = this.redissonReactiveClient.getBucket(MOBILE_PHONE_OTP + mobile);
 

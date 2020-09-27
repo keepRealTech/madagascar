@@ -11,6 +11,8 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
+import com.keepreal.madagascar.coua.CreateOrUpdateUserPasswordRequest;
+import com.keepreal.madagascar.coua.CreateOrUpdateUserPasswordResponse;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsRequest;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
@@ -37,6 +39,7 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import swagger.model.CommonResponse;
 import swagger.model.PutUserMobileRequest;
 
 import java.util.List;
@@ -244,10 +247,13 @@ public class UserService {
      *
      * @param mobile 手机号
      */
-    public void sendOtpToMobile(String mobile) {
+    public void sendOtpToMobile(String code, String mobile) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
-        SendOtpToMobileRequest request = SendOtpToMobileRequest.newBuilder().setMobile(mobile).build();
+        SendOtpToMobileRequest request = SendOtpToMobileRequest.newBuilder()
+                .setMobile(mobile)
+                .setCode(code)
+                .build();
 
         SendOtpToMobileResponse response;
         try {
@@ -277,11 +283,12 @@ public class UserService {
      * @return {@link UserMessage}
      */
     @CachePut(value = "UserMessage", key = "#userId", cacheManager = "redisCacheManager")
-    public UserMessage updateUserMobilePhone(String userId, String mobile, Integer otp) {
+    public UserMessage updateUserMobilePhone(String userId, String code, String mobile, Integer otp) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
 
         UpdateUserMobileRequest request = UpdateUserMobileRequest.newBuilder()
                 .setUserId(userId)
+                .setCode(code)
                 .setMobile(mobile)
                 .setOtp(otp)
                 .build();
@@ -384,6 +391,43 @@ public class UserService {
         }
 
         return response.getMessageList();
+    }
+
+    /**
+     * 创建/更新 用户密码
+     *
+     * @param userId 用户id
+     * @param code   区号
+     * @param mobile 手机
+     * @param otp    验证码
+     * @param password 密码
+     */
+    public void createOrUpdateUserPassword(String userId, String code, String mobile, Integer otp, String password) {
+        UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
+        CreateOrUpdateUserPasswordRequest request = CreateOrUpdateUserPasswordRequest.newBuilder()
+                .setUserId(userId)
+                .setCode(code)
+                .setMobile(mobile)
+                .setOtp(otp)
+                .setPassword(password)
+                .build();
+
+        CreateOrUpdateUserPasswordResponse response;
+        try {
+            response = stub.createOrUpdateUserPassword(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "create or update user password returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
     }
 
     /**

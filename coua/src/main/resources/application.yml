@@ -66,3 +66,4 @@ aliyun:
     access-key:
     access-secret:
     template-id: SMS_200712472
+    international-template-id: SMS_201653094

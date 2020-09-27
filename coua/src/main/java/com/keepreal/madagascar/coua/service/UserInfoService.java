@@ -63,6 +63,7 @@ public class UserInfoService {
         if (StringUtils.isEmpty(userInfo.getNickName()) && !StringUtils.isEmpty(userInfo.getMobile())
                 && StringUtils.isEmpty(userInfo.getUnionId()) && userInfo.getState() != 0) {
             userInfo.setNickName("用户" + userInfo.getDisplayId());
+            userInfo.setUsername(userInfo.getMobile());
         }
         userInfo = userInfoRepository.save(userInfo);
 
@@ -123,6 +124,7 @@ public class UserInfoService {
                 .addAllIdentities(identityTypes)
                 .setUsername(StringUtils.isEmpty(userInfo.getUsername()) ? "" : userInfo.getUsername())
                 .setPassword(StringUtils.isEmpty(userInfo.getPassword()) ? "" : userInfo.getPassword())
+                .setAdminPassword(StringUtils.isEmpty(userInfo.getPassword()) ? "" : userInfo.getAdminPassword())
                 .setCreatedAt(userInfo.getCreatedTime())
                 .setLocked(Instant.now().toEpochMilli() <= userInfo.getLockedUntil())
                 .setState(userInfo.getState())

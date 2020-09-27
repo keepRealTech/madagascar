@@ -98,7 +98,7 @@ public class LoginController implements LoginApi {
     /**
      * Implements the login api.
      *
-     * @param body {@link PostLoginRequest}.
+     * @param postLoginRequest {@link PostLoginRequest}.
      * @return {@link LoginResponse}.
      */
     @Override
@@ -109,91 +109,100 @@ public class LoginController implements LoginApi {
             value = "body.data.user.id"
     )
     @CrossOrigin
-    public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest body) {
+    public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest postLoginRequest, @Valid Boolean admin) {
         LoginRequest loginRequest;
-        switch (body.getLoginType()) {
+        switch (postLoginRequest.getLoginType()) {
             case OAUTH_WECHAT:
-                if (StringUtils.isEmpty(body.getData().getCode())) {
+                if (StringUtils.isEmpty(postLoginRequest.getData().getCode())) {
                     throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
                 }
 
                 loginRequest = LoginRequest.newBuilder()
                         .setOauthWechatPayload(OAuthWechatLoginPayload.newBuilder()
-                                .setCode(body.getData().getCode()))
+                                .setCode(postLoginRequest.getData().getCode()))
                         .setLoginType(LoginType.LOGIN_OAUTH_WECHAT)
                         .build();
                 break;
             case OAUTH_MP_WECHAT:
-                if (StringUtils.isEmpty(body.getData().getCode())) {
+                if (StringUtils.isEmpty(postLoginRequest.getData().getCode())) {
                     throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
                 }
 
                 loginRequest = LoginRequest.newBuilder()
                         .setOauthWechatPayload(OAuthWechatLoginPayload.newBuilder()
-                                .setCode(body.getData().getCode()))
+                                .setCode(postLoginRequest.getData().getCode()))
                         .setLoginType(LoginType.LOGIN_OAUTH_MP_WECHAT)
                         .build();
                 break;
             case PASSWORD:
-                if (StringUtils.isEmpty(body.getData().getUsername())
-                        || StringUtils.isEmpty(body.getData().getPassword())) {
+                if (StringUtils.isEmpty(postLoginRequest.getData().getUsername())
+                        || StringUtils.isEmpty(postLoginRequest.getData().getPassword())) {
                     throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
                 }
 
                 loginRequest = LoginRequest.newBuilder()
                         .setPasswordPayload(PasswordLoginPayload.newBuilder()
-                                .setUsername(body.getData().getUsername())
-                                .setPassword(body.getData().getPassword()))
+                                .setUsername(postLoginRequest.getData().getUsername())
+                                .setPassword(postLoginRequest.getData().getPassword())
+                                .setAdmin(admin)
+                                .setCode(StringUtils.isEmpty(postLoginRequest.getData().getCode()) ?
+                                        "86" : postLoginRequest.getData().getCode()))
                         .setLoginType(LoginType.LOGIN_PASSWORD)
                         .build();
                 break;
             case MOBILE:
-                if (StringUtils.isEmpty(body.getData().getMobile())
-                        || StringUtils.isEmpty(body.getData().getOtp())) {
+                if (StringUtils.isEmpty(postLoginRequest.getData().getMobile())
+                        || StringUtils.isEmpty(postLoginRequest.getData().getOtp())) {
                     throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
                 }
 
                 loginRequest = LoginRequest.newBuilder()
                         .setWebMobilePayload(WebMobileLoginPayload.newBuilder()
-                                .setMobile(body.getData().getMobile())
-                                .setOtp(body.getData().getOtp()))
+                                .setMobile(postLoginRequest.getData().getMobile())
+                                .setOtp(postLoginRequest.getData().getOtp())
+                                .setCode(StringUtils.isEmpty(postLoginRequest.getData().getCode()) ?
+                                        "86" : postLoginRequest.getData().getCode()))
                         .setLoginType(LoginType.LOGIN_WEB_MOBILE)
                         .build();
                 break;
             case MOBILE_APP:
-                if (StringUtils.isEmpty(body.getData().getMobile())
-                        || StringUtils.isEmpty(body.getData().getOtp())) {
+                if (StringUtils.isEmpty(postLoginRequest.getData().getMobile())
+                        || StringUtils.isEmpty(postLoginRequest.getData().getOtp())) {
                     throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
                 }
 
                 loginRequest = LoginRequest.newBuilder()
                         .setAppMobilePayload(AppMobileLoginPayload.newBuilder()
-                                .setMobile(body.getData().getMobile())
-                                .setOtp(body.getData().getOtp()))
+                                .setMobile(postLoginRequest.getData().getMobile())
+                                .setOtp(postLoginRequest.getData().getOtp())
+                                .setCode(StringUtils.isEmpty(postLoginRequest.getData().getCode()) ?
+                                        "86" : postLoginRequest.getData().getCode()))
                         .setLoginType(LoginType.LOGIN_APP_MOBILE)
                         .build();
                 break;
             case MOBILE_HOME:
-                if (StringUtils.isEmpty(body.getData().getMobile())
-                        || StringUtils.isEmpty(body.getData().getOtp())) {
+                if (StringUtils.isEmpty(postLoginRequest.getData().getMobile())
+                        || StringUtils.isEmpty(postLoginRequest.getData().getOtp())) {
                     throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
                 }
 
                 loginRequest = LoginRequest.newBuilder()
                         .setAppMobilePayload(AppMobileLoginPayload.newBuilder()
-                                .setMobile(body.getData().getMobile())
-                                .setOtp(body.getData().getOtp()))
+                                .setMobile(postLoginRequest.getData().getMobile())
+                                .setOtp(postLoginRequest.getData().getOtp())
+                                .setCode(StringUtils.isEmpty(postLoginRequest.getData().getCode()) ?
+                                        "86" : postLoginRequest.getData().getCode()))
                         .setLoginType(LoginType.LOGIN_APP_MOBILE)
                         .build();
                 break;
             case JWT_IOS:
-                if (StringUtils.isEmpty(body.getData().getCode())) {
+                if (StringUtils.isEmpty(postLoginRequest.getData().getCode())) {
                     throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
                 }
 
                 loginRequest = LoginRequest.newBuilder()
                         .setJwtIsoLoginPayload(JWTISOLoginPayload.newBuilder()
-                                .setIdentifyToken(body.getData().getCode()).build())
+                                .setIdentifyToken(postLoginRequest.getData().getCode()).build())
                         .setLoginType(LoginType.LOGIN_JWT_IOS)
                         .build();
                 break;
@@ -393,7 +402,8 @@ public class LoginController implements LoginApi {
             String userId = HttpContextUtils.getUserIdFromContext();
             this.userService.checkUserMobileIsExisted(userId, postOTPRequest.getMobile());
         }
-        this.userService.sendOtpToMobile(postOTPRequest.getMobile());
+        this.userService.sendOtpToMobile(StringUtils.isEmpty(postOTPRequest.getCode()) ? "86" : postOTPRequest.getCode(),
+                postOTPRequest.getMobile());
 
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);

@@ -40,6 +40,7 @@ public class AliyunSmsService {
     private final Random random;
     private final RedissonClient redissonClient;
     private final Gson gson;
+    private final IAcsClient client;
 
     public AliyunSmsService(AliyunSmsConfig aliyunSmsConfig,
                             RedissonClient redissonClient) {
@@ -47,21 +48,20 @@ public class AliyunSmsService {
         this.redissonClient = redissonClient;
         this.random = new Random();
         this.gson = new Gson();
+        this.client = new DefaultAcsClient(DefaultProfile.getProfile(REGION_ID, aliyunSmsConfig.getAccessKey(), aliyunSmsConfig.getAccessSecret()));
     }
 
     /**
      * use aliyun sms send otp
      *
+     * @param code mobile phone area code
      * @param mobile mobile phone number
      */
-    public CommonStatus sendOtpToMobile(String mobile) {
+    public CommonStatus sendOtpToMobile(String code, String mobile) {
         Boolean isLimited = this.isMobileOtpLimited(mobile);
         if (isLimited) {
             return CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_TOO_FREQUENTLY);
         }
-
-        DefaultProfile profile = DefaultProfile.getProfile(REGION_ID, aliyunSmsConfig.getAccessKey(), aliyunSmsConfig.getAccessSecret());
-        IAcsClient client = new DefaultAcsClient(profile);
 
         int otpCode = this.generateOtp();
 
@@ -72,13 +72,19 @@ public class AliyunSmsService {
         request.setSysVersion(SYS_VERSION);
         request.setSysAction("SendSms");
         request.putQueryParameter("RegionId", REGION_ID);
-        request.putQueryParameter("PhoneNumbers", mobile);
         request.putQueryParameter("SignName", "跳岛");
-        request.putQueryParameter("TemplateCode", this.aliyunSmsConfig.getTemplateId());
         request.putQueryParameter("TemplateParam", "{\"code\" : " + otpCode + "}");
 
+        if ("86".equals(code)) {
+            request.putQueryParameter("PhoneNumbers", mobile);
+            request.putQueryParameter("TemplateCode", this.aliyunSmsConfig.getTemplateId());
+        } else {
+            request.putQueryParameter("PhoneNumbers", code + mobile);
+            request.putQueryParameter("TemplateCode", this.aliyunSmsConfig.getInternationalTemplateId());
+        }
+
         try {
-            response = client.getCommonResponse(request);
+            response = this.client.getCommonResponse(request);
         } catch (Exception exception) {
             log.info("aliyun sms error : {}", exception.getMessage());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
@@ -91,7 +97,7 @@ public class AliyunSmsService {
         }
 
         this.updateMobileLimitStatus(mobile);
-        RBucket<Integer> mobileOtp = this.redissonClient.getBucket(MOBILE_PHONE_OTP + mobile);
+        RBucket<Integer> mobileOtp = this.redissonClient.getBucket(MOBILE_PHONE_OTP + code + "-" + mobile);
         mobileOtp.set(otpCode, 3L, TimeUnit.MINUTES);
         return CommonStatusUtils.getSuccStatus();
     }
