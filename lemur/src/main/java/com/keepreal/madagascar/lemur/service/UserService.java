@@ -402,7 +402,8 @@ public class UserService {
      * @param otp    验证码
      * @param password 密码
      */
-    public void createOrUpdateUserPassword(String userId, String code, String mobile, Integer otp, String password) {
+    @CachePut(value = "UserMessage", key = "#userId", cacheManager = "redisCacheManager")
+    public UserMessage createOrUpdateUserPassword(String userId, String code, String mobile, Integer otp, String password) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
         CreateOrUpdateUserPasswordRequest request = CreateOrUpdateUserPasswordRequest.newBuilder()
                 .setUserId(userId)
@@ -412,7 +413,7 @@ public class UserService {
                 .setPassword(password)
                 .build();
 
-        CreateOrUpdateUserPasswordResponse response;
+        UserResponse response;
         try {
             response = stub.createOrUpdateUserPassword(request);
         } catch (StatusRuntimeException exception) {
@@ -428,6 +429,8 @@ public class UserService {
         if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
             throw new KeepRealBusinessException(response.getStatus());
         }
+
+        return response.getUser();
     }
 
     /**

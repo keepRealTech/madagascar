@@ -504,14 +504,14 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
      * @param responseObserver  {@link CreateOrUpdateUserPasswordResponse}
      */
     @Override
-    public void createOrUpdateUserPassword(CreateOrUpdateUserPasswordRequest request, StreamObserver<CreateOrUpdateUserPasswordResponse> responseObserver) {
+    public void createOrUpdateUserPassword(CreateOrUpdateUserPasswordRequest request, StreamObserver<UserResponse> responseObserver) {
         String userId = request.getUserId();
         String code = request.getCode();
         String mobile = request.getMobile();
         Integer otp = request.getOtp();
         String password = request.getPassword();
 
-        CreateOrUpdateUserPasswordResponse.Builder responseBuilder = CreateOrUpdateUserPasswordResponse.newBuilder();
+        UserResponse.Builder responseBuilder = UserResponse.newBuilder();
 
         RBucket<Integer> bucket = this.redissonClient.getBucket(MOBILE_PHONE_OTP + code + "-" + mobile);
         if (!bucket.isExists() || !bucket.get().equals(otp)) {
@@ -520,8 +520,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
             bucket.delete();
             UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
             userInfo.setPassword(this.encoder.encode(password));
-            this.userInfoService.updateUser(userInfo);
+            UserInfo userInfoNew = this.userInfoService.updateUser(userInfo);
             responseBuilder.setStatus(CommonStatusUtils.getSuccStatus());
+            responseBuilder.setUser(this.userInfoService.getUserMessage(userInfoNew));
         }
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
