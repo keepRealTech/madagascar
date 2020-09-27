@@ -33,11 +33,11 @@ global:
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.3.1-staging
+      tag: 1.3.2-staging
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
-      tag: 1.2.1-staging
+      tag: 1.2.2-staging
       imagePullPolicy: Always
     brookesia:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/brookesia
@@ -49,7 +49,7 @@ global:
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-      tag: 1.2.1-staging
+      tag: 1.2.2-staging
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
@@ -69,7 +69,7 @@ global:
       imagePullPolicy: Always
     vanga:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
-      tag: 1.2.0-staging
+      tag: 1.2.2-staging
       imagePullPolicy: Always
     asity:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
