@@ -385,12 +385,12 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         if (Objects.isNull(intOtp) || !otp.equals(intOtp)) {
             builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
         } else {
-            UserInfo h5UserInfo = this.userInfoService.findUserByMobileAndState(mobile, UserState.USER_H5_MOBILE_VALUE);
+            UserInfo h5UserInfo = this.userInfoService.findUserByMobileAndState(code + "-" + mobile, UserState.USER_H5_MOBILE_VALUE);
             if (Objects.nonNull(h5UserInfo)) {
                 this.mergeUserAccounts(userId, h5UserInfo.getId());
             }
             UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
-            userInfo.setMobile(mobile);
+            userInfo.setMobile(code + "-" +mobile);
             userInfo.setUsername(code + "-" + mobile);
             UserInfo userInfoNew = this.userInfoService.updateUser(userInfo);
             builder.setStatus(CommonStatusUtils.getSuccStatus());
@@ -412,9 +412,10 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
         String mobile = request.getMobile();
         String userId = request.getUserId();
+        String code = request.getCode();
         CheckUserMobileIsExistedResponse.Builder builder = CheckUserMobileIsExistedResponse.newBuilder();
 
-        UserInfo userInfo = this.userInfoService.findUserInfoByMobile(mobile);
+        UserInfo userInfo = this.userInfoService.findUserInfoByMobile(code + "-" + mobile);
 
         if (Objects.nonNull(userInfo)) {
             if (userInfo.getState() == UserState.USER_WECHAT_VALUE) {

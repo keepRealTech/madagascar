@@ -317,10 +317,11 @@ public class UserService {
      *
      * @param mobile 手机号
      */
-    public void checkUserMobileIsExisted(String userId, String mobile) {
+    public void checkUserMobileIsExisted(String userId, String code, String mobile) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
         CheckUserMobileIsExistedRequest request = CheckUserMobileIsExistedRequest.newBuilder()
                 .setUserId(userId)
+                .setCode(code)
                 .setMobile(mobile)
                 .build();
         CheckUserMobileIsExistedResponse response;

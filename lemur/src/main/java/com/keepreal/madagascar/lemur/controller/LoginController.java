@@ -400,7 +400,9 @@ public class LoginController implements LoginApi {
     public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest,  @Valid Boolean login) {
         if (!login) {
             String userId = HttpContextUtils.getUserIdFromContext();
-            this.userService.checkUserMobileIsExisted(userId, postOTPRequest.getMobile());
+            this.userService.checkUserMobileIsExisted(userId,
+                    StringUtils.isEmpty(postOTPRequest.getCode()) ? "86" : postOTPRequest.getCode(),
+                    postOTPRequest.getMobile());
         }
         this.userService.sendOtpToMobile(StringUtils.isEmpty(postOTPRequest.getCode()) ? "86" : postOTPRequest.getCode(),
                 postOTPRequest.getMobile());
