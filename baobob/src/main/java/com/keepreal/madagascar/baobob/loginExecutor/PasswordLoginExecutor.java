@@ -74,6 +74,9 @@ public class PasswordLoginExecutor implements LoginExecutor {
                 .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
                                 && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_GRPC_LOGIN_FROZEN,
                         this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_FROZEN))
+                .onErrorReturn(throwable -> throwable instanceof KeepRealBusinessException
+                                && ((KeepRealBusinessException) throwable).getErrorCode() == ErrorCode.REQUEST_USER_PASSWORD_NOT_MATCH,
+                        this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_USER_PASSWORD_NOT_MATCH))
                 .onErrorReturn(this.grpcResponseUtils.buildInvalidLoginResponse(ErrorCode.REQUEST_GRPC_LOGIN_INVALID));
     }
 
@@ -94,7 +97,7 @@ public class PasswordLoginExecutor implements LoginExecutor {
                     return userMessage;
                 })
                 .filter(userMessage -> this.encoder.matches(password, userMessage.getPassword()))
-                .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)));
+                .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_USER_PASSWORD_NOT_MATCH)));
     }
 
     /**
@@ -113,7 +116,7 @@ public class PasswordLoginExecutor implements LoginExecutor {
                     return userMessage;
                 })
                 .filter(userMessage -> this.encoder.matches(password, userMessage.getAdminPassword()))
-                .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_GRPC_LOGIN_INVALID)));
+                .switchIfEmpty(Mono.error(new KeepRealBusinessException(ErrorCode.REQUEST_USER_PASSWORD_NOT_MATCH)));
     }
 
 }

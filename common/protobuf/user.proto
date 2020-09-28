@@ -115,6 +115,7 @@ message UpdateUserMobileRequest {
 message CheckUserMobileIsExistedRequest {
     string userId = 1;
     string mobile = 2;
+    string code = 3;
 }
 
 message CheckUserMobileIsExistedResponse {
