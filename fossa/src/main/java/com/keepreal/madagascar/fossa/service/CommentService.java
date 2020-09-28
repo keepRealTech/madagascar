@@ -87,8 +87,7 @@ public class CommentService {
         );
 
         List<LinkedHashMap> commentMaps = this.mongoTemplate.aggregate(aggregation, CommentInfo.class, LinkedHashMap.class).getMappedResults();
-
-//        return comments.stream().map(this::getCommentMessage).collect(Collectors.toList());
+        
         return commentMaps.stream()
                 .collect(Collectors.toMap(
                         map -> map.get("_id").toString(),
