@@ -10,7 +10,7 @@ spring:
   data:
     mongodb:
       database: fossa
-      uri: mongodb://localhost:27017
+      uri: mongodb://root:05GEJ9k7heSCM3E@dds-2ze9a184c36df9441710-pub.mongodb.rds.aliyuncs.com:3717/admin?replicaSet=mgset-31197927&readPreference=secondaryPreferred&maxIdleTimeMS=300000
 
 madagascar:
   short-code-base: https://staging.keepreal.cn/s/%s

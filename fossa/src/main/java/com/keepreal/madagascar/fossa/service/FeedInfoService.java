@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @Service
 public class FeedInfoService {
 
-    private static final int DEFAULT_LAST_COMMENT_COUNT = 2;
+    public static final int DEFAULT_LAST_COMMENT_COUNT = 2;
 
     private final MongoTemplate mongoTemplate;
     private final CommentService commentService;
@@ -180,27 +180,30 @@ public class FeedInfoService {
 
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
 
-        return this.getFeedMessage(feedInfo, userId, myMembershipIds, isLiked);
+        List<CommentMessage> lastCommentMessage = this.commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
+
+        return this.getFeedMessage(feedInfo, userId, myMembershipIds, lastCommentMessage, isLiked);
     }
 
     /**
      * Retrieves the feed message.
      *
-     * @param feedInfo        {@link FeedInfo}.
-     * @param userId          User id (decide is liked).
-     * @param myMembershipIds User valid membership ids.
-     * @param isLiked         Feed liked by user or not.
+     * @param feedInfo            {@link FeedInfo}.
+     * @param userId              User id (decide is liked).
+     * @param myMembershipIds     User valid membership ids.
+     * @param lastCommentMessages Last comment messages.
+     * @param isLiked             Feed liked by user or not.
      * @return {@link FeedMessage}.
      */
     public FeedMessage getFeedMessage(FeedInfo feedInfo,
                                       String userId,
                                       List<String> myMembershipIds,
+                                      List<CommentMessage> lastCommentMessages,
                                       boolean isLiked) {
         if (Objects.isNull(feedInfo)) {
             return null;
         }
 
-        List<CommentMessage> lastCommentMessage = this.commentService.getLastCommentsByFeedIds(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
         FeedMessage.Builder builder = FeedMessage.newBuilder()
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
@@ -211,7 +214,7 @@ public class FeedInfoService {
                 .setCommentsCount(feedInfo.getCommentsCount())
                 .setLikesCount(feedInfo.getLikesCount() < 0 ? 0 : feedInfo.getLikesCount())
                 .setRepostCount(feedInfo.getRepostCount())
-                .addAllLastComments(lastCommentMessage)
+                .addAllLastComments(lastCommentMessages)
                 .setIsLiked(isLiked)
                 .setIsDeleted(feedInfo.getDeleted())
                 .setPriceInCents(Objects.nonNull(feedInfo.getPriceInCents()) ? feedInfo.getPriceInCents() : 0L)
