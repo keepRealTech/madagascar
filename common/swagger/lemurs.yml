@@ -4369,6 +4369,8 @@ components:
           type: integer
         memberCount:
           type: integer
+        isPermanent:
+          type: boolean
     BriefMembershipDTO:
       type: object
       properties:

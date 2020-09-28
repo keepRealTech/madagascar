@@ -74,6 +74,7 @@ message FeedMembershipMessage {
     string name = 2;
     int32 pricePerMonth = 3;
     int32 memberCount = 4;
+    bool permanent = 5;
 }
 
 message FeedMembershipResponse {
