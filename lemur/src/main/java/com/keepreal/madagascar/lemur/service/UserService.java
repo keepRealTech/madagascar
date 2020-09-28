@@ -12,7 +12,6 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserPasswordRequest;
-import com.keepreal.madagascar.coua.CreateOrUpdateUserPasswordResponse;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsRequest;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
@@ -402,7 +401,8 @@ public class UserService {
      * @param otp    验证码
      * @param password 密码
      */
-    public void createOrUpdateUserPassword(String userId, String code, String mobile, Integer otp, String password) {
+    @CachePut(value = "UserMessage", key = "#userId", cacheManager = "redisCacheManager")
+    public UserMessage createOrUpdateUserPassword(String userId, String code, String mobile, Integer otp, String password) {
         UserServiceGrpc.UserServiceBlockingStub stub = UserServiceGrpc.newBlockingStub(this.channel);
         CreateOrUpdateUserPasswordRequest request = CreateOrUpdateUserPasswordRequest.newBuilder()
                 .setUserId(userId)
@@ -412,7 +412,7 @@ public class UserService {
                 .setPassword(password)
                 .build();
 
-        CreateOrUpdateUserPasswordResponse response;
+        UserResponse response;
         try {
             response = stub.createOrUpdateUserPassword(request);
         } catch (StatusRuntimeException exception) {
@@ -428,6 +428,8 @@ public class UserService {
         if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
             throw new KeepRealBusinessException(response.getStatus());
         }
+
+        return response.getUser();
     }
 
     /**

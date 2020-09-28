@@ -154,10 +154,6 @@ message CreateOrUpdateUserPasswordRequest {
     string password = 5;
 }
 
-message CreateOrUpdateUserPasswordResponse {
-    CommonStatus status = 1;
-}
-
 service UserService {
     rpc CreateUser(NewUserRequest) returns (UserResponse) {};
     rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
@@ -171,5 +167,5 @@ service UserService {
     rpc CheckUserMobileIsExisted(CheckUserMobileIsExistedRequest) returns (CheckUserMobileIsExistedResponse) {};
     rpc RetrieveUserQualifications (RetrieveUserQualificationsRequest) returns (RetrieveUserQualificationsResponse) {};
     rpc CreateOrUpdateUserQualifications (CreateOrUpdateUserQualificationsRequest) returns (CreateOrUpdateUserQualificationsResponse) {};
-    rpc CreateOrUpdateUserPassword (CreateOrUpdateUserPasswordRequest) returns (CreateOrUpdateUserPasswordResponse) {};
+    rpc CreateOrUpdateUserPassword (CreateOrUpdateUserPasswordRequest) returns (UserResponse) {};
 }

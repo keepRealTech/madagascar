@@ -9,7 +9,6 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserPasswordRequest;
-import com.keepreal.madagascar.coua.CreateOrUpdateUserPasswordResponse;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsRequest;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
@@ -392,7 +391,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
             }
             UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
             userInfo.setMobile(mobile);
-            userInfo.setUsername(mobile);
+            userInfo.setUsername(code + "-" + mobile);
             UserInfo userInfoNew = this.userInfoService.updateUser(userInfo);
             builder.setStatus(CommonStatusUtils.getSuccStatus());
             builder.setUser(this.userInfoService.getUserMessage(userInfoNew));
@@ -501,17 +500,17 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
      * 创建/更新 用户密码
      *
      * @param request   {@link CreateOrUpdateUserPasswordRequest}
-     * @param responseObserver  {@link CreateOrUpdateUserPasswordResponse}
+     * @param responseObserver  {@link UserResponse}
      */
     @Override
-    public void createOrUpdateUserPassword(CreateOrUpdateUserPasswordRequest request, StreamObserver<CreateOrUpdateUserPasswordResponse> responseObserver) {
+    public void createOrUpdateUserPassword(CreateOrUpdateUserPasswordRequest request, StreamObserver<UserResponse> responseObserver) {
         String userId = request.getUserId();
         String code = request.getCode();
         String mobile = request.getMobile();
         Integer otp = request.getOtp();
         String password = request.getPassword();
 
-        CreateOrUpdateUserPasswordResponse.Builder responseBuilder = CreateOrUpdateUserPasswordResponse.newBuilder();
+        UserResponse.Builder responseBuilder = UserResponse.newBuilder();
 
         RBucket<Integer> bucket = this.redissonClient.getBucket(MOBILE_PHONE_OTP + code + "-" + mobile);
         if (!bucket.isExists() || !bucket.get().equals(otp)) {
@@ -520,8 +519,9 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
             bucket.delete();
             UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
             userInfo.setPassword(this.encoder.encode(password));
-            this.userInfoService.updateUser(userInfo);
+            UserInfo userInfoNew = this.userInfoService.updateUser(userInfo);
             responseBuilder.setStatus(CommonStatusUtils.getSuccStatus());
+            responseBuilder.setUser(this.userInfoService.getUserMessage(userInfoNew));
         }
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
