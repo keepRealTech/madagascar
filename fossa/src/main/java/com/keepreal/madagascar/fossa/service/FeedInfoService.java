@@ -200,7 +200,7 @@ public class FeedInfoService {
             return null;
         }
 
-        List<CommentMessage> lastCommentMessage = commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
+        List<CommentMessage> lastCommentMessage = this.commentService.getLastCommentsByFeedIds(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
         FeedMessage.Builder builder = FeedMessage.newBuilder()
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())

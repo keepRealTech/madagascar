@@ -5,28 +5,35 @@ import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.dao.CommentInfoRepository;
 import com.keepreal.madagascar.fossa.model.CommentInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+/**
+ * Represents the comment service.
+ */
 @Slf4j
 @Service
 public class CommentService {
 
     private final CommentInfoRepository commentInfoRepository;
     private final LongIdGenerator idGenerator;
+    private final MongoTemplate mongoTemplate;
 
-    @Autowired
     public CommentService(CommentInfoRepository commentInfoRepository,
-                          LongIdGenerator idGenerator) {
+                          LongIdGenerator idGenerator,
+                          MongoTemplate mongoTemplate) {
         this.commentInfoRepository = commentInfoRepository;
         this.idGenerator = idGenerator;
+        this.mongoTemplate = mongoTemplate;
     }
 
     /**
@@ -49,15 +56,22 @@ public class CommentService {
 
     /**
      *
-     * @param feedId
+     * @param feedIds
      * @param commentCount
      * @return
      */
-    public List<CommentMessage> getCommentsMessage(String feedId, int commentCount) {
-        Pageable pageable = PageRequest.of(0, commentCount);
-        List<CommentInfo> commentInfoList = commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseOrderByCreatedTimeDesc(feedId, pageable).getContent();
+    public List<CommentMessage> getLastCommentsByFeedIds(Iterable<String> feedIds, int commentCount) {
+        Criteria criteria = Criteria.where("feedId").in(feedIds).and("isDeleted").is(false);
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(criteria),
+                Aggregation.sort(Sort.Direction.DESC, "createdTime"),
+                Aggregation.group("feedId").last("feedId").as("feedId").push("$$root").as("comments"),
+                Aggregation.project()
+        );
 
-        return commentInfoList.stream().map(this::getCommentMessage).collect(Collectors.toList());
+        List<CommentInfo> comments = this.mongoTemplate.aggregate(aggregation, "commentInfo", CommentInfo.class).getMappedResults();
+
+        return comments.stream().map(this::getCommentMessage).collect(Collectors.toList());
     }
 
     /**
