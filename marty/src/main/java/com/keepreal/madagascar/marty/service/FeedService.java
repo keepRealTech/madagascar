@@ -32,7 +32,7 @@ public class FeedService {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
-        return feedResponse.getFeed().getIsMembership() ? "这是给你的「支持者专属动态」" : feedResponse.getFeed().getText();
+        return feedResponse.getFeed().getIsMembership() || feedResponse.getFeed().getPriceInCents() > 0L ? "这是给你的「支持者专属动态」" : feedResponse.getFeed().getText();
     }
 
     public FeedResponse retrieveFeedInfoById(String feedId, String userId) {
