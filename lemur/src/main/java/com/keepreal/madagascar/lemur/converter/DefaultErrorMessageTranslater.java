@@ -68,6 +68,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "新手机号不可与当前已绑定号码相同";
             case REQUEST_MEMBERSHIP_NOT_FOUND_ERROR:
                 return "该订阅已经被岛主大人移除啦";
+            case REQUEST_USER_PASSWORD_NOT_MATCH:
+                return "密码错误，请重新输入";
             default:
                 return errorCode.getValueDescriptor().getName();
         }
