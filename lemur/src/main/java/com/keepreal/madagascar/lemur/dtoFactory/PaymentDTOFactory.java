@@ -27,6 +27,8 @@ public class PaymentDTOFactory {
     private final MembershipDTOFactory membershipDTOFactory;
     private final SkuDTOFactory skuDTOFactory;
 
+    private static final long PERMANENT_TIMESTAMP = 4070880000000L; // 2099-01-01 00:00:00
+
     /**
      * Constructs the {@link PaymentDTOFactory}.
      *
@@ -68,6 +70,13 @@ public class PaymentDTOFactory {
 
         ZonedDateTime expiration = ZonedDateTime.ofInstant(Instant.ofEpochMilli(userPaymentMessage.getExpiresAt()), ZoneId.systemDefault());
         userPaymentDTO.setExpiration(expiration.with(ChronoField.SECOND_OF_DAY, 0).toInstant().toEpochMilli());
+
+        /*
+            当会员从永久改为按月付费之后，如果该用户买过永久会员，订单有效期仍然是永久有效
+         */
+        if (userPaymentDTO.getExpiration() >= PERMANENT_TIMESTAMP) {
+            userPaymentDTO.getMembershipSku().setIsPermanent(true);
+        }
 
         return userPaymentDTO;
     }
