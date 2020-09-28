@@ -30,6 +30,7 @@ import java.util.Objects;
 public class RongCloudService {
 
     private static final String HOST_TEMPLATE = "我刚刚支持了你的「%s」会员（¥%.2f x %d个月）。创作加油！";
+    private static final String HOST_PERMANENT_TEMPLATE = "我刚刚支持了你的「%s」会员（¥%.2f x 永久有效）。创作加油！";
     private static final String MEMBER_TEMPLATE = "感谢你的支持！\n更多信息可前往「我的 - 订单中心」中查看。";
     private static final String OFFICIAL_USER_ID = "4";
     private static final String CREATE_ISLAND_CONTENT = "创作者你好，恭喜成功创建了你的跳岛主页！\n" +
@@ -95,9 +96,9 @@ public class RongCloudService {
     /**
      * Tries to update the user info in rong cloud.
      *
-     * @param userId        User id.
-     * @param userName      User name.
-     * @param portraitUrl   Portrait url.
+     * @param userId      User id.
+     * @param userName    User name.
+     * @param portraitUrl Portrait url.
      */
     @SneakyThrows
     public void updateUser(String userId, String userName, String portraitUrl) {
@@ -202,10 +203,14 @@ public class RongCloudService {
     @SneakyThrows
     public void sendThanks(NotificationEvent event, MembershipMessage membership) {
         TxtMessage hostTextMessage = new TxtMessage(
-                String.format(RongCloudService.HOST_TEMPLATE,
-                        event.getMemberEvent().getMembershipName(),
-                        Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths(),
-                        event.getMemberEvent().getTimeInMonths()),
+                event.getMemberEvent().getPermanent() ?
+                        String.format(RongCloudService.HOST_TEMPLATE,
+                                event.getMemberEvent().getMembershipName(),
+                                Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths(),
+                                event.getMemberEvent().getTimeInMonths()) :
+                        String.format(RongCloudService.HOST_PERMANENT_TEMPLATE,
+                                event.getMemberEvent().getMembershipName(),
+                                Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths()),
                 "");
         PrivateMessage hostMessage = new PrivateMessage()
                 .setSenderId(event.getMemberEvent().getMemberId())

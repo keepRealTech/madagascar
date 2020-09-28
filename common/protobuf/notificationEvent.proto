@@ -34,6 +34,7 @@ message MemberEvent {
     string membershipName = 4;
     uint64 priceInCents = 5;
     int32 timeInMonths = 6;
+    bool permanent = 7;
 }
 
 message CommentEvent {
