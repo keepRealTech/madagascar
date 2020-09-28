@@ -204,13 +204,13 @@ public class RongCloudService {
     public void sendThanks(NotificationEvent event, MembershipMessage membership) {
         TxtMessage hostTextMessage = new TxtMessage(
                 event.getMemberEvent().getPermanent() ?
+                        String.format(RongCloudService.HOST_PERMANENT_TEMPLATE,
+                                event.getMemberEvent().getMembershipName(),
+                                Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths()) :
                         String.format(RongCloudService.HOST_TEMPLATE,
                                 event.getMemberEvent().getMembershipName(),
                                 Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths(),
-                                event.getMemberEvent().getTimeInMonths()) :
-                        String.format(RongCloudService.HOST_PERMANENT_TEMPLATE,
-                                event.getMemberEvent().getMembershipName(),
-                                Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths()),
+                                event.getMemberEvent().getTimeInMonths()),
                 "");
         PrivateMessage hostMessage = new PrivateMessage()
                 .setSenderId(event.getMemberEvent().getMemberId())

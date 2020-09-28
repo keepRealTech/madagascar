@@ -169,8 +169,8 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                 skuMembershipDTO.setTimeInMonths(noticeMessage.getMemberNotice().getTimeInMonths());
                 noticeDTO.setMembership(skuMembershipDTO);
                 noticeDTO.setContent(noticeMessage.getMemberNotice().getPermanent() ?
-                        String.format(MEMBER_CONTENT, noticeMessage.getMemberNotice().getTimeInMonths(), noticeMessage.getMemberNotice().getMembershipName()) :
-                        String.format(MEMBER_PERMANENT_CONTENT, noticeMessage.getMemberNotice().getMembershipName()));
+                        String.format(MEMBER_PERMANENT_CONTENT, noticeMessage.getMemberNotice().getMembershipName()) :
+                        String.format(MEMBER_CONTENT, noticeMessage.getMemberNotice().getTimeInMonths(), noticeMessage.getMemberNotice().getMembershipName()));
                 return noticeDTO;
 
             default:
