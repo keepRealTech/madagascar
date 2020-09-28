@@ -16,5 +16,6 @@ public class MemberNotice {
     private String membershipName;
     private Long priceInCents;
     private Integer timeInMonths;
+    private Boolean permanent;
 
 }
