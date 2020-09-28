@@ -9,7 +9,6 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserPasswordRequest;
-import com.keepreal.madagascar.coua.CreateOrUpdateUserPasswordResponse;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsRequest;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
@@ -501,7 +500,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
      * 创建/更新 用户密码
      *
      * @param request   {@link CreateOrUpdateUserPasswordRequest}
-     * @param responseObserver  {@link CreateOrUpdateUserPasswordResponse}
+     * @param responseObserver  {@link UserResponse}
      */
     @Override
     public void createOrUpdateUserPassword(CreateOrUpdateUserPasswordRequest request, StreamObserver<UserResponse> responseObserver) {
