@@ -58,7 +58,7 @@ public class AliyunSmsService {
      * @param mobile mobile phone number
      */
     public CommonStatus sendOtpToMobile(String code, String mobile) {
-        Boolean isLimited = this.isMobileOtpLimited(mobile);
+        Boolean isLimited = this.isMobileOtpLimited(code, mobile);
         if (isLimited) {
             return CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_TOO_FREQUENTLY);
         }
@@ -96,7 +96,7 @@ public class AliyunSmsService {
             return CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_TOO_FREQUENTLY);
         }
 
-        this.updateMobileLimitStatus(mobile);
+        this.updateMobileLimitStatus(code, mobile);
         RBucket<Integer> mobileOtp = this.redissonClient.getBucket(MOBILE_PHONE_OTP + code + "-" + mobile);
         mobileOtp.set(otpCode, 3L, TimeUnit.MINUTES);
         return CommonStatusUtils.getSuccStatus();
@@ -117,12 +117,12 @@ public class AliyunSmsService {
      * @param mobile 手机号
      * @return 没有限制返回false
      */
-    private Boolean isMobileOtpLimited(String mobile) {
-        RBucket<String> busy = this.redissonClient.getBucket(MOBILE_PHONE_LIMIT + mobile);
+    private Boolean isMobileOtpLimited(String code, String mobile) {
+        RBucket<String> busy = this.redissonClient.getBucket(MOBILE_PHONE_LIMIT + code + "-" + mobile);
         if (Objects.nonNull(busy.get())) {
             return true;
         }
-        RBucket<Integer> otpCount = this.redissonClient.getBucket(MOBILE_PHONE_OTP_COUNT + mobile);
+        RBucket<Integer> otpCount = this.redissonClient.getBucket(MOBILE_PHONE_OTP_COUNT + code + "-" + mobile);
         return Objects.nonNull(otpCount.get()) && otpCount.get() > 10;
     }
 
@@ -131,11 +131,11 @@ public class AliyunSmsService {
      *
      * @param mobile 手机号
      */
-    private void updateMobileLimitStatus(String mobile) {
-        RBucket<String> limit = this.redissonClient.getBucket(MOBILE_PHONE_LIMIT + mobile);
+    private void updateMobileLimitStatus(String code, String mobile) {
+        RBucket<String> limit = this.redissonClient.getBucket(MOBILE_PHONE_LIMIT + code + "-" + mobile);
         limit.trySet("yes", 1L, TimeUnit.MINUTES);
 
-        RBucket<Integer> count = this.redissonClient.getBucket(MOBILE_PHONE_OTP_COUNT + mobile);
+        RBucket<Integer> count = this.redissonClient.getBucket(MOBILE_PHONE_OTP_COUNT + code + "-" + mobile);
         Long todayLastTimestamp = this.getTodayLastTimestamp();
         Integer intCount = count.get();
         if (Objects.isNull(intCount)) {
