@@ -88,10 +88,13 @@ public class SkuController implements SkuApi {
     @CrossOrigin
     @Override
     public ResponseEntity<MembershipSkusResponse> apiV1MembershipIdSkusGet(String id, Boolean permanent) {
-        if (!permanent) {
-            throw new KeepRealBusinessException(ErrorCode.REQUEST_PERMANENT_VERSION_LOW_ERROR);
-        }
         List<MembershipSkuMessage> shellSkuMessageList = this.skuService.retrieveMembershipSkusByMembershipIds(id);
+
+        if (!permanent) {
+            if (shellSkuMessageList.size() == 1 && shellSkuMessageList.get(0).getPermanent()) {
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_PERMANENT_VERSION_LOW_ERROR);
+            }
+        }
 
         MembershipSkusResponse response = new MembershipSkusResponse();
         response.setData(shellSkuMessageList.stream()
