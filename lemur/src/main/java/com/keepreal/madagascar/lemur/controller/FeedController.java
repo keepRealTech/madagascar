@@ -295,20 +295,24 @@ public class FeedController implements FeedApi {
                                                                  Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
-        AbstractMap.SimpleEntry<Boolean, FeedsResponse> entry =
+        AbstractMap.SimpleEntry<Boolean, List<AbstractMap.SimpleEntry<Long, FeedMessage>>> entry =
                 this.feedService.retrievePublicFeeds(userId, minTimestamp, maxTimestamp, pageSize);
 
-        Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(entry.getValue().getFeedList());
+        Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(entry.getValue()
+                .stream()
+                .map(AbstractMap.SimpleEntry::getValue)
+                .collect(Collectors.toList()));
 
         TimelinesResponse response = new TimelinesResponse();
-        response.setData(entry.getValue().getFeedList()
+        response.setData(entry.getValue()
                 .stream()
-                .map(feed -> this.feedDTOFactory.valueOf(feed,
-                        feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList()),
-                        includeChargeable))
+                .map(innerEntry -> this.feedDTOFactory.valueOf(innerEntry.getValue(),
+                        feedMembershipMap.getOrDefault(innerEntry.getValue().getId(), Collections.emptyList()),
+                        includeChargeable,
+                        innerEntry.getKey()))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
-        response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().getFeedCount() > 0, entry.getKey(), pageSize));
+        response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().size() > 0, entry.getKey(), pageSize));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

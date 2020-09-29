@@ -9,11 +9,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-
 
 @Slf4j
 @Service
@@ -21,19 +28,22 @@ public class CommentService {
 
     private final CommentInfoRepository commentInfoRepository;
     private final LongIdGenerator idGenerator;
+    private final MongoTemplate mongoTemplate;
 
     @Autowired
     public CommentService(CommentInfoRepository commentInfoRepository,
-                          LongIdGenerator idGenerator) {
+                          LongIdGenerator idGenerator,
+                          MongoTemplate mongoTemplate) {
         this.commentInfoRepository = commentInfoRepository;
         this.idGenerator = idGenerator;
+        this.mongoTemplate = mongoTemplate;
     }
 
     /**
      * Retrieves comment message.
      *
-     * @param commentInfo   {@link CommentInfo}.
-     * @return  {@link CommentMessage}.
+     * @param commentInfo {@link CommentInfo}.
+     * @return {@link CommentMessage}.
      */
     public CommentMessage getCommentMessage(CommentInfo commentInfo) {
         return CommentMessage.newBuilder()
@@ -48,7 +58,6 @@ public class CommentService {
     }
 
     /**
-     *
      * @param feedId
      * @param commentCount
      * @return
@@ -61,10 +70,41 @@ public class CommentService {
     }
 
     /**
+     * Get the last comments for a list of feeds.
+     *
+     * @param feedIds      Feed ids.
+     * @param commentCount Count of comments to pull.
+     * @return Map of feed id versus comments.
+     */
+    @SuppressWarnings({"rawtypes"})
+    public Map<String, List<CommentMessage>> getLastCommentsByFeedIds(Collection<String> feedIds, int commentCount) {
+        Criteria criteria = Criteria.where("feedId").in(feedIds).and("deleted").is(false);
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(criteria),
+                Aggregation.sort(Sort.Direction.DESC, "createdTime"),
+                Aggregation.group("feedId").last("feedId").as("feedId").push("$$ROOT").as("comments"),
+                Aggregation.project().and("comments").slice(commentCount).as("lastComments")
+        );
+
+        List<LinkedHashMap> commentMaps = this.mongoTemplate.aggregate(aggregation, CommentInfo.class, LinkedHashMap.class).getMappedResults();
+        
+        return commentMaps.stream()
+                .collect(Collectors.toMap(
+                        map -> map.get("_id").toString(),
+                        map -> {
+                            List<CommentInfo> list = (List) map.getOrDefault("lastComments", new ArrayList<>());
+                            return list.stream()
+                                    .map(this::getCommentMessage)
+                                    .collect(Collectors.toList());
+                        }
+                ));
+    }
+
+    /**
      * Inserts the comment.
      *
-     * @param commentInfo   {@link CommentInfo}.
-     * @return  {@link CommentInfo}.
+     * @param commentInfo {@link CommentInfo}.
+     * @return {@link CommentInfo}.
      */
     public CommentInfo insert(CommentInfo commentInfo) {
         commentInfo.setId(String.valueOf(idGenerator.nextId()));
@@ -75,8 +115,8 @@ public class CommentService {
     /**
      * Updates the comment.
      *
-     * @param commentInfo   {@link CommentInfo}.
-     * @return  {@link CommentInfo}.
+     * @param commentInfo {@link CommentInfo}.
+     * @return {@link CommentInfo}.
      */
     public CommentInfo update(CommentInfo commentInfo) {
         return commentInfoRepository.save(commentInfo);
@@ -85,8 +125,8 @@ public class CommentService {
     /**
      * Retrieves comment by id and deleted is false.
      *
-     * @param id    comment id.
-     * @return  {@link CommentInfo}.
+     * @param id comment id.
+     * @return {@link CommentInfo}.
      */
     public CommentInfo findByIdAndDeletedIsFalse(String id) {
         return commentInfoRepository.findByIdAndDeletedIsFalse(id);
@@ -95,8 +135,8 @@ public class CommentService {
     /**
      * Retrieves comments by ids.
      *
-     * @param ids   ids.
-     * @return  {@link CommentInfo}.
+     * @param ids ids.
+     * @return {@link CommentInfo}.
      */
     public List<CommentInfo> findByIdsAndDeletedIsFalse(Iterable<String> ids) {
         return this.commentInfoRepository.findByIdInAndDeletedIsFalse(ids);
@@ -105,14 +145,12 @@ public class CommentService {
     /**
      * Retrieves pageabel comment by feed id order by create time desc.
      *
-     * @param feedId    feed id.
-     * @param pageable  {@link Pageable}.
-     * @return  {@link CommentInfo}.
+     * @param feedId   feed id.
+     * @param pageable {@link Pageable}.
+     * @return {@link CommentInfo}.
      */
     public Page<CommentInfo> getCommentInfosByFeedId(String feedId, Pageable pageable) {
         return commentInfoRepository.getCommentInfosByFeedIdAndDeletedIsFalseOrderByCreatedTimeDesc(feedId, pageable);
     }
-
-
 
 }
