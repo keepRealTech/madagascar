@@ -31,8 +31,5 @@ rocketmq:
     groupId: GID-mantella-default
     tag: event
 
-distributor:
-  publicInboxThreshold: 10
-
 snowflake:
   nodeId: 0

@@ -104,6 +104,7 @@ public class NotificationEventProducerService {
                 .setMembershipName(membershipSku.getMembershipName())
                 .setPriceInCents(membershipSku.getPriceInCents())
                 .setTimeInMonths(membershipSku.getTimeInMonths())
+                .setPermanent(membershipSku.getPermanent())
                 .build();
 
         String uuid = UUID.randomUUID().toString();

@@ -49,6 +49,9 @@ public class MembershipSku {
     @Column(name = "is_active")
     @Builder.Default
     private Boolean active = true;
+    @Column(name = "is_permanent")
+    @Builder.Default
+    private Boolean permanent = false;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

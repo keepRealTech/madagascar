@@ -154,6 +154,15 @@ message RetrieveFeedCountResponse {
     int32 feedCount = 2;
 }
 
+message UpdateFeedSaveAuthorityRequest {
+    string feedId = 1;
+    bool canSave = 2;
+}
+
+message UpdateFeedSaveAuthorityResponse {
+    CommonStatus status = 1;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
@@ -169,4 +178,5 @@ service FeedService {
     rpc RetrieveToppedFeedById (RetrieveToppedFeedByIdRequest) returns (FeedResponse) {}
     rpc UpdateFeedPaidById (UpdateFeedPaidByIdRequest) returns (UpdateFeedPaidByIdResponse) {}
     rpc RetrieveFeedCountByIslandId (RetrieveFeedCountRequest) returns (RetrieveFeedCountResponse) {}
+    rpc UpdateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest) returns (UpdateFeedSaveAuthorityResponse) {}
 }

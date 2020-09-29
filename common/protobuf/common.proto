@@ -186,6 +186,7 @@ message UserMessage {
     bool locked = 15;
     string mobile = 16;
     int32 state = 17;
+    string adminPassword = 18;
 }
 
 message IslandMessage {
@@ -238,6 +239,7 @@ message FeedMessage {
     }
     repeated string userMembershipId = 25;
     string hostId = 26;
+    bool canSave = 27;
 }
 
 message WechatOrderMessage {

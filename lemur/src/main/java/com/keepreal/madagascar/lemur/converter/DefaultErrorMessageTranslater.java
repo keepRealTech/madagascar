@@ -68,6 +68,10 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "新手机号不可与当前已绑定号码相同";
             case REQUEST_MEMBERSHIP_NOT_FOUND_ERROR:
                 return "该订阅已经被岛主大人移除啦";
+            case REQUEST_USER_PASSWORD_NOT_MATCH:
+                return "手机号或密码输入错误，请重新输入";
+            case REQUEST_PERMANENT_VERSION_LOW_ERROR:
+                return "很抱歉，永久方案为最新功能，你的当前版本过低，请升级到最新版本再购买";
             default:
                 return errorCode.getValueDescriptor().getName();
         }

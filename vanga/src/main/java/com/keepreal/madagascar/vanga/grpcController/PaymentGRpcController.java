@@ -79,6 +79,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
 
     private final static String SUPPORT_TEXT = "夏日炎炎，请TA吃个椰子吧";
     private final static String MEMBERSHIP_TEMPLATE = "支持创作者 ¥%.2f（¥%.2f x %d个月）";
+    private final static String MEMBERSHIP_PERMANENT_TEMPLATE = "支持创作者 ¥%.2f（¥%.2f x 永久有效）";
     private final static String SPONSOR_TEMPLATE = "支持一下创作者 ¥%.2f";
     private final static String FEED_CHARGE_TEMPLATE = "单独解锁动态 ￥%.2f";
 
@@ -203,10 +204,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 OrderType.PAYMEMBERSHIP,
                 null,
                 request.getIpAddress(),
-                String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
-                        sku.getPriceInCents().doubleValue() / 100,
-                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100,
-                        sku.getTimeInMonths()).replace(".00", ""));
+                this.processMembershipTemplate(sku));
 
         WechatOrderResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -248,10 +246,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 request.getUserId(),
                 sku.getId(),
                 String.valueOf(sku.getPriceInCents()),
-                String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
-                        sku.getPriceInCents().doubleValue() / 100,
-                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100,
-                        sku.getTimeInMonths()).replace(".00", ""),
+                this.processMembershipTemplate(sku),
                 OrderType.PAYMEMBERSHIP);
 
         AlipayOrderResponse response;
@@ -598,7 +593,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         }
 
         try {
-            this.subscribeMembershipService.subscibeMembershipWithIOSOrder(request.getUserId(), request.getAppleReceipt(), request.getTransactionId(), sku);
+            this.subscribeMembershipService.subscribeMembershipWithIOSOrder(request.getUserId(), request.getAppleReceipt(), request.getTransactionId(), sku);
             response = CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC);
         } catch (KeepRealBusinessException exception) {
             response = CommonStatusUtils.buildCommonStatus(exception.getErrorCode());
@@ -806,10 +801,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 OrderType.PAYMEMBERSHIPH5,
                 request.getSceneType(),
                 request.getIpAddress(),
-                String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
-                        sku.getPriceInCents().doubleValue() / 100,
-                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100,
-                        sku.getTimeInMonths()).replace(".00", ""));
+                this.processMembershipTemplate(sku));
 
         RedirectResponse response;
         if (Objects.nonNull(wechatOrder)) {
@@ -852,10 +844,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
                 request.getUserId(),
                 sku.getId(),
                 String.valueOf(sku.getPriceInCents()),
-                String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
-                        sku.getPriceInCents().doubleValue() / 100,
-                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100,
-                        sku.getTimeInMonths()).replace(".00", ""),
+                this.processMembershipTemplate(sku),
                 OrderType.PAYMEMBERSHIP,
                 request.getReturnUrl(),
                 request.getQuitUrl());
@@ -1171,4 +1160,14 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         responseObserver.onCompleted();
     }
 
+    private String processMembershipTemplate(MembershipSku sku) {
+        return sku.getPermanent() ?
+                String.format(PaymentGRpcController.MEMBERSHIP_PERMANENT_TEMPLATE,
+                        sku.getPriceInCents().doubleValue() / 100,
+                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100).replace(".00", "") :
+                String.format(PaymentGRpcController.MEMBERSHIP_TEMPLATE,
+                        sku.getPriceInCents().doubleValue() / 100,
+                        sku.getPriceInCents().doubleValue() / sku.getTimeInMonths() / 100,
+                        sku.getTimeInMonths()).replace(".00", "");
+    }
 }

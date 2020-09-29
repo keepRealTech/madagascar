@@ -8,6 +8,7 @@ import "google/protobuf/wrappers.proto";
 
 message TimelineMessage {
     string feedId = 1;
+    uint64 recommendatedAt = 2;
 }
 
 message RetrieveMultipleTimelinesRequest {

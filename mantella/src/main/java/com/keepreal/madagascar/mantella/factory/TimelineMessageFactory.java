@@ -25,6 +25,7 @@ public class TimelineMessageFactory {
 
         return TimelineMessage.newBuilder()
                 .setFeedId(timeline.getFeedId())
+                .setRecommendatedAt(timeline.getUpdatedAt())
                 .build();
     }
 

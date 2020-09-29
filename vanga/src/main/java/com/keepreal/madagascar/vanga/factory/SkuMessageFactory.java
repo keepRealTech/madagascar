@@ -57,6 +57,7 @@ public class SkuMessageFactory {
                 .setPriceInShells(membershipSku.getPriceInShells())
                 .setMembershipId(membershipSku.getMembershipId())
                 .setTimeInMonths(membershipSku.getTimeInMonths())
+                .setPermanent(membershipSku.getPermanent())
                 .build();
     }
 

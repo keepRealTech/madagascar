@@ -30,10 +30,12 @@ import swagger.model.AvatarsResponse;
 import swagger.model.BriefIslandDTO;
 import swagger.model.BriefMembershipDTO;
 import swagger.model.ChatUsersResponse;
+import swagger.model.CommonResponse;
 import swagger.model.FullUserResponse;
 import swagger.model.GenderType;
 import swagger.model.PostBatchGetUsersRequest;
 import swagger.model.PutUserMobileRequest;
+import swagger.model.PutUserPasswordRequest;
 import swagger.model.PutUserPayload;
 import swagger.model.PutUserQualificationsRequest;
 import swagger.model.QualificationChannelsResponse;
@@ -280,7 +282,9 @@ public class UserController implements UserApi {
         }
 
         UserMessage userMessage = this.userService.updateUserMobilePhone(userId,
-                putUserMobileRequest.getMobile(), putUserMobileRequest.getOtp());
+                StringUtils.isEmpty(putUserMobileRequest.getCode()) ? "86" : putUserMobileRequest.getCode(),
+                putUserMobileRequest.getMobile(),
+                putUserMobileRequest.getOtp());
 
         response.setData(this.userDTOFactory.valueOf(userMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
@@ -320,6 +324,36 @@ public class UserController implements UserApi {
 
         UserQualificationsResponse response = new UserQualificationsResponse();
         response.setData(messageList.stream().map(this.userDTOFactory::valueOf).collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 创建/更新 用户密码
+     *
+     * @param putUserPasswordRequest  (required) {@link PutUserMobileRequest}
+     * @return  {@link CommonResponse}
+     */
+    @Override
+    public ResponseEntity<CommonResponse> apiV1UsersPasswordPut(@Valid PutUserPasswordRequest putUserPasswordRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        CommonResponse response = new CommonResponse();
+
+        if (StringUtils.isEmpty(putUserPasswordRequest.getMobile())
+                || StringUtils.isEmpty(putUserPasswordRequest.getOtp())
+                || StringUtils.isEmpty(putUserPasswordRequest.getPassword())) {
+            response.setRtn(ErrorCode.REQUEST_INVALID_ARGUMENT.getNumber());
+            response.setMsg(ErrorCode.REQUEST_INVALID_ARGUMENT.getValueDescriptor().getName());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        this.userService.createOrUpdateUserPassword(userId,
+                StringUtils.isEmpty(putUserPasswordRequest.getCode()) ? "86" : putUserPasswordRequest.getCode(),
+                putUserPasswordRequest.getMobile(),
+                putUserPasswordRequest.getOtp(),
+                putUserPasswordRequest.getPassword());
+
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

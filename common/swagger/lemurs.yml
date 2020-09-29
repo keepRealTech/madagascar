@@ -66,6 +66,8 @@ paths:
                 $ref: '#/components/schemas/DummyResponse'
   /api/v1/login:
     post:
+      parameters:
+        - $ref: '#/components/parameters/forAdminLoginInQuery'
       tags:
         - Login
       summary: logs in
@@ -1198,6 +1200,7 @@ paths:
   /api/v1/membership/{id}/skus:
     parameters:
       - $ref: "#/components/parameters/idInPath"
+      - $ref: "#/components/parameters/permanentInQuery"
     get:
       tags:
         - Sku
@@ -2202,6 +2205,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimelinesResponse'
+  /api/v1/feeds/{id}/saveAuthority:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+      - $ref: '#/components/parameters/canSaveInQuery'
+    put:
+      tags:
+        - Feed
+      summary: 设置作品保存权限
+      responses:
+        '200':
+          description: feed save authority
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/memberships/templates:
     get:
       tags:
@@ -2359,6 +2377,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/H5RedirectResponse'
+  /api/v1/users/password:
+    put:
+      tags:
+        - User
+      summary: 更新当前用户的密码
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUserPasswordRequest'
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommonResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2514,6 +2550,14 @@ components:
       schema:
         type: boolean
         default: false
+    canSaveInQuery:
+      in: query
+      name: canSave
+      description: can save feed content
+      required: false
+      schema:
+        type: boolean
+        default: false
     configTypeInQuery:
       in: query
       name: configType
@@ -2526,6 +2570,13 @@ components:
       required: true
       schema:
         type: integer
+    permanentInQuery:
+      in: query
+      name: permanent
+      required: false
+      schema:
+        type: boolean
+        default: false
     channelInQuery:
       in: query
       name: channel
@@ -2589,6 +2640,13 @@ components:
     includeChargeableInQuery:
       in: query
       name: includeChargeable
+      required: false
+      schema:
+        type: boolean
+        default: false
+    forAdminLoginInQuery:
+      in: query
+      name: admin
       required: false
       schema:
         type: boolean
@@ -2764,8 +2822,12 @@ components:
             birthday:
               type: string
               format: date
+            code:
+              type: string
             mobile:
               type: string
+            hasPassword:
+              type: boolean
     FullUserDTO:
       allOf:
         - $ref: '#/components/schemas/UserDTO'
@@ -3330,6 +3392,11 @@ components:
               type: boolean
             isTop:
               type: boolean
+            canSave:
+              type: boolean
+            recommendatedAt:
+              type: integer
+              format: int64
             membership:
               $ref: '#/components/schemas/SimpleMembershipDTO'
             membershipList:
@@ -3860,6 +3927,8 @@ components:
     PasswordLoginPayload:
       type: object
       properties:
+        code:
+          type: string
         username:
           type: string
         password:
@@ -3867,6 +3936,8 @@ components:
     MobileLoginPayload:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
         otp:
@@ -4267,6 +4338,8 @@ components:
           format: int64
         appleSkuId:
           type: string
+        isPermanent:
+          type: boolean
     MembershipSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -4307,6 +4380,8 @@ components:
           type: integer
         memberCount:
           type: integer
+        isPermanent:
+          type: boolean
     BriefMembershipDTO:
       type: object
       properties:
@@ -4330,6 +4405,8 @@ components:
           type: boolean
         message:
           type: string
+        isPermanent:
+          type: boolean
     MembershipDTO:
       allOf:
         - $ref: '#/components/schemas/BriefMembershipDTO'
@@ -4356,6 +4433,8 @@ components:
           type: boolean
         message:
           type: string
+        isPermanent:
+          type: boolean
     PutMembershipRequest:
       type: object
       properties:
@@ -4373,6 +4452,8 @@ components:
           type: boolean
         message:
           type: string
+        isPermanent:
+          type: boolean
     MembershipResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -4749,11 +4830,15 @@ components:
     PostOTPRequest:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
     PutUserMobileRequest:
       type: object
       properties:
+        code:
+          type: string
         mobile:
           type: string
         otp:
@@ -5291,3 +5376,14 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/AlipayOrderDTO'
+    PutUserPasswordRequest:
+      type: object
+      properties:
+        code:
+          type: string
+        mobile:
+          type: string
+        otp:
+          type: integer
+        password:
+          type: string

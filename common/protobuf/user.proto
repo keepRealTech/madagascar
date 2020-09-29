@@ -98,6 +98,7 @@ message UsersReponse {
 
 message SendOtpToMobileRequest {
     string mobile = 1;
+    string code = 2;
 }
 
 message SendOtpToMobileResponse {
@@ -108,11 +109,13 @@ message UpdateUserMobileRequest {
     string userId = 1;
     string mobile = 2;
     int32 otp = 3;
+    string code = 4;
 }
 
 message CheckUserMobileIsExistedRequest {
     string userId = 1;
     string mobile = 2;
+    string code = 3;
 }
 
 message CheckUserMobileIsExistedResponse {
@@ -144,6 +147,14 @@ message CreateOrUpdateUserQualificationsResponse {
     repeated QualificationMessage message = 2;
 }
 
+message CreateOrUpdateUserPasswordRequest {
+    string userId = 1;
+    string code = 2;
+    string mobile = 3;
+    int32 otp = 4;
+    string password = 5;
+}
+
 service UserService {
     rpc CreateUser(NewUserRequest) returns (UserResponse) {};
     rpc RetrieveSingleUser(RetrieveSingleUserRequest) returns (UserResponse) {};
@@ -157,4 +168,5 @@ service UserService {
     rpc CheckUserMobileIsExisted(CheckUserMobileIsExistedRequest) returns (CheckUserMobileIsExistedResponse) {};
     rpc RetrieveUserQualifications (RetrieveUserQualificationsRequest) returns (RetrieveUserQualificationsResponse) {};
     rpc CreateOrUpdateUserQualifications (CreateOrUpdateUserQualificationsRequest) returns (CreateOrUpdateUserQualificationsResponse) {};
+    rpc CreateOrUpdateUserPassword (CreateOrUpdateUserPasswordRequest) returns (UserResponse) {};
 }

@@ -85,6 +85,7 @@ public class SkuDTOFactory {
         membershipSkuDTO.setPriceInShells(membershipSku.getPriceInShells());
         membershipSkuDTO.setMembershipId(membershipSku.getMembershipId());
         membershipSkuDTO.setTimeInMonths(membershipSku.getTimeInMonths());
+        membershipSkuDTO.setIsPermanent(membershipSku.getPermanent());
 
         return membershipSkuDTO;
     }

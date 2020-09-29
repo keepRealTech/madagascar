@@ -50,7 +50,8 @@ public class SkuService {
                                                    String membershipName,
                                                    Integer pricePerMonth,
                                                    String hostId,
-                                                   String islandId) {
+                                                   String islandId,
+                                                   boolean permanent) {
         SkuServiceGrpc.SkuServiceBlockingStub stub = SkuServiceGrpc.newBlockingStub(this.channel);
 
         CreateMembershipSkusRequest request = CreateMembershipSkusRequest.newBuilder()
@@ -59,6 +60,7 @@ public class SkuService {
                 .setPriceInCentsPerMonth(pricePerMonth)
                 .setHostId(hostId)
                 .setIslandId(islandId)
+                .setPermanent(permanent)
                 .build();
 
         MembershipSkusResponse response;
@@ -87,7 +89,7 @@ public class SkuService {
      * @param pricePerMonth  Price per month.
      * @param active         Active.
      */
-    public void updateMembershipSkusByMembershipId(String membershipId, String membershipName, Integer pricePerMonth, Boolean active) {
+    public void updateMembershipSkusByMembershipId(String membershipId, String membershipName, Integer pricePerMonth, Boolean active, Boolean isPermanent) {
         if (StringUtils.isEmpty(membershipName) && Objects.isNull(pricePerMonth) && Objects.isNull(active)) {
             return;
         }
@@ -107,6 +109,10 @@ public class SkuService {
 
         if (Objects.nonNull(active)) {
             requestBuilder.setActive(BoolValue.of(active));
+        }
+
+        if (Objects.nonNull(isPermanent)) {
+            requestBuilder.setPermanent(BoolValue.of(isPermanent));
         }
 
         MembershipSkusResponse response;

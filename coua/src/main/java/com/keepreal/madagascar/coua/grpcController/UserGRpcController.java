@@ -8,6 +8,7 @@ import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedRequest;
 import com.keepreal.madagascar.coua.CheckUserMobileIsExistedResponse;
+import com.keepreal.madagascar.coua.CreateOrUpdateUserPasswordRequest;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsRequest;
 import com.keepreal.madagascar.coua.CreateOrUpdateUserQualificationsResponse;
 import com.keepreal.madagascar.coua.DeviceTokenRequest;
@@ -49,6 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.util.StringUtils;
 
 import java.sql.Date;
@@ -57,6 +59,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.keepreal.madagascar.coua.service.AliyunSmsService.MOBILE_PHONE_OTP;
 
 /**
  * Represents user GRpc controller.
@@ -74,6 +78,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     private final TransactionProducerService transactionProducerService;
     private final UserEventProducerService userEventProducerService;
     private final UserQualificationService userQualificationService;
+    private final BCryptPasswordEncoder encoder;
 
     /**
      * Constructs user grpc controller.
@@ -105,6 +110,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         this.transactionProducerService = transactionProducerService;
         this.userEventProducerService = userEventProducerService;
         this.userQualificationService = userQualificationService;
+        this.encoder = new BCryptPasswordEncoder();
     }
 
     /**
@@ -353,7 +359,7 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
      */
     @Override
     public void sendOtpToMobile(SendOtpToMobileRequest request, StreamObserver<SendOtpToMobileResponse> responseObserver) {
-        CommonStatus commonStatus = aliyunSmsService.sendOtpToMobile(request.getMobile());
+        CommonStatus commonStatus = aliyunSmsService.sendOtpToMobile(request.getCode(), request.getMobile());
         SendOtpToMobileResponse response = SendOtpToMobileResponse.newBuilder().setStatus(commonStatus).build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -370,20 +376,22 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         String userId = request.getUserId();
         String mobile = request.getMobile();
         Integer otp = request.getOtp();
+        String code = request.getCode();
         UserResponse.Builder builder = UserResponse.newBuilder();
 
-        RBucket<Integer> redisOtp = this.redissonClient.getBucket(AliyunSmsService.MOBILE_PHONE_OTP + mobile);
+        RBucket<Integer> redisOtp = this.redissonClient.getBucket(MOBILE_PHONE_OTP + code + "-" + mobile);
         Integer intOtp = redisOtp.get();
 
         if (Objects.isNull(intOtp) || !otp.equals(intOtp)) {
             builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
         } else {
-            UserInfo h5UserInfo = this.userInfoService.findUserByMobileAndState(mobile, UserState.USER_H5_MOBILE_VALUE);
+            UserInfo h5UserInfo = this.userInfoService.findUserByMobileAndState(code + "-" + mobile, UserState.USER_H5_MOBILE_VALUE);
             if (Objects.nonNull(h5UserInfo)) {
                 this.mergeUserAccounts(userId, h5UserInfo.getId());
             }
             UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
-            userInfo.setMobile(mobile);
+            userInfo.setMobile(code + "-" +mobile);
+            userInfo.setUsername(code + "-" + mobile);
             UserInfo userInfoNew = this.userInfoService.updateUser(userInfo);
             builder.setStatus(CommonStatusUtils.getSuccStatus());
             builder.setUser(this.userInfoService.getUserMessage(userInfoNew));
@@ -404,9 +412,10 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
     public void checkUserMobileIsExisted(CheckUserMobileIsExistedRequest request, StreamObserver<CheckUserMobileIsExistedResponse> responseObserver) {
         String mobile = request.getMobile();
         String userId = request.getUserId();
+        String code = request.getCode();
         CheckUserMobileIsExistedResponse.Builder builder = CheckUserMobileIsExistedResponse.newBuilder();
 
-        UserInfo userInfo = this.userInfoService.findUserInfoByMobile(mobile);
+        UserInfo userInfo = this.userInfoService.findUserInfoByMobile(code + "-" + mobile);
 
         if (Objects.nonNull(userInfo)) {
             if (userInfo.getState() == UserState.USER_WECHAT_VALUE) {
@@ -485,6 +494,37 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .addAllMessage(qualifications.stream().filter(userQualification -> !userQualification.getDeleted()).map(this.userQualificationService::getMessage).collect(Collectors.toList()))
                 .build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * 创建/更新 用户密码
+     *
+     * @param request   {@link CreateOrUpdateUserPasswordRequest}
+     * @param responseObserver  {@link UserResponse}
+     */
+    @Override
+    public void createOrUpdateUserPassword(CreateOrUpdateUserPasswordRequest request, StreamObserver<UserResponse> responseObserver) {
+        String userId = request.getUserId();
+        String code = request.getCode();
+        String mobile = request.getMobile();
+        Integer otp = request.getOtp();
+        String password = request.getPassword();
+
+        UserResponse.Builder responseBuilder = UserResponse.newBuilder();
+
+        RBucket<Integer> bucket = this.redissonClient.getBucket(MOBILE_PHONE_OTP + code + "-" + mobile);
+        if (!bucket.isExists() || !bucket.get().equals(otp)) {
+            responseBuilder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_USER_MOBILE_OTP_NOT_MATCH));
+        } else {
+            bucket.delete();
+            UserInfo userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(userId);
+            userInfo.setPassword(this.encoder.encode(password));
+            UserInfo userInfoNew = this.userInfoService.updateUser(userInfo);
+            responseBuilder.setStatus(CommonStatusUtils.getSuccStatus());
+            responseBuilder.setUser(this.userInfoService.getUserMessage(userInfoNew));
+        }
+        responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
 

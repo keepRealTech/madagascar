@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.fossa.grpcController;
 
 import com.google.protobuf.ProtocolStringList;
+import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.MediaType;
@@ -31,10 +32,13 @@ import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdResponse;
+import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
+import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityResponse;
 import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.model.ReactionInfo;
+import com.keepreal.madagascar.fossa.service.CommentService;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedGroupService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
@@ -60,11 +64,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.keepreal.madagascar.fossa.service.FeedInfoService.DEFAULT_LAST_COMMENT_COUNT;
 
 /**
  * Represents the feed GRpc controller.
@@ -83,6 +90,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     private final PaymentService paymentService;
     private final SubscribeMembershipService subscribeMembershipService;
     private final ReactionService reactionService;
+    private final CommentService commentService;
 
     /**
      * Constructs the feed grpc controller
@@ -96,6 +104,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      * @param paymentService             {@link PaymentService}.
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param reactionService            {@link ReactionService}.
+     * @param commentService             {@link CommentService}.
      */
     public FeedGRpcController(LongIdGenerator idGenerator,
                               IslandService islandService,
@@ -105,7 +114,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                               FeedEventProducerService feedEventProducerService,
                               PaymentService paymentService,
                               SubscribeMembershipService subscribeMembershipService,
-                              ReactionService reactionService) {
+                              ReactionService reactionService,
+                              CommentService commentService) {
         this.idGenerator = idGenerator;
         this.islandService = islandService;
         this.feedInfoService = feedInfoService;
@@ -115,6 +125,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         this.paymentService = paymentService;
         this.subscribeMembershipService = subscribeMembershipService;
         this.reactionService = reactionService;
+        this.commentService = commentService;
     }
 
     /**
@@ -416,11 +427,17 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         List<String> myMembershipIds = this.subscribeMembershipService.retrieveMembershipIds(request.getUserId(), null);
 
-        Set<String> likedFeedIds = this.reactionService.retrieveReactionsByFeedIdsAndUserId(feedInfoList.stream().map(FeedInfo::getId).collect(Collectors.toSet()), request.getUserId()).stream()
+        Set<String> likedFeedIds = this.reactionService.retrieveReactionsByFeedIdsAndUserId(request.getIdsList(), request.getUserId()).stream()
                 .map(ReactionInfo::getFeedId).collect(Collectors.toSet());
 
+        Map<String, List<CommentMessage>> commentMap = this.commentService.getLastCommentsByFeedIds(request.getIdsList(), DEFAULT_LAST_COMMENT_COUNT);
+
         List<FeedMessage> feedMessageList = feedInfoList.stream()
-                .map(info -> this.feedInfoService.getFeedMessage(info, request.getUserId(), myMembershipIds, likedFeedIds.contains(info.getId())))
+                .map(info -> this.feedInfoService.getFeedMessage(info,
+                        request.getUserId(),
+                        myMembershipIds,
+                        commentMap.getOrDefault(info.getId(), new ArrayList<>()),
+                        likedFeedIds.contains(info.getId())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -615,6 +632,30 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onNext(RetrieveFeedCountResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .setFeedCount(Math.toIntExact(totalCount))
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void updateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest request, StreamObserver<UpdateFeedSaveAuthorityResponse> responseObserver) {
+        String feedId = request.getFeedId();
+        boolean canSave = request.getCanSave();
+
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(feedId, false);
+
+        if (feedInfo == null) {
+            responseObserver.onNext(UpdateFeedSaveAuthorityResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR))
+                    .build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        feedInfo.setCanSave(canSave);
+        this.feedInfoService.update(feedInfo);
+
+        responseObserver.onNext(UpdateFeedSaveAuthorityResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
                 .build());
         responseObserver.onCompleted();
     }

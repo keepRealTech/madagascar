@@ -21,7 +21,8 @@ import java.util.Objects;
 public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
 
     private final static String SUPPORT_CONTENT = "支持了你";
-    private final static String MEMBER_CONTENT = "支持了%d个月%s";
+    private final static String MEMBER_CONTENT = "支持了%d个月\"%s\"";
+    private final static String MEMBER_PERMANENT_CONTENT = "支持了你的永久方案\"%s\"";
 
     private NotificationMessage notificationMessage;
     private IslandService islandService;
@@ -167,7 +168,9 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                 skuMembershipDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
                 skuMembershipDTO.setTimeInMonths(noticeMessage.getMemberNotice().getTimeInMonths());
                 noticeDTO.setMembership(skuMembershipDTO);
-                noticeDTO.setContent(String.format(MEMBER_CONTENT, noticeMessage.getMemberNotice().getTimeInMonths(), noticeMessage.getMemberNotice().getMembershipName()));
+                noticeDTO.setContent(noticeMessage.getMemberNotice().getPermanent() ?
+                        String.format(MEMBER_PERMANENT_CONTENT, noticeMessage.getMemberNotice().getMembershipName()) :
+                        String.format(MEMBER_CONTENT, noticeMessage.getMemberNotice().getTimeInMonths(), noticeMessage.getMemberNotice().getMembershipName()));
                 return noticeDTO;
 
             default:

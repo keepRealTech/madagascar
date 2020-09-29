@@ -6,6 +6,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.MediaType;
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.DeleteFeedByIdRequest;
@@ -26,6 +27,8 @@ import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
+import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
+import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityResponse;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import com.keepreal.madagascar.mantella.RetrieveMultipleTimelinesRequest;
 import com.keepreal.madagascar.mantella.TimelineMessage;
@@ -46,7 +49,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -55,8 +60,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class FeedService {
-
-    private static final String PUBLIC_INBOX_USER_ID = "00000000";
 
     private final Channel fossaChannel;
     private final Channel mantellaChannel;
@@ -399,16 +402,32 @@ public class FeedService {
      * @param timestampAfter  Timestamp filter.
      * @param timestampBefore Timestamp before.
      * @param pageSize        Page size.
-     * @return {@link FeedsResponse}.
+     * @return {@link FeedMessage}.
      */
-    public AbstractMap.SimpleEntry<Boolean, FeedsResponse> retrievePublicFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
-        TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(FeedService.PUBLIC_INBOX_USER_ID, timestampAfter, timestampBefore, pageSize);
+    public AbstractMap.SimpleEntry<Boolean, List<AbstractMap.SimpleEntry<Long, FeedMessage>>> retrievePublicFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
+        TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(Constants.PUBLIC_INBOX_USER_ID,
+                timestampAfter,
+                timestampBefore,
+                pageSize);
+
+        FeedsResponse feedsResponse = this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
+                .stream()
+                .map(TimelineMessage::getFeedId)
+                .collect(Collectors.toList()), userId);
+        Map<String, FeedMessage> feedMap = feedsResponse.getFeedList().stream()
+                .collect(Collectors.toMap(FeedMessage::getId, Function.identity()));
 
         return new AbstractMap.SimpleEntry<>(timelinesResponse.getHasMore(),
-                this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
-                        .stream()
-                        .map(TimelineMessage::getFeedId)
-                        .collect(Collectors.toList()), userId));
+                timelinesResponse.getTimelinesList().stream()
+                        .map(timelineMessage -> {
+                            FeedMessage feedMessage = feedMap.get(timelineMessage.getFeedId());
+                            return new AbstractMap.SimpleEntry<>(
+                                    timelineMessage.getRecommendatedAt(),
+                                    feedMessage
+                            );
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
     }
 
     /**
@@ -537,6 +556,28 @@ public class FeedService {
         }
 
         return response.getFeedCount();
+    }
+
+    public void updateFeedSaveAuthority(String feedId, boolean canSave) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        UpdateFeedSaveAuthorityResponse response;
+        try {
+            response = stub.updateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest.newBuilder()
+                    .setFeedId(feedId)
+                    .setCanSave(canSave)
+                    .build());
+        } catch (StatusRuntimeException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, e.getMessage());
+        }
+
+        if (Objects.isNull(response) || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "update feed save authority returns null" : response.toString());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
     }
 
     /**
