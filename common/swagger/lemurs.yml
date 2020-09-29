@@ -1200,6 +1200,7 @@ paths:
   /api/v1/membership/{id}/skus:
     parameters:
       - $ref: "#/components/parameters/idInPath"
+      - $ref: "#/components/parameters/permanentInQuery"
     get:
       tags:
         - Sku
@@ -2569,6 +2570,13 @@ components:
       required: true
       schema:
         type: integer
+    permanentInQuery:
+      in: query
+      name: permanent
+      required: false
+      schema:
+        type: boolean
+        default: false
     channelInQuery:
       in: query
       name: channel
