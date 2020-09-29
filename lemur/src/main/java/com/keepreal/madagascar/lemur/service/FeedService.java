@@ -404,7 +404,7 @@ public class FeedService {
      * @param pageSize        Page size.
      * @return {@link FeedMessage}.
      */
-    public AbstractMap.SimpleEntry<Boolean, List<FeedMessage>> retrievePublicFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
+    public AbstractMap.SimpleEntry<Boolean, List<AbstractMap.SimpleEntry<Long, FeedMessage>>> retrievePublicFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
         TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(Constants.PUBLIC_INBOX_USER_ID,
                 timestampAfter,
                 timestampBefore,
@@ -419,7 +419,13 @@ public class FeedService {
 
         return new AbstractMap.SimpleEntry<>(timelinesResponse.getHasMore(),
                 timelinesResponse.getTimelinesList().stream()
-                        .map(timelineMessage -> feedMap.get(timelineMessage.getFeedId()))
+                        .map(timelineMessage -> {
+                            FeedMessage feedMessage = feedMap.get(timelineMessage.getFeedId());
+                            return new AbstractMap.SimpleEntry<>(
+                                    timelineMessage.getRecommendatedAt(),
+                                    feedMessage
+                            );
+                        })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
     }
