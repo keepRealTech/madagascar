@@ -3386,6 +3386,9 @@ components:
               type: boolean
             canSave:
               type: boolean
+            recommendatedAt:
+              type: integer
+              format: int64
             membership:
               $ref: '#/components/schemas/SimpleMembershipDTO'
             membershipList:

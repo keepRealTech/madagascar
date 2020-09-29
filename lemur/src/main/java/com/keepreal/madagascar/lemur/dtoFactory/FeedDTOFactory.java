@@ -79,7 +79,7 @@ public class FeedDTOFactory {
     /**
      * Converts the {@link FeedMessage} into {@link FeedDTO}.
      *
-     * @param feed {@link FeedMessage}.
+     * @param feed        {@link FeedMessage}.
      * @param memberships {@link MembershipMessage}.
      * @return {@link FeedDTO}.
      */
@@ -90,12 +90,29 @@ public class FeedDTOFactory {
     /**
      * Converts the {@link FeedMessage} into {@link FeedDTO}.
      *
-     * @param feed {@link FeedMessage}.
-     * @param memberships {@link MembershipMessage}.
+     * @param feed              {@link FeedMessage}.
+     * @param memberships       {@link MembershipMessage}.
      * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link FeedDTO}.
      */
     public FeedDTO valueOf(FeedMessage feed, List<MembershipMessage> memberships, Boolean includeChargeable) {
+        if (Objects.isNull(feed)
+                || (!includeChargeable && feed.getPriceInCents() > 0L)) {
+            return null;
+        }
+        return this.valueOf(feed, memberships, includeChargeable, feed.getCreatedAt());
+    }
+
+    /**
+     * Converts the {@link FeedMessage} into {@link FeedDTO}.
+     *
+     * @param feed              {@link FeedMessage}.
+     * @param memberships       {@link MembershipMessage}.
+     * @param includeChargeable Whether includes the chargeable feeds.
+     * @param recommendatedAt   Recommendated at.
+     * @return {@link FeedDTO}.
+     */
+    public FeedDTO valueOf(FeedMessage feed, List<MembershipMessage> memberships, Boolean includeChargeable, Long recommendatedAt) {
         if (Objects.isNull(feed)
                 || (!includeChargeable && feed.getPriceInCents() > 0L)) {
             return null;
@@ -126,6 +143,7 @@ public class FeedDTOFactory {
             feedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
             feedDTO.setPriceInCents(feed.getPriceInCents());
             feedDTO.setCanSave(feed.getCanSave());
+            feedDTO.setRecommendatedAt(recommendatedAt);
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
                 feedDTO.setImagesUris(feed.getImageUrisList());
@@ -284,10 +302,10 @@ public class FeedDTOFactory {
     /**
      * Builds a feed message with feed group infos.
      *
-     * @param feed       {@link FeedMessage}.
-     * @param feedGroup  {@link FeedGroupMessage}.
-     * @param lastFeedId Last feed id.
-     * @param nextFeedId Next feed id.
+     * @param feed              {@link FeedMessage}.
+     * @param feedGroup         {@link FeedGroupMessage}.
+     * @param lastFeedId        Last feed id.
+     * @param nextFeedId        Next feed id.
      * @param includeChargeable Whether includes the chargeable.
      * @return {@link FullFeedDTO}.
      */

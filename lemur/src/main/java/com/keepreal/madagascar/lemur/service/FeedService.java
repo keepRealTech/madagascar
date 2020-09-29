@@ -49,7 +49,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -400,16 +402,32 @@ public class FeedService {
      * @param timestampAfter  Timestamp filter.
      * @param timestampBefore Timestamp before.
      * @param pageSize        Page size.
-     * @return {@link FeedsResponse}.
+     * @return {@link FeedMessage}.
      */
-    public AbstractMap.SimpleEntry<Boolean, FeedsResponse> retrievePublicFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
-        TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(Constants.PUBLIC_INBOX_USER_ID, timestampAfter, timestampBefore, pageSize);
+    public AbstractMap.SimpleEntry<Boolean, List<AbstractMap.SimpleEntry<Long, FeedMessage>>> retrievePublicFeeds(String userId, Long timestampAfter, Long timestampBefore, int pageSize) {
+        TimelinesResponse timelinesResponse = this.retrieveTimelinesByUserId(Constants.PUBLIC_INBOX_USER_ID,
+                timestampAfter,
+                timestampBefore,
+                pageSize);
+
+        FeedsResponse feedsResponse = this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
+                .stream()
+                .map(TimelineMessage::getFeedId)
+                .collect(Collectors.toList()), userId);
+        Map<String, FeedMessage> feedMap = feedsResponse.getFeedList().stream()
+                .collect(Collectors.toMap(FeedMessage::getId, Function.identity()));
 
         return new AbstractMap.SimpleEntry<>(timelinesResponse.getHasMore(),
-                this.retrieveFeedsByIds(timelinesResponse.getTimelinesList()
-                        .stream()
-                        .map(TimelineMessage::getFeedId)
-                        .collect(Collectors.toList()), userId));
+                timelinesResponse.getTimelinesList().stream()
+                        .map(timelineMessage -> {
+                            FeedMessage feedMessage = feedMap.get(timelineMessage.getFeedId());
+                            return new AbstractMap.SimpleEntry<>(
+                                    timelineMessage.getRecommendatedAt(),
+                                    feedMessage
+                            );
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList()));
     }
 
     /**
