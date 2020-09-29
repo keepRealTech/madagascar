@@ -189,10 +189,8 @@ public class MembershipService {
             membershipInfo.setPricePerMonth(newPrice);
         }
 
-        Boolean permanent = null;
         if (request.hasPermanent()) {
-            permanent = request.getPermanent().getValue();
-            membershipInfo.setPermanent(permanent);
+            membershipInfo.setPermanent(request.getPermanent().getValue());
         }
 
         if (request.hasDescription()) {
@@ -206,7 +204,7 @@ public class MembershipService {
             }
         }
 
-        this.skuService.updateMembershipSkusByMembershipId(request.getId(), newName, newPrice, null, permanent);
+        this.skuService.updateMembershipSkusByMembershipId(request.getId(), newName, newPrice, null, membershipInfo.getPermanent());
         return this.updateMembership(membershipInfo);
     }
 
