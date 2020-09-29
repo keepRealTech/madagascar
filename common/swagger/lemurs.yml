@@ -4424,8 +4424,6 @@ components:
           type: string
         isPermanent:
           type: boolean
-      required:
-        - isPermanent
     PutMembershipRequest:
       type: object
       properties:
@@ -4445,8 +4443,6 @@ components:
           type: string
         isPermanent:
           type: boolean
-      required:
-        - ispermanent
     MembershipResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
