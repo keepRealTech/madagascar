@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.dtoFactory.SkuDTOFactory;
 import com.keepreal.madagascar.lemur.service.SkuService;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
@@ -86,7 +87,10 @@ public class SkuController implements SkuApi {
      */
     @CrossOrigin
     @Override
-    public ResponseEntity<MembershipSkusResponse> apiV1MembershipIdSkusGet(String id) {
+    public ResponseEntity<MembershipSkusResponse> apiV1MembershipIdSkusGet(String id, Boolean permanent) {
+        if (!permanent) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_PERMANENT_VERSION_LOW_ERROR);
+        }
         List<MembershipSkuMessage> shellSkuMessageList = this.skuService.retrieveMembershipSkusByMembershipIds(id);
 
         MembershipSkusResponse response = new MembershipSkusResponse();
