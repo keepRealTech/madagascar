@@ -68,4 +68,14 @@ public class AlipayOrderService {
         return this.alipayOrderRepository.save(order);
     }
 
+    /**
+     * merge user alipay order
+     *
+     * @param wechatUserId      wechat user id
+     * @param webMobileUserId   mobile user id
+     */
+    public void mergeUserAlipayOrder(String wechatUserId, String webMobileUserId) {
+        this.alipayOrderRepository.mergeUserAlipayOrder(wechatUserId, webMobileUserId);
+    }
+
 }

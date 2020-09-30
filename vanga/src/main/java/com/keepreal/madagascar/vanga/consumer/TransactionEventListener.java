@@ -9,15 +9,11 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.keepreal.madagascar.coua.MergeUserAccountsEvent;
 import com.keepreal.madagascar.coua.TransactionEventMessage;
 import com.keepreal.madagascar.coua.TransactionEventType;
-import com.keepreal.madagascar.vanga.model.Payment;
-import com.keepreal.madagascar.vanga.model.SubscribeMembership;
-import com.keepreal.madagascar.vanga.model.WechatOrder;
+import com.keepreal.madagascar.vanga.service.AlipayOrderService;
 import com.keepreal.madagascar.vanga.service.PaymentService;
 import com.keepreal.madagascar.vanga.service.SubscribeMembershipService;
 import com.keepreal.madagascar.vanga.service.WechatOrderService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +24,16 @@ import java.util.Objects;
 public class TransactionEventListener implements MessageListener {
 
     private final WechatOrderService wechatOrderService;
+    private final AlipayOrderService alipayOrderService;
     private final SubscribeMembershipService subscribeMembershipService;
     private final PaymentService paymentService;
 
     public TransactionEventListener(WechatOrderService wechatOrderService,
-                                           SubscribeMembershipService subscribeMembershipService,
-                                           PaymentService paymentService) {
+                                    AlipayOrderService alipayOrderService,
+                                    SubscribeMembershipService subscribeMembershipService,
+                                    PaymentService paymentService) {
         this.wechatOrderService = wechatOrderService;
+        this.alipayOrderService = alipayOrderService;
         this.subscribeMembershipService = subscribeMembershipService;
         this.paymentService = paymentService;
     }
@@ -68,6 +67,7 @@ public class TransactionEventListener implements MessageListener {
     public void mergeUserAccounts(String wechatUserId, String webMobileUserId) {
         this.subscribeMembershipService.mergeUserSubscribeMembership(wechatUserId, webMobileUserId);
         this.wechatOrderService.mergeUserWechatOrder(wechatUserId, webMobileUserId);
+        this.alipayOrderService.mergeUserAlipayOrder(wechatUserId, webMobileUserId);
         this.paymentService.mergeUserPayment(wechatUserId, webMobileUserId);
     }
 
