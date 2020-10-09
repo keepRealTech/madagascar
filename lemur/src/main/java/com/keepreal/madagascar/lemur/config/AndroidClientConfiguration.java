@@ -17,7 +17,6 @@ import java.util.Map;
 public class AndroidClientConfiguration {
 
     private SetupInfoDTO setupInfo;
-    private Map<Integer, Map<String, Boolean>> versionInfoMap;
     private Map<Integer, UpdateInfoDTO> updateInfoMap;
 
 }
