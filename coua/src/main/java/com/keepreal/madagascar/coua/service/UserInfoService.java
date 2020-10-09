@@ -168,7 +168,7 @@ public class UserInfoService {
      * @return {@link UserInfo}.
      */
     public UserInfo findUserInfoByUserNameAndDeletedIsFalse(String username) {
-        return userInfoRepository.findTopByUsernameAndDeletedIsFalse(username);
+        return userInfoRepository.findTopByUsernameAndDeletedIsFalseOrderByUpdatedTimeDesc(username);
     }
 
     /**
@@ -204,7 +204,7 @@ public class UserInfoService {
      * @return {@link UserInfo}
      */
     public UserInfo findUserInfoByMobile(String mobile) {
-        return this.userInfoRepository.findTopByMobileAndDeletedIsFalse(mobile);
+        return this.userInfoRepository.findTopByMobileAndDeletedIsFalseOrderByUpdatedTimeDesc(mobile);
     }
 
     /**
@@ -215,7 +215,7 @@ public class UserInfoService {
      * @return          {@link UserInfo}
      */
     public UserInfo findUserByMobileAndState(String mobile, Integer state) {
-        return this.userInfoRepository.findTopByMobileAndStateEqualsAndDeletedIsFalse(mobile, state);
+        return this.userInfoRepository.findTopByMobileAndStateEqualsAndDeletedIsFalseOrderByUpdatedTimeDesc(mobile, state);
     }
 
     /**
