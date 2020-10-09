@@ -37,7 +37,7 @@ global:
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
-      tag: 1.2.2
+      tag: 1.2.2-hf1
       imagePullPolicy: Always
     brookesia:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/brookesia
@@ -45,7 +45,7 @@ global:
       imagePullPolicy: Always
     coua:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-      tag: 1.2.1
+      tag: 1.2.1-hf1
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
