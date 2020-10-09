@@ -69,8 +69,8 @@ release:
 client:
   android:
     setup_info:
-      version: 160
-      address: https://images.keepreal.cn/tiaodao_v160_kr.apk
+      version: 171
+      address: https://images.keepreal.cn/tiaodao_v171_kr.apk
 
 security:
   oauth2:
