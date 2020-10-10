@@ -4,6 +4,7 @@ import com.keepreal.madagascar.workflow.statistics.model.coua.IslandInfo;
 import com.keepreal.madagascar.workflow.statistics.repository.vanga.PaymentRepository;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
@@ -46,13 +47,13 @@ public class PaymentService {
         islandInfoList.forEach(islandInfo -> {
             Integer userYesterdayByPayeeId = this.paymentRepository.countYesterdayByPayeeId(islandInfo.getHostId(), yesterday, today);
             Integer amountYesterdayByPayeeId = this.paymentRepository.countAmountYesterdayByPayeeId(islandInfo.getHostId(), yesterday, today);
-            sb.append("「岛名: ")
+            sb.append("【岛名: ")
                     .append(islandInfo.getIslandName())
                     .append(", 昨日支持人数: ")
                     .append(userYesterdayByPayeeId)
                     .append(", 昨日支持金额: ")
-                    .append(amountYesterdayByPayeeId)
-                    .append("」");
+                    .append(BigDecimal.valueOf(Long.valueOf(amountYesterdayByPayeeId)).divide(new BigDecimal(100)).toString())
+                    .append("】");
         });
 
         this.larkService.sendMessage(LARK_MESSAGE_TITLE, sb.toString());
