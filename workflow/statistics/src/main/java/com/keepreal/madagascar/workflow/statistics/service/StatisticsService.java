@@ -2,8 +2,8 @@ package com.keepreal.madagascar.workflow.statistics.service;
 
 import com.keepreal.madagascar.common.workflow.model.WorkflowLog;
 import com.keepreal.madagascar.common.workflow.service.WorkflowService;
-import com.keepreal.madagascar.workflow.statistics.model.IslandIncrement;
-import com.keepreal.madagascar.workflow.statistics.model.IslandInfo;
+import com.keepreal.madagascar.workflow.statistics.model.coua.IslandIncrement;
+import com.keepreal.madagascar.workflow.statistics.model.coua.IslandInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -83,8 +83,7 @@ public class StatisticsService {
             StringBuilder sb = new StringBuilder();
             islandList
                     .forEach(island -> {
-                        String text = String.format("岛id:%s, 岛名:%s, 岛创建时间:%s, 岛民数:%d, 昨日新增岛民数:%d",
-                                island.getId(),
+                        String text = String.format("【岛名:%s, 岛创建时间:%s, 岛民数:%d, 昨日新增岛民数:%d】",
                                 island.getIslandName(),
                                 Instant.ofEpochMilli(island.getCreatedTime()).toString(),
                                 island.getIslanderNumber(),

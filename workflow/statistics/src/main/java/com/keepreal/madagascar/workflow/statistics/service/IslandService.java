@@ -1,7 +1,7 @@
 package com.keepreal.madagascar.workflow.statistics.service;
 
-import com.keepreal.madagascar.workflow.statistics.model.IslandInfo;
-import com.keepreal.madagascar.workflow.statistics.repository.IslandInfoRepository;
+import com.keepreal.madagascar.workflow.statistics.model.coua.IslandInfo;
+import com.keepreal.madagascar.workflow.statistics.repository.coua.IslandInfoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

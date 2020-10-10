@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.workflow.statistics.model;
+package com.keepreal.madagascar.workflow.statistics.model.coua;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
