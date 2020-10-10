@@ -16,4 +16,5 @@ public interface IslandInfoRepository extends JpaRepository<IslandInfo, String> 
 
     List<IslandInfo> findByIdInAndDeletedIsFalse(Iterable<String> ids);
 
+    List<IslandInfo> findByHostIdInAndDeletedIsFalse(Iterable<String> hostIds);
 }

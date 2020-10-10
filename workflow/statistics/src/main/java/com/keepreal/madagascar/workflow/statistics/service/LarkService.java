@@ -32,14 +32,15 @@ public class LarkService {
     /**
      * Sends the naive simple text to lark.
      *
-     * @param text Text.
+     * @param title Title.
+     * @param text  Text.
      */
-    public void sendMessage(String text) {
+    public void sendMessage(String title, String text) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        String requestBody = String.format("{\"title\":\"昨日新增用户超过10人的岛有哪些？\", \"text\":\"%s\"}", text);
-        HttpEntity<String> requst = new HttpEntity<>(requestBody, headers);
-        this.restTemplate.exchange(this.larkConfiguration.getWebhook(), HttpMethod.POST, requst, String.class);
+        String requestBody = String.format("{\"title\":\"%s\", \"text\":\"%s\"}", title, text);
+        HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
+        this.restTemplate.exchange(this.larkConfiguration.getWebhook(), HttpMethod.POST, request, String.class);
     }
 
 }

@@ -24,6 +24,7 @@ import java.util.stream.IntStream;
 public class StatisticsService {
 
     private final static int ITEMS_PER_MESSAGE = 20;
+    private final static String LARK_MESSAGE_TITLE = "昨日新增用户超过5人的岛有哪些？";
 
     private final SubscriptionService subscriptionService;
     private final IslandService islandService;
@@ -59,7 +60,7 @@ public class StatisticsService {
 
         List<IslandIncrement> islandIncrements = this.subscriptionService.retrieveIslandIds();
         if (Objects.isNull(islandIncrements) || islandIncrements.isEmpty()) {
-            this.larkService.sendMessage("没有哦");
+            this.larkService.sendMessage(LARK_MESSAGE_TITLE, "没有哦");
             this.workflowService.succeed(workflowLog);
             return;
         }
@@ -83,16 +84,15 @@ public class StatisticsService {
             StringBuilder sb = new StringBuilder();
             islandList
                     .forEach(island -> {
-                        String text = String.format("【岛名:%s, 岛创建时间:%s, 岛民数:%d, 昨日新增岛民数:%d】",
+                        String text = String.format("【岛名:%s, 岛民数:%d, 昨日新增岛民数:%d】",
                                 island.getIslandName(),
-                                Instant.ofEpochMilli(island.getCreatedTime()).toString(),
                                 island.getIslanderNumber(),
                                 islandIncrementMap.getOrDefault(island.getId(), new BigInteger("0")).longValue());
                         sb.append(text);
                     });
 
             log.info("Sending message {}", sb.toString());
-            this.larkService.sendMessage(sb.toString());
+            this.larkService.sendMessage(LARK_MESSAGE_TITLE, sb.toString());
         });
 
         this.workflowService.succeed(workflowLog);

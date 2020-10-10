@@ -33,4 +33,14 @@ public class IslandService {
         return this.islandInfoRepository.findByIdInAndDeletedIsFalse(ids);
     }
 
+    /**
+     * Retrieves islands by hostIds.
+     *
+     * @param hostIds Island hostIds.
+     * @return {@link IslandInfo}.
+     */
+    public List<IslandInfo> retrieveIslandsByHostIds(Iterable<String> hostIds) {
+        return this.islandInfoRepository.findByHostIdInAndDeletedIsFalse(hostIds);
+    }
+
 }
