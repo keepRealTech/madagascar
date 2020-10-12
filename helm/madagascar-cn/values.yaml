@@ -37,7 +37,7 @@ global:
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
-      tag: 1.2.2-hf1
+      tag: 1.2.2-hf2
       imagePullPolicy: Always
     brookesia:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/brookesia
