@@ -28,7 +28,7 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
 
     boolean existsByDisplayId(String displayId);
 
-    UserInfo findTopByUsernameAndDeletedIsFalse(String username);
+    UserInfo findTopByUsernameAndDeletedIsFalseOrderByUpdatedTimeDesc(String username);
 
     @Query(value =
             "SELECT id, display_id, nick_name, portrait_image_uri, gender, " +
@@ -39,9 +39,9 @@ public interface UserInfoRepository extends JpaRepository<UserInfo, String> {
             nativeQuery = true)
     List<UserInfo> findUserInfoInfosByIdInAndDeletedIsFalse(List<String> idList);
 
-    UserInfo findTopByMobileAndDeletedIsFalse(String mobile);
+    UserInfo findTopByMobileAndDeletedIsFalseOrderByUpdatedTimeDesc(String mobile);
 
-    UserInfo findTopByMobileAndStateEqualsAndDeletedIsFalse(String mobile, Integer state);
+    UserInfo findTopByMobileAndStateEqualsAndDeletedIsFalseOrderByUpdatedTimeDesc(String mobile, Integer state);
 
     @Query(value = "SELECT u.id FROM user u LEFT JOIN user_identity i ON u.id = i.user_id WHERE u.nick_name LIKE ?1% ORDER BY i.identity_type DESC", nativeQuery = true)
     Page<String> findUserIdByNameOrderByIdentity(String username, Pageable pageable);

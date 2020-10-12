@@ -161,19 +161,19 @@ public class UserGRpcController extends UserServiceGrpc.UserServiceImplBase {
         UserResponse.Builder responseBuilder = UserResponse.newBuilder();
         if (queryUserCondition.hasId()) {
             condition = queryUserCondition.getId().getValue();
-            userInfo = userInfoService.findUserInfoByIdAndDeletedIsFalse(condition);
+            userInfo = this.userInfoService.findUserInfoByIdAndDeletedIsFalse(condition);
         }
         if (queryUserCondition.hasUnionId()) {
             condition = queryUserCondition.getUnionId().getValue();
-            userInfo = userInfoService.findUserInfoByUnionIdAndDeletedIsFalse(condition);
+            userInfo = this.userInfoService.findUserInfoByUnionIdAndDeletedIsFalse(condition);
         }
         if (queryUserCondition.hasDisplayId()) {
             condition = queryUserCondition.getDisplayId().getValue();
-            userInfo = userInfoService.findUserInfoByDisplayIdAndDeletedIsFalse(condition);
+            userInfo = this.userInfoService.findUserInfoByDisplayIdAndDeletedIsFalse(condition);
         }
         if (queryUserCondition.hasUsername()) {
             condition = queryUserCondition.getUsername().getValue();
-            userInfo = userInfoService.findUserInfoByUserNameAndDeletedIsFalse(condition);
+            userInfo = this.userInfoService.findUserInfoByUserNameAndDeletedIsFalse(condition);
         }
         if (queryUserCondition.hasMobile() && queryUserCondition.hasState()) {
             condition = queryUserCondition.getMobile().getValue();
