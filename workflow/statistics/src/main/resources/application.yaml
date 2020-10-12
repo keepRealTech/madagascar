@@ -16,7 +16,7 @@ spring:
   data:
     mongodb:
       database: workflow
-      uri: mongodb://root:zIa6%25UGhfdE%23@dds-2ze46b760688db541432-pub.mongodb.rds.aliyuncs.com:3717/?authSource=admin&readPreference=primary&appname=MongoDB%20Compass&ssl=false
+      uri: mongodb://
 
 lark:
   webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73
