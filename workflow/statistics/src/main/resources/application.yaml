@@ -2,8 +2,12 @@ spring:
   application:
     name: settler
   datasource:
-    url:
-    driver-class-name: com.mysql.jdbc.Driver
+    vanga:
+      jdbc-url: jdbc:mysql://kr_admin:gYvi89kGKJoqZbzk@rm-2ze0p9v29ef1p05us6o.mysql.rds.aliyuncs.com:3306/vanga?autoReconnect=true&useUnicode=true&characterEncoding=utf8&character_set_server=utf8mb4&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
+      driver-class-name: com.mysql.cj.jdbc.Driver
+    coua:
+      jdbc-url: jdbc:mysql://kr_admin:gYvi89kGKJoqZbzk@rm-2ze0p9v29ef1p05us6o.mysql.rds.aliyuncs.com:3306/coua?autoReconnect=true&useUnicode=true&characterEncoding=utf8&character_set_server=utf8mb4&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
+      driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
@@ -12,7 +16,7 @@ spring:
   data:
     mongodb:
       database: workflow
-      uri:
+      uri: mongodb://
 
 lark:
   webhook: https://open.feishu.cn/open-apis/bot/hook/61a6dd4a8ffe4d3f9d81ee418d26cb73

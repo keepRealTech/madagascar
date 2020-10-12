@@ -1,0 +1,47 @@
+package com.keepreal.madagascar.workflow.statistics.model.coua;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+/**
+ * @program: madagascar
+ * @author: zhangxidong
+ * @create: 2020-04-26
+ **/
+
+@Data
+@Table(name = "subscription")
+@Entity
+@EntityListeners(AuditingEntityListener.class)
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Subscription {
+
+    @Id
+    private String id;
+    private String userId;
+    private String islandId;
+    private Integer state;
+    private Integer islanderNumber;
+    @Builder.Default
+    private Boolean shouldIntroduce = true;
+    @Column(name = "is_deleted")
+    @Builder.Default
+    private Boolean deleted = false;
+    @CreatedDate
+    private Long createdTime;
+    @LastModifiedDate
+    private Long updatedTime;
+}
