@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.config;
 
+import com.keepreal.madagascar.lemur.filters.GeneralContextFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
