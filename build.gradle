@@ -30,7 +30,7 @@ ext['hoopoe.version'] = '1.0.0'
 
 ext['settler.version'] = '1.1.0'
 ext['reconciliation.version'] = '1.0.1'
-ext['statistics.version'] = '1.0.0'
+ext['statistics.version'] = '1.1.0'
 ext['support-activity.version'] = '1.0.0'
 
 subprojects {

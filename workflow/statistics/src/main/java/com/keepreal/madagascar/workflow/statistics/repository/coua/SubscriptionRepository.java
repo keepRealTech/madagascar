@@ -1,6 +1,6 @@
-package com.keepreal.madagascar.workflow.statistics.repository;
+package com.keepreal.madagascar.workflow.statistics.repository.coua;
 
-import com.keepreal.madagascar.workflow.statistics.model.Subscription;
+import com.keepreal.madagascar.workflow.statistics.model.coua.Subscription;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

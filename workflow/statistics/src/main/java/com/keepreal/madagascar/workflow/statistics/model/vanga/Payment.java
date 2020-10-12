@@ -1,8 +1,9 @@
-package com.keepreal.madagascar.workflow.statistics.model;
+package com.keepreal.madagascar.workflow.statistics.model.vanga;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -15,28 +16,40 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- * @program: madagascar
- * @author: zhangxidong
- * @create: 2020-04-26
- **/
-
+ * Represents the balance appending log.
+ */
+@Builder
 @Data
-@Table(name = "subscription")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Subscription {
+@EqualsAndHashCode
+@Table(name = "balance_log")
+public class Payment {
 
     @Id
     private String id;
     private String userId;
-    private String islandId;
-    private Integer state;
-    private Integer islanderNumber;
     @Builder.Default
-    private Boolean shouldIntroduce = true;
+    private String payeeId = "";
+    @Builder.Default
+    private String tradeNum = "";
+    @Builder.Default
+    private Long amountInCents = 0L;
+    @Builder.Default
+    private Long amountInShells = 0L;
+    @Builder.Default
+    private Integer withdrawPercent = 99;
+    @Builder.Default
+    private String membershipSkuId = "";
+    @Builder.Default
+    private String orderId = "";
+    private Integer type;
+    @Builder.Default
+    private Integer state = 1;
+    @Builder.Default
+    private Long validAfter = 0L;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
@@ -44,4 +57,5 @@ public class Subscription {
     private Long createdTime;
     @LastModifiedDate
     private Long updatedTime;
+
 }
