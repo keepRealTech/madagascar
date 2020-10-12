@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.workflow.statistics;
 
 import com.keepreal.madagascar.common.workflow.annotation.EnableWorkflowService;
+import com.keepreal.madagascar.workflow.statistics.service.PaymentService;
 import com.keepreal.madagascar.workflow.statistics.service.StatisticsService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -16,14 +17,18 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class StatisticsApplication implements CommandLineRunner {
 
     private final StatisticsService statisticsService;
+    private final PaymentService paymentService;
 
     /**
      * Constructs the statistics application.
      *
      * @param statisticsService {@link StatisticsService}.
+     * @param paymentService    {@link PaymentService}.
      */
-    public StatisticsApplication(StatisticsService statisticsService) {
+    public StatisticsApplication(StatisticsService statisticsService,
+                                 PaymentService paymentService) {
         this.statisticsService = statisticsService;
+        this.paymentService = paymentService;
     }
 
     /**
@@ -43,6 +48,7 @@ public class StatisticsApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
         this.statisticsService.run();
+        this.paymentService.run();
         System.exit(0);
     }
 

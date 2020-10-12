@@ -34,11 +34,16 @@ spec:
                     secretKeyRef:
                       name: aliyun-mongo
                       key: connection-string
-                - name: SPRING_DATASOURCE_URL
+                - name: SPRING_DATASOURCE_COUA_JDBCURL
                   valueFrom:
                     secretKeyRef:
                       name: aliyun-rdb
                       key: coua-connection-string
+                - name: SPRING_DATASOURCE_VANGA_JDBCURL
+                  valueFrom:
+                    secretKeyRef:
+                      name: aliyun-rdb
+                      key: vanga-connection-string
               resources:
                 limits:
                   memory: {{ .Values.common_configs.memory }}

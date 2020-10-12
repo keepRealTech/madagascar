@@ -1,8 +1,8 @@
 package com.keepreal.madagascar.workflow.statistics.service;
 
 import com.keepreal.madagascar.workflow.statistics.config.StatisticsConfiguration;
-import com.keepreal.madagascar.workflow.statistics.model.IslandIncrement;
-import com.keepreal.madagascar.workflow.statistics.repository.SubscriptionRepository;
+import com.keepreal.madagascar.workflow.statistics.model.coua.IslandIncrement;
+import com.keepreal.madagascar.workflow.statistics.repository.coua.SubscriptionRepository;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 

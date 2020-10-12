@@ -1,6 +1,6 @@
-package com.keepreal.madagascar.workflow.statistics.repository;
+package com.keepreal.madagascar.workflow.statistics.repository.coua;
 
-import com.keepreal.madagascar.workflow.statistics.model.IslandInfo;
+import com.keepreal.madagascar.workflow.statistics.model.coua.IslandInfo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,4 +16,5 @@ public interface IslandInfoRepository extends JpaRepository<IslandInfo, String> 
 
     List<IslandInfo> findByIdInAndDeletedIsFalse(Iterable<String> ids);
 
+    List<IslandInfo> findByHostIdInAndDeletedIsFalse(Iterable<String> hostIds);
 }
