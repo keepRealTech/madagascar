@@ -4445,7 +4445,18 @@ components:
           $ref: '#/components/schemas/BriefUserDTO'
         host:
           $ref: '#/components/schemas/BriefUserDTO'
-        membershipId:
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/WithExpiredMembershipDTO'
+        icons:
+          type: array
+          items:
+            $ref: '#/components/schemas/MembershipIconType'
+    WithExpiredMembershipDTO:
+      type: object
+      properties:
+        id:
           type: string
         membershipName:
           type: string
@@ -4456,10 +4467,6 @@ components:
           format: int64
         hasExpired:
           type: boolean
-        icons:
-          type: array
-          items:
-            $ref: '#/components/schemas/MembershipIconType'
     BriefMembershipDTO:
       type: object
       properties:
@@ -4563,9 +4570,7 @@ components:
         - type: object
           properties:
             data:
-              type: array
-              items:
-                $ref: '#/components/schemas/MyMembershipDTO'
+              $ref: '#/components/schemas/MyMembershipDTO'
     ChatTokenDTO:
       type: object
       properties:
