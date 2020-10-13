@@ -1286,6 +1286,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FeedMembershipsResponse'
+  /api/v1/islands/{id}/myMemberships:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Membership
+      summary: 获取我在岛内的所有权益
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyMembershipsResponse'
+  /api/v1/islands/{id}/membershipFeeds:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+        - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Membership
+      summary: 获取我在岛内所有可观看的会员动态（包括单独解锁的动态）
+      responses:
+        '200':
+          description: feeds response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinesResponse'
   /api/v1/memberships/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2739,6 +2770,13 @@ components:
         - LOGIN_MOBILE
         - LOGIN_MOBILE_APP
         - LOGIN_MOBILE_HOME
+    MembershipIconType:
+      type: string
+      enum:
+        - ICON_FEED
+        - ICON_QUESTION
+        - ICON_GROUP
+        - ICON_MESSAGE
     SceneType:
       type: string
       enum:
@@ -2808,6 +2846,11 @@ components:
         - STATE_REFUND
         - STATE_PAYERROR
         - STATE_REVOKED
+    PrivilegeState:
+      type: string
+      enum:
+        - PRIVILEGE_EFFECTIVE
+        - PRIVILEGE_EXPIRE
     NoticeType:
       type: string
       enum:
@@ -3050,6 +3093,13 @@ components:
               type: string
             supportTarget:
               $ref: '#/components/schemas/SupportTargetDTO'
+            showIncome:
+              type: boolean
+            supportCount:
+              type: integer
+            centsInMonth:
+              type: integer
+              format: int64
     HostIntroductionDTO:
       type: object
       properties:
@@ -3091,6 +3141,10 @@ components:
           format: int64
         hasGroupchatAccess:
           type: boolean
+        showPrivilege:
+          type: boolean
+        privilegeState:
+          $ref: '#/components/schemas/PrivilegeState'
         hostIntroduction:
           $ref: '#/components/schemas/HostIntroductionDTO'
         subscriberIntroduction:
@@ -3113,6 +3167,8 @@ components:
         description:
           type: string
           description: descriptions
+        showIncome:
+          type: boolean
         secret:
           type: string
           description: secrets for joining island
@@ -4458,6 +4514,35 @@ components:
           type: integer
         isPermanent:
           type: boolean
+    MyMembershipDTO:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        host:
+          $ref: '#/components/schemas/BriefUserDTO'
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/WithExpiredMembershipDTO'
+        icons:
+          type: array
+          items:
+            $ref: '#/components/schemas/MembershipIconType'
+    WithExpiredMembershipDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        membershipName:
+          type: string
+        isPermanent:
+          type: boolean
+        expireTime:
+          type: integer
+          format: int64
+        hasExpired:
+          type: boolean
     BriefMembershipDTO:
       type: object
       properties:
@@ -4555,6 +4640,13 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedMembershipDTO'
+    MyMembershipsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/MyMembershipDTO'
     ChatTokenDTO:
       type: object
       properties:
