@@ -2203,6 +2203,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandDiscoveryResponse'
+  /api/v1/islands/{id}/supportTarget:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Island
+      summary: 获取岛支持目标
+      responses:
+        '200':
+          description: support target response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTargetResponse'
+    post:
+      tags:
+        - Island
+      summary: 修改岛支持目标
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSupportTargetRequest'
+      responses:
+        '200':
+          description: support target response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTargetResponse'
+    delete:
+      tags:
+        - Island
+      summary: 删除岛支持目标
+      responses:
+        '200':
+          description: Dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/feeds/public:
     get:
       parameters:
@@ -2794,6 +2836,16 @@ components:
       enum:
         - PAYMENT_TYPE_MEMBERSHIP
         - PAYMENT_TYPE_FEED
+    SupportTargetType:
+      type: string
+      enum:
+        - SUPPORTER
+        - AMOUNT
+    SupportTargetTimeType:
+      type: string
+      enum:
+        - NO_LIMIT
+        - PER_MONTH
     CommonResponse:
       type: object
       properties:
@@ -2954,6 +3006,8 @@ components:
           type: string
         accessType:
           $ref: '#/components/schemas/IslandAccessType'
+        customUrl:
+          type: string
     PosterIslandDTO:
       type: object
       properties:
@@ -2994,6 +3048,8 @@ components:
           properties:
             secret:
               type: string
+            supportTarget:
+              $ref: '#/components/schemas/SupportTargetDTO'
     HostIntroductionDTO:
       type: object
       properties:
@@ -3062,6 +3118,8 @@ components:
           description: secrets for joining island
         islandAccessType:
           $ref: '#/components/schemas/IslandAccessType'
+        customUrl:
+          type: string
     PostIslandPayload:
       type: object
       properties:
@@ -5452,3 +5510,48 @@ components:
       properties:
         feedgroupId:
           type: string
+    SupportTargetDTO:
+      type: object
+      properties:
+        targetType:
+          $ref: '#/components/schemas/SupportTargetType'
+        timeType:
+          $ref: '#/components/schemas/SupportTargetTimeType'
+        content:
+          type: string
+        completed:
+          type: boolean
+        currentAmountInCents:
+          type: integer
+          format: int64
+        totalAmountInCents:
+          type: integer
+          format: int64
+        currentSupporterNum:
+          type: integer
+          format: int64
+        totalSupporterNum:
+          type: integer
+          format: int64
+    PostSupportTargetRequest:
+      type: object
+      properties:
+        targetType:
+          $ref: '#/components/schemas/SupportTargetType'
+        timeType:
+          $ref: '#/components/schemas/SupportTargetTimeType'
+        content:
+          type: string
+        totalAmountInCents:
+          type: integer
+          format: int64
+        totalSupporterNum:
+          type: integer
+          format: int64
+    SupportTargetResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportTargetDTO'
