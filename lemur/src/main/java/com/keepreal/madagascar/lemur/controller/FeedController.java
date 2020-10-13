@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.brookesia.StatsEventAction;
 import com.keepreal.madagascar.brookesia.StatsEventCategory;
+import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
@@ -255,6 +256,7 @@ public class FeedController implements FeedApi {
      * @return {@link TimelinesResponse}.
      */
     @Override
+    @Deprecated
     public ResponseEntity<TimelinesResponse> apiV11FeedsGet(Long minTimestamp,
                                                             Long maxTimestamp,
                                                             Integer pageSize,
@@ -303,13 +305,19 @@ public class FeedController implements FeedApi {
                 .map(AbstractMap.SimpleEntry::getValue)
                 .collect(Collectors.toList()));
 
+        Map<String, FeedGroupMessage> feedGroupMessageMap = this.generateFeedGroupMap(entry.getValue()
+                .stream()
+                .map(AbstractMap.SimpleEntry::getValue)
+                .collect(Collectors.toList()));
+
         TimelinesResponse response = new TimelinesResponse();
         response.setData(entry.getValue()
                 .stream()
                 .map(innerEntry -> this.feedDTOFactory.valueOf(innerEntry.getValue(),
                         feedMembershipMap.getOrDefault(innerEntry.getValue().getId(), Collections.emptyList()),
                         includeChargeable,
-                        innerEntry.getKey()))
+                        innerEntry.getKey(),
+                        feedGroupMessageMap.get(innerEntry.getValue().getFeedgroupId())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().size() > 0, entry.getKey(), pageSize));
@@ -417,6 +425,7 @@ public class FeedController implements FeedApi {
                 this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize, true);
 
         Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(normalFeedsResponse.getFeedList());
+        Map<String, FeedGroupMessage> feedGroupMessageMap = this.generateFeedGroupMap(normalFeedsResponse.getFeedList());
 
         FeedsResponseV2 response = new FeedsResponseV2();
         ToppedFeedsDTO dto = new ToppedFeedsDTO();
@@ -425,7 +434,9 @@ public class FeedController implements FeedApi {
                 .stream()
                 .map(feed -> this.feedDTOFactory.valueOf(feed,
                         feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList()),
-                        includeChargeable))
+                        includeChargeable,
+                        feed.getCreatedAt(),
+                        feedGroupMessageMap.get(feed.getFeedgroupId())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
 
@@ -434,10 +445,14 @@ public class FeedController implements FeedApi {
             com.keepreal.madagascar.fossa.FeedResponse toppedFeedResponse = this.feedService.retrieveIslandToppedFeeds(id, userId);
 
             Map<String, List<MembershipMessage>> toppedfeedMembershipMap = this.generateFeedMembershipMap(Collections.singletonList(toppedFeedResponse.getFeed()));
+            Map<String, FeedGroupMessage> toppedfeedGroupMessageMap = this.generateFeedGroupMap(Collections.singletonList(toppedFeedResponse.getFeed()));
 
             if (toppedFeedResponse.hasFeed()) {
                 FeedDTO feedDTO = this.feedDTOFactory.valueOf(toppedFeedResponse.getFeed(),
-                        toppedfeedMembershipMap.getOrDefault(toppedFeedResponse.getFeed().getId(), Collections.emptyList()));
+                        toppedfeedMembershipMap.getOrDefault(toppedFeedResponse.getFeed().getId(), Collections.emptyList()),
+                        includeChargeable,
+                        toppedFeedResponse.getFeed().getCreatedAt(),
+                        toppedfeedGroupMessageMap.get(toppedFeedResponse.getFeed().getFeedgroupId()));
                 topFeeds.add(feedDTO);
             }
         }
@@ -475,7 +490,6 @@ public class FeedController implements FeedApi {
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 
     /**
      * Implement the island top feed api v1 api
@@ -689,6 +703,26 @@ public class FeedController implements FeedApi {
         }
 
         return feedMembershipMap;
+    }
+
+    /**
+     * Generates the feed group map.
+     *
+     * @param feeds {@link FeedMessage}.
+     * @return Feed group id vs {@link FeedGroupMessage}.
+     */
+    private Map<String, FeedGroupMessage> generateFeedGroupMap(List<FeedMessage> feeds) {
+        Set<String> feedgroupIdSet = feeds.stream()
+                .map(FeedMessage::getFeedgroupId)
+                .collect(Collectors.toSet());
+
+        Map<String, FeedGroupMessage> feedgroupMap = new HashMap<>();
+        if (!feedgroupIdSet.isEmpty()) {
+            feedgroupMap = this.feedGroupService.retrieveFeedGroupsByIds(feedgroupIdSet).stream()
+                    .collect(Collectors.toMap(FeedGroupMessage::getId, Function.identity(), (feedgroup1, feedgroup2) -> feedgroup1, HashMap::new));
+        }
+
+        return feedgroupMap;
     }
 
 }

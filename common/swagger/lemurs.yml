@@ -3577,6 +3577,31 @@ components:
           properties:
             host:
               $ref: '#/components/schemas/BriefUserDTO'
+    PostFeedPayload:
+      type: object
+      properties:
+        islandIds:
+          type: array
+          items:
+            type: string
+        membershipIds:
+          type: array
+          items:
+            type: string
+        content:
+          type: string
+    PostFeedRequest:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/PostFeedPayload'
+        images:
+          type: array
+          items:
+            type: string
+            format: binary
+      required:
+        - payload
     PostFeedRequestV2:
       type: object
       properties:
