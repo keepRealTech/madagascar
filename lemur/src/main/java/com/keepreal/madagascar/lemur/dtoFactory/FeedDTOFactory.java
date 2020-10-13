@@ -83,7 +83,8 @@ public class FeedDTOFactory {
      * @param memberships {@link MembershipMessage}.
      * @return {@link FeedDTO}.
      */
-    public FeedDTO valueOf(FeedMessage feed, List<MembershipMessage> memberships) {
+    public FeedDTO valueOf(FeedMessage feed,
+                           List<MembershipMessage> memberships) {
         return this.valueOf(feed, memberships, true);
     }
 
@@ -95,7 +96,9 @@ public class FeedDTOFactory {
      * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link FeedDTO}.
      */
-    public FeedDTO valueOf(FeedMessage feed, List<MembershipMessage> memberships, Boolean includeChargeable) {
+    public FeedDTO valueOf(FeedMessage feed,
+                           List<MembershipMessage> memberships,
+                           Boolean includeChargeable) {
         if (Objects.isNull(feed)
                 || (!includeChargeable && feed.getPriceInCents() > 0L)) {
             return null;
@@ -112,7 +115,32 @@ public class FeedDTOFactory {
      * @param recommendatedAt   Recommendated at.
      * @return {@link FeedDTO}.
      */
-    public FeedDTO valueOf(FeedMessage feed, List<MembershipMessage> memberships, Boolean includeChargeable, Long recommendatedAt) {
+    public FeedDTO valueOf(FeedMessage feed,
+                           List<MembershipMessage> memberships,
+                           Boolean includeChargeable,
+                           Long recommendatedAt) {
+        if (Objects.isNull(feed)
+                || (!includeChargeable && feed.getPriceInCents() > 0L)) {
+            return null;
+        }
+        return this.valueOf(feed, memberships, includeChargeable, recommendatedAt, null);
+    }
+
+    /**
+     * Converts the {@link FeedMessage} into {@link FeedDTO}.
+     *
+     * @param feed              {@link FeedMessage}.
+     * @param memberships       {@link MembershipMessage}.
+     * @param includeChargeable Whether includes the chargeable feeds.
+     * @param recommendatedAt   Recommendated at.
+     * @param feedgroup         {@link FeedGroupMessage}.
+     * @return {@link FeedDTO}.
+     */
+    public FeedDTO valueOf(FeedMessage feed,
+                           List<MembershipMessage> memberships,
+                           Boolean includeChargeable,
+                           Long recommendatedAt,
+                           FeedGroupMessage feedgroup) {
         if (Objects.isNull(feed)
                 || (!includeChargeable && feed.getPriceInCents() > 0L)) {
             return null;
@@ -151,6 +179,13 @@ public class FeedDTOFactory {
 
             if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
                 feedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
+            }
+
+            if (Objects.nonNull(feedgroup)) {
+                FeedGroupInfo feedGroupInfo = new FeedGroupInfo();
+                feedGroupInfo.setId(feedgroup.getId());
+                feedGroupInfo.setName(feedgroup.getName());
+                feedDTO.setFeedGroupInfo(feedGroupInfo);
             }
 
             feedDTO.setIsAccess(feed.getIsAccess());
@@ -351,8 +386,6 @@ public class FeedDTOFactory {
                 feedGroupInfo.setLastFeedId(lastFeedId);
                 feedGroupInfo.setNextFeedId(nextFeedId);
                 fullFeedDTO.setFeedGroupInfo(feedGroupInfo);
-            } else {
-                fullFeedDTO.setFeedGroupInfo(null);
             }
 
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);

@@ -91,6 +91,15 @@ public class FeedGroupService {
     }
 
     /**
+     * Retrieves by ids.
+     * @param ids Feed group ids.
+     * @return {@link FeedGroup}.
+     */
+    public List<FeedGroup> retrieveFeedGroupsByIds(Iterable<String> ids) {
+        return this.feedGroupRepository.findAllByIdInAndDeletedIsFalse(ids);
+    }
+
+    /**
      * Updates a feed group entity.
      *
      * @param feedGroup {@link FeedGroup}.
