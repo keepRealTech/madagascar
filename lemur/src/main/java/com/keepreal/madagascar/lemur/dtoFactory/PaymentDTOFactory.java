@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.PaymentState;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.UserPaymentType;
 import com.keepreal.madagascar.common.constants.Constants;
+import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
@@ -129,8 +130,8 @@ public class PaymentDTOFactory {
             }
         } else if (UserPaymentType.PAYMENT_TYPE_FEED.equals(userPaymentMessage.getType())) {
             userPaymentDTO.setType(PaymentType.FEED);
-            userPaymentDTO.setName(Constants.PAYMENT_TYPE_FEED);
-            userPaymentDTO.setPrivileges(Collections.singletonList(String.format()));
+            userPaymentDTO.setName(Templates.PAYMENT_TYPE_FEED);
+            userPaymentDTO.setPrivileges(Collections.singletonList(String.format(Templates.PAYMENT_FEED_PRIVILEGE, userPaymentDTO.getPriceInCents() / 100L)));
         }
 
         return null;
