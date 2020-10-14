@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.PageResponse;
+import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.fossa.CreateDefaultFeedRequest;
@@ -30,6 +31,7 @@ import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
+import com.keepreal.madagascar.fossa.UpdateFeedFeedgroupRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdResponse;
 import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
@@ -80,7 +82,6 @@ import static com.keepreal.madagascar.fossa.service.FeedInfoService.DEFAULT_LAST
 @GRpcService
 public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
-    private static final String DEFAULT_FEED_TEXT = "于yyyy年MM月dd日HH:mm，创建了属于我的岛。";
     private final LongIdGenerator idGenerator;
     private final IslandService islandService;
     private final FeedInfoService feedInfoService;
@@ -224,13 +225,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 responseObserver.onCompleted();
             }
 
-            feedInfoList.get(0).setFeedGroupId(request.getFeedGroupId().getValue());
-
-            if ((MediaType.MEDIA_PICS == mediaType || MediaType.MEDIA_ALBUM == mediaType) && membershipIdsList.isEmpty()) {
-                feedGroup.getImageFeedIds().add(feedInfoList.get(0).getId());
-            }
-            feedGroup.getFeedIds().add(feedInfoList.get(0).getId());
-            feedGroup.setLastFeedTime(feedInfoList.get(0).getCreatedTime());
+            this.assignFeedGroup(feedInfoList.get(0), feedGroup);
             this.feedGroupService.updateFeedGroup(feedGroup);
         }
 
@@ -395,7 +390,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      */
     @Override
     public void createDefaultFeed(CreateDefaultFeedRequest request, StreamObserver<CreateDefaultFeedResponse> responseObserver) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DEFAULT_FEED_TEXT);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Templates.DEFAULT_FEED_TEXT);
         String text = LocalDateTime.now().format(formatter);
 
         FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
@@ -660,6 +655,70 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Updates the feed's feed group.
+     *
+     * @param request           {@link UpdateFeedFeedgroupRequest}.
+     * @param responseObserver  {@link FeedGroupFeedResponse}.
+     */
+    @Override
+    public void updateFeedFeedgroupById(UpdateFeedFeedgroupRequest request,
+                                        StreamObserver<FeedGroupFeedResponse> responseObserver) {
+        FeedGroupFeedResponse.Builder responseBuilder = FeedGroupFeedResponse.newBuilder();
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(request.getId(), false);
+
+        if (Objects.isNull(feedInfo)) {
+            responseBuilder
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR));
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
+        if (Objects.isNull(feedGroup)) {
+            responseBuilder
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEEDGROUP_NOT_FOUND_ERROR));
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+            return;
+        } else if (!feedGroup.getHostId().equals(request.getUserId())) {
+            responseBuilder
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN));
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        if (!request.getFeedgroupId().equals(feedInfo.getFeedGroupId())) {
+            if (!StringUtils.isEmpty(feedInfo.getFeedGroupId())) {
+                FeedGroup originFeedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
+                if (Objects.nonNull(originFeedGroup)) {
+                    originFeedGroup.getFeedIds().remove(feedInfo.getId());
+                    originFeedGroup.getImageFeedIds().remove(feedInfo.getId());
+                    this.feedGroupService.updateFeedGroup(originFeedGroup);
+                }
+            }
+
+            this.assignFeedGroup(feedInfo, feedGroup);
+
+            this.feedGroupService.updateFeedGroup(feedGroup);
+            this.feedInfoService.update(feedInfo);
+        }
+
+        String lastFeedId = feedGroup.getFeedIds().lower(request.getId());
+        String nextFeedId = feedGroup.getFeedIds().higher(request.getId());
+        responseBuilder
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setFeed(this.feedInfoService.getFeedMessage(feedInfo, request.getUserId()))
+                .setFeedGroup(this.feedGroupService.getFeedGroupMessage(feedGroup))
+                .setLastFeedId(Objects.isNull(lastFeedId) ? "" : lastFeedId)
+                .setNextFeedId(Objects.isNull(nextFeedId) ? "" : nextFeedId);
+
+        responseObserver.onNext(responseBuilder.build());
+        responseObserver.onCompleted();
+    }
+
     private List<MediaInfo> buildMediaInfos(NewFeedsRequestV2 request) {
         List<MediaInfo> mediaInfos = new ArrayList<>();
         switch (request.getType()) {
@@ -681,4 +740,16 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
         return mediaInfos;
     }
+
+    private void assignFeedGroup(FeedInfo feedInfo, FeedGroup feedgroup) {
+        feedInfo.setFeedGroupId(feedgroup.getId());
+
+        if ((MediaType.MEDIA_PICS.name().equals(feedInfo.getMultiMediaType()) || MediaType.MEDIA_ALBUM.name().equals(feedInfo.getMultiMediaType()))
+                && (feedInfo.getMembershipIds().isEmpty() && feedInfo.getPriceInCents() <= 0)) {
+            feedgroup.getImageFeedIds().add(feedInfo.getId());
+        }
+        feedgroup.getFeedIds().add(feedInfo.getId());
+        feedgroup.setLastFeedTime(Math.max(feedInfo.getCreatedTime(), feedgroup.getLastFeedTime()));
+    }
+
 }
