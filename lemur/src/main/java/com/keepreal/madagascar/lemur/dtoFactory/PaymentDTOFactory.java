@@ -1,20 +1,27 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.keepreal.madagascar.common.PaymentState;
 import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.common.UserPaymentType;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
 import com.keepreal.madagascar.vanga.UserWithdrawMessage;
 import org.springframework.stereotype.Component;
+import swagger.model.BriefUserDTO;
+import swagger.model.PaymentType;
 import swagger.model.UserPaymentDTO;
+import swagger.model.UserPaymentDTOV11;
 import swagger.model.UserWithdrawDTO;
 import swagger.model.WithdrawState;
 
+import javax.validation.Valid;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -67,6 +74,7 @@ public class PaymentDTOFactory {
         userPaymentDTO.setMembership(this.membershipDTOFactory.briefValueOf(membershipMessage));
         userPaymentDTO.setMembershipSku(this.skuDTOFactory.valueOf(membershipSkuMessage));
         userPaymentDTO.setCreatedAt(userPaymentMessage.getCreatedAt());
+        userPaymentDTO.setPriceInCents(userPaymentMessage.getPriceInCents());
 
         ZonedDateTime expiration = ZonedDateTime.ofInstant(Instant.ofEpochMilli(userPaymentMessage.getExpiresAt()), ZoneId.systemDefault());
         userPaymentDTO.setExpiration(expiration.with(ChronoField.SECOND_OF_DAY, 0).toInstant().toEpochMilli());
@@ -79,6 +87,36 @@ public class PaymentDTOFactory {
         }
 
         return userPaymentDTO;
+    }
+
+    /**
+     * Builds the {@link UserPaymentDTO}.
+     *
+     * @param userPaymentMessage   {@link UserPaymentMessage}.
+     * @param userMessage          {@link UserMessage}.
+     * @param membershipSkuMessage {@link MembershipSkuMessage}.
+     * @param membershipMessage    {@link MembershipMessage}.
+     * @return {@link UserPaymentDTO}.
+     */
+    public UserPaymentDTOV11 v11ValueOf(UserPaymentMessage userPaymentMessage,
+                                     UserMessage userMessage,
+                                     MembershipSkuMessage membershipSkuMessage,
+                                     MembershipMessage membershipMessage) {
+        if (Objects.isNull(userPaymentMessage)) {
+            return null;
+        }
+
+        UserPaymentDTOV11 userPaymentDTO = new UserPaymentDTOV11();
+        userPaymentDTO.setId(userPaymentMessage.getId());
+        userPaymentDTO.setHost(this.userDTOFactory.briefValueOf(userMessage));
+        userPaymentDTO.setCreatedAt(userPaymentMessage.getCreatedAt());
+        userPaymentDTO.setPriceInCents(userPaymentMessage.getPriceInCents());
+
+        if (UserPaymentType.PAYMENT_TYPE_MEMBERSHIP.equals(userPaymentMessage.getType())) {
+            userPaymentDTO.setType(PaymentType.MEMBERSHIP);
+            userPaymentDTO.setPrivileges();
+        }
+
     }
 
     /**
