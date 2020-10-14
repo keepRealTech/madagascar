@@ -68,7 +68,7 @@ public class PaymentDTOFactory {
                                   UserMessage userMessage,
                                   MembershipSkuMessage membershipSkuMessage,
                                   MembershipMessage membershipMessage) {
-        if (Objects.isNull(userPaymentMessage)) {
+        if (Objects.isNull(userPaymentMessage) || !UserPaymentType.PAYMENT_TYPE_MEMBERSHIP.equals(userPaymentMessage.getType())) {
             return null;
         }
 
