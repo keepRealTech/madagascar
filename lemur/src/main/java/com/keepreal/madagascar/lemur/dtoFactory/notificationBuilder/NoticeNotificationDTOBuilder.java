@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.dtoFactory.notificationBuilder;
 
+import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.IslandService;
@@ -20,10 +21,7 @@ import java.util.Objects;
  */
 public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
 
-    private final static String SUPPORT_CONTENT = "支持了你";
-    private final static String MEMBER_CONTENT = "支持了%d个月\"%s\"";
-    private final static String MEMBER_PERMANENT_CONTENT = "支持了你的永久方案\"%s\"";
-    private final static String FEED_PAYMENT_CONTENT = "刚刚解锁了你的动态";
+
 
     private NotificationMessage notificationMessage;
     private IslandService islandService;
@@ -154,7 +152,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                     SkuMembershipDTO skuMembershipDTO = new SkuMembershipDTO();
                     skuMembershipDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
                     noticeDTO.setMembership(skuMembershipDTO);
-                    noticeDTO.setContent(SUPPORT_CONTENT);
+                    noticeDTO.setContent(Templates.LEMUR_NOTICE_SUPPORT_CONTENT);
                     noticeDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
                     return noticeDTO;
                 }
@@ -171,8 +169,8 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                 skuMembershipDTO.setTimeInMonths(noticeMessage.getMemberNotice().getTimeInMonths());
                 noticeDTO.setMembership(skuMembershipDTO);
                 noticeDTO.setContent(noticeMessage.getMemberNotice().getPermanent() ?
-                        String.format(MEMBER_PERMANENT_CONTENT, noticeMessage.getMemberNotice().getMembershipName()) :
-                        String.format(MEMBER_CONTENT, noticeMessage.getMemberNotice().getTimeInMonths(), noticeMessage.getMemberNotice().getMembershipName()));
+                        String.format(Templates.LEMUR_NOTICE_MEMBER_PERMANENT_CONTENT, noticeMessage.getMemberNotice().getMembershipName()) :
+                        String.format(Templates.LEMUR_NOTICE_MEMBER_CONTENT, noticeMessage.getMemberNotice().getTimeInMonths(), noticeMessage.getMemberNotice().getMembershipName()));
                 noticeDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
                 return noticeDTO;
             case NOTICE_TYPE_FEED_NEW_PAYMENT:
@@ -187,7 +185,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                                 this.userService.retrieveUserById(
                                         noticeMessage.getFeedPaymentNotice().getUserId())));
                 noticeDTO.setPriceInCents(noticeMessage.getFeedPaymentNotice().getPriceInCents());
-                noticeDTO.setContent(FEED_PAYMENT_CONTENT);
+                noticeDTO.setContent(Templates.LEMUR_NOTICE_FEED_PAYMENT_CONTENT);
 
                 return noticeDTO;
             default:

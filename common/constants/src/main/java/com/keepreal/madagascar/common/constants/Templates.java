@@ -18,4 +18,12 @@ public class Templates {
             "2.微信扫码登录\r\n" +
             "3.点击\"发布\"按钮";
 
+    /**
+     * Notification templates.
+     */
+    public final static String LEMUR_NOTICE_SUPPORT_CONTENT = "支持了你";
+    public final static String LEMUR_NOTICE_MEMBER_CONTENT = "支持了%d个月\"%s\"";
+    public final static String LEMUR_NOTICE_MEMBER_PERMANENT_CONTENT = "支持了你的永久方案\"%s\"";
+    public final static String LEMUR_NOTICE_FEED_PAYMENT_CONTENT = "刚刚解锁了你的动态";
+
 }
