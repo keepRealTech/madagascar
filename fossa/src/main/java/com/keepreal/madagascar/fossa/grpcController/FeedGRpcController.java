@@ -699,18 +699,19 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             }
         }
 
-        String lastFeedId = feedGroup.getFeedIds().last();
         this.assignFeedGroup(feedInfo, feedGroup);
 
         this.feedGroupService.updateFeedGroup(feedGroup);
         this.feedInfoService.update(feedInfo);
 
+        String lastFeedId = feedGroup.getFeedIds().lower(request.getId());
+        String nextFeedId = feedGroup.getFeedIds().higher(request.getId());
         responseBuilder
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .setFeed(this.feedInfoService.getFeedMessage(feedInfo, request.getUserId()))
                 .setFeedGroup(this.feedGroupService.getFeedGroupMessage(feedGroup))
                 .setLastFeedId(Objects.isNull(lastFeedId) ? "" : lastFeedId)
-                .setNextFeedId("");
+                .setNextFeedId(Objects.isNull(nextFeedId) ? "" : nextFeedId);
 
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
