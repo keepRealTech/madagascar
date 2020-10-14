@@ -690,19 +690,21 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             return;
         }
 
-        if (!StringUtils.isEmpty(feedInfo.getFeedGroupId())) {
-            FeedGroup originFeedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
-            if (Objects.nonNull(originFeedGroup)) {
-                originFeedGroup.getFeedIds().remove(feedInfo.getId());
-                originFeedGroup.getImageFeedIds().remove(feedInfo.getId());
-                this.feedGroupService.updateFeedGroup(originFeedGroup);
+        if (!request.getFeedgroupId().equals(feedInfo.getFeedGroupId())) {
+            if (!StringUtils.isEmpty(feedInfo.getFeedGroupId())) {
+                FeedGroup originFeedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
+                if (Objects.nonNull(originFeedGroup)) {
+                    originFeedGroup.getFeedIds().remove(feedInfo.getId());
+                    originFeedGroup.getImageFeedIds().remove(feedInfo.getId());
+                    this.feedGroupService.updateFeedGroup(originFeedGroup);
+                }
             }
+
+            this.assignFeedGroup(feedInfo, feedGroup);
+
+            this.feedGroupService.updateFeedGroup(feedGroup);
+            this.feedInfoService.update(feedInfo);
         }
-
-        this.assignFeedGroup(feedInfo, feedGroup);
-
-        this.feedGroupService.updateFeedGroup(feedGroup);
-        this.feedInfoService.update(feedInfo);
 
         String lastFeedId = feedGroup.getFeedIds().lower(request.getId());
         String nextFeedId = feedGroup.getFeedIds().higher(request.getId());
