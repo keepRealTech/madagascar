@@ -2247,7 +2247,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupportTargetResponse'
+                $ref: '#/components/schemas/SupportTargetsResponse'
     put:
       tags:
         - Island
@@ -5671,7 +5671,7 @@ components:
         totalSupporterNum:
           type: integer
           format: int64
-    SupportTargetResponse:
+    SupportTargetsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -5680,3 +5680,10 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/SupportTargetDTO'
+    SupportTargetResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportTargetDTO'
