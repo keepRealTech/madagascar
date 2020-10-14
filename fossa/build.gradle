@@ -14,6 +14,7 @@ sourceSets {
 }
 
 dependencies {
+    implementation project(":common:constants")
     implementation project(":common:exceptions")
     implementation project(":common:id-generator-starter")
     implementation 'com.aliyun.openservices:ons-client'

@@ -241,6 +241,7 @@ message FeedMessage {
     repeated string userMembershipId = 25;
     string hostId = 26;
     bool canSave = 27;
+    string feedgroupId = 28;
 }
 
 message WechatOrderMessage {

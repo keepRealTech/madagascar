@@ -26,6 +26,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -221,7 +222,8 @@ public class FeedInfoService {
                 .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost())
                 .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop())
                 .setHostId(feedInfo.getHostId())
-                .setCanSave(feedInfo.getCanSave() == null ? false : feedInfo.getCanSave());
+                .setCanSave(feedInfo.getCanSave() == null ? false : feedInfo.getCanSave())
+                .setFeedgroupId(feedInfo.getFeedGroupId());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
@@ -238,6 +240,17 @@ public class FeedInfoService {
             if (userId.equals(feedInfo.getHostId()) || membershipIds.stream().anyMatch(myMembershipIds::contains)) {
                 builder.setIsAccess(true);
             }
+            membershipIds.sort((o1, o2) -> {
+                boolean co1 = myMembershipIds.contains(o1);
+                boolean co2 = myMembershipIds.contains(o2);
+                if (co1 && !co2) {
+                    return -1;
+                } else if (co2 && !co1){
+                    return 1;
+                } else {
+                    return 0;
+                }
+            });
             builder.addAllMembershipId(membershipIds);
         }
         this.processMedia(builder, feedInfo);

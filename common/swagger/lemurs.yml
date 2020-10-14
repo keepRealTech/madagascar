@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.6.0"
+  version: "1.8.0"
   title: Keep Real API
 
 security:
@@ -2247,8 +2247,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupportTargetResponse'
-    post:
+                $ref: '#/components/schemas/SupportTargetsResponse'
+    put:
       tags:
         - Island
       summary: 修改岛支持目标
@@ -3091,8 +3091,10 @@ components:
           properties:
             secret:
               type: string
-            supportTarget:
-              $ref: '#/components/schemas/SupportTargetDTO'
+            supportTargets:
+              type: array
+              items:
+               $ref: '#/components/schemas/SupportTargetDTO'
             showIncome:
               type: boolean
             supportCount:
@@ -3577,6 +3579,31 @@ components:
           properties:
             host:
               $ref: '#/components/schemas/BriefUserDTO'
+    PostFeedPayload:
+      type: object
+      properties:
+        islandIds:
+          type: array
+          items:
+            type: string
+        membershipIds:
+          type: array
+          items:
+            type: string
+        content:
+          type: string
+    PostFeedRequest:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/PostFeedPayload'
+        images:
+          type: array
+          items:
+            type: string
+            format: binary
+      required:
+        - payload
     PostFeedRequestV2:
       type: object
       properties:
@@ -5605,6 +5632,8 @@ components:
     SupportTargetDTO:
       type: object
       properties:
+        targetId:
+          type: string
         targetType:
           $ref: '#/components/schemas/SupportTargetType'
         timeType:
@@ -5628,6 +5657,8 @@ components:
     PostSupportTargetRequest:
       type: object
       properties:
+        targetId:
+          type: string
         targetType:
           $ref: '#/components/schemas/SupportTargetType'
         timeType:
@@ -5640,6 +5671,15 @@ components:
         totalSupporterNum:
           type: integer
           format: int64
+    SupportTargetsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SupportTargetDTO'
     SupportTargetResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

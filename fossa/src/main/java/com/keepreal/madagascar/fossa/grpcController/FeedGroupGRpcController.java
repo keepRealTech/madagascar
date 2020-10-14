@@ -10,6 +10,7 @@ import com.keepreal.madagascar.fossa.FeedGroupsResponse;
 import com.keepreal.madagascar.fossa.NewFeedGroupRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupContentByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedGroupsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupsByIslandIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedGroupByIdRequest;
 import com.keepreal.madagascar.fossa.model.FeedGroup;
@@ -28,6 +29,8 @@ import org.springframework.data.domain.Sort;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the feed group rpc service.
@@ -227,6 +230,26 @@ public class FeedGroupGRpcController extends FeedGroupServiceGrpc.FeedGroupServi
                     .setFeedGroup(this.feedGroupService.getFeedGroupMessage(feedGroup))
                     .build();
         }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the retrieve feed groups by ids.
+     *
+     * @param request          {@link RetrieveFeedGroupsByIdsRequest}.
+     * @param responseObserver {@link FeedGroupsResponse}.
+     */
+    @Override
+    public void retrieveFeedGroupsByIds(RetrieveFeedGroupsByIdsRequest request,
+                                        StreamObserver<FeedGroupsResponse> responseObserver) {
+        List<FeedGroup> feedGroups = this.feedGroupService.retrieveFeedGroupsByIds(request.getIdsList());
+
+        FeedGroupsResponse response = FeedGroupsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllFeedGroups(feedGroups.stream().map(this.feedGroupService::getFeedGroupMessage).collect(Collectors.toList()))
+                .build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
