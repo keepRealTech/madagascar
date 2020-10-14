@@ -154,6 +154,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                     skuMembershipDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
                     noticeDTO.setMembership(skuMembershipDTO);
                     noticeDTO.setContent(SUPPORT_CONTENT);
+                    noticeDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
                     return noticeDTO;
                 }
 
@@ -171,6 +172,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                 noticeDTO.setContent(noticeMessage.getMemberNotice().getPermanent() ?
                         String.format(MEMBER_PERMANENT_CONTENT, noticeMessage.getMemberNotice().getMembershipName()) :
                         String.format(MEMBER_CONTENT, noticeMessage.getMemberNotice().getTimeInMonths(), noticeMessage.getMemberNotice().getMembershipName()));
+                noticeDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
                 return noticeDTO;
 
             default:
