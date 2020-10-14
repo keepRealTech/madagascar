@@ -15,4 +15,6 @@ public class Constants {
      */
     public static final String SUPER_ADMIN_USER_ID = "99999999";
 
+    public static final String PAYMENT_TYPE_FEED = "单独解锁";
+
 }

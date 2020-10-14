@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.keepreal.madagascar.common.PaymentState;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.UserPaymentType;
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
@@ -21,6 +22,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -114,9 +117,23 @@ public class PaymentDTOFactory {
 
         if (UserPaymentType.PAYMENT_TYPE_MEMBERSHIP.equals(userPaymentMessage.getType())) {
             userPaymentDTO.setType(PaymentType.MEMBERSHIP);
-            userPaymentDTO.setPrivileges();
+            userPaymentDTO.setPrivileges(Arrays.asList(membershipMessage.getDescription().split(",")));
+            userPaymentDTO.setTimeInMonths(membershipSkuMessage.getTimeInMonths());
+            userPaymentDTO.setName(membershipMessage.getName());
+
+            ZonedDateTime expiration = ZonedDateTime.ofInstant(Instant.ofEpochMilli(userPaymentMessage.getExpiresAt()), ZoneId.systemDefault());
+            userPaymentDTO.setExpiration(expiration.with(ChronoField.SECOND_OF_DAY, 0).toInstant().toEpochMilli());
+
+            if (userPaymentDTO.getExpiration() >= PERMANENT_TIMESTAMP) {
+                userPaymentDTO.setIsPermanent(true);
+            }
+        } else if (UserPaymentType.PAYMENT_TYPE_FEED.equals(userPaymentMessage.getType())) {
+            userPaymentDTO.setType(PaymentType.FEED);
+            userPaymentDTO.setName(Constants.PAYMENT_TYPE_FEED);
+            userPaymentDTO.setPrivileges(Collections.singletonList(String.format()));
         }
 
+        return null;
     }
 
     /**
