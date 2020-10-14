@@ -163,6 +163,12 @@ message UpdateFeedSaveAuthorityResponse {
     CommonStatus status = 1;
 }
 
+message UpdateFeedFeedgroupRequest {
+    string id = 1;
+    string feedgroupId = 2;
+    string userId = 3;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
@@ -172,11 +178,12 @@ service FeedService {
     rpc RetrieveFeedGroupFeedById (RetrieveFeedByIdRequest) returns (FeedGroupFeedResponse) {};
     rpc RetrieveFeedsByIds (RetrieveFeedsByIdsRequest) returns (FeedsResponse) {};
     rpc RetrieveMultipleFeeds (RetrieveMultipleFeedsRequest) returns (FeedsResponse) {};
-    rpc CreateDefaultFeed (CreateDefaultFeedRequest) returns (CreateDefaultFeedResponse) {}
-    rpc RetrieveMultipleTimelineFeeds (RetrieveMultipleFeedsRequest) returns (TimelineFeedsResponse) {}
-    rpc TopFeedById (TopFeedByIdRequest) returns (TopFeedByIdResponse) {}
-    rpc RetrieveToppedFeedById (RetrieveToppedFeedByIdRequest) returns (FeedResponse) {}
-    rpc UpdateFeedPaidById (UpdateFeedPaidByIdRequest) returns (UpdateFeedPaidByIdResponse) {}
-    rpc RetrieveFeedCountByIslandId (RetrieveFeedCountRequest) returns (RetrieveFeedCountResponse) {}
-    rpc UpdateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest) returns (UpdateFeedSaveAuthorityResponse) {}
+    rpc CreateDefaultFeed (CreateDefaultFeedRequest) returns (CreateDefaultFeedResponse) {};
+    rpc RetrieveMultipleTimelineFeeds (RetrieveMultipleFeedsRequest) returns (TimelineFeedsResponse) {};
+    rpc TopFeedById (TopFeedByIdRequest) returns (TopFeedByIdResponse) {};
+    rpc RetrieveToppedFeedById (RetrieveToppedFeedByIdRequest) returns (FeedResponse) {};
+    rpc UpdateFeedPaidById (UpdateFeedPaidByIdRequest) returns (UpdateFeedPaidByIdResponse) {};
+    rpc RetrieveFeedCountByIslandId (RetrieveFeedCountRequest) returns (RetrieveFeedCountResponse) {};
+    rpc UpdateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest) returns (UpdateFeedSaveAuthorityResponse) {};
+    rpc UpdateFeedFeedgroupById(UpdateFeedFeedgroupRequest) returns (FeedGroupFeedResponse) {};
 }

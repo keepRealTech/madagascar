@@ -6,6 +6,8 @@ import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.common.constants.Constants;
+import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
@@ -49,6 +51,7 @@ import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
 import swagger.model.PostFeedPayload;
 import swagger.model.PostFeedRequestV2;
+import swagger.model.PutFeedFeedgroupRequest;
 import swagger.model.TimelinesResponse;
 import swagger.model.TopFeedRequest;
 import swagger.model.ToppedFeedsDTO;
@@ -73,12 +76,6 @@ import java.util.stream.Collectors;
 @RestController
 @Slf4j
 public class FeedController implements FeedApi {
-
-    private static final String SUPER_ADMIN_USER_ID = "99999999";
-    private static final String POSTING_INSTRUCTION_TITLE = "高清原图、长篇文章、音频和视频发布指南:";
-    private static final String POSTING_INSTRUCTION_CONTENT = "1.在电脑端打开跳岛官网 tiaodaoapp.com\r\n" +
-            "2.微信扫码登录\r\n" +
-            "3.点击\"发布\"按钮";
 
     private final ImageService imageService;
     private final IslandService islandService;
@@ -167,7 +164,7 @@ public class FeedController implements FeedApi {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
         IslandMessage islandMessage = this.islandService.retrieveIslandById(feedMessage.getIslandId());
-        if (!userId.equals(FeedController.SUPER_ADMIN_USER_ID)
+        if (!userId.equals(Constants.SUPER_ADMIN_USER_ID)
                 && !userId.equals(islandMessage.getHostId())
                 && !userId.equals(feedMessage.getUserId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -528,8 +525,8 @@ public class FeedController implements FeedApi {
     @Override
     public ResponseEntity<TutorialResponse> apiV1FeedsTutorialGet() {
         TutorialDTO tutorialDTO = new TutorialDTO();
-        tutorialDTO.setTitle(FeedController.POSTING_INSTRUCTION_TITLE);
-        tutorialDTO.setContent(FeedController.POSTING_INSTRUCTION_CONTENT);
+        tutorialDTO.setTitle(Templates.POSTING_INSTRUCTION_TITLE);
+        tutorialDTO.setContent(Templates.POSTING_INSTRUCTION_CONTENT);
 
         TutorialResponse response = new TutorialResponse();
         response.setData(tutorialDTO);
@@ -658,6 +655,13 @@ public class FeedController implements FeedApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the feed save auth.
+     *
+     * @param id      id (required) Feed id.
+     * @param canSave can save feed content (optional, default to false).
+     * @return {@link DummyResponse}.
+     */
     @Override
     public ResponseEntity<DummyResponse> apiV1FeedsIdSaveAuthorityPut(String id, @Valid Boolean canSave) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -670,6 +674,30 @@ public class FeedController implements FeedApi {
 
         this.feedService.updateFeedSaveAuthority(id, canSave);
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the feed revise feed group.
+     *
+     * @param id                      id (required) Feed id.
+     * @param putFeedFeedgroupRequest (required) {@link PutFeedFeedgroupRequest}.
+     * @return {@link FullFeedResponse}.
+     */
+    @Override
+    public ResponseEntity<FullFeedResponse> apiV1FeedsIdFeedgroupsPut(String id, PutFeedFeedgroupRequest putFeedFeedgroupRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        FeedGroupFeedResponse feedGroupFeedResponse = this.feedService.updateFeedFeedgroupById(id,
+                userId, putFeedFeedgroupRequest.getFeedgroupId());
+
+        FullFeedResponse response = new FullFeedResponse();
+        response.setData(this.feedDTOFactory.valueOf(feedGroupFeedResponse.getFeed(),
+                feedGroupFeedResponse.getFeedGroup(),
+                feedGroupFeedResponse.getLastFeedId(),
+                feedGroupFeedResponse.getNextFeedId(),
+                true));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
