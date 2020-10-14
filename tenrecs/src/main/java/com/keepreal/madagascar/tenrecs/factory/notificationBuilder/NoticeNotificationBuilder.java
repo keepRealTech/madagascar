@@ -149,6 +149,7 @@ public class NoticeNotificationBuilder implements NotificationBuilder {
                 FeedPaymentNotice feedPaymentNotice = FeedPaymentNotice.builder()
                         .userId(this.event.getFeedPaymentEvent().getUserId())
                         .feedId(this.event.getFeedPaymentEvent().getFeedId())
+                        .priceInCents(this.event.getFeedPaymentEvent().getPriceInCents())
                         .build();
                 noticeBuilder.feedPaymentNotice(feedPaymentNotice);
 

@@ -115,6 +115,7 @@ public class NoticeNotificationMessageBuilder implements NotificationMessageBuil
                 FeedPaymentNotice feedPaymentNotice = FeedPaymentNotice.newBuilder()
                         .setFeedId(notice.getFeedPaymentNotice().getFeedId())
                         .setUserId(notice.getFeedPaymentNotice().getUserId())
+                        .setPriceInCents(notice.getFeedPaymentNotice().getPriceInCents())
                         .build();
 
                 noticeNotificationMessageBuilder.setFeedPaymentNotice(feedPaymentNotice);

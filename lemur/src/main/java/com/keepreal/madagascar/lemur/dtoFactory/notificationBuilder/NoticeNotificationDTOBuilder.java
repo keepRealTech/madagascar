@@ -23,6 +23,7 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
     private final static String SUPPORT_CONTENT = "支持了你";
     private final static String MEMBER_CONTENT = "支持了%d个月\"%s\"";
     private final static String MEMBER_PERMANENT_CONTENT = "支持了你的永久方案\"%s\"";
+    private final static String FEED_PAYMENT_CONTENT = "刚刚解锁了你的动态";
 
     private NotificationMessage notificationMessage;
     private IslandService islandService;
@@ -174,7 +175,21 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                         String.format(MEMBER_CONTENT, noticeMessage.getMemberNotice().getTimeInMonths(), noticeMessage.getMemberNotice().getMembershipName()));
                 noticeDTO.setPriceInCents(noticeMessage.getMemberNotice().getPriceInCents());
                 return noticeDTO;
+            case NOTICE_TYPE_FEED_NEW_PAYMENT:
+                noticeDTO.setNoticeType(NoticeType.ISLAND_NOTICE_NEW_MEMBER);
 
+                if (Objects.isNull(noticeMessage.getFeedPaymentNotice())) {
+                    return noticeDTO;
+                }
+
+                noticeDTO.setMember(
+                        this.userDTOFactory.briefValueOf(
+                                this.userService.retrieveUserById(
+                                        noticeMessage.getFeedPaymentNotice().getUserId())));
+                noticeDTO.setPriceInCents(noticeMessage.getFeedPaymentNotice().getPriceInCents());
+                noticeDTO.setContent(FEED_PAYMENT_CONTENT);
+
+                return noticeDTO;
             default:
         }
 

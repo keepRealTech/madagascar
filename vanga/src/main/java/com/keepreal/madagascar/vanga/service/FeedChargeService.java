@@ -62,7 +62,10 @@ public class FeedChargeService {
         this.paymentService.updateAll(paymentList);
         this.saveFeedCharge(order.getUserId(), order.getPropertyId());
 
-        this.notificationEventProducerService.produceNewFeedPaymentNotificationEventAsync(payment.getUserId(), payment.getPayeeId(), order.getPropertyId());
+        this.notificationEventProducerService.produceNewFeedPaymentNotificationEventAsync(payment.getUserId(),
+                payment.getPayeeId(),
+                order.getPropertyId(),
+                payment.getAmountInCents());
     }
 
     public FeedCharge findFeedCharge(String userId, String feedId) {

@@ -41,6 +41,7 @@ message MemberEvent {
 message FeedPaymentEvent {
     string feedId = 1;
     string userId = 2;
+    uint64 priceInCents = 3;
 }
 
 message CommentEvent {

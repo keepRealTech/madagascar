@@ -71,12 +71,13 @@ public class NotificationEventProducerService {
     /**
      * Produces new feed payment event into mq.
      *
-     * @param userId    User id.
-     * @param payeeId   Payee id.
-     * @param feedId    Feed id.
+     * @param userId       User id.
+     * @param payeeId      Payee id.
+     * @param feedId       Feed id.
+     * @param priceInCents Price in cents.
      */
-    public void produceNewFeedPaymentNotificationEventAsync(String userId, String payeeId, String feedId) {
-        Message message = this.createNewFeedPaymentEventMessage(userId, payeeId, feedId);
+    public void produceNewFeedPaymentNotificationEventAsync(String userId, String payeeId, String feedId, Long priceInCents) {
+        Message message = this.createNewFeedPaymentEventMessage(userId, payeeId, feedId, priceInCents);
         this.sendAsync(message);
     }
 
@@ -158,10 +159,11 @@ public class NotificationEventProducerService {
      * @param feedId Feed id.
      * @return {@link Message}.
      */
-    private Message createNewFeedPaymentEventMessage(String userId, String payeeId, String feedId) {
+    private Message createNewFeedPaymentEventMessage(String userId, String payeeId, String feedId, Long priceInCents) {
         FeedPaymentEvent feedPaymentEvent = FeedPaymentEvent.newBuilder()
                 .setUserId(userId)
                 .setFeedId(feedId)
+                .setPriceInCents(priceInCents)
                 .build();
 
         String uuid = UUID.randomUUID().toString();
