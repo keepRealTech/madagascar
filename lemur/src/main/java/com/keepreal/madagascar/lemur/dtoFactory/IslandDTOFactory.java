@@ -6,10 +6,9 @@ import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.service.ChatService;
-import com.keepreal.madagascar.lemur.service.FeedService;
-import com.keepreal.madagascar.lemur.service.MembershipService;
-import com.keepreal.madagascar.lemur.service.RepostService;
+import com.keepreal.madagascar.lemur.service.PaymentService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import com.keepreal.madagascar.vanga.IncomeMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
@@ -47,6 +46,7 @@ public class IslandDTOFactory {
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final GeneralConfiguration generalConfiguration;
+    private final PaymentService paymentService;
 
     /**
      * Constructs the island dto factory.
@@ -55,15 +55,18 @@ public class IslandDTOFactory {
      * @param userService          {@link UserService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
+     * @param paymentService       {@link PaymentService}.
      */
     public IslandDTOFactory(ChatService chatService,
                             UserService userService,
                             UserDTOFactory userDTOFactory,
-                            GeneralConfiguration generalConfiguration) {
+                            GeneralConfiguration generalConfiguration,
+                            PaymentService paymentService) {
         this.chatService = chatService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.generalConfiguration = generalConfiguration;
+        this.paymentService = paymentService;
     }
 
     /**
@@ -170,6 +173,15 @@ public class IslandDTOFactory {
 
         fullIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 
+        fullIslandDTO.setShowIncome(island.getShowIncome());
+        if (island.getShowIncome()) {
+            IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(island.getHostId());
+            fullIslandDTO.setSupportCount(incomeMessage.getSupportCount());
+            fullIslandDTO.setCentsInMonth(incomeMessage.getCents());
+        } else {
+            fullIslandDTO.setSupportCount(0);
+            fullIslandDTO.setCentsInMonth(0L);
+        }
         return fullIslandDTO;
     }
 

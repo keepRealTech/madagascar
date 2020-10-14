@@ -200,6 +200,7 @@ message IslandMessage {
     int32 memberCount = 8;
     string secret = 9;
     IslandAccessType islandAccessType = 10;
+    bool showIncome = 11;
 }
 
 message RepostMessage {
