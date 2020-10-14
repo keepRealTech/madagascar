@@ -2248,7 +2248,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupportTargetResponse'
-    post:
+    put:
       tags:
         - Island
       summary: 修改岛支持目标
