@@ -3091,8 +3091,10 @@ components:
           properties:
             secret:
               type: string
-            supportTarget:
-              $ref: '#/components/schemas/SupportTargetDTO'
+            supportTargets:
+              type: array
+              items:
+               $ref: '#/components/schemas/SupportTargetDTO'
             showIncome:
               type: boolean
             supportCount:
@@ -5630,6 +5632,8 @@ components:
     SupportTargetDTO:
       type: object
       properties:
+        targetId:
+          type: string
         targetType:
           $ref: '#/components/schemas/SupportTargetType'
         timeType:
@@ -5653,6 +5657,8 @@ components:
     PostSupportTargetRequest:
       type: object
       properties:
+        targetId:
+          type: string
         targetType:
           $ref: '#/components/schemas/SupportTargetType'
         timeType:
@@ -5671,4 +5677,6 @@ components:
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/SupportTargetDTO'
+              type: array
+              items:
+                $ref: '#/components/schemas/SupportTargetDTO'
