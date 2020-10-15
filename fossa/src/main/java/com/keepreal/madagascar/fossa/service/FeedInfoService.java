@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.PicturesMessage;
 import com.keepreal.madagascar.common.ReactionType;
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.fossa.TimelineFeedMessage;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
@@ -39,8 +40,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FeedInfoService {
-
-    public static final int DEFAULT_LAST_COMMENT_COUNT = 2;
 
     private final MongoTemplate mongoTemplate;
     private final CommentService commentService;
@@ -181,7 +180,7 @@ public class FeedInfoService {
 
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
 
-        List<CommentMessage> lastCommentMessage = this.commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
+        List<CommentMessage> lastCommentMessage = this.commentService.getCommentsMessage(feedInfo.getId(), Constants.DEFAULT_FEED_LAST_COMMENT_COUNT);
 
         return this.getFeedMessage(feedInfo, userId, myMembershipIds, lastCommentMessage, isLiked);
     }

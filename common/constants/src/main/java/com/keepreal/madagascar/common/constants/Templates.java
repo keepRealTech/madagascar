@@ -26,4 +26,8 @@ public class Templates {
     public final static String LEMUR_NOTICE_MEMBER_PERMANENT_CONTENT = "支持了你的永久方案\"%s\"";
     public final static String LEMUR_NOTICE_FEED_PAYMENT_CONTENT = "刚刚解锁了你的动态";
 
+
+    public static final String PAYMENT_TYPE_FEED = "单独解锁";
+    public static final String PAYMENT_FEED_PRIVILEGE = "支付%d元立即解锁专属动态";
+
 }
