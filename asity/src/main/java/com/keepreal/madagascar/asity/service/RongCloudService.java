@@ -7,6 +7,7 @@ import com.keepreal.madagascar.coua.CreateUserEvent;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.coua.CreateIslandEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
+import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import io.rong.RongCloud;
 import io.rong.messages.TxtMessage;
 import io.rong.models.Result;
@@ -223,12 +224,10 @@ public class RongCloudService {
                 .setIsIncludeSender(1);
         this.client.message.msgPrivate.send(hostMessage);
 
-
         TxtMessage memberTextMessage;
         if (Objects.isNull(membership) || !membership.getUseCustomMessage()) {
             memberTextMessage = new TxtMessage(
-                    String.format(RongCloudService.MEMBER_TEMPLATE,
-                            event.getMemberEvent().getMembershipName()),
+                    RongCloudService.MEMBER_TEMPLATE,
                     "");
         } else {
             memberTextMessage = new TxtMessage(
@@ -236,9 +235,18 @@ public class RongCloudService {
                     "");
         }
 
+        String targetId;
+        if (Objects.nonNull(event.getMemberEvent())) {
+            targetId = event.getMemberEvent().getMemberId();
+        } else if (Objects.nonNull(event.getFeedPaymentEvent())) {
+            targetId = event.getFeedPaymentEvent().getUserId();
+        } else {
+            return;
+        }
+
         PrivateMessage memberMessage = new PrivateMessage()
                 .setSenderId(event.getUserId())
-                .setTargetId(new String[]{event.getMemberEvent().getMemberId()})
+                .setTargetId(new String[]{targetId})
                 .setObjectName(memberTextMessage.getType())
                 .setContent(memberTextMessage)
                 .setVerifyBlacklist(0)

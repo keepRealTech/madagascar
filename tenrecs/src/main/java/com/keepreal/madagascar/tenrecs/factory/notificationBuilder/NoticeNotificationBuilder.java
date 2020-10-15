@@ -6,6 +6,7 @@ import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import com.keepreal.madagascar.tenrecs.model.Notice;
 import com.keepreal.madagascar.tenrecs.model.Notification;
+import com.keepreal.madagascar.tenrecs.model.notice.FeedPaymentNotice;
 import com.keepreal.madagascar.tenrecs.model.notice.MemberNotice;
 import com.keepreal.madagascar.tenrecs.model.notice.SubscribeNotice;
 import com.keepreal.madagascar.tenrecs.service.NotificationService;
@@ -58,7 +59,7 @@ public class NoticeNotificationBuilder implements NotificationBuilder {
             return null;
         }
 
-        if (!NotificationEventType.NOTIFICATION_EVENT_NEW_MEMBER.equals(this.event.getType())) {
+        if (NotificationEventType.NOTIFICATION_EVENT_NEW_SUBSCRIBE.equals(this.event.getType())) {
             Optional<Notification> lastNotification = this.notificationService.retrieveLastSubscribeNoticeByIslandIdAndSubscriberId(
                     this.event.getSubscribeEvent().getIslandId(), this.event.getSubscribeEvent().getSubscriberId());
             if (lastNotification.isPresent()
@@ -136,6 +137,21 @@ public class NoticeNotificationBuilder implements NotificationBuilder {
                         .timeInMonths(0)
                         .build();
                 noticeBuilder.memberNotice(support);
+
+                return noticeBuilder.build();
+            case NOTIFICATION_EVENT_NEW_FEED_PAYMENT:
+                noticeBuilder.type(NoticeType.NOTICE_TYPE_FEED_NEW_PAYMENT);
+
+                if (Objects.isNull(this.event.getFeedPaymentEvent())) {
+                    return noticeBuilder.build();
+                }
+
+                FeedPaymentNotice feedPaymentNotice = FeedPaymentNotice.builder()
+                        .userId(this.event.getFeedPaymentEvent().getUserId())
+                        .feedId(this.event.getFeedPaymentEvent().getFeedId())
+                        .priceInCents(this.event.getFeedPaymentEvent().getPriceInCents())
+                        .build();
+                noticeBuilder.feedPaymentNotice(feedPaymentNotice);
 
                 return noticeBuilder.build();
             default:
