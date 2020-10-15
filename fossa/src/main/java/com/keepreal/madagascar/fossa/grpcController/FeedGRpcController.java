@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.PageResponse;
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
@@ -72,8 +73,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static com.keepreal.madagascar.fossa.service.FeedInfoService.DEFAULT_LAST_COMMENT_COUNT;
 
 /**
  * Represents the feed GRpc controller.
@@ -390,7 +389,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      */
     @Override
     public void createDefaultFeed(CreateDefaultFeedRequest request, StreamObserver<CreateDefaultFeedResponse> responseObserver) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Templates.DEFAULT_FEED_TEXT);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Templates.FOSSA_DEFAULT_FEED_TEXT);
         String text = LocalDateTime.now().format(formatter);
 
         FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
@@ -425,7 +424,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         Set<String> likedFeedIds = this.reactionService.retrieveReactionsByFeedIdsAndUserId(request.getIdsList(), request.getUserId()).stream()
                 .map(ReactionInfo::getFeedId).collect(Collectors.toSet());
 
-        Map<String, List<CommentMessage>> commentMap = this.commentService.getLastCommentsByFeedIds(request.getIdsList(), DEFAULT_LAST_COMMENT_COUNT);
+        Map<String, List<CommentMessage>> commentMap = this.commentService.getLastCommentsByFeedIds(request.getIdsList(), Constants.DEFAULT_FEED_LAST_COMMENT_COUNT);
 
         List<FeedMessage> feedMessageList = feedInfoList.stream()
                 .map(info -> this.feedInfoService.getFeedMessage(info,

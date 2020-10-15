@@ -2,6 +2,7 @@ package com.keepreal.madagascar.vanga.service;
 
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
+import com.keepreal.madagascar.tenrecs.FeedPaymentEvent;
 import com.keepreal.madagascar.tenrecs.MemberEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
@@ -64,6 +65,19 @@ public class NotificationEventProducerService {
 
     public void produceNewSupportNotificationEventAsync(String userId, String payeeId, Long priceInCents) {
         Message message = this.createNewSupportEventMessage(userId, payeeId, priceInCents);
+        this.sendAsync(message);
+    }
+
+    /**
+     * Produces new feed payment event into mq.
+     *
+     * @param userId       User id.
+     * @param payeeId      Payee id.
+     * @param feedId       Feed id.
+     * @param priceInCents Price in cents.
+     */
+    public void produceNewFeedPaymentNotificationEventAsync(String userId, String payeeId, String feedId, Long priceInCents) {
+        Message message = this.createNewFeedPaymentEventMessage(userId, payeeId, feedId, priceInCents);
         this.sendAsync(message);
     }
 
@@ -137,4 +151,31 @@ public class NotificationEventProducerService {
         return new Message(this.notificationEventProducerConfiguration.getTopic(),
                 this.notificationEventProducerConfiguration.getTag(), uuid, event.toByteArray());
     }
+
+    /**
+     * Creates a new feed payment event message.
+     *
+     * @param userId User id.
+     * @param feedId Feed id.
+     * @return {@link Message}.
+     */
+    private Message createNewFeedPaymentEventMessage(String userId, String payeeId, String feedId, Long priceInCents) {
+        FeedPaymentEvent feedPaymentEvent = FeedPaymentEvent.newBuilder()
+                .setUserId(userId)
+                .setFeedId(feedId)
+                .setPriceInCents(priceInCents)
+                .build();
+
+        String uuid = UUID.randomUUID().toString();
+        NotificationEvent event = NotificationEvent.newBuilder()
+                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_FEED_PAYMENT)
+                .setUserId(payeeId)
+                .setFeedPaymentEvent(feedPaymentEvent)
+                .setTimestamp(System.currentTimeMillis())
+                .setEventId(uuid)
+                .build();
+        return new Message(this.notificationEventProducerConfiguration.getTopic(),
+                this.notificationEventProducerConfiguration.getTag(), uuid, event.toByteArray());
+    }
+
 }
