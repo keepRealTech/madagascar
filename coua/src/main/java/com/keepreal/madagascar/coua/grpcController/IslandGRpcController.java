@@ -18,6 +18,8 @@ import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
 import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
+import com.keepreal.madagascar.coua.CreateOrUpdateSupportTargetRequest;
+import com.keepreal.madagascar.coua.DeleteSupportTargetRequest;
 import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.DiscoverIslandsResponse;
 import com.keepreal.madagascar.coua.DismissIntroductionRequest;
@@ -38,10 +40,14 @@ import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslanderPortraitUrlRequest;
 import com.keepreal.madagascar.coua.RetrieveIslanderPortraitUrlResponse;
 import com.keepreal.madagascar.coua.RetrieveMultipleIslandsRequest;
+import com.keepreal.madagascar.coua.RetrieveSupportTargetsRequest;
 import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateRequest;
 import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateResponse;
 import com.keepreal.madagascar.coua.SubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.SubscribeIslandResponse;
+import com.keepreal.madagascar.coua.SupportTargetResponse;
+import com.keepreal.madagascar.coua.SupportTargetsResponse;
+import com.keepreal.madagascar.coua.TargetType;
 import com.keepreal.madagascar.coua.UnsubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
@@ -49,6 +55,7 @@ import com.keepreal.madagascar.coua.UpdateLastFeedAtResponse;
 import com.keepreal.madagascar.coua.common.SubscriptionState;
 import com.keepreal.madagascar.coua.model.IslandInfo;
 import com.keepreal.madagascar.coua.model.Subscription;
+import com.keepreal.madagascar.coua.model.SupportTarget;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.service.FeedService;
 import com.keepreal.madagascar.coua.service.IslandEventProducerService;
@@ -671,4 +678,129 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void createOrUpdateSupportTarget(CreateOrUpdateSupportTargetRequest request, StreamObserver<SupportTargetResponse> responseObserver) {
+        SupportTarget supportTarget;
+        SupportTargetResponse.Builder responseBuilder = SupportTargetResponse.newBuilder();
+
+        if (!request.hasId()) {
+            SupportTarget.SupportTargetBuilder builder = SupportTarget.builder()
+                    .hostId(request.getHostId())
+                    .islandId(request.getIslandId())
+                    .timeType(request.getTimeType().getValue())
+                    .content(request.getContent().getValue())
+                    .targetType(request.getTargetType().getValue());
+
+            switch (this.convertToTargetType(request.getTargetType().getValue())) {
+                case SUPPORTER:
+                    builder.totalSupporterNum(request.getTotalSupporterNum().getValue());
+                    break;
+                case AMOUNT:
+                    builder.totalAmountInCents(request.getTotalAmountInCents().getValue());
+                    break;
+                case UNRECOGNIZED:
+                    log.error("unknown support target type islandId is {}, targetId is {}", request.getIslandId(),
+                            StringUtils.isEmpty(request.getId().getValue()) ? "no target id" : request.getId());
+                    break;
+            }
+            supportTarget = this.islandInfoService.createSupportTarget(builder.build());
+        } else {
+            supportTarget = this.islandInfoService.findSupportTargetByIdAndDeletedIsFalse(request.getId().getValue());
+            if (Objects.isNull(supportTarget)) {
+                log.error("retrieve supportTarget return null and id is {}", request.getId());
+                responseBuilder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUPPORT_TARGET_NOT_FOUND_ERROR));
+                responseObserver.onNext(responseBuilder.build());
+                responseObserver.onCompleted();
+            }
+
+            if (request.hasTargetType() && supportTarget.getTargetType() != request.getTargetType().getValue()) {
+                supportTarget.setDeleted(true);
+                this.islandInfoService.updateSupportTarget(supportTarget);
+                SupportTarget supportTargetNew = new SupportTarget();
+                supportTargetNew.setTargetType(request.getTargetType().getValue());
+                supportTargetNew.setIslandId(request.getIslandId());
+                supportTargetNew.setHostId(request.getHostId());
+                supportTargetNew.setTimeType(request.getTimeType().getValue());
+                supportTarget = this.islandInfoService.createSupportTarget(supportTargetNew);
+            }
+
+            if (request.hasTimeType()) {
+                supportTarget.setTimeType(request.getTimeType().getValue());
+            }
+
+            if (request.hasContent()) {
+                supportTarget.setContent(request.getContent().getValue());
+            }
+
+            if (request.hasTotalAmountInCents()) {
+                supportTarget.setTotalAmountInCents(request.getTotalAmountInCents().getValue());
+            }
+
+            if (request.hasTotalSupporterNum()) {
+                supportTarget.setTotalSupporterNum(request.getTotalSupporterNum().getValue());
+            }
+
+            supportTarget = this.islandInfoService.updateSupportTarget(supportTarget);
+        }
+
+        SupportTargetResponse response = SupportTargetResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setSupportTarget(this.islandInfoService.getSupportTargetMessage(supportTarget))
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * 删除支持目标
+     *
+     * @param request {@link DeleteSupportTargetRequest}
+     * @param responseObserver {@link CommonStatus}
+     */
+    @Override
+    public void deleteSupportTarget(DeleteSupportTargetRequest request, StreamObserver<CommonStatus> responseObserver) {
+        SupportTarget supportTarget = this.islandInfoService.findSupportTargetByIdAndDeletedIsFalse(request.getId());
+        if (Objects.isNull(supportTarget) || !request.getHostId().equals(supportTarget.getHostId())) {
+            responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN));
+            responseObserver.onCompleted();
+        }
+        supportTarget.setDeleted(true);
+        this.islandInfoService.updateSupportTarget(supportTarget);
+        responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * 获取支持目标
+     *
+     * @param request {@link RetrieveSupportTargetsRequest}
+     * @param responseObserver {@link SupportTargetsResponse}
+     */
+    @Override
+    public void retrieveSupportTargets(RetrieveSupportTargetsRequest request, StreamObserver<SupportTargetsResponse> responseObserver) {
+        List<SupportTarget> list = this.islandInfoService.findAllSupportTargetByIslandIdAndHostId(request.getIslandId(), request.getHostId());
+        SupportTargetsResponse response = SupportTargetsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllSupportTargets(list.stream().map(this.islandInfoService::getSupportTargetMessage).collect(Collectors.toList()))
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * converts int to {@link TargetType}
+     *
+     * @param targetTypeInteger int num
+     * @return {@link TargetType}
+     */
+    private TargetType convertToTargetType(Integer targetTypeInteger) {
+        switch (targetTypeInteger) {
+            case 1:
+                return TargetType.SUPPORTER;
+            case 2:
+                return TargetType.AMOUNT;
+            default:
+                return TargetType.UNRECOGNIZED;
+        }
+    }
 }

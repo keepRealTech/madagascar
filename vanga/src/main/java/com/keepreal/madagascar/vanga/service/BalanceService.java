@@ -18,17 +18,21 @@ public class BalanceService {
 
     private final BalanceRepository balanceRepository;
     private final LongIdGenerator idGenerator;
+    private final SupportTargetService supportTargetService;
 
     /**
      * Constructs the balance service.
      *
      * @param balanceRepository {@link BalanceRepository}.
      * @param idGenerator       {@link LongIdGenerator}.
+     * @param supportTargetService {@link SupportTargetService}
      */
     public BalanceService(BalanceRepository balanceRepository,
-                          LongIdGenerator idGenerator) {
+                          LongIdGenerator idGenerator,
+                          SupportTargetService supportTargetService) {
         this.balanceRepository = balanceRepository;
         this.idGenerator = idGenerator;
+        this.supportTargetService = supportTargetService;
     }
 
     /**
@@ -107,6 +111,7 @@ public class BalanceService {
         balance = this.balanceRepository.findByIdAndDeletedIsFalse(balance.getId());
         balance.setBalanceInCents(balance.getBalanceInCents() + amountInCents);
 
+        this.supportTargetService.UpdateSupportTargetIfExisted(balance.getUserId(), amountInCents);
         return this.updateBalance(balance);
     }
 
