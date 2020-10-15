@@ -29,7 +29,7 @@ public class GrpcChannelFactory {
      * @param tracer            {@link Tracer}.
      */
     public GrpcChannelFactory(@Qualifier("fossaConfiguration") GrpcConfiguration fossaConfiguration,
-                              @Qualifier("fossaConfiguration") GrpcConfiguration couaConfiguration,
+                              @Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration,
                               Tracer tracer) {
         this.fossaConfiguration = fossaConfiguration;
         this.couaConfiguration = couaConfiguration;
