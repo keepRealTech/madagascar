@@ -18,4 +18,6 @@ public interface FeedGroupRepository extends MongoRepository<FeedGroup, String> 
 
     Page<FeedGroup> findAllByIslandIdAndDeletedIsFalseOrderByLastFeedTimeDesc(String islandId, Pageable pageable);
 
+    Boolean existsByHostIdAndDeletedIsFalse(String userId);
+
 }
