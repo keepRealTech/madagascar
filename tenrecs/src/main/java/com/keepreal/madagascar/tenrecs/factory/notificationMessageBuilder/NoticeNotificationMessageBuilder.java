@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.tenrecs.factory.notificationMessageBuilder;
 
 import com.keepreal.madagascar.common.NotificationType;
+import com.keepreal.madagascar.tenrecs.FeedPaymentNotice;
 import com.keepreal.madagascar.tenrecs.NoticeNotificationMessage;
 import com.keepreal.madagascar.tenrecs.NotificationMessage;
 import com.keepreal.madagascar.tenrecs.MemberNotice;
@@ -105,6 +106,19 @@ public class NoticeNotificationMessageBuilder implements NotificationMessageBuil
                         .setPermanent(notice.getMemberNotice().getPermanent() == null ? false : notice.getMemberNotice().getPermanent())
                         .build();
                 noticeNotificationMessageBuilder.setMemberNotice(memberNotice);
+                return noticeNotificationMessageBuilder.build();
+            case NOTICE_TYPE_FEED_NEW_PAYMENT:
+                if (Objects.isNull(notice.getFeedPaymentNotice())) {
+                    return noticeNotificationMessageBuilder.build();
+                }
+
+                FeedPaymentNotice feedPaymentNotice = FeedPaymentNotice.newBuilder()
+                        .setFeedId(notice.getFeedPaymentNotice().getFeedId())
+                        .setUserId(notice.getFeedPaymentNotice().getUserId())
+                        .setPriceInCents(notice.getFeedPaymentNotice().getPriceInCents())
+                        .build();
+
+                noticeNotificationMessageBuilder.setFeedPaymentNotice(feedPaymentNotice);
                 return noticeNotificationMessageBuilder.build();
             default:
         }

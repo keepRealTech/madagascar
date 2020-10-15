@@ -35,7 +35,8 @@ message NoticeNotificationMessage {
         SubscribeNotice SubscribeNotice = 2;
         MemberNotice memberNotice = 3;
         NewQuestionNotice newQuestionNotice = 4;
-        NewAnswerNotice newAnswerNotice= 5;
+        NewAnswerNotice newAnswerNotice = 5;
+        FeedPaymentNotice feedPaymentNotice = 6;
     }
 }
 message NewQuestionNotice {
@@ -46,6 +47,12 @@ message NewQuestionNotice {
 message NewAnswerNotice {
     string feedId = 1;
     string authorId = 2;
+}
+
+message FeedPaymentNotice {
+    string feedId = 1;
+    string userId = 2;
+    uint64 priceInCents = 3;
 }
 
 message SubscribeNotice {

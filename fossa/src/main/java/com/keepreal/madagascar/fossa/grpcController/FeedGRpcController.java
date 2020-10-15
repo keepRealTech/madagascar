@@ -389,7 +389,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      */
     @Override
     public void createDefaultFeed(CreateDefaultFeedRequest request, StreamObserver<CreateDefaultFeedResponse> responseObserver) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Templates.DEFAULT_FEED_TEXT);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(Templates.FOSSA_DEFAULT_FEED_TEXT);
         String text = LocalDateTime.now().format(formatter);
 
         FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();

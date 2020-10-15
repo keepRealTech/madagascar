@@ -24,15 +24,18 @@ public class FeedChargeService {
     private final BalanceService balanceService;
     private final FeedChargeRepository feedChargeRepository;
     private final LongIdGenerator idGenerator;
+    private final NotificationEventProducerService notificationEventProducerService;
 
     public FeedChargeService(PaymentService paymentService,
                              BalanceService balanceService,
                              FeedChargeRepository feedChargeRepository,
-                             LongIdGenerator idGenerator) {
+                             LongIdGenerator idGenerator,
+                             NotificationEventProducerService notificationEventProducerService) {
         this.paymentService = paymentService;
         this.balanceService = balanceService;
         this.feedChargeRepository = feedChargeRepository;
         this.idGenerator = idGenerator;
+        this.notificationEventProducerService = notificationEventProducerService;
     }
 
     @Transactional
@@ -58,6 +61,11 @@ public class FeedChargeService {
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
         this.saveFeedCharge(order.getUserId(), order.getPropertyId());
+
+        this.notificationEventProducerService.produceNewFeedPaymentNotificationEventAsync(payment.getUserId(),
+                payment.getPayeeId(),
+                order.getPropertyId(),
+                payment.getAmountInCents());
     }
 
     public FeedCharge findFeedCharge(String userId, String feedId) {

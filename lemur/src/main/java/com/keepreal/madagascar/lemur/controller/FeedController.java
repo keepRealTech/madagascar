@@ -525,8 +525,8 @@ public class FeedController implements FeedApi {
     @Override
     public ResponseEntity<TutorialResponse> apiV1FeedsTutorialGet() {
         TutorialDTO tutorialDTO = new TutorialDTO();
-        tutorialDTO.setTitle(Templates.POSTING_INSTRUCTION_TITLE);
-        tutorialDTO.setContent(Templates.POSTING_INSTRUCTION_CONTENT);
+        tutorialDTO.setTitle(Templates.LEMUR_POSTING_INSTRUCTION_TITLE);
+        tutorialDTO.setContent(Templates.LEMUR_POSTING_INSTRUCTION_CONTENT);
 
         TutorialResponse response = new TutorialResponse();
         response.setData(tutorialDTO);
