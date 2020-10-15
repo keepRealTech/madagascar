@@ -138,6 +138,15 @@ public class IslandDTOFactory {
         recommendIslandDTO.setPortraitImageUri(discoverIsland.getIsland().getPortraitImageUri());
         recommendIslandDTO.setAccessType(this.convertAccessType(discoverIsland.getIsland().getIslandAccessType()));
         recommendIslandDTO.setMemberCount(discoverIsland.getIsland().getMemberCount());
+        recommendIslandDTO.setShowIncome(discoverIsland.getIsland().getShowIncome());
+        if (discoverIsland.getIsland().getShowIncome()) {
+            IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(discoverIsland.getIsland().getHostId());
+            recommendIslandDTO.setSupportCount(incomeMessage.getSupportCount());
+            recommendIslandDTO.setCentsInMonth(incomeMessage.getCents());
+        } else {
+            recommendIslandDTO.setSupportCount(0);
+            recommendIslandDTO.setCentsInMonth(0L);
+        }
 
         recommendIslandDTO.setRecommendation(discoverIsland.getRecommendation());
         recommendIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(discoverIsland.getIsland().getHostId())));

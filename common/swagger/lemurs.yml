@@ -3084,6 +3084,13 @@ components:
               type: integer
             recommendation:
               type: string
+            showIncome:
+              type: boolean
+            supportCount:
+              type: integer
+            centsInMonth:
+              type: integer
+              format: int64
     FullIslandDTO:
       allOf:
         - $ref: '#/components/schemas/IslandDTO'
