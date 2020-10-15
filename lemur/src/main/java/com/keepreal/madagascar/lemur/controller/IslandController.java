@@ -59,8 +59,6 @@ import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
 import swagger.model.SubscribeIslandRequest;
 import swagger.model.SupportTargetResponse;
-import swagger.model.SupportTargetTimeType;
-import swagger.model.SupportTargetType;
 import swagger.model.SupportTargetsResponse;
 import swagger.model.UsersResponse;
 

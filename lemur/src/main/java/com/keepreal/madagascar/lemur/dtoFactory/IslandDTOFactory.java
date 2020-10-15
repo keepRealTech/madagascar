@@ -6,9 +6,7 @@ import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.service.ChatService;
-import com.keepreal.madagascar.lemur.service.FeedService;
-import com.keepreal.madagascar.lemur.service.MembershipService;
-import com.keepreal.madagascar.lemur.service.RepostService;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -25,6 +23,7 @@ import swagger.model.RecommendIslandDTO;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the island dto factory.
@@ -47,6 +46,8 @@ public class IslandDTOFactory {
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
     private final GeneralConfiguration generalConfiguration;
+    private final IslandService islandService;
+    private final SupportTargetDTOFactory supportTargetDTOFactory;
 
     /**
      * Constructs the island dto factory.
@@ -55,15 +56,21 @@ public class IslandDTOFactory {
      * @param userService          {@link UserService}.
      * @param userDTOFactory       {@link UserDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
+     * @param islandService        {@link IslandService}
+     * @param supportTargetDTOFactory {@link SupportTargetDTOFactory}
      */
     public IslandDTOFactory(ChatService chatService,
                             UserService userService,
                             UserDTOFactory userDTOFactory,
-                            GeneralConfiguration generalConfiguration) {
+                            GeneralConfiguration generalConfiguration,
+                            IslandService islandService,
+                            SupportTargetDTOFactory supportTargetDTOFactory) {
         this.chatService = chatService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.generalConfiguration = generalConfiguration;
+        this.islandService = islandService;
+        this.supportTargetDTOFactory = supportTargetDTOFactory;
     }
 
     /**
@@ -170,6 +177,8 @@ public class IslandDTOFactory {
 
         fullIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 
+        fullIslandDTO.setSupportTargets(this.islandService.retrieveSupportTargetsByIslandIdAndHostId(island.getId(), island.getHostId())
+                                        .stream().map(this.supportTargetDTOFactory::valueOf).collect(Collectors.toList()));
         return fullIslandDTO;
     }
 

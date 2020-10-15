@@ -9,6 +9,7 @@ import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.coua.SupportTargetMessage;
+import com.keepreal.madagascar.coua.TimeType;
 import com.keepreal.madagascar.coua.dao.IslandDiscoveryRepository;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
 import com.keepreal.madagascar.coua.dao.SupportTargetRepository;
@@ -20,6 +21,7 @@ import com.keepreal.madagascar.coua.util.PageResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -399,6 +401,14 @@ public class IslandInfoService {
             return this.supportTargetRepository.findAllByHostIdAndDeletedIsFalse(hostId);
         }
         return this.supportTargetRepository.findAllByIslandIdAndHostIdAndDeletedIsFalse(islandId, hostId);
+    }
+
+    /**
+     * 目标数据每月1日0:00归零
+     */
+    @Scheduled(cron = "0 0 0 1 * ? ")
+    public void clearSupportTargetPerMonth() {
+        this.supportTargetRepository.clearSupportTargetByTimeType(TimeType.PER_MONTH_VALUE);
     }
 
 }

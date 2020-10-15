@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.snowflake.annotation.EnableIdGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * @program: madagascar
@@ -14,6 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @SpringBootApplication
 @EnableIdGenerator
 @EnableJpaAuditing
+@EnableScheduling
 public class CouaApplication {
 
     public static void main(String[] args) {
