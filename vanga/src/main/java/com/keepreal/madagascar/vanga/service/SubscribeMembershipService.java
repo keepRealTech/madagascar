@@ -3,6 +3,7 @@ package com.keepreal.madagascar.vanga.service;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import com.keepreal.madagascar.vanga.SubscribeMembershipMessage;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.IosOrder;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
@@ -11,7 +12,6 @@ import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.PaymentType;
 import com.keepreal.madagascar.vanga.model.SubscribeMembership;
-import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.OrderState;
 import com.keepreal.madagascar.vanga.repository.SubscribeMembershipRepository;
 import com.keepreal.madagascar.vanga.util.AutoRedisLock;
@@ -263,6 +263,32 @@ public class SubscribeMembershipService {
      */
     public void mergeUserSubscribeMembership(String wechatUserId, String webMobileUserId) {
         this.subscriptionMemberRepository.mergeUserSubscribeMembership(wechatUserId, webMobileUserId);
+    }
+
+    /**
+     * Retrieve subscribeMembership by user id and island id.
+     *
+     * @param userId    user id.
+     * @param islandId  island id.
+     * @return  {@link SubscribeMembership}.
+     */
+    public List<SubscribeMembership> retrieveSubscribeMembership(String userId, String islandId) {
+        return this.subscriptionMemberRepository.findSubscribeMembershipsByUserIdAndIslandId(userId, islandId);
+    }
+
+    /**
+     * Build subscribeMembershipMessage.
+     *
+     * @param subscribeMembership   {@link SubscribeMembership}.
+     * @return  {@link SubscribeMembershipMessage}.
+     */
+    public SubscribeMembershipMessage getMessage(SubscribeMembership subscribeMembership) {
+        return SubscribeMembershipMessage.newBuilder()
+                .setUserId(subscribeMembership.getUserId())
+                .setIslandId(subscribeMembership.getIslandId())
+                .setMembershipId(subscribeMembership.getMembershipId())
+                .setExpiredTime(subscribeMembership.getExpireTime())
+                .build();
     }
 
     /**

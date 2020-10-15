@@ -6,10 +6,9 @@ import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.service.ChatService;
-import com.keepreal.madagascar.lemur.service.FeedService;
-import com.keepreal.madagascar.lemur.service.MembershipService;
-import com.keepreal.madagascar.lemur.service.RepostService;
+import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import com.keepreal.madagascar.vanga.SubscribeMembershipMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
@@ -21,9 +20,11 @@ import swagger.model.IslandAccessType;
 import swagger.model.IslandDTO;
 import swagger.model.IslandIdentityDTO;
 import swagger.model.IslandProfileDTO;
+import swagger.model.PrivilegeState;
 import swagger.model.RecommendIslandDTO;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,23 +47,27 @@ public class IslandDTOFactory {
     private final ChatService chatService;
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final SubscribeMembershipService subscribeMembershipService;
     private final GeneralConfiguration generalConfiguration;
 
     /**
      * Constructs the island dto factory.
      *
-     * @param chatService          {@link ChatService}.
-     * @param userService          {@link UserService}.
-     * @param userDTOFactory       {@link UserDTOFactory}.
-     * @param generalConfiguration {@link GeneralConfiguration}.
+     * @param chatService                {@link ChatService}.
+     * @param userService                {@link UserService}.
+     * @param userDTOFactory             {@link UserDTOFactory}.
+     * @param subscribeMembershipService {@link SubscribeMembershipService}.
+     * @param generalConfiguration       {@link GeneralConfiguration}.
      */
     public IslandDTOFactory(ChatService chatService,
                             UserService userService,
                             UserDTOFactory userDTOFactory,
+                            SubscribeMembershipService subscribeMembershipService,
                             GeneralConfiguration generalConfiguration) {
         this.chatService = chatService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.subscribeMembershipService = subscribeMembershipService;
         this.generalConfiguration = generalConfiguration;
     }
 
@@ -209,6 +214,7 @@ public class IslandDTOFactory {
             islandProfileDTO.setIntroduction(this.buildSubscriberIntroduction(islandProfileResponse.getUserShouldIntroduce()));
         }
 
+        this.processShowPrivilege(islandProfileDTO, userId, islandProfileResponse.getIsland().getId());
         return islandProfileDTO;
     }
 
@@ -312,4 +318,22 @@ public class IslandDTOFactory {
         }
     }
 
+    private void processShowPrivilege(IslandProfileDTO islandProfileDTO, String userId, String islandId) {
+        List<SubscribeMembershipMessage> messageList = this.subscribeMembershipService.retrieveSubscribeMembership(userId, islandId);
+        if (messageList.isEmpty()) {
+            islandProfileDTO.setShowPrivilege(false);
+            islandProfileDTO.setPrivilegeState(PrivilegeState.NONE);
+        } else {
+            long currentTime = System.currentTimeMillis();
+            boolean expired = true;
+            for (SubscribeMembershipMessage message : messageList) {
+                if (message.getExpiredTime() > currentTime) {
+                    expired = false;
+                    break;
+                }
+            }
+            islandProfileDTO.setShowPrivilege(true);
+            islandProfileDTO.privilegeState(expired ? PrivilegeState.EXPIRE : PrivilegeState.EFFECTIVE);
+        }
+    }
 }

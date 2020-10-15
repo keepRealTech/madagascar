@@ -133,6 +133,15 @@ message UpdateRongCloudUserRequest {
   string portraitImageUri = 3;
 }
 
+message RetrieveChatgroupMembershipCountRequest {
+  repeated string membershipIds = 1;
+}
+
+message ChatgroupMembershipCountResponse {
+  CommonStatus status = 1;
+  int32 chatgroupCount = 2;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
@@ -147,4 +156,5 @@ service ChatService {
   rpc RetrieveChatgroupMembersById(RetrieveChatgroupMembersByGroupIdRequest) returns (ChatgroupMembersResponse) {};
   rpc DeleteChatgroupMembershipByMembershipId(DeleteChatgroupMembershipByMembershipIdRequest) returns (CommonStatus) {};
   rpc UpdateRongCloudUser (UpdateRongCloudUserRequest) returns (CommonStatus) {};
+  rpc RetrieveChatgroupMembershipCountByMembershipIds(RetrieveChatgroupMembershipCountRequest) returns (ChatgroupMembershipCountResponse) {};
 }
