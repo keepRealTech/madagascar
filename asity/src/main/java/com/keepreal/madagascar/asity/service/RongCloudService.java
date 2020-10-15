@@ -268,7 +268,7 @@ public class RongCloudService {
                 .setVerifyBlacklist(0)
                 .setIsPersisted(0)
                 .setIsCounted(0)
-                .setIsIncludeSender(1);
+                .setIsIncludeSender(0);
         this.client.message.msgPrivate.send(message);
     }
 
@@ -284,7 +284,7 @@ public class RongCloudService {
                 .setVerifyBlacklist(0)
                 .setIsPersisted(0)
                 .setIsCounted(0)
-                .setIsIncludeSender(1);
+                .setIsIncludeSender(0);
         this.client.message.msgPrivate.send(message);
     }
 
@@ -300,7 +300,7 @@ public class RongCloudService {
                 .setVerifyBlacklist(0)
                 .setIsPersisted(0)
                 .setIsCounted(0)
-                .setIsIncludeSender(1);
+                .setIsIncludeSender(0);
         this.client.message.msgPrivate.send(message);
     }
 }
