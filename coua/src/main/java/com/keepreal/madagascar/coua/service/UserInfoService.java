@@ -186,6 +186,7 @@ public class UserInfoService {
      *
      * @param userId user id
      */
+    @Deprecated
     public void dismissUserIntroduction(String userId) {
         UserInfo userInfo = this.userInfoRepository.findUserInfoByIdAndDeletedIsFalse(userId);
 

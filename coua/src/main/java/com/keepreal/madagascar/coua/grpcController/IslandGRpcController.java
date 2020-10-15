@@ -238,7 +238,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                 userFound = true;
                 IslandMessage islandMessage = islandInfoService.getIslandMessage(islandInfo);
                 Subscription subscription = subscriptionService.getSubscriptionByIslandIdAndUserId(islandInfo.getId(), request.getUserId());
-                UserInfo userInfo = userInfoService.findUserInfoByIdAndDeletedIsFalse(request.getUserId());
+
                 if (subscription == null || subscription.getState() < 0) {
                     responseBuilder.setUserIndex(StringValue.of(""))
                             .setSubscribedAt(0L)
@@ -247,8 +247,11 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                 } else {
                     responseBuilder.setUserIndex(StringValue.of(subscription.getIslanderNumber().toString()))
                             .setSubscribedAt(subscription.getCreatedTime())
-                            .setUserShouldIntroduce(userInfo.getShouldIntroduce())
+                            .setUserShouldIntroduce(subscription.getShouldIntroduce())
                             .setHostShouldIntroduce(subscription.getShouldIntroduce());
+
+                    subscription.setShouldIntroduce(false);
+                    this.subscriptionService.updateSubcription(subscription);
                 }
                 responseBuilder.setIsland(islandMessage)
                         .setHost(userMessage)
@@ -610,9 +613,9 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     public void dismissIntroduction(DismissIntroductionRequest request,
                                     StreamObserver<CommonStatus> responseObserver) {
         if (request.getIsIslandHost()) {
-            this.subscriptionService.dismissHostIntroduction(request.getUserId(), request.getIslandId());
+            this.subscriptionService.dismissHostAndUserIntroduction(request.getUserId(), request.getIslandId());
         } else {
-            this.userInfoService.dismissUserIntroduction(request.getUserId());
+            this.subscriptionService.dismissHostAndUserIntroduction(request.getUserId(), request.getIslandId());
         }
 
         responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
