@@ -18,4 +18,6 @@ public class Templates {
             "2.微信扫码登录\r\n" +
             "3.点击\"发布\"按钮";
 
+    public static final String PAYMENT_TYPE_FEED = "单独解锁";
+    public static final String PAYMENT_FEED_PRIVILEGE = "支付%d元立即解锁专属动态";
 }

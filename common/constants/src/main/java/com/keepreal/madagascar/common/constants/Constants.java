@@ -15,4 +15,9 @@ public class Constants {
      */
     public static final String SUPER_ADMIN_USER_ID = "99999999";
 
+    /**
+     * The comments count for feed.
+     */
+    public static final int DEFAULT_FEED_LAST_COMMENT_COUNT = 2;
+
 }
