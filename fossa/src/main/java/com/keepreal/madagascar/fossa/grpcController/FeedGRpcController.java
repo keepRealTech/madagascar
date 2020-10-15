@@ -674,7 +674,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             return;
         }
 
-        FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
+        FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(request.getFeedgroupId());
         if (Objects.isNull(feedGroup)) {
             responseBuilder
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEEDGROUP_NOT_FOUND_ERROR));
@@ -744,7 +744,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         feedInfo.setFeedGroupId(feedgroup.getId());
 
         if ((MediaType.MEDIA_PICS.name().equals(feedInfo.getMultiMediaType()) || MediaType.MEDIA_ALBUM.name().equals(feedInfo.getMultiMediaType()))
-                && (feedInfo.getMembershipIds().isEmpty() && feedInfo.getPriceInCents() <= 0)) {
+                && (Objects.isNull(feedInfo.getMembershipIds()) || feedInfo.getMembershipIds().isEmpty())
+                && (Objects.isNull(feedInfo.getPriceInCents()) || feedInfo.getPriceInCents() <= 0)) {
             feedgroup.getImageFeedIds().add(feedInfo.getId());
         }
         feedgroup.getFeedIds().add(feedInfo.getId());
