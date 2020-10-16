@@ -318,6 +318,8 @@ public class FeedController implements FeedApi {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(entry.getValue().size() > 0, entry.getKey(), pageSize));
+        response.setCurrentTime(System.currentTimeMillis());
+        response.setHasFeedgroup(Boolean.TRUE.equals(this.feedGroupService.existsFeedGroupsByUserId(userId)));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -458,6 +460,7 @@ public class FeedController implements FeedApi {
 
         response.setData(dto);
         response.setCurrentTime(System.currentTimeMillis());
+        response.setHasFeedgroup(Boolean.TRUE.equals(this.feedGroupService.existsFeedGroupsByUserId(userId)));
         response.setPageInfo(PaginationUtils.getPageInfo(normalFeedsResponse.getPageResponse()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());

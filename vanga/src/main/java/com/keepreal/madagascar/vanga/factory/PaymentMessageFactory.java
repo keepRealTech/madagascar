@@ -49,6 +49,7 @@ public class PaymentMessageFactory {
             paymentBuilder.setType(UserPaymentType.PAYMENT_TYPE_MEMBERSHIP)
                     .setExpiresAt(payment.getValidAfter())
                     .setIslandId(membershipSku.getIslandId())
+                    .setMembershipSku(this.skuMessageFactory.valueOf(membershipSku))
                     .setPriceInCents(membershipSku.getPriceInCents());
         } else {
             paymentBuilder.setType(UserPaymentType.PAYMENT_TYPE_FEED)

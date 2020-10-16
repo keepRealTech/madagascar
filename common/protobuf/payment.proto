@@ -158,6 +158,22 @@ message FeedRequest {
   string returnUrl = 8;
 }
 
+message RetrieveIncomeRequest {
+  string userId = 1;
+  uint64 startTimestamp = 2;
+  uint64 endTimestamp = 3;
+}
+
+message RetrieveIncomeResponse {
+  CommonStatus status = 1;
+  IncomeMessage message = 2;
+}
+
+message IncomeMessage {
+  uint32 supportCount = 1;
+  uint64 cents = 2;
+}
+
 service PaymentService {
   rpc CreateWithdrawPayment (CreateWithdrawRequest) returns (BalanceResponse) {};
   rpc SubscribeMembershipWithShell (SubscribeMembershipRequest) returns (CommonStatus) {};
@@ -187,5 +203,5 @@ service PaymentService {
   rpc SubmitFeedWithWechatPayH5 (FeedRequest) returns (RedirectResponse) {};
   rpc SubmitFeedWithAlipay (FeedRequest) returns (AlipayOrderResponse) {};
   rpc SubmitFeedWithAlipayH5 (FeedRequest) returns (AlipayOrderResponse) {};
-
+  rpc RetrieveIncomeByUserId (RetrieveIncomeRequest) returns (RetrieveIncomeResponse) {};
 }
