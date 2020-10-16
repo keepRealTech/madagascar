@@ -1,13 +1,14 @@
 package com.keepreal.madagascar.asity.service;
 
 import com.keepreal.madagascar.asity.config.RongCloudConfiguration;
+import com.keepreal.madagascar.asity.model.SpecialArtist;
+import com.keepreal.madagascar.asity.repository.SpecialArtistsTempRepository;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CreateUserEvent;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.coua.CreateIslandEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
-import com.keepreal.madagascar.tenrecs.NotificationEventType;
 import io.rong.RongCloud;
 import io.rong.messages.TxtMessage;
 import io.rong.models.Result;
@@ -62,16 +63,18 @@ public class RongCloudService {
             "即刻成为创作者，参与活动吧：https://mp.weixin.qq.com/s/oBObVSUnOY-f1TXpDP82Uw";
     private final RongCloud client;
 
-    //需要对私信特殊处理的创作者list 暂时只有凯蒂的userId
-    public final List<String> specialArtistListTemp = new ArrayList<>(Arrays.asList("6706487884553129984"));
+    private final SpecialArtistsTempRepository specialArtistsTempRepository;
 
     /**
      * Constructs the rong cloud service.
      *
      * @param rongCloudConfiguration {@link RongCloudConfiguration}.
+     * @param specialArtistsTempRepository {@link SpecialArtistsTempRepository}
      */
-    public RongCloudService(RongCloudConfiguration rongCloudConfiguration) {
+    public RongCloudService(RongCloudConfiguration rongCloudConfiguration,
+                            SpecialArtistsTempRepository specialArtistsTempRepository) {
         this.client = RongCloud.getInstance(rongCloudConfiguration.getAppKey(), rongCloudConfiguration.getAppSecret());
+        this.specialArtistsTempRepository = specialArtistsTempRepository;
     }
 
     /**
@@ -320,6 +323,7 @@ public class RongCloudService {
      * @return 是返回true
      */
     private boolean isSpecialArtist(String artistUserId) {
-        return CollectionUtils.containsInstance(specialArtistListTemp, artistUserId);
+        SpecialArtist artist = this.specialArtistsTempRepository.findTopByIdAndDeletedIsFalse(artistUserId);
+        return Objects.nonNull(artist);
     }
 }
