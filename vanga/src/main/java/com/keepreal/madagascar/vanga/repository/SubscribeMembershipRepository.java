@@ -30,6 +30,8 @@ public interface SubscribeMembershipRepository extends JpaRepository<SubscribeMe
 
     Page<SubscribeMembership> findAllByUserId(String userId, Pageable pageable);
 
+    List<SubscribeMembership> findSubscribeMembershipsByUserIdAndIslandId(String userId, String islandId);
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE subscribe_membership SET user_id = ?1 WHERE user_id = ?2", nativeQuery = true)

@@ -321,4 +321,14 @@ public class ChatgroupService {
         this.chatgroupMembershipRepository.deleteAllByMembershipId(membershipId);
     }
 
+    /**
+     * Count by membership id list.
+     *
+     * @param membershipIds membership id list.
+     * @return group count.
+     */
+    public Integer countByMembershipIds(List<String> membershipIds) {
+        return this.chatgroupMembershipRepository.countByMembershipIdIn(membershipIds);
+    }
+
 }

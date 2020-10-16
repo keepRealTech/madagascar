@@ -2849,6 +2849,7 @@ components:
     PrivilegeState:
       type: string
       enum:
+        - PRIVILEGE_NONE
         - PRIVILEGE_EFFECTIVE
         - PRIVILEGE_EXPIRE
     NoticeType:

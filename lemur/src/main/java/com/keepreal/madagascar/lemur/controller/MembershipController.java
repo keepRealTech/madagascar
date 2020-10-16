@@ -24,6 +24,7 @@ import swagger.model.FeedMembershipsResponse;
 import swagger.model.MembershipResponse;
 import swagger.model.MembershipTemplatesResponse;
 import swagger.model.MembershipsResponse;
+import swagger.model.MyMembershipsResponse;
 import swagger.model.PostMembershipRequest;
 import swagger.model.PutMembershipRequest;
 import swagger.model.TimelinesResponse;
@@ -229,6 +230,11 @@ public class MembershipController implements MembershipApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the get membership template api.
+     *
+     * @return  {@link MembershipTemplatesResponse}.
+     */
     @Override
     public ResponseEntity<MembershipTemplatesResponse> apiV1MembershipsTemplatesGet() {
         MembershipTemplatesResponse response = new MembershipTemplatesResponse();
@@ -238,6 +244,32 @@ public class MembershipController implements MembershipApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the get my membership api.
+     *
+     * @param id island id.
+     * @return  {@link MyMembershipsResponse}
+     */
+    @Override
+    public ResponseEntity<MyMembershipsResponse> apiV1IslandsIdMyMembershipsGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        MyMembershipsResponse response = new MyMembershipsResponse();
+        response.setData(this.membershipDTOFactory.valueOf(userId, id));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the get membership feed api.
+     *
+     * @param id island id
+     * @param minTimestamp timestamp after (optional)
+     * @param maxTimestamp timestamp before (optional)
+     * @param pageSize size of a page (optional, default to 10)
+     * @return  {@link TimelinesResponse}
+     */
     @Override
     public ResponseEntity<TimelinesResponse> apiV1IslandsIdMembershipFeedsGet(String id, Long minTimestamp, Long maxTimestamp, Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
