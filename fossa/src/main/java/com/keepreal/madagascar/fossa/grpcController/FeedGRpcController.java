@@ -27,6 +27,7 @@ import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedCountRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedCountResponse;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
+import com.keepreal.madagascar.fossa.RetrieveMembershipFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
@@ -716,6 +717,64 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveMembershipFeeds(RetrieveMembershipFeedsRequest request, StreamObserver<FeedsResponse> responseObserver) {
+        String userId = request.getUserId();
+        ProtocolStringList myMembershipIds = request.getMembershipIdsList();
+        int page = request.getPageRequest().getPage();
+        int pageSize = request.getPageRequest().getPageSize();
+
+        Query query = this.buildMyMembershipFeedQuery(request);
+
+        long totalCount = mongoTemplate.count(query, FeedInfo.class);
+        List<FeedInfo> feedInfoList = mongoTemplate.find(query.with(PageRequest.of(page, pageSize)), FeedInfo.class);
+
+        List<FeedMessage> feedMessageList = feedInfoList.stream()
+                .map(info -> feedInfoService.getFeedMessage(info, userId, myMembershipIds))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        PageResponse pageResponse = PageRequestResponseUtils.buildPageResponse(page, pageSize, totalCount);
+        FeedsResponse feedsResponse = FeedsResponse.newBuilder()
+                .addAllFeed(feedMessageList)
+                .setPageResponse(pageResponse)
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .build();
+        responseObserver.onNext(feedsResponse);
+        responseObserver.onCompleted();
+    }
+
+    private Query buildMyMembershipFeedQuery(RetrieveMembershipFeedsRequest request) {
+        ProtocolStringList membershipIds = request.getMembershipIdsList();
+        ProtocolStringList feedIds = request.getFeedIdsList();
+
+        Query query = new Query();
+        query.addCriteria(Criteria.where("deleted").is(false));
+        query.addCriteria(Criteria.where("islandId").is(request.getIslandId()));
+
+        if (!feedIds.isEmpty() && !membershipIds.isEmpty()) {
+            query.addCriteria(new Criteria().orOperator(Criteria.where("_id").in(feedIds), Criteria.where("membershipIds").in(membershipIds)));
+        } else if (!feedIds.isEmpty()) {
+            query.addCriteria(Criteria.where("_id").in(feedIds));
+        } else {
+            query.addCriteria(Criteria.where("membershipIds").in(membershipIds));
+        }
+
+        if (request.hasTimestampBefore() && request.hasTimestampAfter()) {
+            Criteria timeCriteria = new Criteria().andOperator(
+                    Criteria.where("createdTime").gt(request.getTimestampAfter().getValue()),
+                    Criteria.where("createdTime").lt(request.getTimestampBefore().getValue()));
+            query.addCriteria(timeCriteria);
+        } else if (request.hasTimestampBefore() || request.hasTimestampAfter()) {
+            Criteria timeCriteria = request.hasTimestampBefore() ?
+                    Criteria.where("createdTime").lt(request.getTimestampBefore().getValue()) :
+                    Criteria.where("createdTime").gt(request.getTimestampAfter().getValue());
+            query.addCriteria(timeCriteria);
+        }
+
+        return query.with(Sort.by(Sort.Order.desc("createdTime"), Sort.Order.desc("toppedTime")));
     }
 
     private List<MediaInfo> buildMediaInfos(NewFeedsRequestV2 request) {

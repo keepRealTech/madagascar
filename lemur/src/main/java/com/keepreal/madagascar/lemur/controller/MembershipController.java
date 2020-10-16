@@ -1,12 +1,19 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.FeedMembershipMessage;
 import com.keepreal.madagascar.coua.MembershipMessage;
+import com.keepreal.madagascar.fossa.FeedsResponse;
+import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.MembershipDTOFactory;
+import com.keepreal.madagascar.lemur.service.FeedChargeService;
+import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
+import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
+import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,10 +26,16 @@ import swagger.model.MembershipTemplatesResponse;
 import swagger.model.MembershipsResponse;
 import swagger.model.PostMembershipRequest;
 import swagger.model.PutMembershipRequest;
+import swagger.model.TimelinesResponse;
 
 import javax.validation.Valid;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -33,17 +46,33 @@ public class MembershipController implements MembershipApi {
 
     private final MembershipService membershipService;
     private final MembershipDTOFactory membershipDTOFactory;
+    private final FeedService feedService;
+    private final FeedDTOFactory feedDTOFactory;
+    private final SubscribeMembershipService subscribeMembershipService;
+    private final FeedChargeService feedChargeService;
 
     /**
      * Constructs the membership controller.
      *
-     * @param membershipService    {@link MembershipService}.
-     * @param membershipDTOFactory {@link MembershipDTOFactory}.
+     * @param membershipService          {@link MembershipService}.
+     * @param membershipDTOFactory       {@link MembershipDTOFactory}.
+     * @param feedService                {@link FeedService}.
+     * @param feedDTOFactory             {@link FeedDTOFactory}.
+     * @param subscribeMembershipService {@link SubscribeMembershipService}.
+     * @param feedChargeService          {@link FeedChargeService}.
      */
     public MembershipController(MembershipService membershipService,
-                                MembershipDTOFactory membershipDTOFactory) {
+                                MembershipDTOFactory membershipDTOFactory,
+                                FeedService feedService,
+                                FeedDTOFactory feedDTOFactory,
+                                SubscribeMembershipService subscribeMembershipService,
+                                FeedChargeService feedChargeService) {
         this.membershipService = membershipService;
         this.membershipDTOFactory = membershipDTOFactory;
+        this.feedService = feedService;
+        this.feedDTOFactory = feedDTOFactory;
+        this.subscribeMembershipService = subscribeMembershipService;
+        this.feedChargeService = feedChargeService;
     }
 
     /**
@@ -207,5 +236,64 @@ public class MembershipController implements MembershipApi {
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<TimelinesResponse> apiV1IslandsIdMembershipFeedsGet(String id, Long minTimestamp, Long maxTimestamp, Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        List<String> feedIds = this.feedChargeService.retrieveHasAccessFeedIds(userId, id, maxTimestamp, minTimestamp);
+        List<String> membershipIds = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(id, userId);
+        if (feedIds.isEmpty() && membershipIds.isEmpty()) {
+            TimelinesResponse response = new TimelinesResponse();
+            response.setData(Collections.emptyList());
+            response.setCurrentTime(System.currentTimeMillis());
+            response.setPageInfo(PaginationUtils.getPageInfo(false, false, pageSize));
+            response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+            response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        FeedsResponse feedsResponse = this.feedService.retrieveIslandMembershipFeeds(userId, id, minTimestamp, maxTimestamp, pageSize, feedIds, membershipIds);
+        Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(feedsResponse.getFeedList());
+
+        TimelinesResponse response = new TimelinesResponse();
+        response.setData(feedsResponse.getFeedList()
+                .stream()
+                .map(feed -> this.feedDTOFactory.valueOf(feed,
+                        feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList())))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setCurrentTime(System.currentTimeMillis());
+        response.setPageInfo(PaginationUtils.getPageInfo(feedsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    private Map<String, List<MembershipMessage>> generateFeedMembershipMap(List<FeedMessage> feeds) {
+        Set<String> membershipIdSet = feeds.stream()
+                .map(FeedMessage::getMembershipIdList)
+                .flatMap(List::stream)
+                .collect(Collectors.toSet());
+
+        Map<String, MembershipMessage> membershipMap = new HashMap<>();
+        if (!membershipIdSet.isEmpty()) {
+            membershipMap = this.membershipService.retrieveMembershipsByIds(membershipIdSet).stream()
+                    .collect(Collectors.toMap(MembershipMessage::getId, Function.identity(), (feed1, feed2) -> feed1, HashMap::new));
+        }
+
+        Map<String, List<MembershipMessage>> feedMembershipMap = new HashMap<>();
+        if (!membershipIdSet.isEmpty()) {
+            Map<String, MembershipMessage> finalMembershipMap = membershipMap;
+            feedMembershipMap = feeds.stream()
+                    .collect(Collectors.toMap(
+                            FeedMessage::getId,
+                            feed -> feed.getMembershipIdList().stream().map(finalMembershipMap::get).filter(Objects::nonNull).collect(Collectors.toList()),
+                            (memberships1, memberships2) -> memberships1,
+                            HashMap::new));
+        }
+
+        return feedMembershipMap;
     }
 }

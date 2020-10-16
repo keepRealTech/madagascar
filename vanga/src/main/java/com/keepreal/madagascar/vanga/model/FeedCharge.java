@@ -29,6 +29,8 @@ public class FeedCharge {
     private String id;
     private String userId;
     private String feedId;
+    private String islandId;
+    private Long feedCreatedAt;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
