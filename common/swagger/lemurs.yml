@@ -3084,6 +3084,13 @@ components:
               type: integer
             recommendation:
               type: string
+            showIncome:
+              type: boolean
+            supportCount:
+              type: integer
+            centsInMonth:
+              type: integer
+              format: int64
     FullIslandDTO:
       allOf:
         - $ref: '#/components/schemas/IslandDTO'
@@ -3676,6 +3683,8 @@ components:
             currentTime:
               type: integer
               format: int64
+            hasFeedgroup:
+              type: boolean
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
@@ -3715,6 +3724,8 @@ components:
             currentTime:
               type: integer
               format: int64
+            hasFeedgroup:
+              type: boolean
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:

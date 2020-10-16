@@ -6,6 +6,8 @@ import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.DeleteFeedGroupByIdRequest;
+import com.keepreal.madagascar.fossa.ExistsFeedGroupsByUserIdRequest;
+import com.keepreal.madagascar.fossa.ExistsFeedGroupsByUserIdResponse;
 import com.keepreal.madagascar.fossa.FeedGroupFeedsResponse;
 import com.keepreal.madagascar.fossa.FeedGroupResponse;
 import com.keepreal.madagascar.fossa.FeedGroupServiceGrpc;
@@ -303,4 +305,36 @@ public class FeedGroupService {
         return response;
     }
 
+    /**
+     * Retrieves the feeds of a feed group.
+     *
+     * @param userId   User id.
+     * @return True if has feed groups.
+     */
+    public Boolean existsFeedGroupsByUserId(String userId) {
+        FeedGroupServiceGrpc.FeedGroupServiceBlockingStub stub = FeedGroupServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        ExistsFeedGroupsByUserIdRequest request = ExistsFeedGroupsByUserIdRequest.newBuilder()
+                .setUserId(userId)
+                .build();
+
+        ExistsFeedGroupsByUserIdResponse response;
+        try {
+            response = stub.existsFeedGroupsByUserId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Check feed group by user existence returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getHasFeedGroups();
+    }
 }

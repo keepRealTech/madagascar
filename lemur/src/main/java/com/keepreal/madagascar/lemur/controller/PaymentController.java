@@ -297,7 +297,7 @@ public class PaymentController implements PaymentApi {
 
         UserPaymentsResponseV11 response = new UserPaymentsResponseV11();
         response.setData(userPaymentsResponse.getUserPaymentsList().stream()
-                .map(userPaymentMessage -> this.paymentDTOFactory.v11ValueOf(
+                .map(userPaymentMessage -> this.paymentDTOFactory.valueOfV11(
                         userPaymentMessage,
                         userMessageMap.getOrDefault(userPaymentMessage.getPayeeId(), null),
                         userPaymentMessage.getMembershipSku(),

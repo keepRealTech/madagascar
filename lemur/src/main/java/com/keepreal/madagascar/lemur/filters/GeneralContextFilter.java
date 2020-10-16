@@ -22,7 +22,7 @@ import java.util.Objects;
 @Component
 public class GeneralContextFilter extends OncePerRequestFilter {
 
-    public static final String VERSION = "VERSION";
+    public static final String VERSION = "v";
 
     /**
      * Implements the general context extract logic.
