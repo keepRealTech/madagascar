@@ -7,8 +7,10 @@ import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.service.ChatService;
 import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
+import com.keepreal.madagascar.lemur.service.PaymentService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.vanga.SubscribeMembershipMessage;
+import com.keepreal.madagascar.vanga.IncomeMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
@@ -49,6 +51,7 @@ public class IslandDTOFactory {
     private final UserDTOFactory userDTOFactory;
     private final SubscribeMembershipService subscribeMembershipService;
     private final GeneralConfiguration generalConfiguration;
+    private final PaymentService paymentService;
 
     /**
      * Constructs the island dto factory.
@@ -58,17 +61,20 @@ public class IslandDTOFactory {
      * @param userDTOFactory             {@link UserDTOFactory}.
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param generalConfiguration       {@link GeneralConfiguration}.
+     * @param paymentService             {@link PaymentService}.
      */
     public IslandDTOFactory(ChatService chatService,
                             UserService userService,
                             UserDTOFactory userDTOFactory,
                             SubscribeMembershipService subscribeMembershipService,
-                            GeneralConfiguration generalConfiguration) {
+                            GeneralConfiguration generalConfiguration,
+                            PaymentService paymentService) {
         this.chatService = chatService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.subscribeMembershipService = subscribeMembershipService;
         this.generalConfiguration = generalConfiguration;
+        this.paymentService = paymentService;
     }
 
     /**
@@ -140,6 +146,15 @@ public class IslandDTOFactory {
         recommendIslandDTO.setPortraitImageUri(discoverIsland.getIsland().getPortraitImageUri());
         recommendIslandDTO.setAccessType(this.convertAccessType(discoverIsland.getIsland().getIslandAccessType()));
         recommendIslandDTO.setMemberCount(discoverIsland.getIsland().getMemberCount());
+        recommendIslandDTO.setShowIncome(discoverIsland.getIsland().getShowIncome());
+        if (discoverIsland.getIsland().getShowIncome()) {
+            IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(discoverIsland.getIsland().getHostId());
+            recommendIslandDTO.setSupportCount(incomeMessage.getSupportCount());
+            recommendIslandDTO.setCentsInMonth(incomeMessage.getCents());
+        } else {
+            recommendIslandDTO.setSupportCount(0);
+            recommendIslandDTO.setCentsInMonth(0L);
+        }
 
         recommendIslandDTO.setRecommendation(discoverIsland.getRecommendation());
         recommendIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(discoverIsland.getIsland().getHostId())));
@@ -175,6 +190,15 @@ public class IslandDTOFactory {
 
         fullIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 
+        fullIslandDTO.setShowIncome(island.getShowIncome());
+        if (island.getShowIncome()) {
+            IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(island.getHostId());
+            fullIslandDTO.setSupportCount(incomeMessage.getSupportCount());
+            fullIslandDTO.setCentsInMonth(incomeMessage.getCents());
+        } else {
+            fullIslandDTO.setSupportCount(0);
+            fullIslandDTO.setCentsInMonth(0L);
+        }
         return fullIslandDTO;
     }
 

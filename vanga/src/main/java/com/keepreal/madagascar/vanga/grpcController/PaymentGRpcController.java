@@ -13,10 +13,13 @@ import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.FeedRequest;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
+import com.keepreal.madagascar.vanga.IncomeMessage;
 import com.keepreal.madagascar.vanga.OrderCallbackRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.RefundWechatFeedRequest;
+import com.keepreal.madagascar.vanga.RetrieveIncomeRequest;
+import com.keepreal.madagascar.vanga.RetrieveIncomeResponse;
 import com.keepreal.madagascar.vanga.RetrieveOrderByIdRequest;
 import com.keepreal.madagascar.vanga.RetrieveSupportInfoRequest;
 import com.keepreal.madagascar.vanga.RetrieveSupportInfoResponse;
@@ -1157,6 +1160,25 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         }
 
         responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveIncomeByUserId(RetrieveIncomeRequest request, StreamObserver<RetrieveIncomeResponse> responseObserver) {
+        String userId = request.getUserId();
+        long startTimestamp = request.getStartTimestamp();
+        long endTimestamp = request.getEndTimestamp();
+
+        int supportCount = this.paymentService.retrieveSupportCount(userId, startTimestamp, endTimestamp);
+        long cents = this.paymentService.retrieveCents(userId, startTimestamp, endTimestamp);
+
+        responseObserver.onNext(RetrieveIncomeResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setMessage(IncomeMessage.newBuilder()
+                        .setSupportCount(supportCount)
+                        .setCents(cents)
+                        .build())
+                .build());
         responseObserver.onCompleted();
     }
 

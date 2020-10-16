@@ -222,7 +222,7 @@ public class FeedInfoService {
                 .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop())
                 .setHostId(feedInfo.getHostId())
                 .setCanSave(feedInfo.getCanSave() == null ? false : feedInfo.getCanSave())
-                .setFeedgroupId(feedInfo.getFeedGroupId());
+                .setFeedgroupId(feedInfo.getFeedGroupId() == null ? "" : feedInfo.getFeedGroupId());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {

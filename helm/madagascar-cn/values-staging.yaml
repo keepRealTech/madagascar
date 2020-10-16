@@ -33,7 +33,7 @@ global:
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.3.2-staging
+      tag: 1.3.3-staging
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
@@ -45,7 +45,7 @@ global:
       imagePullPolicy: Always
     coua:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-      tag: 1.2.1-staging
+      tag: 1.2.2-staging
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
@@ -69,7 +69,7 @@ global:
       imagePullPolicy: Always
     vanga:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
-      tag: 1.2.3-staging
+      tag: 1.2.4-staging
       imagePullPolicy: Always
     asity:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
