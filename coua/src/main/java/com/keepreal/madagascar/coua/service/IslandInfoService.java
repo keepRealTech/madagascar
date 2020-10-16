@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.Comparator;
 import java.util.stream.Collectors;
@@ -322,6 +323,18 @@ public class IslandInfoService {
                             .setRecommendation(islandDiscoveryMap.get(islandDiscovery.getIslandId()).getRecommendation())
                             .build())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 检查自定义首页链接是否已存在
+     *
+     * @param islandId 岛id
+     * @param customUrl 自定义链接
+     * @return 存在返回true
+     */
+    public boolean checkIslandCustomUrl(String islandId, String customUrl) {
+        IslandInfo islandInfo = this.islandInfoRepository.findTopByIdAndCustomUrlAndDeletedIsFalse(islandId, customUrl);
+        return Objects.nonNull(islandInfo);
     }
 
 }

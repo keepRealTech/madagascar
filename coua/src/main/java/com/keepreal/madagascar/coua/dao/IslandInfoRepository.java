@@ -68,4 +68,6 @@ public interface IslandInfoRepository extends JpaRepository<IslandInfo, String> 
     List<IslandInfo> findByIdInAndDeletedIsFalse(Set<String> idList);
 
     List<IslandInfo> findIslandInfosByHostIdIn(List<String> userIds);
+
+    IslandInfo findTopByIdAndCustomUrlAndDeletedIsFalse(String id, String customUrl);
 }

@@ -349,6 +349,14 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         if (request.hasShowIncome()) {
             islandInfo.setShowIncome(request.getShowIncome().getValue());
         }
+        if (request.hasCustomUrl()) {
+            if (this.islandInfoService.checkIslandCustomUrl(request.getId(), request.getCustomUrl().getValue())) {
+                responseBuilder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_CUSTOM_URL_EXISTED));
+                responseObserver.onNext(responseBuilder.build());
+                responseObserver.onCompleted();
+            }
+            islandInfo.setCustomUrl(request.getCustomUrl().getValue());
+        }
 
         IslandInfo save = islandInfoService.updateIsland(islandInfo);
         IslandMessage islandMessage = islandInfoService.getIslandMessage(save);

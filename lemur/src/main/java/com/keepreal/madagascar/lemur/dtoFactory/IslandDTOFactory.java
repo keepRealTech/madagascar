@@ -99,6 +99,7 @@ public class IslandDTOFactory {
         islandDTO.setHostId(island.getHostId());
         islandDTO.setPortraitImageUri(island.getPortraitImageUri());
         islandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
+        islandDTO.setCustomUrl(island.getCustomUrl());
 
         islandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 
@@ -123,6 +124,7 @@ public class IslandDTOFactory {
         briefIslandDTO.setHostId(island.getHostId());
         briefIslandDTO.setPortraitImageUri(island.getPortraitImageUri());
         briefIslandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
+        briefIslandDTO.setCustomUrl(island.getCustomUrl());
 
         return briefIslandDTO;
     }
@@ -179,6 +181,7 @@ public class IslandDTOFactory {
         fullIslandDTO.setId(island.getId());
         fullIslandDTO.setName(island.getName());
         fullIslandDTO.setDescription(island.getDescription());
+        fullIslandDTO.setCustomUrl(island.getCustomUrl());
         fullIslandDTO.setHostId(island.getHostId());
         fullIslandDTO.setPortraitImageUri(island.getPortraitImageUri());
         fullIslandDTO.setSecret(maskSecret ? "******" : secret);

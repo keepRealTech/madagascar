@@ -305,6 +305,8 @@ public class IslandService {
      * @param secret           Secret.
      * @param description      Description.
      * @param islandAccessType Island access type.
+     * @param showIncome whether show income.
+     * @param customUrl Island home custom url.
      * @return {@link IslandMessage}.
      */
     public IslandMessage updateIslandById(String id,
@@ -313,7 +315,8 @@ public class IslandService {
                                           String secret,
                                           String description,
                                           IslandAccessType islandAccessType,
-                                          Boolean showIncome) {
+                                          Boolean showIncome,
+                                          String customUrl) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         UpdateIslandByIdRequest.Builder requestBuilder = UpdateIslandByIdRequest.newBuilder()
@@ -344,6 +347,10 @@ public class IslandService {
 
         if (Objects.nonNull(showIncome)) {
             requestBuilder.setShowIncome(BoolValue.of(showIncome));
+        }
+
+        if (!StringUtils.isEmpty(customUrl)) {
+            requestBuilder.setCustomUrl(StringValue.of(customUrl));
         }
 
         IslandResponse islandResponse;

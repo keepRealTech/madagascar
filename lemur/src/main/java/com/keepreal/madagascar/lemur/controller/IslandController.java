@@ -418,7 +418,8 @@ public class IslandController implements IslandApi {
                 payload.getSecret(),
                 payload.getDescription(),
                 accessType,
-                payload.getShowIncome());
+                payload.getShowIncome(),
+                payload.getCustomUrl());
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));

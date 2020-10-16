@@ -209,6 +209,7 @@ message IslandMessage {
     string secret = 9;
     IslandAccessType islandAccessType = 10;
     bool showIncome = 11;
+    string customUrl = 12;
 }
 
 message RepostMessage {
