@@ -3,6 +3,8 @@ package com.keepreal.madagascar.fossa.grpcController;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.DeleteFeedGroupByIdRequest;
+import com.keepreal.madagascar.fossa.ExistsFeedGroupsByUserIdRequest;
+import com.keepreal.madagascar.fossa.ExistsFeedGroupsByUserIdResponse;
 import com.keepreal.madagascar.fossa.FeedGroupFeedsResponse;
 import com.keepreal.madagascar.fossa.FeedGroupResponse;
 import com.keepreal.madagascar.fossa.FeedGroupServiceGrpc;
@@ -249,6 +251,26 @@ public class FeedGroupGRpcController extends FeedGroupServiceGrpc.FeedGroupServi
         FeedGroupsResponse response = FeedGroupsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .addAllFeedGroups(feedGroups.stream().map(this.feedGroupService::getFeedGroupMessage).collect(Collectors.toList()))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the check if exists by user id.
+     *
+     * @param request   {@link ExistsFeedGroupsByUserIdRequest}.
+     * @param responseObserver  {@link ExistsFeedGroupsByUserIdResponse}.
+     */
+    @Override
+    public void existsFeedGroupsByUserId(ExistsFeedGroupsByUserIdRequest request,
+                                         StreamObserver<ExistsFeedGroupsByUserIdResponse> responseObserver) {
+        Boolean exists = this.feedGroupService.existsByHostId(request.getUserId());
+
+        ExistsFeedGroupsByUserIdResponse response = ExistsFeedGroupsByUserIdResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setHasFeedGroups(exists)
                 .build();
 
         responseObserver.onNext(response);

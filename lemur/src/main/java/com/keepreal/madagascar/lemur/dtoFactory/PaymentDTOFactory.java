@@ -1,10 +1,8 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.keepreal.madagascar.common.PaymentState;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.UserPaymentType;
-import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
@@ -18,14 +16,12 @@ import swagger.model.UserPaymentDTOV11;
 import swagger.model.UserWithdrawDTO;
 import swagger.model.WithdrawState;
 
-import javax.validation.Valid;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -102,10 +98,10 @@ public class PaymentDTOFactory {
      * @param membershipMessage    {@link MembershipMessage}.
      * @return {@link UserPaymentDTO}.
      */
-    public UserPaymentDTOV11 v11ValueOf(UserPaymentMessage userPaymentMessage,
-                                     UserMessage userMessage,
-                                     MembershipSkuMessage membershipSkuMessage,
-                                     MembershipMessage membershipMessage) {
+    public UserPaymentDTOV11 valueOfV11(UserPaymentMessage userPaymentMessage,
+                                        UserMessage userMessage,
+                                        MembershipSkuMessage membershipSkuMessage,
+                                        MembershipMessage membershipMessage) {
         if (Objects.isNull(userPaymentMessage)) {
             return null;
         }
@@ -117,6 +113,10 @@ public class PaymentDTOFactory {
         userPaymentDTO.setPriceInCents(userPaymentMessage.getPriceInCents());
 
         if (UserPaymentType.PAYMENT_TYPE_MEMBERSHIP.equals(userPaymentMessage.getType())) {
+            if (Objects.isNull(membershipMessage) || Objects.isNull(membershipSkuMessage)) {
+                return null;
+            }
+
             userPaymentDTO.setType(PaymentType.MEMBERSHIP);
             userPaymentDTO.setPrivileges(Arrays.asList(membershipMessage.getDescription().split(",")));
             userPaymentDTO.setTimeInMonths(membershipSkuMessage.getTimeInMonths());
@@ -130,11 +130,11 @@ public class PaymentDTOFactory {
             }
         } else if (UserPaymentType.PAYMENT_TYPE_FEED.equals(userPaymentMessage.getType())) {
             userPaymentDTO.setType(PaymentType.FEED);
-            userPaymentDTO.setName(Templates.PAYMENT_TYPE_FEED);
-            userPaymentDTO.setPrivileges(Collections.singletonList(String.format(Templates.PAYMENT_FEED_PRIVILEGE, userPaymentDTO.getPriceInCents() / 100L)));
+            userPaymentDTO.setName(Templates.LEMUR_PAYMENT_TYPE_FEED);
+            userPaymentDTO.setPrivileges(Collections.singletonList(String.format(Templates.LEMUR_PAYMENT_FEED_PRIVILEGE, userPaymentDTO.getPriceInCents() / 100L)));
         }
 
-        return null;
+        return userPaymentDTO;
     }
 
     /**

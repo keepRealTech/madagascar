@@ -346,6 +346,9 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         if (request.hasSecret() && IslandAccessType.ISLAND_ACCESS_PRIVATE_VALUE == islandInfo.getIslandAccessType()) {
             islandInfo.setSecret(request.getSecret().getValue());
         }
+        if (request.hasShowIncome()) {
+            islandInfo.setShowIncome(request.getShowIncome().getValue());
+        }
 
         IslandInfo save = islandInfoService.updateIsland(islandInfo);
         IslandMessage islandMessage = islandInfoService.getIslandMessage(save);

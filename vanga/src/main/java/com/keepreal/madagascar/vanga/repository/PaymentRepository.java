@@ -40,4 +40,9 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     @Query(value = "UPDATE balance_log SET user_id = ?1 WHERE user_id = ?2", nativeQuery = true)
     void mergeUserPayment(String wechatUserId, String webMobileUserId);
 
+    @Query(value = "SELECT COUNT(DISTINCT user_id) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
+    Integer countSupportCountByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp);
+
+    @Query(value = "SELECT SUM(amount_in_cents) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
+    Long countAmountByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp);
 }

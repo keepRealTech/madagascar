@@ -61,6 +61,15 @@ message RetrieveFeedGroupsByIdsRequest {
   repeated string ids = 1;
 }
 
+message ExistsFeedGroupsByUserIdRequest {
+  string userId = 1;
+}
+
+message ExistsFeedGroupsByUserIdResponse {
+  CommonStatus status = 1;
+  bool hasFeedGroups = 2;
+}
+
 service FeedGroupService {
   rpc CreateFeedGroup (NewFeedGroupRequest) returns (FeedGroupResponse) {};
   rpc DeleteFeedGroupById (DeleteFeedGroupByIdRequest) returns (CommonStatus) {};
@@ -69,4 +78,5 @@ service FeedGroupService {
   rpc RetrieveFeedGroupsByIds (RetrieveFeedGroupsByIdsRequest) returns (FeedGroupsResponse) {};
   rpc RetrieveFeedGroupFeedsById (RetrieveFeedGroupContentByIdRequest) returns (FeedGroupFeedsResponse) {};
   rpc RetrieveFeedGroupsByIslandId (RetrieveFeedGroupsByIslandIdRequest) returns (FeedGroupsResponse) {};
+  rpc ExistsFeedGroupsByUserId (ExistsFeedGroupsByUserIdRequest) returns (ExistsFeedGroupsByUserIdResponse) {};
 }
