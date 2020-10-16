@@ -6,13 +6,17 @@ import com.keepreal.madagascar.vanga.RetrieveMemberCountByMembershipIdRequest;
 import com.keepreal.madagascar.vanga.RetrieveMemberCountResponse;
 import com.keepreal.madagascar.vanga.RetrieveMembershipIdsRequest;
 import com.keepreal.madagascar.vanga.RetrieveMembershipIdsResponse;
+import com.keepreal.madagascar.vanga.RetrieveSubscribeMembershipRequest;
+import com.keepreal.madagascar.vanga.RetrieveSubscribeMembershipResponse;
 import com.keepreal.madagascar.vanga.SubscribeMembershipServiceGrpc;
+import com.keepreal.madagascar.vanga.model.SubscribeMembership;
 import com.keepreal.madagascar.vanga.service.SubscribeMembershipService;
 import com.keepreal.madagascar.vanga.util.CommonStatusUtils;
 import io.grpc.stub.StreamObserver;
 import org.lognet.springboot.grpc.GRpcService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Represent the subscribeMembership controller.
@@ -67,6 +71,23 @@ public class SubscribeMembershipGRpcController extends SubscribeMembershipServic
         responseObserver.onNext(RetrieveMembershipIdsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .addAllMembershipIds(membershipIdList)
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveSubscribeMembershipByUserId(RetrieveSubscribeMembershipRequest request, StreamObserver<RetrieveSubscribeMembershipResponse> responseObserver) {
+        String userId = request.getUserId();
+        String islandId = request.getIslandId();
+
+        List<SubscribeMembership> subscribeMemberships = this.subscribeMembershipService.retrieveSubscribeMembership(userId, islandId);
+
+        responseObserver.onNext(RetrieveSubscribeMembershipResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .addAllMessage(subscribeMemberships
+                        .stream()
+                        .map(this.subscribeMembershipService::getMessage)
+                        .collect(Collectors.toList()))
                 .build());
         responseObserver.onCompleted();
     }

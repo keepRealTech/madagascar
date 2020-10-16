@@ -3,9 +3,11 @@ package com.keepreal.madagascar.lemur.service;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
-import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.vanga.RetrieveMembershipIdsRequest;
 import com.keepreal.madagascar.vanga.RetrieveMembershipIdsResponse;
+import com.keepreal.madagascar.vanga.RetrieveSubscribeMembershipRequest;
+import com.keepreal.madagascar.vanga.RetrieveSubscribeMembershipResponse;
+import com.keepreal.madagascar.vanga.SubscribeMembershipMessage;
 import com.keepreal.madagascar.vanga.SubscribeMembershipServiceGrpc;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
@@ -72,4 +74,39 @@ public class SubscribeMembershipService {
         return response.getMembershipIdsList();
     }
 
+    /**
+     * Retrieve subscribe membership message by user id and island id.
+     *
+     * @param userId    user id.
+     * @param islandId  island id.
+     * @return  {@link SubscribeMembershipMessage}.
+     */
+    public List<SubscribeMembershipMessage> retrieveSubscribeMembership(String userId, String islandId) {
+        SubscribeMembershipServiceGrpc.SubscribeMembershipServiceBlockingStub stub = SubscribeMembershipServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveSubscribeMembershipRequest request = RetrieveSubscribeMembershipRequest.newBuilder()
+                .setUserId(userId)
+                .setIslandId(islandId)
+                .build();
+
+        RetrieveSubscribeMembershipResponse response;
+
+        try {
+            response = stub.retrieveSubscribeMembershipByUserId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve subscribe membership returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getMessageList();
+    }
 }
