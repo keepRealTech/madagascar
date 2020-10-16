@@ -3676,6 +3676,8 @@ components:
             currentTime:
               type: integer
               format: int64
+            hasFeedgroup:
+              type: boolean
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
@@ -3715,6 +3717,8 @@ components:
             currentTime:
               type: integer
               format: int64
+            hasFeedgroup:
+              type: boolean
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:

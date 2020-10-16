@@ -136,4 +136,14 @@ public class FeedGroupService {
         return this.feedGroupRepository.findAllByIslandIdAndDeletedIsFalseOrderByLastFeedTimeDesc(islandId, pageable);
     }
 
+    /**
+     * Exists by user id.
+     *
+     * @param userId User id.
+     * @return True if exists.
+     */
+    public Boolean existsByHostId(String userId) {
+        return this.feedGroupRepository.existsByHostIdAndDeletedIsFalse(userId);
+    }
+
 }
