@@ -9,6 +9,7 @@ import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.IslandsResponse;
 import com.keepreal.madagascar.coua.SupportTargetMessage;
+import com.keepreal.madagascar.coua.TargetType;
 import com.keepreal.madagascar.coua.TimeType;
 import com.keepreal.madagascar.coua.dao.IslandDiscoveryRepository;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
@@ -335,7 +337,7 @@ public class IslandInfoService {
     }
 
     /**
-     * 根据 islandId 和 hostId 查询支持目标
+     * 根据 id 查询支持目标
      *
      * @param id 支持目标主键id
      * @return {@link SupportTarget}
@@ -401,6 +403,47 @@ public class IslandInfoService {
             return this.supportTargetRepository.findAllByHostIdAndDeletedIsFalse(hostId);
         }
         return this.supportTargetRepository.findAllByIslandIdAndHostIdAndDeletedIsFalse(islandId, hostId);
+    }
+
+    /**
+     * 如果有支持目标就根据类型更新支持目标
+     *
+     * @param hostId 岛主id
+     * @param amountInCents 金额
+     */
+    public void updateSupportTargetIfExisted(String hostId, Long amountInCents) {
+        List<SupportTarget> supportTargets = this.supportTargetRepository.findAllByHostIdAndDeletedIsFalse(hostId);
+        if (!CollectionUtils.isEmpty(supportTargets)) {
+            SupportTarget supportTarget = supportTargets.get(0);
+            switch (this.convertToTargetType(supportTarget.getTargetType())) {
+                case SUPPORTER:
+                    supportTarget.setCurrentSupporterNum(supportTarget.getCurrentSupporterNum() + 1L);
+                    break;
+                case AMOUNT:
+                    supportTarget.setCurrentAmountInCents(supportTarget.getCurrentAmountInCents() + amountInCents);
+                    break;
+                case UNRECOGNIZED:
+                    break;
+            }
+            this.updateSupportTarget(supportTarget);
+        }
+    }
+
+    /**
+     * converts int to {@link TargetType}
+     *
+     * @param targetTypeInteger int num
+     * @return {@link TargetType}
+     */
+    public TargetType convertToTargetType(Integer targetTypeInteger) {
+        switch (targetTypeInteger) {
+            case 1:
+                return TargetType.SUPPORTER;
+            case 2:
+                return TargetType.AMOUNT;
+            default:
+                return TargetType.UNRECOGNIZED;
+        }
     }
 
     /**

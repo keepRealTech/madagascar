@@ -15,6 +15,7 @@ enum NotificationEventType {
     NOTIFICATION_EVENT_NEW_QUESTION = 6;
     NOTIFICATION_EVENT_NEW_REPLY = 7;
     NOTIFICATION_EVENT_NEW_SUPPORT = 8;
+    NOTIFICATION_EVENT_NEW_BALANCE = 9;
 }
 
 message SubscribeEvent {
@@ -52,6 +53,11 @@ message SupportEvent {
     uint64 priceInCents = 2;
 }
 
+message BalanceEvent {
+    string hostId = 1;
+    uint64 amountInCents = 2;
+}
+
 message NotificationEvent {
     NotificationEventType type = 1;
     string userId = 2;
@@ -62,6 +68,7 @@ message NotificationEvent {
         ReactionEvent reactionEvent = 6;
         MemberEvent memberEvent = 7;
         SupportEvent supportEvent = 8;
+        BalanceEvent balanceEvent = 11;
     }
     uint64 timestamp = 9;
     string eventId = 10;

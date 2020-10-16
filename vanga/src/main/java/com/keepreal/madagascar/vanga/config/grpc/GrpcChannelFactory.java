@@ -19,7 +19,6 @@ import org.springframework.context.annotation.Configuration;
 public class GrpcChannelFactory {
 
     private final GrpcConfiguration fossaConfiguration;
-    private final GrpcConfiguration couaConfiguration;
     private final Tracer tracer;
 
     /**
@@ -29,10 +28,8 @@ public class GrpcChannelFactory {
      * @param tracer            {@link Tracer}.
      */
     public GrpcChannelFactory(@Qualifier("fossaConfiguration") GrpcConfiguration fossaConfiguration,
-                              @Qualifier("couaConfiguration") GrpcConfiguration couaConfiguration,
                               Tracer tracer) {
         this.fossaConfiguration = fossaConfiguration;
-        this.couaConfiguration = couaConfiguration;
         this.tracer = tracer;
     }
 
@@ -52,24 +49,7 @@ public class GrpcChannelFactory {
                         .usePlaintext()
                         .build());
     }
-
-    /**
-     * Represents the coua grpc channel.
-     *
-     * @return Coua grpc channel.
-     */
-    @Bean(name = "couaChannel")
-    public Channel getCouaChannel() {
-        return TracingClientInterceptor
-                .newBuilder()
-                .withTracer(this.tracer)
-                .build()
-                .intercept(ManagedChannelBuilder
-                        .forAddress(this.couaConfiguration.getHost(), this.couaConfiguration.getPort())
-                        .usePlaintext()
-                        .build());
-    }
-
+    
     /**
      * Represents the grpc tracing server interceptor.
      * s

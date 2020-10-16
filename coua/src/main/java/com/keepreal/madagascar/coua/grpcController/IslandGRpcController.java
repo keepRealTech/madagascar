@@ -691,7 +691,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
                     .content(request.getContent().getValue())
                     .targetType(request.getTargetType().getValue());
 
-            switch (this.convertToTargetType(request.getTargetType().getValue())) {
+            switch (this.islandInfoService.convertToTargetType(request.getTargetType().getValue())) {
                 case SUPPORTER:
                     builder.totalSupporterNum(request.getTotalSupporterNum().getValue());
                     break;
@@ -787,20 +787,4 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         responseObserver.onCompleted();
     }
 
-    /**
-     * converts int to {@link TargetType}
-     *
-     * @param targetTypeInteger int num
-     * @return {@link TargetType}
-     */
-    private TargetType convertToTargetType(Integer targetTypeInteger) {
-        switch (targetTypeInteger) {
-            case 1:
-                return TargetType.SUPPORTER;
-            case 2:
-                return TargetType.AMOUNT;
-            default:
-                return TargetType.UNRECOGNIZED;
-        }
-    }
 }
