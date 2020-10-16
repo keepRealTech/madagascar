@@ -19,8 +19,12 @@ import io.rong.models.user.UserModel;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -57,6 +61,9 @@ public class RongCloudService {
             "\n" +
             "即刻成为创作者，参与活动吧：https://mp.weixin.qq.com/s/oBObVSUnOY-f1TXpDP82Uw";
     private final RongCloud client;
+
+    //需要对私信特殊处理的创作者list 暂时只有凯蒂的userId
+    public final List<String> specialArtistListTemp = new ArrayList<>(Arrays.asList("6706487884553129984"));
 
     /**
      * Constructs the rong cloud service.
@@ -222,7 +229,9 @@ public class RongCloudService {
                 .setIsPersisted(0)
                 .setIsCounted(0)
                 .setIsIncludeSender(1);
-        this.client.message.msgPrivate.send(hostMessage);
+        if (!isSpecialArtist(event.getUserId())) {
+            this.client.message.msgPrivate.send(hostMessage);
+        }
 
         TxtMessage memberTextMessage;
         if (Objects.isNull(membership) || !membership.getUseCustomMessage()) {
@@ -252,7 +261,7 @@ public class RongCloudService {
                 .setVerifyBlacklist(0)
                 .setIsPersisted(0)
                 .setIsCounted(0)
-                .setIsIncludeSender(1);
+                .setIsIncludeSender(this.isSpecialArtist(event.getUserId()) ? 0 : 1);
         this.client.message.msgPrivate.send(memberMessage);
     }
 
@@ -302,5 +311,15 @@ public class RongCloudService {
                 .setIsCounted(0)
                 .setIsIncludeSender(0);
         this.client.message.msgPrivate.send(message);
+    }
+
+    /**
+     * 判断是否为特殊创作者
+     *
+     * @param artistUserId 创作者 user id
+     * @return 是返回true
+     */
+    private boolean isSpecialArtist(String artistUserId) {
+        return CollectionUtils.containsInstance(specialArtistListTemp, artistUserId);
     }
 }
