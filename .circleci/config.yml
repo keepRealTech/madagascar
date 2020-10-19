@@ -21,8 +21,7 @@ jobs:
     steps:
       - checkout
 
-      - run: |
-        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD registry.cn-beijing.aliyuncs.com
+      - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD registry.cn-beijing.aliyuncs.com
 
       # run tests!
       - run: gradle indri:dockerpushstaging
