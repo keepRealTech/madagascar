@@ -8,16 +8,24 @@ import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.IslandsResponse;
+import com.keepreal.madagascar.coua.SupportTargetMessage;
+import com.keepreal.madagascar.coua.TargetType;
+import com.keepreal.madagascar.coua.TimeType;
 import com.keepreal.madagascar.coua.dao.IslandDiscoveryRepository;
 import com.keepreal.madagascar.coua.dao.IslandInfoRepository;
+import com.keepreal.madagascar.coua.dao.SupportTargetRepository;
 import com.keepreal.madagascar.coua.dao.UserInfoRepository;
 import com.keepreal.madagascar.coua.model.IslandDiscovery;
 import com.keepreal.madagascar.coua.model.IslandInfo;
+import com.keepreal.madagascar.coua.model.SupportTarget;
 import com.keepreal.madagascar.coua.util.PageResponseUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,6 +48,7 @@ public class IslandInfoService {
     private final SubscriptionService subscriptionService;
     private final LongIdGenerator idGenerator;
     private final UserInfoRepository userInfoRepository;
+    private final SupportTargetRepository supportTargetRepository;
 
     /**
      * Constructs the island service.
@@ -49,17 +58,20 @@ public class IslandInfoService {
      * @param subscriptionService       {@link SubscriptionService}.
      * @param idGenerator               {@link LongIdGenerator}.
      * @param userInfoRepository        {@link UserInfoRepository}.
+     * @param supportTargetRepository   {@link SupportTargetRepository}
      */
     public IslandInfoService(IslandDiscoveryRepository islandDiscoveryRepository,
                              IslandInfoRepository islandInfoRepository,
                              SubscriptionService subscriptionService,
                              LongIdGenerator idGenerator,
-                             UserInfoRepository userInfoRepository) {
+                             UserInfoRepository userInfoRepository,
+                             SupportTargetRepository supportTargetRepository) {
         this.islandDiscoveryRepository = islandDiscoveryRepository;
         this.islandInfoRepository = islandInfoRepository;
         this.subscriptionService = subscriptionService;
         this.idGenerator = idGenerator;
         this.userInfoRepository = userInfoRepository;
+        this.supportTargetRepository = supportTargetRepository;
     }
 
     /**
@@ -324,6 +336,124 @@ public class IslandInfoService {
                             .setRecommendation(islandDiscoveryMap.get(islandDiscovery.getIslandId()).getRecommendation())
                             .build())
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 根据 id 查询支持目标
+     *
+     * @param id 支持目标主键id
+     * @return {@link SupportTarget}
+     */
+    public SupportTarget findSupportTargetByIdAndDeletedIsFalse(String id) {
+        return this.supportTargetRepository.findTopByIdAndDeletedIsFalse(id);
+    }
+
+    /**
+     * 更新支持目标
+     *
+     * @param supportTarget {@link SupportTarget}
+     * @return {@link SupportTarget}
+     */
+    public SupportTarget updateSupportTarget(SupportTarget supportTarget) {
+        return this.supportTargetRepository.save(supportTarget);
+    }
+
+    /**
+     * 创建支持目标
+     *
+     * @param supportTarget {@link SupportTarget}
+     * @return {@link SupportTarget}
+     */
+    public SupportTarget createSupportTarget(SupportTarget supportTarget) {
+        supportTarget.setId(String.valueOf(idGenerator.nextId()));
+        return this.updateSupportTarget(supportTarget);
+    }
+
+    /**
+     * converts {@link SupportTarget} to the {@link SupportTargetMessage}
+     *
+     * @param supportTarget {@link SupportTarget}
+     * @return {@link SupportTargetMessage}
+     */
+    public SupportTargetMessage getSupportTargetMessage(SupportTarget supportTarget) {
+        if (Objects.isNull(supportTarget)) {
+            return null;
+        }
+        return SupportTargetMessage.newBuilder()
+                .setId(supportTarget.getId())
+                .setContent(supportTarget.getContent())
+                .setHostId(supportTarget.getHostId())
+                .setIslandId(supportTarget.getIslandId())
+                .setTargetTypeValue(supportTarget.getTargetType())
+                .setTimeTypeValue(supportTarget.getTimeType())
+                .setCurrentSupporterNum(supportTarget.getCurrentSupporterNum())
+                .setTotalSupporterNum(supportTarget.getTotalSupporterNum())
+                .setCurrentAmountInCents(supportTarget.getCurrentAmountInCents())
+                .setTotalAmountInCents(supportTarget.getTotalAmountInCents())
+                .build();
+    }
+
+    /**
+     * 根据岛id 和 岛主id 获取支持目标
+     *
+     * @param islandId 岛id
+     * @param hostId 岛主id
+     * @return {@link List<SupportTarget>}
+     */
+    public List<SupportTarget> findAllSupportTargetByIslandIdAndHostId(String islandId, String hostId) {
+        if (StringUtils.isEmpty(islandId)) {
+            return this.supportTargetRepository.findAllByHostIdAndDeletedIsFalse(hostId);
+        }
+        return this.supportTargetRepository.findAllByIslandIdAndHostIdAndDeletedIsFalse(islandId, hostId);
+    }
+
+    /**
+     * 如果有支持目标就根据类型更新支持目标
+     *
+     * @param hostId 岛主id
+     * @param amountInCents 金额
+     */
+    public void updateSupportTargetIfExisted(String hostId, Long amountInCents) {
+        List<SupportTarget> supportTargets = this.supportTargetRepository.findAllByHostIdAndDeletedIsFalse(hostId);
+        if (!CollectionUtils.isEmpty(supportTargets)) {
+            SupportTarget supportTarget = supportTargets.get(0);
+            switch (this.convertToTargetType(supportTarget.getTargetType())) {
+                case SUPPORTER:
+                    supportTarget.setCurrentSupporterNum(supportTarget.getCurrentSupporterNum() + 1L);
+                    break;
+                case AMOUNT:
+                    supportTarget.setCurrentAmountInCents(supportTarget.getCurrentAmountInCents() + amountInCents);
+                    break;
+                case UNRECOGNIZED:
+                    break;
+            }
+            this.updateSupportTarget(supportTarget);
+        }
+    }
+
+    /**
+     * converts int to {@link TargetType}
+     *
+     * @param targetTypeInteger int num
+     * @return {@link TargetType}
+     */
+    public TargetType convertToTargetType(Integer targetTypeInteger) {
+        switch (targetTypeInteger) {
+            case 1:
+                return TargetType.SUPPORTER;
+            case 2:
+                return TargetType.AMOUNT;
+            default:
+                return TargetType.UNRECOGNIZED;
+        }
+    }
+
+    /**
+     * 目标数据每月1日0:00归零
+     */
+    @Scheduled(cron = "0 0 0 1 * ? ")
+    public void clearSupportTargetPerMonth() {
+        this.supportTargetRepository.clearSupportTargetByTimeType(TimeType.PER_MONTH_VALUE);
     }
 
     /**

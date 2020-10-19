@@ -8,6 +8,7 @@ import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.service.ChatService;
 import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
 import com.keepreal.madagascar.lemur.service.PaymentService;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.vanga.SubscribeMembershipMessage;
 import com.keepreal.madagascar.vanga.IncomeMessage;
@@ -28,6 +29,7 @@ import swagger.model.RecommendIslandDTO;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the island dto factory.
@@ -52,6 +54,8 @@ public class IslandDTOFactory {
     private final SubscribeMembershipService subscribeMembershipService;
     private final GeneralConfiguration generalConfiguration;
     private final PaymentService paymentService;
+    private final IslandService islandService;
+    private final SupportTargetDTOFactory supportTargetDTOFactory;
 
     /**
      * Constructs the island dto factory.
@@ -62,19 +66,25 @@ public class IslandDTOFactory {
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param generalConfiguration       {@link GeneralConfiguration}.
      * @param paymentService             {@link PaymentService}.
+     * @param islandService              {@link IslandService}
+     * @param supportTargetDTOFactory    {@link SupportTargetDTOFactory}
      */
     public IslandDTOFactory(ChatService chatService,
                             UserService userService,
                             UserDTOFactory userDTOFactory,
                             SubscribeMembershipService subscribeMembershipService,
                             GeneralConfiguration generalConfiguration,
-                            PaymentService paymentService) {
+                            PaymentService paymentService,
+                            IslandService islandService,
+                            SupportTargetDTOFactory supportTargetDTOFactory) {
         this.chatService = chatService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
         this.subscribeMembershipService = subscribeMembershipService;
         this.generalConfiguration = generalConfiguration;
         this.paymentService = paymentService;
+        this.islandService = islandService;
+        this.supportTargetDTOFactory = supportTargetDTOFactory;
     }
 
     /**
@@ -202,6 +212,8 @@ public class IslandDTOFactory {
             fullIslandDTO.setSupportCount(0);
             fullIslandDTO.setCentsInMonth(0L);
         }
+        fullIslandDTO.setSupportTargets(this.islandService.retrieveSupportTargetsByIslandIdAndHostId(island.getId(), island.getHostId())
+                                        .stream().map(this.supportTargetDTOFactory::valueOf).collect(Collectors.toList()));
         return fullIslandDTO;
     }
 

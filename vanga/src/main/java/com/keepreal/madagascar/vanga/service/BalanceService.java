@@ -18,17 +18,21 @@ public class BalanceService {
 
     private final BalanceRepository balanceRepository;
     private final LongIdGenerator idGenerator;
+    private final NotificationEventProducerService notificationEventProducerService;
 
     /**
      * Constructs the balance service.
      *
      * @param balanceRepository {@link BalanceRepository}.
      * @param idGenerator       {@link LongIdGenerator}.
+     * @param notificationEventProducerService {@link NotificationEventProducerService}
      */
     public BalanceService(BalanceRepository balanceRepository,
-                          LongIdGenerator idGenerator) {
+                          LongIdGenerator idGenerator,
+                          NotificationEventProducerService notificationEventProducerService) {
         this.balanceRepository = balanceRepository;
         this.idGenerator = idGenerator;
+        this.notificationEventProducerService = notificationEventProducerService;
     }
 
     /**
@@ -107,6 +111,7 @@ public class BalanceService {
         balance = this.balanceRepository.findByIdAndDeletedIsFalse(balance.getId());
         balance.setBalanceInCents(balance.getBalanceInCents() + amountInCents);
 
+        this.notificationEventProducerService.produceNewBalanceNotificationEventAsync(balance.getUserId(), amountInCents);
         return this.updateBalance(balance);
     }
 

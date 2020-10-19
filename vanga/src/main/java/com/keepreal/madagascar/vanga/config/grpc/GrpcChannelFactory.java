@@ -49,7 +49,7 @@ public class GrpcChannelFactory {
                         .usePlaintext()
                         .build());
     }
-
+    
     /**
      * Represents the grpc tracing server interceptor.
      * s
