@@ -23,6 +23,7 @@ import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedCountRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedCountResponse;
 import com.keepreal.madagascar.fossa.RetrieveFeedsByIdsRequest;
+import com.keepreal.madagascar.fossa.RetrieveMembershipFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
@@ -410,6 +411,49 @@ public class FeedService {
         }
 
         return feedsResponse;
+    }
+
+    public FeedsResponse retrieveIslandMembershipFeeds(String userId,
+                                                       String islandId,
+                                                       Long timestampAfter,
+                                                       Long timestampBefore,
+                                                       int pageSize,
+                                                       List<String> feedIdList,
+                                                       List<String> membershipIdList) {
+        FeedServiceGrpc.FeedServiceBlockingStub fossaStub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        RetrieveMembershipFeedsRequest.Builder builder = RetrieveMembershipFeedsRequest.newBuilder()
+                .setPageRequest(PaginationUtils.buildPageRequest(0, pageSize))
+                .setUserId(userId)
+                .setIslandId(islandId)
+                .addAllFeedIds(feedIdList)
+                .addAllMembershipIds(membershipIdList);
+
+        if (Objects.nonNull(timestampBefore)) {
+            builder.setTimestampBefore(Int64Value.of(timestampBefore));
+        } else {
+            builder.setTimestampAfter(Int64Value.of(timestampAfter == null ? 0L : timestampAfter));
+        }
+
+        FeedsResponse response;
+
+        try {
+            response = fossaStub.retrieveMembershipFeeds(builder.build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve membership feeds returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
     }
 
     /**
