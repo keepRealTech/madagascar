@@ -11,10 +11,13 @@ import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
+import com.keepreal.madagascar.coua.SupportTargetMessage;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
+import com.keepreal.madagascar.lemur.converter.SupportTargetConverter;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
+import com.keepreal.madagascar.lemur.dtoFactory.SupportTargetDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
@@ -29,6 +32,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -49,10 +53,13 @@ import swagger.model.IslandProfilesResponse;
 import swagger.model.IslandResponse;
 import swagger.model.PostIslandPayload;
 import swagger.model.PostIslandPayloadV2;
+import swagger.model.PostSupportTargetRequest;
 import swagger.model.PosterFeedDTO;
 import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
 import swagger.model.SubscribeIslandRequest;
+import swagger.model.SupportTargetResponse;
+import swagger.model.SupportTargetsResponse;
 import swagger.model.UsersResponse;
 
 import javax.validation.Valid;
@@ -78,6 +85,7 @@ public class IslandController implements IslandApi {
     private final GeneralConfiguration generalConfiguration;
     private final TextContentFilter textContentFilter;
     private final DefaultErrorMessageTranslater translater;
+    private final SupportTargetDTOFactory supportTargetDTOFactory;
 
     /**
      * Constructs the island controller.
@@ -91,6 +99,7 @@ public class IslandController implements IslandApi {
      * @param feedDTOFactory       {@link FeedDTOFactory}.
      * @param generalConfiguration {@link GeneralConfiguration}.
      * @param textContentFilter    {@link TextContentFilter}.
+     * @param supportTargetDTOFactory {@link SupportTargetDTOFactory}
      */
     public IslandController(ImageService imageService,
                             IslandService islandService,
@@ -100,7 +109,8 @@ public class IslandController implements IslandApi {
                             FeedService feedService,
                             FeedDTOFactory feedDTOFactory,
                             GeneralConfiguration generalConfiguration,
-                            TextContentFilter textContentFilter) {
+                            TextContentFilter textContentFilter,
+                            SupportTargetDTOFactory supportTargetDTOFactory) {
         this.imageService = imageService;
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
@@ -110,6 +120,7 @@ public class IslandController implements IslandApi {
         this.feedDTOFactory = feedDTOFactory;
         this.generalConfiguration = generalConfiguration;
         this.textContentFilter = textContentFilter;
+        this.supportTargetDTOFactory = supportTargetDTOFactory;
         this.translater = new DefaultErrorMessageTranslater();
     }
 
@@ -594,6 +605,92 @@ public class IslandController implements IslandApi {
     }
 
     /**
+     * 删除 支持目标
+     *
+     * @param id id (required) 支持目标id
+     * @return {@link DummyResponse}
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1IslandsIdSupportTargetDelete(String id) {
+        if (StringUtils.isEmpty(id)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        String userId = HttpContextUtils.getUserIdFromContext();
+        this.islandService.deleteSupportTargetById(id, userId);
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 根据岛id 获取支持目标
+     *
+     * @param id id (required) 岛id
+     * @return {@link SupportTargetsResponse}
+     */
+    @Override
+    public ResponseEntity<SupportTargetsResponse> apiV1IslandsIdSupportTargetGet(String id) {
+        if (StringUtils.isEmpty(id)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        String userId = HttpContextUtils.getUserIdFromContext();
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+        if (!userId.equals(islandMessage.getHostId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        List<SupportTargetMessage> messages = this.islandService.retrieveSupportTargetsByIslandIdAndHostId(id, userId);
+        SupportTargetsResponse response = new SupportTargetsResponse();
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        response.setData(this.supportTargetDTOFactory.listValueOf(messages));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 创建/修改 支持目标
+     *
+     * @param id id (required)
+     * @param postSupportTargetRequest  (required)
+     * @return {@link SupportTargetResponse}
+     */
+    @Override
+    public ResponseEntity<SupportTargetResponse> apiV1IslandsIdSupportTargetPut(String id, @Valid PostSupportTargetRequest postSupportTargetRequest) {
+        if (StringUtils.isEmpty(id) || !this.checkSupportTargetRequest(postSupportTargetRequest)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        String userId = HttpContextUtils.getUserIdFromContext();
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+        if (!userId.equals(islandMessage.getHostId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        // v1.8 支持目标唯一
+        if (StringUtils.isEmpty(postSupportTargetRequest.getTargetId())) {
+            List<SupportTargetMessage> messages = this.islandService.retrieveSupportTargetsByIslandIdAndHostId(id, userId);
+            if (!CollectionUtils.isEmpty(messages)) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        }
+
+        SupportTargetMessage supportTarget = this.islandService.createOrUpdateSupportTarget(
+                id,
+                userId,
+                SupportTargetConverter.convertToTargetType(postSupportTargetRequest.getTargetType()),
+                SupportTargetConverter.convertToTimeType(postSupportTargetRequest.getTimeType()),
+                postSupportTargetRequest.getTotalAmountInCents(),
+                postSupportTargetRequest.getTotalSupporterNum(),
+                postSupportTargetRequest.getContent(),
+                postSupportTargetRequest.getTargetId());
+
+        SupportTargetResponse response = new SupportTargetResponse();
+        response.setData(this.supportTargetDTOFactory.valueOf(supportTarget));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Builds the {@link BriefIslandsResponse} from {@link IslandsResponse}.
      *
      * @param islandsResponse {@link IslandsResponse}.
@@ -648,4 +745,56 @@ public class IslandController implements IslandApi {
         }
     }
 
+    /**
+     * 检查请求体参数合法性 {@link PostSupportTargetRequest}
+     *
+     * @param postSupportTargetRequest {@link PostSupportTargetRequest}
+     * @return {@link Boolean}
+     */
+    private boolean checkSupportTargetRequest(PostSupportTargetRequest postSupportTargetRequest) {
+        if (StringUtils.isEmpty(postSupportTargetRequest.getTargetId())) {
+            if (Objects.isNull(postSupportTargetRequest.getTimeType())
+                    || Objects.isNull(postSupportTargetRequest.getTargetType())
+                    || StringUtils.isEmpty(postSupportTargetRequest.getContent())) {
+                return false;
+            }
+            switch (postSupportTargetRequest.getTargetType()) {
+                case SUPPORTER:
+                    if (Objects.isNull(postSupportTargetRequest.getTotalSupporterNum())) {
+                        return false;
+                    }
+                    break;
+                case AMOUNT:
+                    if (Objects.isNull(postSupportTargetRequest.getTotalAmountInCents())) {
+                        return false;
+                    }
+                    break;
+            }
+        } else {
+            if (Objects.nonNull(postSupportTargetRequest.getTargetType())) {
+                if (Objects.isNull(postSupportTargetRequest.getTimeType()) || StringUtils.isEmpty(postSupportTargetRequest.getContent())) {
+                    return false;
+                }
+
+                switch (postSupportTargetRequest.getTargetType()) {
+                    case SUPPORTER:
+                        if (Objects.isNull(postSupportTargetRequest.getTotalSupporterNum())) {
+                            return false;
+                        }
+                        break;
+                    case AMOUNT:
+                        if (Objects.isNull(postSupportTargetRequest.getTotalAmountInCents())) {
+                            return false;
+                        }
+                        break;
+                }
+            } else {
+                if (Objects.nonNull(postSupportTargetRequest.getTotalAmountInCents())
+                        && Objects.nonNull(postSupportTargetRequest.getTotalSupporterNum())) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

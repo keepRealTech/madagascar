@@ -190,6 +190,62 @@ message DiscoverIslandMessage {
     string recommendation = 2;
 }
 
+message CreateOrUpdateSupportTargetRequest {
+    google.protobuf.Int32Value targetType = 1;
+    google.protobuf.Int32Value timeType = 2;
+    google.protobuf.StringValue content = 3;
+    google.protobuf.UInt64Value totalAmountInCents = 4;
+    google.protobuf.UInt64Value totalSupporterNum = 5;
+    string islandId = 6;
+    string hostId = 7;
+    google.protobuf.StringValue id = 8;
+}
+
+message DeleteSupportTargetRequest {
+    string id = 1;
+    string hostId = 2;
+}
+
+message RetrieveSupportTargetsRequest {
+    string islandId = 1;
+    string hostId = 2;
+}
+
+message SupportTargetsResponse {
+    CommonStatus status = 1;
+    repeated SupportTargetMessage supportTargets = 2;
+}
+
+message SupportTargetResponse {
+    CommonStatus status = 1;
+    SupportTargetMessage supportTarget = 2;
+}
+
+message SupportTargetMessage {
+    string id = 1;
+    TargetType targetType = 2;
+    TimeType timeType = 3;
+    string content = 4;
+    uint64 currentAmountInCents = 5;
+    uint64 totalAmountInCents = 6;
+    uint64 currentSupporterNum = 7;
+    uint64 totalSupporterNum = 8;
+    string islandId = 9;
+    string hostId = 10;
+}
+
+enum TargetType {
+    TARGET_TYPE_NONE = 0;
+    SUPPORTER = 1;
+    AMOUNT = 2;
+}
+
+enum TimeType {
+    TIME_TYPE_NONE = 0;
+    NO_LIMIT = 1;
+    PER_MONTH = 2;
+}
+
 service IslandService {
     rpc CheckName (CheckNameRequest) returns (CheckNameResponse) {};
     rpc CreateIsland (NewIslandRequest) returns (IslandResponse) {};
@@ -209,4 +265,7 @@ service IslandService {
     rpc RetrieveIslanderPortraitUrlByIslandId(RetrieveIslanderPortraitUrlRequest) returns (RetrieveIslanderPortraitUrlResponse) {}
     rpc CheckIslandSubscription(CheckIslandSubscriptionRequest) returns (IslandSubscriptionStateResponse) {};
     rpc DiscoverIslands(google.protobuf.Empty) returns (DiscoverIslandsResponse) {};
+    rpc CreateOrUpdateSupportTarget(CreateOrUpdateSupportTargetRequest) returns (SupportTargetResponse) {};
+    rpc DeleteSupportTarget(DeleteSupportTargetRequest) returns (CommonStatus) {};
+    rpc RetrieveSupportTargets(RetrieveSupportTargetsRequest) returns (SupportTargetsResponse) {};
 }

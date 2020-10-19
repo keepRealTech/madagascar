@@ -2,7 +2,9 @@ package com.keepreal.madagascar.lemur.service;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
@@ -14,6 +16,8 @@ import com.keepreal.madagascar.coua.CheckNameResponse;
 import com.keepreal.madagascar.coua.CheckNewFeedsMessage;
 import com.keepreal.madagascar.coua.CheckNewFeedsRequest;
 import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
+import com.keepreal.madagascar.coua.CreateOrUpdateSupportTargetRequest;
+import com.keepreal.madagascar.coua.DeleteSupportTargetRequest;
 import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.DiscoverIslandsResponse;
 import com.keepreal.madagascar.coua.DismissIntroductionRequest;
@@ -35,10 +39,16 @@ import com.keepreal.madagascar.coua.RetrieveIslandSubscribersByIdRequest;
 import com.keepreal.madagascar.coua.RetrieveIslanderPortraitUrlRequest;
 import com.keepreal.madagascar.coua.RetrieveIslanderPortraitUrlResponse;
 import com.keepreal.madagascar.coua.RetrieveMultipleIslandsRequest;
+import com.keepreal.madagascar.coua.RetrieveSupportTargetsRequest;
 import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateRequest;
 import com.keepreal.madagascar.coua.RetrieveUserSubscriptionStateResponse;
 import com.keepreal.madagascar.coua.SubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.SubscribeIslandResponse;
+import com.keepreal.madagascar.coua.SupportTargetMessage;
+import com.keepreal.madagascar.coua.SupportTargetResponse;
+import com.keepreal.madagascar.coua.SupportTargetsResponse;
+import com.keepreal.madagascar.coua.TargetType;
+import com.keepreal.madagascar.coua.TimeType;
 import com.keepreal.madagascar.coua.UnsubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateIslandByIdRequest;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -743,6 +753,146 @@ public class IslandService {
      */
     public List<IslandMessage> retrieveIslandsByHostId(String hostId) {
         return this.retrieveIslands(null, hostId, null, 0, 10).getIslandsList();
+    }
+
+    /**
+     * 创建/更新 支持目标
+     *
+     * @param islandId 岛id
+     * @param hostId 岛主id
+     * @param targetType 支持目标类型(金额/人数)
+     * @param timeType 支持目标时间类型(无限制/每月)
+     * @param totalAmountInCents 目标金额
+     * @param totalSupporterNum 目标人数
+     * @param content 权益内容
+     * @param targetId 支持目标id
+     * @return {@link SupportTargetMessage}
+     */
+    public SupportTargetMessage createOrUpdateSupportTarget(String islandId,
+                                                            String hostId,
+                                                            TargetType targetType,
+                                                            TimeType timeType,
+                                                            Long totalAmountInCents,
+                                                            Long totalSupporterNum,
+                                                            String content,
+                                                            String targetId) {
+        CreateOrUpdateSupportTargetRequest.Builder builder = CreateOrUpdateSupportTargetRequest.newBuilder()
+                .setIslandId(islandId)
+                .setHostId(hostId);
+
+        if (Objects.nonNull(targetType)) {
+            builder.setTargetType(Int32Value.of(targetType.getNumber()));
+            switch (targetType) {
+                case SUPPORTER:
+                    builder.setTotalSupporterNum(UInt64Value.of(totalSupporterNum));
+                    break;
+                case AMOUNT:
+                    builder.setTotalAmountInCents(UInt64Value.of(totalAmountInCents));
+                    break;
+                case UNRECOGNIZED:
+                    log.error("unknown support target type islandId is {}, targetId is {}", islandId,
+                            StringUtils.isEmpty(targetId) ? "no target id" : targetId);
+            }
+        }
+
+        if (Objects.nonNull(timeType)) {
+            builder.setTimeType(Int32Value.of(timeType.getNumber()));
+        }
+
+        if (!StringUtils.isEmpty(targetId)) {
+            builder.setId(StringValue.of(targetId));
+        }
+
+        if (!StringUtils.isEmpty(content)) {
+            builder.setContent(StringValue.of(content));
+        }
+
+        if (Objects.nonNull(totalAmountInCents)) {
+            builder.setTotalAmountInCents(UInt64Value.of(totalAmountInCents));
+        }
+
+        if (Objects.nonNull(totalSupporterNum)) {
+            builder.setTotalSupporterNum(UInt64Value.of(totalSupporterNum));
+        }
+
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        SupportTargetResponse response;
+        try {
+            response = stub.createOrUpdateSupportTarget(builder.build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "create or update support target returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getSupportTarget();
+    }
+
+    /**
+     * 根据岛id 和 岛主id 获取支持目标
+     *
+     * @param islandId 岛id
+     * @param hostId 岛主ie
+     * @return {@link List<SupportTargetMessage>}
+     */
+    public List<SupportTargetMessage> retrieveSupportTargetsByIslandIdAndHostId(String islandId, String hostId) {
+        RetrieveSupportTargetsRequest request = RetrieveSupportTargetsRequest.newBuilder().setIslandId(islandId).setHostId(hostId).build();
+
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        SupportTargetsResponse response;
+        try {
+            response = stub.retrieveSupportTargets(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "retrieve support targets returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getSupportTargetsList();
+    }
+
+    /**
+     * 删除支持目标
+     *
+     * @param id {}
+     */
+    public void deleteSupportTargetById(String id, String hostId) {
+        IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+        DeleteSupportTargetRequest request = DeleteSupportTargetRequest.newBuilder().setId(id).setHostId(hostId).build();
+        CommonStatus commonStatus;
+
+        try {
+            commonStatus = stub.deleteSupportTarget(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(commonStatus)) {
+            log.error(Objects.isNull(commonStatus) ? "delete support target returned null." : commonStatus.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != commonStatus.getRtn()) {
+            throw new KeepRealBusinessException(commonStatus);
+        }
     }
 
     /**
