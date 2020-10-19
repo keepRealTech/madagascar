@@ -118,6 +118,7 @@ public class IslandInfoService {
                 .setMemberCount(memberCount)
                 .setIslandAccessType(IslandAccessType.forNumber(islandInfo.getIslandAccessType()))
                 .setShowIncome(islandInfo.getShowIncome())
+                .setCustomUrl(islandInfo.getCustomUrl())
                 .build();
     }
 
@@ -453,6 +454,17 @@ public class IslandInfoService {
     @Scheduled(cron = "0 0 0 1 * ? ")
     public void clearSupportTargetPerMonth() {
         this.supportTargetRepository.clearSupportTargetByTimeType(TimeType.PER_MONTH_VALUE);
+    }
+
+    /**
+     * 检查自定义首页链接是否已存在
+     *
+     * @param customUrl 自定义链接
+     * @return 存在返回true
+     */
+    public boolean checkIslandCustomUrl(String customUrl) {
+        IslandInfo islandInfo = this.islandInfoRepository.findTopByCustomUrlAndDeletedIsFalse(customUrl);
+        return Objects.nonNull(islandInfo);
     }
 
 }
