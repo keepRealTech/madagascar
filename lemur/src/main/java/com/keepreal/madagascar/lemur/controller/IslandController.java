@@ -363,6 +363,7 @@ public class IslandController implements IslandApi {
                 payload.getIdentityId(),
                 userId,
                 accessType,
+                null,
                 null);
 
         BriefIslandResponse response = new BriefIslandResponse();
@@ -566,7 +567,8 @@ public class IslandController implements IslandApi {
                 payload.getIdentityId(),
                 userId,
                 accessType,
-                payload.getDescription());
+                payload.getDescription(),
+                payload.getCustomUrl());
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));

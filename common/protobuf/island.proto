@@ -21,6 +21,7 @@ message NewIslandRequest {
     google.protobuf.StringValue identityId = 5;
     IslandAccessType islandAccessType = 6;
     google.protobuf.StringValue description = 7;
+    google.protobuf.StringValue customUrl = 8;
 }
 
 message IslandResponse {

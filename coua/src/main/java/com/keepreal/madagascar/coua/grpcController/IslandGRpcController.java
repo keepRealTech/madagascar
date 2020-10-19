@@ -169,6 +169,16 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
         if (request.hasDescription()) {
             infoBuilder.description(request.getDescription().getValue());
         }
+        if (request.hasCustomUrl()) {
+            if (this.islandInfoService.checkIslandCustomUrl(request.getCustomUrl().getValue())) {
+                IslandResponse islandResponse = IslandResponse.newBuilder()
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_CUSTOM_URL_EXISTED))
+                        .build();
+                responseObserver.onNext(islandResponse);
+                responseObserver.onCompleted();
+            }
+            infoBuilder.customUrl(request.getCustomUrl().getValue());
+        }
 
         IslandInfo save = islandInfoService.createIsland(infoBuilder.build());
         try {
@@ -350,7 +360,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             islandInfo.setShowIncome(request.getShowIncome().getValue());
         }
         if (request.hasCustomUrl()) {
-            if (this.islandInfoService.checkIslandCustomUrl(request.getId(), request.getCustomUrl().getValue())) {
+            if (this.islandInfoService.checkIslandCustomUrl(request.getCustomUrl().getValue())) {
                 responseBuilder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_CUSTOM_URL_EXISTED));
                 responseObserver.onNext(responseBuilder.build());
                 responseObserver.onCompleted();

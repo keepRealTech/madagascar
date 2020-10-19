@@ -247,7 +247,8 @@ public class IslandService {
                                       String identityId,
                                       String userId,
                                       IslandAccessType islandAccessType,
-                                      String description) {
+                                      String description,
+                                      String customUrl) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         if (Objects.isNull(identityId)) {
@@ -274,6 +275,10 @@ public class IslandService {
 
         if (!StringUtils.isEmpty(description)) {
             requestBuilder.setDescription(StringValue.of(description));
+        }
+
+        if (!StringUtils.isEmpty(customUrl)) {
+            requestBuilder.setCustomUrl(StringValue.of(customUrl));
         }
 
         IslandResponse islandResponse;

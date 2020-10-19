@@ -106,6 +106,7 @@ public class IslandInfoService {
                 .setMemberCount(memberCount)
                 .setIslandAccessType(IslandAccessType.forNumber(islandInfo.getIslandAccessType()))
                 .setShowIncome(islandInfo.getShowIncome())
+                .setCustomUrl(islandInfo.getCustomUrl())
                 .build();
     }
 
@@ -328,12 +329,11 @@ public class IslandInfoService {
     /**
      * 检查自定义首页链接是否已存在
      *
-     * @param islandId 岛id
      * @param customUrl 自定义链接
      * @return 存在返回true
      */
-    public boolean checkIslandCustomUrl(String islandId, String customUrl) {
-        IslandInfo islandInfo = this.islandInfoRepository.findTopByIdAndCustomUrlAndDeletedIsFalse(islandId, customUrl);
+    public boolean checkIslandCustomUrl(String customUrl) {
+        IslandInfo islandInfo = this.islandInfoRepository.findTopByCustomUrlAndDeletedIsFalse(customUrl);
         return Objects.nonNull(islandInfo);
     }
 
