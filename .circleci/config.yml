@@ -21,22 +21,11 @@ jobs:
     steps:
       - checkout
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "build.gradle" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run: gradle dependencies
-
-      - save_cache:
-          paths:
-            - ~/.gradle
-          key: v1-dependencies-{{ checksum "build.gradle" }}
+      - run: |
+        docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD registry.cn-beijing.aliyuncs.com
 
       # run tests!
-      - run: gradle test
+      - run: gradle indri:dockerpushstaging
 
 
 workflows:
@@ -44,7 +33,9 @@ workflows:
   build-with-tests:
     jobs:
       - build:
+          context:
+            - develop
           filters:
             branches:
               only:
-                - develop
+                - feature/sli/ci
