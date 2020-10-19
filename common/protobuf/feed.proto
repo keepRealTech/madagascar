@@ -169,6 +169,16 @@ message UpdateFeedFeedgroupRequest {
     string userId = 3;
 }
 
+message RetrieveMembershipFeedsRequest {
+    string userId = 1;
+    string islandId = 2;
+    repeated string membershipIds = 3;
+    google.protobuf.Int64Value timestampAfter = 4;
+    google.protobuf.Int64Value timestampBefore = 5;
+    repeated string feedIds = 6;
+    PageRequest pageRequest = 7;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
@@ -186,4 +196,5 @@ service FeedService {
     rpc RetrieveFeedCountByIslandId (RetrieveFeedCountRequest) returns (RetrieveFeedCountResponse) {};
     rpc UpdateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest) returns (UpdateFeedSaveAuthorityResponse) {};
     rpc UpdateFeedFeedgroupById(UpdateFeedFeedgroupRequest) returns (FeedGroupFeedResponse) {};
+    rpc RetrieveMembershipFeeds(RetrieveMembershipFeedsRequest) returns (FeedsResponse) {};
 }

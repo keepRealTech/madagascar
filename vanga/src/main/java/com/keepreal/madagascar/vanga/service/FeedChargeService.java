@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.vanga.service;
 
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.FeedCharge;
@@ -25,17 +26,20 @@ public class FeedChargeService {
     private final FeedChargeRepository feedChargeRepository;
     private final LongIdGenerator idGenerator;
     private final NotificationEventProducerService notificationEventProducerService;
+    private final FeedService feedService;
 
     public FeedChargeService(PaymentService paymentService,
                              BalanceService balanceService,
                              FeedChargeRepository feedChargeRepository,
                              LongIdGenerator idGenerator,
-                             NotificationEventProducerService notificationEventProducerService) {
+                             NotificationEventProducerService notificationEventProducerService,
+                             FeedService feedService) {
         this.paymentService = paymentService;
         this.balanceService = balanceService;
         this.feedChargeRepository = feedChargeRepository;
         this.idGenerator = idGenerator;
         this.notificationEventProducerService = notificationEventProducerService;
+        this.feedService = feedService;
     }
 
     @Transactional
@@ -72,13 +76,24 @@ public class FeedChargeService {
         return this.feedChargeRepository.findFeedChargeByUserIdAndFeedIdAndDeletedIsFalse(userId, feedId);
     }
 
+    public List<String> findHasAccessFeedIdTimestampBefore(String userId, String islandId, Long timestamp) {
+        return this.feedChargeRepository.findFeedIdByUserIdAndIslandIdTimestampBefore(userId, islandId, timestamp);
+    }
+
+    public List<String> findHasAccessFeedIdTimestampAfter(String userId, String islandId, Long timestamp) {
+        return this.feedChargeRepository.findFeedIdByUserIdAndIslandIdTimestampAfter(userId, islandId, timestamp);
+    }
+
     private void saveFeedCharge(String userId, String feedId) {
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(feedId, userId);
         FeedCharge feedCharge = this.feedChargeRepository.findFeedChargeByUserIdAndFeedIdAndDeletedIsFalse(userId, feedId);
         if (feedCharge == null) {
             feedCharge = new FeedCharge();
             feedCharge.setId(String.valueOf(this.idGenerator.nextId()));
             feedCharge.setUserId(userId);
             feedCharge.setFeedId(feedId);
+            feedCharge.setIslandId(feedMessage.getIslandId());
+            feedCharge.setFeedCreatedAt(feedMessage.getCreatedAt());
             this.feedChargeRepository.save(feedCharge);
         }
     }
