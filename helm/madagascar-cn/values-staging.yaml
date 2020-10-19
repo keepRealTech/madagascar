@@ -33,11 +33,11 @@ global:
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.3.3-staging
+      tag: 1.3.4-staging
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
-      tag: 1.2.2-staging
+      tag: 1.2.3-staging
       imagePullPolicy: Always
     brookesia:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/brookesia
@@ -45,11 +45,11 @@ global:
       imagePullPolicy: Always
     coua:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-      tag: 1.2.2-staging
+      tag: 1.2.3-staging
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-      tag: 1.2.2-staging
+      tag: 1.2.3-staging
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
@@ -57,23 +57,23 @@ global:
       imagePullPolicy: Always
     mantella:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/mantella
-      tag: 1.1.1-staging
+      tag: 1.1.2-staging
       imagePullPolicy: Always
     marty:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/marty
-      tag: 1.0.6-staging
+      tag: 1.0.7-staging
       imagePullPolicy: Always
     tenrecs:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/tenrecs
-      tag: 1.0.6-staging
+      tag: 1.0.7-staging
       imagePullPolicy: Always
     vanga:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
-      tag: 1.2.4-staging
+      tag: 1.2.5-staging
       imagePullPolicy: Always
     asity:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
-      tag: 1.0.5-staging
+      tag: 1.0.6-staging
       imagePullPolicy: Always
     hoopoe:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/hoopoe
