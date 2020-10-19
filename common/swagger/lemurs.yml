@@ -3216,6 +3216,8 @@ components:
           type: string
         islandAccessType:
           $ref: "#/components/schemas/IslandAccessType"
+        customUrl:
+          type: string
       required:
         - name
         - description
