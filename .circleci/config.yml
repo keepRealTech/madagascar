@@ -21,8 +21,11 @@ jobs:
     steps:
       - checkout
 
-      - run: echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin registry.cn-beijing.aliyuncs.com
+      - run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin registry.cn-beijing.aliyuncs.com
 
+      - setup_remote_docker:
+        version: 19.03.13
+      
       # run tests!
       - run: gradle indri:dockerpushstaging
 
