@@ -59,6 +59,7 @@ message UpdateIslandByIdRequest {
     google.protobuf.StringValue secret = 4;
     google.protobuf.StringValue description = 5;
     IslandAccessType islandAccessType = 6;
+    google.protobuf.BoolValue showIncome = 7;
 }
 
 message RetrieveIslandSubscribersByIdRequest {

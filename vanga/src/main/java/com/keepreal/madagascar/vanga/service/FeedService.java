@@ -1,8 +1,11 @@
 package com.keepreal.madagascar.vanga.service;
 
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.fossa.FeedResponse;
 import com.keepreal.madagascar.fossa.FeedServiceGrpc;
+import com.keepreal.madagascar.fossa.RetrieveFeedByIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdRequest;
 import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.Payment;
@@ -10,6 +13,7 @@ import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.OrderState;
 import io.grpc.Channel;
+import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -144,6 +148,35 @@ public class FeedService {
         payment.setState(PaymentState.OPEN.getValue());
 
         this.paymentService.updateAll(Collections.singletonList(payment));
+    }
+
+    public FeedMessage retrieveFeedById(String id, String userId) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveFeedByIdRequest request = RetrieveFeedByIdRequest.newBuilder()
+                .setId(id)
+                .setUserId(userId)
+                .setIncludeDeleted(false)
+                .build();
+
+        FeedResponse feedResponse;
+        try {
+            feedResponse = stub.retrieveFeedById(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(feedResponse)
+                || !feedResponse.hasStatus()) {
+            log.error(Objects.isNull(feedResponse) ? "retrieve feed returned null." : feedResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != feedResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(feedResponse.getStatus());
+        }
+
+        return feedResponse.getFeed();
     }
 
     /**

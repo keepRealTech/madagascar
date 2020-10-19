@@ -42,6 +42,7 @@ import swagger.model.PostSupportRequest;
 import swagger.model.SceneType;
 import swagger.model.SubscribeMemberRequest;
 import swagger.model.UserPaymentsResponse;
+import swagger.model.UserPaymentsResponseV11;
 import swagger.model.UserWithdrawsResponse;
 import swagger.model.WechatOrderResponse;
 
@@ -244,6 +245,59 @@ public class PaymentController implements PaymentApi {
         UserPaymentsResponse response = new UserPaymentsResponse();
         response.setData(userPaymentsResponse.getUserPaymentsList().stream()
                 .map(userPaymentMessage -> this.paymentDTOFactory.valueOf(
+                        userPaymentMessage,
+                        userMessageMap.getOrDefault(userPaymentMessage.getPayeeId(), null),
+                        userPaymentMessage.getMembershipSku(),
+                        membershipMessageMap.getOrDefault(userPaymentMessage.getMembershipSku().getMembershipId(), null)
+                ))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList()));
+        response.setPageInfo(PaginationUtils.getPageInfo(userPaymentsResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the get user payment history api.
+     *
+     * @param page     page number (optional, default to 0).
+     * @param pageSize size of a page (optional, default to 10).
+     * @return {@link UserPaymentsResponse}.
+     */
+    @CrossOrigin
+    @Override
+    public ResponseEntity<UserPaymentsResponseV11> apiV11PaymentsGet(Integer page,
+                                                                     Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        com.keepreal.madagascar.vanga.UserPaymentsResponse userPaymentsResponse =
+                this.paymentService.retrieveUserPayments(userId, page, pageSize);
+
+        if (userPaymentsResponse.getUserPaymentsList().isEmpty()) {
+            UserPaymentsResponseV11 response = new UserPaymentsResponseV11();
+            response.setData(new ArrayList<>());
+            response.setPageInfo(PaginationUtils.getPageInfo(userPaymentsResponse.getPageResponse()));
+            response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+            response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+
+        Set<String> hostIds = userPaymentsResponse.getUserPaymentsList().stream()
+                .map(UserPaymentMessage::getPayeeId)
+                .collect(Collectors.toSet());
+        Map<String, UserMessage> userMessageMap = this.userService.retrieveUsersByIds(hostIds).stream()
+                .collect(Collectors.toMap(UserMessage::getId, Function.identity(), (u1, u2) -> u1, HashMap::new));
+
+        Set<String> membershipIds = userPaymentsResponse.getUserPaymentsList().stream()
+                .map(payment -> payment.getMembershipSku().getMembershipId())
+                .collect(Collectors.toSet());
+        Map<String, MembershipMessage> membershipMessageMap = this.membershipService.retrieveMembershipsByIds(membershipIds).stream()
+                .collect(Collectors.toMap(MembershipMessage::getId, Function.identity(), (u1, u2) -> u1, HashMap::new));
+
+        UserPaymentsResponseV11 response = new UserPaymentsResponseV11();
+        response.setData(userPaymentsResponse.getUserPaymentsList().stream()
+                .map(userPaymentMessage -> this.paymentDTOFactory.valueOfV11(
                         userPaymentMessage,
                         userMessageMap.getOrDefault(userPaymentMessage.getPayeeId(), null),
                         userPaymentMessage.getMembershipSku(),

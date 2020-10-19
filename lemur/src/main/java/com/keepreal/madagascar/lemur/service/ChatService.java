@@ -4,6 +4,7 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
+import com.keepreal.madagascar.asity.ChatgroupMembershipCountResponse;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
@@ -17,6 +18,7 @@ import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupMembershipCountRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
@@ -446,6 +448,39 @@ public class ChatService {
         return response;
     }
 
+    /**
+     * Retrieve chatgroup membership count.
+     *
+     * @param membershipIds membership id list.
+     * @return  chatgroup count.
+     */
+    public Integer retrieveChatgroupMembershipCount(List<String> membershipIds) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveChatgroupMembershipCountRequest request = RetrieveChatgroupMembershipCountRequest.newBuilder()
+                .addAllMembershipIds(membershipIds)
+                .build();
+
+        ChatgroupMembershipCountResponse response;
+
+        try {
+            response = stub.retrieveChatgroupMembershipCountByMembershipIds(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve chat group membership count returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getChatgroupCount();
+    }
 
     /**
      * Checks if a string field is too long.

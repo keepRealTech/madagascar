@@ -428,7 +428,8 @@ public class IslandController implements IslandApi {
                 portraitImageUri,
                 payload.getSecret(),
                 payload.getDescription(),
-                accessType);
+                accessType,
+                payload.getShowIncome());
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));

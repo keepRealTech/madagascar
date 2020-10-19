@@ -16,6 +16,7 @@ enum NotificationEventType {
     NOTIFICATION_EVENT_NEW_REPLY = 7;
     NOTIFICATION_EVENT_NEW_SUPPORT = 8;
     NOTIFICATION_EVENT_NEW_BALANCE = 9;
+    NOTIFICATION_EVENT_NEW_FEED_PAYMENT = 10;
 }
 
 message SubscribeEvent {
@@ -36,6 +37,12 @@ message MemberEvent {
     uint64 priceInCents = 5;
     int32 timeInMonths = 6;
     bool permanent = 7;
+}
+
+message FeedPaymentEvent {
+    string feedId = 1;
+    string userId = 2;
+    uint64 priceInCents = 3;
 }
 
 message CommentEvent {
@@ -61,15 +68,16 @@ message BalanceEvent {
 message NotificationEvent {
     NotificationEventType type = 1;
     string userId = 2;
+    uint64 timestamp = 3;
+    string eventId = 4;
     oneof event {
-        SubscribeEvent subscribeEvent = 3;
-        UnsubscribeEvent unsubscribeEvent = 4;
-        CommentEvent commentEvent = 5;
-        ReactionEvent reactionEvent = 6;
-        MemberEvent memberEvent = 7;
-        SupportEvent supportEvent = 8;
-        BalanceEvent balanceEvent = 11;
+        SubscribeEvent subscribeEvent = 5;
+        UnsubscribeEvent unsubscribeEvent = 6;
+        CommentEvent commentEvent = 7;
+        ReactionEvent reactionEvent = 8;
+        MemberEvent memberEvent = 9;
+        SupportEvent supportEvent = 10;
+        FeedPaymentEvent feedPaymentEvent = 11;
+        BalanceEvent balanceEvent = 12;
     }
-    uint64 timestamp = 9;
-    string eventId = 10;
 }

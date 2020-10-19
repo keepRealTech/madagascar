@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.service;
 
+import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
@@ -7,7 +8,6 @@ import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
-import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CheckIslandSubscriptionRequest;
@@ -322,7 +322,8 @@ public class IslandService {
                                           String portraitImageUri,
                                           String secret,
                                           String description,
-                                          IslandAccessType islandAccessType) {
+                                          IslandAccessType islandAccessType,
+                                          Boolean showIncome) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         UpdateIslandByIdRequest.Builder requestBuilder = UpdateIslandByIdRequest.newBuilder()
@@ -349,6 +350,10 @@ public class IslandService {
         if (!Objects.isNull(description)) {
             description = this.checkLength(description, DESCRIPTION_LENGTH_THRESHOLD);
             requestBuilder.setDescription(StringValue.of(description));
+        }
+
+        if (Objects.nonNull(showIncome)) {
+            requestBuilder.setShowIncome(BoolValue.of(showIncome));
         }
 
         IslandResponse islandResponse;

@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.6.0"
+  version: "1.8.0"
   title: Keep Real API
 
 security:
@@ -2849,6 +2849,7 @@ components:
     PrivilegeState:
       type: string
       enum:
+        - PRIVILEGE_NONE
         - PRIVILEGE_EFFECTIVE
         - PRIVILEGE_EXPIRE
     NoticeType:
@@ -3084,6 +3085,13 @@ components:
               type: integer
             recommendation:
               type: string
+            showIncome:
+              type: boolean
+            supportCount:
+              type: integer
+            centsInMonth:
+              type: integer
+              format: int64
     FullIslandDTO:
       allOf:
         - $ref: '#/components/schemas/IslandDTO'
@@ -3208,6 +3216,8 @@ components:
           type: string
         islandAccessType:
           $ref: "#/components/schemas/IslandAccessType"
+        customUrl:
+          type: string
       required:
         - name
         - description
@@ -3676,6 +3686,8 @@ components:
             currentTime:
               type: integer
               format: int64
+            hasFeedgroup:
+              type: boolean
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
@@ -3715,6 +3727,8 @@ components:
             currentTime:
               type: integer
               format: int64
+            hasFeedgroup:
+              type: boolean
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:

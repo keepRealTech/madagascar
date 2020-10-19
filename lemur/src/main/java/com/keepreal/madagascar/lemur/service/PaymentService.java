@@ -12,8 +12,11 @@ import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BalanceResponse;
 import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.FeedRequest;
+import com.keepreal.madagascar.vanga.IncomeMessage;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RedirectResponse;
+import com.keepreal.madagascar.vanga.RetrieveIncomeRequest;
+import com.keepreal.madagascar.vanga.RetrieveIncomeResponse;
 import com.keepreal.madagascar.vanga.RetrieveSupportInfoRequest;
 import com.keepreal.madagascar.vanga.RetrieveSupportInfoResponse;
 import com.keepreal.madagascar.vanga.RetrieveUserPaymentsRequest;
@@ -29,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Calendar;
 import java.util.Objects;
 
 /**
@@ -738,4 +742,56 @@ public class PaymentService {
         return response.getAlipayOrder();
     }
 
+    /**
+     * Retrieve the income by userId this month.
+     *
+     * @param userId    user id.
+     * @return  {@link IncomeMessage}.
+     */
+    public IncomeMessage retrieveIncomeByUserId(String userId) {
+        PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveIncomeRequest request = RetrieveIncomeRequest.newBuilder()
+                .setUserId(userId)
+                .setStartTimestamp(getMonthStartTime())
+                .setEndTimestamp(System.currentTimeMillis())
+                .build();
+
+        RetrieveIncomeResponse response;
+
+        try {
+            response = stub.retrieveIncomeByUserId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve income returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getMessage();
+    }
+
+    /**
+     * 获取当月开始时间戳
+     *
+     * @return
+     */
+    private static Long getMonthStartTime() {
+        Calendar calendar = Calendar.getInstance();// 获取当前日期
+        calendar.add(Calendar.YEAR, 0);
+        calendar.add(Calendar.MONTH, 0);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);// 设置为1号,当前日期既为本月第一天
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTimeInMillis();
+    }
 }

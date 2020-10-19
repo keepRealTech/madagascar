@@ -286,19 +286,29 @@ public class SubscriptionService {
     }
 
     /**
-     * Flips the island host should introduce to false.
+     * Flips the island host and normal user should introduce to false.
      *
      * @param userId   User id.
      * @param islandId Island id.
      */
-    public void dismissHostIntroduction(String userId, String islandId) {
+    public void dismissHostAndUserIntroduction(String userId, String islandId) {
         Subscription subscription = this.subscriptionRepository.findTopByIslandIdAndUserIdAndDeletedIsFalse(islandId, userId);
         if (Objects.isNull(subscription)) {
             return;
         }
 
         subscription.setShouldIntroduce(false);
-        this.subscriptionRepository.save(subscription);
+        this.updateSubcription(subscription);
+    }
+
+    /**
+     * Update subscription
+     *
+     * @param subscription {@link Subscription}
+     * @return {@link Subscription}
+     */
+    public Subscription updateSubcription(Subscription subscription) {
+        return this.subscriptionRepository.save(subscription);
     }
 
     public Page<String> getIslandIdsByUsername(String username, Pageable pageable) {

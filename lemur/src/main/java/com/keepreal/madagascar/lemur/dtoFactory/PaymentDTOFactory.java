@@ -2,12 +2,17 @@ package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.PaymentState;
 import com.keepreal.madagascar.common.UserMessage;
+import com.keepreal.madagascar.common.UserPaymentType;
+import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
 import com.keepreal.madagascar.vanga.UserWithdrawMessage;
 import org.springframework.stereotype.Component;
+import swagger.model.BriefUserDTO;
+import swagger.model.PaymentType;
 import swagger.model.UserPaymentDTO;
+import swagger.model.UserPaymentDTOV11;
 import swagger.model.UserWithdrawDTO;
 import swagger.model.WithdrawState;
 
@@ -15,6 +20,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 
 /**
@@ -57,7 +64,7 @@ public class PaymentDTOFactory {
                                   UserMessage userMessage,
                                   MembershipSkuMessage membershipSkuMessage,
                                   MembershipMessage membershipMessage) {
-        if (Objects.isNull(userPaymentMessage)) {
+        if (Objects.isNull(userPaymentMessage) || !UserPaymentType.PAYMENT_TYPE_MEMBERSHIP.equals(userPaymentMessage.getType())) {
             return null;
         }
 
@@ -67,6 +74,7 @@ public class PaymentDTOFactory {
         userPaymentDTO.setMembership(this.membershipDTOFactory.briefValueOf(membershipMessage));
         userPaymentDTO.setMembershipSku(this.skuDTOFactory.valueOf(membershipSkuMessage));
         userPaymentDTO.setCreatedAt(userPaymentMessage.getCreatedAt());
+        userPaymentDTO.setPriceInCents(userPaymentMessage.getPriceInCents());
 
         ZonedDateTime expiration = ZonedDateTime.ofInstant(Instant.ofEpochMilli(userPaymentMessage.getExpiresAt()), ZoneId.systemDefault());
         userPaymentDTO.setExpiration(expiration.with(ChronoField.SECOND_OF_DAY, 0).toInstant().toEpochMilli());
@@ -76,6 +84,54 @@ public class PaymentDTOFactory {
          */
         if (userPaymentDTO.getExpiration() >= PERMANENT_TIMESTAMP) {
             userPaymentDTO.getMembershipSku().setIsPermanent(true);
+        }
+
+        return userPaymentDTO;
+    }
+
+    /**
+     * Builds the {@link UserPaymentDTO}.
+     *
+     * @param userPaymentMessage   {@link UserPaymentMessage}.
+     * @param userMessage          {@link UserMessage}.
+     * @param membershipSkuMessage {@link MembershipSkuMessage}.
+     * @param membershipMessage    {@link MembershipMessage}.
+     * @return {@link UserPaymentDTO}.
+     */
+    public UserPaymentDTOV11 valueOfV11(UserPaymentMessage userPaymentMessage,
+                                        UserMessage userMessage,
+                                        MembershipSkuMessage membershipSkuMessage,
+                                        MembershipMessage membershipMessage) {
+        if (Objects.isNull(userPaymentMessage)) {
+            return null;
+        }
+
+        UserPaymentDTOV11 userPaymentDTO = new UserPaymentDTOV11();
+        userPaymentDTO.setId(userPaymentMessage.getId());
+        userPaymentDTO.setHost(this.userDTOFactory.briefValueOf(userMessage));
+        userPaymentDTO.setCreatedAt(userPaymentMessage.getCreatedAt());
+        userPaymentDTO.setPriceInCents(userPaymentMessage.getPriceInCents());
+
+        if (UserPaymentType.PAYMENT_TYPE_MEMBERSHIP.equals(userPaymentMessage.getType())) {
+            if (Objects.isNull(membershipMessage) || Objects.isNull(membershipSkuMessage)) {
+                return null;
+            }
+
+            userPaymentDTO.setType(PaymentType.MEMBERSHIP);
+            userPaymentDTO.setPrivileges(Arrays.asList(membershipMessage.getDescription().split(",")));
+            userPaymentDTO.setTimeInMonths(membershipSkuMessage.getTimeInMonths());
+            userPaymentDTO.setName(membershipMessage.getName());
+
+            ZonedDateTime expiration = ZonedDateTime.ofInstant(Instant.ofEpochMilli(userPaymentMessage.getExpiresAt()), ZoneId.systemDefault());
+            userPaymentDTO.setExpiration(expiration.with(ChronoField.SECOND_OF_DAY, 0).toInstant().toEpochMilli());
+
+            if (userPaymentDTO.getExpiration() >= PERMANENT_TIMESTAMP) {
+                userPaymentDTO.setIsPermanent(true);
+            }
+        } else if (UserPaymentType.PAYMENT_TYPE_FEED.equals(userPaymentMessage.getType())) {
+            userPaymentDTO.setType(PaymentType.FEED);
+            userPaymentDTO.setName(Templates.LEMUR_PAYMENT_TYPE_FEED);
+            userPaymentDTO.setPrivileges(Collections.singletonList(String.format(Templates.LEMUR_PAYMENT_FEED_PRIVILEGE, userPaymentDTO.getPriceInCents() / 100L)));
         }
 
         return userPaymentDTO;

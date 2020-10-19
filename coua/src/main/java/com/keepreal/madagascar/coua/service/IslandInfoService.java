@@ -117,6 +117,7 @@ public class IslandInfoService {
                 .setSecret(islandInfo.getSecret())
                 .setMemberCount(memberCount)
                 .setIslandAccessType(IslandAccessType.forNumber(islandInfo.getIslandAccessType()))
+                .setShowIncome(islandInfo.getShowIncome())
                 .build();
     }
 

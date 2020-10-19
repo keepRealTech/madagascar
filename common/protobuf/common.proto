@@ -57,6 +57,7 @@ enum NoticeType {
     NOTICE_TYPE_BOX_NEW_QUESTION = 3;
     NOTICE_TYPE_BOX_NEW_ANSWER = 4;
     NOTICE_TYPE_ISLAND_NEW_SUPPORT = 5;
+    NOTICE_TYPE_FEED_NEW_PAYMENT = 6;
 }
 
 message NoticeTypeValue {
@@ -115,6 +116,13 @@ enum PushPriority {
     NEW_QUESTION = 5;
     NEW_REPLY = 6;
     NEW_PUBLIC_REPLY = 7;
+}
+
+enum UserPaymentType {
+    PAYMENT_TYPE_NONE = 0;
+    PAYMENT_TYPE_MEMBERSHIP = 1;
+    PAYMENT_TYPE_SUPPORT = 2;
+    PAYMENT_TYPE_FEED = 3;
 }
 
 message GenderValue {
@@ -200,6 +208,7 @@ message IslandMessage {
     int32 memberCount = 8;
     string secret = 9;
     IslandAccessType islandAccessType = 10;
+    bool showIncome = 11;
 }
 
 message RepostMessage {

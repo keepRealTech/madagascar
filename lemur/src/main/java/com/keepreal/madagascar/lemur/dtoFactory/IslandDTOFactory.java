@@ -6,8 +6,12 @@ import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.service.ChatService;
+import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
+import com.keepreal.madagascar.lemur.service.PaymentService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import com.keepreal.madagascar.vanga.SubscribeMembershipMessage;
+import com.keepreal.madagascar.vanga.IncomeMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import swagger.model.BriefIslandDTO;
@@ -19,9 +23,11 @@ import swagger.model.IslandAccessType;
 import swagger.model.IslandDTO;
 import swagger.model.IslandIdentityDTO;
 import swagger.model.IslandProfileDTO;
+import swagger.model.PrivilegeState;
 import swagger.model.RecommendIslandDTO;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -45,30 +51,38 @@ public class IslandDTOFactory {
     private final ChatService chatService;
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final SubscribeMembershipService subscribeMembershipService;
     private final GeneralConfiguration generalConfiguration;
+    private final PaymentService paymentService;
     private final IslandService islandService;
     private final SupportTargetDTOFactory supportTargetDTOFactory;
 
     /**
      * Constructs the island dto factory.
      *
-     * @param chatService          {@link ChatService}.
-     * @param userService          {@link UserService}.
-     * @param userDTOFactory       {@link UserDTOFactory}.
-     * @param generalConfiguration {@link GeneralConfiguration}.
-     * @param islandService        {@link IslandService}
-     * @param supportTargetDTOFactory {@link SupportTargetDTOFactory}
+     * @param chatService                {@link ChatService}.
+     * @param userService                {@link UserService}.
+     * @param userDTOFactory             {@link UserDTOFactory}.
+     * @param subscribeMembershipService {@link SubscribeMembershipService}.
+     * @param generalConfiguration       {@link GeneralConfiguration}.
+     * @param paymentService             {@link PaymentService}.
+     * @param islandService              {@link IslandService}
+     * @param supportTargetDTOFactory    {@link SupportTargetDTOFactory}
      */
     public IslandDTOFactory(ChatService chatService,
                             UserService userService,
                             UserDTOFactory userDTOFactory,
+                            SubscribeMembershipService subscribeMembershipService,
                             GeneralConfiguration generalConfiguration,
+                            PaymentService paymentService,
                             IslandService islandService,
                             SupportTargetDTOFactory supportTargetDTOFactory) {
         this.chatService = chatService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.subscribeMembershipService = subscribeMembershipService;
         this.generalConfiguration = generalConfiguration;
+        this.paymentService = paymentService;
         this.islandService = islandService;
         this.supportTargetDTOFactory = supportTargetDTOFactory;
     }
@@ -142,6 +156,15 @@ public class IslandDTOFactory {
         recommendIslandDTO.setPortraitImageUri(discoverIsland.getIsland().getPortraitImageUri());
         recommendIslandDTO.setAccessType(this.convertAccessType(discoverIsland.getIsland().getIslandAccessType()));
         recommendIslandDTO.setMemberCount(discoverIsland.getIsland().getMemberCount());
+        recommendIslandDTO.setShowIncome(discoverIsland.getIsland().getShowIncome());
+        if (discoverIsland.getIsland().getShowIncome()) {
+            IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(discoverIsland.getIsland().getHostId());
+            recommendIslandDTO.setSupportCount(incomeMessage.getSupportCount());
+            recommendIslandDTO.setCentsInMonth(incomeMessage.getCents());
+        } else {
+            recommendIslandDTO.setSupportCount(0);
+            recommendIslandDTO.setCentsInMonth(0L);
+        }
 
         recommendIslandDTO.setRecommendation(discoverIsland.getRecommendation());
         recommendIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(discoverIsland.getIsland().getHostId())));
@@ -177,6 +200,15 @@ public class IslandDTOFactory {
 
         fullIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 
+        fullIslandDTO.setShowIncome(island.getShowIncome());
+        if (island.getShowIncome()) {
+            IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(island.getHostId());
+            fullIslandDTO.setSupportCount(incomeMessage.getSupportCount());
+            fullIslandDTO.setCentsInMonth(incomeMessage.getCents());
+        } else {
+            fullIslandDTO.setSupportCount(0);
+            fullIslandDTO.setCentsInMonth(0L);
+        }
         fullIslandDTO.setSupportTargets(this.islandService.retrieveSupportTargetsByIslandIdAndHostId(island.getId(), island.getHostId())
                                         .stream().map(this.supportTargetDTOFactory::valueOf).collect(Collectors.toList()));
         return fullIslandDTO;
@@ -218,6 +250,7 @@ public class IslandDTOFactory {
             islandProfileDTO.setIntroduction(this.buildSubscriberIntroduction(islandProfileResponse.getUserShouldIntroduce()));
         }
 
+        this.processShowPrivilege(islandProfileDTO, userId, islandProfileResponse.getIsland().getId());
         return islandProfileDTO;
     }
 
@@ -321,4 +354,22 @@ public class IslandDTOFactory {
         }
     }
 
+    private void processShowPrivilege(IslandProfileDTO islandProfileDTO, String userId, String islandId) {
+        List<SubscribeMembershipMessage> messageList = this.subscribeMembershipService.retrieveSubscribeMembership(userId, islandId);
+        if (messageList.isEmpty()) {
+            islandProfileDTO.setShowPrivilege(false);
+            islandProfileDTO.setPrivilegeState(PrivilegeState.NONE);
+        } else {
+            long currentTime = System.currentTimeMillis();
+            boolean expired = true;
+            for (SubscribeMembershipMessage message : messageList) {
+                if (message.getExpiredTime() > currentTime) {
+                    expired = false;
+                    break;
+                }
+            }
+            islandProfileDTO.setShowPrivilege(true);
+            islandProfileDTO.privilegeState(expired ? PrivilegeState.EXPIRE : PrivilegeState.EFFECTIVE);
+        }
+    }
 }

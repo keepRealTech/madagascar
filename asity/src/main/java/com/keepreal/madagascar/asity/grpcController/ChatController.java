@@ -1,7 +1,9 @@
 package com.keepreal.madagascar.asity.grpcController;
 
+import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
+import com.keepreal.madagascar.asity.ChatgroupMembershipCountResponse;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
 import com.keepreal.madagascar.asity.CreateChatgroupRequest;
 import com.keepreal.madagascar.asity.DeleteChatgroupMembershipByMembershipIdRequest;
@@ -15,6 +17,7 @@ import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatgroupMembershipCountRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
@@ -487,4 +490,20 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Retrieve chat group membership count by membership id list.
+     *
+     * @param request           {@link RetrieveChatgroupMembershipCountRequest}.
+     * @param responseObserver  {@link ChatgroupMembershipCountResponse}.
+     */
+    @Override
+    public void retrieveChatgroupMembershipCountByMembershipIds(RetrieveChatgroupMembershipCountRequest request, StreamObserver<ChatgroupMembershipCountResponse> responseObserver) {
+        ProtocolStringList membershipIdsList = request.getMembershipIdsList();
+
+        responseObserver.onNext(ChatgroupMembershipCountResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setChatgroupCount(this.chatgroupService.countByMembershipIds(membershipIdsList))
+                .build());
+        responseObserver.onCompleted();
+    }
 }

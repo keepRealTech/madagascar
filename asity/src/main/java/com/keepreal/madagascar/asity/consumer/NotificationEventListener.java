@@ -81,6 +81,14 @@ public class NotificationEventListener implements MessageListener {
 
                     this.rongCloudService.sendThanks(event, membership);
                     break;
+                case NOTIFICATION_EVENT_NEW_FEED_PAYMENT:
+                    if (Objects.isNull(event.getFeedPaymentEvent())
+                            || StringUtils.isEmpty(event.getFeedPaymentEvent().getUserId())) {
+                        break;
+                    }
+
+                    this.rongCloudService.sendThanks(event, null);
+                    break;
                 case NOTIFICATION_EVENT_NEW_SUBSCRIBE:
                 default:
             }
