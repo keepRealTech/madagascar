@@ -14,7 +14,7 @@ jobs:
       - setup_remote_docker:
           version: 19.03.13
           docker_layer_caching: false
-      - run: gradle indri:build
+      - run: gradle indri:dockerpushstaging
   push-images-staging:
     docker:
       # specify the version you desire here
@@ -23,7 +23,6 @@ jobs:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
     steps:
-      - restore_cache
       - run: gradle indri:dockerpushstaging
 
 workflows:
