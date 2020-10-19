@@ -41,12 +41,11 @@ jobs:
 
 workflows:
   build-with-tests:
-      triggers:
-       - schedule:
-           filters:
-             branches:
-               only:
-                 - develop
-     jobs:
-       - build
-
+    triggers:
+      - schedule:
+          filters:
+            branches:
+              only:
+                - develop
+    jobs:
+      - build
