@@ -159,12 +159,11 @@ public class IslandDTOFactory {
         recommendIslandDTO.setAccessType(this.convertAccessType(discoverIsland.getIsland().getIslandAccessType()));
         recommendIslandDTO.setMemberCount(discoverIsland.getIsland().getMemberCount());
         recommendIslandDTO.setShowIncome(discoverIsland.getIsland().getShowIncome());
+        IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(discoverIsland.getIsland().getHostId());
+        recommendIslandDTO.setSupportCount(incomeMessage.getSupportCount());
         if (discoverIsland.getIsland().getShowIncome()) {
-            IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(discoverIsland.getIsland().getHostId());
-            recommendIslandDTO.setSupportCount(incomeMessage.getSupportCount());
             recommendIslandDTO.setCentsInMonth(incomeMessage.getCents());
         } else {
-            recommendIslandDTO.setSupportCount(0);
             recommendIslandDTO.setCentsInMonth(0L);
         }
 
@@ -204,12 +203,11 @@ public class IslandDTOFactory {
         fullIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 
         fullIslandDTO.setShowIncome(island.getShowIncome());
+        IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(island.getHostId());
+        fullIslandDTO.setSupportCount(incomeMessage.getSupportCount());
         if (island.getShowIncome()) {
-            IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(island.getHostId());
-            fullIslandDTO.setSupportCount(incomeMessage.getSupportCount());
             fullIslandDTO.setCentsInMonth(incomeMessage.getCents());
         } else {
-            fullIslandDTO.setSupportCount(0);
             fullIslandDTO.setCentsInMonth(0L);
         }
         fullIslandDTO.setSupportTargets(this.islandService.retrieveSupportTargetsByIslandIdAndHostId(island.getId(), island.getHostId())
