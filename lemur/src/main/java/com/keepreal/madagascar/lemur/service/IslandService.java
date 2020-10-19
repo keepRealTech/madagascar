@@ -239,6 +239,8 @@ public class IslandService {
      * @param identityId       Identity id.
      * @param userId           User id.
      * @param islandAccessType {@link IslandAccessType}.
+     * @param description description.
+     * @param customUrl island home custom url.
      * @return {@link IslandMessage}.
      */
     public IslandMessage createIsland(String name,
