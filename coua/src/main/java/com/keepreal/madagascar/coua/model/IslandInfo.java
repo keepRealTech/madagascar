@@ -56,7 +56,7 @@ public class IslandInfo {
     @Builder.Default
     private Boolean showIncome = true;
     @Builder.Default
-    private String customUrl = UUID.randomUUID().toString().replace("-", "");
+    private String customUrl = "";
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

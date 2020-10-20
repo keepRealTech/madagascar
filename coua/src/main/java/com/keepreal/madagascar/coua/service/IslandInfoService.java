@@ -250,6 +250,7 @@ public class IslandInfoService {
      */
     public IslandInfo createIsland(IslandInfo islandInfo) {
         islandInfo.setId(String.valueOf(idGenerator.nextId()));
+        islandInfo.setCustomUrl(islandInfo.getId());
         IslandInfo save = this.updateIsland(islandInfo);
         // 维护 subscription 表
         subscriptionService.initHost(save.getId(), save.getHostId());
