@@ -168,10 +168,12 @@ public class RepostService {
         return decode.substring(decode.length() - 1).equals(HOST_TAG);
     }
 
+    // TODO: 2020/10/20  和前端沟通后改成 域名 + 自定义主页链接
     public String combineLinkUrl(String islandId, String userId) {
         return String.format(LINK_URL, islandId, userId);
     }
 
+    @Deprecated
     public String generateShortCode(String url) {
          return RepostCodeUtils.getRandomString();
     }

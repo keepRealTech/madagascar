@@ -228,6 +228,7 @@ public class RepostService {
             throw new KeepRealBusinessException(response.getStatus());
         }
 
+        // TODO: 2020/10/20  短链更换成自定义主页链接后 不需要将关系存在redis里
         this.redirectService.insertRedirectUrl(response.getShortCode(), response.getLinkUrl());
 
         return response.getCode();

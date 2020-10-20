@@ -48,6 +48,7 @@ public class RedirectService {
      * @param shortCode  Short code.
      * @param linkUrl    Link url.
      */
+    @Deprecated
     public void insertRedirectUrl(String shortCode, String linkUrl) {
         if (Objects.isNull(this.redirectCache.get(shortCode))
                 && !this.redirectCache.fastPut(shortCode, linkUrl, 300L, TimeUnit.DAYS)) {
