@@ -755,7 +755,7 @@ public class PaymentService {
 
         RetrieveIncomeRequest request = RetrieveIncomeRequest.newBuilder()
                 .setUserId(userId)
-                .setStartTimestamp(getMonthStartTime())
+                .setStartTimestamp(0L)
                 .setEndTimestamp(System.currentTimeMillis())
                 .build();
 
