@@ -210,7 +210,6 @@ message DeleteSupportTargetRequest {
 
 message RetrieveSupportTargetsRequest {
     string islandId = 1;
-    string hostId = 2;
 }
 
 message SupportTargetsResponse {

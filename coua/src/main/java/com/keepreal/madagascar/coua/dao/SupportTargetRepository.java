@@ -18,6 +18,8 @@ public interface SupportTargetRepository extends JpaRepository<SupportTarget, St
 
     List<SupportTarget> findAllByHostIdAndDeletedIsFalse(String hostId);
 
+    List<SupportTarget> findAllByIslandIdAndDeletedIsFalse(String islandId);
+
     @Modifying
     @Transactional
     @Query(value = "UPDATE support_target " +

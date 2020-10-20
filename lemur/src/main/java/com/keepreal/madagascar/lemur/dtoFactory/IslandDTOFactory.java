@@ -210,7 +210,7 @@ public class IslandDTOFactory {
         } else {
             fullIslandDTO.setCentsInMonth(0L);
         }
-        fullIslandDTO.setSupportTargets(this.islandService.retrieveSupportTargetsByIslandIdAndHostId(island.getId(), island.getHostId())
+        fullIslandDTO.setSupportTargets(this.islandService.retrieveSupportTargetsByIslandId(island.getId())
                                         .stream().map(this.supportTargetDTOFactory::valueOf).collect(Collectors.toList()));
         return fullIslandDTO;
     }

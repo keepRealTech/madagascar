@@ -796,7 +796,7 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
      */
     @Override
     public void retrieveSupportTargets(RetrieveSupportTargetsRequest request, StreamObserver<SupportTargetsResponse> responseObserver) {
-        List<SupportTarget> list = this.islandInfoService.findAllSupportTargetByIslandIdAndHostId(request.getIslandId(), request.getHostId());
+        List<SupportTarget> list = this.islandInfoService.findAllSupportTargetByIslandId(request.getIslandId());
         SupportTargetsResponse response = SupportTargetsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .addAllSupportTargets(list.stream().map(this.islandInfoService::getSupportTargetMessage).collect(Collectors.toList()))

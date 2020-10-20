@@ -636,12 +636,8 @@ public class IslandController implements IslandApi {
         if (StringUtils.isEmpty(id)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-        String userId = HttpContextUtils.getUserIdFromContext();
-        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
-        if (!userId.equals(islandMessage.getHostId())) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
-        List<SupportTargetMessage> messages = this.islandService.retrieveSupportTargetsByIslandIdAndHostId(id, userId);
+
+        List<SupportTargetMessage> messages = this.islandService.retrieveSupportTargetsByIslandId(id);
         SupportTargetsResponse response = new SupportTargetsResponse();
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
@@ -670,7 +666,7 @@ public class IslandController implements IslandApi {
 
         // v1.8 支持目标唯一
         if (StringUtils.isEmpty(postSupportTargetRequest.getTargetId())) {
-            List<SupportTargetMessage> messages = this.islandService.retrieveSupportTargetsByIslandIdAndHostId(id, userId);
+            List<SupportTargetMessage> messages = this.islandService.retrieveSupportTargetsByIslandId(id);
             if (!CollectionUtils.isEmpty(messages)) {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }

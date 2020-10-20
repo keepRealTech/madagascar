@@ -394,17 +394,13 @@ public class IslandInfoService {
     }
 
     /**
-     * 根据岛id 和 岛主id 获取支持目标
+     * 根据 岛id 获取支持目标
      *
      * @param islandId 岛id
-     * @param hostId 岛主id
      * @return {@link List<SupportTarget>}
      */
-    public List<SupportTarget> findAllSupportTargetByIslandIdAndHostId(String islandId, String hostId) {
-        if (StringUtils.isEmpty(islandId)) {
-            return this.supportTargetRepository.findAllByHostIdAndDeletedIsFalse(hostId);
-        }
-        return this.supportTargetRepository.findAllByIslandIdAndHostIdAndDeletedIsFalse(islandId, hostId);
+    public List<SupportTarget> findAllSupportTargetByIslandId(String islandId) {
+        return this.supportTargetRepository.findAllByIslandIdAndDeletedIsFalse(islandId);
     }
 
     /**
