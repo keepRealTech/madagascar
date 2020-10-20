@@ -70,7 +70,7 @@ public class ImageGRpcController extends ReactorImageServiceGrpc.ImageServiceImp
                 .last()
                 .map(putObjectResult -> this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .doOnError(error -> log.error(error.toString()))
-                .onErrorReturn(NoSuchElementException.class, this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .onErrorReturn(NoSuchElementException.class, this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))                .onErrorReturn(NoSuchElementException.class, this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .onErrorReturn(this.commonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_GRPC_IMAGE_UPLOAD_ERROR));
     }
 
