@@ -852,14 +852,13 @@ public class IslandService {
     }
 
     /**
-     * 根据岛id 和 岛主id 获取支持目标
+     * 根据 岛id 获取支持目标
      *
      * @param islandId 岛id
-     * @param hostId 岛主ie
      * @return {@link List<SupportTargetMessage>}
      */
-    public List<SupportTargetMessage> retrieveSupportTargetsByIslandIdAndHostId(String islandId, String hostId) {
-        RetrieveSupportTargetsRequest request = RetrieveSupportTargetsRequest.newBuilder().setIslandId(islandId).setHostId(hostId).build();
+    public List<SupportTargetMessage> retrieveSupportTargetsByIslandId(String islandId) {
+        RetrieveSupportTargetsRequest request = RetrieveSupportTargetsRequest.newBuilder().setIslandId(islandId).build();
 
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
