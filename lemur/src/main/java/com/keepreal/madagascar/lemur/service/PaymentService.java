@@ -30,6 +30,7 @@ import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Calendar;
@@ -748,6 +749,7 @@ public class PaymentService {
      * @param userId    user id.
      * @return  {@link IncomeMessage}.
      */
+    @Cacheable(value = "IncomeMessage", key = "#userId", cacheManager = "redisCacheManager")
     public IncomeMessage retrieveIncomeByUserId(String userId) {
         PaymentServiceGrpc.PaymentServiceBlockingStub stub = PaymentServiceGrpc.newBlockingStub(this.channel);
 
