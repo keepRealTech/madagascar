@@ -15,6 +15,7 @@ import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.UUID;
 
 /**
  * @program: madagascar
@@ -55,7 +56,7 @@ public class IslandInfo {
     @Builder.Default
     private Boolean showIncome = true;
     @Builder.Default
-    private String customUrl = "";
+    private String customUrl = UUID.randomUUID().toString().replace("-", "");
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
