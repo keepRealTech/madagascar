@@ -142,6 +142,7 @@ public class SubscribeMembershipService {
                                 .toInstant().toEpochMilli());
                     });
 
+            this.notificationEventProducerService.produceNewBalanceNotificationEventAsync(hostBalance.getUserId(), sku.getPriceInCents());
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.updateAll(innerPaymentList);
             this.createOrRenewSubscriptionMember(order.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
@@ -171,6 +172,7 @@ public class SubscribeMembershipService {
 
             Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
             this.balanceService.consumeShells(userBalance, sku.getPriceInShells());
+            this.notificationEventProducerService.produceNewBalanceNotificationEventAsync(hostBalance.getUserId(), sku.getPriceInCents());
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.createPayShellPayments(userId, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
@@ -196,6 +198,7 @@ public class SubscribeMembershipService {
             ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
 
             Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(sku.getHostId());
+            this.notificationEventProducerService.produceNewBalanceNotificationEventAsync(hostBalance.getUserId(), sku.getPriceInCents());
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.createIOSPayPayments(userId, iosOrder, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
