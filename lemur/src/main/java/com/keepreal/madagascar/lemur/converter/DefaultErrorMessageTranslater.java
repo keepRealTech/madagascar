@@ -72,8 +72,10 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "手机号或密码输入错误，请重新输入";
             case REQUEST_PERMANENT_VERSION_LOW_ERROR:
                 return "很抱歉，永久方案为最新功能，你的当前版本过低，请升级到最新版本再购买";
-            case REQUEST_ISLAND_CUSTOM_URL_EXISTED:
+            case REQUEST_ISLAND_CUSTOM_URL_EXISTED_ERROR:
                 return "主页链接已被占用，请换一个";
+            case REQUEST_MEMBERSHIP_NAME_TOO_LONG_ERROR:
+                return "会员名字过长，请换一个";
             default:
                 return errorCode.getValueDescriptor().getName();
         }

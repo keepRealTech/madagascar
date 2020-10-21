@@ -1,7 +1,9 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.FeedMessage;
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.FeedMembershipMessage;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.fossa.FeedsResponse;
@@ -121,6 +123,11 @@ public class MembershipController implements MembershipApi {
     @Override
     public ResponseEntity<MembershipResponse> apiV1IslandsIdMembershipsPost(String id, @Valid PostMembershipRequest postMembershipRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (postMembershipRequest.getName().length() >= Constants.MEMBERSHIP_NAME_MAX_LENGTH) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_MEMBERSHIP_NAME_TOO_LONG_ERROR);
+        }
+
         MembershipMessage membershipMessage = membershipService.createMembership(postMembershipRequest.getName(),
                 postMembershipRequest.getChargePerMonth(),
                 postMembershipRequest.getDescription(),

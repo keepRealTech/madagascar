@@ -377,6 +377,8 @@ public class UserController implements UserApi {
                 return Gender.MALE;
             case NUMBER_2:
                 return Gender.FEMALE;
+            case NUMBER_3:
+                return Gender.UNSET;
             default:
                 return Gender.UNRECOGNIZED;
         }
