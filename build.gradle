@@ -15,7 +15,6 @@ allprojects {
     }
 }
 
-<<<<<<< HEAD
 ext['lemur.version'] = '1.3.4'
 ext['baobob.version'] = '1.2.3'
 ext['brookesia.version'] = '1.0.3'
@@ -27,19 +26,6 @@ ext['marty.version'] = '1.0.7'
 ext['tenrecs.version'] = '1.0.7'
 ext['vanga.version'] = '1.2.5'
 ext['asity.version'] = '1.0.6'
-=======
-ext['baobob.version'] = '1.2.2-hf2'
-ext['indri.version'] = '1.0.3'
-ext['coua.version'] = '1.2.1-hf1'
-ext['fossa.version'] = '1.2.2'
-ext['lemur.version'] = '1.3.2'
-ext['tenrecs.version'] = '1.0.6'
-ext['brookesia.version'] = '1.0.3'
-ext['marty.version'] = '1.0.6-hf1'
-ext['mantella.version'] = '1.1.1'
-ext['vanga.version'] = '1.2.3'
-ext['asity.version'] = '1.0.5'
->>>>>>> master
 ext['hoopoe.version'] = '1.0.0'
 
 ext['settler.version'] = '1.1.0'
