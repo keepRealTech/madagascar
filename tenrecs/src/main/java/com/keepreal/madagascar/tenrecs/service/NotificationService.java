@@ -87,6 +87,18 @@ public class NotificationService {
     }
 
     /**
+     * Retrieves notifications by user id and notice type.
+     *
+     * @param userId      User id.
+     * @param noticeTypes  {@link NoticeType}.
+     * @param pageRequest {@link PageRequest}.
+     * @return {@link Notification}.
+     */
+    public Page<Notification> retrieveByUserIdAndNoticeTypeInWithPagination(String userId, Iterable<NoticeType> noticeTypes, PageRequest pageRequest) {
+        return this.notificationRepository.findAllByUserIdAndNotice_TypeInAndIsDeletedIsFalse(userId, noticeTypes, PaginationUtils.valueOf(pageRequest));
+    }
+
+    /**
      * Retrieves notifications by user id.
      *
      * @param userId      User id.
