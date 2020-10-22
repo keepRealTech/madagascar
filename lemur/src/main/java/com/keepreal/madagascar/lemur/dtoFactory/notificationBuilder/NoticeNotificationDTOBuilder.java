@@ -180,6 +180,9 @@ public class NoticeNotificationDTOBuilder implements NotificationDTOBuilder {
                     return noticeDTO;
                 }
 
+                SkuMembershipDTO skuMembership = new SkuMembershipDTO();
+                skuMembership.setPriceInCents(noticeMessage.getFeedPaymentNotice().getPriceInCents());
+                noticeDTO.setMembership(skuMembership);
                 noticeDTO.setMember(
                         this.userDTOFactory.briefValueOf(
                                 this.userService.retrieveUserById(
