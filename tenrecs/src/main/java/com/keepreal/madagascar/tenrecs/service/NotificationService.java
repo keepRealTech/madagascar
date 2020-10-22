@@ -63,6 +63,19 @@ public class NotificationService {
     }
 
     /**
+     * Counts the notifications.
+     *
+     * @param userId    User id.
+     * @param types      {@link NoticeType}.
+     * @param timestamp Created timestamp after.
+     * @return Count.
+     */
+    public int countByUserIdAndNoticeTypeInAndCreatedAtAfter(String userId, Iterable<NoticeType> types, long timestamp) {
+        return Math.toIntExact(
+                this.notificationRepository.countByUserIdAndNotice_TypeInAndTimestampAfterAndIsDeletedIsFalse(userId, types, timestamp));
+    }
+
+    /**
      * Retrieves notifications by user id and type.
      *
      * @param userId      User id.

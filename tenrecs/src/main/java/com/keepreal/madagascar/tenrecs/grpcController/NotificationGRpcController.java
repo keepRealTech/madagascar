@@ -188,9 +188,9 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 Objects.isNull(record.getLastReadIslandNoticeNewSubscriberNotificationTimestamp())
                         ? 0 : record.getLastReadIslandNoticeNewSubscriberNotificationTimestamp());
 
-        int newMemberCount = this.notificationService.countByUserIdAndNoticeTypeAndCreatedAtAfter(
+        int newMemberCount = this.notificationService.countByUserIdAndNoticeTypeInAndCreatedAtAfter(
                 userId,
-                NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER,
+                Arrays.asList(NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER, NoticeType.NOTICE_TYPE_FEED_NEW_PAYMENT),
                 Objects.isNull(record.getLastReadIslandNoticeNewMemberNotificationTimestamp())
                         ? 0 : record.getLastReadIslandNoticeNewMemberNotificationTimestamp());
 
