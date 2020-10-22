@@ -37,7 +37,6 @@ public class FeedService {
     private final WechatOrderService wechatOrderService;
     private final WechatPayService wechatPayService;
     private final BalanceService balanceService;
-    private final NotificationEventProducerService notificationEventProducerService;
 
     /**
      * Constructs the feed service.
@@ -47,20 +46,17 @@ public class FeedService {
      * @param wechatOrderService {@link WechatOrderService}.
      * @param wechatPayService   {@link WechatPayService}.
      * @param balanceService     {@link BalanceService}.
-     * @param notificationEventProducerService {@link NotificationEventProducerService}
      */
     public FeedService(@Qualifier("fossaChannel") Channel channel,
                        PaymentService paymentService,
                        WechatOrderService wechatOrderService,
                        WechatPayService wechatPayService,
-                       BalanceService balanceService,
-                       NotificationEventProducerService notificationEventProducerService) {
+                       BalanceService balanceService) {
         this.channel = channel;
         this.paymentService = paymentService;
         this.wechatOrderService = wechatOrderService;
         this.wechatPayService = wechatPayService;
         this.balanceService = balanceService;
-        this.notificationEventProducerService = notificationEventProducerService;
     }
 
     /**
