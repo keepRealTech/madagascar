@@ -111,7 +111,6 @@ public class BalanceService {
         balance = this.balanceRepository.findByIdAndDeletedIsFalse(balance.getId());
         balance.setBalanceInCents(balance.getBalanceInCents() + amountInCents);
 
-        this.notificationEventProducerService.produceNewBalanceNotificationEventAsync(balance.getUserId(), amountInCents);
         return this.updateBalance(balance);
     }
 
