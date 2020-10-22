@@ -3,6 +3,8 @@ package com.keepreal.madagascar.asity.service;
 import com.keepreal.madagascar.asity.config.RongCloudConfiguration;
 import com.keepreal.madagascar.asity.model.SpecialArtist;
 import com.keepreal.madagascar.asity.repository.SpecialArtistsTempRepository;
+import com.keepreal.madagascar.common.constants.Constants;
+import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CreateUserEvent;
@@ -35,37 +37,7 @@ import java.util.Objects;
 @Slf4j
 public class RongCloudService {
 
-    private static final String HOST_TEMPLATE = "我刚刚支持了你的「%s」会员（¥%.2f x %d个月）。创作加油！";
-    private static final String HOST_PERMANENT_TEMPLATE = "我刚刚支持了你的「%s」会员（¥%.2f x 永久有效）。创作加油！";
-    private static final String MEMBER_TEMPLATE = "感谢你的支持！\n更多信息可前往「我的 - 订单中心」中查看。";
-    private static final String OFFICIAL_USER_ID = "4";
-    private static final String CREATE_ISLAND_CONTENT = "创作者你好，恭喜成功创建了你的跳岛主页！\n" +
-            "\n" +
-            "你可以：在手机端发布图文动态、创建群组、管理提问箱。在网页端上传文章、高清大图、音频和视频。快分享主页链接来获取支持吧～\n" +
-            "\n" +
-            "你还可以：阅读《创作者指南》，以便更好的使用跳岛： https://mp.weixin.qq.com/s/7uarq2vJOnt0VPVWfHCb_g\n" +
-            "\n" +
-            "欢迎来官方微博给我留言跟我互动哦～如遇到问题可在【设置】-【反馈与帮助】内咨询跳岛小客服。";
-
-    private static final String CREATE_USER_CONTENT = "欢迎登岛！我是跳岛管理员“岛蛋”！跳岛是帮助创作者获取支持以维持创作的平台。\n" +
-            "\n" +
-            "跳岛团队中有音乐视频达人、个人博主、独立乐队发烧友...我们深知创作不易，更坚信为内容世界创造价值的人本应得到回报，跳岛为此而生。创作不是一座孤岛，还有支持者的陪伴，愿大家在岛上玩得开心！\n" +
-            "\n" +
-            "如果你是创作者：\n" +
-            "点击「我的-成为创作者」，跟随提示设置创作主页和支持方案，分享获得支持。\n" +
-            "\n" +
-            "如果你是支持者：\n" +
-            "搜索你喜爱的创作者为他[支持一下]，订购他的支持方案享受对应权益或回馈。或是发现更多有趣好玩的创作。\n" +
-            "\n" +
-            "欢迎来官方微博给我留言跟我互动哦～如遇到问题可在设置内-咨询跳岛小客服";
-    private static final String CREATE_USER_CONTENT_TEMP = "🎁【有奖问卷】快来填问卷拿礼物吧！\n" +
-            "欢迎登岛！这里有一份新用户小问卷，非常希望百忙之中您能帮忙填一下！\n" +
-            "岛蛋会有随机红包奖励呦，请提交问卷后添加官方微信领取：tiaodaoapp \n" +
-            "问卷地址：https://www.wenjuan.com/s/UZBZJvzgDu/\n" +
-            "关于跳岛的有奖问答\n" +
-            "感谢您能抽出几分钟时间来帮助我们做问答，我们会从中抽取奖品哦!\n";
     private final RongCloud client;
-
     private final SpecialArtistsTempRepository specialArtistsTempRepository;
 
     /**
@@ -217,37 +189,23 @@ public class RongCloudService {
     @SneakyThrows
     public void sendThanks(NotificationEvent event, MembershipMessage membership) {
         if (event.hasMemberEvent() && !isSpecialArtist(event.getUserId())) {
-            TxtMessage hostTextMessage = new TxtMessage(
+            String txt =
                     event.getMemberEvent().getPermanent() ?
-                            String.format(RongCloudService.HOST_PERMANENT_TEMPLATE,
+                            String.format(Templates.ASITY_PURCHASE_HOST_PERMANENT_TEMPLATE,
                                     event.getMemberEvent().getMembershipName(),
                                     Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths()) :
-                            String.format(RongCloudService.HOST_TEMPLATE,
+                            String.format(Templates.ASITY_PURCHASE_HOST_TEMPLATE,
                                     event.getMemberEvent().getMembershipName(),
                                     Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths(),
-                                    event.getMemberEvent().getTimeInMonths()),
-                    "");
-            PrivateMessage hostMessage = new PrivateMessage()
-                    .setSenderId(event.getMemberEvent().getMemberId())
-                    .setTargetId(new String[]{event.getUserId()})
-                    .setObjectName(hostTextMessage.getType())
-                    .setContent(hostTextMessage)
-                    .setVerifyBlacklist(0)
-                    .setIsPersisted(0)
-                    .setIsCounted(0)
-                    .setIsIncludeSender(1);
-            this.client.message.msgPrivate.send(hostMessage);
+                                    event.getMemberEvent().getTimeInMonths());
+            this.sendMessage(event.getMemberEvent().getMemberId(), new String[]{event.getUserId()}, txt, 1);
         }
 
-        TxtMessage memberTextMessage;
+        String txt;
         if (!event.hasMemberEvent() || !membership.getUseCustomMessage()) {
-            memberTextMessage = new TxtMessage(
-                    RongCloudService.MEMBER_TEMPLATE,
-                    "");
+            txt = Templates.ASITY_PURCHASE_CUSTOMER_TEMPLATE;
         } else {
-            memberTextMessage = new TxtMessage(
-                    membership.getMessage(),
-                    "");
+            txt = membership.getMessage();
         }
 
         String targetId;
@@ -259,63 +217,41 @@ public class RongCloudService {
             return;
         }
 
-        PrivateMessage memberMessage = new PrivateMessage()
-                .setSenderId(event.getUserId())
-                .setTargetId(new String[]{targetId})
-                .setObjectName(memberTextMessage.getType())
-                .setContent(memberTextMessage)
-                .setVerifyBlacklist(0)
-                .setIsPersisted(0)
-                .setIsCounted(0)
-                .setIsIncludeSender(this.isSpecialArtist(event.getUserId()) ? 0 : 1);
-        this.client.message.msgPrivate.send(memberMessage);
+        this.sendMessage(event.getUserId(), new String[]{targetId}, txt, this.isSpecialArtist(event.getUserId()) ? 0 : 1);
     }
 
+    /**
+     * Sends simple text message.
+     *
+     * @param targetIds Target user ids.
+     * @param text      Text.
+     */
     @SneakyThrows
-    public void sentCreateIslandNotice(CreateIslandEvent createIslandEvent) {
-        TxtMessage txtMessage = new TxtMessage(CREATE_ISLAND_CONTENT, "");
+    public void sendMessage(String[] targetIds, String text) {
+        this.sendMessage(Constants.OFFICIAL_USER_ID, targetIds, text, 0);
+    }
+
+    /**
+     * Sends simple text message.
+     *
+     * @param senderId      Sender user id.
+     * @param targetIds     Target user ids.
+     * @param text          Text.
+     * @param includeSender Whether includes the sender, 0 exclude : 1 include.
+     */
+    @SneakyThrows
+    public void sendMessage(String senderId, String[] targetIds, String text, int includeSender) {
+        TxtMessage txtMessage = new TxtMessage(text, "");
 
         PrivateMessage message = new PrivateMessage()
-                .setSenderId(OFFICIAL_USER_ID)
-                .setTargetId(new String[]{createIslandEvent.getHostId()})
+                .setSenderId(senderId)
+                .setTargetId(targetIds)
                 .setObjectName(txtMessage.getType())
                 .setContent(txtMessage)
                 .setVerifyBlacklist(0)
                 .setIsPersisted(0)
                 .setIsCounted(0)
-                .setIsIncludeSender(0);
-        this.client.message.msgPrivate.send(message);
-    }
-
-    @SneakyThrows
-    public void sentCreateUserNotice(CreateUserEvent createUserEvent) {
-        TxtMessage txtMessage = new TxtMessage(CREATE_USER_CONTENT, "");
-
-        PrivateMessage message = new PrivateMessage()
-                .setSenderId(OFFICIAL_USER_ID)
-                .setTargetId(new String[]{createUserEvent.getUserId()})
-                .setObjectName(txtMessage.getType())
-                .setContent(txtMessage)
-                .setVerifyBlacklist(0)
-                .setIsPersisted(0)
-                .setIsCounted(0)
-                .setIsIncludeSender(0);
-        this.client.message.msgPrivate.send(message);
-    }
-
-    @SneakyThrows
-    public void sentCreateUserNoticeTemp(CreateUserEvent createUserEvent) {
-        TxtMessage txtMessage = new TxtMessage(CREATE_USER_CONTENT_TEMP, "");
-
-        PrivateMessage message = new PrivateMessage()
-                .setSenderId(OFFICIAL_USER_ID)
-                .setTargetId(new String[]{createUserEvent.getUserId()})
-                .setObjectName(txtMessage.getType())
-                .setContent(txtMessage)
-                .setVerifyBlacklist(0)
-                .setIsPersisted(0)
-                .setIsCounted(0)
-                .setIsIncludeSender(0);
+                .setIsIncludeSender(includeSender);
         this.client.message.msgPrivate.send(message);
     }
 
@@ -329,4 +265,5 @@ public class RongCloudService {
         SpecialArtist artist = this.specialArtistsTempRepository.findTopByIdAndDeletedIsFalse(artistUserId);
         return Objects.nonNull(artist);
     }
+
 }

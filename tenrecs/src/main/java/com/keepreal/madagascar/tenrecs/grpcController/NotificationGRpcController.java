@@ -23,6 +23,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -87,8 +88,13 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
         } else {
             if (NotificationType.NOTIFICATION_ISLAND_NOTICE.equals(request.getCondition().getType().getValue())
                     && request.getCondition().hasNoticeType()) {
-                notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId, 
-                        request.getCondition().getNoticeType().getValue(), pageRequest);
+                if (NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER.equals(request.getCondition().getNoticeType().getValue())) {
+                    notifications = this.notificationService.retrieveByUserIdAndNoticeTypeInWithPagination(userId,
+                            Arrays.asList(NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER, NoticeType.NOTICE_TYPE_FEED_NEW_PAYMENT), pageRequest);
+                } else {
+                    notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId,
+                            request.getCondition().getNoticeType().getValue(), pageRequest);
+                }
             } else if (NotificationType.NOTIFICATION_BOX_NOTICE.equals(request.getCondition().getType().getValue())
                     && request.getCondition().hasNoticeType()) {
                 notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId,
