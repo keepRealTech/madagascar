@@ -52,9 +52,12 @@ public class RongCloudService {
             "搜索你喜爱的创作者为他[支持一下]，订购他的支持方案享受对应权益或回馈。或是发现更多有趣好玩的创作。\n" +
             "\n" +
             "欢迎来官方微博给我留言跟我互动哦～如遇到问题可在设置内-咨询跳岛小客服";
-    private static final String CREATE_USER_CONTENT_TEMP = "【活动】创作鼓励金计划正在进行中！活动期间，创作者所得的支持收入可全额提现，同时跳岛平台会额外补贴您收益的10%作为创作鼓励金，最高¥8888。\n" +
-            "\n" +
-            "即刻成为创作者，参与活动吧：https://mp.weixin.qq.com/s/oBObVSUnOY-f1TXpDP82Uw";
+    private static final String CREATE_USER_CONTENT_TEMP = "🎁【有奖问卷】快来填问卷拿礼物吧！\n" +
+            "欢迎登岛！这里有一份新用户小问卷，非常希望百忙之中您能帮忙填一下！\n" +
+            "岛蛋会有随机红包奖励呦，请提交问卷后添加官方微信领取：tiaodaoapp \n" +
+            "问卷地址：https://www.wenjuan.com/s/UZBZJvzgDu/\n" +
+            "关于跳岛的有奖问答\n" +
+            "感谢您能抽出几分钟时间来帮助我们做问答，我们会从中抽取奖品哦!\n";
     private final RongCloud client;
 
     /**

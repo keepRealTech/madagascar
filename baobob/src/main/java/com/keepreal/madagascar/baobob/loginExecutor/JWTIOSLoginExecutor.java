@@ -28,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
+import java.time.Duration;
 
 /**
  * Represents a login executor working with IOS jwt.
@@ -116,6 +117,7 @@ public class JWTIOSLoginExecutor implements LoginExecutor {
         String sub = JSONObject.parseObject(claim).get("sub").toString();
 
         return this.generatorPublicKey(kid)
+                .retryBackoff(3, Duration.ofMillis(200L))
                 .filter(publicKey -> this.verify(publicKey, jwt, aud, sub))
                 .map(publicKey -> {
                     IOSLoginInfo iosLoginInfo = new IOSLoginInfo();
