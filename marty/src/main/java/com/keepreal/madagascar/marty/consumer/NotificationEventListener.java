@@ -70,10 +70,20 @@ public class NotificationEventListener implements MessageListener {
                 this.redissonService.putPushInfo(userId, PushPriority.NEW_SUBSCRIBE, notificationEvent.getSubscribeEvent().getSubscriberId());
             }
 
-            if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_MEMBER)) {
+            if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_MEMBER) ||
+                    notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_SUPPORT) ||
+                    notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_FEED_PAYMENT)) {
                 String userId = notificationEvent.getUserId();
                 pushService.pushMessageByType(userId, PushType.PUSH_MEMBER);
-                this.redissonService.putPushInfo(userId, PushPriority.NEW_MEMBERSHIP, notificationEvent.getMemberEvent().getMemberId());
+                String latestUserId;
+                if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_MEMBER)) {
+                    latestUserId = notificationEvent.getMemberEvent().getMemberId();
+                } else if (notificationEvent.getType().equals(NotificationEventType.NOTIFICATION_EVENT_NEW_SUPPORT)) {
+                    latestUserId = notificationEvent.getSupportEvent().getUserId();
+                } else {
+                    latestUserId = notificationEvent.getFeedPaymentEvent().getUserId();
+                }
+                this.redissonService.putPushInfo(userId, PushPriority.NEW_MEMBERSHIP, latestUserId);
             }
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {
