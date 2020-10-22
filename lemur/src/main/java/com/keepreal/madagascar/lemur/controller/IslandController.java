@@ -767,6 +767,9 @@ public class IslandController implements IslandApi {
                     if (Objects.isNull(postSupportTargetRequest.getTotalAmountInCents())) {
                         return false;
                     }
+                    if (postSupportTargetRequest.getTotalAmountInCents() > 1000000000L) {
+                        return false;
+                    }
                     break;
             }
         } else {
@@ -783,6 +786,9 @@ public class IslandController implements IslandApi {
                         break;
                     case AMOUNT:
                         if (Objects.isNull(postSupportTargetRequest.getTotalAmountInCents())) {
+                            return false;
+                        }
+                        if (postSupportTargetRequest.getTotalAmountInCents() > 1000000000L) {
                             return false;
                         }
                         break;
