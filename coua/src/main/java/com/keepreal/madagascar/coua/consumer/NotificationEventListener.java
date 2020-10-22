@@ -49,8 +49,15 @@ public class NotificationEventListener implements MessageListener {
             }
 
             if (NotificationEventType.NOTIFICATION_EVENT_NEW_MEMBER.equals(event.getType())) {
+                if (Objects.isNull(event.getMemberEvent())
+                        || StringUtils.isEmpty(event.getUserId())) {
+                    log.error("new member event doesn't has host id , eventId is {}", event.getEventId());
+                    return Action.CommitMessage;
+                }
                 String membershipId = event.getMemberEvent().getMembershipId();
                 this.membershipService.addMemberCount(membershipId);
+                this.islandInfoService.updateSupportTargetIfExisted(event.getUserId(),
+                        event.getMemberEvent().getPriceInCents());
             }
 
             if (NotificationEventType.NOTIFICATION_EVENT_NEW_FEED_PAYMENT.equals(event.getType())) {
@@ -61,16 +68,6 @@ public class NotificationEventListener implements MessageListener {
                 }
                 this.islandInfoService.updateSupportTargetIfExisted(event.getUserId(),
                         event.getFeedPaymentEvent().getPriceInCents());
-            }
-
-            if (NotificationEventType.NOTIFICATION_EVENT_NEW_MEMBER.equals(event.getType())) {
-                if (Objects.isNull(event.getMemberEvent())
-                        || StringUtils.isEmpty(event.getUserId())) {
-                    log.error("new member event doesn't has host id , eventId is {}", event.getEventId());
-                    return Action.CommitMessage;
-                }
-                this.islandInfoService.updateSupportTargetIfExisted(event.getUserId(),
-                        event.getMemberEvent().getPriceInCents());
             }
 
             if (NotificationEventType.NOTIFICATION_EVENT_NEW_SUPPORT.equals(event.getType())) {
