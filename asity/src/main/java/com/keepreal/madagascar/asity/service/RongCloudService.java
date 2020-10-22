@@ -216,31 +216,31 @@ public class RongCloudService {
      */
     @SneakyThrows
     public void sendThanks(NotificationEvent event, MembershipMessage membership) {
-        TxtMessage hostTextMessage = new TxtMessage(
-                event.getMemberEvent().getPermanent() ?
-                        String.format(RongCloudService.HOST_PERMANENT_TEMPLATE,
-                                event.getMemberEvent().getMembershipName(),
-                                Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths()) :
-                        String.format(RongCloudService.HOST_TEMPLATE,
-                                event.getMemberEvent().getMembershipName(),
-                                Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths(),
-                                event.getMemberEvent().getTimeInMonths()),
-                "");
-        PrivateMessage hostMessage = new PrivateMessage()
-                .setSenderId(event.getMemberEvent().getMemberId())
-                .setTargetId(new String[]{event.getUserId()})
-                .setObjectName(hostTextMessage.getType())
-                .setContent(hostTextMessage)
-                .setVerifyBlacklist(0)
-                .setIsPersisted(0)
-                .setIsCounted(0)
-                .setIsIncludeSender(1);
-        if (!isSpecialArtist(event.getUserId())) {
+        if (event.hasMemberEvent() && !isSpecialArtist(event.getUserId())) {
+            TxtMessage hostTextMessage = new TxtMessage(
+                    event.getMemberEvent().getPermanent() ?
+                            String.format(RongCloudService.HOST_PERMANENT_TEMPLATE,
+                                    event.getMemberEvent().getMembershipName(),
+                                    Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths()) :
+                            String.format(RongCloudService.HOST_TEMPLATE,
+                                    event.getMemberEvent().getMembershipName(),
+                                    Long.valueOf(event.getMemberEvent().getPriceInCents()).doubleValue() / 100 / event.getMemberEvent().getTimeInMonths(),
+                                    event.getMemberEvent().getTimeInMonths()),
+                    "");
+            PrivateMessage hostMessage = new PrivateMessage()
+                    .setSenderId(event.getMemberEvent().getMemberId())
+                    .setTargetId(new String[]{event.getUserId()})
+                    .setObjectName(hostTextMessage.getType())
+                    .setContent(hostTextMessage)
+                    .setVerifyBlacklist(0)
+                    .setIsPersisted(0)
+                    .setIsCounted(0)
+                    .setIsIncludeSender(1);
             this.client.message.msgPrivate.send(hostMessage);
         }
 
         TxtMessage memberTextMessage;
-        if (Objects.isNull(membership) || !membership.getUseCustomMessage()) {
+        if (!event.hasMemberEvent() || !membership.getUseCustomMessage()) {
             memberTextMessage = new TxtMessage(
                     RongCloudService.MEMBER_TEMPLATE,
                     "");
@@ -251,9 +251,9 @@ public class RongCloudService {
         }
 
         String targetId;
-        if (Objects.nonNull(event.getMemberEvent())) {
+        if (event.hasMemberEvent()) {
             targetId = event.getMemberEvent().getMemberId();
-        } else if (Objects.nonNull(event.getFeedPaymentEvent())) {
+        } else if (event.hasFeedPaymentEvent()) {
             targetId = event.getFeedPaymentEvent().getUserId();
         } else {
             return;
