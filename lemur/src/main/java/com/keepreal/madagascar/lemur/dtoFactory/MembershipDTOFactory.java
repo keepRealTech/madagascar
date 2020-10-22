@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.google.protobuf.ProtocolStringList;
+import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
 import com.keepreal.madagascar.coua.FeedMembershipMessage;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.fossa.BoxMessage;
@@ -187,17 +188,14 @@ public class MembershipDTOFactory {
         BoxMessage boxMessage = this.boxService.retrieveBoxInfo(islandId);
         ProtocolStringList boxMembershipIdList = boxMessage.getMembershipIdsList();
         for (SubscribeMembershipMessage message : messageList) {
-            if (boxMembershipIdList.contains(message.getMembershipId()) && message.getExpiredTime() > System.currentTimeMillis()) {
+            if (boxMessage.getEnabled() && (boxMembershipIdList.size() == 0 || boxMembershipIdList.contains(message.getMembershipId())) && message.getExpiredTime() > System.currentTimeMillis()) {
                 iconTypeList.add(MembershipIconType.QUESTION);
                 break;
             }
         }
 
-        Integer count = this.chatService.retrieveChatgroupMembershipCount(messageList.stream()
-                .filter(message -> message.getExpiredTime() > System.currentTimeMillis())
-                .map(SubscribeMembershipMessage::getMembershipId)
-                .collect(Collectors.toList()));
-        if (count > 0) {
+        IslandChatgroupsResponse response = this.chatService.retrieveChatgroupsByIslandId(islandId, messageList.get(0).getUserId(), 0, 10);
+        if (response.getChatgroupsList().size() > 0) {
             iconTypeList.add(MembershipIconType.GROUP);
         }
 
