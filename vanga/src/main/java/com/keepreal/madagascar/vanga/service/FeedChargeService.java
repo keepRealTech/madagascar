@@ -62,7 +62,6 @@ public class FeedChargeService {
                 .toInstant().toEpochMilli());
 
         Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payment.getPayeeId());
-        this.notificationEventProducerService.produceNewBalanceNotificationEventAsync(hostBalance.getUserId(), payment.getAmountInCents());
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
         this.saveFeedCharge(order.getUserId(), order.getPropertyId());

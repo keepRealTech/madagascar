@@ -59,7 +59,6 @@ public class SupportService {
 
         payment.setValidAfter(currentExpireTime.plusMonths(1).toInstant().toEpochMilli());
 
-        this.notificationEventProducerService.produceNewBalanceNotificationEventAsync(hostBalance.getUserId(), payment.getAmountInCents());
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
         this.sendAsyncMessage(payment.getUserId(), payment.getPayeeId(), payment.getAmountInCents());

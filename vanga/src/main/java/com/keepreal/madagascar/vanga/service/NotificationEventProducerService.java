@@ -82,11 +82,6 @@ public class NotificationEventProducerService {
         this.sendAsync(message);
     }
 
-    public void produceNewBalanceNotificationEventAsync(String hostId, Long amountInCents) {
-        Message message = this.createNewBalanceEventMessage(hostId, amountInCents);
-        this.sendAsync(message);
-    }
-
     /**
      * Sends a message in async manner.
      *
@@ -150,25 +145,6 @@ public class NotificationEventProducerService {
                 .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_SUPPORT)
                 .setUserId(payeeId)
                 .setSupportEvent(supportEvent)
-                .setTimestamp(System.currentTimeMillis())
-                .setEventId(uuid)
-                .build();
-
-        return new Message(this.notificationEventProducerConfiguration.getTopic(),
-                this.notificationEventProducerConfiguration.getTag(), uuid, event.toByteArray());
-    }
-
-    private Message createNewBalanceEventMessage(String hostId, Long amountInCents) {
-        BalanceEvent balanceEvent = BalanceEvent.newBuilder()
-                .setHostId(hostId)
-                .setAmountInCents(amountInCents)
-                .build();
-
-        String uuid = UUID.randomUUID().toString();
-        NotificationEvent event = NotificationEvent.newBuilder()
-                .setType(NotificationEventType.NOTIFICATION_EVENT_NEW_BALANCE)
-                .setUserId(hostId)
-                .setBalanceEvent(balanceEvent)
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
                 .build();

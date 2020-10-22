@@ -60,11 +60,6 @@ message SupportEvent {
     uint64 priceInCents = 2;
 }
 
-message BalanceEvent {
-    string hostId = 1;
-    uint64 amountInCents = 2;
-}
-
 message NotificationEvent {
     NotificationEventType type = 1;
     string userId = 2;
@@ -78,6 +73,5 @@ message NotificationEvent {
         MemberEvent memberEvent = 9;
         SupportEvent supportEvent = 10;
         FeedPaymentEvent feedPaymentEvent = 11;
-        BalanceEvent balanceEvent = 12;
     }
 }

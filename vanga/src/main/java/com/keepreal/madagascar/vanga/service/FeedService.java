@@ -89,7 +89,6 @@ public class FeedService {
                 .plusMonths(SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
                 .toInstant().toEpochMilli());
 
-        this.notificationEventProducerService.produceNewBalanceNotificationEventAsync(hostBalance.getUserId(), payment.getAmountInCents());
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(Collections.singletonList(payment));
         this.updatePaidQuestion(wechatOrder.getPropertyId());
