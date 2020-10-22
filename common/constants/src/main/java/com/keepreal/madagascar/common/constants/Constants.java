@@ -20,4 +20,9 @@ public class Constants {
      */
     public static final int DEFAULT_FEED_LAST_COMMENT_COUNT = 2;
 
+    /**
+     * The max length for membership name.
+     */
+    public static final int MEMBERSHIP_NAME_MAX_LENGTH = 20;
+
 }
