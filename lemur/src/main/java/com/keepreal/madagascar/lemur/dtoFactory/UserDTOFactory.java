@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Component
 public class UserDTOFactory {
 
-    private final List<String> channelList = Arrays.asList("微博", "抖音", "哔哩哔哩", "快手", "Lofter", "快看漫画", "晋江", "阅文", "起点读书", "网易云音乐", "喜马拉雅", "小宇宙", "荔枝");
+    private final List<String> channelList = Arrays.asList("微博", "抖音", "哔哩哔哩", "快手", "Lofter", "快看漫画", "晋江", "阅文", "起点读书", "网易云音乐", "喜马拉雅", "小宇宙", "荔枝", "其他");
 
     /**
      * Converts {@link UserMessage} to {@link UserDTO}.
