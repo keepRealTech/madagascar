@@ -1,5 +1,7 @@
 package com.keepreal.madagascar.lemur.config;
 
+import org.jetbrains.annotations.NotNull;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,6 +13,8 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * Represents the spring web security filter configurations.
@@ -77,6 +81,23 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
 
         config.accessDeniedHandler(auth2AccessDeniedHandler)
                 .authenticationEntryPoint(authenticationEntryPoint);
+    }
+
+    /**
+     * Configures the cors settings.
+     *
+     * @return {@link WebMvcConfigurer}.
+     */
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(@NotNull CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("https://tiaodaoapp.com", "https://www.tiaodaoapp.com")
+                        .allowedMethods("*");
+            }
+        };
     }
 
 }
