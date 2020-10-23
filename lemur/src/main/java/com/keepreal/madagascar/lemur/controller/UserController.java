@@ -38,6 +38,7 @@ import swagger.model.PutUserMobileRequest;
 import swagger.model.PutUserPasswordRequest;
 import swagger.model.PutUserPayload;
 import swagger.model.PutUserQualificationsRequest;
+import swagger.model.PutUserRequestV2;
 import swagger.model.QualificationChannelsResponse;
 import swagger.model.UserQualificationDTO;
 import swagger.model.UserQualificationsResponse;
@@ -173,6 +174,50 @@ public class UserController implements UserApi {
                 this.convertGenderEnum(payload.getGender()),
                 payload.getDescription(),
                 payload.getCity(),
+                birthday,
+                identityTypeList.stream().map(this::convertIdentityType).collect(Collectors.toList()));
+
+        UserResponse response = new UserResponse();
+        response.setData(this.userDTOFactory.valueOf(userMessage, false));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the put user v2.
+     *
+     * @param id               id (required) User id.
+     * @param putUserRequestV2 (required)  {@link PutUserRequestV2}.
+     * @return {@link UserResponse}.
+     */
+    @Override
+    public ResponseEntity<UserResponse> apiV2UsersIdPut(String id,
+                                                        PutUserRequestV2 putUserRequestV2) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        if (this.textContentFilter.isDisallowed(putUserRequestV2.getName())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
+        }
+
+        if (!userId.equals(id)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        List<swagger.model.IdentityType> identityTypeList =
+                Objects.nonNull(putUserRequestV2.getIdentityTypes()) ? putUserRequestV2.getIdentityTypes() : new ArrayList<>();
+
+        String birthday = null;
+        if (Objects.nonNull(putUserRequestV2.getBirthday())) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            birthday = formatter.format(putUserRequestV2.getBirthday());
+        }
+
+        UserMessage userMessage = this.userService.updateUser(id,
+                putUserRequestV2.getName(),
+                putUserRequestV2.getPortraitImageUri(),
+                this.convertGenderEnum(putUserRequestV2.getGender()),
+                putUserRequestV2.getDescription(),
+                putUserRequestV2.getCity(),
                 birthday,
                 identityTypeList.stream().map(this::convertIdentityType).collect(Collectors.toList()));
 
@@ -332,8 +377,8 @@ public class UserController implements UserApi {
     /**
      * 创建/更新 用户密码
      *
-     * @param putUserPasswordRequest  (required) {@link PutUserMobileRequest}
-     * @return  {@link CommonResponse}
+     * @param putUserPasswordRequest (required) {@link PutUserMobileRequest}
+     * @return {@link CommonResponse}
      */
     @Override
     public ResponseEntity<CommonResponse> apiV1UsersPasswordPut(@Valid PutUserPasswordRequest putUserPasswordRequest) {

@@ -56,6 +56,7 @@ import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -326,6 +327,7 @@ public class IslandService {
      * @param customUrl Island home custom url.
      * @return {@link IslandMessage}.
      */
+    @CacheEvict(value = "IslandMessage", key = "#id", cacheManager = "redisCacheManager")
     public IslandMessage updateIslandById(String id,
                                           String name,
                                           String portraitImageUri,
