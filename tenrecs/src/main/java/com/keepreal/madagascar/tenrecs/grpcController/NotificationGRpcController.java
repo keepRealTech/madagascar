@@ -200,7 +200,6 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 Objects.isNull(record.getLastReadBoxNoticeNewQuestionNotificationTimestamp())
                         ? 0 : record.getLastReadBoxNoticeNewQuestionNotificationTimestamp());
 
-
         int newAnswerCount = this.notificationService.countByUserIdAndNoticeTypeAndCreatedAtAfter(
                 userId,
                 NoticeType.NOTICE_TYPE_BOX_NEW_ANSWER,
