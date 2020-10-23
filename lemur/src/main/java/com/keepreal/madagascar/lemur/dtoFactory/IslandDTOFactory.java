@@ -91,9 +91,10 @@ public class IslandDTOFactory {
      * Converts {@link IslandMessage} to {@link IslandDTO}.
      *
      * @param island {@link IslandMessage}.
+     * @param maskSecret Whether masks secret.
      * @return {@link IslandDTO}.
      */
-    public IslandDTO valueOf(IslandMessage island) {
+    public IslandDTO valueOf(IslandMessage island, boolean maskSecret) {
         if (Objects.isNull(island)) {
             return null;
         }
@@ -110,6 +111,7 @@ public class IslandDTOFactory {
         islandDTO.setPortraitImageUri(island.getPortraitImageUri());
         islandDTO.setAccessType(this.convertAccessType(island.getIslandAccessType()));
         islandDTO.setCustomUrl(island.getCustomUrl());
+        islandDTO.setSecret(maskSecret ? "******" : island.getSecret());
 
         islandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 

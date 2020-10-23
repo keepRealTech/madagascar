@@ -172,6 +172,7 @@ public class IslandController implements IslandApi {
                                                                          Boolean subscribed,
                                                                          Integer page,
                                                                          Integer pageSize) {
+        String userId = HttpContextUtils.getUserIdFromContext();
         String subscriberId = (Objects.nonNull(subscribed) && subscribed) ? HttpContextUtils.getUserIdFromContext() : null;
         if (Objects.nonNull(subscriberId) && subscriberId.equals("99999999")) {
             pageSize = 1000;
@@ -183,7 +184,7 @@ public class IslandController implements IslandApi {
         swagger.model.IslandsResponse response = new swagger.model.IslandsResponse();
         response.setData(islandsResponse.getIslandsList()
                 .stream()
-                .map(this.islandDTOFactory::valueOf)
+                .map(island -> this.islandDTOFactory.valueOf(island, !island.getHostId().equals(userId)))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(islandsResponse.getPageResponse()));
@@ -200,10 +201,11 @@ public class IslandController implements IslandApi {
      */
     @Override
     public ResponseEntity<IslandResponse> apiV1IslandsIdGet(String id) {
+        String userId = HttpContextUtils.getUserIdFromContext();
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
 
         IslandResponse response = new IslandResponse();
-        response.setData(this.islandDTOFactory.valueOf(islandMessage));
+        response.setData(this.islandDTOFactory.valueOf(islandMessage, !islandMessage.getHostId().equals(userId)));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -287,7 +289,7 @@ public class IslandController implements IslandApi {
         swagger.model.IslandsResponse response = new swagger.model.IslandsResponse();
         response.setData(islandsResponse.getIslandsList()
                 .stream()
-                .map(this.islandDTOFactory::valueOf)
+                .map(island -> this.islandDTOFactory.valueOf(island, !island.getHostId().equals(userId)))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(islandsResponse.getPageResponse()));
