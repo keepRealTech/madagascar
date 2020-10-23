@@ -3,7 +3,6 @@ package com.keepreal.madagascar.vanga.service;
 import com.aliyun.openservices.ons.api.Message;
 import com.aliyun.openservices.ons.api.bean.ProducerBean;
 import com.keepreal.madagascar.tenrecs.FeedPaymentEvent;
-import com.keepreal.madagascar.tenrecs.BalanceEvent;
 import com.keepreal.madagascar.tenrecs.MemberEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEventType;
