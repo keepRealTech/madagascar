@@ -3155,6 +3155,8 @@ components:
               $ref: '#/components/schemas/BriefUserDTO'
             memberCount:
               type: integer
+            secret:
+              type: string
     RecommendIslandDTO:
       allOf:
         - $ref: '#/components/schemas/IslandDTO'
@@ -3178,8 +3180,6 @@ components:
         - $ref: '#/components/schemas/IslandDTO'
         - type: object
           properties:
-            secret:
-              type: string
             supportTargets:
               type: array
               items:
