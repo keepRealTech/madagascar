@@ -1,6 +1,6 @@
 openapi: 3.0.1
 info:
-  version: "1.6.0"
+  version: "1.8.0"
   title: Keep Real API
 
 security:
@@ -206,6 +206,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+  /api/v2/users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - User
+      summary: updates a user by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUserRequestV2'
+            encoding:
+              payload:
+                contentType: application/json
+      responses:
+        '200':
+          description: user response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
   /api/v1/islands:
     get:
       parameters:
@@ -232,6 +255,24 @@ paths:
         required: true
         content:
           multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostIslandRequestV11'
+      responses:
+        '200':
+          description: brief island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandResponse'
+  /api/v2/islands:
+    post:
+      tags:
+        - Island
+      summary: 创建新的创作首页
+      requestBody:
+        required: true
+        content:
+          application/json:
             schema:
               $ref: '#/components/schemas/PostIslandRequestV2'
       responses:
@@ -334,6 +375,26 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PutIslandRequest'
+      responses:
+        '200':
+          description: island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandResponse'
+  /api/v2/islands/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Island
+      summary: updates a island by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutIslandRequestV2'
       responses:
         '200':
           description: island response
@@ -1056,6 +1117,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserPaymentsResponse'
+  /api/v1.1/payments:
+    get:
+      tags:
+        - Payment
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      summary: 获得用户订单信息
+      responses:
+        '200':
+          description: payments response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPaymentsResponseV11'
   /api/v1/payments/withdraws:
     get:
       tags:
@@ -1271,6 +1347,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FeedMembershipsResponse'
+  /api/v1/islands/{id}/myMemberships:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Membership
+      summary: 获取我在岛内的所有权益
+      responses:
+        '200':
+          description: comment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyMembershipsResponse'
+  /api/v1/islands/{id}/membershipFeeds:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/idInPath'
+        - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Membership
+      summary: 获取我在岛内所有可观看的会员动态（包括单独解锁的动态）
+      responses:
+        '200':
+          description: feeds response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinesResponse'
   /api/v1/memberships/{id}:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2188,6 +2295,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IslandDiscoveryResponse'
+  /api/v1/islands/{id}/supportTarget:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Island
+      summary: 获取岛支持目标
+      responses:
+        '200':
+          description: support target response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTargetsResponse'
+    put:
+      tags:
+        - Island
+      summary: 修改岛支持目标
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSupportTargetRequest'
+      responses:
+        '200':
+          description: support target response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportTargetResponse'
+    delete:
+      tags:
+        - Island
+      summary: 删除岛支持目标
+      responses:
+        '200':
+          description: Dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
   /api/v1/feeds/public:
     get:
       parameters:
@@ -2395,6 +2544,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CommonResponse'
+  /api/v1/feeds/{id}/feedgroups:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Feed
+      summary: 更新动态的作品集信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutFeedFeedgroupRequest'
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FullFeedResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -2662,6 +2831,13 @@ components:
         - LOGIN_MOBILE
         - LOGIN_MOBILE_APP
         - LOGIN_MOBILE_HOME
+    MembershipIconType:
+      type: string
+      enum:
+        - ICON_FEED
+        - ICON_QUESTION
+        - ICON_GROUP
+        - ICON_MESSAGE
     SceneType:
       type: string
       enum:
@@ -2731,6 +2907,12 @@ components:
         - STATE_REFUND
         - STATE_PAYERROR
         - STATE_REVOKED
+    PrivilegeState:
+      type: string
+      enum:
+        - PRIVILEGE_NONE
+        - PRIVILEGE_EFFECTIVE
+        - PRIVILEGE_EXPIRE
     NoticeType:
       type: string
       enum:
@@ -2754,6 +2936,21 @@ components:
         - DEVICE_TYPE_UNKNOWN
         - DEVICE_TYPE_IOS
         - DEVICE_TYPE_ANDROID
+    PaymentType:
+      type: string
+      enum:
+        - PAYMENT_TYPE_MEMBERSHIP
+        - PAYMENT_TYPE_FEED
+    SupportTargetType:
+      type: string
+      enum:
+        - SUPPORTER
+        - AMOUNT
+    SupportTargetTimeType:
+      type: string
+      enum:
+        - NO_LIMIT
+        - PER_MONTH
     CommonResponse:
       type: object
       properties:
@@ -2863,6 +3060,26 @@ components:
         portraitImage:
           type: string
           format: binary
+    PutUserRequestV2:
+      type: object
+      properties:
+        name:
+          type: string
+        gender:
+          $ref: '#/components/schemas/GenderType'
+        description:
+          type: string
+        city:
+          type: string
+        birthday:
+          type: string
+          format: date
+        identityTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityType'
+        portraitImageUri:
+          type: string
     UserResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -2914,6 +3131,8 @@ components:
           type: string
         accessType:
           $ref: '#/components/schemas/IslandAccessType'
+        customUrl:
+          type: string
     PosterIslandDTO:
       type: object
       properties:
@@ -2947,6 +3166,13 @@ components:
               type: integer
             recommendation:
               type: string
+            showIncome:
+              type: boolean
+            supportCount:
+              type: integer
+            centsInMonth:
+              type: integer
+              format: int64
     FullIslandDTO:
       allOf:
         - $ref: '#/components/schemas/IslandDTO'
@@ -2954,6 +3180,17 @@ components:
           properties:
             secret:
               type: string
+            supportTargets:
+              type: array
+              items:
+                $ref: '#/components/schemas/SupportTargetDTO'
+            showIncome:
+              type: boolean
+            supportCount:
+              type: integer
+            centsInMonth:
+              type: integer
+              format: int64
     HostIntroductionDTO:
       type: object
       properties:
@@ -2995,6 +3232,10 @@ components:
           format: int64
         hasGroupchatAccess:
           type: boolean
+        showPrivilege:
+          type: boolean
+        privilegeState:
+          $ref: '#/components/schemas/PrivilegeState'
         hostIntroduction:
           $ref: '#/components/schemas/HostIntroductionDTO'
         subscriberIntroduction:
@@ -3017,11 +3258,15 @@ components:
         description:
           type: string
           description: descriptions
+        showIncome:
+          type: boolean
         secret:
           type: string
           description: secrets for joining island
         islandAccessType:
           $ref: '#/components/schemas/IslandAccessType'
+        customUrl:
+          type: string
     PostIslandPayload:
       type: object
       properties:
@@ -3037,7 +3282,7 @@ components:
           $ref: "#/components/schemas/IslandAccessType"
       required:
         - name
-    PostIslandPayloadV2:
+    PostIslandPayloadV11:
       type: object
       properties:
         name:
@@ -3052,6 +3297,8 @@ components:
           type: string
         islandAccessType:
           $ref: "#/components/schemas/IslandAccessType"
+        customUrl:
+          type: string
       required:
         - name
         - description
@@ -3064,6 +3311,26 @@ components:
           type: string
           description: portrait image
           format: binary
+    PutIslandRequestV2:
+      type: object
+      properties:
+        name:
+          type: string
+          description: island name
+        description:
+          type: string
+          description: descriptions
+        showIncome:
+          type: boolean
+        secret:
+          type: string
+          description: secrets for joining island
+        islandAccessType:
+          $ref: '#/components/schemas/IslandAccessType'
+        customUrl:
+          type: string
+        portraitImageUri:
+          type: string
     PostIslandRequest:
       type: object
       properties:
@@ -3075,17 +3342,39 @@ components:
           format: binary
       required:
         - payload
-    PostIslandRequestV2:
+    PostIslandRequestV11:
       type: object
       properties:
         payload:
-          $ref: '#/components/schemas/PostIslandPayloadV2'
+          $ref: '#/components/schemas/PostIslandPayloadV11'
         portraitImage:
           type: string
           description: portrait image
           format: binary
       required:
         - payload
+    PostIslandRequestV2:
+      type: object
+      properties:
+        name:
+          type: string
+          description: island name
+        secret:
+          type: string
+          description: secrets for joining island
+        identityId:
+          type: string
+        description:
+          type: string
+        islandAccessType:
+          $ref: "#/components/schemas/IslandAccessType"
+        customUrl:
+          type: string
+        portraitImageUri:
+          type: string
+      required:
+        - name
+        - description
     SubscribeIslandRequest:
       type: object
       properties:
@@ -3403,6 +3692,8 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/SimpleMembershipDTO'
+            feedGroupInfo:
+              $ref: '#/components/schemas/FeedGroupInfo'
     FeedGroupInfo:
       type: object
       properties:
@@ -3419,8 +3710,6 @@ components:
         - $ref: '#/components/schemas/FeedDTO'
         - type: object
           properties:
-            feedGroupInfo:
-              $ref: '#/components/schemas/FeedGroupInfo'
             host:
               $ref: '#/components/schemas/BriefUserDTO'
     PostFeedPayload:
@@ -3520,6 +3809,8 @@ components:
             currentTime:
               type: integer
               format: int64
+            hasFeedgroup:
+              type: boolean
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
@@ -3559,6 +3850,8 @@ components:
             currentTime:
               type: integer
               format: int64
+            hasFeedgroup:
+              type: boolean
             pageInfo:
               $ref: '#/components/schemas/PageInfo'
             data:
@@ -3696,6 +3989,9 @@ components:
           $ref: '#/components/schemas/BriefUserDTO'
         membership:
           $ref: '#/components/schemas/SkuMembershipDTO'
+        priceInCents:
+          type: integer
+          format: int64
         content:
           type: string
     SkuMembershipDTO:
@@ -4382,6 +4678,35 @@ components:
           type: integer
         isPermanent:
           type: boolean
+    MyMembershipDTO:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        host:
+          $ref: '#/components/schemas/BriefUserDTO'
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/WithExpiredMembershipDTO'
+        icons:
+          type: array
+          items:
+            $ref: '#/components/schemas/MembershipIconType'
+    WithExpiredMembershipDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        membershipName:
+          type: string
+        isPermanent:
+          type: boolean
+        expireTime:
+          type: integer
+          format: int64
+        hasExpired:
+          type: boolean
     BriefMembershipDTO:
       type: object
       properties:
@@ -4479,6 +4804,13 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedMembershipDTO'
+    MyMembershipsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/MyMembershipDTO'
     ChatTokenDTO:
       type: object
       properties:
@@ -4673,10 +5005,41 @@ components:
           $ref: '#/components/schemas/BriefMembershipDTO'
         membershipSku:
           $ref: '#/components/schemas/MembershipSkuDTO'
+        expiration:
+          type: integer
+          format: int64
+        priceInCents:
+          type: integer
+          format: int64
         createdAt:
           type: integer
           format: int64
+    UserPaymentDTOV11:
+      type: object
+      properties:
+        id:
+          type: string
+        host:
+          $ref: '#/components/schemas/BriefUserDTO'
+        type:
+          $ref: '#/components/schemas/PaymentType'
+        name:
+          type: string
+        privileges:
+          type: array
+          items:
+            type: string
+        isPermanent:
+          type: boolean
+        timeInMonths:
+          type: integer
         expiration:
+          type: integer
+          format: int64
+        priceInCents:
+          type: integer
+          format: int64
+        createdAt:
           type: integer
           format: int64
     UserPaymentsResponse:
@@ -4690,6 +5053,17 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/UserPaymentDTO'
+    UserPaymentsResponseV11:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/UserPaymentDTOV11'
     QrTicketDTO:
       type: object
       properties:
@@ -5387,3 +5761,66 @@ components:
           type: integer
         password:
           type: string
+    PutFeedFeedgroupRequest:
+      type: object
+      properties:
+        feedgroupId:
+          type: string
+    SupportTargetDTO:
+      type: object
+      properties:
+        targetId:
+          type: string
+        targetType:
+          $ref: '#/components/schemas/SupportTargetType'
+        timeType:
+          $ref: '#/components/schemas/SupportTargetTimeType'
+        content:
+          type: string
+        completed:
+          type: boolean
+        currentAmountInCents:
+          type: integer
+          format: int64
+        totalAmountInCents:
+          type: integer
+          format: int64
+        currentSupporterNum:
+          type: integer
+          format: int64
+        totalSupporterNum:
+          type: integer
+          format: int64
+    PostSupportTargetRequest:
+      type: object
+      properties:
+        targetId:
+          type: string
+        targetType:
+          $ref: '#/components/schemas/SupportTargetType'
+        timeType:
+          $ref: '#/components/schemas/SupportTargetTimeType'
+        content:
+          type: string
+        totalAmountInCents:
+          type: integer
+          format: int64
+        totalSupporterNum:
+          type: integer
+          format: int64
+    SupportTargetsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SupportTargetDTO'
+    SupportTargetResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportTargetDTO'

@@ -5,7 +5,7 @@ spring:
     url: jdbc:mysql://root:pass@host:port
     driver-class-name: com.mysql.jdbc.Driver
   jpa:
-    show-sql: true
+    show-sql: false
     database-platform: org.hibernate.dialect.MySQLDialect
   data:
     mongodb:

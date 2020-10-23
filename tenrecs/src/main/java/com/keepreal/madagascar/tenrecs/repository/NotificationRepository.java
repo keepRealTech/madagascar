@@ -18,9 +18,13 @@ public interface NotificationRepository extends MongoRepository<Notification, St
 
     Long countByUserIdAndNotice_TypeAndTimestampAfterAndIsDeletedIsFalse(String userId, NoticeType type, Long timestamp);
 
+    Long countByUserIdAndNotice_TypeInAndTimestampAfterAndIsDeletedIsFalse(String userId, Iterable<NoticeType> type, Long timestamp);
+
     Page<Notification> findAllByUserIdAndTypeAndIsDeletedIsFalse(String userId, NotificationType type, Pageable pageable);
 
     Page<Notification> findAllByUserIdAndNotice_TypeAndIsDeletedIsFalse(String userId, NoticeType type, Pageable pageable);
+
+    Page<Notification> findAllByUserIdAndNotice_TypeInAndIsDeletedIsFalse(String userId, Iterable<NoticeType> types, Pageable pageable);
 
     Page<Notification> findAllByUserIdAndIsDeletedIsFalse(String userId, Pageable pageable);
 

@@ -21,7 +21,7 @@ grpc:
     host: 127.0.0.1
     port: 12006
   asity:
-    host: asity
+    host: 127.0.0.1
     port: 12007
   hoopoe:
     host: 127.0.0.1
@@ -94,18 +94,6 @@ client:
     setupInfo:
       version: 1
       address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
-    versionInfoMap:
-      1:
-        a360: false
-        oppo: false
-        vivo: false
-        xiaomi: false
-        huawei: false
-        baidu: false
-        wandoujia: false
-        yingyongbao: false
-        lianxiang: false
-        kr: false
     updateInfoMap:
       1:
         currentVersion: 1

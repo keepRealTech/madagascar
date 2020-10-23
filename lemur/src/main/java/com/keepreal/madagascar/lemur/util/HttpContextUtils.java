@@ -1,11 +1,12 @@
 package com.keepreal.madagascar.lemur.util;
 
+import com.keepreal.madagascar.lemur.filters.GeneralContextFilter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.ServletContext;
 import java.util.Objects;
 
 /**
@@ -21,6 +22,16 @@ public class HttpContextUtils {
     public static String getUserIdFromContext() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return String.valueOf(authentication.getPrincipal());
+    }
+
+    /**
+     * Extracts the version number from the servlet request context.
+     *
+     * @return Version.
+     */
+    public static String getVersionFromContext() {
+        RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
+        return String.valueOf(Objects.requireNonNull(attributes).getAttribute(GeneralContextFilter.VERSION, RequestAttributes.SCOPE_REQUEST));
     }
 
     /**

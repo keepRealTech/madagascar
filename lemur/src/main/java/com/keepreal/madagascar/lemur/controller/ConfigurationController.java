@@ -34,7 +34,6 @@ public class ConfigurationController implements ConfigApi {
     private final ReleaseManager releaseManager;
     private final SetupInfoDTO androidSetupInfoDTO;
     private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
-    private final Map<Integer, Map<String, Boolean>> androidConfigVersionMap = new HashMap<>();
     private final Map<Integer, UpdateInfoDTO> iOSUpdateInfoMap = new HashMap<>();
     private final Map<Integer, UpdateInfoDTO> androidUpdateInfoMap = new HashMap<>();
 
@@ -50,7 +49,6 @@ public class ConfigurationController implements ConfigApi {
                                    AndroidClientConfiguration androidClientConfiguration) {
         this.releaseManager = releaseManager;
         this.androidSetupInfoDTO = androidClientConfiguration.getSetupInfo();
-        this.androidConfigVersionMap.putAll(androidClientConfiguration.getVersionInfoMap());
         this.iOSConfigVersionMap.putAll(iosClientConfiguration.getVersionInfoMap());
         this.androidUpdateInfoMap.putAll(androidClientConfiguration.getUpdateInfoMap());
         this.iOSUpdateInfoMap.putAll(iosClientConfiguration.getUpdateInfoMap());
@@ -71,7 +69,7 @@ public class ConfigurationController implements ConfigApi {
                 configurationDTO = this.iOSConfigVersionMap.get(version);
                 break;
             case ANDROID:
-                configurationDTO = this.createAndroidConfigurationDTO(version, channel);
+                configurationDTO = this.createAndroidConfigurationDTO();
                 break;
             default:
         }
@@ -151,21 +149,10 @@ public class ConfigurationController implements ConfigApi {
     /**
      * Constructs the android configuration DTOs.
      *
-     * @param version Query version.
-     * @param channel Channel name.
      * @return {@link ConfigurationDTO}.
      */
-    private ConfigurationDTO createAndroidConfigurationDTO(Integer version, String channel) {
+    private ConfigurationDTO createAndroidConfigurationDTO() {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
-        configurationDTO.setIsAccountLogin(false);
-        Map<String, Boolean> channelMap = this.androidConfigVersionMap.get(version);
-
-        if (Objects.isNull(channelMap)
-                || Objects.isNull(channelMap.get(channel.toLowerCase()))
-                || !channelMap.get(channel.toLowerCase())) {
-            return configurationDTO;
-        }
-
         configurationDTO.setIsAccountLogin(true);
         return configurationDTO;
     }

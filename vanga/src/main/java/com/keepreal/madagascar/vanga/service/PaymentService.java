@@ -372,13 +372,39 @@ public class PaymentService {
      * @param wechatUserId      wechat user id
      * @param webMobileUserId   mobile user id
      */
-   public void mergeUserPayment(String wechatUserId, String webMobileUserId) {
+    public void mergeUserPayment(String wechatUserId, String webMobileUserId) {
         this.paymentRepository.mergeUserPayment(wechatUserId, webMobileUserId);
    }
 
     public int supportCount(String userId) {
         Integer count = this.paymentRepository.countByPayeeIdAndTypeAndStateInAndDeletedIsFalse(userId, PaymentType.SUPPORT.getValue(), Arrays.asList(PaymentState.OPEN.getValue(), PaymentState.CLOSED.getValue()));
         return count == null ? 0 : count;
+    }
+
+    /**
+     * retrieve support count by userId and timestamp
+     *
+     * @param userId    userId.
+     * @param startTimestamp    start timestamp.
+     * @param endTimestamp      end timestamp.
+     * @return  support count.
+     */
+    public int retrieveSupportCount(String userId, long startTimestamp, long endTimestamp) {
+        return this.paymentRepository.countSupportCountByPayeeIdAndTimestamp(userId, startTimestamp, endTimestamp);
+    }
+
+    /**
+     * retrieve total cents by userId and timestamp
+     *
+     * @param userId    userId.
+     * @param startTimestamp    start timestamp.
+     * @param endTimestamp      end timestamp.
+     * @return  total cents.
+     */
+    public long retrieveCents(String userId, long startTimestamp, long endTimestamp) {
+        Long cents = this.paymentRepository.countAmountByPayeeIdAndTimestamp(userId, startTimestamp, endTimestamp);
+
+        return cents == null ? 0 : cents;
     }
 
 }

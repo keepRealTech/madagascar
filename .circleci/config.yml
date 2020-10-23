@@ -1,0 +1,47 @@
+version: 2.1
+
+jobs:
+  build-staging:
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - checkout
+      - run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin registry.cn-beijing.aliyuncs.com
+      - setup_remote_docker:
+          version: 19.03.13
+          docker_layer_caching: false
+      - run: gradle dockerpushstaging
+  deploy-staging:
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+    steps:
+      - run: gradle indri:dockerpushstaging
+
+workflows:
+  version: 2
+  ci-with-staging:
+    jobs:
+      - build-staging:
+          context:
+            - develop
+          filters:
+            branches:
+              only:
+                - feature/sli/ci
+      - hold-for-push-images-staging:
+          type: approval
+          requires:
+            - build-staging
+      - deploy-staging:
+          context:
+            - develop
+          requires:
+            - hold-for-push-images-staging

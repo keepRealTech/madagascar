@@ -3,6 +3,8 @@ package com.keepreal.madagascar.fossa.grpcController;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.fossa.DeleteFeedGroupByIdRequest;
+import com.keepreal.madagascar.fossa.ExistsFeedGroupsByUserIdRequest;
+import com.keepreal.madagascar.fossa.ExistsFeedGroupsByUserIdResponse;
 import com.keepreal.madagascar.fossa.FeedGroupFeedsResponse;
 import com.keepreal.madagascar.fossa.FeedGroupResponse;
 import com.keepreal.madagascar.fossa.FeedGroupServiceGrpc;
@@ -10,6 +12,7 @@ import com.keepreal.madagascar.fossa.FeedGroupsResponse;
 import com.keepreal.madagascar.fossa.NewFeedGroupRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupByIdRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupContentByIdRequest;
+import com.keepreal.madagascar.fossa.RetrieveFeedGroupsByIdsRequest;
 import com.keepreal.madagascar.fossa.RetrieveFeedGroupsByIslandIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedGroupByIdRequest;
 import com.keepreal.madagascar.fossa.model.FeedGroup;
@@ -28,6 +31,8 @@ import org.springframework.data.domain.Sort;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * Represents the feed group rpc service.
@@ -227,6 +232,46 @@ public class FeedGroupGRpcController extends FeedGroupServiceGrpc.FeedGroupServi
                     .setFeedGroup(this.feedGroupService.getFeedGroupMessage(feedGroup))
                     .build();
         }
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the retrieve feed groups by ids.
+     *
+     * @param request          {@link RetrieveFeedGroupsByIdsRequest}.
+     * @param responseObserver {@link FeedGroupsResponse}.
+     */
+    @Override
+    public void retrieveFeedGroupsByIds(RetrieveFeedGroupsByIdsRequest request,
+                                        StreamObserver<FeedGroupsResponse> responseObserver) {
+        List<FeedGroup> feedGroups = this.feedGroupService.retrieveFeedGroupsByIds(request.getIdsList());
+
+        FeedGroupsResponse response = FeedGroupsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllFeedGroups(feedGroups.stream().map(this.feedGroupService::getFeedGroupMessage).collect(Collectors.toList()))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Implements the check if exists by user id.
+     *
+     * @param request   {@link ExistsFeedGroupsByUserIdRequest}.
+     * @param responseObserver  {@link ExistsFeedGroupsByUserIdResponse}.
+     */
+    @Override
+    public void existsFeedGroupsByUserId(ExistsFeedGroupsByUserIdRequest request,
+                                         StreamObserver<ExistsFeedGroupsByUserIdResponse> responseObserver) {
+        Boolean exists = this.feedGroupService.existsByHostId(request.getUserId());
+
+        ExistsFeedGroupsByUserIdResponse response = ExistsFeedGroupsByUserIdResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setHasFeedGroups(exists)
+                .build();
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

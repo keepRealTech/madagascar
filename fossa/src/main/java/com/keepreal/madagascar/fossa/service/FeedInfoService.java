@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.PicturesMessage;
 import com.keepreal.madagascar.common.ReactionType;
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.fossa.TimelineFeedMessage;
 import com.keepreal.madagascar.fossa.dao.FeedInfoRepository;
 import com.keepreal.madagascar.fossa.dao.ReactionRepository;
@@ -26,6 +27,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,8 +40,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FeedInfoService {
-
-    public static final int DEFAULT_LAST_COMMENT_COUNT = 2;
 
     private final MongoTemplate mongoTemplate;
     private final CommentService commentService;
@@ -180,7 +180,7 @@ public class FeedInfoService {
 
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
 
-        List<CommentMessage> lastCommentMessage = this.commentService.getCommentsMessage(feedInfo.getId(), DEFAULT_LAST_COMMENT_COUNT);
+        List<CommentMessage> lastCommentMessage = this.commentService.getCommentsMessage(feedInfo.getId(), Constants.DEFAULT_FEED_LAST_COMMENT_COUNT);
 
         return this.getFeedMessage(feedInfo, userId, myMembershipIds, lastCommentMessage, isLiked);
     }
@@ -221,7 +221,8 @@ public class FeedInfoService {
                 .setFromHost(feedInfo.getFromHost() == null ? false : feedInfo.getFromHost())
                 .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop())
                 .setHostId(feedInfo.getHostId())
-                .setCanSave(feedInfo.getCanSave() == null ? false : feedInfo.getCanSave());
+                .setCanSave(feedInfo.getCanSave() == null ? false : feedInfo.getCanSave())
+                .setFeedgroupId(feedInfo.getFeedGroupId() == null ? "" : feedInfo.getFeedGroupId());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
         if (Objects.isNull(membershipIds) || membershipIds.size() == 0) {
@@ -238,6 +239,17 @@ public class FeedInfoService {
             if (userId.equals(feedInfo.getHostId()) || membershipIds.stream().anyMatch(myMembershipIds::contains)) {
                 builder.setIsAccess(true);
             }
+            membershipIds.sort((o1, o2) -> {
+                boolean co1 = myMembershipIds.contains(o1);
+                boolean co2 = myMembershipIds.contains(o2);
+                if (co1 && !co2) {
+                    return -1;
+                } else if (co2 && !co1){
+                    return 1;
+                } else {
+                    return 0;
+                }
+            });
             builder.addAllMembershipId(membershipIds);
         }
         this.processMedia(builder, feedInfo);

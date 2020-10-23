@@ -23,6 +23,7 @@ import org.lognet.springboot.grpc.GRpcService;
 import org.springframework.data.domain.Page;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -87,8 +88,13 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
         } else {
             if (NotificationType.NOTIFICATION_ISLAND_NOTICE.equals(request.getCondition().getType().getValue())
                     && request.getCondition().hasNoticeType()) {
-                notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId, 
-                        request.getCondition().getNoticeType().getValue(), pageRequest);
+                if (NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER.equals(request.getCondition().getNoticeType().getValue())) {
+                    notifications = this.notificationService.retrieveByUserIdAndNoticeTypeInWithPagination(userId,
+                            Arrays.asList(NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER, NoticeType.NOTICE_TYPE_FEED_NEW_PAYMENT), pageRequest);
+                } else {
+                    notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId,
+                            request.getCondition().getNoticeType().getValue(), pageRequest);
+                }
             } else if (NotificationType.NOTIFICATION_BOX_NOTICE.equals(request.getCondition().getType().getValue())
                     && request.getCondition().hasNoticeType()) {
                 notifications = this.notificationService.retrieveByUserIdAndNoticeTypeWithPagination(userId,
@@ -182,9 +188,9 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 Objects.isNull(record.getLastReadIslandNoticeNewSubscriberNotificationTimestamp())
                         ? 0 : record.getLastReadIslandNoticeNewSubscriberNotificationTimestamp());
 
-        int newMemberCount = this.notificationService.countByUserIdAndNoticeTypeAndCreatedAtAfter(
+        int newMemberCount = this.notificationService.countByUserIdAndNoticeTypeInAndCreatedAtAfter(
                 userId,
-                NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER,
+                Arrays.asList(NoticeType.NOTICE_TYPE_ISLAND_NEW_MEMBER, NoticeType.NOTICE_TYPE_FEED_NEW_PAYMENT),
                 Objects.isNull(record.getLastReadIslandNoticeNewMemberNotificationTimestamp())
                         ? 0 : record.getLastReadIslandNoticeNewMemberNotificationTimestamp());
 
@@ -193,7 +199,6 @@ public class NotificationGRpcController extends NotificationServiceGrpc.Notifica
                 NoticeType.NOTICE_TYPE_BOX_NEW_QUESTION,
                 Objects.isNull(record.getLastReadBoxNoticeNewQuestionNotificationTimestamp())
                         ? 0 : record.getLastReadBoxNoticeNewQuestionNotificationTimestamp());
-
 
         int newAnswerCount = this.notificationService.countByUserIdAndNoticeTypeAndCreatedAtAfter(
                 userId,

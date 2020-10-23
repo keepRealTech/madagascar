@@ -29,8 +29,26 @@ message RetrieveMembershipIdsResponse {
     repeated string membershipIds = 2;
 }
 
+message RetrieveSubscribeMembershipRequest {
+    string userId = 1;
+    string islandId = 2;
+}
+
+message RetrieveSubscribeMembershipResponse {
+    CommonStatus status = 1;
+    repeated SubscribeMembershipMessage message = 2;
+}
+
+message SubscribeMembershipMessage {
+    string userId = 1;
+    string islandId = 2;
+    string membershipId = 3;
+    uint64 expiredTime = 4;
+}
+
 service SubscribeMembershipService{
     rpc RetrieveMemberCountByIslandId (RetrieveMemberCountByIslandIdRequest) returns (RetrieveMemberCountResponse) {};
     rpc RetrieveMemberCountByMembershipId (RetrieveMemberCountByMembershipIdRequest) returns (RetrieveMemberCountResponse) {};
     rpc RetrieveMembershipIdsByUserIdAndIslandId (RetrieveMembershipIdsRequest) returns (RetrieveMembershipIdsResponse) {};
+    rpc RetrieveSubscribeMembershipByUserId (RetrieveSubscribeMembershipRequest) returns (RetrieveSubscribeMembershipResponse) {};
 }

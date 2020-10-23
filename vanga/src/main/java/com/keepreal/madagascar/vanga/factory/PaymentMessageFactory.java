@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.vanga.factory;
 
 import com.keepreal.madagascar.common.PaymentState;
+import com.keepreal.madagascar.common.UserPaymentType;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
 import com.keepreal.madagascar.vanga.UserWithdrawMessage;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
@@ -34,19 +35,28 @@ public class PaymentMessageFactory {
      * @return {@link UserPaymentMessage}.
      */
     public UserPaymentMessage valueOf(Payment payment, MembershipSku membershipSku) {
-        if (Objects.isNull(payment) || Objects.isNull(membershipSku)) {
+        if (Objects.isNull(payment)) {
             return null;
         }
 
-        return UserPaymentMessage.newBuilder()
+        UserPaymentMessage.Builder paymentBuilder = UserPaymentMessage.newBuilder()
                 .setId(payment.getId())
-                .setIslandId(membershipSku.getIslandId())
                 .setUserId(payment.getUserId())
                 .setPayeeId(payment.getPayeeId())
-                .setMembershipSku(this.skuMessageFactory.valueOf(membershipSku))
-                .setExpiresAt(payment.getValidAfter())
-                .setCreatedAt(payment.getCreatedTime())
-                .build();
+                .setCreatedAt(payment.getCreatedTime());
+
+        if (Objects.nonNull(membershipSku)) {
+            paymentBuilder.setType(UserPaymentType.PAYMENT_TYPE_MEMBERSHIP)
+                    .setExpiresAt(payment.getValidAfter())
+                    .setIslandId(membershipSku.getIslandId())
+                    .setMembershipSku(this.skuMessageFactory.valueOf(membershipSku))
+                    .setPriceInCents(membershipSku.getPriceInCents());
+        } else {
+            paymentBuilder.setType(UserPaymentType.PAYMENT_TYPE_FEED)
+                    .setPriceInCents(payment.getAmountInCents());
+        }
+
+        return paymentBuilder.build();
     }
 
     /**

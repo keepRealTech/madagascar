@@ -63,6 +63,19 @@ public class NotificationService {
     }
 
     /**
+     * Counts the notifications.
+     *
+     * @param userId    User id.
+     * @param types      {@link NoticeType}.
+     * @param timestamp Created timestamp after.
+     * @return Count.
+     */
+    public int countByUserIdAndNoticeTypeInAndCreatedAtAfter(String userId, Iterable<NoticeType> types, long timestamp) {
+        return Math.toIntExact(
+                this.notificationRepository.countByUserIdAndNotice_TypeInAndTimestampAfterAndIsDeletedIsFalse(userId, types, timestamp));
+    }
+
+    /**
      * Retrieves notifications by user id and type.
      *
      * @param userId      User id.
@@ -84,6 +97,18 @@ public class NotificationService {
      */
     public Page<Notification> retrieveByUserIdAndNoticeTypeWithPagination(String userId, NoticeType noticeType, PageRequest pageRequest) {
         return this.notificationRepository.findAllByUserIdAndNotice_TypeAndIsDeletedIsFalse(userId, noticeType, PaginationUtils.valueOf(pageRequest));
+    }
+
+    /**
+     * Retrieves notifications by user id and notice type.
+     *
+     * @param userId      User id.
+     * @param noticeTypes  {@link NoticeType}.
+     * @param pageRequest {@link PageRequest}.
+     * @return {@link Notification}.
+     */
+    public Page<Notification> retrieveByUserIdAndNoticeTypeInWithPagination(String userId, Iterable<NoticeType> noticeTypes, PageRequest pageRequest) {
+        return this.notificationRepository.findAllByUserIdAndNotice_TypeInAndIsDeletedIsFalse(userId, noticeTypes, PaginationUtils.valueOf(pageRequest));
     }
 
     /**

@@ -91,6 +91,15 @@ public class FeedGroupService {
     }
 
     /**
+     * Retrieves by ids.
+     * @param ids Feed group ids.
+     * @return {@link FeedGroup}.
+     */
+    public List<FeedGroup> retrieveFeedGroupsByIds(Iterable<String> ids) {
+        return this.feedGroupRepository.findAllByIdInAndDeletedIsFalse(ids);
+    }
+
+    /**
      * Updates a feed group entity.
      *
      * @param feedGroup {@link FeedGroup}.
@@ -125,6 +134,16 @@ public class FeedGroupService {
      */
     public Page<FeedGroup> retrieveFeedGroupsByIslandId(String islandId, Pageable pageable) {
         return this.feedGroupRepository.findAllByIslandIdAndDeletedIsFalseOrderByLastFeedTimeDesc(islandId, pageable);
+    }
+
+    /**
+     * Exists by user id.
+     *
+     * @param userId User id.
+     * @return True if exists.
+     */
+    public Boolean existsByHostId(String userId) {
+        return this.feedGroupRepository.existsByHostIdAndDeletedIsFalse(userId);
     }
 
 }

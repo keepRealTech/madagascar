@@ -4,6 +4,7 @@ option java_multiple_files = true;
 option java_package = "com.keepreal.madagascar.vanga";
 
 import "common.proto";
+import "google/protobuf/wrappers.proto";
 
 message RetrieveFeedChargeRequest {
     string userId = 1;
@@ -15,6 +16,19 @@ message RetrieveFeedChargeResponse {
     bool hasAccess = 2;
 }
 
+message RetrieveHasAccessFeedIdRequest {
+    string userId = 1;
+    string islandId = 2;
+    google.protobuf.Int64Value timestampAfter = 3;
+    google.protobuf.Int64Value timestampBefore = 4;
+}
+
+message RetrieveHasAccessFeedIdResponse {
+    CommonStatus status = 1;
+    repeated string feedIds = 2;
+}
+
 service FeedChargeService {
     rpc RetrieveFeedChargeAccess(RetrieveFeedChargeRequest) returns (RetrieveFeedChargeResponse) {};
+    rpc RetrieveHasAccessFeedId(RetrieveHasAccessFeedIdRequest) returns (RetrieveHasAccessFeedIdResponse) {};
 }

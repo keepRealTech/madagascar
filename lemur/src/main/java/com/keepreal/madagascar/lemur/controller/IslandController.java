@@ -11,10 +11,13 @@ import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandSubscribersResponse;
 import com.keepreal.madagascar.coua.IslandsResponse;
+import com.keepreal.madagascar.coua.SupportTargetMessage;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
+import com.keepreal.madagascar.lemur.converter.SupportTargetConverter;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
+import com.keepreal.madagascar.lemur.dtoFactory.SupportTargetDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
@@ -25,10 +28,10 @@ import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -48,11 +51,16 @@ import swagger.model.IslandProfileResponse;
 import swagger.model.IslandProfilesResponse;
 import swagger.model.IslandResponse;
 import swagger.model.PostIslandPayload;
-import swagger.model.PostIslandPayloadV2;
+import swagger.model.PostIslandPayloadV11;
+import swagger.model.PostIslandRequestV2;
+import swagger.model.PostSupportTargetRequest;
 import swagger.model.PosterFeedDTO;
 import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
+import swagger.model.PutIslandRequestV2;
 import swagger.model.SubscribeIslandRequest;
+import swagger.model.SupportTargetResponse;
+import swagger.model.SupportTargetsResponse;
 import swagger.model.UsersResponse;
 
 import javax.validation.Valid;
@@ -78,19 +86,21 @@ public class IslandController implements IslandApi {
     private final GeneralConfiguration generalConfiguration;
     private final TextContentFilter textContentFilter;
     private final DefaultErrorMessageTranslater translater;
+    private final SupportTargetDTOFactory supportTargetDTOFactory;
 
     /**
      * Constructs the island controller.
      *
-     * @param imageService         {@link ImageService}.
-     * @param islandService        {@link IslandService}.
-     * @param islandDTOFactory     {@link IslandDTOFactory}.
-     * @param userService          {@link UserService}.
-     * @param userDTOFactory       {@link UserDTOFactory}.
-     * @param feedService          {@link FeedService}.
-     * @param feedDTOFactory       {@link FeedDTOFactory}.
-     * @param generalConfiguration {@link GeneralConfiguration}.
-     * @param textContentFilter    {@link TextContentFilter}.
+     * @param imageService            {@link ImageService}.
+     * @param islandService           {@link IslandService}.
+     * @param islandDTOFactory        {@link IslandDTOFactory}.
+     * @param userService             {@link UserService}.
+     * @param userDTOFactory          {@link UserDTOFactory}.
+     * @param feedService             {@link FeedService}.
+     * @param feedDTOFactory          {@link FeedDTOFactory}.
+     * @param generalConfiguration    {@link GeneralConfiguration}.
+     * @param textContentFilter       {@link TextContentFilter}.
+     * @param supportTargetDTOFactory {@link SupportTargetDTOFactory}
      */
     public IslandController(ImageService imageService,
                             IslandService islandService,
@@ -100,7 +110,8 @@ public class IslandController implements IslandApi {
                             FeedService feedService,
                             FeedDTOFactory feedDTOFactory,
                             GeneralConfiguration generalConfiguration,
-                            TextContentFilter textContentFilter) {
+                            TextContentFilter textContentFilter,
+                            SupportTargetDTOFactory supportTargetDTOFactory) {
         this.imageService = imageService;
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
@@ -110,6 +121,7 @@ public class IslandController implements IslandApi {
         this.feedDTOFactory = feedDTOFactory;
         this.generalConfiguration = generalConfiguration;
         this.textContentFilter = textContentFilter;
+        this.supportTargetDTOFactory = supportTargetDTOFactory;
         this.translater = new DefaultErrorMessageTranslater();
     }
 
@@ -363,6 +375,7 @@ public class IslandController implements IslandApi {
                 payload.getIdentityId(),
                 userId,
                 accessType,
+                null,
                 null);
 
         BriefIslandResponse response = new BriefIslandResponse();
@@ -381,7 +394,6 @@ public class IslandController implements IslandApi {
      * @return {@link BriefIslandResponse}.
      */
     @Override
-    @CacheEvict(value = "IslandMessage", key = "#id", cacheManager = "redisCacheManager")
     public ResponseEntity<BriefIslandResponse> apiV1IslandsIdPut(
             String id,
             PutIslandPayload payload,
@@ -417,7 +429,52 @@ public class IslandController implements IslandApi {
                 portraitImageUri,
                 payload.getSecret(),
                 payload.getDescription(),
-                accessType);
+                accessType,
+                payload.getShowIncome(),
+                payload.getCustomUrl());
+
+        BriefIslandResponse response = new BriefIslandResponse();
+        response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Imlements the put island by id v2.
+     *
+     * @param id                 id (required)  Island id.
+     * @param putIslandRequestV2 (required) {@link PutIslandRequestV2}.
+     * @return {@link BriefIslandResponse}.
+     */
+    @Override
+    public ResponseEntity<BriefIslandResponse> apiV2IslandsIdPut(String id,
+                                                                 PutIslandRequestV2 putIslandRequestV2) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        IslandAccessType accessType = this.convertIslandAccessType(putIslandRequestV2.getIslandAccessType());
+
+        if (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(putIslandRequestV2.getSecret())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.textContentFilter.isDisallowed(putIslandRequestV2.getName())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
+        }
+
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+        if (!userId.equals(islandMessage.getHostId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        islandMessage = this.islandService.updateIslandById(id,
+                putIslandRequestV2.getName(),
+                putIslandRequestV2.getPortraitImageUri(),
+                putIslandRequestV2.getSecret(),
+                putIslandRequestV2.getDescription(),
+                accessType,
+                putIslandRequestV2.getShowIncome(),
+                putIslandRequestV2.getCustomUrl());
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -530,9 +587,16 @@ public class IslandController implements IslandApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the post island v11.
+     *
+     * @param payload       (required)     Payload.
+     * @param portraitImage portrait image (optional)
+     * @return {@link BriefIslandResponse}.
+     */
     @Override
     public ResponseEntity<BriefIslandResponse> apiV11IslandsPost(
-            PostIslandPayloadV2 payload,
+            PostIslandPayloadV11 payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
@@ -564,7 +628,47 @@ public class IslandController implements IslandApi {
                 payload.getIdentityId(),
                 userId,
                 accessType,
-                payload.getDescription());
+                payload.getDescription(),
+                payload.getCustomUrl());
+
+        BriefIslandResponse response = new BriefIslandResponse();
+        response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the post island v2.
+     *
+     * @param postIslandRequestV2 (required) {@link PostIslandRequestV2}.
+     * @return {@link BriefIslandResponse}.
+     */
+    @Override
+    public ResponseEntity<BriefIslandResponse> apiV2IslandsPost(PostIslandRequestV2 postIslandRequestV2) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        IslandAccessType accessType = this.convertIslandAccessType(postIslandRequestV2.getIslandAccessType());
+        accessType = Objects.isNull(accessType) ? IslandAccessType.ISLAND_ACCESS_PRIVATE : accessType;
+
+        if (StringUtils.isEmpty(postIslandRequestV2.getName())
+                || (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(postIslandRequestV2.getSecret()))) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.textContentFilter.isDisallowed(postIslandRequestV2.getName())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
+        }
+
+        IslandMessage islandMessage = this.islandService.createIsland(
+                postIslandRequestV2.getName(),
+                postIslandRequestV2.getPortraitImageUri(),
+                postIslandRequestV2.getSecret(),
+                postIslandRequestV2.getIdentityId(),
+                userId,
+                accessType,
+                postIslandRequestV2.getDescription(),
+                postIslandRequestV2.getCustomUrl());
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -587,6 +691,88 @@ public class IslandController implements IslandApi {
                 .filter(Objects::nonNull)
                 .map(this.islandDTOFactory::valueOf)
                 .collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 删除 支持目标
+     *
+     * @param id id (required) 支持目标id
+     * @return {@link DummyResponse}
+     */
+    @Override
+    public ResponseEntity<DummyResponse> apiV1IslandsIdSupportTargetDelete(String id) {
+        if (StringUtils.isEmpty(id)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        String userId = HttpContextUtils.getUserIdFromContext();
+        this.islandService.deleteSupportTargetById(id, userId);
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 根据岛id 获取支持目标
+     *
+     * @param id id (required) 岛id
+     * @return {@link SupportTargetsResponse}
+     */
+    @Override
+    public ResponseEntity<SupportTargetsResponse> apiV1IslandsIdSupportTargetGet(String id) {
+        if (StringUtils.isEmpty(id)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<SupportTargetMessage> messages = this.islandService.retrieveSupportTargetsByIslandId(id);
+        SupportTargetsResponse response = new SupportTargetsResponse();
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        response.setData(this.supportTargetDTOFactory.listValueOf(messages));
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * 创建/修改 支持目标
+     *
+     * @param id                       id (required)
+     * @param postSupportTargetRequest (required)
+     * @return {@link SupportTargetResponse}
+     */
+    @Override
+    public ResponseEntity<SupportTargetResponse> apiV1IslandsIdSupportTargetPut(String id, @Valid PostSupportTargetRequest postSupportTargetRequest) {
+        if (StringUtils.isEmpty(id) || !this.checkSupportTargetRequest(postSupportTargetRequest)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        String userId = HttpContextUtils.getUserIdFromContext();
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+        if (!userId.equals(islandMessage.getHostId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        // v1.8 支持目标唯一
+        if (StringUtils.isEmpty(postSupportTargetRequest.getTargetId())) {
+            List<SupportTargetMessage> messages = this.islandService.retrieveSupportTargetsByIslandId(id);
+            if (!CollectionUtils.isEmpty(messages)) {
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
+        }
+
+        SupportTargetMessage supportTarget = this.islandService.createOrUpdateSupportTarget(
+                id,
+                userId,
+                SupportTargetConverter.convertToTargetType(postSupportTargetRequest.getTargetType()),
+                SupportTargetConverter.convertToTimeType(postSupportTargetRequest.getTimeType()),
+                postSupportTargetRequest.getTotalAmountInCents(),
+                postSupportTargetRequest.getTotalSupporterNum(),
+                postSupportTargetRequest.getContent(),
+                postSupportTargetRequest.getTargetId());
+
+        SupportTargetResponse response = new SupportTargetResponse();
+        response.setData(this.supportTargetDTOFactory.valueOf(supportTarget));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -647,4 +833,60 @@ public class IslandController implements IslandApi {
         }
     }
 
+    /**
+     * 检查请求体参数合法性 {@link PostSupportTargetRequest}
+     *
+     * @param postSupportTargetRequest {@link PostSupportTargetRequest}
+     * @return {@link Boolean}
+     */
+    private boolean checkSupportTargetRequest(PostSupportTargetRequest postSupportTargetRequest) {
+        if (StringUtils.isEmpty(postSupportTargetRequest.getTargetId())) {
+            if (Objects.isNull(postSupportTargetRequest.getTimeType())
+                    || Objects.isNull(postSupportTargetRequest.getTargetType())
+                    || StringUtils.isEmpty(postSupportTargetRequest.getContent())) {
+                return false;
+            }
+            switch (postSupportTargetRequest.getTargetType()) {
+                case SUPPORTER:
+                    if (Objects.isNull(postSupportTargetRequest.getTotalSupporterNum())) {
+                        return false;
+                    }
+                    break;
+                case AMOUNT:
+                    if (Objects.isNull(postSupportTargetRequest.getTotalAmountInCents())) {
+                        return false;
+                    }
+                    if (postSupportTargetRequest.getTotalAmountInCents() > 1000000000L) {
+                        return false;
+                    }
+                    break;
+            }
+        } else {
+            if (Objects.nonNull(postSupportTargetRequest.getTargetType())) {
+                if (Objects.isNull(postSupportTargetRequest.getTimeType()) || StringUtils.isEmpty(postSupportTargetRequest.getContent())) {
+                    return false;
+                }
+
+                switch (postSupportTargetRequest.getTargetType()) {
+                    case SUPPORTER:
+                        if (Objects.isNull(postSupportTargetRequest.getTotalSupporterNum())) {
+                            return false;
+                        }
+                        break;
+                    case AMOUNT:
+                        if (Objects.isNull(postSupportTargetRequest.getTotalAmountInCents())) {
+                            return false;
+                        }
+                        if (postSupportTargetRequest.getTotalAmountInCents() > 1000000000L) {
+                            return false;
+                        }
+                        break;
+                }
+            } else {
+                return !Objects.nonNull(postSupportTargetRequest.getTotalAmountInCents())
+                        || !Objects.nonNull(postSupportTargetRequest.getTotalSupporterNum());
+            }
+        }
+        return true;
+    }
 }

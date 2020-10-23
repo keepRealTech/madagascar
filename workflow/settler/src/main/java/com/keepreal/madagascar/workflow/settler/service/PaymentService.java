@@ -20,7 +20,11 @@ import java.util.stream.Collectors;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final List<Integer> unsettledType = Arrays.asList(PaymentType.SHELLPAY.getValue(), PaymentType.WECHATPAY.getValue());
+    private final List<Integer> unsettledType = Arrays.asList(PaymentType.SHELLPAY.getValue(),
+            PaymentType.WECHATPAY.getValue(),
+            PaymentType.IOSBUY.getValue(),
+            PaymentType.SUPPORT.getValue(),
+            PaymentType.ALIPAY.getValue());
 
     /**
      * Constructs the payment service.

@@ -13,10 +13,13 @@ import com.keepreal.madagascar.vanga.CreateWithdrawRequest;
 import com.keepreal.madagascar.vanga.FeedRequest;
 import com.keepreal.madagascar.vanga.IOSOrderBuyShellRequest;
 import com.keepreal.madagascar.vanga.IOSOrderSubscribeRequest;
+import com.keepreal.madagascar.vanga.IncomeMessage;
 import com.keepreal.madagascar.vanga.OrderCallbackRequest;
 import com.keepreal.madagascar.vanga.PaymentServiceGrpc;
 import com.keepreal.madagascar.vanga.RedirectResponse;
 import com.keepreal.madagascar.vanga.RefundWechatFeedRequest;
+import com.keepreal.madagascar.vanga.RetrieveIncomeRequest;
+import com.keepreal.madagascar.vanga.RetrieveIncomeResponse;
 import com.keepreal.madagascar.vanga.RetrieveOrderByIdRequest;
 import com.keepreal.madagascar.vanga.RetrieveSupportInfoRequest;
 import com.keepreal.madagascar.vanga.RetrieveSupportInfoResponse;
@@ -77,7 +80,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImplBase {
 
-    private final static String SUPPORT_TEXT = "夏日炎炎，请TA吃个椰子吧";
+    private final static String SUPPORT_TEXT = "向TA投喂一颗椰子";
     private final static String MEMBERSHIP_TEMPLATE = "支持创作者 ¥%.2f（¥%.2f x %d个月）";
     private final static String MEMBERSHIP_PERMANENT_TEMPLATE = "支持创作者 ¥%.2f（¥%.2f x 永久有效）";
     private final static String SPONSOR_TEMPLATE = "支持一下创作者 ¥%.2f";
@@ -1157,6 +1160,25 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
         }
 
         responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveIncomeByUserId(RetrieveIncomeRequest request, StreamObserver<RetrieveIncomeResponse> responseObserver) {
+        String userId = request.getUserId();
+        long startTimestamp = request.getStartTimestamp();
+        long endTimestamp = request.getEndTimestamp();
+
+        int supportCount = this.paymentService.retrieveSupportCount(userId, startTimestamp, endTimestamp);
+        long cents = this.paymentService.retrieveCents(userId, startTimestamp, endTimestamp);
+
+        responseObserver.onNext(RetrieveIncomeResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setMessage(IncomeMessage.newBuilder()
+                        .setSupportCount(supportCount)
+                        .setCents(cents)
+                        .build())
+                .build());
         responseObserver.onCompleted();
     }
 
