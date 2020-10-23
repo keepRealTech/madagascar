@@ -206,6 +206,29 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+  /api/v2/users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - User
+      summary: updates a user by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutUserRequestV2'
+            encoding:
+              payload:
+                contentType: application/json
+      responses:
+        '200':
+          description: user response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
   /api/v1/islands:
     get:
       parameters:
@@ -232,6 +255,24 @@ paths:
         required: true
         content:
           multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostIslandRequestV11'
+      responses:
+        '200':
+          description: brief island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandResponse'
+  /api/v2/islands:
+    post:
+      tags:
+        - Island
+      summary: 创建新的创作首页
+      requestBody:
+        required: true
+        content:
+          application/json:
             schema:
               $ref: '#/components/schemas/PostIslandRequestV2'
       responses:
@@ -334,6 +375,26 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PutIslandRequest'
+      responses:
+        '200':
+          description: island response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BriefIslandResponse'
+  /api/v2/islands/{id}:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    put:
+      tags:
+        - Island
+      summary: updates a island by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutIslandRequestV2'
       responses:
         '200':
           description: island response
@@ -2999,6 +3060,26 @@ components:
         portraitImage:
           type: string
           format: binary
+    PutUserRequestV2:
+      type: object
+      properties:
+        name:
+          type: string
+        gender:
+          $ref: '#/components/schemas/GenderType'
+        description:
+          type: string
+        city:
+          type: string
+        birthday:
+          type: string
+          format: date
+        identityTypes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentityType'
+        portraitImageUri:
+          type: string
     UserResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -3102,7 +3183,7 @@ components:
             supportTargets:
               type: array
               items:
-               $ref: '#/components/schemas/SupportTargetDTO'
+                $ref: '#/components/schemas/SupportTargetDTO'
             showIncome:
               type: boolean
             supportCount:
@@ -3201,7 +3282,7 @@ components:
           $ref: "#/components/schemas/IslandAccessType"
       required:
         - name
-    PostIslandPayloadV2:
+    PostIslandPayloadV11:
       type: object
       properties:
         name:
@@ -3230,6 +3311,26 @@ components:
           type: string
           description: portrait image
           format: binary
+    PutIslandRequestV2:
+      type: object
+      properties:
+        name:
+          type: string
+          description: island name
+        description:
+          type: string
+          description: descriptions
+        showIncome:
+          type: boolean
+        secret:
+          type: string
+          description: secrets for joining island
+        islandAccessType:
+          $ref: '#/components/schemas/IslandAccessType'
+        customUrl:
+          type: string
+        portraitImageUri:
+          type: string
     PostIslandRequest:
       type: object
       properties:
@@ -3241,17 +3342,39 @@ components:
           format: binary
       required:
         - payload
-    PostIslandRequestV2:
+    PostIslandRequestV11:
       type: object
       properties:
         payload:
-          $ref: '#/components/schemas/PostIslandPayloadV2'
+          $ref: '#/components/schemas/PostIslandPayloadV11'
         portraitImage:
           type: string
           description: portrait image
           format: binary
       required:
         - payload
+    PostIslandRequestV2:
+      type: object
+      properties:
+        name:
+          type: string
+          description: island name
+        secret:
+          type: string
+          description: secrets for joining island
+        identityId:
+          type: string
+        description:
+          type: string
+        islandAccessType:
+          $ref: "#/components/schemas/IslandAccessType"
+        customUrl:
+          type: string
+        portraitImageUri:
+          type: string
+      required:
+        - name
+        - description
     SubscribeIslandRequest:
       type: object
       properties:

@@ -28,7 +28,6 @@ import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,11 +51,13 @@ import swagger.model.IslandProfileResponse;
 import swagger.model.IslandProfilesResponse;
 import swagger.model.IslandResponse;
 import swagger.model.PostIslandPayload;
-import swagger.model.PostIslandPayloadV2;
+import swagger.model.PostIslandPayloadV11;
+import swagger.model.PostIslandRequestV2;
 import swagger.model.PostSupportTargetRequest;
 import swagger.model.PosterFeedDTO;
 import swagger.model.PosterIslandDTO;
 import swagger.model.PutIslandPayload;
+import swagger.model.PutIslandRequestV2;
 import swagger.model.SubscribeIslandRequest;
 import swagger.model.SupportTargetResponse;
 import swagger.model.SupportTargetsResponse;
@@ -90,15 +91,15 @@ public class IslandController implements IslandApi {
     /**
      * Constructs the island controller.
      *
-     * @param imageService         {@link ImageService}.
-     * @param islandService        {@link IslandService}.
-     * @param islandDTOFactory     {@link IslandDTOFactory}.
-     * @param userService          {@link UserService}.
-     * @param userDTOFactory       {@link UserDTOFactory}.
-     * @param feedService          {@link FeedService}.
-     * @param feedDTOFactory       {@link FeedDTOFactory}.
-     * @param generalConfiguration {@link GeneralConfiguration}.
-     * @param textContentFilter    {@link TextContentFilter}.
+     * @param imageService            {@link ImageService}.
+     * @param islandService           {@link IslandService}.
+     * @param islandDTOFactory        {@link IslandDTOFactory}.
+     * @param userService             {@link UserService}.
+     * @param userDTOFactory          {@link UserDTOFactory}.
+     * @param feedService             {@link FeedService}.
+     * @param feedDTOFactory          {@link FeedDTOFactory}.
+     * @param generalConfiguration    {@link GeneralConfiguration}.
+     * @param textContentFilter       {@link TextContentFilter}.
      * @param supportTargetDTOFactory {@link SupportTargetDTOFactory}
      */
     public IslandController(ImageService imageService,
@@ -393,7 +394,6 @@ public class IslandController implements IslandApi {
      * @return {@link BriefIslandResponse}.
      */
     @Override
-    @CacheEvict(value = "IslandMessage", key = "#id", cacheManager = "redisCacheManager")
     public ResponseEntity<BriefIslandResponse> apiV1IslandsIdPut(
             String id,
             PutIslandPayload payload,
@@ -432,6 +432,49 @@ public class IslandController implements IslandApi {
                 accessType,
                 payload.getShowIncome(),
                 payload.getCustomUrl());
+
+        BriefIslandResponse response = new BriefIslandResponse();
+        response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Imlements the put island by id v2.
+     *
+     * @param id                 id (required)  Island id.
+     * @param putIslandRequestV2 (required) {@link PutIslandRequestV2}.
+     * @return {@link BriefIslandResponse}.
+     */
+    @Override
+    public ResponseEntity<BriefIslandResponse> apiV2IslandsIdPut(String id,
+                                                                 PutIslandRequestV2 putIslandRequestV2) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        IslandAccessType accessType = this.convertIslandAccessType(putIslandRequestV2.getIslandAccessType());
+
+        if (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(putIslandRequestV2.getSecret())) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.textContentFilter.isDisallowed(putIslandRequestV2.getName())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
+        }
+
+        IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
+        if (!userId.equals(islandMessage.getHostId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        islandMessage = this.islandService.updateIslandById(id,
+                putIslandRequestV2.getName(),
+                putIslandRequestV2.getPortraitImageUri(),
+                putIslandRequestV2.getSecret(),
+                putIslandRequestV2.getDescription(),
+                accessType,
+                putIslandRequestV2.getShowIncome(),
+                putIslandRequestV2.getCustomUrl());
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -544,9 +587,16 @@ public class IslandController implements IslandApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the post island v11.
+     *
+     * @param payload       (required)     Payload.
+     * @param portraitImage portrait image (optional)
+     * @return {@link BriefIslandResponse}.
+     */
     @Override
     public ResponseEntity<BriefIslandResponse> apiV11IslandsPost(
-            PostIslandPayloadV2 payload,
+            PostIslandPayloadV11 payload,
             @RequestPart(value = "portraitImage", required = false) MultipartFile portraitImage) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
@@ -580,6 +630,45 @@ public class IslandController implements IslandApi {
                 accessType,
                 payload.getDescription(),
                 payload.getCustomUrl());
+
+        BriefIslandResponse response = new BriefIslandResponse();
+        response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the post island v2.
+     *
+     * @param postIslandRequestV2 (required) {@link PostIslandRequestV2}.
+     * @return {@link BriefIslandResponse}.
+     */
+    @Override
+    public ResponseEntity<BriefIslandResponse> apiV2IslandsPost(PostIslandRequestV2 postIslandRequestV2) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        IslandAccessType accessType = this.convertIslandAccessType(postIslandRequestV2.getIslandAccessType());
+        accessType = Objects.isNull(accessType) ? IslandAccessType.ISLAND_ACCESS_PRIVATE : accessType;
+
+        if (StringUtils.isEmpty(postIslandRequestV2.getName())
+                || (IslandAccessType.ISLAND_ACCESS_PRIVATE.equals(accessType) && StringUtils.isEmpty(postIslandRequestV2.getSecret()))) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.textContentFilter.isDisallowed(postIslandRequestV2.getName())) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_NAME_INVALID);
+        }
+
+        IslandMessage islandMessage = this.islandService.createIsland(
+                postIslandRequestV2.getName(),
+                postIslandRequestV2.getPortraitImageUri(),
+                postIslandRequestV2.getSecret(),
+                postIslandRequestV2.getIdentityId(),
+                userId,
+                accessType,
+                postIslandRequestV2.getDescription(),
+                postIslandRequestV2.getCustomUrl());
 
         BriefIslandResponse response = new BriefIslandResponse();
         response.setData(this.islandDTOFactory.briefValueOf(islandMessage));
@@ -648,8 +737,8 @@ public class IslandController implements IslandApi {
     /**
      * 创建/修改 支持目标
      *
-     * @param id id (required)
-     * @param postSupportTargetRequest  (required)
+     * @param id                       id (required)
+     * @param postSupportTargetRequest (required)
      * @return {@link SupportTargetResponse}
      */
     @Override
@@ -794,10 +883,8 @@ public class IslandController implements IslandApi {
                         break;
                 }
             } else {
-                if (Objects.nonNull(postSupportTargetRequest.getTotalAmountInCents())
-                        && Objects.nonNull(postSupportTargetRequest.getTotalSupporterNum())) {
-                    return false;
-                }
+                return !Objects.nonNull(postSupportTargetRequest.getTotalAmountInCents())
+                        || !Objects.nonNull(postSupportTargetRequest.getTotalSupporterNum());
             }
         }
         return true;
