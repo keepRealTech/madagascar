@@ -128,7 +128,7 @@ public class SubscribeMembershipService {
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
                     order.getUserId(), sku.getMembershipId());
 
-            Instant instant = Objects.isNull(currentSubscribeMembership) ?
+            Instant instant = Objects.isNull(currentSubscribeMembership) || currentSubscribeMembership.getExpireTime() < System.currentTimeMillis() ?
                     Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
             ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
 
@@ -159,7 +159,7 @@ public class SubscribeMembershipService {
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", userId))) {
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
                     userId, sku.getMembershipId());
-            Instant instant = Objects.isNull(currentSubscribeMembership) ?
+            Instant instant = Objects.isNull(currentSubscribeMembership) || currentSubscribeMembership.getExpireTime() < System.currentTimeMillis() ?
                     Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
             ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
 
@@ -191,7 +191,7 @@ public class SubscribeMembershipService {
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", userId))) {
             SubscribeMembership currentSubscribeMembership = this.subscriptionMemberRepository.findByUserIdAndMembershipIdAndDeletedIsFalse(
                     userId, sku.getMembershipId());
-            Instant instant = Objects.isNull(currentSubscribeMembership) ?
+            Instant instant = Objects.isNull(currentSubscribeMembership) || currentSubscribeMembership.getExpireTime() < System.currentTimeMillis() ?
                     Instant.now() : Instant.ofEpochMilli(currentSubscribeMembership.getExpireTime());
             ZonedDateTime currentExpireTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
 
