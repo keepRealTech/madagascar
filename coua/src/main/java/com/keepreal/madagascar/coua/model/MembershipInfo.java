@@ -45,6 +45,7 @@ public class MembershipInfo {
     private Integer memberCount = 0;
     @Column(name = "is_permanent")
     private Boolean permanent;
+    private String image;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
