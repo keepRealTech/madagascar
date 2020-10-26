@@ -94,7 +94,10 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
             @Override
             public void addCorsMappings(@NotNull CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://tiaodaoapp.com", "https://www.tiaodaoapp.com")
+                        .allowedOrigins("https://tiaodaoapp.com",
+                                "https://www.tiaodaoapp.com",
+                                "https://h5.tiaodaoapp.com",
+                                "https://home.keepreal.cn")
                         .allowedMethods("*");
             }
         };
