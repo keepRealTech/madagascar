@@ -1315,7 +1315,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupportSkusResponseV2'
+                $ref: '#/components/schemas/SponsorSkusResponse'
   /api/v1/islands/{id}/memberships:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -5708,7 +5708,7 @@ components:
             $ref: '#/components/schemas/SponsorSkuDTO'
         customizedSku:
           $ref: '#/components/schemas/SponsorSkuDTO'
-    SupportSkusDTOV2:
+    SponsorSkusDTO:
       type: object
       properties:
         sponsor:
@@ -5740,13 +5740,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportSkusDTO'
-    SupportSkusResponseV2:
+    SponsorSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/SupportSkusDTOV2'
+              $ref: '#/components/schemas/SponsorSkusDTO'
     SponsorDTO:
       type: object
       properties:
