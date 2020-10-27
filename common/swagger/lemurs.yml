@@ -4859,6 +4859,8 @@ components:
               type: integer
             isTop:
               type: boolean
+            imageUri:
+              type: string
     PostMembershipRequest:
       type: object
       properties:
@@ -4878,6 +4880,8 @@ components:
           type: string
         isPermanent:
           type: boolean
+        imageUri:
+          type: string
     PutMembershipRequest:
       type: object
       properties:
@@ -4897,6 +4901,8 @@ components:
           type: string
         isPermanent:
           type: boolean
+        imageUri:
+          type: string
     MembershipResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
