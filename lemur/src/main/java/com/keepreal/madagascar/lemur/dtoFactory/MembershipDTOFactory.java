@@ -144,7 +144,7 @@ public class MembershipDTOFactory {
         dto.setUseCustomMessage(membershipMessage.getUseCustomMessage());
         dto.setMessage(membershipMessage.getMessage());
         dto.setIsPermanent(membershipMessage.getPermanent());
-        dto.setImageUrl(membershipMessage.getImageUrl());
+        dto.setImageUri(membershipMessage.getImageUri());
         return dto;
     }
 
