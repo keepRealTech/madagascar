@@ -612,6 +612,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/feeds:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Feed
+      summary: 在指定的岛发布动态
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostIslandFeedRequest'
+      responses:
+        '200':
+          description: brief feed response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponse'
   /api/v1/feeds/check:
     post:
       tags:
@@ -1469,6 +1489,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatTokenResponse'
+  /api/v1/chats/settings:
+    get:
+      tags:
+        - Chat
+      summary: 获得当前用户的聊天消息设置
+      responses:
+        '200':
+          description: chat settings response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSettingResponse'
+    put:
+      tags:
+        - Chat
+      summary: 修改当前用户的聊天消息设置
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutChatSettingRequest'
+      responses:
+        '200':
+          description: chat settings response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatSettingResponse'
   /api/v1/users/{id}/chats:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1893,6 +1942,23 @@ paths:
       tags:
         - Feed
       summary: 获得指定作品集中的动态内容
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedsResponse'
+  /api/v1/feedgroups/{id}/audios:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Feed
+      summary: 获得指定作品集中的音频内容
       responses:
         '200':
           description: common response
@@ -3219,12 +3285,12 @@ components:
         - $ref: '#/components/schemas/BriefIslandDTO'
         - type: object
           properties:
+            secret:
+              type: string
             host:
               $ref: '#/components/schemas/BriefUserDTO'
             memberCount:
               type: integer
-            secret:
-              type: string
     RecommendIslandDTO:
       allOf:
         - $ref: '#/components/schemas/IslandDTO'
@@ -3665,7 +3731,11 @@ components:
           $ref: '#/components/schemas/BriefIslandDTO'
         user:
           $ref: '#/components/schemas/BriefUserDTO'
+        title:
+          type: string
         text:
+          type: string
+        brief:
           type: string
         imagesUris:
           type: array
@@ -3829,8 +3899,30 @@ components:
             $ref: '#/components/schemas/MultiMediaDTO'
         feedGroupId:
           type: string
-      required:
-        - islandId
+    PostIslandFeedRequest:
+      type: object
+      properties:
+        membershipIds:
+          type: array
+          items:
+            type: string
+        priceInCents:
+          type: integer
+          format: int64
+        title:
+          type: string
+        text:
+          type: string
+        brief:
+          type: string
+        mediaType:
+          $ref: '#/components/schemas/MultiMediaType'
+        multimedia:
+          type: array
+          items:
+            $ref: '#/components/schemas/MultiMediaDTO'
+        feedGroupId:
+          type: string
     CheckFeedsMessage:
       type: object
       properties:
@@ -5899,6 +5991,23 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportTargetDTO'
+    ChatSettingDTO:
+      type: object
+      properties:
+        displayPaymentMessage:
+          type: boolean
+    PutChatSettingRequest:
+      type: object
+      properties:
+        displayPaymentMessage:
+          type: boolean
+    ChatSettingResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ChatSettingDTO'
     IncomeProfileResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
