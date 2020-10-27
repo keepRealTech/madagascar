@@ -1492,7 +1492,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatSettingResponse'
+                $ref: '#/components/schemas/ChatSettingsResponse'
     put:
       tags:
         - Chat
@@ -1509,7 +1509,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatSettingResponse'
+                $ref: '#/components/schemas/ChatSettingsResponse'
   /api/v1/users/{id}/chats:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -5916,9 +5916,11 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportTargetDTO'
-    ChatSettingDTO:
+    ChatSettingsDTO:
       type: object
       properties:
+        userId:
+          type: string
         displayPaymentMessage:
           type: boolean
     PutChatSettingRequest:
@@ -5926,10 +5928,10 @@ components:
       properties:
         displayPaymentMessage:
           type: boolean
-    ChatSettingResponse:
+    ChatSettingsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/ChatSettingDTO'
+              $ref: '#/components/schemas/ChatSettingsDTO'

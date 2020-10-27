@@ -1,6 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
-import com.google.common.base.Functions;
+import com.keepreal.madagascar.asity.ChatSettingsMessage;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
 import com.keepreal.madagascar.asity.IslandChatgroupsResponse;
@@ -23,31 +23,28 @@ import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ChatApi;
 import swagger.model.BriefUsersResponse;
 import swagger.model.ChatAccessResponse;
 import swagger.model.ChatGroupDTO;
 import swagger.model.ChatGroupResponse;
+import swagger.model.ChatSettingsResponse;
 import swagger.model.ChatTokenResponse;
 import swagger.model.DummyResponse;
 import swagger.model.IslandChatAccessResponse;
 import swagger.model.IslandChatGroupsResponse;
 import swagger.model.PostChatGroupRequest;
 import swagger.model.PutChatGroupRequest;
+import swagger.model.PutChatSettingRequest;
 import swagger.model.SimpleMembershipDTO;
 import swagger.model.UserChatGroupsResponse;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -163,7 +160,7 @@ public class ChatController implements ChatApi {
         }
 
         if (Objects.nonNull(targetIsland) && this.islandService.retrieveIslandSubscribeStateByUserId(userId,
-                    Collections.singletonList(targetIsland.getId())).get(targetIsland.getId())) {
+                Collections.singletonList(targetIsland.getId())).get(targetIsland.getId())) {
             hasAccess = true;
         } else if (Objects.nonNull(myIsland) && this.islandService.retrieveIslandSubscribeStateByUserId(id,
                 Collections.singletonList(myIsland.getId())).get(myIsland.getId())) {
@@ -535,6 +532,44 @@ public class ChatController implements ChatApi {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(chatgroupMembersResponse.getPageResponse()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the retrieve chat settings method.
+     *
+     * @return {@link ChatSettingsResponse}.
+     */
+    @Override
+    public ResponseEntity<ChatSettingsResponse> apiV1ChatsSettingsGet() {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        ChatSettingsMessage chatSettings = this.chatService.retrieveChatSettingsByUserId(userId);
+
+        ChatSettingsResponse response = new ChatSettingsResponse();
+        response.setData(this.chatDTOFactory.valueOf(chatSettings));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the update chat settings method.
+     *
+     * @param putChatSettingRequest (required) {@link PutChatSettingRequest}.
+     * @return {@link ChatSettingsResponse}.
+     */
+    @Override
+    public ResponseEntity<ChatSettingsResponse> apiV1ChatsSettingsPut(PutChatSettingRequest putChatSettingRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        ChatSettingsMessage chatSettings = this.chatService.updateChatSettingsByUserId(userId,
+                putChatSettingRequest.getDisplayPaymentMessage());
+
+        ChatSettingsResponse response = new ChatSettingsResponse();
+        response.setData(this.chatDTOFactory.valueOf(chatSettings));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
