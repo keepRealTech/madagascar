@@ -182,8 +182,8 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
                     membership.setMessage(request.getMessage().getValue());
                 }
             }
-            if (request.hasImage()) {
-                membership.setImage(request.getImage().getValue());
+            if (request.hasImageUrl()) {
+                membership.setImageUrl(request.getImageUrl().getValue());
             }
 
             membership = this.membershipService.updateMembership(membership);
@@ -225,7 +225,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         membershipInfo.setUseCustomMessage(request.getUseCustomMessage());
         membershipInfo.setMessage(request.getMessage());
         membershipInfo.setPermanent(request.getPermanent());
-        membershipInfo.setImage(request.getImage());
+        membershipInfo.setImageUrl(request.getImageUrl());
         MembershipInfo membership = membershipService.createMembership(membershipInfo);
 
         responseObserver.onNext(MembershipResponse.newBuilder()

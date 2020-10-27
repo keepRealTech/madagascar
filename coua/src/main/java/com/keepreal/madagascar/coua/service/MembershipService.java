@@ -143,6 +143,7 @@ public class MembershipService {
                 .setUseCustomMessage(membershipInfo.getUseCustomMessage())
                 .setMessage(membershipInfo.getMessage())
                 .setPermanent(membershipInfo.getPermanent())
+                .setImageUrl(membershipInfo.getImageUrl())
                 .build();
     }
 
@@ -204,8 +205,8 @@ public class MembershipService {
             }
         }
 
-        if (request.hasImage()) {
-            membershipInfo.setImage(request.getImage().getValue());
+        if (request.hasImageUrl()) {
+            membershipInfo.setImageUrl(request.getImageUrl().getValue());
         }
 
         this.skuService.updateMembershipSkusByMembershipId(request.getId(), newName, newPrice, null, membershipInfo.getPermanent());

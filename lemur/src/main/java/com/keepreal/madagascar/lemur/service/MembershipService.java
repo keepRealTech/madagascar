@@ -135,7 +135,7 @@ public class MembershipService {
                                               boolean useCustomMessage,
                                               String message,
                                               boolean isPermanent,
-                                              String image) {
+                                              String imageUrl) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         String descriptionStr = String.join(",", descriptions);
@@ -148,7 +148,7 @@ public class MembershipService {
                 .setUseCustomMessage(useCustomMessage)
                 .setMessage(message)
                 .setPermanent(isPermanent)
-                .setImage(image)
+                .setImageUrl(imageUrl)
                 .build();
 
         MembershipResponse membershipResponse;
@@ -200,7 +200,7 @@ public class MembershipService {
                                                   Boolean useCustomMessage,
                                                   String message,
                                                   Boolean isPermanent,
-                                                  String image) {
+                                                  String imageUrl) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         UpdateMembershipRequest.Builder builder = UpdateMembershipRequest.newBuilder()
@@ -224,8 +224,8 @@ public class MembershipService {
         if (Objects.nonNull(isPermanent)) {
             builder.setPermanent(BoolValue.of(isPermanent));
         }
-        if (Objects.nonNull(image)) {
-            builder.setImage(StringValue.of(image));
+        if (Objects.nonNull(imageUrl)) {
+            builder.setImageUrl(StringValue.of(imageUrl));
         }
 
         MembershipResponse membershipResponse;

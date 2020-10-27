@@ -4833,7 +4833,7 @@ components:
               type: integer
             isTop:
               type: boolean
-            image:
+            imageUrl:
               type: string
     PostMembershipRequest:
       type: object
@@ -4854,7 +4854,7 @@ components:
           type: string
         isPermanent:
           type: boolean
-        image:
+        imageUrl:
           type: string
     PutMembershipRequest:
       type: object
@@ -4875,7 +4875,7 @@ components:
           type: string
         isPermanent:
           type: boolean
-        image:
+        imageUrl:
           type: string
     MembershipResponse:
       allOf:
