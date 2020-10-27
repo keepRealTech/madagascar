@@ -2375,7 +2375,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostSupportRequest'
+              $ref: '#/components/schemas/PostSponsorRequest'
       responses:
         '200':
           description: wechat order
@@ -2415,7 +2415,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostSupportRequest'
+              $ref: '#/components/schemas/PostSponsorRequest'
       responses:
         '200':
           description: wechat order
@@ -2459,7 +2459,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PostSupportRequest'
+              $ref: '#/components/schemas/PostSponsorRequest'
       responses:
         '200':
           description: dummy response
@@ -2473,7 +2473,7 @@ paths:
     post:
       tags:
         - Payment
-      summary: 支持一下h5微信支付渠道
+      summary: 支持一下h5支付宝支付渠道
       requestBody:
         required: true
         content:
@@ -2493,13 +2493,13 @@ paths:
     post:
       tags:
         - Payment
-      summary: 支持一下h5微信支付渠道
+      summary: 支持一下h5支付宝支付渠道
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AlipayH5PostSupportRequest'
+              $ref: '#/components/schemas/AlipayH5PostSponsorRequest'
       responses:
         '200':
           description: dummy response
@@ -5932,6 +5932,16 @@ components:
           format: int64
       required:
         - sponsorSkuId
+    PostSponsorRequest:
+      type: object
+      properties:
+        sponsorSkuId:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
+      required:
+        - sponsorSkuId
     AlipayH5PostSupportRequest:
       type: object
       properties:
@@ -5941,6 +5951,22 @@ components:
           type: integer
           format: int64
         priceInShells:
+          type: integer
+          format: int64
+        quitUrl:
+          type: string
+        returnUrl:
+          type: string
+      required:
+        - sponsorSkuId
+        - quitUrl
+        - returnUrl
+    AlipayH5PostSponsorRequest:
+      type: object
+      properties:
+        sponsorSkuId:
+          type: string
+        priceInCents:
           type: integer
           format: int64
         quitUrl:
