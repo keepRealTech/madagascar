@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.asity.ChatAccessMessage;
+import com.keepreal.madagascar.asity.ChatSettingsMessage;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
@@ -9,6 +10,7 @@ import swagger.model.BriefIslandDTO;
 import swagger.model.BriefUserDTO;
 import swagger.model.ChatAccessDTO;
 import swagger.model.ChatGroupDTO;
+import swagger.model.ChatSettingsDTO;
 import swagger.model.ChatTokenDTO;
 import swagger.model.IslandChatAccessDTO;
 import swagger.model.IslandGroupedChatGroupDTO;
@@ -163,6 +165,24 @@ public class ChatDTOFactory {
                 || groupMembershipIds.stream().anyMatch(userMembershipIds::contains));
 
         return userChatGroupDTO;
+    }
+
+    /**
+     * Converts {@link ChatSettingsMessage} into {@link ChatSettingsDTO}.
+     *
+     * @param chatSettings {@link ChatSettingsMessage}.
+     * @return {@link ChatSettingsDTO}.
+     */
+    public ChatSettingsDTO valueOf(ChatSettingsMessage chatSettings) {
+        if (Objects.isNull(chatSettings)) {
+            return null;
+        }
+
+        ChatSettingsDTO chatSettingsDTO = new ChatSettingsDTO();
+        chatSettingsDTO.setDisplayPaymentMessage(chatSettings.getDisplayPaymentMessage());
+        chatSettingsDTO.setUserId(chatSettings.getUserId());
+
+        return chatSettingsDTO;
     }
 
 }

@@ -24,7 +24,7 @@ public class ChatgroupMessageFactory {
      */
     public ChatgroupMessage valueOf(Chatgroup chatgroup, ChatgroupMember chatgroupMember) {
         if (Objects.isNull(chatgroup)) {
-            return null;
+            return ChatgroupMessage.getDefaultInstance();
         }
 
         return ChatgroupMessage.newBuilder()

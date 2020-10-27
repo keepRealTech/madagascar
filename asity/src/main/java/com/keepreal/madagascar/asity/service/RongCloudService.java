@@ -1,15 +1,12 @@
 package com.keepreal.madagascar.asity.service;
 
 import com.keepreal.madagascar.asity.config.RongCloudConfiguration;
-import com.keepreal.madagascar.asity.model.SpecialArtist;
-import com.keepreal.madagascar.asity.repository.SpecialArtistsTempRepository;
+import com.keepreal.madagascar.asity.model.ChatSettings;
 import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
-import com.keepreal.madagascar.coua.CreateUserEvent;
 import com.keepreal.madagascar.coua.MembershipMessage;
-import com.keepreal.madagascar.coua.CreateIslandEvent;
 import com.keepreal.madagascar.tenrecs.NotificationEvent;
 import io.rong.RongCloud;
 import io.rong.messages.TxtMessage;
@@ -22,12 +19,8 @@ import io.rong.models.user.UserModel;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -38,18 +31,18 @@ import java.util.Objects;
 public class RongCloudService {
 
     private final RongCloud client;
-    private final SpecialArtistsTempRepository specialArtistsTempRepository;
+    private final ChatSettingsService chatSettingsService;
 
     /**
      * Constructs the rong cloud service.
      *
      * @param rongCloudConfiguration {@link RongCloudConfiguration}.
-     * @param specialArtistsTempRepository {@link SpecialArtistsTempRepository}
+     * @param chatSettingsService    {@link ChatSettingsService}
      */
     public RongCloudService(RongCloudConfiguration rongCloudConfiguration,
-                            SpecialArtistsTempRepository specialArtistsTempRepository) {
+                            ChatSettingsService chatSettingsService) {
         this.client = RongCloud.getInstance(rongCloudConfiguration.getAppKey(), rongCloudConfiguration.getAppSecret());
-        this.specialArtistsTempRepository = specialArtistsTempRepository;
+        this.chatSettingsService = chatSettingsService;
     }
 
     /**
@@ -188,7 +181,9 @@ public class RongCloudService {
      */
     @SneakyThrows
     public void sendThanks(NotificationEvent event, MembershipMessage membership) {
-        if (event.hasMemberEvent() && !isSpecialArtist(event.getUserId())) {
+        ChatSettings chatSettings = this.chatSettingsService.retrieveOrCreateChatSettingsIfNotExistsByUserId(event.getUserId());
+
+        if (event.hasMemberEvent() && chatSettings.getDisplayPaymentMessage()) {
             String txt =
                     event.getMemberEvent().getPermanent() ?
                             String.format(Templates.ASITY_PURCHASE_HOST_PERMANENT_TEMPLATE,
@@ -217,7 +212,7 @@ public class RongCloudService {
             return;
         }
 
-        this.sendMessage(event.getUserId(), new String[]{targetId}, txt, this.isSpecialArtist(event.getUserId()) ? 0 : 1);
+        this.sendMessage(event.getUserId(), new String[]{targetId}, txt, chatSettings.getDisplayPaymentMessage() ? 1 : 0);
     }
 
     /**
@@ -253,17 +248,6 @@ public class RongCloudService {
                 .setIsCounted(0)
                 .setIsIncludeSender(includeSender);
         this.client.message.msgPrivate.send(message);
-    }
-
-    /**
-     * 判断是否为特殊创作者
-     *
-     * @param artistUserId 创作者 user id
-     * @return 是返回true
-     */
-    private boolean isSpecialArtist(String artistUserId) {
-        SpecialArtist artist = this.specialArtistsTempRepository.findTopByIdAndDeletedIsFalse(artistUserId);
-        return Objects.nonNull(artist);
     }
 
 }
