@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Column;
@@ -13,19 +15,33 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 /**
- *  Represents the special artist entity.
+ * Represents the chat setting.
  */
 @Data
-@Table(name = "special_artists_temp")
+@Table(name = "chat_setting")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SpecialArtist {
+public class ChatSettings {
+
     @Id
-    String id;
+    private String id;
+    private String userId;
+
+    /**
+     * Controls whether the supporters send the support message && whether the user message display in history.
+     */
+    @Builder.Default
+    private Boolean displayPaymentMessage = true;
+
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
+    @CreatedDate
+    private Long createdTime;
+    @LastModifiedDate
+    private Long updatedTime;
+
 }

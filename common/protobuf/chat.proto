@@ -6,6 +6,12 @@ option java_package = "com.keepreal.madagascar.asity";
 import "common.proto";
 import "google/protobuf/wrappers.proto";
 
+message ChatSettingsMessage {
+  string id = 1;
+  string userId = 2;
+  bool displayPaymentMessage = 3;
+}
+
 message ChatAccessMessage {
   string id = 1;
   string islandId = 2;
@@ -142,6 +148,20 @@ message ChatgroupMembershipCountResponse {
   int32 chatgroupCount = 2;
 }
 
+message UpdateChatSettingsRequest {
+  string userId = 1;
+  google.protobuf.BoolValue displayPaymentMessage = 2;
+}
+
+message RetrieveChatSettingsByUserIdRequest {
+  string userId = 1;
+}
+
+message ChatSettingsResponse {
+  CommonStatus status = 1;
+  ChatSettingsMessage chatSettings = 2;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
@@ -157,4 +177,6 @@ service ChatService {
   rpc DeleteChatgroupMembershipByMembershipId(DeleteChatgroupMembershipByMembershipIdRequest) returns (CommonStatus) {};
   rpc UpdateRongCloudUser (UpdateRongCloudUserRequest) returns (CommonStatus) {};
   rpc RetrieveChatgroupMembershipCountByMembershipIds(RetrieveChatgroupMembershipCountRequest) returns (ChatgroupMembershipCountResponse) {};
+  rpc RetrieveChatSettingsByUserId(RetrieveChatSettingsByUserIdRequest) returns (ChatSettingsResponse) {};
+  rpc UpdateChatSettingsByUserId(UpdateChatSettingsRequest) returns (ChatSettingsResponse) {};
 }

@@ -2,6 +2,7 @@ package com.keepreal.madagascar.asity.grpcController;
 
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
+import com.keepreal.madagascar.asity.ChatSettingsResponse;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupMembershipCountResponse;
 import com.keepreal.madagascar.asity.ChatgroupResponse;
@@ -15,22 +16,27 @@ import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatSettingsByUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembershipCountRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
+import com.keepreal.madagascar.asity.UpdateChatSettingsRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.UpdateRongCloudUserRequest;
 import com.keepreal.madagascar.asity.UserChatgroupsResponse;
 import com.keepreal.madagascar.asity.config.RongCloudConfiguration;
+import com.keepreal.madagascar.asity.factory.ChatSettingsMessageFactory;
 import com.keepreal.madagascar.asity.factory.ChatgroupMessageFactory;
 import com.keepreal.madagascar.asity.factory.IslandChatAccessMessageFactory;
+import com.keepreal.madagascar.asity.model.ChatSettings;
 import com.keepreal.madagascar.asity.model.Chatgroup;
 import com.keepreal.madagascar.asity.model.ChatgroupMember;
 import com.keepreal.madagascar.asity.model.ChatgroupMembership;
 import com.keepreal.madagascar.asity.model.IslandChatAccess;
 import com.keepreal.madagascar.asity.service.ChatEventProducerService;
+import com.keepreal.madagascar.asity.service.ChatSettingsService;
 import com.keepreal.madagascar.asity.service.ChatgroupService;
 import com.keepreal.madagascar.asity.service.IslandChatAccessService;
 import com.keepreal.madagascar.asity.service.RongCloudService;
@@ -65,9 +71,11 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
 
     private final ChatgroupService chatgroupService;
     private final RongCloudService rongCloudService;
+    private final ChatSettingsService chatSettingsService;
     private final IslandChatAccessService islandChatAccessService;
     private final ChatEventProducerService chatEventProducerService;
 
+    private final ChatSettingsMessageFactory chatSettingsMessageFactory;
     private final ChatgroupMessageFactory chatgroupMessageFactory;
     private final IslandChatAccessMessageFactory islandChatAccessMessageFactory;
 
@@ -78,23 +86,29 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
      *
      * @param chatgroupService               {@link ChatgroupService}.
      * @param rongCloudService               {@link RongCloudService}.
+     * @param chatSettingsService            {@link ChatSettingsService}.
      * @param islandChatAccessService        {@link IslandChatAccessService}.
      * @param chatEventProducerService       {@link ChatEventProducerService}.
+     * @param chatSettingsMessageFactory     {@link ChatSettingsMessageFactory}.
      * @param chatgroupMessageFactory        {@link IslandChatAccessService}.
      * @param islandChatAccessMessageFactory {@link IslandChatAccessMessageFactory}.
      * @param rongCloudConfiguration         {@link RongCloudConfiguration}.
      */
     public ChatController(ChatgroupService chatgroupService,
                           RongCloudService rongCloudService,
+                          ChatSettingsService chatSettingsService,
                           IslandChatAccessService islandChatAccessService,
                           ChatEventProducerService chatEventProducerService,
+                          ChatSettingsMessageFactory chatSettingsMessageFactory,
                           ChatgroupMessageFactory chatgroupMessageFactory,
                           IslandChatAccessMessageFactory islandChatAccessMessageFactory,
                           RongCloudConfiguration rongCloudConfiguration) {
         this.chatgroupService = chatgroupService;
         this.rongCloudService = rongCloudService;
+        this.chatSettingsService = chatSettingsService;
         this.islandChatAccessService = islandChatAccessService;
         this.chatEventProducerService = chatEventProducerService;
+        this.chatSettingsMessageFactory = chatSettingsMessageFactory;
         this.chatgroupMessageFactory = chatgroupMessageFactory;
         this.islandChatAccessMessageFactory = islandChatAccessMessageFactory;
         this.rongCloudConfiguration = rongCloudConfiguration;
@@ -297,7 +311,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
             chatgroup = this.chatgroupService.updateChatgroupMembershipInMem(chatgroup, request.getMembershipIdsList());
         }
 
-        chatgroup = this.chatgroupService.upsert(chatgroup);
+        chatgroup = this.chatgroupService.update(chatgroup);
 
         response = ChatgroupResponse.newBuilder()
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
@@ -475,7 +489,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Updates the user info for rong cloud.
      *
-     * @param request {@link UpdateRongCloudUserRequest}.
+     * @param request          {@link UpdateRongCloudUserRequest}.
      * @param responseObserver {@link CommonStatus}.
      */
     @Override
@@ -493,8 +507,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     /**
      * Retrieve chat group membership count by membership id list.
      *
-     * @param request           {@link RetrieveChatgroupMembershipCountRequest}.
-     * @param responseObserver  {@link ChatgroupMembershipCountResponse}.
+     * @param request          {@link RetrieveChatgroupMembershipCountRequest}.
+     * @param responseObserver {@link ChatgroupMembershipCountResponse}.
      */
     @Override
     public void retrieveChatgroupMembershipCountByMembershipIds(RetrieveChatgroupMembershipCountRequest request, StreamObserver<ChatgroupMembershipCountResponse> responseObserver) {
@@ -506,4 +520,49 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
                 .build());
         responseObserver.onCompleted();
     }
+
+    /**
+     * Retrieves the chat settings by user id.
+     *
+     * @param request          {@link RetrieveChatSettingsByUserIdRequest}.
+     * @param responseObserver {@link ChatSettingsResponse}.
+     */
+    @Override
+    public void retrieveChatSettingsByUserId(RetrieveChatSettingsByUserIdRequest request,
+                                             StreamObserver<ChatSettingsResponse> responseObserver) {
+        ChatSettings chatSettings = this.chatSettingsService.retrieveOrCreateChatSettingsIfNotExistsByUserId(request.getUserId());
+
+        responseObserver.onNext(ChatSettingsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setChatSettings(this.chatSettingsMessageFactory.valueOf(chatSettings))
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Updates the chat settings by user id.
+     *
+     * @param request          {@link UpdateChatSettingsRequest}.
+     * @param responseObserver {@link ChatSettingsResponse}.
+     */
+    @Override
+    public void updateChatSettingsByUserId(UpdateChatSettingsRequest request,
+                                           StreamObserver<ChatSettingsResponse> responseObserver) {
+        ChatSettings chatSettings = this.chatSettingsService.retrieveOrCreateChatSettingsIfNotExistsByUserId(request.getUserId());
+
+        if (request.hasDisplayPaymentMessage()) {
+            chatSettings.setDisplayPaymentMessage(request.getDisplayPaymentMessage().getValue());
+        }
+
+        this.chatSettingsService.update(chatSettings);
+
+        ChatSettingsResponse response = ChatSettingsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                .setChatSettings(this.chatSettingsMessageFactory.valueOf(chatSettings))
+                .build();
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
 }
