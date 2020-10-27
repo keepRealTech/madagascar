@@ -5590,6 +5590,9 @@ components:
         priceInCents:
           type: integer
           format: int64
+        quantity:
+          type: integer
+          format: int64
         image:
           type: string
     SupportHistoryDTO:
