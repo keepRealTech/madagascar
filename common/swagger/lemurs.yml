@@ -2665,7 +2665,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IncomeSupportsResponse'
-  /api/v1/income/Monthly:
+  /api/v1/income/currentMonth:
     get:
       tags:
         - Income
@@ -2676,8 +2676,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MonthlySupportResponse'
-  /api/v1/income/detailList:
+                $ref: '#/components/schemas/CurrentMonthSupportResponse'
+  /api/v1/income/monthly:
     get:
       tags:
         - Income
@@ -2688,7 +2688,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IncomeMonthResponse'
+                $ref: '#/components/schemas/IncomeMonthlyResponse'
   /api/v1/income/detailByCondition:
     get:
       parameters:
@@ -6073,16 +6073,31 @@ components:
         amountInCents:
           type: integer
           format: int64
-    MonthlySupportResponse:
+    CurrentMonthSupportResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
             data:
-              type: array
-              items:
-                $ref: '#/components/schemas/MonthlySupportDTO'
-    MonthlySupportDTO:
+              $ref: '#/components/schemas/CurrentMonthSupportDTO'
+    CurrentMonthSupportDTO:
+      type: object
+      properties:
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupportMembershipDTO'
+        support:
+          type: object
+          properties:
+            name:
+              type: string
+            supportCount:
+              type: integer
+            income:
+              type: integer
+              format: int64
+    SupportMembershipDTO:
       type: object
       properties:
         id:
@@ -6099,7 +6114,7 @@ components:
         income:
           type: integer
           format: int64
-    IncomeMonthResponse:
+    IncomeMonthlyResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -6107,8 +6122,8 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/IncomeMonthDTO'
-    IncomeMonthDTO:
+                $ref: '#/components/schemas/IncomeMonthlyDTO'
+    IncomeMonthlyDTO:
       type: object
       properties:
         monthTimestamp:
