@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.MembershipApi;
+import swagger.model.DeactivateMembershipRequest;
 import swagger.model.DummyResponse;
 import swagger.model.FeedMembershipsResponse;
 import swagger.model.MembershipResponse;
@@ -151,13 +152,8 @@ public class MembershipController implements MembershipApi {
      * @return {@link DummyResponse}.
      */
     @Override
-    public ResponseEntity<DummyResponse> apiV1MembershipsIdDeactivatePut(String id) {
-        String userId = HttpContextUtils.getUserIdFromContext();
-        membershipService.deactivateMembershipById(id, userId);
-
-        DummyResponse response = new DummyResponse();
-        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+    public ResponseEntity<DummyResponse> apiV1MembershipsIdDeactivatePut(String id, @Valid DeactivateMembershipRequest deactivateMembershipRequest) {
+        return null;
     }
 
     /**
