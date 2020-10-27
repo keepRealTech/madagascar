@@ -5593,7 +5593,7 @@ components:
         quantity:
           type: integer
           format: int64
-        image:
+        imageUri:
           type: string
     SupportHistoryDTO:
       type: object
