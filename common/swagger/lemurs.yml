@@ -5721,6 +5721,7 @@ components:
           $ref: '#/components/schemas/SponsorSkuDTOV2'
         count:
           type: integer
+          format: int64
     SponsorshipDTO:
       type: object
       properties:
