@@ -1302,6 +1302,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupportSkusResponse'
+  /api/v1.1/islands/{id}/support/skus:
+    parameters:
+      - $ref: "#/components/parameters/idInPath"
+    get:
+      tags:
+        - Sku
+      summary: 获得支持一下商品信息
+      responses:
+        '200':
+          description: skus
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportSkusResponseV2'
   /api/v1/islands/{id}/memberships:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2185,6 +2199,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupportsResponse'
+  /api/v1.1/islands/{id}/support:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Support
+      summary: 获得支持商品信息
+      responses:
+        '200':
+          description: retrieve video/audio url
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportsResponseV2'
+  /api/v1/islands/{id}/supportHistory:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+      - $ref: '#/components/parameters/supportHistorySize'
+    get:
+      tags:
+        - Support
+      summary: 获得支持一下历史
+      responses:
+        '200':
+          description: support history response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportHistoryResponse'
   /api/v1/islands/{id}/support/iosPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2337,6 +2380,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/supportGiftList:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Support
+      summary: 获取支持一下礼物图片列表
+      responses:
+        '200':
+          description: support gift images response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportGiftListResponse'
+  /api/v1/islands/{id}/supportSetting:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Support
+      summary: 获取支持一下信息
+      responses:
+        '200':
+          description: support setting response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportSettingResponse'
+    put:
+      tags:
+        - Support
+      summary: 修改支持一下信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutSupportSettingRequest'
+      responses:
+        '200':
+          description: support setting response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleSupportSettingResponse'
+
   /api/v1/feeds/public:
     get:
       parameters:
@@ -2650,6 +2739,16 @@ components:
         type: integer
         minimum: 1
         maximum: 3000
+        default: 10
+    supportHistorySize:
+      in: query
+      name: size
+      description: size of a support history
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 338
         default: 10
     islandidInPath:
       in: query
@@ -5483,6 +5582,23 @@ components:
           format: int64
         isDefault:
           type: boolean
+    SponsorSkuDTOV2:
+      type: object
+      properties:
+        id:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
+        image:
+          type: string
+    SupportHistoryDTO:
+      type: object
+      properties:
+        supporterName:
+          type: string
+        image:
+          type: string
     SupportSkusDTO:
       type: object
       properties:
@@ -5492,6 +5608,37 @@ components:
             $ref: '#/components/schemas/SponsorSkuDTO'
         customizedSku:
           $ref: '#/components/schemas/SponsorSkuDTO'
+    SupportSkusDTOV2:
+      type: object
+      properties:
+        hostSupport:
+          $ref: '#/components/schemas/HostSupportDTO'
+        sponsorSkus:
+          type: array
+          items:
+            $ref: '#/components/schemas/SponsorSkuDTOV2'
+        customizedSku:
+          $ref: '#/components/schemas/SponsorSkuDTOV2'
+        count:
+          type: integer
+    HostSupportDTO:
+      type: object
+      properties:
+        supportId:
+          type: string
+        hostName:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        pricePerUnit:
+          type: string
+    HostSupportImageDTO:
+      type: object
+      properties:
+        image:
+          type: string
     SupportSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -5499,6 +5646,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportSkusDTO'
+    SupportSkusResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportSkusDTOV2'
     SponsorDTO:
       type: object
       properties:
@@ -5515,6 +5669,17 @@ components:
             $ref: '#/components/schemas/MembershipDTO'
         sponsors:
           $ref: '#/components/schemas/SponsorDTO'
+    SupportDTOV2:
+      type: object
+      properties:
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/MembershipDTO'
+        sponsors:
+          type: array
+          items:
+            $ref: '#/components/schemas/HostSupportDTO'
     SupportsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -5522,6 +5687,22 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportDTO'
+    SupportHistoryResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SupportHistoryDTO'
+    SupportsResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportDTOV2'
     PostSupportRequest:
       type: object
       properties:
@@ -5808,6 +5989,19 @@ components:
         totalSupporterNum:
           type: integer
           format: int64
+    PutSupportSettingRequest:
+      type: object
+      properties:
+        supportId:
+          type: string
+        hostName:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        pricePerUnit:
+          type: string
     SupportTargetsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -5824,3 +6018,31 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportTargetDTO'
+    SupportGiftListResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: string
+    SupportSettingResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                support:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/HostSupportDTO'
+    SingleSupportSettingResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/HostSupportDTO'
