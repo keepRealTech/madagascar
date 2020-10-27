@@ -5634,11 +5634,6 @@ components:
           type: string
         pricePerUnit:
           type: string
-    HostSupportImageDTO:
-      type: object
-      properties:
-        image:
-          type: string
     SupportSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
