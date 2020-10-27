@@ -1302,13 +1302,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupportSkusResponse'
-  /api/v2/islands/{id}/support/skus:
+  /api/v2/islands/{id}/sponsors/skus:
     parameters:
       - $ref: "#/components/parameters/idInPath"
     get:
       tags:
         - Sku
-      summary: 获得支持一下商品信息
+      summary: 获得赞助商品信息
       responses:
         '200':
           description: skus
@@ -2199,13 +2199,13 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupportsResponse'
-  /api/v1.1/islands/{id}/support:
+  /api/v2/islands/{id}/support:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
       tags:
         - Support
-      summary: 获得支持商品信息
+      summary: 获得支持内容信息
       responses:
         '200':
           description: island home membership and support response
@@ -2213,22 +2213,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupportsResponseV2'
-  /api/v1/islands/{id}/support/history:
+  /api/v1/islands/{id}/sponsors/history:
     parameters:
       - $ref: '#/components/parameters/idInPath'
-      - $ref: '#/components/parameters/supportHistorySize'
+      - $ref: '#/components/parameters/sponsorPageSize'
     get:
       tags:
         - Support
-      summary: 获得支持一下历史
+      summary: 获得赞助历史
       responses:
         '200':
-          description: support history response
+          description: sponsor history response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupportHistoryResponse'
+                $ref: '#/components/schemas/SponsorHistoryResponse'
   /api/v1/islands/{id}/support/iosPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
+      tags:
+        - Payment
+      summary: 支持一下 H5跳转地址
+      responses:
+        '200':
+          description: H5 跳转地址
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5RedirectResponse'
+  /api/v2/islands/{id}/sponsors/iosPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
@@ -2264,7 +2280,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v2/islands/{id}/sponsors/wechatPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下微信支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSupportRequest'
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
   /api/v1/islands/{id}/support/alipay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下支付宝支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSupportRequest'
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayOrderResponse'
+  /api/v2/islands/{id}/sponsors/alipay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
@@ -2306,7 +2362,49 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v2/islands/{id}/sponsors/wechatPay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      parameters:
+        - $ref: '#/components/parameters/sceneTypeInQuery'
+      tags:
+        - Payment
+      summary: 支持一下h5微信支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSupportRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5WechatOrderResponse'
   /api/v1/islands/{id}/support/alipay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下h5微信支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayH5PostSupportRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayOrderResponse'
+  /api/v2/islands/{id}/sponsors/alipay/html5:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
@@ -2380,7 +2478,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
-  /api/v1/islands/{id}/support/gifts:
+  /api/v1/islands/{id}/sponsors/gifts:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
@@ -2393,21 +2491,21 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupportGiftListResponse'
-  /api/v1/islands/{id}/support/setting:
+                $ref: '#/components/schemas/SponsorGiftsResponse'
+  /api/v1/islands/{id}/sponsors:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
       tags:
         - Support
-      summary: 获取支持一下信息
+      summary: 获取赞助信息
       responses:
         '200':
           description: support setting response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupportSettingResponse'
+                $ref: '#/components/schemas/SponsorshipResponse'
     put:
       tags:
         - Support
@@ -2417,15 +2515,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PutSupportSettingRequest'
+              $ref: '#/components/schemas/PutSponsorRequest'
       responses:
         '200':
           description: support setting response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SupportSettingResponse'
-
+                $ref: '#/components/schemas/SponsorshipResponse'
   /api/v1/feeds/public:
     get:
       parameters:
@@ -2740,7 +2837,7 @@ components:
         minimum: 1
         maximum: 3000
         default: 10
-    supportHistorySize:
+    sponsorPageSize:
       in: query
       name: size
       description: size of a support history
@@ -5595,7 +5692,7 @@ components:
           format: int64
         imageUri:
           type: string
-    SupportHistoryDTO:
+    SponsorHistoryDTO:
       type: object
       properties:
         name:
@@ -5614,8 +5711,8 @@ components:
     SupportSkusDTOV2:
       type: object
       properties:
-        supportSetting:
-          $ref: '#/components/schemas/HostSupportDTO'
+        sponsor:
+          $ref: '#/components/schemas/SponsorshipDTO'
         sponsorSkus:
           type: array
           items:
@@ -5624,7 +5721,7 @@ components:
           $ref: '#/components/schemas/SponsorSkuDTOV2'
         count:
           type: integer
-    HostSupportDTO:
+    SponsorshipDTO:
       type: object
       properties:
         host:
@@ -5673,9 +5770,7 @@ components:
           items:
             $ref: '#/components/schemas/MembershipDTO'
         sponsors:
-          type: array
-          items:
-            $ref: '#/components/schemas/HostSupportDTO'
+          $ref: '#/components/schemas/SponsorshipDTO'
     SupportsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -5683,7 +5778,7 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportDTO'
-    SupportHistoryResponse:
+    SponsorHistoryResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -5691,7 +5786,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/SupportHistoryDTO'
+                $ref: '#/components/schemas/SponsorHistoryDTO'
     SupportsResponseV2:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -5985,7 +6080,7 @@ components:
         totalSupporterNum:
           type: integer
           format: int64
-    PutSupportSettingRequest:
+    PutSponsorRequest:
       type: object
       properties:
         description:
@@ -6010,7 +6105,7 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportTargetDTO'
-    SupportGiftListResponse:
+    SponsorGiftsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -6019,10 +6114,10 @@ components:
               type: array
               items:
                 type: string
-    SupportSettingResponse:
+    SponsorshipResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/HostSupportDTO'
+              $ref: '#/components/schemas/SponsorshipDTO'
