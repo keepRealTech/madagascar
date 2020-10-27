@@ -664,6 +664,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FullFeedResponse'
+    put:
+      tags:
+        - Feed
+      summary: update a feed by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutFeedRequest'
+      responses:
+        '200':
+          description: brief feed response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
     delete:
       tags:
         - Feed
@@ -3830,6 +3847,15 @@ components:
           items:
             $ref: '#/components/schemas/MultiMediaDTO'
         feedGroupId:
+          type: string
+    PutFeedRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        text:
+          type: string
+        brief:
           type: string
     PostIslandFeedRequest:
       type: object
