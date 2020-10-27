@@ -680,7 +680,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DummyResponse'
+                $ref: '#/components/schemas/FeedResponse'
     delete:
       tags:
         - Feed
