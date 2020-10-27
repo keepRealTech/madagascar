@@ -2652,6 +2652,9 @@ paths:
                 $ref: '#/components/schemas/IncomeProfileResponse'
   /api/v1/income/supportList:
     get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
       tags:
         - Income
       summary: 支持榜列表
@@ -2662,7 +2665,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IncomeSupportsResponse'
-  /api/v1/income/currentMonth:
+  /api/v1/income/Monthly:
     get:
       tags:
         - Income
@@ -2673,7 +2676,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CurrentMonthSupportResponse'
+                $ref: '#/components/schemas/MonthlySupportResponse'
   /api/v1/income/detailList:
     get:
       tags:
@@ -2688,6 +2691,11 @@ paths:
                 $ref: '#/components/schemas/IncomeMonthResponse'
   /api/v1/income/detailByCondition:
     get:
+      parameters:
+        - $ref: '#/components/parameters/timestampInQuery'
+        - $ref: '#/components/parameters/membershipIdOptionalInQuery'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
       tags:
         - Income
       summary: 收入概况-明细（按月查询或按会员查询）
@@ -2904,6 +2912,19 @@ components:
       required: true
       schema:
         type: string
+    membershipIdOptionalInQuery:
+      in: query
+      name: membershipId
+      required: false
+      schema:
+        type: string
+    timestampInQuery:
+      in: query
+      name: timestamp
+      required: false
+      schema:
+        type: integer
+        format: int64
     sceneIdInQuery:
       in: query
       name: sceneId
@@ -4892,7 +4913,7 @@ components:
           type: string
         isPermanent:
           type: boolean
-        isActivity:
+        isActive:
           type: boolean
     MembershipDTO:
       allOf:
@@ -6038,6 +6059,8 @@ components:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
             data:
               type: array
               items:
@@ -6045,16 +6068,12 @@ components:
     IncomeSupportDTO:
       type: object
       properties:
-        userId:
-          type: string
-        nickname:
-          type: string
-        portraitImageUri:
-          type: string
-        cents:
-          type: string
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        amountInCents:
+          type: integer
           format: int64
-    CurrentMonthSupportResponse:
+    MonthlySupportResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
@@ -6062,8 +6081,8 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/CurrentMonthSupportDTO'
-    CurrentMonthSupportDTO:
+                $ref: '#/components/schemas/MonthlySupportDTO'
+    MonthlySupportDTO:
       type: object
       properties:
         id:
@@ -6073,6 +6092,8 @@ components:
         priceInMonth:
           type: integer
           format: int64
+        isPermanent:
+          type: boolean
         supportCount:
           type: integer
         income:
@@ -6090,7 +6111,7 @@ components:
     IncomeMonthDTO:
       type: object
       properties:
-        timestamp:
+        monthTimestamp:
           type: integer
           format: int64
         currentMonthIncome:
@@ -6103,6 +6124,8 @@ components:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
             data:
               type: array
               items:
@@ -6110,14 +6133,10 @@ components:
     IncomeDetailsDTO:
       type: object
       properties:
-        userId:
-          type: string
-        nickname:
-          type: string
-        portraitImageUri:
-          type: string
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
         content:
           type: string
-        cents:
+        amountInCents:
           type: integer
           format: int64
