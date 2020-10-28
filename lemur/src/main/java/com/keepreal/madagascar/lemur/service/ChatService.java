@@ -3,6 +3,8 @@ package com.keepreal.madagascar.lemur.service;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.asity.ChatServiceGrpc;
+import com.keepreal.madagascar.asity.ChatSettingsMessage;
+import com.keepreal.madagascar.asity.ChatSettingsResponse;
 import com.keepreal.madagascar.asity.ChatgroupMembersResponse;
 import com.keepreal.madagascar.asity.ChatgroupMembershipCountResponse;
 import com.keepreal.madagascar.asity.ChatgroupMessage;
@@ -16,11 +18,13 @@ import com.keepreal.madagascar.asity.JoinChatgroupRequest;
 import com.keepreal.madagascar.asity.RegisterRequest;
 import com.keepreal.madagascar.asity.RegisterResponse;
 import com.keepreal.madagascar.asity.RetrieveChatAccessByIslandIdRequest;
+import com.keepreal.madagascar.asity.RetrieveChatSettingsByUserIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupByIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembershipCountRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
+import com.keepreal.madagascar.asity.UpdateChatSettingsRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.UserChatgroupsResponse;
 import com.keepreal.madagascar.common.CommonStatus;
@@ -166,7 +170,11 @@ public class ChatService {
      * @param bulletin      Bulletin.
      * @return {@link ChatgroupMessage}.
      */
-    public ChatgroupMessage createChatgroup(String islandId, String userId, String name, List<String> membershipIds, String bulletin) {
+    public ChatgroupMessage createChatgroup(String islandId,
+                                            String userId,
+                                            String name,
+                                            List<String> membershipIds,
+                                            String bulletin) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
 
         CreateChatgroupRequest request = CreateChatgroupRequest.newBuilder()
@@ -234,7 +242,12 @@ public class ChatService {
      * @param muted         Muted.
      * @return {@link ChatgroupMessage}.
      */
-    public ChatgroupMessage updateChatgroup(String id, String userId, String name, List<String> membershipIds, String bulletin, Boolean muted) {
+    public ChatgroupMessage updateChatgroup(String id,
+                                            String userId,
+                                            String name,
+                                            List<String> membershipIds,
+                                            String bulletin,
+                                            Boolean muted) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
 
         UpdateChatgroupRequest.Builder requestBuilder = UpdateChatgroupRequest.newBuilder()
@@ -341,10 +354,10 @@ public class ChatService {
     /**
      * Retrieves chatgroups by island id.
      *
-     * @param islandId          Island id.
-     * @param userId            User id.
-     * @param page              Page index.
-     * @param pageSize          Page size.
+     * @param islandId Island id.
+     * @param userId   User id.
+     * @param page     Page index.
+     * @param pageSize Page size.
      * @return {@link IslandChatgroupsResponse}.
      */
     public IslandChatgroupsResponse retrieveChatgroupsByIslandId(String islandId,
@@ -419,7 +432,10 @@ public class ChatService {
      * @param userId  User id.
      * @return {@link ChatgroupMembersResponse}.
      */
-    public ChatgroupMembersResponse retrieveChatgroupMembersByGroupId(String groupId, String userId, Integer page, Integer pageSize) {
+    public ChatgroupMembersResponse retrieveChatgroupMembersByGroupId(String groupId,
+                                                                      String userId,
+                                                                      Integer page,
+                                                                      Integer pageSize) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
 
         RetrieveChatgroupMembersByGroupIdRequest request = RetrieveChatgroupMembersByGroupIdRequest.newBuilder()
@@ -452,7 +468,7 @@ public class ChatService {
      * Retrieve chatgroup membership count.
      *
      * @param membershipIds membership id list.
-     * @return  chatgroup count.
+     * @return chatgroup count.
      */
     public Integer retrieveChatgroupMembershipCount(List<String> membershipIds) {
         ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
@@ -480,6 +496,76 @@ public class ChatService {
         }
 
         return response.getChatgroupCount();
+    }
+
+    /**
+     * Retrieves the chat settings by user id.
+     *
+     * @param userId User id.
+     * @return {@link ChatSettingsMessage}.
+     */
+    public ChatSettingsMessage retrieveChatSettingsByUserId(String userId) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        RetrieveChatSettingsByUserIdRequest request = RetrieveChatSettingsByUserIdRequest.newBuilder()
+                .setUserId(userId)
+                .build();
+
+        ChatSettingsResponse response;
+        try {
+            response = stub.retrieveChatSettingsByUserId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve chat settings returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getChatSettings();
+    }
+
+    /**
+     * Updates the chat settings by user id.
+     *
+     * @param userId                User id.
+     * @param displayPaymentMessage Whether displays supporter messages.
+     * @return {@link ChatSettingsMessage}.
+     */
+    public ChatSettingsMessage updateChatSettingsByUserId(String userId, Boolean displayPaymentMessage) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        UpdateChatSettingsRequest.Builder requestBuilder = UpdateChatSettingsRequest.newBuilder()
+                .setUserId(userId);
+
+        if (Objects.nonNull(displayPaymentMessage)) {
+            requestBuilder.setDisplayPaymentMessage(BoolValue.of(displayPaymentMessage));
+        }
+
+        ChatSettingsResponse response;
+        try {
+            response = stub.updateChatSettingsByUserId(requestBuilder.build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Update chat settings returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getChatSettings();
     }
 
     /**

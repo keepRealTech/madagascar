@@ -81,7 +81,7 @@ public class ChatgroupService {
                 .chatgroupMemberships(membershipSet)
                 .bulletin(bulletin)
                 .build();
-        chatgroup = this.upsert(chatgroup);
+        chatgroup = this.update(chatgroup);
 
         this.rongCloudService.createGroup(chatgroup.getId(), chatgroup.getName(), chatgroup.getHostId());
         return chatgroup;
@@ -113,7 +113,7 @@ public class ChatgroupService {
         this.rongCloudService.joinGroup(chatgroup.getId(), chatgroup.getName(), userId);
 
         chatgroup.setMemberCount(chatgroup.getMemberCount() + 1);
-        chatgroup = this.upsert(chatgroup);
+        chatgroup = this.update(chatgroup);
 
         return chatgroupMember;
     }
@@ -140,7 +140,7 @@ public class ChatgroupService {
     public void dismiss(Chatgroup chatgroup) {
         this.rongCloudService.dismissGroup(chatgroup.getId(), chatgroup.getHostId());
         chatgroup.setDeleted(true);
-        this.upsert(chatgroup);
+        this.update(chatgroup);
     }
 
     /**
@@ -149,7 +149,7 @@ public class ChatgroupService {
      * @param chatgroup {@link Chatgroup}.
      * @return {@link Chatgroup}.
      */
-    public Chatgroup upsert(Chatgroup chatgroup) {
+    public Chatgroup update(Chatgroup chatgroup) {
         return this.chatgroupRepository.save(chatgroup);
     }
 

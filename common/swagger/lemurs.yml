@@ -666,6 +666,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FullFeedResponse'
+    put:
+      tags:
+        - Feed
+      summary: update a feed by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutFeedRequest'
+      responses:
+        '200':
+          description: brief feed response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedResponse'
     delete:
       tags:
         - Feed
@@ -1324,6 +1341,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupportSkusResponse'
+  /api/v2/islands/{id}/sponsors/skus:
+    parameters:
+      - $ref: "#/components/parameters/idInPath"
+    get:
+      tags:
+        - Sku
+      summary: 获得赞助商品信息
+      responses:
+        '200':
+          description: skus
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorSkusResponse'
   /api/v1/islands/{id}/memberships:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1500,7 +1531,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatSettingResponse'
+                $ref: '#/components/schemas/ChatSettingsResponse'
     put:
       tags:
         - Chat
@@ -1517,7 +1548,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatSettingResponse'
+                $ref: '#/components/schemas/ChatSettingsResponse'
   /api/v1/users/{id}/chats:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -1938,27 +1969,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/mediaTypeInQuery'
         - $ref: '#/components/parameters/includeChargeableInQuery'
       tags:
         - Feed
       summary: 获得指定作品集中的动态内容
-      responses:
-        '200':
-          description: common response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FeedsResponse'
-  /api/v1/feedgroups/{id}/audios:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    get:
-      parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/pageSize'
-      tags:
-        - Feed
-      summary: 获得指定作品集中的音频内容
       responses:
         '200':
           description: common response
@@ -2259,7 +2274,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SupportsResponse'
+  /api/v2/islands/{id}/support:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Support
+      summary: 获得支持内容信息
+      responses:
+        '200':
+          description: island home membership and support response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportsResponseV2'
+  /api/v1/islands/{id}/sponsors/history:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+      - $ref: '#/components/parameters/sponsorPageSize'
+    get:
+      tags:
+        - Support
+      summary: 获得赞助历史
+      responses:
+        '200':
+          description: sponsor history response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorHistoryResponse'
   /api/v1/islands/{id}/support/iosPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      parameters:
+        - $ref: '#/components/parameters/versionInQuery'
+      tags:
+        - Payment
+      summary: 支持一下 H5跳转地址
+      responses:
+        '200':
+          description: H5 跳转地址
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5RedirectResponse'
+  /api/v2/islands/{id}/sponsors/iosPay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     get:
@@ -2295,6 +2355,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WechatOrderResponse'
+  /api/v2/islands/{id}/sponsors/wechatPay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下微信支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSponsorRequest'
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WechatOrderResponse'
   /api/v1/islands/{id}/support/alipay:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -2308,6 +2388,26 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PostSupportRequest'
+      responses:
+        '200':
+          description: wechat order
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayOrderResponse'
+  /api/v2/islands/{id}/sponsors/alipay:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下支付宝支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostSponsorRequest'
       responses:
         '200':
           description: wechat order
@@ -2337,10 +2437,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/H5WechatOrderResponse'
-  /api/v1/islands/{id}/support/alipay/html5:
+  /api/v2/islands/{id}/sponsors/wechatPay/html5:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
+      parameters:
+        - $ref: '#/components/parameters/sceneTypeInQuery'
       tags:
         - Payment
       summary: 支持一下h5微信支付渠道
@@ -2349,7 +2451,47 @@ paths:
         content:
           application/json:
             schema:
+              $ref: '#/components/schemas/PostSponsorRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/H5WechatOrderResponse'
+  /api/v1/islands/{id}/support/alipay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下h5支付宝支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
               $ref: '#/components/schemas/AlipayH5PostSupportRequest'
+      responses:
+        '200':
+          description: dummy response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlipayOrderResponse'
+  /api/v2/islands/{id}/sponsors/alipay/html5:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - Payment
+      summary: 支持一下h5支付宝支付渠道
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlipayH5PostSponsorRequest'
       responses:
         '200':
           description: dummy response
@@ -2411,6 +2553,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DummyResponse'
+  /api/v1/islands/{id}/sponsors/gifts:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Support
+      summary: 获取支持一下礼物图片列表
+      responses:
+        '200':
+          description: support gift images response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorGiftsResponse'
+  /api/v1/islands/{id}/sponsors:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    get:
+      tags:
+        - Support
+      summary: 获取赞助信息
+      responses:
+        '200':
+          description: support setting response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorshipResponse'
+    put:
+      tags:
+        - Support
+      summary: 修改支持一下信息
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutSponsorRequest'
+      responses:
+        '200':
+          description: support setting response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SponsorshipResponse'
   /api/v1/feeds/public:
     get:
       parameters:
@@ -2734,20 +2921,13 @@ components:
       required: true
       schema:
         type: string
-    vInQuery:
+    mediaTypeInQuery:
       in: query
-      name: v
-      description: v
+      name: type
+      description: 动态类型
       required: false
       schema:
-        type: string
-    osnInQuery:
-      in: query
-      name: osn
-      description: osn
-      required: false
-      schema:
-        type: string
+        $ref: '#/components/schemas/MultiMediaType'
     timestampAfter:
       in: query
       name: minTimestamp
@@ -2792,6 +2972,16 @@ components:
         type: integer
         minimum: 1
         maximum: 3000
+        default: 10
+    sponsorPageSize:
+      in: query
+      name: size
+      description: size of a support history
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 500
         default: 10
     islandidInPath:
       in: query
@@ -3920,6 +4110,15 @@ components:
             $ref: '#/components/schemas/MultiMediaDTO'
         feedGroupId:
           type: string
+    PutFeedRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        text:
+          type: string
+        brief:
+          type: string
     PostIslandFeedRequest:
       type: object
       properties:
@@ -4924,6 +5123,8 @@ components:
               type: integer
             isTop:
               type: boolean
+            imageUri:
+              type: string
     PostMembershipRequest:
       type: object
       properties:
@@ -4943,6 +5144,8 @@ components:
           type: string
         isPermanent:
           type: boolean
+        imageUri:
+          type: string
     PutMembershipRequest:
       type: object
       properties:
@@ -4962,6 +5165,8 @@ components:
           type: string
         isPermanent:
           type: boolean
+        imageUri:
+          type: string
     DeactivateMembershipRequest:
       type: object
       properties:
@@ -5671,6 +5876,26 @@ components:
           format: int64
         isDefault:
           type: boolean
+    SponsorSkuDTOV2:
+      type: object
+      properties:
+        id:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
+        quantity:
+          type: integer
+          format: int64
+        imageUri:
+          type: string
+    SponsorHistoryDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        uri:
+          type: string
     SupportSkusDTO:
       type: object
       properties:
@@ -5680,6 +5905,31 @@ components:
             $ref: '#/components/schemas/SponsorSkuDTO'
         customizedSku:
           $ref: '#/components/schemas/SponsorSkuDTO'
+    SponsorSkusDTO:
+      type: object
+      properties:
+        sponsor:
+          $ref: '#/components/schemas/SponsorshipDTO'
+        sponsorSkus:
+          type: array
+          items:
+            $ref: '#/components/schemas/SponsorSkuDTOV2'
+        customizedSku:
+          $ref: '#/components/schemas/SponsorSkuDTOV2'
+        count:
+          type: integer
+          format: int64
+    SponsorshipDTO:
+      type: object
+      properties:
+        host:
+          $ref: '#/components/schemas/BriefUserDTO'
+        description:
+          type: string
+        imageUri:
+          type: string
+        pricePerUnit:
+          type: string
     SupportSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -5687,6 +5937,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportSkusDTO'
+    SponsorSkusResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SponsorSkusDTO'
     SponsorDTO:
       type: object
       properties:
@@ -5703,6 +5960,15 @@ components:
             $ref: '#/components/schemas/MembershipDTO'
         sponsors:
           $ref: '#/components/schemas/SponsorDTO'
+    SupportDTOV2:
+      type: object
+      properties:
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/MembershipDTO'
+        sponsors:
+          $ref: '#/components/schemas/SponsorshipDTO'
     SupportsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -5710,6 +5976,22 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportDTO'
+    SponsorHistoryResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/SponsorHistoryDTO'
+    SupportsResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SupportDTOV2'
     PostSupportRequest:
       type: object
       properties:
@@ -5723,6 +6005,16 @@ components:
           format: int64
       required:
         - sponsorSkuId
+    PostSponsorRequest:
+      type: object
+      properties:
+        sponsorSkuId:
+          type: string
+        priceInCents:
+          type: integer
+          format: int64
+      required:
+        - sponsorSkuId
     AlipayH5PostSupportRequest:
       type: object
       properties:
@@ -5732,6 +6024,22 @@ components:
           type: integer
           format: int64
         priceInShells:
+          type: integer
+          format: int64
+        quitUrl:
+          type: string
+        returnUrl:
+          type: string
+      required:
+        - sponsorSkuId
+        - quitUrl
+        - returnUrl
+    AlipayH5PostSponsorRequest:
+      type: object
+      properties:
+        sponsorSkuId:
+          type: string
+        priceInCents:
           type: integer
           format: int64
         quitUrl:
@@ -5996,6 +6304,15 @@ components:
         totalSupporterNum:
           type: integer
           format: int64
+    PutSponsorRequest:
+      type: object
+      properties:
+        description:
+          type: string
+        imageUri:
+          type: string
+        pricePerUnit:
+          type: string
     SupportTargetsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -6012,9 +6329,27 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/SupportTargetDTO'
-    ChatSettingDTO:
+    SponsorGiftsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: string
+    SponsorshipResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/SponsorshipDTO'
+    ChatSettingsDTO:
       type: object
       properties:
+        userId:
+          type: string
         displayPaymentMessage:
           type: boolean
     PutChatSettingRequest:
@@ -6022,13 +6357,13 @@ components:
       properties:
         displayPaymentMessage:
           type: boolean
-    ChatSettingResponse:
+    ChatSettingsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
             data:
-              $ref: '#/components/schemas/ChatSettingDTO'
+              $ref: '#/components/schemas/ChatSettingsDTO'
     IncomeProfileResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

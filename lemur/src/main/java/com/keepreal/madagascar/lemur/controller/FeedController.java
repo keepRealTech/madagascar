@@ -544,6 +544,7 @@ public class FeedController implements FeedApi {
      * @param id                id (required) Feed group id.
      * @param page              page number (optional, default to 0) Page.
      * @param pageSize          size of a page (optional, default to 10) Page size.
+     * @param type              {@link MultiMediaType}.
      * @param includeChargeable Whether includes chargeable.
      * @return {@link FeedsResponse}.
      */
@@ -551,6 +552,7 @@ public class FeedController implements FeedApi {
     public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedgroupsIdFeedsGet(String id,
                                                                                  Integer page,
                                                                                  Integer pageSize,
+                                                                                 MultiMediaType type,
                                                                                  Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedGroupFeedsResponse feedGroupFeedsResponse = this.feedGroupService.retrieveFeedGroupFeeds(id, userId, page, pageSize);
