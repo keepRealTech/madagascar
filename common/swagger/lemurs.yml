@@ -1961,27 +1961,11 @@ paths:
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/pageSize'
+        - $ref: '#/components/parameters/mediaTypeInQuery'
         - $ref: '#/components/parameters/includeChargeableInQuery'
       tags:
         - Feed
       summary: 获得指定作品集中的动态内容
-      responses:
-        '200':
-          description: common response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/FeedsResponse'
-  /api/v1/feedgroups/{id}/audios:
-    parameters:
-      - $ref: '#/components/parameters/idInPath'
-    get:
-      parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/pageSize'
-      tags:
-        - Feed
-      summary: 获得指定作品集中的音频内容
       responses:
         '200':
           description: common response
@@ -2861,20 +2845,13 @@ components:
       required: true
       schema:
         type: string
-    vInQuery:
+    mediaTypeInQuery:
       in: query
-      name: v
-      description: v
+      name: type
+      description: 动态类型
       required: false
       schema:
-        type: string
-    osnInQuery:
-      in: query
-      name: osn
-      description: osn
-      required: false
-      schema:
-        type: string
+        $ref: '#/components/schemas/MultiMediaType'
     timestampAfter:
       in: query
       name: minTimestamp
