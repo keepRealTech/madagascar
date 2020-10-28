@@ -51,6 +51,8 @@ tags:
     description: 支持一下 controller
   - name: Activity
     description: 活动 controller
+  - name: Income
+    description: 收入 controller
 
 paths:
   /api/healthcheck:
@@ -1478,6 +1480,12 @@ paths:
       tags:
         - Membership
       summary: deletes a membership by id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeactivateMembershipRequest'
       responses:
         '200':
           description: common response
@@ -2817,6 +2825,74 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FullFeedResponse'
+  /api/v1/income/profile:
+    get:
+      tags:
+        - Income
+      summary: 收入概况
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeProfileResponse'
+  /api/v1/income/supportList:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Income
+      summary: 支持榜列表
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeSupportsResponse'
+  /api/v1/income/currentMonth:
+    get:
+      tags:
+        - Income
+      summary: 本月支持详情
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentMonthSupportResponse'
+  /api/v1/income/monthly:
+    get:
+      tags:
+        - Income
+      summary: 收入概况-明细
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeMonthlyResponse'
+  /api/v1/income/detailByCondition:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/timestampInQuery'
+        - $ref: '#/components/parameters/membershipIdOptionalInQuery'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - Income
+      summary: 收入概况-明细（按月查询或按会员查询）
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeDetailsResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -3026,6 +3102,19 @@ components:
       required: true
       schema:
         type: string
+    membershipIdOptionalInQuery:
+      in: query
+      name: membershipId
+      required: false
+      schema:
+        type: string
+    timestampInQuery:
+      in: query
+      name: timestamp
+      required: false
+      schema:
+        type: integer
+        format: int64
     sceneIdInQuery:
       in: query
       name: sceneId
@@ -5023,6 +5112,8 @@ components:
           type: string
         isPermanent:
           type: boolean
+        isActive:
+          type: boolean
     MembershipDTO:
       allOf:
         - $ref: '#/components/schemas/BriefMembershipDTO'
@@ -5076,6 +5167,11 @@ components:
           type: boolean
         imageUri:
           type: string
+    DeactivateMembershipRequest:
+      type: object
+      properties:
+        isDeactivate:
+          type: boolean
     MembershipResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -6268,3 +6364,129 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ChatSettingsDTO'
+    IncomeProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/IncomeProfileDTO'
+    IncomeProfileDTO:
+      type: object
+      properties:
+        totalIncome:
+          type: integer
+          format: int64
+        totalSupportCount:
+          type: integer
+        totalSubscriber:
+          type: integer
+        currentMonthIncome:
+          type: integer
+          format: int64
+        currentMonthSupportCount:
+          type: integer
+        nextMonthIncome:
+          type: integer
+          format: int64
+    IncomeSupportsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/IncomeSupportDTO'
+    IncomeSupportDTO:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        amountInCents:
+          type: integer
+          format: int64
+    CurrentMonthSupportResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/CurrentMonthSupportDTO'
+    CurrentMonthSupportDTO:
+      type: object
+      properties:
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/SupportMembershipDTO'
+        support:
+          type: object
+          properties:
+            name:
+              type: string
+            supportCount:
+              type: integer
+            income:
+              type: integer
+              format: int64
+    SupportMembershipDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        priceInMonth:
+          type: integer
+          format: int64
+        isPermanent:
+          type: boolean
+        supportCount:
+          type: integer
+        income:
+          type: integer
+          format: int64
+    IncomeMonthlyResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/IncomeMonthlyDTO'
+    IncomeMonthlyDTO:
+      type: object
+      properties:
+        monthTimestamp:
+          type: integer
+          format: int64
+        currentMonthIncome:
+          type: integer
+          format: int64
+        supportCount:
+          type: integer
+    IncomeDetailsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/IncomeDetailsDTO'
+    IncomeDetailsDTO:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/BriefUserDTO'
+        content:
+          type: string
+        amountInCents:
+          type: integer
+          format: int64
