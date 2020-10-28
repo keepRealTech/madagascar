@@ -178,6 +178,10 @@ enum MediaType {
     MEDIA_QUESTION = 7;
 }
 
+message MediaTypeValue {
+    MediaType value = 1;
+}
+
 enum PaymentState {
     PAYMENT_STATE_NONE = 0;
     PAYMENT_STATE_OPEN = 1;

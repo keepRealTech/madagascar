@@ -2291,7 +2291,8 @@ paths:
   /api/v1/islands/{id}/sponsors/history:
     parameters:
       - $ref: '#/components/parameters/idInPath'
-      - $ref: '#/components/parameters/sponsorPageSize'
+      - $ref: '#/components/parameters/page'
+      - $ref: '#/components/parameters/pageSize'
     get:
       tags:
         - Support
@@ -2973,16 +2974,6 @@ components:
         type: integer
         minimum: 1
         maximum: 3000
-        default: 10
-    sponsorPageSize:
-      in: query
-      name: size
-      description: size of a support history
-      required: true
-      schema:
-        type: integer
-        minimum: 1
-        maximum: 500
         default: 10
     islandidInPath:
       in: query
@@ -5903,15 +5894,15 @@ components:
         quantity:
           type: integer
           format: int64
-        imageUri:
-          type: string
+        gift:
+          $ref: '#/components/schemas/GiftImageDTO'
     SponsorHistoryDTO:
       type: object
       properties:
         name:
           type: string
-        uri:
-          type: string
+        gift:
+          $ref: '#/components/schemas/GiftImageDTO'
     SupportSkusDTO:
       type: object
       properties:
@@ -5940,10 +5931,14 @@ components:
       properties:
         host:
           $ref: '#/components/schemas/BriefUserDTO'
+        defaultGifts:
+          type: array
+          items:
+            $ref: '#/components/schemas/GiftImageDTO'
         description:
           type: string
-        imageUri:
-          type: string
+        gift:
+          $ref: '#/components/schemas/GiftImageDTO'
         pricePerUnit:
           type: string
     SupportSkusResponse:
@@ -6325,7 +6320,7 @@ components:
       properties:
         description:
           type: string
-        imageUri:
+        giftId:
           type: string
         pricePerUnit:
           type: string
@@ -6353,7 +6348,7 @@ components:
             data:
               type: array
               items:
-                type: string
+                $ref: '#/components/schemas/GiftImageDTO'
     SponsorshipResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -6438,7 +6433,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SupportMembershipDTO'
-        support:
+        sponsor:
           type: object
           properties:
             name:
@@ -6509,3 +6504,16 @@ components:
         timestamp:
           type: integer
           format: int64
+    GiftImageDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        text:
+          type: string
+        uri:
+          type: string
+        emoji:
+          type: string
