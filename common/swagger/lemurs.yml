@@ -2880,6 +2880,7 @@ paths:
   /api/v1/income/detailByCondition:
     get:
       parameters:
+        - $ref: '#/components/parameters/incomeTypeInQuery'
         - $ref: '#/components/parameters/timestampInQuery'
         - $ref: '#/components/parameters/membershipIdOptionalInQuery'
         - $ref: '#/components/parameters/page'
@@ -3156,6 +3157,12 @@ components:
       schema:
         type: boolean
         default: false
+    incomeTypeInQuery:
+      in: query
+      name: type
+      required: true
+      schema:
+        $ref: '#/components/schemas/IncomeType'
   schemas:
     LoginType:
       type: string
@@ -3287,6 +3294,13 @@ components:
       enum:
         - NO_LIMIT
         - PER_MONTH
+    IncomeType:
+      type: string
+      enum:
+        - INCOME_MONTH
+        - INCOME_MEMBERSHIP
+        - INCOME_SUPPORT
+        - INCOME_FEED_CHARGE
     CommonResponse:
       type: object
       properties:
@@ -5078,6 +5092,8 @@ components:
           format: int64
         hasExpired:
           type: boolean
+        isActive:
+          type: boolean
     BriefMembershipDTO:
       type: object
       properties:
@@ -6427,6 +6443,16 @@ components:
             income:
               type: integer
               format: int64
+        feedCharge:
+          type: object
+          properties:
+            name:
+              type: string
+            supportCount:
+              type: integer
+            income:
+              type: integer
+              format: int64
     SupportMembershipDTO:
       type: object
       properties:
@@ -6483,6 +6509,9 @@ components:
         content:
           type: string
         amountInCents:
+          type: integer
+          format: int64
+        timestamp:
           type: integer
           format: int64
     GiftImageDTO:
