@@ -199,4 +199,5 @@ service FeedService {
     rpc UpdateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest) returns (UpdateFeedSaveAuthorityResponse) {};
     rpc UpdateFeedFeedgroupById(UpdateFeedFeedgroupRequest) returns (FeedGroupFeedResponse) {};
     rpc RetrieveMembershipFeeds(RetrieveMembershipFeedsRequest) returns (FeedsResponse) {};
+    rpc CreateFeed (NewFeedsRequestV2) returns (FeedResponse) {};
 }

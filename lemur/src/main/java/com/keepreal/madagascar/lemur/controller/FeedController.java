@@ -147,7 +147,7 @@ public class FeedController implements FeedApi {
                 .map(this.imageService::uploadSingleImage)
                 .collect(Collectors.toList());
 
-        this.feedService.createFeed(payload.getIslandIds(), payload.getMembershipIds(), userId, payload.getContent(), imageUris);
+        this.feedService.createFeeds(payload.getIslandIds(), payload.getMembershipIds(), userId, payload.getContent(), imageUris);
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -623,7 +623,7 @@ public class FeedController implements FeedApi {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
         }
 
-        this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(),
+        this.feedService.createFeedsV2(postFeedRequestV2.getIslandIds(),
                 postFeedRequestV2.getMembershipIds(),
                 userId,
                 MediaTypeConverter.convertToMediaType(mediaType),
@@ -648,22 +648,64 @@ public class FeedController implements FeedApi {
                                                                 PostIslandFeedRequest postIslandFeedRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
+        if (!this.islandService.checkIslandSubscription(id, userId)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_USER_NOT_SUBSCRIBED_ERROR);
+        }
+
+        switch (postIslandFeedRequest.getMediaType()) {
+            case PICS:
+                if (postIslandFeedRequest.getMultimedia().size() > 9) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+                }
+                break;
+            case ALBUM:
+                if (postIslandFeedRequest.getMultimedia().size() > 18) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+                }
+                break;
+            case VIDEO:
+            case AUDIO:
+                if (CollectionUtils.isEmpty(postIslandFeedRequest.getMultimedia()) ||
+                        StringUtils.isEmpty(postIslandFeedRequest.getMultimedia().get(0).getVideoId())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+                break;
+            case HTML:
+                if (StringUtils.isEmpty(postIslandFeedRequest.getText())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+                break;
+            case TEXT:
+                break;
+            default:
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
         if (!CollectionUtils.isEmpty(postIslandFeedRequest.getMembershipIds())
                 && postIslandFeedRequest.getPriceInCents() != null
                 && postIslandFeedRequest.getPriceInCents() > 0L) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
         }
 
-        this.feedService.createFeedV2(id,
+        FeedMessage feed = this.feedService.createFeed(id,
                 postIslandFeedRequest.getMembershipIds(),
                 userId,
                 MediaTypeConverter.convertToMediaType(postIslandFeedRequest.getMediaType()),
                 postIslandFeedRequest.getMultimedia(),
                 postIslandFeedRequest.getText(),
+                postIslandFeedRequest.getTitle(),
+                postIslandFeedRequest.getBrief(),
                 postIslandFeedRequest.getFeedGroupId(),
                 postIslandFeedRequest.getPriceInCents());
 
-        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        Map<String, List<MembershipMessage>> feedMembershipMap =
+                this.generateFeedMembershipMap(Collections.singletonList(feed));
+
+        FeedResponse response = new FeedResponse();
+        response.setData(this.feedDTOFactory.valueOf(feed,
+                feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList())));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
