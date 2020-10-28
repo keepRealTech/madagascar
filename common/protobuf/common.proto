@@ -125,6 +125,14 @@ enum UserPaymentType {
     PAYMENT_TYPE_FEED = 3;
 }
 
+enum IncomeDetailType {
+    INCOME_NONE = 0;
+    INCOME_MONTH = 1;
+    INCOME_MEMBERSHIP = 2;
+    INCOME_SUPPORT = 3;
+    INCOME_FEED_CHARGE = 4;
+}
+
 message GenderValue {
     Gender value = 1;
 }
