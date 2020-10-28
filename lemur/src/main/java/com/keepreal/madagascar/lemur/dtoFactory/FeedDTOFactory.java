@@ -152,6 +152,8 @@ public class FeedDTOFactory {
 
             FeedDTO feedDTO = new FeedDTO();
             feedDTO.setId(feed.getId());
+            feedDTO.setTitle(feed.getTitle());
+            feedDTO.setBrief(feed.getBrief());
             feedDTO.setText(feed.getText());
             feedDTO.setFromHost(feed.getFromHost());
             feedDTO.setLikesCount(feed.getLikesCount());
@@ -224,6 +226,8 @@ public class FeedDTOFactory {
 
             BriefFeedDTO briefFeedDTO = new BriefFeedDTO();
             briefFeedDTO.setId(feed.getId());
+            briefFeedDTO.setTitle(feed.getTitle());
+            briefFeedDTO.setBrief(feed.getBrief());
             briefFeedDTO.setText(feed.getText());
             briefFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
             briefFeedDTO.setCreatedAt(feed.getCreatedAt());
@@ -269,6 +273,8 @@ public class FeedDTOFactory {
 
         SnapshotFeedDTO snapshotFeedDTO = new SnapshotFeedDTO();
         snapshotFeedDTO.setId(feed.getId());
+        snapshotFeedDTO.setTitle(feed.getTitle());
+        snapshotFeedDTO.setBrief(feed.getBrief());
         snapshotFeedDTO.setText(feed.getText());
         snapshotFeedDTO.setImagesUris(feed.getImageUrisList());
         snapshotFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
@@ -360,6 +366,8 @@ public class FeedDTOFactory {
 
             FullFeedDTO fullFeedDTO = new FullFeedDTO();
             fullFeedDTO.setId(feed.getId());
+            fullFeedDTO.setTitle(feed.getTitle());
+            fullFeedDTO.setBrief(feed.getBrief());
             fullFeedDTO.setText(feed.getText());
             fullFeedDTO.setFromHost(feed.getFromHost());
             fullFeedDTO.setLikesCount(feed.getLikesCount());
