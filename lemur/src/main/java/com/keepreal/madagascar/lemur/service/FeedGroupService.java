@@ -4,6 +4,7 @@ import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.MediaType;
+import com.keepreal.madagascar.common.MediaTypeValue;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.DeleteFeedGroupByIdRequest;
@@ -287,7 +288,7 @@ public class FeedGroupService {
                 .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize));
 
         if (Objects.nonNull(type)) {
-            requestBuilder.setMediaType(type);
+            requestBuilder.setMediaType(MediaTypeValue.newBuilder().setValue(type).build());
         }
 
         FeedGroupFeedsResponse response;

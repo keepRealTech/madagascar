@@ -334,6 +334,17 @@ public class FeedInfoService {
     }
 
     /**
+     * Retrieves feeds by feed group id.
+     *
+     * @param feedGroupId Feed group id.
+     * @param pageable    {@link Pageable}.
+     * @return {@link FeedInfo}.
+     */
+    public Page<FeedInfo> retrieveFeedsByFeedGroupId(String feedGroupId, String mediaTypeVal, Pageable pageable) {
+        return this.feedInfoRepository.findAllByFeedGroupIdAndMultiMediaTypeAndDeletedIsFalseOrderByCreatedTimeDesc(feedGroupId, mediaTypeVal, pageable);
+    }
+
+    /**
      * top feed by feed id
      *
      * @param feedId feed id

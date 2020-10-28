@@ -34,7 +34,7 @@ message RetrieveFeedGroupContentByIdRequest {
   string id = 1;
   PageRequest pageRequest = 2;
   string userId = 3;
-  MediaType mediaType = 4;
+  MediaTypeValue mediaType = 4;
 }
 
 message RetrieveFeedGroupByIdRequest {

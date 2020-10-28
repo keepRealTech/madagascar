@@ -27,6 +27,8 @@ public interface FeedInfoRepository extends MongoRepository<FeedInfo, String> {
 
     Page<FeedInfo> findAllByFeedGroupIdAndDeletedIsFalseOrderByCreatedTimeDesc(String id, Pageable pageable);
 
+    Page<FeedInfo> findAllByFeedGroupIdAndMultiMediaTypeAndDeletedIsFalseOrderByCreatedTimeDesc(String id, String mediaType, Pageable pageable);
+
     FeedInfo findTopByIslandIdAndIsTopIsTrueAndDeletedIsFalse(String id);
 
 }
