@@ -5878,14 +5878,14 @@ components:
         quantity:
           type: integer
           format: int64
-        image:
+        gift:
           $ref: '#/components/schemas/GiftImageDTO'
     SponsorHistoryDTO:
       type: object
       properties:
         name:
           type: string
-        image:
+        gift:
           $ref: '#/components/schemas/GiftImageDTO'
     SupportSkusDTO:
       type: object
@@ -5915,13 +5915,13 @@ components:
       properties:
         host:
           $ref: '#/components/schemas/BriefUserDTO'
-        preset:
+        defaultGifts:
           type: array
           items:
-            $ref: '#/components/schemas/PreSetGiftDTO'
+            $ref: '#/components/schemas/GiftImageDTO'
         description:
           type: string
-        image:
+        gift:
           $ref: '#/components/schemas/GiftImageDTO'
         pricePerUnit:
           type: string
@@ -6304,7 +6304,7 @@ components:
       properties:
         description:
           type: string
-        imageId:
+        giftId:
           type: string
         pricePerUnit:
           type: string
@@ -6417,7 +6417,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SupportMembershipDTO'
-        support:
+        sponsor:
           type: object
           properties:
             name:
@@ -6490,16 +6490,11 @@ components:
       properties:
         id:
           type: string
+        name:
+          type: string
+        text:
+          type: string
         uri:
           type: string
         emoji:
-          type: string
-    PreSetGiftDTO:
-      type: object
-      properties:
-        name:
-          type: string
-        imageUri:
-          type: string
-        text:
           type: string
