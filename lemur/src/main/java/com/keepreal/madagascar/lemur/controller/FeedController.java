@@ -33,7 +33,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +50,7 @@ import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
 import swagger.model.PostFeedPayload;
 import swagger.model.PostFeedRequestV2;
+import swagger.model.PostIslandFeedRequest;
 import swagger.model.PutFeedFeedgroupRequest;
 import swagger.model.TimelinesResponse;
 import swagger.model.TopFeedRequest;
@@ -184,7 +184,6 @@ public class FeedController implements FeedApi {
      * @param includeChargeable Whether includes chargeable feeds.
      * @return {@link FullFeedResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<FullFeedResponse> apiV1FeedsIdGet(String id, Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -404,7 +403,6 @@ public class FeedController implements FeedApi {
      * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link swagger.model.FeedsResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<FeedsResponseV2> apiV12IslandsIdFeedsGet(String id,
                                                                    Boolean fromHost,
@@ -580,7 +578,6 @@ public class FeedController implements FeedApi {
      * @param postFeedRequestV2 (required)
      * @return {@link DummyResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<DummyResponse> apiV11FeedsPost(PostFeedRequestV2 postFeedRequestV2) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -620,7 +617,9 @@ public class FeedController implements FeedApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (!CollectionUtils.isEmpty(postFeedRequestV2.getMembershipIds()) && postFeedRequestV2.getPriceInCents() != null && postFeedRequestV2.getPriceInCents() > 0L) {
+        if (!CollectionUtils.isEmpty(postFeedRequestV2.getMembershipIds())
+                && postFeedRequestV2.getPriceInCents() != null
+                && postFeedRequestV2.getPriceInCents() > 0L) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
         }
 
@@ -638,12 +637,42 @@ public class FeedController implements FeedApi {
     }
 
     /**
+     * Implements the create feed on island.
+     *
+     * @param id                    id (required)      Island id.
+     * @param postIslandFeedRequest (required) {@link PostIslandFeedRequest}.
+     * @return {@link FeedResponse}.
+     */
+    @Override
+    public ResponseEntity<FeedResponse> apiV1IslandsIdFeedsPost(String id,
+                                                                PostIslandFeedRequest postIslandFeedRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (!CollectionUtils.isEmpty(postIslandFeedRequest.getMembershipIds())
+                && postIslandFeedRequest.getPriceInCents() != null
+                && postIslandFeedRequest.getPriceInCents() > 0L) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
+        this.feedService.createFeedV2(id,
+                postIslandFeedRequest.getMembershipIds(),
+                userId,
+                MediaTypeConverter.convertToMediaType(postIslandFeedRequest.getMediaType()),
+                postIslandFeedRequest.getMultimedia(),
+                postIslandFeedRequest.getText(),
+                postIslandFeedRequest.getFeedGroupId(),
+                postIslandFeedRequest.getPriceInCents());
+
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Implements the api for unsubscribed island feeds.
      *
      * @param id id (required) Island id.
      * @return {@link IslandFeedSnapshotResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<IslandFeedSnapshotResponse> apiV1IslandsIdFeedsSnapshotGet(String id) {
         Integer count = this.feedService.retrieveFeedCountByIslandId(id);

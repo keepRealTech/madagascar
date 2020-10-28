@@ -11,8 +11,6 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.vanga.BalanceMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.OrderApi;
 import swagger.model.AlipayCheckRequest;
@@ -76,7 +74,6 @@ public class OrderController implements OrderApi {
      * @param postWechatOrderRequest (required) {@link PostWechatOrderRequest}.
      * @return {@link WechatOrderResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<WechatOrderResponse> apiV1OrdersWechatPost(PostWechatOrderRequest postWechatOrderRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -96,7 +93,6 @@ public class OrderController implements OrderApi {
      * @param id id (required) Order id.
      * @return {@link WechatOrderResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<WechatOrderResponse> apiV1OrdersWechatIdCheckPost(String id) {
         WechatOrderMessage wechatOrderMessage = this.orderService.retrieveWechatOrderById(id);
@@ -114,7 +110,6 @@ public class OrderController implements OrderApi {
      * @param id id (required) Order id.
      * @return {@link AlipayOrderResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<AlipayOrderResponse> apiV1OrdersAlipayIdCheckPost(String id,
                                                                             AlipayCheckRequest alipayCheckRequest) {

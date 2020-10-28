@@ -27,6 +27,8 @@ public class FeedInfo {
     private String id;
     private String islandId;
     private String userId;
+    private String title;
+    private String brief;
     private String text;
     private String hostId;
     private Boolean fromHost;

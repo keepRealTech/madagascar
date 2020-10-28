@@ -32,12 +32,14 @@ message NewFeedsRequestV2 {
     google.protobuf.StringValue text = 6;
     google.protobuf.StringValue feedGroupId = 7;
     google.protobuf.Int64Value priceInCents = 8;
+    google.protobuf.StringValue title = 9;
+    google.protobuf.StringValue brief = 10;
     oneof message {
-        PicturesMessage pics = 9;
-        VideoMessage video = 10;
-        AudioMessage audio = 11;
-        HtmlMessage html = 12;
-        AnswerMessage question = 13;
+        PicturesMessage pics = 11;
+        VideoMessage video = 12;
+        AudioMessage audio = 13;
+        HtmlMessage html = 14;
+        AnswerMessage question = 15;
     }
 }
 

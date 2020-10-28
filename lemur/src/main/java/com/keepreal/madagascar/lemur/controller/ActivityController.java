@@ -11,7 +11,6 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ActivityApi;
 import swagger.model.ActivitiesResponse;
@@ -74,7 +73,6 @@ public class ActivityController implements ActivityApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @CrossOrigin
     @Override
     public ResponseEntity<BonusResponse> apiV1ActivitiesBonusGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
