@@ -6443,6 +6443,16 @@ components:
             income:
               type: integer
               format: int64
+        feedCharge:
+          type: object
+          properties:
+            name:
+              type: string
+            supportCount:
+              type: integer
+            income:
+              type: integer
+              format: int64
     SupportMembershipDTO:
       type: object
       properties:
