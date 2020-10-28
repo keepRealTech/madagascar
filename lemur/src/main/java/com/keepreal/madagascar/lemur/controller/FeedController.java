@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -555,7 +556,11 @@ public class FeedController implements FeedApi {
                                                                                  MultiMediaType type,
                                                                                  Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        FeedGroupFeedsResponse feedGroupFeedsResponse = this.feedGroupService.retrieveFeedGroupFeeds(id, userId, page, pageSize);
+        FeedGroupFeedsResponse feedGroupFeedsResponse = this.feedGroupService.retrieveFeedGroupFeeds(id,
+                userId,
+                this.convertMediaType(type),
+                page,
+                pageSize);
 
         Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(feedGroupFeedsResponse.getFeedList());
 
@@ -756,6 +761,37 @@ public class FeedController implements FeedApi {
         }
 
         return feedgroupMap;
+    }
+
+    /**
+     * Converts the {@link MultiMediaType} into {@link MediaType}.
+     *
+     * @param type {@link MultiMediaType}.
+     * @return {@link MediaType}.
+     */
+    private MediaType convertMediaType(MultiMediaType type) {
+        if (Objects.isNull(type)) {
+            return null;
+        }
+
+        switch (type) {
+            case HTML:
+                return MediaType.MEDIA_HTML;
+            case PICS:
+                return MediaType.MEDIA_PICS;
+            case TEXT:
+                return MediaType.MEDIA_TEXT;
+            case ALBUM:
+                return MediaType.MEDIA_ALBUM;
+            case AUDIO:
+                return MediaType.MEDIA_AUDIO;
+            case VIDEO:
+                return MediaType.MEDIA_VIDEO;
+            case QUESTION:
+                return MediaType.MEDIA_QUESTION;
+            default:
+                return MediaType.MEDIA_NONE;
+        }
     }
 
 }
