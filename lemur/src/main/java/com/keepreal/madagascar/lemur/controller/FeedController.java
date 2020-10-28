@@ -671,7 +671,8 @@ public class FeedController implements FeedApi {
                 }
                 break;
             case HTML:
-                if (StringUtils.isEmpty(postIslandFeedRequest.getText())) {
+                if (StringUtils.isEmpty(postIslandFeedRequest.getTitle())
+                        || StringUtils.isEmpty(postIslandFeedRequest.getBrief())) {
                     throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
                 }
                 break;

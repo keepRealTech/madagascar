@@ -208,6 +208,8 @@ public class FeedInfoService {
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
                 .setUserId(feedInfo.getUserId())
+                .setTitle(feedInfo.getTitle())
+                .setBrief(feedInfo.getBrief())
                 .setText(feedInfo.getText())
                 .addAllImageUris(feedInfo.getImageUrls() == null ? Collections.emptyList() : feedInfo.getImageUrls())
                 .setCreatedAt(feedInfo.getCreatedTime())
