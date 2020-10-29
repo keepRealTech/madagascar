@@ -208,8 +208,8 @@ public class FeedInfoService {
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
                 .setUserId(feedInfo.getUserId())
-                .setTitle(feedInfo.getTitle())
-                .setBrief(feedInfo.getBrief())
+                .setTitle(StringUtils.isEmpty(feedInfo.getTitle()) ? "" : feedInfo.getTitle())
+                .setBrief(StringUtils.isEmpty(feedInfo.getBrief()) ? "" : feedInfo.getBrief())
                 .setText(feedInfo.getText())
                 .addAllImageUris(feedInfo.getImageUrls() == null ? Collections.emptyList() : feedInfo.getImageUrls())
                 .setCreatedAt(feedInfo.getCreatedTime())
@@ -450,6 +450,9 @@ public class FeedInfoService {
             case MEDIA_HTML:
                 if (!feedInfo.getMediaInfos().isEmpty()) {
                     builder.setHtml(MediaMessageConvertUtils.toHtmlMessage(feedInfo.getMediaInfos().get(0)));
+                }
+                if (Objects.isNull(feedInfo.getTitle())) {
+                    builder.setTitle(feedInfo.getText());
                 }
                 break;
             case MEDIA_QUESTION:

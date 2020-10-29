@@ -261,6 +261,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         builder.userId(userId);
         builder.hostId(request.getHostId(0));
         builder.fromHost(userId.equals(request.getHostId(0)));
+        builder.title(request.hasTitle() ? request.getTitle().getValue() : "");
+        builder.brief(request.hasBrief() ? request.getBrief().getValue() : "");
         builder.text(request.hasText() ? request.getText().getValue() : "");
         builder.duplicateTag(UUID.randomUUID().toString());
         builder.multiMediaType(mediaType.name());
@@ -272,8 +274,6 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         if (request.hasPriceInCents()) {
             builder.priceInCents(request.getPriceInCents().getValue());
         }
-        builder.title(request.hasTitle() ? request.getTitle().getValue() : "");
-        builder.brief(request.hasBrief() ? request.getBrief().getValue() : "");
 
         FeedInfo feed = builder.build();
 
