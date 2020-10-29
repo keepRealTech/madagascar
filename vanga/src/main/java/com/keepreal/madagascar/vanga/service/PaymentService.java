@@ -197,6 +197,7 @@ public class PaymentService {
      * @param currentExpireTime {@link ZonedDateTime}.
      * @return {@link Payment}.
      */
+    @Deprecated
     @Transactional
     public List<Payment> createPayShellPayments(String userId, Integer withdrawPercent, MembershipSku sku, ZonedDateTime currentExpireTime) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
@@ -231,6 +232,7 @@ public class PaymentService {
      * @param currentExpireTime {@link ZonedDateTime}.
      * @return {@link Payment}.
      */
+    @Deprecated
     @Transactional
     public List<Payment> createIOSPayPayments(String userId,
                                               IosOrder iosOrder,
