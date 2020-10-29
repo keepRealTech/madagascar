@@ -23,6 +23,7 @@ import swagger.model.CheckFeedsDTO;
 import swagger.model.FeedDTO;
 import swagger.model.FeedGroupInfo;
 import swagger.model.FullFeedDTO;
+import swagger.model.MultiMediaType;
 import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
@@ -229,7 +230,7 @@ public class FeedDTOFactory {
             briefFeedDTO.setTitle(feed.getTitle());
             briefFeedDTO.setBrief(feed.getBrief());
             briefFeedDTO.setText(feed.getText());
-            briefFeedDTO.setFromHost(Objects.nonNull(userMessage) && userMessage.getId().equals(islandMessage.getHostId()));
+            briefFeedDTO.setFromHost(feed.getFromHost());
             briefFeedDTO.setCreatedAt(feed.getCreatedAt());
             briefFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             briefFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
@@ -238,9 +239,7 @@ public class FeedDTOFactory {
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
                 briefFeedDTO.setImagesUris(feed.getImageUrisList());
-            }
-
-            if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
+            } else if (isPicType) {
                 briefFeedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
             }
 
@@ -384,7 +383,7 @@ public class FeedDTOFactory {
             fullFeedDTO.setIsChargeable(feed.getPriceInCents() > 0L);
             fullFeedDTO.setIsTop(feed.getIsTop());
             fullFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
-            fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed, false));
             fullFeedDTO.setPriceInCents(feed.getPriceInCents());
             fullFeedDTO.setCanSave(feed.getCanSave());
             if (!StringUtils.isEmpty(feedGroup.getId())) {

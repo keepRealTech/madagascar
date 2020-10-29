@@ -581,7 +581,6 @@ public class FeedService {
                                     feedMessage
                             );
                         })
-                        .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
     }
 
