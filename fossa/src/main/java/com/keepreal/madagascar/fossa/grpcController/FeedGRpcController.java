@@ -203,6 +203,9 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.hostId(hostIdList.get(i));
             builder.fromHost(userId.equals(hostIdList.get(i)));
             builder.text(text);
+            if (MediaType.MEDIA_HTML.equals(mediaType)) {
+                builder.title(request.getText().getValue());
+            }
             builder.duplicateTag(duplicateTag);
             builder.multiMediaType(mediaType.name());
             builder.mediaInfos(this.buildMediaInfos(request));
