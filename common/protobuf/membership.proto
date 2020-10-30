@@ -27,6 +27,8 @@ message UpdateMembershipRequest {
     google.protobuf.StringValue message = 7;
     google.protobuf.BoolValue permanent = 8;
     google.protobuf.StringValue imageUri = 9;
+    google.protobuf.Int32Value width = 10;
+    google.protobuf.Int32Value height = 11;
 }
 
 message CreateMembershipRequest {
@@ -39,6 +41,8 @@ message CreateMembershipRequest {
     string message = 7;
     bool permanent = 8;
     string imageUri = 9;
+    int32 width = 10;
+    int32 height = 11;
 }
 
 message RetrieveMembershipsRequest {

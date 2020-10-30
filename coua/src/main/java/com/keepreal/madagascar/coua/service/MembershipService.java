@@ -209,6 +209,13 @@ public class MembershipService {
             membershipInfo.setImageUri(request.getImageUri().getValue());
         }
 
+        if (request.hasWidth()) {
+            membershipInfo.setWidth(request.getWidth().getValue());
+        }
+        if (request.hasHeight()) {
+            membershipInfo.setHeight(request.getHeight().getValue());
+        }
+
         this.skuService.updateMembershipSkusByMembershipId(request.getId(), newName, newPrice, null, membershipInfo.getPermanent());
         return this.updateMembership(membershipInfo);
     }

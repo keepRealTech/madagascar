@@ -135,7 +135,9 @@ public class MembershipService {
                                               boolean useCustomMessage,
                                               String message,
                                               boolean isPermanent,
-                                              String imageUri) {
+                                              String imageUri,
+                                              int width,
+                                              int height) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         String descriptionStr = String.join(",", descriptions);
@@ -149,6 +151,8 @@ public class MembershipService {
                 .setMessage(message)
                 .setPermanent(isPermanent)
                 .setImageUri(imageUri)
+                .setWidth(width)
+                .setHeight(height)
                 .build();
 
         MembershipResponse membershipResponse;
@@ -200,7 +204,9 @@ public class MembershipService {
                                                   Boolean useCustomMessage,
                                                   String message,
                                                   Boolean isPermanent,
-                                                  String imageUri) {
+                                                  String imageUri,
+                                                  Integer width,
+                                                  Integer height) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         UpdateMembershipRequest.Builder builder = UpdateMembershipRequest.newBuilder()
@@ -226,6 +232,12 @@ public class MembershipService {
         }
         if (Objects.nonNull(imageUri)) {
             builder.setImageUri(StringValue.of(imageUri));
+        }
+        if (Objects.nonNull(width)) {
+            builder.setWidth(Int32Value.of(width));
+        }
+        if (Objects.nonNull(height)) {
+            builder.setHeight(Int32Value.of(height));
         }
 
         MembershipResponse membershipResponse;
