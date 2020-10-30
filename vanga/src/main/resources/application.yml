@@ -2,7 +2,7 @@ spring:
   application:
     name: vanga
   datasource:
-    url: jdbc:mysql://root:123456@localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
+    url: jdbc:mysql://kr_admin:gYvi89kGKJoqZbzk@rm-2ze0p9v29ef1p05us6o.mysql.rds.aliyuncs.com:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&serverTimezone=CTT
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     show-sql: false
