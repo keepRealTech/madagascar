@@ -4,7 +4,6 @@ import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.Order;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
-import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.OrderState;
 import org.springframework.stereotype.Service;
 
@@ -14,20 +13,22 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.IntStream;
 
 @Service
 public class SupportService {
 
     private final PaymentService paymentService;
     private final BalanceService balanceService;
+    private final IncomeService incomeService;
     private final NotificationEventProducerService notificationEventProducerService;
 
     public SupportService(PaymentService paymentService,
                           BalanceService balanceService,
+                          IncomeService incomeService,
                           NotificationEventProducerService notificationEventProducerService) {
         this.paymentService = paymentService;
         this.balanceService = balanceService;
+        this.incomeService = incomeService;
         this.notificationEventProducerService = notificationEventProducerService;
     }
 
@@ -62,6 +63,10 @@ public class SupportService {
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
         this.sendAsyncMessage(payment.getUserId(), payment.getPayeeId(), payment.getAmountInCents());
+
+        this.incomeService.updateIncomeProfile(payment.getPayeeId(), payment.getAmountInCents());
+        this.incomeService.updateIncomeDetail(payment.getPayeeId(), System.currentTimeMillis(), payment.getAmountInCents());
+        this.incomeService.updateIncomeSupport(payment.getPayeeId(), order.getUserId(), payment.getAmountInCents());
     }
 
     private void sendAsyncMessage(String userId, String payeeId, Long priceInCents) {

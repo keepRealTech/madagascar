@@ -10,4 +10,6 @@ import org.springframework.stereotype.Repository;
 public interface IncomeSupportRepository extends JpaRepository<IncomeSupport, String> {
 
     Page<IncomeSupport> findIncomeSupportsByUserIdAndDeletedIsFalse(String userId, Pageable pageable);
+
+    IncomeSupport findIncomeSupportByUserIdAndSupporterIdAndDeletedIsFalse(String userId, String supporterId);
 }

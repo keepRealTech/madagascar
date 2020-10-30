@@ -10,4 +10,6 @@ import java.util.List;
 public interface IncomeDetailRepository extends JpaRepository<IncomeDetail, String> {
 
     List<IncomeDetail> findIncomeDetailsByUserIdAndDeletedIsFalse(String userId);
+
+    IncomeDetail findIncomeDetailByUserIdAndMonthTimestampAndDeletedIsFalse(String userId, Long monthTimestamp);
 }

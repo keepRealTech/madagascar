@@ -11,15 +11,12 @@ import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.repository.FeedChargeRepository;
 import com.keepreal.madagascar.vanga.settlementCalculator.DefaultSettlementCalculator;
 import com.keepreal.madagascar.vanga.settlementCalculator.SettlementCalculator;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,6 +29,7 @@ public class FeedChargeService {
     private final LongIdGenerator idGenerator;
     private final NotificationEventProducerService notificationEventProducerService;
     private final FeedService feedService;
+    private final IncomeService incomeService;
 
     private final SettlementCalculator settlementCalculator;
 
@@ -40,13 +38,15 @@ public class FeedChargeService {
                              FeedChargeRepository feedChargeRepository,
                              LongIdGenerator idGenerator,
                              NotificationEventProducerService notificationEventProducerService,
-                             FeedService feedService) {
+                             FeedService feedService,
+                             IncomeService incomeService) {
         this.paymentService = paymentService;
         this.balanceService = balanceService;
         this.feedChargeRepository = feedChargeRepository;
         this.idGenerator = idGenerator;
         this.notificationEventProducerService = notificationEventProducerService;
         this.feedService = feedService;
+        this.incomeService = incomeService;
         this.settlementCalculator = new DefaultSettlementCalculator();
     }
 
@@ -71,6 +71,10 @@ public class FeedChargeService {
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
         this.saveFeedCharge(order.getUserId(), order.getPropertyId());
+
+        this.incomeService.updateIncomeProfile(payment.getPayeeId(), payment.getAmountInCents());
+        this.incomeService.updateIncomeDetail(payment.getPayeeId(), System.currentTimeMillis(), payment.getAmountInCents());
+        this.incomeService.updateIncomeSupport(payment.getPayeeId(), order.getUserId(), payment.getAmountInCents());
 
         this.notificationEventProducerService.produceNewFeedPaymentNotificationEventAsync(payment.getUserId(),
                 payment.getPayeeId(),
