@@ -15,17 +15,17 @@ allprojects {
     }
 }
 
-ext['lemur.version'] = '1.3.4-hf2'
+ext['lemur.version'] = '1.4.0'
 ext['baobob.version'] = '1.2.3'
 ext['brookesia.version'] = '1.0.3'
 ext['coua.version'] = '1.2.3'
-ext['fossa.version'] = '1.2.3'
+ext['fossa.version'] = '1.2.4'
 ext['indri.version'] = '1.0.3'
 ext['mantella.version'] = '1.1.2'
 ext['marty.version'] = '1.0.7'
 ext['tenrecs.version'] = '1.0.7'
-ext['vanga.version'] = '1.2.5'
-ext['asity.version'] = '1.0.6'
+ext['vanga.version'] = '1.2.6'
+ext['asity.version'] = '1.0.7'
 ext['hoopoe.version'] = '1.0.0'
 
 ext['settler.version'] = '1.1.0'
