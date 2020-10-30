@@ -40,6 +40,16 @@ public class IncomeMessageFactory {
     }
 
     public IncomeProfileMessage profileValueOf(String userId, IncomeProfile incomeProfile) {
+        if (incomeProfile == null) {
+            return IncomeProfileMessage.newBuilder()
+                    .setTotalIncome(0)
+                    .setTotalSupportCount(0)
+                    .setTotalSubscriber(0)
+                    .setCurrentMonthIncome(0)
+                    .setCurrentMonthSupportCount(0)
+                    .setNextMonthIncome(0)
+                    .build();
+        }
         Long currentMonthIncome = this.paymentRepository.countAmountByPayeeIdAndValidAfter(userId, DateUtils.startOfMonthTimestamp(1), DateUtils.endOfMonthTimestamp(1));
         Long nextMonthIncome = this.paymentRepository.countAmountByPayeeIdAndValidAfter(userId, DateUtils.startOfMonthTimestamp(2), DateUtils.endOfMonthTimestamp(2));
         Integer currentMonthSupportCount = this.paymentRepository.countSupportCountByPayeeIdAndValidAfter(userId, DateUtils.startOfMonthTimestamp(1), DateUtils.endOfMonthTimestamp(1));
@@ -71,25 +81,31 @@ public class IncomeMessageFactory {
 
     public SupportMembershipMessage valueOf(MembershipMessage membershipMessage) {
         List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipId(membershipMessage.getId());
+        Integer supportCount;
+        Long income;
+        if (membershipSkus.size() == 0) {
+            supportCount = 0;
+            income = 0L;
+        } else {
+            supportCount = this.paymentRepository.countSupportCountByPayeeIdAndTimestampAndMemberhipSku(
+                    membershipMessage.getHostId(),
+                    DateUtils.startOfMonthTimestamp(),
+                    DateUtils.endOfMonthTimestamp(),
+                    membershipSkus.stream().map(MembershipSku::getId).collect(Collectors.toList()));
 
-        Integer supportCount = this.paymentRepository.countSupportCountByPayeeIdAndTimestampAndMemberhipSku(
-                membershipMessage.getHostId(),
-                DateUtils.startOfMonthTimestamp(),
-                DateUtils.endOfMonthTimestamp(),
-                membershipSkus.stream().map(MembershipSku::getId).collect(Collectors.toList()));
-
-        Long income = this.paymentRepository.countAmountByPayeeIdAndTimestampAndMemberhipSku(
-                membershipMessage.getHostId(),
-                DateUtils.startOfMonthTimestamp(),
-                DateUtils.endOfMonthTimestamp(),
-                membershipSkus.stream().map(MembershipSku::getId).collect(Collectors.toList()));
+            income = this.paymentRepository.countAmountByPayeeIdAndTimestampAndMemberhipSku(
+                    membershipMessage.getHostId(),
+                    DateUtils.startOfMonthTimestamp(),
+                    DateUtils.endOfMonthTimestamp(),
+                    membershipSkus.stream().map(MembershipSku::getId).collect(Collectors.toList()));
+        }
 
         return SupportMembershipMessage.newBuilder()
                 .setMembershipId(membershipMessage.getId())
                 .setMembershipName(membershipMessage.getName())
                 .setPriceInMonth(membershipMessage.getPricePerMonth())
                 .setIsPermanent(membershipMessage.getPermanent())
-                .setIncome(income)
+                .setIncome(income == null ? 0L : income)
                 .setSupportCount(supportCount)
                 .build();
     }
@@ -98,7 +114,7 @@ public class IncomeMessageFactory {
         Integer supportCount = this.paymentRepository.countSponsorByPayeeIdAndTimestamp(userId, DateUtils.startOfMonthTimestamp(), DateUtils.endOfMonthTimestamp());
         Long income = this.paymentRepository.countSponsorIncomeByPayeeIdAndTimestamp(userId, DateUtils.startOfMonthTimestamp(), DateUtils.endOfMonthTimestamp());
         return SponsorMessage.newBuilder()
-                .setIncome(income)
+                .setIncome(income == null ? 0L : income)
                 .setSupportCount(supportCount)
                 .build();
     }
@@ -107,7 +123,7 @@ public class IncomeMessageFactory {
         Integer supportCount = this.feedChargeRepository.countByHostIdAndTimestamp(userId, DateUtils.startOfMonthTimestamp(), DateUtils.endOfMonthTimestamp());
         Long income = this.feedChargeRepository.countAmountByHostIdAndTimestamp(userId, DateUtils.startOfMonthTimestamp(), DateUtils.endOfMonthTimestamp());
         return FeedChargeMessage.newBuilder()
-                .setIncome(income)
+                .setIncome(income == null ? 0L : income)
                 .setSupportCount(supportCount)
                 .build();
     }

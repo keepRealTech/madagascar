@@ -81,37 +81,49 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     /**
      * 计算创作者在指定时间范围内购买指定会员的付费用户数量
      */
-    @Query(value = "SELECT COUNT(DISTINCT order_id) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN ?4", nativeQuery = true)
+    @Query(value = "SELECT COUNT(DISTINCT order_id) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) ", nativeQuery = true)
     Integer countSupportCountByPayeeIdAndTimestampAndMemberhipSku(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds);
 
     /**
      * 计算创作者在指定时间范围内购买指定会员的收入总和
      */
-    @Query(value = "SELECT SUM(amount_in_cents) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN ?4", nativeQuery = true)
+    @Query(value = "SELECT SUM(amount_in_cents) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN (?4)", nativeQuery = true)
     Long countAmountByPayeeIdAndTimestampAndMemberhipSku(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds);
 
     /**
      * 计算创作者在指定时间范围内的记录
      */
-    @Query(value = "SELECT * FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
+    @Query(value = "SELECT id, user_id AS userId, payee_id AS payeeId, trade_num AS tradeNum, " +
+            "amount_in_cents AS amountInCents, amount_in_shells AS amountInShells, order_id AS orderId, " +
+            "type, state, valid_after AS validAfter, is_deleted AS deleted, created_time AS createdTime, updated_time AS updatedTime " +
+            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
     Page<Payment> retrievePaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable);
 
     /**
      * 计算创作者在指定时间范围内购买指定会员的记录
      */
-    @Query(value = "SELECT * FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN ?4 GROUP BY order_id", nativeQuery = true)
+    @Query(value = "SELECT id, user_id AS userId, payee_id AS payeeId, trade_num AS tradeNum, " +
+            "amount_in_cents AS amountInCents, amount_in_shells AS amountInShells, order_id AS orderId, " +
+            "type, state, valid_after AS validAfter, is_deleted AS deleted, created_time AS createdTime, updated_time AS updatedTime " +
+            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN (?4) GROUP BY order_id", nativeQuery = true)
     Page<Payment> retrieveMembershipPaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds, Pageable pageable);
 
     /**
      * 计算创作者在指定时间范围内付费用户支持一下的记录（type=6 用来筛选支持一下的记录）
      */
-    @Query(value = "SELECT * FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type = 6", nativeQuery = true)
+    @Query(value = "SELECT id, user_id AS userId, payee_id AS payeeId, trade_num AS tradeNum, " +
+            "amount_in_cents AS amountInCents, amount_in_shells AS amountInShells, order_id AS orderId, " +
+            "type, state, valid_after AS validAfter, is_deleted AS deleted, created_time AS createdTime, updated_time AS updatedTime " +
+            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type = 6", nativeQuery = true)
     Page<Payment> retrieveSponsorPaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable);
 
     /**
      * 计算创作者在指定时间范围内支付单独解锁的记录
      */
-    @Query(value = "SELECT * FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND (type = 1 OR type = 7) AND membership_sku_id = ''", nativeQuery = true)
+    @Query(value = "SELECT id, user_id AS userId, payee_id AS payeeId, trade_num AS tradeNum, " +
+            "amount_in_cents AS amountInCents, amount_in_shells AS amountInShells, order_id AS orderId, " +
+            "type, state, valid_after AS validAfter, is_deleted AS deleted, created_time AS createdTime, updated_time AS updatedTime " +
+            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND (type = 1 OR type = 7) AND membership_sku_id = ''", nativeQuery = true)
     Page<Payment> retrieveFeedChargePaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable);
 
 

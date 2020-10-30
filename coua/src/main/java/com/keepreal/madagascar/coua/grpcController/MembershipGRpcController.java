@@ -314,6 +314,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .addAllMessage(membershipInfoList.stream().map(this.membershipService::getMembershipMessage).collect(Collectors.toList()))
                 .build());
+        responseObserver.onCompleted();
     }
 
     private void updateAndResponse(MembershipInfo membershipInfo, StreamObserver<MembershipResponse> responseObserver) {

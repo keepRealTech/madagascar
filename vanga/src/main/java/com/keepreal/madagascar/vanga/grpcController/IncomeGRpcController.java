@@ -106,6 +106,7 @@ public class IncomeGRpcController extends IncomeServiceGrpc.IncomeServiceImplBas
                 .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
                 .addAllMessage(incomeDetailList.stream().map(this.incomeMessageFactory::valueOf).collect(Collectors.toList()))
                 .build());
+        responseObserver.onCompleted();
     }
 
     @Override
@@ -122,6 +123,13 @@ public class IncomeGRpcController extends IncomeServiceGrpc.IncomeServiceImplBas
         } else if (incomeDetailType.equals(IncomeDetailType.INCOME_MEMBERSHIP)) {
             String membershipId = request.getMembershipId().getValue();
             List<MembershipSku> membershipSkus = skuService.retrieveMembershipSkusByMembershipId(membershipId);
+            if (membershipSkus.size() == 0) {
+                responseObserver.onNext(RetrieveIncomeDetailResponse.newBuilder()
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
+                        .build());
+                responseObserver.onCompleted();
+                return;
+            }
             List<String> membershipSkuIdList = membershipSkus.stream().map(MembershipSku::getId).collect(Collectors.toList());
             paymentPage = this.paymentService.retrieveMembershipPaymentsByPayeeId(userId, DateUtils.startOfMonthTimestamp(), DateUtils.endOfMonthTimestamp(), membershipSkuIdList, PaginationUtils.valueOf(pageRequest));
         } else if (incomeDetailType.equals(IncomeDetailType.INCOME_SUPPORT)) {
@@ -135,5 +143,6 @@ public class IncomeGRpcController extends IncomeServiceGrpc.IncomeServiceImplBas
                 .setPageResponse(PaginationUtils.valueOf(paymentPage, pageRequest))
                 .addAllMessage(paymentPage.getContent().stream().map(this.incomeMessageFactory::valueOf).collect(Collectors.toList()))
                 .build());
+        responseObserver.onCompleted();
     }
 }
