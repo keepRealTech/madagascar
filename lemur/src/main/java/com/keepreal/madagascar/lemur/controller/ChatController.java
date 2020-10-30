@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.ChatApi;
 import swagger.model.BriefUsersResponse;
@@ -182,7 +181,6 @@ public class ChatController implements ChatApi {
      * @param id Island id.
      * @return {@link IslandChatAccessResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<IslandChatAccessResponse> apiV1IslandsIdChataccessGet(String id) {
         com.keepreal.madagascar.asity.IslandChatAccessResponse islandChatAccessResponse =

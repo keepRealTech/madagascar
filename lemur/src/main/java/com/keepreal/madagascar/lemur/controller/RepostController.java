@@ -11,7 +11,6 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.RepostApi;
 import swagger.model.DeviceType;
@@ -162,7 +161,6 @@ public class RepostController implements RepostApi {
      * @param id id (required)
      * @return {@link IslandRepostCodeResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<IslandRepostCodeResponse> apiV1IslandsIdRepostsGenerateCodeGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
