@@ -76,6 +76,8 @@ public class Templates {
      */
     public static final String INCOME_MEMBERSHIP_CONTENT = "支持了%d个月\"%s\"";
     public static final String INCOME_MEMBERSHIP_PERMANENT_CONTENT = "支持了永久方案\"%s\"";
-    public static final String INCOME_SPONSOR_CONTENT = "支持了你的独立付费动态";
-    public static final String INCOME_FEED_CHARGE_CONTENT = "支持了你";
+    public static final String INCOME_SPONSOR_CONTENT = "支持了你";
+    public static final String INCOME_FEED_CHARGE_CONTENT = "支持了你的独立付费动态";
+    public static final String INCOME_DTO_SPONSOR = "支持一下";
+    public static final String INCOME_DTO_FEED_CHARGE = "单独解锁";
 }

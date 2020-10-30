@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.vanga.FeedChargeMessage;
 import com.keepreal.madagascar.vanga.IncomeDetailMessage;
@@ -96,7 +97,7 @@ public class IncomeDTOFactory {
         CurrentMonthSupportDTOSponsor dtoSponsor = new CurrentMonthSupportDTOSponsor();
         dtoSponsor.setIncome(message.getIncome());
         dtoSponsor.setSupportCount(message.getSupportCount());
-        dtoSponsor.setName("支持一下");
+        dtoSponsor.setName(Templates.INCOME_DTO_SPONSOR);
 
         return dtoSponsor;
     }
@@ -105,7 +106,7 @@ public class IncomeDTOFactory {
         CurrentMonthSupportDTOSponsor dtoSponsor = new CurrentMonthSupportDTOSponsor();
         dtoSponsor.setIncome(message.getIncome());
         dtoSponsor.setSupportCount(message.getSupportCount());
-        dtoSponsor.setName("单独解锁");
+        dtoSponsor.setName(Templates.INCOME_DTO_FEED_CHARGE);
 
         return dtoSponsor;
     }
