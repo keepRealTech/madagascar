@@ -562,12 +562,16 @@ public class FeedController implements FeedApi {
 
         Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(feedGroupFeedsResponse.getFeedList());
 
+        Map<String, FeedGroupMessage> feedGroupMessageMap = this.generateFeedGroupMap(feedGroupFeedsResponse.getFeedList());
+
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedGroupFeedsResponse.getFeedList()
                 .stream()
                 .map(feed -> this.feedDTOFactory.valueOf(feed,
                         feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList()),
-                        includeChargeable))
+                        includeChargeable,
+                        feed.getCreatedAt(),
+                        feedGroupMessageMap.get(feed.getFeedgroupId())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setCurrentTime(System.currentTimeMillis());
