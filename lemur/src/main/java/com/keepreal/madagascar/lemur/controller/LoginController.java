@@ -34,7 +34,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -108,7 +107,6 @@ public class LoginController implements LoginApi {
             label = "user id",
             value = "body.data.user.id"
     )
-    @CrossOrigin
     public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest postLoginRequest, @Valid Boolean admin) {
         LoginRequest loginRequest;
         switch (postLoginRequest.getLoginType()) {
@@ -264,7 +262,6 @@ public class LoginController implements LoginApi {
      *
      * @return {@link UserResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<UserResponse> apiV1UserInfoGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -351,7 +348,6 @@ public class LoginController implements LoginApi {
      * @return {@link QrTicketResponse}.
      */
     @Override
-    @CrossOrigin
     public ResponseEntity<QrTicketResponse> apiV1LoginGeneratePost() {
         GenerateQrcodeResponse generateQrcodeResponse = loginService.generateQrcode();
         QrTicketResponse response = new QrTicketResponse();
@@ -373,7 +369,6 @@ public class LoginController implements LoginApi {
      * @param sceneId (required) unique scene id.
      * @return {@link LoginResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<LoginResponse> apiV1LoginPollingGet(String sceneId) {
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.checkWechatMpAccountLogin(sceneId);
@@ -392,12 +387,11 @@ public class LoginController implements LoginApi {
     /**
      * 向指定手机号发送验证码
      *
-     * @param postOTPRequest  (required) {@link PostOTPRequest}
+     * @param postOTPRequest (required) {@link PostOTPRequest}
      * @return {@link DummyResponse}
      */
-    @CrossOrigin
     @Override
-    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest,  @Valid Boolean login) {
+    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest, @Valid Boolean login) {
         if (!login) {
             String userId = HttpContextUtils.getUserIdFromContext();
             this.userService.checkUserMobileIsExisted(userId,

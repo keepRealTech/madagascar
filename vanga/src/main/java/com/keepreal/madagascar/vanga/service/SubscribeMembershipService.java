@@ -14,6 +14,8 @@ import com.keepreal.madagascar.vanga.model.PaymentType;
 import com.keepreal.madagascar.vanga.model.SubscribeMembership;
 import com.keepreal.madagascar.vanga.model.OrderState;
 import com.keepreal.madagascar.vanga.repository.SubscribeMembershipRepository;
+import com.keepreal.madagascar.vanga.settlementCalculator.DefaultSettlementCalculator;
+import com.keepreal.madagascar.vanga.settlementCalculator.SettlementCalculator;
 import com.keepreal.madagascar.vanga.util.AutoRedisLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,8 @@ public class SubscribeMembershipService {
     private final RedissonClient redissonClient;
     private final NotificationEventProducerService notificationEventProducerService;
 
+    private final SettlementCalculator settlementCalculator;
+
     /**
      * Constructor the subscribe membership service.
      *
@@ -72,6 +76,8 @@ public class SubscribeMembershipService {
         this.idGenerator = idGenerator;
         this.redissonClient = redissonClient;
         this.notificationEventProducerService = notificationEventProducerService;
+
+        this.settlementCalculator = new DefaultSettlementCalculator();
     }
 
     /**
@@ -137,9 +143,7 @@ public class SubscribeMembershipService {
                     .forEach(i -> {
                         finalInnerPaymentList.get(i).setWithdrawPercent(hostBalance.getWithdrawPercent());
                         finalInnerPaymentList.get(i).setState(PaymentState.OPEN.getValue());
-                        finalInnerPaymentList.get(i).setValidAfter(currentExpireTime
-                                .plusMonths((i + 1) * SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
-                                .toInstant().toEpochMilli());
+                        finalInnerPaymentList.get(i).setValidAfter(this.settlementCalculator.generateSettlementTimestamp(currentExpireTime, i));
                     });
 
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
@@ -154,6 +158,7 @@ public class SubscribeMembershipService {
      * @param userId User id.
      * @param sku    {@link MembershipSku}.
      */
+    @Deprecated
     @Transactional
     public void subscribeMembershipWithShell(String userId, MembershipSku sku) {
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("member-%s", userId))) {
@@ -185,6 +190,7 @@ public class SubscribeMembershipService {
      * @param transactionId Transaction id.
      * @param sku           Membership sku.
      */
+    @Deprecated
     @Transactional
     public void subscribeMembershipWithIOSOrder(String userId, String receipt, String transactionId, MembershipSku sku) {
         IosOrder iosOrder = this.iosOrderService.verify(userId, receipt, sku.getDescription(), sku.getAppleSkuId(), sku.getId(), transactionId);

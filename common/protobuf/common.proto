@@ -263,6 +263,8 @@ message FeedMessage {
     string hostId = 26;
     bool canSave = 27;
     string feedgroupId = 28;
+    string brief = 29;
+    string title = 30;
 }
 
 message WechatOrderMessage {

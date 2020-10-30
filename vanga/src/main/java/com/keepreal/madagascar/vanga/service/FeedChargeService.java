@@ -9,13 +9,17 @@ import com.keepreal.madagascar.vanga.model.OrderState;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.repository.FeedChargeRepository;
+import com.keepreal.madagascar.vanga.settlementCalculator.DefaultSettlementCalculator;
+import com.keepreal.madagascar.vanga.settlementCalculator.SettlementCalculator;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,6 +33,8 @@ public class FeedChargeService {
     private final NotificationEventProducerService notificationEventProducerService;
     private final FeedService feedService;
 
+    private final SettlementCalculator settlementCalculator;
+
     public FeedChargeService(PaymentService paymentService,
                              BalanceService balanceService,
                              FeedChargeRepository feedChargeRepository,
@@ -41,6 +47,7 @@ public class FeedChargeService {
         this.idGenerator = idGenerator;
         this.notificationEventProducerService = notificationEventProducerService;
         this.feedService = feedService;
+        this.settlementCalculator = new DefaultSettlementCalculator();
     }
 
     @Transactional
@@ -58,9 +65,7 @@ public class FeedChargeService {
         ZonedDateTime currentTimestamp = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
         Payment payment = paymentList.get(0);
         payment.setState(PaymentState.OPEN.getValue());
-        payment.setValidAfter(currentTimestamp
-                .plusMonths(SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
-                .toInstant().toEpochMilli());
+        payment.setValidAfter(this.settlementCalculator.generateSettlementTimestamp(currentTimestamp, 0));
 
         Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payment.getPayeeId());
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
@@ -105,4 +110,5 @@ public class FeedChargeService {
         assert amount > 0;
         return amount * ratio / 100L;
     }
+
 }

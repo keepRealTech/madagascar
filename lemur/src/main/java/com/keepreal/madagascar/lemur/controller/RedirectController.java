@@ -18,8 +18,8 @@ public class RedirectController {
     /**
      * Constructs the redirect controller.
      *
-     * @param iosClientConfiguration    {@link IOSClientConfiguration}.
-     * @param redirectService           {@link RedirectService}.
+     * @param iosClientConfiguration {@link IOSClientConfiguration}.
+     * @param redirectService        {@link RedirectService}.
      */
     public RedirectController(IOSClientConfiguration iosClientConfiguration,
                               RedirectService redirectService) {

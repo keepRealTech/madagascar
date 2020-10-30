@@ -29,6 +29,10 @@ public class MultiMediaDTOFactory {
     }
 
     public List<MultiMediaDTO> listValueOf(FeedMessage feedMessage) {
+        return this.listValueOf(feedMessage, true);
+    }
+
+    public List<MultiMediaDTO> listValueOf(FeedMessage feedMessage, boolean ignoreHtmlContent) {
         MultiMediaDTO dto = new MultiMediaDTO();
 
         switch (feedMessage.getType()) {
@@ -47,7 +51,11 @@ public class MultiMediaDTOFactory {
                 dto = this.valueOf(feedMessage.getAudio());
                 break;
             case MEDIA_HTML:
-                dto = this.valueOf(feedMessage.getHtml());
+                if (ignoreHtmlContent && !StringUtils.isEmpty(feedMessage.getBrief())) {
+                    dto = new MultiMediaDTO();
+                } else {
+                    dto = this.valueOf(feedMessage.getHtml());
+                }
                 break;
             case MEDIA_QUESTION:
                 dto = this.valueOf(feedMessage.getAnswer(), feedMessage.getCreatedAt());
