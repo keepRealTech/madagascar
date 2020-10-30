@@ -12,6 +12,7 @@ import com.keepreal.madagascar.coua.MembershipServiceGrpc;
 import com.keepreal.madagascar.coua.MembershipsResponse;
 import com.keepreal.madagascar.coua.RetrieveMembershipsByIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveMembershipsByIslandIdsRequest;
+import com.keepreal.madagascar.coua.RetrieveMembershipsByUserIdRequest;
 import com.keepreal.madagascar.coua.RetrieveMembershipsRequest;
 import com.keepreal.madagascar.coua.TopMembershipRequest;
 import com.keepreal.madagascar.coua.UpdateMembershipRequest;
@@ -301,6 +302,18 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
                 .addAllMessage(membershipMessages)
                 .build());
         responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveMembershipsByUserId(RetrieveMembershipsByUserIdRequest request, StreamObserver<MembershipsResponse> responseObserver) {
+        String userId = request.getUserId();
+
+        List<MembershipInfo> membershipInfoList = this.membershipService.getMembershipListByHostId(userId);
+
+        responseObserver.onNext(MembershipsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllMessage(membershipInfoList.stream().map(this.membershipService::getMembershipMessage).collect(Collectors.toList()))
+                .build());
     }
 
     private void updateAndResponse(MembershipInfo membershipInfo, StreamObserver<MembershipResponse> responseObserver) {

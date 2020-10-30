@@ -80,6 +80,10 @@ public class MembershipService {
         }
     }
 
+    public List<MembershipInfo> getMembershipListByHostId(String userId) {
+        return repository.findMembershipInfosByHostIdAndDeletedIsFalse(userId);
+    }
+
     public List<MembershipInfo> getMembershipListByIslandIds(List<String> islandIds) {
         return repository.findMembershipInfosByIslandIdInAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandIds);
     }

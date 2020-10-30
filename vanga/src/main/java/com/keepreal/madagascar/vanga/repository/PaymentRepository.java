@@ -40,9 +40,79 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     @Query(value = "UPDATE balance_log SET user_id = ?1 WHERE user_id = ?2", nativeQuery = true)
     void mergeUserPayment(String wechatUserId, String webMobileUserId);
 
+    /**
+     *  计算创作者在指定时间范围内付费的用户数量
+     */
     @Query(value = "SELECT COUNT(DISTINCT user_id) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
     Integer countSupportCountByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp);
 
+    /**
+     * 计算创作者在指定时间范围内的收入总和
+     */
     @Query(value = "SELECT SUM(amount_in_cents) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
     Long countAmountByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp);
+
+    /**
+     * 计算创作者在指定时间范围内付费用户支持一下的次数（type=6 用来筛选支持一下的记录）
+     */
+    @Query(value = "SELECT COUNT(*) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type = 6", nativeQuery = true)
+    Integer countSponsorByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp);
+
+    /**
+     * 计算创作者在指定时间范围内付费用户支持一下的收入总和（type=6 用来筛选支持一下的记录）
+     */
+    @Query(value = "SELECT SUM(amount_in_cents) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type = 6", nativeQuery = true)
+    Long countSponsorIncomeByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp);
+
+    /**
+     * 计算创作者在指定时间范围内付费用户的数量
+     * (valid_after是表示结算时间的字段，比如用户买了三个月会员，会有三条记录，created_time相同，而valid_after不同)
+     */
+    @Query(value = "SELECT COUNT(DISTINCT user_id) FROM balance_log WHERE payee_id = ?1 AND valid_after > ?2 AND valid_after < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
+    Integer countSupportCountByPayeeIdAndValidAfter(String payeeId, long startTimestamp, long endTimestamp);
+
+    /**
+     * 计算创作者在指定时间范围内的收入总和
+     * (valid_after是表示结算时间的字段，比如用户买了三个月会员，会有三条记录，created_time相同，而valid_after不同)
+     */
+    @Query(value = "SELECT SUM(amount_in_cents) FROM balance_log WHERE payee_id = ?1 AND valid_after > ?2 AND valid_after < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
+    Long countAmountByPayeeIdAndValidAfter(String payeeId, long startTimestamp, long endTimestamp);
+
+    /**
+     * 计算创作者在指定时间范围内购买指定会员的付费用户数量
+     */
+    @Query(value = "SELECT COUNT(DISTINCT order_id) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN ?4", nativeQuery = true)
+    Integer countSupportCountByPayeeIdAndTimestampAndMemberhipSku(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds);
+
+    /**
+     * 计算创作者在指定时间范围内购买指定会员的收入总和
+     */
+    @Query(value = "SELECT SUM(amount_in_cents) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN ?4", nativeQuery = true)
+    Long countAmountByPayeeIdAndTimestampAndMemberhipSku(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds);
+
+    /**
+     * 计算创作者在指定时间范围内的记录
+     */
+    @Query(value = "SELECT * FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
+    Page<Payment> retrievePaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable);
+
+    /**
+     * 计算创作者在指定时间范围内购买指定会员的记录
+     */
+    @Query(value = "SELECT * FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN ?4 GROUP BY order_id", nativeQuery = true)
+    Page<Payment> retrieveMembershipPaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds, Pageable pageable);
+
+    /**
+     * 计算创作者在指定时间范围内付费用户支持一下的记录（type=6 用来筛选支持一下的记录）
+     */
+    @Query(value = "SELECT * FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type = 6", nativeQuery = true)
+    Page<Payment> retrieveSponsorPaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable);
+
+    /**
+     * 计算创作者在指定时间范围内支付单独解锁的记录
+     */
+    @Query(value = "SELECT * FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND (type = 1 OR type = 7) AND membership_sku_id = ''", nativeQuery = true)
+    Page<Payment> retrieveFeedChargePaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable);
+
+
 }

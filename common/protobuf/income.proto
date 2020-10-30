@@ -16,10 +16,11 @@ message RetrieveSupportListRequest {
 }
 
 message RetrieveIncomeDetailRequest {
-    IncomeDetailType type = 1;
-    google.protobuf.Int64Value timestamp = 2;
-    google.protobuf.StringValue membershipId = 3;
-    PageRequest pageRequest = 4;
+    string userId = 1;
+    IncomeDetailType type = 2;
+    google.protobuf.Int64Value timestamp = 3;
+    google.protobuf.StringValue membershipId = 4;
+    PageRequest pageRequest = 5;
 }
 
 message RetrieveIncomeProfileResponse {

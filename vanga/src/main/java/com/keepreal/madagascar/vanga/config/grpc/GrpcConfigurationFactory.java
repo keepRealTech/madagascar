@@ -21,4 +21,14 @@ public class GrpcConfigurationFactory {
         return new GrpcConfiguration();
     }
 
+    /**
+     * Represents configurations for coua.
+     *
+     * @return Grpc configuration.
+     */
+    @Bean(name = "couaConfiguration")
+    @ConfigurationProperties(prefix = "grpc.coua", ignoreUnknownFields = false)
+    public GrpcConfiguration couaManagerConfiguration() {
+        return new GrpcConfiguration();
+    }
 }

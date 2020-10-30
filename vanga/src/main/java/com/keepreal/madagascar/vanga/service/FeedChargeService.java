@@ -9,6 +9,7 @@ import com.keepreal.madagascar.vanga.model.OrderState;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.repository.FeedChargeRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -94,6 +95,8 @@ public class FeedChargeService {
             feedCharge.setFeedId(feedId);
             feedCharge.setIslandId(feedMessage.getIslandId());
             feedCharge.setFeedCreatedAt(feedMessage.getCreatedAt());
+            feedCharge.setHostId(feedMessage.getHostId());
+            feedCharge.setPriceInCents(feedMessage.getPriceInCents());
             this.feedChargeRepository.save(feedCharge);
         }
     }
