@@ -22,6 +22,7 @@ public class ActivityService {
      *
      * @return {@link List<Activity>}
      */
+    @Deprecated
     public List<Activity> findAllAccessActivities() {
         return this.activityRepository.findAllByActiveIsTrueAndDeletedIsFalse();
     }
