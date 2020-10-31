@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import swagger.api.SkuApi;
 import swagger.model.IOSShellSkusResponse;
 import swagger.model.MembershipSkusResponse;
+import swagger.model.SponsorSkusResponse;
 import swagger.model.SupportSkusResponse;
 import swagger.model.WechatShellSkusResponse;
 
@@ -117,6 +118,24 @@ public class SkuController implements SkuApi {
     public ResponseEntity<SupportSkusResponse> apiV1IslandsIdSupportSkusGet(String id) {
         SupportSkusResponse response = new SupportSkusResponse();
         response.setData(this.skuDTOFactory.valueOf(this.skuService.retrieveSupportSkus()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements sponsor skus get api.
+     *
+     * @param id id (required) island id
+     * @return {@link SponsorSkusResponse}
+     */
+    @Override
+    public ResponseEntity<SponsorSkusResponse> apiV2IslandsIdSponsorsSkusGet(String id) {
+
+        com.keepreal.madagascar.vanga.SponsorSkusResponse responseMessage = this.skuService.retrieveSponsorSkus(id);
+
+        SponsorSkusResponse response = new SponsorSkusResponse();
+        response.setData(this.skuDTOFactory.sponsorSkusValueOf(id, responseMessage.getSponsorSkusList(), responseMessage.getCount()));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

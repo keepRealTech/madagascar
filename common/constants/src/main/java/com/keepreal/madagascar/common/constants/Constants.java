@@ -30,4 +30,14 @@ public class Constants {
      */
     public static final int MEMBERSHIP_NAME_MAX_LENGTH = 20;
 
+    /**
+     * The default sponsor gift id.
+     */
+    public static final String DEFAULT_SPONSOR_GIFT_ID = "171";
+
+    public static final String DEFAULT_SPONSOR_DESCRIPTION = "买杯椰子汁儿";
+
+    public static final Long DEFAULT_SPONSOR_GIFT_UNIT_PRICE = 300L;
+
+    public static final Long DEFAULT_SPONSOR_SKU_QUANTITY = 3L;
 }

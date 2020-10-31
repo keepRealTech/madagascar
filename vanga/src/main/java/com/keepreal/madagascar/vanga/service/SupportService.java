@@ -4,7 +4,6 @@ import com.keepreal.madagascar.vanga.model.Balance;
 import com.keepreal.madagascar.vanga.model.Order;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
-import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.OrderState;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +13,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.IntStream;
 
 @Service
 public class SupportService {
@@ -22,13 +20,16 @@ public class SupportService {
     private final PaymentService paymentService;
     private final BalanceService balanceService;
     private final NotificationEventProducerService notificationEventProducerService;
+    private final SponsorHistoryService sponsorHistoryService;
 
     public SupportService(PaymentService paymentService,
                           BalanceService balanceService,
-                          NotificationEventProducerService notificationEventProducerService) {
+                          NotificationEventProducerService notificationEventProducerService,
+                          SponsorHistoryService sponsorHistoryService) {
         this.paymentService = paymentService;
         this.balanceService = balanceService;
         this.notificationEventProducerService = notificationEventProducerService;
+        this.sponsorHistoryService = sponsorHistoryService;
     }
 
     /**
@@ -61,6 +62,7 @@ public class SupportService {
 
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
+        this.sponsorHistoryService.addSponsorHistoryWithOrderAndPayment(order, payment);
         this.sendAsyncMessage(payment.getUserId(), payment.getPayeeId(), payment.getAmountInCents());
     }
 
