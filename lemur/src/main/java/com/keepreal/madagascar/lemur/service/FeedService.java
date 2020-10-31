@@ -29,6 +29,7 @@ import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
 import com.keepreal.madagascar.fossa.UpdateFeedFeedgroupRequest;
+import com.keepreal.madagascar.fossa.UpdateFeedRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityResponse;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -732,6 +733,53 @@ public class FeedService {
         if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
             throw new KeepRealBusinessException(response.getStatus());
         }
+    }
+
+    /**
+     * Updates a feed by id
+     *
+     * @param id feed id
+     * @param title title
+     * @param text text
+     * @param brief brief
+     * @return {@link FeedMessage}
+     */
+    public FeedMessage updateFeedById(String id,
+                                      String title,
+                                      String text,
+                                      String brief) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        UpdateFeedRequest.Builder builder = UpdateFeedRequest.newBuilder();
+
+        if (!StringUtils.isEmpty(title)) {
+            builder.setTitle(StringValue.of(title));
+        }
+
+        if (!StringUtils.isEmpty(text)) {
+            builder.setText(StringValue.of(text));
+        }
+
+        if (!StringUtils.isEmpty(brief)) {
+            builder.setBrief(StringValue.of(brief));
+        }
+
+        FeedResponse response;
+
+        try {
+            response = stub.updateFeed(builder.build());
+        } catch (StatusRuntimeException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, e.getMessage());
+        }
+
+        if (Objects.isNull(response) || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "update feed returns null" : response.toString());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getFeed();
     }
 
     /**
