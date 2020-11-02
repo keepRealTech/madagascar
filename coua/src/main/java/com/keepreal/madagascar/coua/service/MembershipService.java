@@ -153,6 +153,9 @@ public class MembershipService {
                 .setMessage(membershipInfo.getMessage())
                 .setPermanent(membershipInfo.getPermanent())
                 .setImageUri(membershipInfo.getImageUri())
+                .setWidth(membershipInfo.getWidth())
+                .setHeight(membershipInfo.getHeight())
+                .setSize(membershipInfo.getSize())
                 .setActivate(membershipInfo.getActive())
                 .build();
     }
@@ -218,6 +221,16 @@ public class MembershipService {
 
         if (request.hasImageUri()) {
             membershipInfo.setImageUri(request.getImageUri().getValue());
+        }
+
+        if (request.hasWidth()) {
+            membershipInfo.setWidth(request.getWidth().getValue());
+        }
+        if (request.hasHeight()) {
+            membershipInfo.setHeight(request.getHeight().getValue());
+        }
+        if (request.hasSize()) {
+            membershipInfo.setSize(request.getSize().getValue());
         }
 
         this.skuService.updateMembershipSkusByMembershipId(request.getId(), newName, newPrice, null, membershipInfo.getPermanent());

@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.service;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
+import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -137,7 +138,10 @@ public class MembershipService {
                                               boolean useCustomMessage,
                                               String message,
                                               boolean isPermanent,
-                                              String imageUri) {
+                                              String imageUri,
+                                              int width,
+                                              int height,
+                                              long size) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         String descriptionStr = String.join(",", descriptions);
@@ -151,6 +155,9 @@ public class MembershipService {
                 .setMessage(message)
                 .setPermanent(isPermanent)
                 .setImageUri(imageUri)
+                .setWidth(width)
+                .setHeight(height)
+                .setSize(size)
                 .build();
 
         MembershipResponse membershipResponse;
@@ -202,7 +209,10 @@ public class MembershipService {
                                                   Boolean useCustomMessage,
                                                   String message,
                                                   Boolean isPermanent,
-                                                  String imageUri) {
+                                                  String imageUri,
+                                                  Integer width,
+                                                  Integer height,
+                                                  Long size) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
         UpdateMembershipRequest.Builder builder = UpdateMembershipRequest.newBuilder()
@@ -228,6 +238,15 @@ public class MembershipService {
         }
         if (Objects.nonNull(imageUri)) {
             builder.setImageUri(StringValue.of(imageUri));
+        }
+        if (Objects.nonNull(width)) {
+            builder.setWidth(Int32Value.of(width));
+        }
+        if (Objects.nonNull(height)) {
+            builder.setHeight(Int32Value.of(height));
+        }
+        if (Objects.nonNull(size)) {
+            builder.setSize(Int64Value.of(size));
         }
 
         MembershipResponse membershipResponse;

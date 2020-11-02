@@ -187,6 +187,15 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
             if (request.hasImageUri()) {
                 membership.setImageUri(request.getImageUri().getValue());
             }
+            if (request.hasWidth()) {
+                membership.setWidth(request.getWidth().getValue());
+            }
+            if (request.hasHeight()) {
+                membership.setHeight(request.getHeight().getValue());
+            }
+            if (request.hasSize()) {
+                membership.setSize(request.getSize().getValue());
+            }
 
             membership = this.membershipService.updateMembership(membership);
         } else {
@@ -228,6 +237,9 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         membershipInfo.setMessage(request.getMessage());
         membershipInfo.setPermanent(request.getPermanent());
         membershipInfo.setImageUri(request.getImageUri());
+        membershipInfo.setWidth(request.getWidth());
+        membershipInfo.setHeight(request.getHeight());
+        membershipInfo.setSize(request.getSize());
         MembershipInfo membership = membershipService.createMembership(membershipInfo);
 
         responseObserver.onNext(MembershipResponse.newBuilder()

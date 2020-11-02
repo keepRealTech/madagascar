@@ -88,7 +88,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: '#/components/schemas/FullUserResponse'
   /api/v1/refreshToken:
     post:
       tags:
@@ -5144,8 +5144,8 @@ components:
               type: integer
             isTop:
               type: boolean
-            imageUri:
-              type: string
+            image:
+              $ref: '#/components/schemas/PictureDTO'
     PostMembershipRequest:
       type: object
       properties:
@@ -5167,6 +5167,13 @@ components:
           type: boolean
         imageUri:
           type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        size:
+          type: integer
+          format: int64
     PutMembershipRequest:
       type: object
       properties:
@@ -5188,6 +5195,13 @@ components:
           type: boolean
         imageUri:
           type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        size:
+          type: integer
+          format: int64
     DeactivateMembershipRequest:
       type: object
       properties:
