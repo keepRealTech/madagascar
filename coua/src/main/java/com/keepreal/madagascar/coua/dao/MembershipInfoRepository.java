@@ -18,6 +18,8 @@ public interface MembershipInfoRepository extends JpaRepository<MembershipInfo, 
 
     List<MembershipInfo> findMembershipInfosByIslandIdAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(String islandId);
 
+    List<MembershipInfo> findMembershipInfosByHostIdAndDeletedIsFalse(String userId);
+
     List<MembershipInfo> findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(String islandId);
 
     List<MembershipInfo> findMembershipInfosByIslandIdInAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(List<String> islandIds);

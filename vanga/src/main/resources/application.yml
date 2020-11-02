@@ -15,6 +15,9 @@ grpc:
   fossa:
     host: 127.0.0.1
     port: 12003
+  coua:
+    host: 127.0.0.1
+    port: 12002
 
 ali-pay:
   app-id: xxx
