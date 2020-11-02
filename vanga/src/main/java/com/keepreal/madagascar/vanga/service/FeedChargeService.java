@@ -72,9 +72,7 @@ public class FeedChargeService {
         this.paymentService.updateAll(paymentList);
         this.saveFeedCharge(order.getUserId(), order.getPropertyId());
 
-        this.incomeService.updateIncomeProfile(payment.getPayeeId(), payment.getAmountInCents());
-        this.incomeService.updateIncomeDetail(payment.getPayeeId(), System.currentTimeMillis(), payment.getAmountInCents());
-        this.incomeService.updateIncomeSupport(payment.getPayeeId(), order.getUserId(), payment.getAmountInCents());
+        this.incomeService.updateIncomeAll(payment.getPayeeId(), order.getUserId(), System.currentTimeMillis(), payment.getAmountInCents());
 
         this.notificationEventProducerService.produceNewFeedPaymentNotificationEventAsync(payment.getUserId(),
                 payment.getPayeeId(),

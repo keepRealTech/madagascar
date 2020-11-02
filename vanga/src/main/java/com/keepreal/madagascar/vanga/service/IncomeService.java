@@ -49,6 +49,12 @@ public class IncomeService {
         return this.incomeSupportRepository.findIncomeSupportsByUserIdAndDeletedIsFalse(userId, pageable);
     }
 
+    public void updateIncomeAll(String userId, String supporterId, long timestamp, long amountInCents) {
+        this.updateIncomeProfile(userId, amountInCents);
+        this.updateIncomeDetail(userId, timestamp, amountInCents);
+        this.updateIncomeSupport(userId, supporterId, amountInCents);
+    }
+
     public IncomeDetail updateIncomeDetail(String userId, long timestamp, long amountInCents) {
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("income-detail-%s", userId))) {
             long startTimestamp = DateUtils.startOfMonthTimestamp(timestamp);
