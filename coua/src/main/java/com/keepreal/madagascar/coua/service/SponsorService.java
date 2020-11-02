@@ -52,7 +52,7 @@ public class SponsorService {
      * @param islandId 岛id
      * @return {@link Sponsor}
      */
-    @Cacheable(condition = "islandId = 0")
+    @Cacheable(condition = "islandId.equals(0)")
     public Sponsor retrieveSponsorByIslandId(String islandId) {
         return this.sponsorRepository.findTopByIslandIdAndActiveIsTrueAndDeletedIsFalse(islandId);
     }
