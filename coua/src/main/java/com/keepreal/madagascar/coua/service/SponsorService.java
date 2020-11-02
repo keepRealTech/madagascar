@@ -10,6 +10,7 @@ import com.keepreal.madagascar.coua.dao.SponsorRepository;
 import com.keepreal.madagascar.coua.model.Sponsor;
 import com.keepreal.madagascar.coua.model.SponsorGift;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +52,7 @@ public class SponsorService {
      * @param islandId 岛id
      * @return {@link Sponsor}
      */
+    @Cacheable(condition = "islandId = 0")
     public Sponsor retrieveSponsorByIslandId(String islandId) {
         return this.sponsorRepository.findTopByIslandIdAndActiveIsTrueAndDeletedIsFalse(islandId);
     }
