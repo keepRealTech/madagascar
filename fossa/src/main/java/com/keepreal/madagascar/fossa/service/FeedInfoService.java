@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -238,10 +239,11 @@ public class FeedInfoService {
         } else {
             builder.setIsMembership(true);
             builder.setIsAccess(false);
+            List<String> modifiable = new ArrayList<>(membershipIds);
             if (userId.equals(feedInfo.getHostId()) || membershipIds.stream().anyMatch(myMembershipIds::contains)) {
                 builder.setIsAccess(true);
             }
-            membershipIds.sort((o1, o2) -> {
+            modifiable.sort((o1, o2) -> {
                 boolean co1 = myMembershipIds.contains(o1);
                 boolean co2 = myMembershipIds.contains(o2);
                 if (co1 && !co2) {
@@ -252,7 +254,7 @@ public class FeedInfoService {
                     return 0;
                 }
             });
-            builder.addAllMembershipId(membershipIds);
+            builder.addAllMembershipId(modifiable);
         }
         this.processMedia(builder, feedInfo);
 

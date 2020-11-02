@@ -804,7 +804,10 @@ public class FeedController implements FeedApi {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        FeedMessage feedMessageUpdated = this.feedService.updateFeedById(id, putFeedRequest.getTitle(), putFeedRequest.getText(), putFeedRequest.getBrief());
+        FeedMessage feedMessageUpdated = this.feedService.updateFeedById(id,
+                putFeedRequest.getTitle(),
+                putFeedRequest.getText(),
+                putFeedRequest.getBrief());
 
         Map<String, List<MembershipMessage>> feedMembershipMap =
                 this.generateFeedMembershipMap(Collections.singletonList(feedMessageUpdated));
