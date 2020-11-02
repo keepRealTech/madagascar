@@ -1,13 +1,14 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
 import com.keepreal.madagascar.common.constants.Templates;
+import com.keepreal.madagascar.coua.SponsorMessage;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.vanga.FeedChargeMessage;
 import com.keepreal.madagascar.vanga.IncomeDetailMessage;
 import com.keepreal.madagascar.vanga.IncomeMonthlyMessage;
 import com.keepreal.madagascar.vanga.IncomeProfileMessage;
 import com.keepreal.madagascar.vanga.RetrieveCurrentMonthResponse;
-import com.keepreal.madagascar.vanga.SponsorMessage;
+import com.keepreal.madagascar.vanga.SponsorIncomeMessage;
 import com.keepreal.madagascar.vanga.SupportListMessage;
 import com.keepreal.madagascar.vanga.SupportMembershipMessage;
 import org.springframework.stereotype.Component;
@@ -93,7 +94,7 @@ public class IncomeDTOFactory {
         return dto;
     }
 
-    private CurrentMonthSupportDTOSponsor valueOf(SponsorMessage message) {
+    private CurrentMonthSupportDTOSponsor valueOf(SponsorIncomeMessage message) {
         CurrentMonthSupportDTOSponsor dtoSponsor = new CurrentMonthSupportDTOSponsor();
         dtoSponsor.setIncome(message.getIncome());
         dtoSponsor.setSupportCount(message.getSupportCount());

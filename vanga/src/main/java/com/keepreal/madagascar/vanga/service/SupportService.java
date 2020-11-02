@@ -25,8 +25,7 @@ public class SupportService {
 
     public SupportService(PaymentService paymentService,
                           BalanceService balanceService,
-                          NotificationEventProducerService notificationEventProducerService,
-                          SponsorHistoryService sponsorHistoryService) {
+                          SponsorHistoryService sponsorHistoryService,
                           IncomeService incomeService,
                           NotificationEventProducerService notificationEventProducerService) {
         this.paymentService = paymentService;
