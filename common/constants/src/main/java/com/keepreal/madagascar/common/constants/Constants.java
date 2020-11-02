@@ -35,6 +35,10 @@ public class Constants {
      */
     public static final String DEFAULT_SPONSOR_GIFT_ID = "171";
 
+    public static final String DEFAULT_SPONSOR_ISLAND_ID = "0";
+
+    public static final String DEFAULT_SPONSOR_SKU_ISLAND_ID = "0";
+
     public static final String DEFAULT_SPONSOR_DESCRIPTION = "买杯椰子汁儿";
 
     public static final Long DEFAULT_SPONSOR_GIFT_UNIT_PRICE = 300L;

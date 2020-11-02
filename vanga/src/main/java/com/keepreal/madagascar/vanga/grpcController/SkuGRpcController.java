@@ -2,6 +2,7 @@ package com.keepreal.madagascar.vanga.grpcController;
 
 import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.vanga.CreateMembershipSkusRequest;
 import com.keepreal.madagascar.vanga.CreateSponsorSkusRequest;
@@ -275,8 +276,7 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
         List<SponsorSku> sponsorSkus = this.skuService.retrieveSponsorSkusByIslandId(request.getIslandId());
         SponsorSkusResponse.Builder builder = SponsorSkusResponse.newBuilder();
         if (sponsorSkus.isEmpty()) {
-            responseObserver.onNext(builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SPONSOR_SKU_NOT_FOUND_ERROR)).build());
-            responseObserver.onCompleted();
+            sponsorSkus = this.skuService.retrieveSponsorSkusByIslandId(Constants.DEFAULT_SPONSOR_SKU_ISLAND_ID);
         }
 
         responseObserver.onNext(builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))

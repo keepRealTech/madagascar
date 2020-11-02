@@ -35,7 +35,6 @@ public class SponsorHistoryGRpcController extends SponsorHistoryServiceGrpc.Spon
         this.sponsorHistoryService = sponsorHistoryService;
     }
 
-
     /**
      * 获取支持一下赞助历史
      *
