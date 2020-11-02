@@ -144,6 +144,8 @@ public class MembershipService {
                 .setMessage(membershipInfo.getMessage())
                 .setPermanent(membershipInfo.getPermanent())
                 .setImageUri(membershipInfo.getImageUri())
+                .setWidth(membershipInfo.getWidth())
+                .setHeight(membershipInfo.getHeight())
                 .build();
     }
 

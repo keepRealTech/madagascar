@@ -5130,12 +5130,8 @@ components:
               type: integer
             isTop:
               type: boolean
-            imageUri:
-              type: string
-            width:
-              type: integer
-            height:
-              type: integer
+            image:
+              $ref: '#/components/schemas/PictureDTO'
     PostMembershipRequest:
       type: object
       properties:

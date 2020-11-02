@@ -52,17 +52,18 @@ public class MembershipDTOFactory {
     private final MembershipService membershipService;
     private final BoxService boxService;
     private final ChatService chatService;
+    private final MultiMediaDTOFactory multiMediaDTOFactory;
 
     /**
      * Constructs the membershipDTOFactory.
-     *
-     * @param subscribeMembershipService {@link SubscribeMembershipService}.
+     *  @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param userService                {@link UserService}.
      * @param userDTOFactory             {@link UserDTOFactory}.
      * @param islandService              {@link IslandService}.
      * @param membershipService          {@link MembershipService}.
      * @param boxService                 {@link BoxService}.
      * @param chatService                {@link ChatService}.
+     * @param multiMediaDTOFactory
      */
     public MembershipDTOFactory(SubscribeMembershipService subscribeMembershipService,
                                 UserService userService,
@@ -70,7 +71,8 @@ public class MembershipDTOFactory {
                                 IslandService islandService,
                                 MembershipService membershipService,
                                 BoxService boxService,
-                                ChatService chatService) {
+                                ChatService chatService,
+                                MultiMediaDTOFactory multiMediaDTOFactory) {
         this.subscribeMembershipService = subscribeMembershipService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
@@ -78,6 +80,7 @@ public class MembershipDTOFactory {
         this.membershipService = membershipService;
         this.boxService = boxService;
         this.chatService = chatService;
+        this.multiMediaDTOFactory = multiMediaDTOFactory;
     }
 
     public SimpleMembershipDTO simpleValueOf(MembershipMessage membershipMessage) {
@@ -144,7 +147,7 @@ public class MembershipDTOFactory {
         dto.setUseCustomMessage(membershipMessage.getUseCustomMessage());
         dto.setMessage(membershipMessage.getMessage());
         dto.setIsPermanent(membershipMessage.getPermanent());
-        dto.setImageUri(membershipMessage.getImageUri());
+        dto.setImage(this.multiMediaDTOFactory.valueOf(membershipMessage));
         return dto;
     }
 

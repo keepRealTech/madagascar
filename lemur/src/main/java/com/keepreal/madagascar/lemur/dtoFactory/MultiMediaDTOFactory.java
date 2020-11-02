@@ -6,15 +6,19 @@ import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.HtmlMessage;
 import com.keepreal.madagascar.common.Picture;
 import com.keepreal.madagascar.common.VideoMessage;
+import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.lemur.service.UserService;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import swagger.model.MultiMediaDTO;
+import swagger.model.PictureDTO;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Component
 public class MultiMediaDTOFactory {
 
     private final UserService userService;
@@ -61,6 +65,15 @@ public class MultiMediaDTOFactory {
                 dto = this.valueOf(feedMessage.getAnswer(), feedMessage.getCreatedAt());
         }
         return Collections.singletonList(dto);
+    }
+
+    public PictureDTO valueOf(MembershipMessage membershipMessage) {
+        PictureDTO dto = new PictureDTO();
+        dto.setUrl(membershipMessage.getImageUri());
+        dto.setWidth(membershipMessage.getWidth());
+        dto.setHeight(membershipMessage.getHeight());
+        dto.setSize(0L);
+        return dto;
     }
 
     private MultiMediaDTO valueOf(AnswerMessage answerMessage, long creatTimestamp) {
