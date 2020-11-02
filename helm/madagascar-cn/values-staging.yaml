@@ -61,7 +61,7 @@ global:
       imagePullPolicy: Always
     marty:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/marty
-      tag: 1.0.7-staging
+      tag: 1.0.8-staging
       imagePullPolicy: Always
     tenrecs:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/tenrecs
