@@ -31,6 +31,8 @@ public class FeedCharge {
     private String feedId;
     private String islandId;
     private Long feedCreatedAt;
+    private String hostId;
+    private Long priceInCents;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

@@ -109,13 +109,13 @@ enum DeviceType {
 
 enum PushPriority {
     NEW_FEED = 0;
-    NEW_SUBSCRIBE = 1;
-    NEW_MEMBERSHIP = 2;
-    NEW_LIKE = 3;
-    NEW_COMMENT = 4;
-    NEW_QUESTION = 5;
-    NEW_REPLY = 6;
-    NEW_PUBLIC_REPLY = 7;
+    NEW_QUESTION = 1;
+    NEW_REPLY = 2;
+    NEW_PUBLIC_REPLY = 3;
+    NEW_SUBSCRIBE = 4;
+    NEW_LIKE = 5;
+    NEW_COMMENT = 6;
+    NEW_MEMBERSHIP = 7;
 }
 
 enum UserPaymentType {

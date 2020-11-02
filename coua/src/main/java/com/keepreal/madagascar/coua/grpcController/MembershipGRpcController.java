@@ -3,6 +3,7 @@ package com.keepreal.madagascar.coua.grpcController;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.CreateMembershipRequest;
+import com.keepreal.madagascar.coua.DeactivateMembershipRequest;
 import com.keepreal.madagascar.coua.FeedMembershipMessage;
 import com.keepreal.madagascar.coua.FeedMembershipResponse;
 import com.keepreal.madagascar.coua.MembershipIdRequest;
@@ -12,6 +13,7 @@ import com.keepreal.madagascar.coua.MembershipServiceGrpc;
 import com.keepreal.madagascar.coua.MembershipsResponse;
 import com.keepreal.madagascar.coua.RetrieveMembershipsByIdsRequest;
 import com.keepreal.madagascar.coua.RetrieveMembershipsByIslandIdsRequest;
+import com.keepreal.madagascar.coua.RetrieveMembershipsByUserIdRequest;
 import com.keepreal.madagascar.coua.RetrieveMembershipsRequest;
 import com.keepreal.madagascar.coua.TopMembershipRequest;
 import com.keepreal.madagascar.coua.UpdateMembershipRequest;
@@ -110,13 +112,13 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
      * @param responseObserver {@link CommonStatus}.
      */
     @Override
-    public void deactivateMembershipById(MembershipIdRequest request, StreamObserver<CommonStatus> responseObserver) {
-        MembershipInfo membership = membershipService.getMembershipById(request.getId());
+    public void deactivateMembershipById(DeactivateMembershipRequest request, StreamObserver<CommonStatus> responseObserver) {
+        MembershipInfo membership = membershipService.getMembershipById(request.getId(), true);
 
         if (notExist(membership, responseObserver) || notPermission(membership, request.getUserId(), responseObserver)) {
             return;
         }
-        this.membershipService.deactivateMembership(membership);
+        this.membershipService.deactivateMembership(membership, request.getDeactivate());
 
         responseObserver.onNext(CommonStatusUtils.getSuccStatus());
         responseObserver.onCompleted();
@@ -131,7 +133,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
     @Override
     public void deleteMembershipById(MembershipIdRequest request, StreamObserver<CommonStatus> responseObserver) {
         String membershipId = request.getId();
-        MembershipInfo membership = membershipService.getMembershipById(request.getId());
+        MembershipInfo membership = membershipService.getMembershipById(request.getId(), true);
 
         if (notExist(membership, responseObserver) || notPermission(membership, request.getUserId(), responseObserver)) {
             return;
@@ -155,7 +157,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
      */
     @Override
     public void updateMembership(UpdateMembershipRequest request, StreamObserver<MembershipResponse> responseObserver) {
-        MembershipInfo membership = membershipService.getMembershipById(request.getId());
+        MembershipInfo membership = membershipService.getMembershipById(request.getId(), true);
 
         if (membership == null) {
             responseObserver.onNext(MembershipResponse.newBuilder()
@@ -267,7 +269,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         String islandId = request.getIslandId();
         List<FeedMembershipMessage> feedMembershipMessages = new ArrayList<>();
         feedMembershipMessages.addAll(membershipService.generateBaseMessage(islandId));
-        feedMembershipMessages.addAll(membershipService.getMembershipListByIslandId(islandId, false)
+        feedMembershipMessages.addAll(membershipService.getMembershipListByIslandId(islandId, true)
                 .stream()
                 .map(membershipService::getFeedMembershipMessage)
                 .collect(Collectors.toList()));
@@ -311,6 +313,19 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
         responseObserver.onNext(MembershipsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .addAllMessage(membershipMessages)
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveMembershipsByUserId(RetrieveMembershipsByUserIdRequest request, StreamObserver<MembershipsResponse> responseObserver) {
+        String userId = request.getUserId();
+
+        List<MembershipInfo> membershipInfoList = this.membershipService.getMembershipListByHostId(userId);
+
+        responseObserver.onNext(MembershipsResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .addAllMessage(membershipInfoList.stream().map(this.membershipService::getMembershipMessage).collect(Collectors.toList()))
                 .build());
         responseObserver.onCompleted();
     }

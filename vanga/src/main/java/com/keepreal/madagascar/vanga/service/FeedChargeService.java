@@ -13,12 +13,10 @@ import com.keepreal.madagascar.vanga.settlementCalculator.DefaultSettlementCalcu
 import com.keepreal.madagascar.vanga.settlementCalculator.SettlementCalculator;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +29,7 @@ public class FeedChargeService {
     private final LongIdGenerator idGenerator;
     private final NotificationEventProducerService notificationEventProducerService;
     private final FeedService feedService;
+    private final IncomeService incomeService;
 
     private final SettlementCalculator settlementCalculator;
 
@@ -39,13 +38,15 @@ public class FeedChargeService {
                              FeedChargeRepository feedChargeRepository,
                              LongIdGenerator idGenerator,
                              NotificationEventProducerService notificationEventProducerService,
-                             FeedService feedService) {
+                             FeedService feedService,
+                             IncomeService incomeService) {
         this.paymentService = paymentService;
         this.balanceService = balanceService;
         this.feedChargeRepository = feedChargeRepository;
         this.idGenerator = idGenerator;
         this.notificationEventProducerService = notificationEventProducerService;
         this.feedService = feedService;
+        this.incomeService = incomeService;
         this.settlementCalculator = new DefaultSettlementCalculator();
     }
 
@@ -70,6 +71,8 @@ public class FeedChargeService {
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
         this.saveFeedCharge(order.getUserId(), order.getPropertyId());
+
+        this.incomeService.updateIncomeAll(payment.getPayeeId(), order.getUserId(), System.currentTimeMillis(), payment.getAmountInCents());
 
         this.notificationEventProducerService.produceNewFeedPaymentNotificationEventAsync(payment.getUserId(),
                 payment.getPayeeId(),
@@ -99,6 +102,8 @@ public class FeedChargeService {
             feedCharge.setFeedId(feedId);
             feedCharge.setIslandId(feedMessage.getIslandId());
             feedCharge.setFeedCreatedAt(feedMessage.getCreatedAt());
+            feedCharge.setHostId(feedMessage.getHostId());
+            feedCharge.setPriceInCents(feedMessage.getPriceInCents());
             this.feedChargeRepository.save(feedCharge);
         }
     }

@@ -113,6 +113,7 @@ public class MembershipDTOFactory {
         dto.setUseCustomMessage(membershipMessage.getUseCustomMessage());
         dto.setMessage(membershipMessage.getMessage());
         dto.setIsPermanent(membershipMessage.getPermanent());
+        dto.setIsActive(membershipMessage.getActivate());
         return dto;
     }
 
@@ -149,6 +150,7 @@ public class MembershipDTOFactory {
         dto.setMessage(membershipMessage.getMessage());
         dto.setIsPermanent(membershipMessage.getPermanent());
         dto.setImage(this.multiMediaDTOFactory.valueOf(membershipMessage));
+        dto.setIsActive(membershipMessage.getActivate());
         return dto;
     }
 

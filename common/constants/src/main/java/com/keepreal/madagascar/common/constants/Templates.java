@@ -71,4 +71,13 @@ public class Templates {
     public static final String ASITY_PURCHASE_HOST_PERMANENT_TEMPLATE = "我刚刚支持了你的「%s」会员（¥%.2f x 永久有效）。创作加油！";
     public static final String ASITY_PURCHASE_CUSTOMER_TEMPLATE = "感谢你的支持！\n更多信息可前往「我的 - 订单中心」中查看。";
 
+    /**
+     * Income detail list templates.
+     */
+    public static final String INCOME_MEMBERSHIP_CONTENT = "支持了%d个月\"%s\"";
+    public static final String INCOME_MEMBERSHIP_PERMANENT_CONTENT = "支持了永久方案\"%s\"";
+    public static final String INCOME_SPONSOR_CONTENT = "支持了你";
+    public static final String INCOME_FEED_CHARGE_CONTENT = "支持了你的独立付费动态";
+    public static final String INCOME_DTO_SPONSOR = "支持一下";
+    public static final String INCOME_DTO_FEED_CHARGE = "单独解锁";
 }

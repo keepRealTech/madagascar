@@ -52,6 +52,12 @@ message RetrieveMembershipsRequest {
     bool includeInactive = 2;
 }
 
+message DeactivateMembershipRequest {
+    string id = 1;
+    string userId = 2;
+    bool deactivate = 3;
+}
+
 message MembershipMessage {
     string id = 1;
     string hostId = 2;
@@ -69,6 +75,7 @@ message MembershipMessage {
     int32 width = 14;
     int32 height = 15;
     int64 size = 16;
+    bool activate = 17;
 }
 
 message MembershipResponse {
@@ -102,10 +109,14 @@ message RetrieveMembershipsByIdsRequest {
     repeated string ids = 1;
 }
 
+message RetrieveMembershipsByUserIdRequest {
+    string userId = 1;
+}
+
 service MembershipService {
     rpc TopMembershipById (TopMembershipRequest) returns (MembershipResponse) {};
     rpc RetrieveMembershipById (MembershipIdRequest) returns (MembershipResponse) {};
-    rpc DeactivateMembershipById (MembershipIdRequest) returns (CommonStatus) {};
+    rpc DeactivateMembershipById (DeactivateMembershipRequest) returns (CommonStatus) {};
     rpc DeleteMembershipById (MembershipIdRequest) returns (CommonStatus) {};
     rpc UpdateMembership (UpdateMembershipRequest) returns (MembershipResponse) {};
     rpc CreateMembership (CreateMembershipRequest) returns (MembershipResponse) {};
@@ -113,4 +124,5 @@ service MembershipService {
     rpc RetrieveFeedMembershipsByIslandId (RetrieveMembershipsRequest) returns (FeedMembershipResponse) {};
     rpc RetrieveMembershipsByIslandIds (RetrieveMembershipsByIslandIdsRequest) returns (MembershipsResponse) {};
     rpc RetrieveMembershipsByIds (RetrieveMembershipsByIdsRequest) returns (MembershipsResponse) {};
+    rpc RetrieveMembershipsByUserId (RetrieveMembershipsByUserIdRequest) returns (MembershipsResponse) {};
 }

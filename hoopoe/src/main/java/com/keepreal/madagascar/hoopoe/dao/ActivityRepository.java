@@ -14,4 +14,6 @@ public interface ActivityRepository extends JpaRepository<Activity, String> {
 
     List<Activity> findAllByActiveIsTrueAndDeletedIsFalse();
 
+    List<Activity> findAllByTypeAndActiveIsTrueAndDeletedIsFalse(int type);
+
 }

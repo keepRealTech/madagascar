@@ -8,6 +8,7 @@ import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.CreateMembershipRequest;
+import com.keepreal.madagascar.coua.DeactivateMembershipRequest;
 import com.keepreal.madagascar.coua.FeedMembershipMessage;
 import com.keepreal.madagascar.coua.FeedMembershipResponse;
 import com.keepreal.madagascar.coua.MembershipIdRequest;
@@ -75,12 +76,13 @@ public class MembershipService {
     }
 
     @CacheEvict(value = "MembershipMessage", key = "#membershipId", cacheManager = "redisCacheManager")
-    public void deactivateMembershipById(String membershipId, String userId) {
+    public void deactivateMembershipById(String membershipId, String userId, boolean deactivate) {
         MembershipServiceGrpc.MembershipServiceBlockingStub stub = MembershipServiceGrpc.newBlockingStub(this.channel);
 
-        MembershipIdRequest request = MembershipIdRequest.newBuilder()
+        DeactivateMembershipRequest request = DeactivateMembershipRequest.newBuilder()
                 .setId(membershipId)
                 .setUserId(userId)
+                .setDeactivate(deactivate)
                 .build();
 
         CommonStatus commonStatus;

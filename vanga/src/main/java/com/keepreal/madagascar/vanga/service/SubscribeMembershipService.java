@@ -45,6 +45,7 @@ public class SubscribeMembershipService {
     private final LongIdGenerator idGenerator;
     private final RedissonClient redissonClient;
     private final NotificationEventProducerService notificationEventProducerService;
+    private final IncomeService incomeService;
 
     private final SettlementCalculator settlementCalculator;
 
@@ -59,6 +60,7 @@ public class SubscribeMembershipService {
      * @param idGenerator                      {@link LongIdGenerator}.
      * @param redissonClient                   {@link RedissonClient}.
      * @param notificationEventProducerService {@link NotificationEventProducerService}.
+     * @param incomeService                    {@link IncomeService}.
      */
     public SubscribeMembershipService(IOSOrderService iosOrderService,
                                       BalanceService balanceService,
@@ -67,7 +69,8 @@ public class SubscribeMembershipService {
                                       SubscribeMembershipRepository subscriptionMemberRepository,
                                       LongIdGenerator idGenerator,
                                       RedissonClient redissonClient,
-                                      NotificationEventProducerService notificationEventProducerService) {
+                                      NotificationEventProducerService notificationEventProducerService,
+                                      IncomeService incomeService) {
         this.iosOrderService = iosOrderService;
         this.balanceService = balanceService;
         this.paymentService = paymentService;
@@ -76,6 +79,7 @@ public class SubscribeMembershipService {
         this.idGenerator = idGenerator;
         this.redissonClient = redissonClient;
         this.notificationEventProducerService = notificationEventProducerService;
+        this.incomeService = incomeService;
 
         this.settlementCalculator = new DefaultSettlementCalculator();
     }
@@ -103,8 +107,8 @@ public class SubscribeMembershipService {
     /**
      * Subscribe member for a newly succeed wechat pay order.
      *
-     * @param order         {@link Order}.
-     * @param paymentType   {@link PaymentType}.
+     * @param order       {@link Order}.
+     * @param paymentType {@link PaymentType}.
      */
     @Transactional
     public void subscribeMembershipWithOrder(Order order, PaymentType paymentType) {
@@ -149,6 +153,7 @@ public class SubscribeMembershipService {
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.updateAll(innerPaymentList);
             this.createOrRenewSubscriptionMember(order.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
+            this.incomeService.updateIncomeAll(sku.getHostId(), order.getUserId(), System.currentTimeMillis(), sku.getPriceInCents() * sku.getTimeInMonths());
         }
     }
 
@@ -179,6 +184,8 @@ public class SubscribeMembershipService {
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.createPayShellPayments(userId, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
+            this.incomeService.updateIncomeAll(sku.getHostId(), userId, System.currentTimeMillis(), sku.getPriceInCents() * sku.getTimeInMonths());
+
         }
     }
 
@@ -205,6 +212,8 @@ public class SubscribeMembershipService {
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.createIOSPayPayments(userId, iosOrder, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
+            this.incomeService.updateIncomeAll(sku.getHostId(), userId, System.currentTimeMillis(), sku.getPriceInCents() * sku.getTimeInMonths());
+
         }
     }
 
@@ -264,8 +273,8 @@ public class SubscribeMembershipService {
     /**
      * merge user subscribed membership
      *
-     * @param wechatUserId      wechat user id
-     * @param webMobileUserId   mobile user id
+     * @param wechatUserId    wechat user id
+     * @param webMobileUserId mobile user id
      */
     public void mergeUserSubscribeMembership(String wechatUserId, String webMobileUserId) {
         this.subscriptionMemberRepository.mergeUserSubscribeMembership(wechatUserId, webMobileUserId);
@@ -274,9 +283,9 @@ public class SubscribeMembershipService {
     /**
      * Retrieve subscribeMembership by user id and island id.
      *
-     * @param userId    user id.
-     * @param islandId  island id.
-     * @return  {@link SubscribeMembership}.
+     * @param userId   user id.
+     * @param islandId island id.
+     * @return {@link SubscribeMembership}.
      */
     public List<SubscribeMembership> retrieveSubscribeMembership(String userId, String islandId) {
         return this.subscriptionMemberRepository.findSubscribeMembershipsByUserIdAndIslandId(userId, islandId);
@@ -285,8 +294,8 @@ public class SubscribeMembershipService {
     /**
      * Build subscribeMembershipMessage.
      *
-     * @param subscribeMembership   {@link SubscribeMembership}.
-     * @return  {@link SubscribeMembershipMessage}.
+     * @param subscribeMembership {@link SubscribeMembership}.
+     * @return {@link SubscribeMembershipMessage}.
      */
     public SubscribeMembershipMessage getMessage(SubscribeMembership subscribeMembership) {
         return SubscribeMembershipMessage.newBuilder()

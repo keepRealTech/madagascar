@@ -53,6 +53,8 @@ tags:
     description: 活动 controller
   - name: Income
     description: 收入 controller
+  - name: Banner
+    description: Banner controller
 
 paths:
   /api/healthcheck:
@@ -2895,6 +2897,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IncomeDetailsResponse'
+  /api/v1/banners/creator:
+    get:
+      tags:
+        - Banner
+      summary: 获取创作者专属banner
+      responses:
+        '200':
+          description: banner response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BannersResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -6541,3 +6555,12 @@ components:
           type: string
         emoji:
           type: string
+    BannersResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BannerDTO'

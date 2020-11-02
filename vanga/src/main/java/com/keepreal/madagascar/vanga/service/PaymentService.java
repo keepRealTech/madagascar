@@ -409,4 +409,19 @@ public class PaymentService {
         return cents == null ? 0 : cents;
     }
 
+    public Page<Payment> retrievePaymentsByPayeeId(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable) {
+        return this.paymentRepository.retrievePaymentsByPayeeIdAndTimestamp(payeeId, startTimestamp, endTimestamp, pageable);
+    }
+
+    public Page<Payment> retrieveMembershipPaymentsByPayeeId(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds, Pageable pageable) {
+        return this.paymentRepository.retrieveMembershipPaymentsByPayeeIdAndTimestamp(payeeId, startTimestamp, endTimestamp, membershipSkuIds, pageable);
+    }
+
+    public Page<Payment> retrieveSponsorPaymentsByPayeeId(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable) {
+        return this.paymentRepository.retrieveSponsorPaymentsByPayeeIdAndTimestamp(payeeId, startTimestamp, endTimestamp, pageable);
+    }
+
+    public Page<Payment> retrieveFeedChargePaymentsByPayeeId(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable) {
+        return this.paymentRepository.retrieveFeedChargePaymentsByPayeeIdAndTimestamp(payeeId, startTimestamp, endTimestamp, pageable);
+    }
 }
