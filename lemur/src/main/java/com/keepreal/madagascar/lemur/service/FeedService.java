@@ -229,7 +229,7 @@ public class FeedService {
         }
 
         if (Objects.nonNull(brief)) {
-            builder.setTitle(StringValue.of(brief));
+            builder.setBrief(StringValue.of(brief));
         }
 
         this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
