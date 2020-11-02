@@ -69,7 +69,12 @@ public class MembershipService {
     }
 
     public MembershipInfo getMembershipById(String id) {
-        return repository.findMembershipInfoByIdAndActiveIsTrueAndDeletedIsFalse(id);
+        return this.getMembershipById(id, false);
+    }
+
+    public MembershipInfo getMembershipById(String id, boolean includeInactive) {
+        return includeInactive ? repository.findMembershipInfoByIdAndDeletedIsFalse(id) :
+                repository.findMembershipInfoByIdAndActiveIsTrueAndDeletedIsFalse(id);
     }
 
     public List<MembershipInfo> getMembershipListByIslandId(String islandId, boolean includeInactive) {
@@ -144,6 +149,7 @@ public class MembershipService {
                 .setMessage(membershipInfo.getMessage())
                 .setPermanent(membershipInfo.getPermanent())
                 .setImageUri(membershipInfo.getImageUri())
+                .setActivate(membershipInfo.getActive())
                 .build();
     }
 
@@ -164,10 +170,11 @@ public class MembershipService {
      *
      * @param membership {@link MembershipInfo}.
      */
-    public void deactivateMembership(MembershipInfo membership) {
-        membership.setActive(false);
-        this.skuService.updateMembershipSkusByMembershipId(membership.getId(), null, null, true, false);
+    public void deactivateMembership(MembershipInfo membership, boolean deactivate) {
+        membership.setActive(!deactivate);
         this.updateMembership(membership);
+
+        this.skuService.updateMembershipSkusByMembershipId(membership.getId(), membership.getName(), membership.getPricePerMonth(), !deactivate, membership.getPermanent());
     }
 
     /**

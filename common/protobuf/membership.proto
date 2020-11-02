@@ -46,6 +46,12 @@ message RetrieveMembershipsRequest {
     bool includeInactive = 2;
 }
 
+message DeactivateMembershipRequest {
+    string id = 1;
+    string userId = 2;
+    bool deactivate = 3;
+}
+
 message MembershipMessage {
     string id = 1;
     string hostId = 2;
@@ -60,6 +66,7 @@ message MembershipMessage {
     string message = 11;
     bool permanent = 12;
     string imageUri = 13;
+    bool activate = 14;
 }
 
 message MembershipResponse {
@@ -96,7 +103,7 @@ message RetrieveMembershipsByIdsRequest {
 service MembershipService {
     rpc TopMembershipById (TopMembershipRequest) returns (MembershipResponse) {};
     rpc RetrieveMembershipById (MembershipIdRequest) returns (MembershipResponse) {};
-    rpc DeactivateMembershipById (MembershipIdRequest) returns (CommonStatus) {};
+    rpc DeactivateMembershipById (DeactivateMembershipRequest) returns (CommonStatus) {};
     rpc DeleteMembershipById (MembershipIdRequest) returns (CommonStatus) {};
     rpc UpdateMembership (UpdateMembershipRequest) returns (MembershipResponse) {};
     rpc CreateMembership (CreateMembershipRequest) returns (MembershipResponse) {};
