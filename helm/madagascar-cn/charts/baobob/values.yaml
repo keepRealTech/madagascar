@@ -13,7 +13,7 @@ wechat:
 
 jwt:
   access_token_validity: 604800
-  refresh_token_validity: 604800
+  refresh_token_validity: 1209600
 
 coua:
   host: coua
