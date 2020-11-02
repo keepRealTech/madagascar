@@ -749,7 +749,7 @@ public class FeedService {
                                       String text,
                                       String brief) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
-        UpdateFeedRequest.Builder builder = UpdateFeedRequest.newBuilder();
+        UpdateFeedRequest.Builder builder = UpdateFeedRequest.newBuilder().setId(id);
 
         if (!StringUtils.isEmpty(title)) {
             builder.setTitle(StringValue.of(title));
