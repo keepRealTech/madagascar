@@ -89,7 +89,8 @@ subprojects {
             tag 'staging', "registry.cn-beijing.aliyuncs.com/keepreal/${project.name.replace('_','-')}:$project.version-staging"
             dockerfile file("$projectDir/dockerfile")
             files "$projectDir/start.sh", "$projectDir/healthcheck.sh", "$projectDir/apiclient_cert.p12",
-                  "$projectDir/appCertPublicKey_2021001189642510.crt", "$projectDir/alipayCertPublicKey_RSA2.crt", "$projectDir/alipayRootCert.crt"
+                  "$projectDir/appCertPublicKey_2021001189642510.crt", "$projectDir/alipayCertPublicKey_RSA2.crt", "$projectDir/alipayRootCert.crt",
+                  "$projectDir/GeoLite2-Country.mmdb"
             copySpec.from(tasks.unpack.outputs).into("dependency")
             buildArgs(['DEPENDENCY': "dependency"])
             pull true
@@ -177,6 +178,7 @@ subprojects {
             dependency "com.squareup.okhttp3:okhttp:4.8.1"
             dependency "com.squareup.okio:okio:2.2.2"
             dependency "org.jetbrains.kotlin:kotlin-stdlib:1.4.10"
+            dependency "com.maxmind.geoip2:geoip2:2.15.0"
         }
     }
 }
