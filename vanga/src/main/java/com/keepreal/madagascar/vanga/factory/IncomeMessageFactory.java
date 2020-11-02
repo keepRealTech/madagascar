@@ -5,7 +5,7 @@ import com.keepreal.madagascar.vanga.FeedChargeMessage;
 import com.keepreal.madagascar.vanga.IncomeDetailMessage;
 import com.keepreal.madagascar.vanga.IncomeMonthlyMessage;
 import com.keepreal.madagascar.vanga.IncomeProfileMessage;
-import com.keepreal.madagascar.vanga.SponsorMessage;
+import com.keepreal.madagascar.vanga.SponsorIncomeMessage;
 import com.keepreal.madagascar.vanga.SupportListMessage;
 import com.keepreal.madagascar.vanga.SupportMembershipMessage;
 import com.keepreal.madagascar.vanga.model.IncomeDetail;
@@ -110,10 +110,10 @@ public class IncomeMessageFactory {
                 .build();
     }
 
-    public SponsorMessage sponsorValueOf(String userId) {
+    public SponsorIncomeMessage sponsorValueOf(String userId) {
         Integer supportCount = this.paymentRepository.countSponsorByPayeeIdAndTimestamp(userId, DateUtils.startOfMonthTimestamp(), DateUtils.endOfMonthTimestamp());
         Long income = this.paymentRepository.countSponsorIncomeByPayeeIdAndTimestamp(userId, DateUtils.startOfMonthTimestamp(), DateUtils.endOfMonthTimestamp());
-        return SponsorMessage.newBuilder()
+        return SponsorIncomeMessage.newBuilder()
                 .setIncome(income == null ? 0L : income)
                 .setSupportCount(supportCount)
                 .build();

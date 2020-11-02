@@ -121,7 +121,7 @@ public class LoginController implements LoginApi {
             label = "user id",
             value = "body.data.user.id"
     )
-    public ResponseEntity<FullUserResponse> apiV1LoginPost(@Valid PostLoginRequest postLoginRequest, @Valid Boolean admin) {
+    public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest postLoginRequest, @Valid Boolean admin) {
         LoginRequest loginRequest;
         switch (postLoginRequest.getLoginType()) {
             case OAUTH_WECHAT:
@@ -231,8 +231,8 @@ public class LoginController implements LoginApi {
                 .map(this.islandDTOFactory::briefValueOf)
                 .collect(Collectors.toList());
 
-        FullUserResponse response = new FullUserResponse();
-        response.setData(this.userDTOFactory.fullValueOf(user, false, createdIslands));
+        LoginResponse response = new LoginResponse();
+        response.setData(this.buildTokenInfo(loginResponse, user, createdIslands));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -396,7 +396,12 @@ public class LoginController implements LoginApi {
         LoginResponse response = new LoginResponse();
         if (!StringUtils.isEmpty(loginResponse.getUserId())) {
             UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
-            response.setData(this.buildTokenInfo(loginResponse, user));
+            List<BriefIslandDTO> createdIslands = this.islandService.retrieveIslands(null, user.getId(), null, 0, Integer.MAX_VALUE)
+                    .getIslandsList()
+                    .stream()
+                    .map(this.islandDTOFactory::briefValueOf)
+                    .collect(Collectors.toList());
+            response.setData(this.buildTokenInfo(loginResponse, user, createdIslands));
         }
 
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
@@ -451,11 +456,12 @@ public class LoginController implements LoginApi {
      * @return {@link LoginTokenInfo}.
      */
     private LoginTokenInfo buildTokenInfo(com.keepreal.madagascar.baobob.LoginResponse loginResponse,
-                                          UserMessage userMessage) {
+                                          UserMessage userMessage,
+                                          List<BriefIslandDTO> createdIslands) {
         LoginTokenInfo loginTokenInfo = new LoginTokenInfo();
         loginTokenInfo.setToken(loginResponse.getToken());
         loginTokenInfo.setRefreshToken(loginResponse.getRefreshToken());
-        loginTokenInfo.setUser(this.userDTOFactory.valueOf(userMessage, false));
+        loginTokenInfo.setUser(this.userDTOFactory.fullValueOf(userMessage, false, createdIslands));
         loginTokenInfo.setOpenId(loginResponse.getOpenId());
         return loginTokenInfo;
     }

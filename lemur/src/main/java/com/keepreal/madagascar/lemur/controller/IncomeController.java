@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.IncomeDetailType;
+import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.dtoFactory.IncomeDTOFactory;
@@ -18,12 +19,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.IncomeApi;
 import swagger.model.CurrentMonthSupportResponse;
+import swagger.model.GreetingsResponse;
 import swagger.model.IncomeDetailsResponse;
 import swagger.model.IncomeMonthlyResponse;
 import swagger.model.IncomeProfileResponse;
 import swagger.model.IncomeSupportsResponse;
 import swagger.model.IncomeType;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,6 +44,16 @@ public class IncomeController implements IncomeApi {
                             IncomeDTOFactory incomeDTOFactory) {
         this.incomeService = incomeService;
         this.incomeDTOFactory = incomeDTOFactory;
+    }
+
+    @Override
+    public ResponseEntity<GreetingsResponse> apiV1IncomeGreetingsGet() {
+        GreetingsResponse response = new GreetingsResponse();
+
+        response.setData(Arrays.asList(Templates.INCOME_GREETINGS_CONTENTS.split(",")));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @Override

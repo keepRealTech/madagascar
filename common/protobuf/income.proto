@@ -51,7 +51,7 @@ message SupportListMessage {
 message RetrieveCurrentMonthResponse {
     CommonStatus status = 1;
     repeated SupportMembershipMessage membershipMessage = 2;
-    SponsorMessage sponsorMessage = 3;
+    SponsorIncomeMessage sponsorMessage = 3;
     FeedChargeMessage feedChargeMessage = 4;
 }
 
@@ -64,7 +64,7 @@ message SupportMembershipMessage {
     int64 income = 6;
 }
 
-message SponsorMessage {
+message SponsorIncomeMessage {
     int32 supportCount = 1;
     int64 income = 2;
 }
