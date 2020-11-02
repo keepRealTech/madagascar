@@ -29,6 +29,7 @@ message UpdateMembershipRequest {
     google.protobuf.StringValue imageUri = 9;
     google.protobuf.Int32Value width = 10;
     google.protobuf.Int32Value height = 11;
+    google.protobuf.Int64Value size = 12;
 }
 
 message CreateMembershipRequest {
@@ -43,6 +44,7 @@ message CreateMembershipRequest {
     string imageUri = 9;
     int32 width = 10;
     int32 height = 11;
+    int64 size = 12;
 }
 
 message RetrieveMembershipsRequest {
@@ -66,6 +68,7 @@ message MembershipMessage {
     string imageUri = 13;
     int32 width = 14;
     int32 height = 15;
+    int64 size = 16;
 }
 
 message MembershipResponse {

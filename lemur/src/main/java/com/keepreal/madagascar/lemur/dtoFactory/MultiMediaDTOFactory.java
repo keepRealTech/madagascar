@@ -72,7 +72,7 @@ public class MultiMediaDTOFactory {
         dto.setUrl(membershipMessage.getImageUri());
         dto.setWidth(membershipMessage.getWidth());
         dto.setHeight(membershipMessage.getHeight());
-        dto.setSize(0L);
+        dto.setSize(membershipMessage.getSize());
         return dto;
     }
 

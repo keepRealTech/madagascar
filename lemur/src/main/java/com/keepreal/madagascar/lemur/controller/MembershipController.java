@@ -137,7 +137,8 @@ public class MembershipController implements MembershipApi {
                 Objects.nonNull(postMembershipRequest.getIsPermanent()) ? postMembershipRequest.getIsPermanent() : false,
                 Objects.nonNull(postMembershipRequest.getImageUri()) ? postMembershipRequest.getImageUri() : "",
                 postMembershipRequest.getWidth(),
-                postMembershipRequest.getHeight());
+                postMembershipRequest.getHeight(),
+                postMembershipRequest.getSize());
 
         MembershipResponse response = new MembershipResponse();
         response.data(membershipDTOFactory.briefValueOf(membershipMessage));
@@ -210,7 +211,8 @@ public class MembershipController implements MembershipApi {
                 putMembershipRequest.getIsPermanent(),
                 putMembershipRequest.getImageUri(),
                 putMembershipRequest.getWidth(),
-                putMembershipRequest.getHeight());
+                putMembershipRequest.getHeight(),
+                putMembershipRequest.getSize());
 
         MembershipResponse response = new MembershipResponse();
         response.data(membershipDTOFactory.briefValueOf(membershipMessage));

@@ -48,6 +48,7 @@ public class MembershipInfo {
     private String imageUri;
     private Integer width;
     private Integer height;
+    private Long size;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
