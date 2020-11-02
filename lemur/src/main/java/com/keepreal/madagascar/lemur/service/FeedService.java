@@ -29,6 +29,7 @@ import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
 import com.keepreal.madagascar.fossa.UpdateFeedFeedgroupRequest;
+import com.keepreal.madagascar.fossa.UpdateFeedRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityResponse;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
@@ -94,7 +95,7 @@ public class FeedService {
      * @param text      Text content.
      * @param imageUris Image uris.
      */
-    public void createFeed(List<String> islandIds, List<String> membershipIds, String userId, String text, List<String> imageUris) {
+    public void createFeeds(List<String> islandIds, List<String> membershipIds, String userId, String text, List<String> imageUris) {
         if (Objects.isNull(islandIds) || islandIds.size() == 0) {
             log.error("param islandIds is invalid");
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
@@ -130,14 +131,14 @@ public class FeedService {
         }
     }
 
-    public void createFeedV2(List<String> islandIds,
-                             List<String> membershipIds,
-                             String userId,
-                             MediaType mediaType,
-                             List<MultiMediaDTO> multiMediaDTOList,
-                             String text,
-                             String feedGroupId,
-                             Long priceInCents) {
+    public void createFeedsV2(List<String> islandIds,
+                              List<String> membershipIds,
+                              String userId,
+                              MediaType mediaType,
+                              List<MultiMediaDTO> multiMediaDTOList,
+                              String text,
+                              String feedGroupId,
+                              Long priceInCents) {
         if (Objects.isNull(islandIds) || islandIds.size() == 0) {
             log.error("param islandIds is invalid");
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
@@ -179,6 +180,79 @@ public class FeedService {
         if (ErrorCode.REQUEST_SUCC_VALUE != newFeedsResponse.getStatus().getRtn()) {
             throw new KeepRealBusinessException(newFeedsResponse.getStatus());
         }
+    }
+
+    /**
+     * Creates a feed in a given island.
+     *
+     * @param islandId          Island id.
+     * @param membershipIds     Membership ids.
+     * @param userId            Creator id.
+     * @param mediaType         Media type.
+     * @param multiMediaDTOList Media entity.
+     * @param text              Text.
+     * @param title             Title.
+     * @param brief             Brief.
+     * @param feedGroupId       Feed group id.
+     * @param priceInCents      Price in cents.
+     * @return {@link FeedMessage}.
+     */
+    public FeedMessage createFeed(String islandId,
+                                  List<String> membershipIds,
+                                  String userId,
+                                  MediaType mediaType,
+                                  List<MultiMediaDTO> multiMediaDTOList,
+                                  String text,
+                                  String title,
+                                  String brief,
+                                  String feedGroupId,
+                                  Long priceInCents) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        String hostId = this.islandService.retrieveIslandById(islandId).getHostId();
+
+        NewFeedsRequestV2.Builder builder = NewFeedsRequestV2.newBuilder()
+                .addIslandId(islandId)
+                .addHostId(hostId)
+                .addAllMembershipIds(Objects.isNull(membershipIds) ? new ArrayList<>() : membershipIds)
+                .setUserId(userId)
+                .setType(mediaType);
+
+        if (Objects.nonNull(feedGroupId)) {
+            builder.setFeedGroupId(StringValue.of(feedGroupId));
+        }
+
+        if (priceInCents != null && priceInCents > 0) {
+            builder.setPriceInCents(Int64Value.of(priceInCents));
+        }
+
+        if (Objects.nonNull(title)) {
+            builder.setTitle(StringValue.of(title));
+        }
+
+        if (Objects.nonNull(brief)) {
+            builder.setBrief(StringValue.of(brief));
+        }
+
+        this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
+
+        FeedResponse feedResponse;
+        try {
+            feedResponse = stub.createFeed(builder.build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(feedResponse)
+                || !feedResponse.hasStatus()) {
+            log.error(Objects.isNull(feedResponse) ? "Create feed returned null." : feedResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != feedResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(feedResponse.getStatus());
+        }
+
+        return feedResponse.getFeed();
     }
 
     /**
@@ -508,7 +582,6 @@ public class FeedService {
                                     feedMessage
                             );
                         })
-                        .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
     }
 
@@ -663,6 +736,53 @@ public class FeedService {
     }
 
     /**
+     * Updates a feed by id
+     *
+     * @param id feed id
+     * @param title title
+     * @param text text
+     * @param brief brief
+     * @return {@link FeedMessage}
+     */
+    public FeedMessage updateFeedById(String id,
+                                      String title,
+                                      String text,
+                                      String brief) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+        UpdateFeedRequest.Builder builder = UpdateFeedRequest.newBuilder();
+
+        if (!StringUtils.isEmpty(title)) {
+            builder.setTitle(StringValue.of(title));
+        }
+
+        if (!StringUtils.isEmpty(text)) {
+            builder.setText(StringValue.of(text));
+        }
+
+        if (!StringUtils.isEmpty(brief)) {
+            builder.setBrief(StringValue.of(brief));
+        }
+
+        FeedResponse response;
+
+        try {
+            response = stub.updateFeed(builder.build());
+        } catch (StatusRuntimeException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, e.getMessage());
+        }
+
+        if (Objects.isNull(response) || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "update feed returns null" : response.toString());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getFeed();
+    }
+
+    /**
      * Retrieves timelines by user id.
      *
      * @param userId         User id.
@@ -702,7 +822,10 @@ public class FeedService {
         return timelinesResponse;
     }
 
-    private void buildMediaMessage(NewFeedsRequestV2.Builder builder, MediaType mediaType, List<MultiMediaDTO> multiMediaDTOList, String text) {
+    private void buildMediaMessage(NewFeedsRequestV2.Builder builder,
+                                   MediaType mediaType,
+                                   List<MultiMediaDTO> multiMediaDTOList,
+                                   String text) {
         switch (mediaType) {
             case MEDIA_PICS:
             case MEDIA_ALBUM:

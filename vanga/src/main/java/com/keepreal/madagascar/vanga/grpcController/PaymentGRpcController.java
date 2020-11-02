@@ -520,6 +520,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param request          {@link SubscribeMembershipRequest}.
      * @param responseObserver {@link StreamObserver}.
      */
+    @Deprecated
     @Override
     public void subscribeMembershipWithShell(SubscribeMembershipRequest request,
                                              StreamObserver<CommonStatus> responseObserver) {
@@ -583,6 +584,7 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
      * @param request          {@link IOSOrderSubscribeRequest}.
      * @param responseObserver {@link CommonStatus}.
      */
+    @Deprecated
     @Override
     public void iOSSubscribeMembership(IOSOrderSubscribeRequest request,
                                        io.grpc.stub.StreamObserver<CommonStatus> responseObserver) {

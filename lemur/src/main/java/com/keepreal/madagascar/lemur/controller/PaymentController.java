@@ -25,7 +25,6 @@ import com.keepreal.madagascar.vanga.UserPaymentMessage;
 import com.keepreal.madagascar.vanga.WithdrawPaymentsResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.PaymentApi;
 import swagger.model.AlipayH5PayFeedRequest;
@@ -159,7 +158,6 @@ public class PaymentController implements PaymentApi {
      * @param subscribeMemberRequest (required) {@link SubscribeMemberRequest}.
      * @return {@link H5WechatOrderResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<H5WechatOrderResponse> apiV1IslandsIdMemberSubscriptionWechatPayHtml5Post(String id,
                                                                                                     SceneType sceneType,
@@ -191,7 +189,6 @@ public class PaymentController implements PaymentApi {
      * @param alipayH5SubscribeMemberRequest (required) {@link AlipayH5SubscribeMemberRequest}.
      * @return {@link AlipayOrderResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<AlipayOrderResponse> apiV1IslandsIdMemberSubscriptionAlipayHtml5Post(String id,
                                                                                                AlipayH5SubscribeMemberRequest alipayH5SubscribeMemberRequest) {
@@ -216,7 +213,6 @@ public class PaymentController implements PaymentApi {
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link UserPaymentsResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<UserPaymentsResponse> apiV1PaymentsGet(Integer page,
                                                                  Integer pageSize) {
@@ -269,7 +265,6 @@ public class PaymentController implements PaymentApi {
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link UserPaymentsResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<UserPaymentsResponseV11> apiV11PaymentsGet(Integer page,
                                                                      Integer pageSize) {
@@ -322,7 +317,6 @@ public class PaymentController implements PaymentApi {
      * @param pageSize size of a page (optional, default to 10).
      * @return {@link UserWithdrawsResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<UserWithdrawsResponse> apiV1PaymentsWithdrawsGet(Integer page, Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -456,7 +450,6 @@ public class PaymentController implements PaymentApi {
      * @param postSupportRequest (required) {@link PostSupportRequest}.
      * @return {@link H5WechatOrderResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<H5WechatOrderResponse> apiV1IslandsIdSupportWechatPayHtml5Post(String id,
                                                                                          SceneType sceneType,
@@ -539,7 +532,6 @@ public class PaymentController implements PaymentApi {
      * @param alipayH5PostSupportRequest (required) {@link AlipayH5PostSupportRequest}.
      * @return {@link AlipayOrderResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<AlipayOrderResponse> apiV1IslandsIdSupportAlipayHtml5Post(String id,
                                                                                     AlipayH5PostSupportRequest alipayH5PostSupportRequest) {
@@ -699,7 +691,6 @@ public class PaymentController implements PaymentApi {
      * @param id id (required) Feed id.
      * @return {@link H5RedirectResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<H5WechatOrderResponse> apiV1FeedsIdWechatPayHtml5Post(String id, SceneType sceneType) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -765,7 +756,6 @@ public class PaymentController implements PaymentApi {
      * @param id id (required) Feed id.
      * @return {@link AlipayOrderResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<AlipayOrderResponse> apiV1FeedsIdAlipayHtml5Post(String id,
                                                                            AlipayH5PayFeedRequest alipayH5PayFeedRequest) {

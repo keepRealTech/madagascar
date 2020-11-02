@@ -18,7 +18,7 @@ import javax.persistence.Table;
  * Represents the chat setting.
  */
 @Data
-@Table(name = "chat_setting")
+@Table(name = "chat_settings")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Builder

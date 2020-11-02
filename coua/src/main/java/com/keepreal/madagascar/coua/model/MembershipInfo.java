@@ -46,6 +46,9 @@ public class MembershipInfo {
     @Column(name = "is_permanent")
     private Boolean permanent;
     private String imageUri;
+    private Integer width;
+    private Integer height;
+    private Long size;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

@@ -69,7 +69,12 @@ public class MembershipService {
     }
 
     public MembershipInfo getMembershipById(String id) {
-        return repository.findMembershipInfoByIdAndActiveIsTrueAndDeletedIsFalse(id);
+        return this.getMembershipById(id, false);
+    }
+
+    public MembershipInfo getMembershipById(String id, boolean includeInactive) {
+        return includeInactive ? repository.findMembershipInfoByIdAndDeletedIsFalse(id) :
+                repository.findMembershipInfoByIdAndActiveIsTrueAndDeletedIsFalse(id);
     }
 
     public List<MembershipInfo> getMembershipListByIslandId(String islandId, boolean includeInactive) {
@@ -78,6 +83,10 @@ public class MembershipService {
         } else {
             return repository.findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandId);
         }
+    }
+
+    public List<MembershipInfo> getMembershipListByHostId(String userId) {
+        return repository.findMembershipInfosByHostIdAndDeletedIsFalse(userId);
     }
 
     public List<MembershipInfo> getMembershipListByIslandIds(List<String> islandIds) {
@@ -144,6 +153,10 @@ public class MembershipService {
                 .setMessage(membershipInfo.getMessage())
                 .setPermanent(membershipInfo.getPermanent())
                 .setImageUri(membershipInfo.getImageUri())
+                .setWidth(membershipInfo.getWidth())
+                .setHeight(membershipInfo.getHeight())
+                .setSize(membershipInfo.getSize())
+                .setActivate(membershipInfo.getActive())
                 .build();
     }
 
@@ -164,10 +177,11 @@ public class MembershipService {
      *
      * @param membership {@link MembershipInfo}.
      */
-    public void deactivateMembership(MembershipInfo membership) {
-        membership.setActive(false);
-        this.skuService.updateMembershipSkusByMembershipId(membership.getId(), null, null, true, false);
+    public void deactivateMembership(MembershipInfo membership, boolean deactivate) {
+        membership.setActive(!deactivate);
         this.updateMembership(membership);
+
+        this.skuService.updateMembershipSkusByMembershipId(membership.getId(), membership.getName(), membership.getPricePerMonth(), !deactivate, membership.getPermanent());
     }
 
     /**
@@ -207,6 +221,16 @@ public class MembershipService {
 
         if (request.hasImageUri()) {
             membershipInfo.setImageUri(request.getImageUri().getValue());
+        }
+
+        if (request.hasWidth()) {
+            membershipInfo.setWidth(request.getWidth().getValue());
+        }
+        if (request.hasHeight()) {
+            membershipInfo.setHeight(request.getHeight().getValue());
+        }
+        if (request.hasSize()) {
+            membershipInfo.setSize(request.getSize().getValue());
         }
 
         this.skuService.updateMembershipSkusByMembershipId(request.getId(), newName, newPrice, null, membershipInfo.getPermanent());

@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.vanga";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message RetrieveMyIncomeRequest {
+    string userId = 1;
+}
+
+message RetrieveSupportListRequest {
+    string userId = 1;
+    PageRequest pageRequest = 2;
+}
+
+message RetrieveIncomeDetailRequest {
+    string userId = 1;
+    IncomeDetailType type = 2;
+    google.protobuf.Int64Value timestamp = 3;
+    google.protobuf.StringValue membershipId = 4;
+    PageRequest pageRequest = 5;
+}
+
+message RetrieveIncomeProfileResponse {
+    CommonStatus status = 1;
+    IncomeProfileMessage message = 2;
+}
+
+message RetrieveSupportListResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated SupportListMessage message = 3;
+}
+
+message IncomeProfileMessage {
+    int64 totalIncome = 1;
+    int32 totalSupportCount = 2;
+    int32 totalSubscriber = 3;
+    int64 currentMonthIncome = 4;
+    int32 currentMonthSupportCount = 5;
+    int64 nextMonthIncome = 6;
+}
+
+message SupportListMessage {
+    string userId = 1;
+    int64 amountInCents = 2;
+}
+
+message RetrieveCurrentMonthResponse {
+    CommonStatus status = 1;
+    repeated SupportMembershipMessage membershipMessage = 2;
+    SponsorMessage sponsorMessage = 3;
+    FeedChargeMessage feedChargeMessage = 4;
+}
+
+message SupportMembershipMessage {
+    string membershipId = 1;
+    string membershipName = 2;
+    int64 priceInMonth = 3;
+    bool isPermanent = 4;
+    int32 supportCount = 5;
+    int64 income = 6;
+}
+
+message SponsorMessage {
+    int32 supportCount = 1;
+    int64 income = 2;
+}
+
+message FeedChargeMessage {
+    int32 supportCount = 1;
+    int64 income = 2;
+}
+
+message RetrieveIncomeMonthlyResponse {
+    CommonStatus status = 1;
+    repeated IncomeMonthlyMessage message = 2;
+}
+
+message IncomeMonthlyMessage {
+    int64 monthTimestamp = 1;
+    int64 currentMonthIncome = 2;
+    int32 supportCount = 3;
+}
+
+message RetrieveIncomeDetailResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated IncomeDetailMessage message = 3;
+}
+
+message IncomeDetailMessage {
+    string userId = 1;
+    string content = 2;
+    int64 amountInCents = 3;
+    int64 timestamp = 4;
+}
+
+service IncomeService {
+    rpc RetrieveIncomeProfile(RetrieveMyIncomeRequest) returns (RetrieveIncomeProfileResponse) {};
+    rpc RetrieveSupportList(RetrieveSupportListRequest) returns (RetrieveSupportListResponse) {};
+    rpc RetrieveCurrentMonth(RetrieveMyIncomeRequest) returns (RetrieveCurrentMonthResponse) {};
+    rpc RetrieveIncomeMonthly(RetrieveMyIncomeRequest) returns (RetrieveIncomeMonthlyResponse) {};
+    rpc RetrieveIncomeDetail(RetrieveIncomeDetailRequest) returns (RetrieveIncomeDetailResponse) {};
+}

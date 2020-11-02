@@ -9,6 +9,8 @@ import com.keepreal.madagascar.vanga.model.OrderState;
 import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.repository.FeedChargeRepository;
+import com.keepreal.madagascar.vanga.settlementCalculator.DefaultSettlementCalculator;
+import com.keepreal.madagascar.vanga.settlementCalculator.SettlementCalculator;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -27,19 +29,25 @@ public class FeedChargeService {
     private final LongIdGenerator idGenerator;
     private final NotificationEventProducerService notificationEventProducerService;
     private final FeedService feedService;
+    private final IncomeService incomeService;
+
+    private final SettlementCalculator settlementCalculator;
 
     public FeedChargeService(PaymentService paymentService,
                              BalanceService balanceService,
                              FeedChargeRepository feedChargeRepository,
                              LongIdGenerator idGenerator,
                              NotificationEventProducerService notificationEventProducerService,
-                             FeedService feedService) {
+                             FeedService feedService,
+                             IncomeService incomeService) {
         this.paymentService = paymentService;
         this.balanceService = balanceService;
         this.feedChargeRepository = feedChargeRepository;
         this.idGenerator = idGenerator;
         this.notificationEventProducerService = notificationEventProducerService;
         this.feedService = feedService;
+        this.incomeService = incomeService;
+        this.settlementCalculator = new DefaultSettlementCalculator();
     }
 
     @Transactional
@@ -57,14 +65,14 @@ public class FeedChargeService {
         ZonedDateTime currentTimestamp = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
         Payment payment = paymentList.get(0);
         payment.setState(PaymentState.OPEN.getValue());
-        payment.setValidAfter(currentTimestamp
-                .plusMonths(SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
-                .toInstant().toEpochMilli());
+        payment.setValidAfter(this.settlementCalculator.generateSettlementTimestamp(currentTimestamp, 0));
 
         Balance hostBalance = this.balanceService.retrieveOrCreateBalanceIfNotExistsByUserId(payment.getPayeeId());
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
         this.saveFeedCharge(order.getUserId(), order.getPropertyId());
+
+        this.incomeService.updateIncomeAll(payment.getPayeeId(), order.getUserId(), System.currentTimeMillis(), payment.getAmountInCents());
 
         this.notificationEventProducerService.produceNewFeedPaymentNotificationEventAsync(payment.getUserId(),
                 payment.getPayeeId(),
@@ -94,6 +102,8 @@ public class FeedChargeService {
             feedCharge.setFeedId(feedId);
             feedCharge.setIslandId(feedMessage.getIslandId());
             feedCharge.setFeedCreatedAt(feedMessage.getCreatedAt());
+            feedCharge.setHostId(feedMessage.getHostId());
+            feedCharge.setPriceInCents(feedMessage.getPriceInCents());
             this.feedChargeRepository.save(feedCharge);
         }
     }
@@ -102,4 +112,5 @@ public class FeedChargeService {
         assert amount > 0;
         return amount * ratio / 100L;
     }
+
 }

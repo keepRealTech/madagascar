@@ -18,7 +18,6 @@ import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.BoxApi;
 import swagger.model.BoxDTO;
@@ -61,9 +60,9 @@ public class BoxController implements BoxApi {
     /**
      * Implements the answered me question list api.
      *
-     * @param page page number (optional, default to 0)
+     * @param page     page number (optional, default to 0)
      * @param pageSize size of a page (optional, default to 10)
-     * @return  {@link QuestionsResponse}.
+     * @return {@link QuestionsResponse}.
      */
     @Override
     public ResponseEntity<QuestionsResponse> apiV1BoxesAnswersGet(Integer page,
@@ -79,12 +78,12 @@ public class BoxController implements BoxApi {
     /**
      * Implements the ask me question list by condition(answered, membershipId, paid).
      *
-     * @param answered  (optional)
-     * @param hasMembership  (optional)
-     * @param paid  (optional)
-     * @param page page number (optional, default to 0)
-     * @param pageSize size of a page (optional, default to 10)
-     * @return  {@link QuestionsResponse}.
+     * @param answered      (optional)
+     * @param hasMembership (optional)
+     * @param paid          (optional)
+     * @param page          page number (optional, default to 0)
+     * @param pageSize      size of a page (optional, default to 10)
+     * @return {@link QuestionsResponse}.
      */
     @Override
     public ResponseEntity<QuestionsResponse> apiV1BoxesQuestionsGet(Boolean answered,
@@ -103,8 +102,8 @@ public class BoxController implements BoxApi {
     /**
      * Implements the answer question by id api.
      *
-     * @param id id (required)
-     * @param postAnswerRequest  (required)
+     * @param id                id (required)
+     * @param postAnswerRequest (required)
      * @return {@link DummyResponse}.
      */
     @Override
@@ -122,7 +121,7 @@ public class BoxController implements BoxApi {
      * Implements the retrieve question by id api.
      *
      * @param id id (required)
-     * @return  {@link FullQuestionResponse}.
+     * @return {@link FullQuestionResponse}.
      */
     @Override
     public ResponseEntity<FullQuestionResponse> apiV1BoxesQuestionsIdGet(String id) {
@@ -149,9 +148,9 @@ public class BoxController implements BoxApi {
     /**
      * Implements the update box access by island id api.
      *
-     * @param id id (required)
-     * @param putIslandBoxAccessRequest  (required)
-     * @return  {@link IslandBoxResponse}.
+     * @param id                        id (required)
+     * @param putIslandBoxAccessRequest (required)
+     * @return {@link IslandBoxResponse}.
      */
     @Override
     public ResponseEntity<IslandBoxAccessResponse> apiV1IslandsIdBoxesAccessPut(String id,
@@ -172,11 +171,10 @@ public class BoxController implements BoxApi {
     /**
      * Implements the create free question api.
      *
-     * @param id id (required) Island id.
-     * @param postQuestionRequest  (required) {@link PostQuestionRequest}.
-     * @return  {@link DummyResponse}.
+     * @param id                  id (required) Island id.
+     * @param postQuestionRequest (required) {@link PostQuestionRequest}.
+     * @return {@link DummyResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<DummyResponse> apiV1IslandsIdBoxesFreeQuestionsPost(String id,
                                                                               PostQuestionRequest postQuestionRequest) {
@@ -197,9 +195,8 @@ public class BoxController implements BoxApi {
      * Implements the retrieve box info api.
      *
      * @param id islandId (required)
-     * @return  {@link IslandBoxResponse}.
+     * @return {@link IslandBoxResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<IslandBoxResponse> apiV1IslandsIdBoxesGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -248,10 +245,10 @@ public class BoxController implements BoxApi {
     /**
      * Implements the retrieve answered and visible questions api.
      *
-     * @param id islandId (required)
-     * @param page page number (optional, default to 0)
+     * @param id       islandId (required)
+     * @param page     page number (optional, default to 0)
      * @param pageSize size of a page (optional, default to 10)
-     * @return  {@link QuestionsResponse}.
+     * @return {@link QuestionsResponse}.
      */
     @Override
     public ResponseEntity<QuestionsResponse> apiV1IslandsIdBoxesQuestionsGet(String id,

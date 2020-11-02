@@ -15,7 +15,6 @@ import com.keepreal.madagascar.vanga.RetrieveSponsorHistoryResponse;
 import com.keepreal.madagascar.vanga.SupportMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.SupportApi;
 import swagger.model.PutSponsorRequest;
@@ -53,7 +52,6 @@ public class SupportController implements SupportApi {
         this.sponsorDTOFactory = sponsorDTOFactory;
     }
 
-    @CrossOrigin
     @Override
     public ResponseEntity<SupportsResponse> apiV1IslandsIdSupportGet(String id) {
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);

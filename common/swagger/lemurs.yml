@@ -53,6 +53,8 @@ tags:
     description: 活动 controller
   - name: Income
     description: 收入 controller
+  - name: Banner
+    description: Banner controller
 
 paths:
   /api/healthcheck:
@@ -86,7 +88,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: '#/components/schemas/FullUserResponse'
   /api/v1/refreshToken:
     post:
       tags:
@@ -2880,6 +2882,7 @@ paths:
   /api/v1/income/detailByCondition:
     get:
       parameters:
+        - $ref: '#/components/parameters/incomeTypeInQuery'
         - $ref: '#/components/parameters/timestampInQuery'
         - $ref: '#/components/parameters/membershipIdOptionalInQuery'
         - $ref: '#/components/parameters/page'
@@ -2894,6 +2897,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IncomeDetailsResponse'
+  /api/v1/banners/creator:
+    get:
+      tags:
+        - Banner
+      summary: 获取创作者专属banner
+      responses:
+        '200':
+          description: banner response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BannersResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -3156,6 +3171,12 @@ components:
       schema:
         type: boolean
         default: false
+    incomeTypeInQuery:
+      in: query
+      name: type
+      required: true
+      schema:
+        $ref: '#/components/schemas/IncomeType'
   schemas:
     LoginType:
       type: string
@@ -3287,6 +3308,13 @@ components:
       enum:
         - NO_LIMIT
         - PER_MONTH
+    IncomeType:
+      type: string
+      enum:
+        - INCOME_MONTH
+        - INCOME_MEMBERSHIP
+        - INCOME_SUPPORT
+        - INCOME_FEED_CHARGE
     CommonResponse:
       type: object
       properties:
@@ -5078,6 +5106,8 @@ components:
           format: int64
         hasExpired:
           type: boolean
+        isActive:
+          type: boolean
     BriefMembershipDTO:
       type: object
       properties:
@@ -5114,8 +5144,8 @@ components:
               type: integer
             isTop:
               type: boolean
-            imageUri:
-              type: string
+            image:
+              $ref: '#/components/schemas/PictureDTO'
     PostMembershipRequest:
       type: object
       properties:
@@ -5137,6 +5167,13 @@ components:
           type: boolean
         imageUri:
           type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        size:
+          type: integer
+          format: int64
     PutMembershipRequest:
       type: object
       properties:
@@ -5158,6 +5195,13 @@ components:
           type: boolean
         imageUri:
           type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        size:
+          type: integer
+          format: int64
     DeactivateMembershipRequest:
       type: object
       properties:
@@ -6433,6 +6477,16 @@ components:
             income:
               type: integer
               format: int64
+        feedCharge:
+          type: object
+          properties:
+            name:
+              type: string
+            supportCount:
+              type: integer
+            income:
+              type: integer
+              format: int64
     SupportMembershipDTO:
       type: object
       properties:
@@ -6491,6 +6545,9 @@ components:
         amountInCents:
           type: integer
           format: int64
+        timestamp:
+          type: integer
+          format: int64
     GiftImageDTO:
       type: object
       properties:
@@ -6504,3 +6561,12 @@ components:
           type: string
         emoji:
           type: string
+    BannersResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/BannerDTO'

@@ -97,7 +97,8 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                         .allowedOrigins("https://tiaodaoapp.com",
                                 "https://www.tiaodaoapp.com",
                                 "https://h5.tiaodaoapp.com",
-                                "https://home.keepreal.cn")
+                                "https://home.keepreal.cn",
+                                "http://test.keepreal.cn")
                         .allowedMethods("*");
             }
         };

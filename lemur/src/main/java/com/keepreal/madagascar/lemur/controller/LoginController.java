@@ -22,7 +22,9 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.stats_events.annotation.HttpStatsEventTrigger;
 import com.keepreal.madagascar.lemur.config.OssClientConfiguration;
+import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.UserDTOFactory;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.LoginService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
@@ -34,14 +36,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.LoginApi;
+import swagger.model.BriefIslandDTO;
 import swagger.model.BriefTokenInfo;
 import swagger.model.DeviceTokenRequest;
 import swagger.model.DummyResponse;
+import swagger.model.FullUserResponse;
 import swagger.model.LoginResponse;
 import swagger.model.LoginTokenInfo;
 import swagger.model.OssTokenDTO;
@@ -58,8 +61,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.nio.charset.Charset;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Represents the login controllers.
@@ -71,6 +76,8 @@ public class LoginController implements LoginApi {
     private final LoginService loginService;
     private final UserService userService;
     private final UserDTOFactory userDTOFactory;
+    private final IslandService islandService;
+    private final IslandDTOFactory islandDTOFactory;
     private final OssClientConfiguration ossClientConfiguration;
     private final DefaultAcsClient acsClient;
 
@@ -80,17 +87,23 @@ public class LoginController implements LoginApi {
      * @param loginService           {@link LoginService}.
      * @param userService            {@link UserService}.
      * @param userDTOFactory         {@link UserDTOFactory}.
+     * @param islandService          {@link IslandService}.
+     * @param islandDTOFactory       {@link IslandDTOFactory}.
      * @param ossClientConfiguration {@link OssClientConfiguration}.
      * @param acsClient              {@link DefaultAcsClient}.
      */
     public LoginController(LoginService loginService,
                            UserService userService,
                            UserDTOFactory userDTOFactory,
+                           IslandService islandService,
+                           IslandDTOFactory islandDTOFactory,
                            OssClientConfiguration ossClientConfiguration,
                            @Qualifier("oss-acs-client") DefaultAcsClient acsClient) {
         this.loginService = loginService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
+        this.islandService = islandService;
+        this.islandDTOFactory = islandDTOFactory;
         this.ossClientConfiguration = ossClientConfiguration;
         this.acsClient = acsClient;
     }
@@ -108,8 +121,7 @@ public class LoginController implements LoginApi {
             label = "user id",
             value = "body.data.user.id"
     )
-    @CrossOrigin
-    public ResponseEntity<LoginResponse> apiV1LoginPost(@Valid PostLoginRequest postLoginRequest, @Valid Boolean admin) {
+    public ResponseEntity<FullUserResponse> apiV1LoginPost(@Valid PostLoginRequest postLoginRequest, @Valid Boolean admin) {
         LoginRequest loginRequest;
         switch (postLoginRequest.getLoginType()) {
             case OAUTH_WECHAT:
@@ -213,8 +225,14 @@ public class LoginController implements LoginApi {
 
         UserMessage user = this.userService.retrieveUserById(loginResponse.getUserId());
 
-        LoginResponse response = new LoginResponse();
-        response.setData(this.buildTokenInfo(loginResponse, user));
+        List<BriefIslandDTO> createdIslands = this.islandService.retrieveIslands(null, user.getId(), null, 0, Integer.MAX_VALUE)
+                .getIslandsList()
+                .stream()
+                .map(this.islandDTOFactory::briefValueOf)
+                .collect(Collectors.toList());
+
+        FullUserResponse response = new FullUserResponse();
+        response.setData(this.userDTOFactory.fullValueOf(user, false, createdIslands));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -264,7 +282,6 @@ public class LoginController implements LoginApi {
      *
      * @return {@link UserResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<UserResponse> apiV1UserInfoGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -351,7 +368,6 @@ public class LoginController implements LoginApi {
      * @return {@link QrTicketResponse}.
      */
     @Override
-    @CrossOrigin
     public ResponseEntity<QrTicketResponse> apiV1LoginGeneratePost() {
         GenerateQrcodeResponse generateQrcodeResponse = loginService.generateQrcode();
         QrTicketResponse response = new QrTicketResponse();
@@ -373,7 +389,6 @@ public class LoginController implements LoginApi {
      * @param sceneId (required) unique scene id.
      * @return {@link LoginResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<LoginResponse> apiV1LoginPollingGet(String sceneId) {
         com.keepreal.madagascar.baobob.LoginResponse loginResponse = this.loginService.checkWechatMpAccountLogin(sceneId);
@@ -392,12 +407,11 @@ public class LoginController implements LoginApi {
     /**
      * 向指定手机号发送验证码
      *
-     * @param postOTPRequest  (required) {@link PostOTPRequest}
+     * @param postOTPRequest (required) {@link PostOTPRequest}
      * @return {@link DummyResponse}
      */
-    @CrossOrigin
     @Override
-    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest,  @Valid Boolean login) {
+    public ResponseEntity<DummyResponse> apiV1MobileOtpPost(@Valid PostOTPRequest postOTPRequest, @Valid Boolean login) {
         if (!login) {
             String userId = HttpContextUtils.getUserIdFromContext();
             this.userService.checkUserMobileIsExisted(userId,
