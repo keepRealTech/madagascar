@@ -47,19 +47,21 @@ import com.keepreal.madagascar.coua.SubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.SubscribeIslandResponse;
 import com.keepreal.madagascar.coua.SupportTargetResponse;
 import com.keepreal.madagascar.coua.SupportTargetsResponse;
-import com.keepreal.madagascar.coua.TargetType;
 import com.keepreal.madagascar.coua.UnsubscribeIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateIslandByIdRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtRequest;
 import com.keepreal.madagascar.coua.UpdateLastFeedAtResponse;
 import com.keepreal.madagascar.coua.common.SubscriptionState;
 import com.keepreal.madagascar.coua.model.IslandInfo;
+import com.keepreal.madagascar.coua.model.Sponsor;
 import com.keepreal.madagascar.coua.model.Subscription;
 import com.keepreal.madagascar.coua.model.SupportTarget;
 import com.keepreal.madagascar.coua.model.UserInfo;
 import com.keepreal.madagascar.coua.service.FeedService;
 import com.keepreal.madagascar.coua.service.IslandEventProducerService;
 import com.keepreal.madagascar.coua.service.IslandInfoService;
+import com.keepreal.madagascar.coua.service.SkuService;
+import com.keepreal.madagascar.coua.service.SponsorService;
 import com.keepreal.madagascar.coua.service.SubscriptionService;
 import com.keepreal.madagascar.coua.service.UserDeviceInfoService;
 import com.keepreal.madagascar.coua.service.UserInfoService;
@@ -94,6 +96,8 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     private final UserInfoService userInfoService;
     private final UserDeviceInfoService userDeviceInfoService;
     private final IslandEventProducerService islandEventProducerService;
+    private final SponsorService sponsorService;
+    private final SkuService skuService;
 
     /**
      * Constructs the island grpc controller.
@@ -104,19 +108,25 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
      * @param userInfoService            {@link UserInfoService}.
      * @param userDeviceInfoService      {@link UserDeviceInfoService}.
      * @param islandEventProducerService {@link IslandEventProducerService}
+     * @param sponsorService             {@link SponsorService}
+     * @param skuService                 {@link SkuService}
      */
     public IslandGRpcController(IslandInfoService islandInfoService,
                                 SubscriptionService subscriptionService,
                                 FeedService feedService,
                                 UserInfoService userInfoService,
                                 UserDeviceInfoService userDeviceInfoService,
-                                IslandEventProducerService islandEventProducerService) {
+                                IslandEventProducerService islandEventProducerService,
+                                SponsorService sponsorService,
+                                SkuService skuService) {
         this.islandInfoService = islandInfoService;
         this.subscriptionService = subscriptionService;
         this.feedService = feedService;
         this.userInfoService = userInfoService;
         this.userDeviceInfoService = userDeviceInfoService;
         this.islandEventProducerService = islandEventProducerService;
+        this.sponsorService = sponsorService;
+        this.skuService = skuService;
     }
 
     /**
@@ -199,6 +209,12 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
             return;
         }
 
+        Sponsor sponsor = this.sponsorService.createDefaultSponsor(save.getId(), save.getHostId());
+        this.skuService.createSponsorSkusBySponsorId(sponsor.getId(),
+                sponsor.getPricePerUnit(),
+                sponsor.getHostId(),
+                sponsor.getIslandId(),
+                sponsor.getGiftId());
         this.islandEventProducerService.produceCreateIslandEventAsync(request.getHostId());
 
         IslandMessage islandMessage = islandInfoService.getIslandMessage(save);

@@ -17,7 +17,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableIdGenerator
 @EnableJpaAuditing
 @EnableScheduling
-@EnableCaching
 public class CouaApplication {
 
     public static void main(String[] args) {

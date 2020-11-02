@@ -63,9 +63,7 @@ public class SponsorGRpcController extends SponsorServiceGrpc.SponsorServiceImpl
         String islandId = request.getIslandId();
         Sponsor sponsor;
         sponsor = this.sponsorService.retrieveSponsorByIslandId(islandId);
-        if (Objects.isNull(sponsor)) {
-           sponsor = this.sponsorService.retrieveSponsorByIslandId(Constants.DEFAULT_SPONSOR_ISLAND_ID);
-        }
+
         responseObserver.onNext(builder.setStatus(CommonStatusUtils.getSuccStatus()).
                 setSponsorMessage(this.sponsorService.getSponsorMessage(sponsor))
                 .build());
@@ -104,23 +102,6 @@ public class SponsorGRpcController extends SponsorServiceGrpc.SponsorServiceImpl
         RetrieveSponsorResponse.Builder builder = RetrieveSponsorResponse.newBuilder();
         String islandId = request.getIslandId();
         Sponsor sponsor = this.sponsorService.retrieveSponsorByIslandId(islandId);
-        if (Objects.isNull(sponsor)) {
-            IslandInfo islandInfo = this.islandInfoService.findTopByIdAndDeletedIsFalse(islandId);
-            if (Objects.isNull(islandInfo)) {
-                log.error("retrieve island return null islandId is {}", islandId);
-                builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_ISLAND_NOT_FOUND_ERROR));
-                responseObserver.onNext(builder.build());
-                responseObserver.onCompleted();
-                return;
-            } else {
-                sponsor = this.sponsorService.createDefaultSponsor(islandInfo.getId(), islandInfo.getHostId());
-                this.skuService.createSponsorSkusBySponsorId(sponsor.getId(),
-                        sponsor.getPricePerUnit(),
-                        sponsor.getHostId(),
-                        sponsor.getIslandId(),
-                        sponsor.getGiftId());
-            }
-        }
 
         if (request.hasPricePerUnit() || request.hasGiftId()) {
            sponsor = this.sponsorService.updateSponsorAndSku(sponsor, request);

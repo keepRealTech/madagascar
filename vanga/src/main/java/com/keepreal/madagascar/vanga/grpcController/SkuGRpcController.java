@@ -276,7 +276,9 @@ public class SkuGRpcController extends SkuServiceGrpc.SkuServiceImplBase {
         List<SponsorSku> sponsorSkus = this.skuService.retrieveSponsorSkusByIslandId(request.getIslandId());
         SponsorSkusResponse.Builder builder = SponsorSkusResponse.newBuilder();
         if (sponsorSkus.isEmpty()) {
-            sponsorSkus = this.skuService.retrieveSponsorSkusByIslandId(Constants.DEFAULT_SPONSOR_SKU_ISLAND_ID);
+            responseObserver.onNext(builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SPONSOR_SKU_NOT_FOUND_ERROR)).build());
+            responseObserver.onCompleted();
+            return;
         }
 
         responseObserver.onNext(builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))
