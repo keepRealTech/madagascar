@@ -56,14 +56,15 @@ public class MembershipDTOFactory {
 
     /**
      * Constructs the membershipDTOFactory.
-     *  @param subscribeMembershipService {@link SubscribeMembershipService}.
+     *
+     * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param userService                {@link UserService}.
      * @param userDTOFactory             {@link UserDTOFactory}.
      * @param islandService              {@link IslandService}.
      * @param membershipService          {@link MembershipService}.
      * @param boxService                 {@link BoxService}.
      * @param chatService                {@link ChatService}.
-     * @param multiMediaDTOFactory
+     * @param multiMediaDTOFactory       {@link MultiMediaDTOFactory}.
      */
     public MembershipDTOFactory(SubscribeMembershipService subscribeMembershipService,
                                 UserService userService,
