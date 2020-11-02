@@ -129,3 +129,7 @@ aliyun-vod:
   region-id: cn-shanghai
   access-key: xxx
   access-secret: xxx
+
+maxmind:
+  geo:
+    database-path: /app/GeoLite2-Country.mmdb
