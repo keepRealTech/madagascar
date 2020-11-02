@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface IncomeDetailRepository extends JpaRepository<IncomeDetail, String> {
 
-    List<IncomeDetail> findIncomeDetailsByUserIdAndDeletedIsFalse(String userId);
+    List<IncomeDetail> findIncomeDetailsByUserIdAndDeletedIsFalseOrderByMonthTimestampDesc(String userId);
 
     IncomeDetail findIncomeDetailByUserIdAndMonthTimestampAndDeletedIsFalse(String userId, Long monthTimestamp);
 }

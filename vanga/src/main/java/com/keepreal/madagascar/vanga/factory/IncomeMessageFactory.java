@@ -93,7 +93,7 @@ public class IncomeMessageFactory {
                     DateUtils.endOfMonthTimestamp(),
                     membershipSkus.stream().map(MembershipSku::getId).collect(Collectors.toList()));
 
-            income = this.paymentRepository.countAmountByPayeeIdAndTimestampAndMemberhipSku(
+            income = this.paymentRepository.countAmountByPayeeIdAndTimestampAndMembershipSku(
                     membershipMessage.getHostId(),
                     DateUtils.startOfMonthTimestamp(),
                     DateUtils.endOfMonthTimestamp(),

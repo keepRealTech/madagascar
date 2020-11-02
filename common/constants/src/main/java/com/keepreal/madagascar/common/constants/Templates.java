@@ -80,5 +80,5 @@ public class Templates {
     public static final String INCOME_FEED_CHARGE_CONTENT = "支持了你的独立付费动态";
     public static final String INCOME_DTO_SPONSOR = "支持一下";
     public static final String INCOME_DTO_FEED_CHARGE = "单独解锁";
-    public static final String INCOME_GREETINGS_CONTENTS = "早上好,下午好,晚上好,夜深了";
+    public static final String INCOME_GREETINGS_CONTENTS = "早上好！,下午好！,晚上好！,夜深了！";
 }
