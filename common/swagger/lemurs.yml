@@ -2828,6 +2828,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FullFeedResponse'
+  /api/v1/income/greetings:
+    get:
+      tags:
+        - Income
+      summary: 问候语
+      responses:
+        '200':
+          description: update user password response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GreetingsResponse'
   /api/v1/income/profile:
     get:
       tags:
@@ -6409,6 +6421,15 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ChatSettingsDTO'
+    GreetingsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: string
     IncomeProfileResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
