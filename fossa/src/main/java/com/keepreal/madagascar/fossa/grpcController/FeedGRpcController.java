@@ -822,6 +822,14 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     @Override
     public void updateFeed(UpdateFeedRequest request, StreamObserver<FeedResponse> responseObserver) {
         FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(request.getId(), false);
+        if (Objects.isNull(feedInfo)) {
+            FeedResponse response = FeedResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
 
         if (request.hasTitle()) {
             feedInfo.setTitle(request.getTitle().getValue());
