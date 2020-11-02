@@ -42,11 +42,11 @@ public class IncomeService {
     }
 
     public List<IncomeDetail> findIncomeDetailsByUserId(String userId) {
-        return this.incomeDetailRepository.findIncomeDetailsByUserIdAndDeletedIsFalse(userId);
+        return this.incomeDetailRepository.findIncomeDetailsByUserIdAndDeletedIsFalseOrderByMonthTimestampDesc(userId);
     }
 
     public Page<IncomeSupport> findIncomeSupportsByUserId(String userId, Pageable pageable) {
-        return this.incomeSupportRepository.findIncomeSupportsByUserIdAndDeletedIsFalse(userId, pageable);
+        return this.incomeSupportRepository.findIncomeSupportsByUserIdAndDeletedIsFalseOrderByCentsDesc(userId, pageable);
     }
 
     public void updateIncomeAll(String userId, String supporterId, long timestamp, long amountInCents) {

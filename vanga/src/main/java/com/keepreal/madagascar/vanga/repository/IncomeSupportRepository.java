@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IncomeSupportRepository extends JpaRepository<IncomeSupport, String> {
 
-    Page<IncomeSupport> findIncomeSupportsByUserIdAndDeletedIsFalse(String userId, Pageable pageable);
+    Page<IncomeSupport> findIncomeSupportsByUserIdAndDeletedIsFalseOrderByCentsDesc(String userId, Pageable pageable);
 
     IncomeSupport findIncomeSupportByUserIdAndSupporterIdAndDeletedIsFalse(String userId, String supporterId);
 }
