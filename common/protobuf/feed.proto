@@ -181,6 +181,13 @@ message RetrieveMembershipFeedsRequest {
     PageRequest pageRequest = 7;
 }
 
+message UpdateFeedRequest {
+    string id = 1;
+    google.protobuf.StringValue title = 2;
+    google.protobuf.StringValue text = 3;
+    google.protobuf.StringValue brief = 4;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
@@ -200,4 +207,5 @@ service FeedService {
     rpc UpdateFeedFeedgroupById(UpdateFeedFeedgroupRequest) returns (FeedGroupFeedResponse) {};
     rpc RetrieveMembershipFeeds(RetrieveMembershipFeedsRequest) returns (FeedsResponse) {};
     rpc CreateFeed (NewFeedsRequestV2) returns (FeedResponse) {};
+    rpc UpdateFeed (UpdateFeedRequest) returns (FeedResponse) {};
 }

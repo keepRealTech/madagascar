@@ -103,7 +103,7 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<MembershipsResponse> apiV1IslandsIdMembershipsGet(String id) {
-        List<MembershipMessage> membershipMessages = membershipService.retrieveMembershipsByIslandId(id, false);
+        List<MembershipMessage> membershipMessages = membershipService.retrieveMembershipsByIslandId(id, true);
 
         MembershipsResponse response = new MembershipsResponse();
         response.data(membershipMessages.stream().map(membershipDTOFactory::valueOf).collect(Collectors.toList()));
@@ -152,7 +152,12 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<DummyResponse> apiV1MembershipsIdDeactivatePut(String id, @Valid DeactivateMembershipRequest deactivateMembershipRequest) {
-        return null;
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        membershipService.deactivateMembershipById(id, userId, deactivateMembershipRequest.getIsDeactivate());
+        DummyResponse response = new DummyResponse();
+        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     /**

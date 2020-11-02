@@ -30,6 +30,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -53,6 +54,7 @@ import swagger.model.PostFeedPayload;
 import swagger.model.PostFeedRequestV2;
 import swagger.model.PostIslandFeedRequest;
 import swagger.model.PutFeedFeedgroupRequest;
+import swagger.model.PutFeedRequest;
 import swagger.model.TimelinesResponse;
 import swagger.model.TopFeedRequest;
 import swagger.model.ToppedFeedsDTO;
@@ -562,12 +564,16 @@ public class FeedController implements FeedApi {
 
         Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(feedGroupFeedsResponse.getFeedList());
 
+        Map<String, FeedGroupMessage> feedGroupMessageMap = this.generateFeedGroupMap(feedGroupFeedsResponse.getFeedList());
+
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedGroupFeedsResponse.getFeedList()
                 .stream()
                 .map(feed -> this.feedDTOFactory.valueOf(feed,
                         feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList()),
-                        includeChargeable))
+                        includeChargeable,
+                        feed.getCreatedAt(),
+                        feedGroupMessageMap.get(feed.getFeedgroupId())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setCurrentTime(System.currentTimeMillis());
@@ -778,6 +784,34 @@ public class FeedController implements FeedApi {
                 feedGroupFeedResponse.getLastFeedId(),
                 feedGroupFeedResponse.getNextFeedId(),
                 true));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the feed update api.
+     *
+     * @param id id (required) feed id
+     * @param putFeedRequest  (required) {@link PutFeedRequest}
+     * @return {@link FeedResponse}
+     */
+    @Override
+    public ResponseEntity<FeedResponse> apiV1FeedsIdPut(String id, @Valid PutFeedRequest putFeedRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+        if (!userId.equals(feedMessage.getHostId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        FeedMessage feedMessageUpdated = this.feedService.updateFeedById(id, putFeedRequest.getTitle(), putFeedRequest.getText(), putFeedRequest.getBrief());
+
+        Map<String, List<MembershipMessage>> feedMembershipMap =
+                this.generateFeedMembershipMap(Collections.singletonList(feedMessageUpdated));
+
+        FeedResponse response = new FeedResponse();
+        response.setData(this.feedDTOFactory.valueOf(feedMessageUpdated,
+                feedMembershipMap.getOrDefault(feedMessageUpdated.getId(), Collections.emptyList())));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
