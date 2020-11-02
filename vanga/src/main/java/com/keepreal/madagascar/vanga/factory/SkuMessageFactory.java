@@ -2,9 +2,11 @@ package com.keepreal.madagascar.vanga.factory;
 
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.ShellSkuMessage;
+import com.keepreal.madagascar.vanga.SponsorSkuMessage;
 import com.keepreal.madagascar.vanga.SupportSkuMessage;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
+import com.keepreal.madagascar.vanga.model.SponsorSku;
 import com.keepreal.madagascar.vanga.model.SupportSku;
 import org.springframework.stereotype.Component;
 
@@ -70,6 +72,30 @@ public class SkuMessageFactory {
                 .setPriceInCents(supportSku.getPriceInCents())
                 .setPriceInShells(supportSku.getShells())
                 .setDefaulted(supportSku.getDefaultSku())
+                .build();
+    }
+
+    /**
+     * Converts {@link SponsorSku} into {@link SponsorSkuMessage}.
+     *
+     * @param sponsorSku {@link SponsorSku}.
+     * @return {@link SponsorSkuMessage}.
+     */
+    public SponsorSkuMessage valueOf(SponsorSku sponsorSku) {
+        if (Objects.isNull(sponsorSku)) {
+            return null;
+        }
+
+        return SponsorSkuMessage.newBuilder()
+                .setId(sponsorSku.getId())
+                .setSponsorId(sponsorSku.getSponsorId())
+                .setIslandId(sponsorSku.getIslandId())
+                .setHostId(sponsorSku.getHostId())
+                .setGiftId(sponsorSku.getGiftId())
+                .setQuantity(sponsorSku.getQuantity())
+                .setPriceInCents(sponsorSku.getPriceInCents())
+                .setIsCustom(sponsorSku.getCustomSku())
+                .setDefaultSku(sponsorSku.getDefaultSku())
                 .build();
     }
 

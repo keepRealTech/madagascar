@@ -45,7 +45,7 @@ global:
       imagePullPolicy: Always
     coua:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-      tag: 1.2.3-staging
+      tag: 1.2.4-staging
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa

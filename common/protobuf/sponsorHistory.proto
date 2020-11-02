@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.vanga";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message RetrieveSponsorHistoryRequest {
+  string islandId = 1;
+  PageRequest pageRequest = 2;
+}
+
+message RetrieveSponsorHistoryResponse {
+  CommonStatus status = 1;
+  PageResponse pageResponse = 2;
+  repeated SponsorHistoryMessage sponsorHistory = 3;
+}
+
+message RetrieveSponsorHistoryCountRequest {
+  string islandId = 1;
+}
+
+message RetrieveSponsorHistoryCountResponse {
+  CommonStatus status = 1;
+  uint64 count = 2;
+}
+
+message SponsorHistoryMessage {
+  string userId = 1;
+  string islandId = 2;
+  string hostId = 3;
+  string sponsorId = 4;
+  string giftId = 5;
+  uint64 costInCents = 6;
+}
+
+service SponsorHistoryService{
+  rpc RetrieveSponsorHistoryByIslandId (RetrieveSponsorHistoryRequest) returns (RetrieveSponsorHistoryResponse) {};
+  rpc RetrieveSponsorHistoryCountByIslandId (RetrieveSponsorHistoryCountRequest) returns (RetrieveSponsorHistoryCountResponse) {};
+}

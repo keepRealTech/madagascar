@@ -36,6 +36,18 @@ message MembershipSkuMessage {
   bool permanent = 9;
 }
 
+message SponsorSkuMessage {
+  string id = 1;
+  string sponsorId = 2;
+  string island_id = 3;
+  string host_id = 4;
+  string gift_id = 5;
+  uint64 quantity = 6;
+  uint64 priceInCents = 7;
+  bool is_custom = 8;
+  bool defaultSku = 9;
+}
+
 message RetrieveMembershipSkusByMembershipIdRequest {
   string membershipId = 1;
 }
@@ -45,6 +57,12 @@ message MembershipSkusResponse {
   repeated MembershipSkuMessage membershipSkus = 2;
 }
 
+message SponsorSkusResponse {
+  CommonStatus status = 1;
+  repeated SponsorSkuMessage SponsorSkus = 2;
+  uint64 count = 3;
+}
+
 message CreateMembershipSkusRequest {
   string membershipId = 1;
   string membershipName = 2;
@@ -52,6 +70,20 @@ message CreateMembershipSkusRequest {
   string hostId = 4;
   string islandId = 5;
   bool permanent = 6;
+}
+
+message CreateSponsorSkusRequest {
+  string sponsorId = 1;
+  uint64 priceInCentsPerUnit = 2;
+  string hostId = 3;
+  string islandId = 4;
+  string giftId = 5;
+}
+
+message UpdateSponsorSkusRequest {
+  string sponsorId = 1;
+  google.protobuf.UInt64Value priceInCentsPerUnit = 2;
+  google.protobuf.StringValue giftId = 3;
 }
 
 message UpdateMembershipSkusByIdRequest {
@@ -81,6 +113,10 @@ message SupportSkuMessage {
   int64 priceInShells = 4;
 }
 
+message RetrieveSponsorSkusRequest{
+  string islandId = 1;
+}
+
 service SkuService {
   rpc RetrieveActiveShellSkus (RetrieveShellSkusRequest) returns (ShellSkusResponse) {};
   rpc RetrieveActiveMembershipSkusByMembershipId (RetrieveMembershipSkusByMembershipIdRequest) returns (MembershipSkusResponse) {};
@@ -88,4 +124,7 @@ service SkuService {
   rpc CreateMembershipSkusByMembershipId (CreateMembershipSkusRequest) returns (MembershipSkusResponse) {};
   rpc UpdateMembershipSkusByMembershipId (UpdateMembershipSkusByIdRequest) returns (MembershipSkusResponse) {};
   rpc DeleteMembershipSkusByMembershipId (DeleteMembershipSkusByIdRequest) returns (CommonStatus) {};
+  rpc CreateSponsorSkusBySponsorId (CreateSponsorSkusRequest) returns (SponsorSkusResponse) {};
+  rpc UpdateSponsorSkusBySponsorId (UpdateSponsorSkusRequest) returns (SponsorSkusResponse) {};
+  rpc RetrieveSponsorSkusByIslandId (RetrieveSponsorSkusRequest) returns (SponsorSkusResponse) {};
 }

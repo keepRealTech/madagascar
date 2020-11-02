@@ -21,15 +21,19 @@ public class SupportService {
     private final BalanceService balanceService;
     private final IncomeService incomeService;
     private final NotificationEventProducerService notificationEventProducerService;
+    private final SponsorHistoryService sponsorHistoryService;
 
     public SupportService(PaymentService paymentService,
                           BalanceService balanceService,
+                          NotificationEventProducerService notificationEventProducerService,
+                          SponsorHistoryService sponsorHistoryService) {
                           IncomeService incomeService,
                           NotificationEventProducerService notificationEventProducerService) {
         this.paymentService = paymentService;
         this.balanceService = balanceService;
         this.incomeService = incomeService;
         this.notificationEventProducerService = notificationEventProducerService;
+        this.sponsorHistoryService = sponsorHistoryService;
     }
 
     /**
@@ -62,6 +66,7 @@ public class SupportService {
 
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(paymentList);
+        this.sponsorHistoryService.addSponsorHistoryWithOrderAndPayment(order, payment);
         this.sendAsyncMessage(payment.getUserId(), payment.getPayeeId(), payment.getAmountInCents());
 
         this.incomeService.updateIncomeAll(payment.getPayeeId(), order.getUserId(), System.currentTimeMillis(), payment.getAmountInCents());

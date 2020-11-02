@@ -5922,6 +5922,8 @@ components:
         quantity:
           type: integer
           format: int64
+        isDefault:
+          type: boolean
         gift:
           $ref: '#/components/schemas/GiftImageDTO'
     SponsorHistoryDTO:
@@ -5968,7 +5970,8 @@ components:
         gift:
           $ref: '#/components/schemas/GiftImageDTO'
         pricePerUnit:
-          type: string
+          type: integer
+          format: int64
     SupportSkusResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -6020,6 +6023,8 @@ components:
         - $ref: '#/components/schemas/CommonResponse'
         - type: object
           properties:
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
             data:
               type: array
               items:
@@ -6351,7 +6356,8 @@ components:
         giftId:
           type: string
         pricePerUnit:
-          type: string
+          type: integer
+          format: int64
     SupportTargetsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

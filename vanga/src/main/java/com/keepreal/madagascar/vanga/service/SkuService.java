@@ -1,15 +1,17 @@
 package com.keepreal.madagascar.vanga.service;
 
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import com.keepreal.madagascar.vanga.UpdateMembershipSkusByIdRequest;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.ShellSku;
+import com.keepreal.madagascar.vanga.model.SponsorSku;
 import com.keepreal.madagascar.vanga.model.SupportSku;
 import com.keepreal.madagascar.vanga.repository.MembershipSkuRepository;
 import com.keepreal.madagascar.vanga.repository.ShellSkuRepository;
+import com.keepreal.madagascar.vanga.repository.SponsorSkuRepository;
 import com.keepreal.madagascar.vanga.repository.SupportSkuRepository;
 import com.keepreal.madagascar.vanga.util.AutoRedisLock;
-import kotlin.collections.EmptyList;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -30,8 +32,10 @@ public class SkuService {
     private final ShellSkuRepository shellSkuRepository;
     private final MembershipSkuRepository membershipSkuRepository;
     private final SupportSkuRepository supportSkuRepository;
+    private final SponsorSkuRepository sponsorSkuRepository;
     private final LongIdGenerator idGenerator;
     private final List<Integer> membershipPeriods = Stream.of(1, 3, 6, 12).collect(Collectors.toList());
+    private final List<Integer> sponsorPeriods = Stream.of(1, 3, 5).collect(Collectors.toList());
     private final RedissonClient redissonClient;
     private static final String APPLE_SKU_TEMPLATE = "cn.keepreal.feeds.nonrenewal%d";
 
@@ -41,17 +45,20 @@ public class SkuService {
      * @param shellSkuRepository      {@link ShellSkuRepository}.
      * @param membershipSkuRepository {@link MembershipSkuRepository}.
      * @param supportSkuRepository    {@link SupportSkuRepository}.
+     * @param sponsorSkuRepository    {@link SponsorSkuRepository}
      * @param idGenerator             {@link LongIdGenerator}.
      * @param redissonClient          {@link RedissonClient}.
      */
     public SkuService(ShellSkuRepository shellSkuRepository,
                       MembershipSkuRepository membershipSkuRepository,
                       SupportSkuRepository supportSkuRepository,
+                      SponsorSkuRepository sponsorSkuRepository,
                       LongIdGenerator idGenerator,
                       RedissonClient redissonClient) {
         this.shellSkuRepository = shellSkuRepository;
         this.membershipSkuRepository = membershipSkuRepository;
         this.supportSkuRepository = supportSkuRepository;
+        this.sponsorSkuRepository = sponsorSkuRepository;
         this.idGenerator = idGenerator;
         this.redissonClient = redissonClient;
     }
@@ -159,6 +166,16 @@ public class SkuService {
     }
 
     /**
+     * Updates all sponsor skus.
+     *
+     * @param sponsorSkus {@link SponsorSku}.
+     */
+    @Transactional
+    public List<SponsorSku> updateAllSponsorSkus(Iterable<SponsorSku> sponsorSkus) {
+        return this.sponsorSkuRepository.saveAll(sponsorSkus);
+    }
+
+    /**
      * Creates default membership skus if not exists.
      *
      * @param membershipId        Membership id.
@@ -230,6 +247,110 @@ public class SkuService {
     }
 
     /**
+     * Creates default sponsor skus if not exists.
+     *
+     * @param sponsorId             sponsor id.
+     * @param hostId                host id.
+     * @param islandId              island id.
+     * @param priceInCentsPeUnit    unit price.
+     * @param giftId                gift image id.
+     * @return {@link SponsorSku}.
+     */
+    @Transactional
+    public List<SponsorSku> createDefaultSponsorSkusBySponsorIdAndPricePerUnit(String sponsorId,
+                                                                               String hostId,
+                                                                               String islandId,
+                                                                               Long priceInCentsPeUnit,
+                                                                               String giftId) {
+        List<SponsorSku> sponsorSkus = this.retrieveSponsorSkusBySponsorIdAndActiveIsTrue(sponsorId);
+        if (Objects.nonNull(sponsorSkus) && !sponsorSkus.isEmpty()) {
+            return sponsorSkus;
+        }
+
+        sponsorSkus = this.sponsorPeriods.stream()
+                    .map(i -> this.generateSponsorSku(sponsorId, hostId, islandId, giftId, priceInCentsPeUnit, i, false))
+                    .collect(Collectors.toList());
+        //自定义金额 sku 总价即为单价 方便计算礼物个数(取整)
+        sponsorSkus.add(this.generateSponsorSku(sponsorId, hostId, islandId, giftId, priceInCentsPeUnit, 1, true));
+
+        return this.sponsorSkuRepository.saveAll(sponsorSkus);
+    }
+
+    /**
+     * Retrieves active sponsor skus for a given sponsor id.
+     *
+     * @param sponsorId sponsor id.
+     * @return {@link SponsorSku}.
+     */
+    public List<SponsorSku> retrieveSponsorSkusBySponsorIdAndActiveIsTrue(String sponsorId) {
+        return this.sponsorSkuRepository.findAllBySponsorIdAndActiveIsTrueAndDeletedIsFalse(sponsorId);
+    }
+
+    /**
+     * Retrieves sponsor skus for a given sponsor id.
+     *
+     * @param sponsorId sponsor id.
+     * @return {@link SponsorSku}.
+     */
+    public List<SponsorSku> retrieveSponsorSkusBySponsorId(String sponsorId) {
+        return this.sponsorSkuRepository.findAllBySponsorIdAndDeletedIsFalse(sponsorId);
+    }
+
+    /**
+     * Obsoletes the sponsor skus.
+     *
+     * @param sponsorId   Sponsor id.
+     * @param sponsorSkus {@link SponsorSku}.
+     * @param pricePerUnit  New price per unit.
+     * @return {@link SponsorSku}.
+     */
+    @Transactional
+    public List<SponsorSku> obsoleteSponsorSkusWithNewUnitPrice(String sponsorId, List<SponsorSku> sponsorSkus, Long pricePerUnit) {
+        try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("obsolete-sponsorsku-%s", sponsorId))) {
+            SponsorSku sponsorSku = sponsorSkus.get(0);
+            List<SponsorSku> newSponsorSkus = this.sponsorPeriods.stream()
+                    .map(i -> this.generateSponsorSku(sponsorSku.getSponsorId(),
+                            sponsorSku.getHostId(),
+                            sponsorSku.getIslandId(),
+                            sponsorSku.getGiftId(),
+                            pricePerUnit,
+                            i,
+                            false))
+                    .collect(Collectors.toList());
+            newSponsorSkus.add(this.generateSponsorSku(sponsorId,
+                    sponsorSku.getHostId(),
+                    sponsorSku.getIslandId(),
+                    sponsorSku.getGiftId(),
+                    pricePerUnit,
+                    1,
+                    true));
+            sponsorSkus = sponsorSkus.stream().peek(sku -> sku.setDeleted(true)).collect(Collectors.toList());
+            this.sponsorSkuRepository.saveAll(sponsorSkus);
+            return this.sponsorSkuRepository.saveAll(newSponsorSkus);
+        }
+    }
+
+    /**
+     * Retrieves sponsor skus for a given island id.
+     *
+     * @param islandId island id.
+     * @return {@link SponsorSku}.
+     */
+    public List<SponsorSku> retrieveSponsorSkusByIslandId(String islandId) {
+        return this.sponsorSkuRepository.findAllByIslandIdAndActiveIsTrueAndDeletedIsFalse(islandId);
+    }
+
+    /**
+     * Retrieves sponsor sku by id.
+     *
+     * @param id sku id
+     * @return {@link SponsorSku}
+     */
+    public SponsorSku retrieveSponsorSkuById(String id) {
+        return this.sponsorSkuRepository.findTopByIdAndDeletedIsFalse(id);
+    }
+
+    /**
      * Generates membership sku for given info.
      *
      * @param membershipId        Membership id.
@@ -281,6 +402,38 @@ public class SkuService {
                 .active(active)
                 .appleSkuId(String.format(SkuService.APPLE_SKU_TEMPLATE, price))
                 .permanent(true)
+                .build();
+    }
+
+    /**
+     * Generates sponsor sku for given info.
+     *
+     * @param sponsorId   sponsor id.
+     * @param hostId      host id.
+     * @param islandId    island id.
+     * @param giftId      gift id.
+     * @param priceInCentsPerUnit   unit price.
+     * @param quantity    number of gift.
+     * @param isCustomSku whether custom amount.
+     * @return {@link SponsorSku}.
+     */
+    private SponsorSku generateSponsorSku(String sponsorId,
+                                          String hostId,
+                                          String islandId,
+                                          String giftId,
+                                          long priceInCentsPerUnit,
+                                          long quantity,
+                                          boolean isCustomSku) {
+        return SponsorSku.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .sponsorId(sponsorId)
+                .islandId(islandId)
+                .hostId(hostId)
+                .giftId(giftId)
+                .priceInCents(priceInCentsPerUnit * quantity)
+                .quantity(quantity)
+                .customSku(isCustomSku)
+                .defaultSku(quantity == Constants.DEFAULT_SPONSOR_SKU_QUANTITY && !isCustomSku)
                 .build();
     }
 
