@@ -42,6 +42,7 @@ dependencies {
     implementation 'org.openapitools:jackson-databind-nullable'
     implementation 'io.swagger.core.v3:swagger-annotations'
     implementation 'io.swagger:swagger-annotations'
+    implementation 'com.maxmind.geoip2:geoip2'
     implementation 'com.aliyun.oss:aliyun-sdk-oss'
     implementation 'com.aliyun:aliyun-java-sdk-vod:2.15.2'
     implementation 'com.aliyun:aliyun-java-sdk-core:4.5.3'

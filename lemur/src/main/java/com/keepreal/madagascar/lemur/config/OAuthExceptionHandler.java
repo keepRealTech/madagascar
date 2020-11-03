@@ -19,17 +19,20 @@ public class OAuthExceptionHandler implements WebResponseExceptionTranslator<Dum
      *
      * @param e Exception.
      * @return {@link DummyResponse}.
-     * @throws Exception
      */
     @Override
-    public ResponseEntity<DummyResponse> translate(Exception e) throws Exception {
+    public ResponseEntity<DummyResponse> translate(Exception e) {
         if (!(e instanceof InsufficientAuthenticationException)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
-        DummyResponse response = new DummyResponse();
-        DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_GRPC_TOKEN_EXPIRED);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        if (e.getMessage().contains("Full authentication is required to access this resource")) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        } else {
+            DummyResponse response = new DummyResponse();
+            DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_GRPC_TOKEN_EXPIRED);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
     }
 
 }
