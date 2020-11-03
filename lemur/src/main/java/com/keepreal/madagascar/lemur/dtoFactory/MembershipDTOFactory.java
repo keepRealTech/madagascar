@@ -114,6 +114,7 @@ public class MembershipDTOFactory {
         dto.setMessage(membershipMessage.getMessage());
         dto.setIsPermanent(membershipMessage.getPermanent());
         dto.setIsActive(membershipMessage.getActivate());
+        dto.setImage(this.multiMediaDTOFactory.valueOf(membershipMessage));
         return dto;
     }
 

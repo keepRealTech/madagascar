@@ -5147,6 +5147,8 @@ components:
           type: boolean
         isActive:
           type: boolean
+        image:
+          $ref: '#/components/schemas/PictureDTO'
     MembershipDTO:
       allOf:
         - $ref: '#/components/schemas/BriefMembershipDTO'
@@ -5156,8 +5158,6 @@ components:
               type: integer
             isTop:
               type: boolean
-            image:
-              $ref: '#/components/schemas/PictureDTO'
     PostMembershipRequest:
       type: object
       properties:
