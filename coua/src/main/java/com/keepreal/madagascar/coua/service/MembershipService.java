@@ -131,6 +131,7 @@ public class MembershipService {
                 .setPricePerMonth(membershipInfo.getPricePerMonth())
                 .setMemberCount(subscribeMembershipService.getMemberCountByMembershipId(membershipInfo.getId()))
                 .setPermanent(membershipInfo.getPermanent())
+                .setActive(membershipInfo.getActive())
                 .build();
     }
 

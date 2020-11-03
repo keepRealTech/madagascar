@@ -5089,6 +5089,8 @@ components:
           type: integer
         isPermanent:
           type: boolean
+        isActive:
+          type: boolean
     MyMembershipDTO:
       type: object
       properties:
@@ -6525,6 +6527,8 @@ components:
         income:
           type: integer
           format: int64
+        isActive:
+          type: boolean
     IncomeMonthlyResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

@@ -94,6 +94,7 @@ message FeedMembershipMessage {
     int32 pricePerMonth = 3;
     int32 memberCount = 4;
     bool permanent = 5;
+    bool active = 6;
 }
 
 message FeedMembershipResponse {
