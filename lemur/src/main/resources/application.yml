@@ -54,9 +54,7 @@ security:
       client-id: lemur
       client-secret: secret
     resource:
-      jwt:
-        key-value: thisisatopsecret
-#      token-info-uri: http://localhost:8080/oauth/check_token
+      token-info-uri: http://localhost:8080/oauth/check_token
     basic:
       enabled: false
 
@@ -134,4 +132,4 @@ aliyun-vod:
 
 maxmind:
   geo:
-    database-path: /Users/sli/development/madagascar/lemur/GeoLite2-Country.mmdb
+    database-path: /app/GeoLite2-Country.mmdb
