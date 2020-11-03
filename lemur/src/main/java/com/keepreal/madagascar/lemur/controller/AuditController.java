@@ -2,10 +2,10 @@ package com.keepreal.madagascar.lemur.controller;
 
 import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.FeedMessage;
-import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.DiscoverIslandMessage;
 import com.keepreal.madagascar.coua.MembershipMessage;
+import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.dtoFactory.IslandDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedGroupService;
@@ -14,21 +14,13 @@ import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import io.swagger.annotations.Authorization;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import swagger.api.ApiUtil;
-import swagger.model.ConfigurationDTO;
 import swagger.model.H5RedirectDTO;
 import swagger.model.H5RedirectResponse;
 import swagger.model.IslandDiscoveryResponse;
@@ -52,6 +44,8 @@ import java.util.stream.Collectors;
 @RestController
 public class AuditController {
 
+    private final IOSClientConfiguration iosClientConfiguration;
+
     private final IslandService islandService;
     private final IslandDTOFactory islandDTOFactory;
     private final FeedService feedService;
@@ -62,19 +56,22 @@ public class AuditController {
     /**
      * Constructs the audit controller.
      *
-     * @param islandService     {@link IslandService}.
-     * @param islandDTOFactory  {@link IslandDTOFactory}.
-     * @param feedService       {@link FeedService}.
-     * @param feedDTOFactory    {@link FeedDTOFactory}.
-     * @param feedGroupService  {@link FeedGroupService}.
-     * @param membershipService {@link MembershipService}.
+     * @param iosClientConfiguration {@link IOSClientConfiguration}.
+     * @param islandService          {@link IslandService}.
+     * @param islandDTOFactory       {@link IslandDTOFactory}.
+     * @param feedService            {@link FeedService}.
+     * @param feedDTOFactory         {@link FeedDTOFactory}.
+     * @param feedGroupService       {@link FeedGroupService}.
+     * @param membershipService      {@link MembershipService}.
      */
-    public AuditController(IslandService islandService,
+    public AuditController(IOSClientConfiguration iosClientConfiguration,
+                           IslandService islandService,
                            IslandDTOFactory islandDTOFactory,
                            FeedService feedService,
                            FeedDTOFactory feedDTOFactory,
                            FeedGroupService feedGroupService,
                            MembershipService membershipService) {
+        this.iosClientConfiguration = iosClientConfiguration;
         this.islandService = islandService;
         this.islandDTOFactory = islandDTOFactory;
         this.feedService = feedService;
@@ -86,17 +83,17 @@ public class AuditController {
     /**
      * GET /api/v1/feeds/{id}/iosPay : 单独解锁动态IOS跳转
      *
-     * @param id id (required)
-     * @param version  (required)
+     * @param id      id (required)
+     * @param version (required)
      * @return H5 跳转地址 (status code 200)
      */
     @RequestMapping(value = "/api/v0/feeds/{id}/iosPay",
-            produces = { "application/json" },
+            produces = {"application/json"},
             method = RequestMethod.GET)
     public ResponseEntity<H5RedirectResponse> apiV0FeedsIdIosPayGet(@PathVariable("id") String id,
                                                                     @NotNull @Valid @RequestParam(value = "version", required = true) Integer version) {
         H5RedirectDTO data = new H5RedirectDTO();
-        data.setUrl("feeds://");
+        data.setUrl(String.format("%s/app/feed/unlock/%s/notsupport", this.iosClientConfiguration.getHtmlHostName(), id));
         H5RedirectResponse response = new H5RedirectResponse();
         response.setData(data);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
@@ -107,13 +104,13 @@ public class AuditController {
     /**
      * GET /api/v1/islands/{id}/memberSubscription/iosPay : 会员订购H5跳转
      *
-     * @param id id (required)
-     * @param version  (required)
-     * @param membershipId  (required)
+     * @param id           id (required)
+     * @param version      (required)
+     * @param membershipId (required)
      * @return H5 跳转地址 (status code 200)
      */
     @RequestMapping(value = "/api/v0/islands/{id}/memberSubscription/iosPay",
-            produces = { "application/json" },
+            produces = {"application/json"},
             method = RequestMethod.GET)
     public ResponseEntity<H5RedirectResponse> apiV0IslandsIdMemberSubscriptionIosPayGet(@PathVariable("id") String id,
                                                                                         @NotNull @Valid @RequestParam(value = "version", required = true) Integer version,
@@ -130,12 +127,12 @@ public class AuditController {
     /**
      * GET /api/v1/islands/{id}/support/iosPay : 支持一下 H5跳转地址
      *
-     * @param id id (required)
-     * @param version  (required)
+     * @param id      id (required)
+     * @param version (required)
      * @return H5 跳转地址 (status code 200)
      */
     @RequestMapping(value = "/api/v0/islands/{id}/support/iosPay",
-            produces = { "application/json" },
+            produces = {"application/json"},
             method = RequestMethod.GET)
     public ResponseEntity<H5RedirectResponse> apiV0IslandsIdSupportIosPayGet(@PathVariable("id") String id,
                                                                              @NotNull @Valid @RequestParam(value = "version", required = true) Integer version) {
@@ -151,12 +148,12 @@ public class AuditController {
     /**
      * GET /api/v2/islands/{id}/sponsors/iosPay : 支持一下 H5跳转地址
      *
-     * @param id id (required)
-     * @param version  (required)
+     * @param id      id (required)
+     * @param version (required)
      * @return H5 跳转地址 (status code 200)
      */
     @RequestMapping(value = "/api/v0/islands/{id}/sponsors/iosPay",
-            produces = { "application/json" },
+            produces = {"application/json"},
             method = RequestMethod.GET)
     public ResponseEntity<H5RedirectResponse> apiV0IslandsIdSponsorsIosPayGet(@PathVariable("id") String id,
                                                                               @NotNull @Valid @RequestParam(value = "version", required = true) Integer version) {
