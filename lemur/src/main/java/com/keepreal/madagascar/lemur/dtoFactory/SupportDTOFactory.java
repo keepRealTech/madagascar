@@ -44,7 +44,7 @@ public class SupportDTOFactory {
 
     public SupportDTOV2 valueOf (SponsorMessage sponsorMessage, String islandId) {
         SupportDTOV2 supportDTOV2 = new SupportDTOV2();
-        List<MembershipMessage> membershipMessages = this.membershipService.retrieveMembershipsByIslandId(islandId, false);
+        List<MembershipMessage> membershipMessages = this.membershipService.retrieveMembershipsByIslandId(islandId, true);
         supportDTOV2.setMemberships(membershipMessages.stream().map(this.membershipDTOFactory::valueOf).collect(Collectors.toList()));
         supportDTOV2.setSponsors(this.sponsorDTOFactory.valueOf(sponsorMessage));
         return supportDTOV2;
