@@ -119,7 +119,10 @@ public class IncomeGRpcController extends IncomeServiceGrpc.IncomeServiceImplBas
 
         if (incomeDetailType.equals(IncomeDetailType.INCOME_MONTH)) {
             long value = request.getTimestamp().getValue();
-            paymentPage = this.paymentService.retrievePaymentsByPayeeId(userId, DateUtils.startOfMonthTimestamp(value), DateUtils.endOfMonthTimestamp(value), PaginationUtils.valueOf(pageRequest));
+            paymentPage = this.paymentService.retrievePaymentsByPayeeId(userId,
+                    DateUtils.startOfMonthTimestamp(value),
+                    DateUtils.endOfMonthTimestamp(value),
+                    PaginationUtils.valueOf(pageRequest));
         } else if (incomeDetailType.equals(IncomeDetailType.INCOME_MEMBERSHIP)) {
             String membershipId = request.getMembershipId().getValue();
             List<MembershipSku> membershipSkus = skuService.retrieveMembershipSkusByMembershipId(membershipId);

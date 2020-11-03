@@ -2,6 +2,7 @@ package com.keepreal.madagascar.lemur.service;
 
 import com.keepreal.madagascar.lemur.config.MaxMindGeoConfiguration;
 import com.maxmind.geoip2.DatabaseReader;
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.maxmind.geoip2.model.CountryResponse;
 import com.maxmind.geoip2.record.Country;
 import lombok.SneakyThrows;
@@ -36,8 +37,7 @@ public class GeoIpService {
      * @param ip Ip address.
      * @return Country.
      */
-    @SneakyThrows
-    public Country getCountry(String ip) {
+    public Country getCountry(String ip) throws IOException, GeoIp2Exception {
         InetAddress ipAddress = InetAddress.getByName(ip);
         CountryResponse response = this.dbReader.country(ipAddress);
 
@@ -51,9 +51,12 @@ public class GeoIpService {
      * @return True if from U.S.A.
      */
     public boolean fromStates(String ip) {
-        Country country = this.getCountry(ip);
-
-        return country.getIsoCode().toUpperCase().equals("US");
+        try {
+            Country country = this.getCountry(ip);
+            return country.getIsoCode().toUpperCase().equals("US");
+        } catch (GeoIp2Exception | IOException e) {
+            return false;
+        }
     }
 
 }

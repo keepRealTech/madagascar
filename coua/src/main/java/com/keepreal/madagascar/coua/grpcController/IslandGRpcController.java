@@ -21,6 +21,7 @@ import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
 import com.keepreal.madagascar.coua.CreateOrUpdateSupportTargetRequest;
 import com.keepreal.madagascar.coua.DeleteSupportTargetRequest;
 import com.keepreal.madagascar.coua.DiscoverIslandMessage;
+import com.keepreal.madagascar.coua.DiscoverIslandsRequest;
 import com.keepreal.madagascar.coua.DiscoverIslandsResponse;
 import com.keepreal.madagascar.coua.DismissIntroductionRequest;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
@@ -680,13 +681,13 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     /**
      * Retrieves all islands in discovery.
      *
-     * @param request          {@link Empty}.
+     * @param request          {@link DiscoverIslandsRequest}.
      * @param responseObserver {@link DiscoverIslandsResponse}.
      */
     @Override
-    public void discoverIslands(Empty request,
+    public void discoverIslands(DiscoverIslandsRequest request,
                                 StreamObserver<DiscoverIslandsResponse> responseObserver) {
-        List<DiscoverIslandMessage> discoverIslandMessageList = this.islandInfoService.retrieveAllDiscoveredIslands();
+        List<DiscoverIslandMessage> discoverIslandMessageList = this.islandInfoService.retrieveAllDiscoveredIslands(request.getIsAuditMode());
 
         DiscoverIslandsResponse response = DiscoverIslandsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())

@@ -1,8 +1,6 @@
 package com.keepreal.madagascar.lemur.filters;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.boot.web.servlet.ServletContextInitializer;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;

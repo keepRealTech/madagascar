@@ -182,6 +182,10 @@ message IslandSubscriptionStateResponse {
     bool hasSubscribed = 2;
 }
 
+message DiscoverIslandsRequest {
+    bool isAuditMode = 1;
+}
+
 message DiscoverIslandsResponse {
     CommonStatus status = 1;
     repeated DiscoverIslandMessage dicoverIslands = 2;
@@ -265,7 +269,7 @@ service IslandService {
     rpc DismissIntroduction(DismissIntroductionRequest) returns (CommonStatus) {};
     rpc RetrieveIslanderPortraitUrlByIslandId(RetrieveIslanderPortraitUrlRequest) returns (RetrieveIslanderPortraitUrlResponse) {}
     rpc CheckIslandSubscription(CheckIslandSubscriptionRequest) returns (IslandSubscriptionStateResponse) {};
-    rpc DiscoverIslands(google.protobuf.Empty) returns (DiscoverIslandsResponse) {};
+    rpc DiscoverIslands(DiscoverIslandsRequest) returns (DiscoverIslandsResponse) {};
     rpc CreateOrUpdateSupportTarget(CreateOrUpdateSupportTargetRequest) returns (SupportTargetResponse) {};
     rpc DeleteSupportTarget(DeleteSupportTargetRequest) returns (CommonStatus) {};
     rpc RetrieveSupportTargets(RetrieveSupportTargetsRequest) returns (SupportTargetsResponse) {};

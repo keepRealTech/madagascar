@@ -173,9 +173,6 @@ public class IslandController implements IslandApi {
                                                                          Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         String subscriberId = (Objects.nonNull(subscribed) && subscribed) ? HttpContextUtils.getUserIdFromContext() : null;
-        if (Objects.nonNull(subscriberId) && subscriberId.equals("99999999")) {
-            pageSize = 1000;
-        }
 
         IslandsResponse islandsResponse = this.islandService.retrieveIslands(
                 name, null, subscriberId, page, pageSize);
@@ -682,7 +679,7 @@ public class IslandController implements IslandApi {
      */
     @Override
     public ResponseEntity<IslandDiscoveryResponse> apiV1IslandsDiscoveryGet() {
-        List<DiscoverIslandMessage> discoverIslandMessageList = this.islandService.retrieveIslandsInDiscovery();
+        List<DiscoverIslandMessage> discoverIslandMessageList = this.islandService.retrieveIslandsInDiscovery(false);
 
         IslandDiscoveryResponse response = new IslandDiscoveryResponse();
         response.setData(discoverIslandMessageList.stream()

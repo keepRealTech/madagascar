@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.BalanceDTOFactory;
@@ -198,7 +199,7 @@ public class BillingController implements BillingApi {
         ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
 
         H5RedirectDTO data = new H5RedirectDTO();
-        if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+        if (Constants.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
             data.setUrl(String.format("%s/app/my/wallet/notsupport", this.iosClientConfiguration.getHtmlHostName()));
         } else {
             data.setUrl(String.format("%s/app/my/wallet", this.iosClientConfiguration.getHtmlHostName()));
