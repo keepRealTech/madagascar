@@ -24,9 +24,13 @@ import java.util.Set;
  */
 public class AuditUserFilter extends OncePerRequestFilter {
 
-    private static final Set<String> AUDIT_URIS_SET = new HashSet<>(Arrays.asList(
-            "/api/v1/feeds/public",
-            "/api/v1/islands/discovery"));
+    private static final Set<String> AUDIT_URI_PATTERNS_SET = new HashSet<>(Arrays.asList(
+            "^/api/v1/feeds/public",
+            "^/api/v1/islands/discovery",
+            "^/api/v1/feeds/[0-9]+/iosPay",
+            "^/api/v1/islands/[0-9]+/support/iosPay",
+            "^/api/v2/islands/[0-9]+/sponsors/iosPay",
+            "^/api/v1/islands/[0-9]+/memberSubscription/iosPay"));
     private static final String ISLAND_SEARCH_URI = "/api/v1/islands";
 
     private final UserService userService;
@@ -85,7 +89,7 @@ public class AuditUserFilter extends OncePerRequestFilter {
         }
 
         String uri = request.getRequestURI();
-        if (AuditUserFilter.AUDIT_URIS_SET.contains(uri)) {
+        if (AuditUserFilter.AUDIT_URI_PATTERNS_SET.stream().anyMatch(uri::matches)) {
             return false;
         } else if (AuditUserFilter.ISLAND_SEARCH_URI.equals(uri) && Objects.nonNull(request.getParameter("name"))) {
             return false;

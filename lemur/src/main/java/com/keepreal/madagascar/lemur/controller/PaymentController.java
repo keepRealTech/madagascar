@@ -429,7 +429,7 @@ public class PaymentController implements PaymentApi {
 
         H5RedirectDTO data = new H5RedirectDTO();
         if (Constants.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
-            data.setUrl(String.format("%s/app/feed/unlock/%s/notsupport", this.iosClientConfiguration.getHtmlHostName(), id));
+            data.setUrl("feeds://");
         } else {
             data.setUrl(String.format("%s/app/feed/unlock/%s", this.iosClientConfiguration.getHtmlHostName(), id));
         }
