@@ -45,8 +45,8 @@ public class IncomeMessageFactory {
         if (incomeProfile == null) {
             return IncomeProfileMessage.newBuilder()
                     .setTotalIncome(0)
-                    .setTotalSupportCount(0)
-                    .setTotalSubscriber(0)
+                    .setTotalSupportCountReal(0)
+                    .setTotalSupportCountShow(0)
                     .setCurrentMonthIncome(0)
                     .setCurrentMonthSupportCount(0)
                     .setNextMonthIncome(0)
@@ -58,8 +58,8 @@ public class IncomeMessageFactory {
 
         return IncomeProfileMessage.newBuilder()
                 .setTotalIncome(incomeProfile.getAmountInCents())
-                .setTotalSupportCount(incomeProfile.getSupportCountReal())
-                .setTotalSubscriber(incomeProfile.getMemberCount())
+                .setTotalSupportCountReal(incomeProfile.getSupportCountReal())
+                .setTotalSupportCountShow(incomeProfile.getSupportCountShow())
                 .setCurrentMonthIncome(currentMonthIncome == null ? 0L : currentMonthIncome)
                 .setCurrentMonthSupportCount(currentMonthSupportCount)
                 .setNextMonthIncome(nextMonthIncome == null ? 0L : nextMonthIncome)

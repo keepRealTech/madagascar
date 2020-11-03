@@ -31,7 +31,6 @@ public class IncomeProfile {
     private Integer supportCountShow;
     private Integer supportCountReal;
     private Long amountInCents;
-    private Integer memberCount;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;

@@ -1,7 +1,8 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.constants.Templates;
-import com.keepreal.madagascar.coua.SponsorMessage;
+import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.vanga.FeedChargeMessage;
 import com.keepreal.madagascar.vanga.IncomeDetailMessage;
@@ -20,17 +21,21 @@ import swagger.model.IncomeProfileDTO;
 import swagger.model.IncomeSupportDTO;
 import swagger.model.SupportMembershipDTO;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
 public class IncomeDTOFactory {
 
     private final UserService userService;
+    private final IslandService islandService;
     private final UserDTOFactory userDTOFactory;
 
     public IncomeDTOFactory(UserService userService,
+                            IslandService islandService,
                             UserDTOFactory userDTOFactory) {
         this.userService = userService;
+        this.islandService = islandService;
         this.userDTOFactory = userDTOFactory;
     }
 
@@ -52,11 +57,12 @@ public class IncomeDTOFactory {
         return dto;
     }
 
-    public IncomeProfileDTO valueOf(IncomeProfileMessage message) {
+    public IncomeProfileDTO valueOf(IncomeProfileMessage message, String userId) {
         IncomeProfileDTO dto = new IncomeProfileDTO();
         dto.setTotalIncome(message.getTotalIncome());
-        dto.setTotalSubscriber(message.getTotalSubscriber());
-        dto.setTotalSupportCount(message.getTotalSupportCount());
+        List<IslandMessage> islandMessages = this.islandService.retrieveIslandsByHostId(userId);
+        dto.setTotalSubscriber(islandMessages.isEmpty() ? 0 : islandMessages.get(0).getMemberCount());
+        dto.setTotalSupportCount(message.getTotalSupportCountReal());
         dto.setCurrentMonthIncome(message.getCurrentMonthIncome());
         dto.setCurrentMonthSupportCount(message.getCurrentMonthSupportCount());
         dto.setNextMonthIncome(message.getNextMonthIncome());
