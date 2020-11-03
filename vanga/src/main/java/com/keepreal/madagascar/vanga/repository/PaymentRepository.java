@@ -98,7 +98,9 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             "amount_in_cents, amount_in_shells, order_id, " +
             "type, state, valid_after, is_deleted, created_time, updated_time," +
             "withdraw_percent, membership_sku_id " +
-            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
+            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4",
+            countQuery = "select count(*) from balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4",
+            nativeQuery = true)
     Page<Payment> retrievePaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable);
 
     /**
@@ -108,7 +110,9 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             "amount_in_cents, amount_in_shells, order_id, " +
             "type, state, valid_after, is_deleted, created_time, updated_time," +
             "withdraw_percent, membership_sku_id " +
-            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN ?4 GROUP BY order_id", nativeQuery = true)
+            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN ?4 GROUP BY order_id",
+            countQuery = "select count(*) from balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4",
+            nativeQuery = true)
     Page<Payment> retrieveMembershipPaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds, Pageable pageable);
 
     /**
@@ -118,7 +122,9 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             "amount_in_cents, amount_in_shells, order_id, " +
             "type, state, valid_after, is_deleted, created_time, updated_time," +
             "withdraw_percent, membership_sku_id " +
-            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type = 6", nativeQuery = true)
+            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type = 6",
+            countQuery = "select count(*) from balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4",
+            nativeQuery = true)
     Page<Payment> retrieveSponsorPaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable);
 
     /**
@@ -128,7 +134,9 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
             "amount_in_cents, amount_in_shells, order_id, " +
             "type, state, valid_after, is_deleted, created_time, updated_time," +
             "withdraw_percent, membership_sku_id " +
-            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND (type = 1 OR type = 7) AND membership_sku_id = ''", nativeQuery = true)
+            "FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND (type = 1 OR type = 7) AND membership_sku_id = ''",
+            countQuery = "select count(*) from balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4",
+            nativeQuery = true)
     Page<Payment> retrieveFeedChargePaymentsByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable);
 
 
