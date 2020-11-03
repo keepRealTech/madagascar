@@ -21,6 +21,8 @@ import com.keepreal.madagascar.vanga.util.DateUtils;
 import org.springframework.stereotype.Component;
 
 import com.keepreal.madagascar.common.constants.Templates;
+import org.springframework.util.StringUtils;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -132,7 +134,7 @@ public class IncomeMessageFactory {
         String content;
         Long amountInCent;
 
-        if (payment.getMembershipSkuId() != null) {
+        if (!StringUtils.isEmpty(payment.getMembershipSkuId())) {
             MembershipSku membershipSku = this.skuService.retrieveMembershipSkuById(payment.getMembershipSkuId());
             if (membershipSku.getPermanent()) {
                 content = String.format(Templates.INCOME_MEMBERSHIP_PERMANENT_CONTENT, membershipSku.getMembershipName());
