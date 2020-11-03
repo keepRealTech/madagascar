@@ -70,27 +70,28 @@ public class AuditUserFilter extends OncePerRequestFilter {
      */
     @Override
     protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
+        String ip = HttpContextUtils.getRemoteIpFromContext();
+        String userId = HttpContextUtils.getUserIdFromContext();
+        UserMessage user = this.userService.retrieveUserById(userId);
+
+        boolean isAuditUser = this.geoIpService.fromStates(ip)
+                || Constants.AUDIT_USER_IDS.contains(userId)
+                || user.getUnionId().contains(".")
+                || user.getUsername().startsWith("1-")
+                || user.getMobile().startsWith("1-");
+
+        if (!isAuditUser) {
+            return true;
+        }
+
         String uri = request.getRequestURI();
         if (AuditUserFilter.AUDIT_URIS_SET.contains(uri)) {
             return false;
-        }
-
-        if (AuditUserFilter.ISLAND_SEARCH_URI.equals(uri) && Objects.nonNull(request.getParameter("name"))) {
+        } else if (AuditUserFilter.ISLAND_SEARCH_URI.equals(uri) && Objects.nonNull(request.getParameter("name"))) {
             return false;
         }
 
-        String ip = HttpContextUtils.getRemoteIpFromContext();
-        String userId = HttpContextUtils.getUserIdFromContext();
-
-        if (this.geoIpService.fromStates(ip)) {
-            return false;
-        }
-
-        UserMessage user = this.userService.retrieveUserById(userId);
-        return !Constants.AUDIT_USER_IDS.contains(userId)
-                && !user.getUnionId().contains(".")
-                && !user.getUsername().startsWith("1-")
-                && !user.getMobile().startsWith("1-");
+        return true;
     }
 
 }
