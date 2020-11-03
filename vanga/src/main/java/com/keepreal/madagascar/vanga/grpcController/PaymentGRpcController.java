@@ -869,9 +869,6 @@ public class PaymentGRpcController extends PaymentServiceGrpc.PaymentServiceImpl
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
-
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
     }
 
     @Override
