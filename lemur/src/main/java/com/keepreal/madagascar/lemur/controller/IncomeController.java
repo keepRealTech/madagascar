@@ -106,7 +106,7 @@ public class IncomeController implements IncomeApi {
         IncomeProfileMessage incomeProfileMessage = this.incomeService.retrieveIncomeProfile(userId);
 
         IncomeProfileResponse response = new IncomeProfileResponse();
-        response.setData(this.incomeDTOFactory.valueOf(incomeProfileMessage));
+        response.setData(this.incomeDTOFactory.valueOf(incomeProfileMessage, userId));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
