@@ -36,8 +36,8 @@ message RetrieveSupportListResponse {
 
 message IncomeProfileMessage {
     int64 totalIncome = 1;
-    int32 totalSupportCount = 2;
-    int32 totalSubscriber = 3;
+    int32 totalSupportCountReal = 2;
+    int32 totalSupportCountShow = 3;
     int64 currentMonthIncome = 4;
     int32 currentMonthSupportCount = 5;
     int64 nextMonthIncome = 6;
