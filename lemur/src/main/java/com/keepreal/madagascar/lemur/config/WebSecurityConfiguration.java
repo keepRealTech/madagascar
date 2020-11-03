@@ -1,5 +1,8 @@
 package com.keepreal.madagascar.lemur.config;
 
+import com.keepreal.madagascar.lemur.filters.AuditUserFilter;
+import com.keepreal.madagascar.lemur.service.GeoIpService;
+import com.keepreal.madagascar.lemur.service.UserService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +16,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -23,6 +27,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableResourceServer
 @EnableWebSecurity
 public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
+
+    private final GeoIpService geoIpService;
+    private final UserService userService;
+
+    /**
+     * Constructs the web security configuration.
+     *
+     * @param geoIpService {@link GeoIpService}.
+     * @param userService  {@link UserService}.
+     */
+    public WebSecurityConfiguration(GeoIpService geoIpService,
+                                    UserService userService) {
+        this.geoIpService = geoIpService;
+        this.userService = userService;
+    }
 
     /**
      * Configures the http security.
@@ -65,6 +84,9 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                 .anyRequest().authenticated();
 
         httpSecurity.headers().cacheControl();
+        httpSecurity.addFilterAfter(new AuditUserFilter(this.userService, this.geoIpService),
+                UsernamePasswordAuthenticationFilter.class);
+
     }
 
     /**

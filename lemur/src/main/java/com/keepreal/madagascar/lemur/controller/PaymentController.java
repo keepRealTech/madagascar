@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandMessage;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.WechatOrderMessage;
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.MembershipMessage;
@@ -64,8 +65,6 @@ import java.util.stream.Collectors;
  */
 @RestController
 public class PaymentController implements PaymentApi {
-
-    public static final Set<String> AUDIT_USER_IDS = new HashSet<>(Collections.singleton("484"));
 
     private final Map<Integer, ConfigurationDTO> iOSConfigVersionMap = new HashMap<>();
     private final IOSClientConfiguration iosClientConfiguration;
@@ -349,7 +348,7 @@ public class PaymentController implements PaymentApi {
         ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
 
         H5RedirectDTO data = new H5RedirectDTO();
-        if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+        if (Constants.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
             data.setUrl(String.format("%s/pay-ios?sid=%s&id=%s", this.iosClientConfiguration.getHtmlHostName(), membershipId, id));
         } else {
             data.setUrl(String.format("%s/pay?sid=%s&id=%s", this.iosClientConfiguration.getHtmlHostName(), membershipId, id));
@@ -376,7 +375,7 @@ public class PaymentController implements PaymentApi {
         ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
 
         H5RedirectDTO data = new H5RedirectDTO();
-        if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+        if (Constants.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
             data.setUrl(String.format("%s/pay-ta-ios?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
         } else {
             data.setUrl(String.format("%s/pay-ta?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
@@ -402,7 +401,7 @@ public class PaymentController implements PaymentApi {
         ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
 
         H5RedirectDTO data = new H5RedirectDTO();
-        if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+        if (Constants.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
             data.setUrl(String.format("%s/pay-ta-ios?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
         } else {
             data.setUrl(String.format("%s/pay-ta?id=%s", this.iosClientConfiguration.getHtmlHostName(), id));
@@ -429,7 +428,7 @@ public class PaymentController implements PaymentApi {
         ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
 
         H5RedirectDTO data = new H5RedirectDTO();
-        if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+        if (Constants.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
             data.setUrl(String.format("%s/app/feed/unlock/%s/notsupport", this.iosClientConfiguration.getHtmlHostName(), id));
         } else {
             data.setUrl(String.format("%s/app/feed/unlock/%s", this.iosClientConfiguration.getHtmlHostName(), id));

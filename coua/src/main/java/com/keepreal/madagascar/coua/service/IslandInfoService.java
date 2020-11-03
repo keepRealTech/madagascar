@@ -314,10 +314,11 @@ public class IslandInfoService {
     /**
      * Retrieves all discovered islands.
      *
+     * @param isAuditMode Whether is audit mode.
      * @return {@link DiscoverIslandMessage}.
      */
-    public List<DiscoverIslandMessage> retrieveAllDiscoveredIslands() {
-        List<IslandDiscovery> islandDiscoveryList = this.islandDiscoveryRepository.findAllByDeletedIsFalseOrderByRankAsc();
+    public List<DiscoverIslandMessage> retrieveAllDiscoveredIslands(boolean isAuditMode) {
+        List<IslandDiscovery> islandDiscoveryList = this.islandDiscoveryRepository.findAllByAuditModeAndDeletedIsFalseOrderByRankAsc(isAuditMode);
 
         Map<String, IslandDiscovery> islandDiscoveryMap = islandDiscoveryList.stream()
                 .collect(Collectors.toMap(IslandDiscovery::getIslandId, Function.identity(), (mem1, mem2) -> mem1, HashMap::new));

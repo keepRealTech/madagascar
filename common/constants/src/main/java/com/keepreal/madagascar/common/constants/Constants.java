@@ -1,5 +1,9 @@
 package com.keepreal.madagascar.common.constants;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Contains constants.
  */
@@ -14,6 +18,11 @@ public class Constants {
      * The super user id for admin.
      */
     public static final String SUPER_ADMIN_USER_ID = "99999999";
+
+    /**
+     * The ios audit user ids.
+     */
+    public static final Set<String> AUDIT_USER_IDS = new HashSet<>(Collections.singleton("484"));
 
     /**
      * The official user id for marketing.
