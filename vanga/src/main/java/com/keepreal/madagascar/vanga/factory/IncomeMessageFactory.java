@@ -82,14 +82,14 @@ public class IncomeMessageFactory {
     }
 
     public SupportMembershipMessage valueOf(MembershipMessage membershipMessage) {
-        List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipId(membershipMessage.getId());
+        List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipId(membershipMessage.getId(), true);
         Integer supportCount;
         Long income;
         if (membershipSkus.size() == 0) {
             supportCount = 0;
             income = 0L;
         } else {
-            supportCount = this.paymentRepository.countSupportCountByPayeeIdAndTimestampAndMemberhipSku(
+            supportCount = this.paymentRepository.countSupportCountByPayeeIdAndTimestampAndMembershipSku(
                     membershipMessage.getHostId(),
                     DateUtils.startOfMonthTimestamp(),
                     DateUtils.endOfMonthTimestamp(),

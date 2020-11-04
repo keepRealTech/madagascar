@@ -125,7 +125,7 @@ public class IncomeGRpcController extends IncomeServiceGrpc.IncomeServiceImplBas
                     PaginationUtils.valueOf(pageRequest));
         } else if (incomeDetailType.equals(IncomeDetailType.INCOME_MEMBERSHIP)) {
             String membershipId = request.getMembershipId().getValue();
-            List<MembershipSku> membershipSkus = skuService.retrieveMembershipSkusByMembershipId(membershipId);
+            List<MembershipSku> membershipSkus = skuService.retrieveMembershipSkusByMembershipId(membershipId, true);
             if (membershipSkus.size() == 0) {
                 responseObserver.onNext(RetrieveIncomeDetailResponse.newBuilder()
                         .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC))

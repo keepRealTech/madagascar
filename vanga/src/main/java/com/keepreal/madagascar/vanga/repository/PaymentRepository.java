@@ -82,8 +82,8 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     /**
      * 计算创作者在指定时间范围内购买指定会员的付费用户数量
      */
-    @Query(value = "SELECT COUNT(DISTINCT order_id) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) ", nativeQuery = true)
-    Integer countSupportCountByPayeeIdAndTimestampAndMemberhipSku(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds);
+    @Query(value = "SELECT COUNT(DISTINCT order_id) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND membership_sku_id IN ?4", nativeQuery = true)
+    Integer countSupportCountByPayeeIdAndTimestampAndMembershipSku(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds);
 
     /**
      * 计算创作者在指定时间范围内购买指定会员的收入总和

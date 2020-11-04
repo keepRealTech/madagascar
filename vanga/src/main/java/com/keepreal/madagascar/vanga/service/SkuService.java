@@ -80,7 +80,12 @@ public class SkuService {
      * @return {@link MembershipSku}.
      */
     public List<MembershipSku> retrieveMembershipSkusByMembershipId(String membershipId) {
-        return this.membershipSkuRepository.findAllByMembershipIdAndDeletedIsFalse(membershipId);
+        return this.retrieveMembershipSkusByMembershipId(membershipId, false);
+    }
+
+    public List<MembershipSku> retrieveMembershipSkusByMembershipId(String membershipId, boolean includeDeleted) {
+        return includeDeleted ? this.membershipSkuRepository.findAllByMembershipId(membershipId) :
+                this.membershipSkuRepository.findAllByMembershipIdAndDeletedIsFalse(membershipId);
     }
 
     /**
