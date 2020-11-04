@@ -6,6 +6,7 @@ import com.keepreal.madagascar.lemur.service.GeoIpService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -76,6 +77,11 @@ public class AuditUserFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(@NotNull HttpServletRequest request) {
         String ip = HttpContextUtils.getRemoteIpFromContext();
         String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (StringUtils.isEmpty(userId)) {
+            return true;
+        }
+
         UserMessage user = this.userService.retrieveUserById(userId);
 
         boolean isAuditUser = this.geoIpService.fromStates(ip)
