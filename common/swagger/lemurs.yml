@@ -4040,6 +4040,8 @@ components:
         pricePerMonthInCents:
           type: integer
           format: int64
+        isActive:
+          type: boolean
     FeedDTO:
       allOf:
         - $ref: '#/components/schemas/BriefFeedDTO'
