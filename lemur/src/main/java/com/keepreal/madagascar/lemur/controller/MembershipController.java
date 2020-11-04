@@ -136,9 +136,9 @@ public class MembershipController implements MembershipApi {
                 Objects.nonNull(postMembershipRequest.getMessage()) ? postMembershipRequest.getMessage() : "",
                 Objects.nonNull(postMembershipRequest.getIsPermanent()) ? postMembershipRequest.getIsPermanent() : false,
                 Objects.nonNull(postMembershipRequest.getImageUri()) ? postMembershipRequest.getImageUri() : "",
-                postMembershipRequest.getWidth(),
-                postMembershipRequest.getHeight(),
-                postMembershipRequest.getSize());
+                Objects.nonNull(postMembershipRequest.getWidth()) ? postMembershipRequest.getWidth() : 0,
+                Objects.nonNull(postMembershipRequest.getHeight()) ? postMembershipRequest.getHeight() : 0,
+                Objects.nonNull(postMembershipRequest.getSize()) ? postMembershipRequest.getSize() : 0);
 
         MembershipResponse response = new MembershipResponse();
         response.data(membershipDTOFactory.briefValueOf(membershipMessage));
