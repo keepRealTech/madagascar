@@ -94,6 +94,7 @@ public class MembershipDTOFactory {
         dto.setMembershipName(membershipMessage.getName());
         dto.setColorType(membershipMessage.getColorType());
         dto.setPricePerMonthInCents((long) membershipMessage.getPricePerMonth());
+        dto.setIsActive(membershipMessage.getActivate());
         return dto;
     }
 
@@ -187,6 +188,7 @@ public class MembershipDTOFactory {
         dto.setIsPermanent(membershipMessage.getPermanent());
         dto.setExpireTime(message.getExpiredTime());
         dto.setHasExpired(message.getExpiredTime() < System.currentTimeMillis());
+        dto.setIsActive(membershipMessage.getActivate());
         return dto;
     }
 
