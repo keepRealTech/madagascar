@@ -109,6 +109,7 @@ public class IncomeMessageFactory {
                 .setIsPermanent(membershipMessage.getPermanent())
                 .setIncome(income == null ? 0L : income)
                 .setSupportCount(supportCount)
+                .setIsActive(membershipMessage.getActivate())
                 .build();
     }
 

@@ -129,6 +129,7 @@ public class MembershipDTOFactory {
         dto.setChargePerMonth(feedMembershipMessage.getPricePerMonth());
         dto.setMembershipName(feedMembershipMessage.getName());
         dto.setIsPermanent(feedMembershipMessage.getPermanent());
+        dto.setIsActive(feedMembershipMessage.getActive());
         return dto;
     }
 

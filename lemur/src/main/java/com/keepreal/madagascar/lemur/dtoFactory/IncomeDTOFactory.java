@@ -96,6 +96,7 @@ public class IncomeDTOFactory {
         dto.setIsPermanent(message.getIsPermanent());
         dto.setSupportCount(message.getSupportCount());
         dto.setIncome(message.getIncome());
+        dto.setIsActive(message.getIsActive());
 
         return dto;
     }

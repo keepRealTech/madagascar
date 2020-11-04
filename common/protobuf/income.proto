@@ -62,6 +62,7 @@ message SupportMembershipMessage {
     bool isPermanent = 4;
     int32 supportCount = 5;
     int64 income = 6;
+    bool isActive = 7;
 }
 
 message SponsorIncomeMessage {
