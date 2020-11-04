@@ -121,7 +121,8 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                                 "https://www.tiaodaoapp.com",
                                 "https://h5.tiaodaoapp.com",
                                 "https://home.keepreal.cn",
-                                "http://test.keepreal.cn")
+                                "http://test.keepreal.cn",
+                                "http://122.152.196.164:3000")
                         .allowedMethods("*");
             }
         };
