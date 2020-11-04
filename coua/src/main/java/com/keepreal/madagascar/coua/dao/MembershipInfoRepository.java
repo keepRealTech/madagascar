@@ -16,13 +16,13 @@ public interface MembershipInfoRepository extends JpaRepository<MembershipInfo, 
 
     MembershipInfo findMembershipInfoByIdAndDeletedIsFalse(String id);
 
-    List<MembershipInfo> findMembershipInfosByIslandIdAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(String islandId);
+    List<MembershipInfo> findMembershipInfosByIslandIdAndDeletedIsFalseOrderByTopDescPricePerMonthAscActiveDesc(String islandId);
 
     List<MembershipInfo> findMembershipInfosByHostIdAndDeletedIsFalse(String userId);
 
-    List<MembershipInfo> findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(String islandId);
+    List<MembershipInfo> findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAscActiveDesc(String islandId);
 
-    List<MembershipInfo> findMembershipInfosByIslandIdInAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(List<String> islandIds);
+    List<MembershipInfo> findMembershipInfosByIslandIdInAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAscActiveDesc(List<String> islandIds);
 
     @Query(value = "SELECT color_type FROM membership WHERE island_id = ?1 AND is_active = TRUE AND is_deleted = FALSE", nativeQuery = true)
     List<Integer> getColorTypeListByIslandId(String islandId);
