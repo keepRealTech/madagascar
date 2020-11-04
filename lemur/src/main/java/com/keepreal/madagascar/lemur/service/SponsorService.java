@@ -173,6 +173,11 @@ public class SponsorService {
         }
 
         if (!StringUtils.isEmpty(giftId)) {
+            try {
+                Integer.valueOf(giftId);
+            } catch (NumberFormatException exception) {
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT, exception.getMessage());
+            }
             builder.setGiftId(StringValue.of(giftId));
         }
 
