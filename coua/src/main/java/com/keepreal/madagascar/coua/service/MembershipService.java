@@ -79,9 +79,9 @@ public class MembershipService {
 
     public List<MembershipInfo> getMembershipListByIslandId(String islandId, boolean includeInactive) {
         if (includeInactive) {
-            return repository.findMembershipInfosByIslandIdAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandId);
+            return repository.findMembershipInfosByIslandIdAndDeletedIsFalseOrderByTopDescActiveDescPricePerMonthAsc(islandId);
         } else {
-            return repository.findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandId);
+            return repository.findMembershipInfosByIslandIdAndActiveIsTrueAndDeletedIsFalseOrderByTopDescActiveDescPricePerMonthAsc(islandId);
         }
     }
 
@@ -90,7 +90,7 @@ public class MembershipService {
     }
 
     public List<MembershipInfo> getMembershipListByIslandIds(List<String> islandIds) {
-        return repository.findMembershipInfosByIslandIdInAndActiveIsTrueAndDeletedIsFalseOrderByTopDescPricePerMonthAsc(islandIds);
+        return repository.findMembershipInfosByIslandIdInAndActiveIsTrueAndDeletedIsFalseOrderByTopDescActiveDescPricePerMonthAsc(islandIds);
     }
 
     public List<MembershipInfo> getMembershipListByIds(Iterable<String> ids) {
@@ -179,6 +179,7 @@ public class MembershipService {
      * @param membership {@link MembershipInfo}.
      */
     public void deactivateMembership(MembershipInfo membership, boolean deactivate) {
+        membership.setTop(false);
         membership.setActive(!deactivate);
         this.updateMembership(membership);
 
