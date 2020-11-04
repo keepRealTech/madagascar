@@ -90,7 +90,7 @@ public class MembershipGRpcController extends MembershipServiceGrpc.MembershipSe
     @Override
     public void retrieveMembershipById(MembershipIdRequest request, StreamObserver<MembershipResponse> responseObserver) {
         String membershipId = request.getId();
-        MembershipInfo membership = membershipService.getMembershipById(membershipId);
+        MembershipInfo membership = membershipService.getMembershipById(membershipId, true);
         if (membership == null) {
             responseObserver.onNext(MembershipResponse.newBuilder()
                     .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_MEMBERSHIP_NOT_FOUND_ERROR))
