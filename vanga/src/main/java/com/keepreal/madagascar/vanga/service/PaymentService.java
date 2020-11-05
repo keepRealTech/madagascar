@@ -414,7 +414,7 @@ public class PaymentService {
     }
 
     public Page<Payment> retrieveMembershipPaymentsByPayeeId(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds, Pageable pageable) {
-        return this.paymentRepository.findPaymentsByPayeeIdAndCreatedTimeBetweenAndStateInAndMembershipSkuIdInOrderByOrderId(payeeId, startTimestamp, endTimestamp, Arrays.asList(2, 3), membershipSkuIds, pageable);
+        return this.paymentRepository.findPaymentsByPayeeIdAndCreatedTimeBetweenAndStateInAndMembershipSkuIdIn(payeeId, startTimestamp, endTimestamp, Arrays.asList(2, 3), membershipSkuIds, pageable);
     }
 
     public Page<Payment> retrieveSponsorPaymentsByPayeeId(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable) {

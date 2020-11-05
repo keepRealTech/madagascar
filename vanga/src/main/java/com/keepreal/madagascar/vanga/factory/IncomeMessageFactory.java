@@ -142,7 +142,7 @@ public class IncomeMessageFactory {
                 amountInCent = membershipSku.getPriceInCents();
             } else {
                 content = String.format(Templates.INCOME_MEMBERSHIP_CONTENT, membershipSku.getTimeInMonths(), membershipSku.getMembershipName());
-                amountInCent = membershipSku.getTimeInMonths() * membershipSku.getPriceInCents();
+                amountInCent = membershipSku.getPriceInCents();
             }
         } else if (payment.getType() == PaymentType.SUPPORT.getValue()) {
             content = Templates.INCOME_SPONSOR_CONTENT;
