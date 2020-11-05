@@ -82,14 +82,14 @@ public class IncomeMessageFactory {
     }
 
     public SupportMembershipMessage valueOf(MembershipMessage membershipMessage) {
-        List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipId(membershipMessage.getId());
+        List<MembershipSku> membershipSkus = this.skuService.retrieveMembershipSkusByMembershipId(membershipMessage.getId(), true);
         Integer supportCount;
         Long income;
         if (membershipSkus.size() == 0) {
             supportCount = 0;
             income = 0L;
         } else {
-            supportCount = this.paymentRepository.countSupportCountByPayeeIdAndTimestampAndMemberhipSku(
+            supportCount = this.paymentRepository.countSupportCountByPayeeIdAndTimestampAndMembershipSku(
                     membershipMessage.getHostId(),
                     DateUtils.startOfMonthTimestamp(),
                     DateUtils.endOfMonthTimestamp(),
@@ -142,7 +142,7 @@ public class IncomeMessageFactory {
                 amountInCent = membershipSku.getPriceInCents();
             } else {
                 content = String.format(Templates.INCOME_MEMBERSHIP_CONTENT, membershipSku.getTimeInMonths(), membershipSku.getMembershipName());
-                amountInCent = membershipSku.getTimeInMonths() * membershipSku.getPriceInCents();
+                amountInCent = membershipSku.getPriceInCents();
             }
         } else if (payment.getType() == PaymentType.SUPPORT.getValue()) {
             content = Templates.INCOME_SPONSOR_CONTENT;

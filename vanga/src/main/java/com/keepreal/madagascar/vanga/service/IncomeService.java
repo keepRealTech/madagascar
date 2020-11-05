@@ -7,6 +7,7 @@ import com.keepreal.madagascar.vanga.model.IncomeSupport;
 import com.keepreal.madagascar.vanga.repository.IncomeDetailRepository;
 import com.keepreal.madagascar.vanga.repository.IncomeProfileRepository;
 import com.keepreal.madagascar.vanga.repository.IncomeSupportRepository;
+import com.keepreal.madagascar.vanga.repository.PaymentRepository;
 import com.keepreal.madagascar.vanga.util.AutoRedisLock;
 import com.keepreal.madagascar.vanga.util.DateUtils;
 import org.redisson.api.RedissonClient;
@@ -22,17 +23,20 @@ public class IncomeService {
     private final IncomeDetailRepository incomeDetailRepository;
     private final IncomeProfileRepository incomeProfileRepository;
     private final IncomeSupportRepository incomeSupportRepository;
+    private final PaymentRepository paymentRepository;
     private final RedissonClient redissonClient;
     private final LongIdGenerator idGenerator;
 
     public IncomeService(IncomeDetailRepository incomeDetailRepository,
                          IncomeProfileRepository incomeProfileRepository,
                          IncomeSupportRepository incomeSupportRepository,
+                         PaymentRepository paymentRepository,
                          RedissonClient redissonClient,
                          LongIdGenerator idGenerator) {
         this.incomeDetailRepository = incomeDetailRepository;
         this.incomeProfileRepository = incomeProfileRepository;
         this.incomeSupportRepository = incomeSupportRepository;
+        this.paymentRepository = paymentRepository;
         this.redissonClient = redissonClient;
         this.idGenerator = idGenerator;
     }
@@ -67,7 +71,7 @@ public class IncomeService {
                 incomeDetail.setUserId(userId);
                 return this.createIncomeDetail(incomeDetail);
             } else {
-                incomeDetail.setSupportCount(incomeDetail.getSupportCount() + 1);
+                incomeDetail.setSupportCount(this.paymentRepository.countSupportCountByPayeeIdAndTimestamp(userId, DateUtils.startOfMonthTimestamp(timestamp), DateUtils.endOfMonthTimestamp(timestamp)));
                 incomeDetail.setAmountInCents(incomeDetail.getAmountInCents() + amountInCents);
                 return this.incomeDetailRepository.save(incomeDetail);
             }
@@ -85,8 +89,9 @@ public class IncomeService {
                 incomeProfile.setUserId(userId);
                 return this.createIncomeProfile(incomeProfile);
             } else {
-                incomeProfile.setSupportCountReal(incomeProfile.getSupportCountReal() + 1);
-                incomeProfile.setSupportCountShow(incomeProfile.getSupportCountShow() + 1);
+                Integer supportCount = this.paymentRepository.countSupportCountByPayeeIdAndTimestamp(userId, 0, DateUtils.endOfMonthTimestamp());
+                incomeProfile.setSupportCountReal(supportCount);
+                incomeProfile.setSupportCountShow(supportCount);
                 incomeProfile.setAmountInCents(incomeProfile.getAmountInCents() + amountInCents);
                 return this.incomeProfileRepository.save(incomeProfile);
             }

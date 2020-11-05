@@ -153,7 +153,7 @@ public class SubscribeMembershipService {
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.updateAll(innerPaymentList);
             this.createOrRenewSubscriptionMember(order.getUserId(), sku, currentSubscribeMembership, currentExpireTime);
-            this.incomeService.updateIncomeAll(sku.getHostId(), order.getUserId(), System.currentTimeMillis(), sku.getPriceInCents() * sku.getTimeInMonths());
+            this.incomeService.updateIncomeAll(sku.getHostId(), order.getUserId(), System.currentTimeMillis(), sku.getPriceInCents());
         }
     }
 
@@ -184,7 +184,7 @@ public class SubscribeMembershipService {
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.createPayShellPayments(userId, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
-            this.incomeService.updateIncomeAll(sku.getHostId(), userId, System.currentTimeMillis(), sku.getPriceInCents() * sku.getTimeInMonths());
+            this.incomeService.updateIncomeAll(sku.getHostId(), userId, System.currentTimeMillis(), sku.getPriceInCents());
 
         }
     }
@@ -212,7 +212,7 @@ public class SubscribeMembershipService {
             this.balanceService.addOnCents(hostBalance, this.calculateAmount(sku.getPriceInCents(), hostBalance.getWithdrawPercent()));
             this.paymentService.createIOSPayPayments(userId, iosOrder, hostBalance.getWithdrawPercent(), sku, currentExpireTime);
             this.createOrRenewSubscriptionMember(userId, sku, currentSubscribeMembership, currentExpireTime);
-            this.incomeService.updateIncomeAll(sku.getHostId(), userId, System.currentTimeMillis(), sku.getPriceInCents() * sku.getTimeInMonths());
+            this.incomeService.updateIncomeAll(sku.getHostId(), userId, System.currentTimeMillis(), sku.getPriceInCents());
 
         }
     }
