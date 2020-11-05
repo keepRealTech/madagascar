@@ -159,7 +159,7 @@ public class SkuDTOFactory {
         SponsorSkuDTOV2 sponsorSkuDTOV2 = new SponsorSkuDTOV2();
         sponsorSkuDTOV2.setId(message.getId());
         sponsorSkuDTOV2.setQuantity(message.getQuantity());
-        sponsorSkuDTOV2.setPriceInCents(message.getPriceInCents());
+        sponsorSkuDTOV2.setPriceInCents(message.getIsCustom() ? 0L : message.getPriceInCents());
         sponsorSkuDTOV2.setGift(this.sponsorDTOFactory.valueOf(this.sponsorService.retrieveSponsorGiftByGiftId(message.getGiftId())));
         sponsorSkuDTOV2.setIsDefault(message.getDefaultSku());
         return sponsorSkuDTOV2;
