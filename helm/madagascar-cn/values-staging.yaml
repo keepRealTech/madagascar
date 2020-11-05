@@ -89,7 +89,7 @@ global:
       imagePullPolicy: Always
     statistics:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/statistics
-      tag: 1.0.0-staging
+      tag: 1.1.0-staging
       imagePullPolicy: Always
     support_activity:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/support-activity

@@ -25,7 +25,7 @@ ios_pay:
 fossa:
   host: fossa
   port: 6565
-  
+
 coua:
   host: coua
   port: 6565
