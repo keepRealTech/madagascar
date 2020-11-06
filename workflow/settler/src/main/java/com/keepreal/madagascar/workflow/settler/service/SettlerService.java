@@ -64,7 +64,9 @@ public class SettlerService {
      * @param larkConfiguration     {@link LarkConfiguration}.
      * @param restTemplate          {@link RestTemplate}.
      */
-    public SettlerService(WechatOrderService wechatOrderService, WechatPayService wechatPayService, WorkflowService workflowService,
+    public SettlerService(WechatOrderService wechatOrderService,
+                          WechatPayService wechatPayService,
+                          WorkflowService workflowService,
                           PaymentService paymentService,
                           BalanceService balanceService,
                           RedissonClient redissonClient,

@@ -109,13 +109,13 @@ enum DeviceType {
 
 enum PushPriority {
     NEW_FEED = 0;
-    NEW_SUBSCRIBE = 1;
-    NEW_MEMBERSHIP = 2;
-    NEW_LIKE = 3;
-    NEW_COMMENT = 4;
-    NEW_QUESTION = 5;
-    NEW_REPLY = 6;
-    NEW_PUBLIC_REPLY = 7;
+    NEW_QUESTION = 1;
+    NEW_REPLY = 2;
+    NEW_PUBLIC_REPLY = 3;
+    NEW_SUBSCRIBE = 4;
+    NEW_LIKE = 5;
+    NEW_COMMENT = 6;
+    NEW_MEMBERSHIP = 7;
 }
 
 enum UserPaymentType {
@@ -123,6 +123,14 @@ enum UserPaymentType {
     PAYMENT_TYPE_MEMBERSHIP = 1;
     PAYMENT_TYPE_SUPPORT = 2;
     PAYMENT_TYPE_FEED = 3;
+}
+
+enum IncomeDetailType {
+    INCOME_NONE = 0;
+    INCOME_MONTH = 1;
+    INCOME_MEMBERSHIP = 2;
+    INCOME_SUPPORT = 3;
+    INCOME_FEED_CHARGE = 4;
 }
 
 message GenderValue {
@@ -168,6 +176,10 @@ enum MediaType {
     MEDIA_AUDIO = 5;
     MEDIA_HTML = 6;
     MEDIA_QUESTION = 7;
+}
+
+message MediaTypeValue {
+    MediaType value = 1;
 }
 
 enum PaymentState {
@@ -251,6 +263,8 @@ message FeedMessage {
     string hostId = 26;
     bool canSave = 27;
     string feedgroupId = 28;
+    string brief = 29;
+    string title = 30;
 }
 
 message WechatOrderMessage {

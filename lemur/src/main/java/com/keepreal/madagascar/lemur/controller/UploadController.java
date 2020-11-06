@@ -5,7 +5,6 @@ import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.service.UploadService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.UploadApi;
 import swagger.model.MediaUrlRequest;
@@ -70,7 +69,6 @@ public class UploadController implements UploadApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @CrossOrigin
     @Override
     public ResponseEntity<UploadUrlResponse> apiV1UploadMediaUrlPost(@Valid MediaUrlRequest mediaUrlRequest) {
         UploadMediaDTO uploadVideo = uploadService.createUploadVideo(mediaUrlRequest.getMediaTitle(), mediaUrlRequest.getMediaFilename());
@@ -82,7 +80,6 @@ public class UploadController implements UploadApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @CrossOrigin
     @Override
     public ResponseEntity<RefreshVideoResponse> apiV1UploadRefreshVideoGet(@NotNull @Valid String videoId) {
         UploadMediaDTO dto = uploadService.refreshUploadVideo(videoId);
@@ -94,7 +91,6 @@ public class UploadController implements UploadApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @CrossOrigin
     @Override
     public ResponseEntity<OssSignatureResponse> apiV1UploadOssSignaturePost(@Valid MediaUrlsRequest mediaUrlsRequest) {
         OssSignatureDTO dto = uploadService.retrieveOssSignature();

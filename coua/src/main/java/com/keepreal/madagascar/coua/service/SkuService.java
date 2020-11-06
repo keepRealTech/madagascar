@@ -3,14 +3,18 @@ package com.keepreal.madagascar.coua.service;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.vanga.CreateMembershipSkusRequest;
+import com.keepreal.madagascar.vanga.CreateSponsorSkusRequest;
 import com.keepreal.madagascar.vanga.DeleteMembershipSkusByIdRequest;
 import com.keepreal.madagascar.vanga.MembershipSkusResponse;
 import com.keepreal.madagascar.vanga.SkuServiceGrpc;
+import com.keepreal.madagascar.vanga.SponsorSkusResponse;
 import com.keepreal.madagascar.vanga.UpdateMembershipSkusByIdRequest;
+import com.keepreal.madagascar.vanga.UpdateSponsorSkusRequest;
 import io.grpc.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -155,6 +159,91 @@ public class SkuService {
         if (Objects.isNull(response) || ErrorCode.REQUEST_SUCC_VALUE != response.getRtn()) {
             log.error("Delete membership sku returned null.");
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+    }
+
+    /**
+     * Creates sponsor skus by island id.
+     *
+     * @param sponsorId     sponsor id.
+     * @param pricePerUnit  gift unit price.
+     * @param hostId        host id.
+     * @param islandId      island id.
+     * @param giftId        gift image id.
+     */
+    public void createSponsorSkusBySponsorId(String sponsorId,
+                                             Long pricePerUnit,
+                                             String hostId,
+                                             String islandId,
+                                             String giftId) {
+        SkuServiceGrpc.SkuServiceBlockingStub stub = SkuServiceGrpc.newBlockingStub(this.channel);
+
+        CreateSponsorSkusRequest request = CreateSponsorSkusRequest.newBuilder()
+                .setHostId(hostId)
+                .setIslandId(islandId)
+                .setPriceInCentsPerUnit(pricePerUnit)
+                .setSponsorId(sponsorId)
+                .setGiftId(giftId)
+                .build();
+
+        SponsorSkusResponse response;
+        try {
+            response = stub.createSponsorSkusBySponsorId(request);
+        } catch (Exception e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Create sponsor skus returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+    }
+
+    /**
+     * Updates sponsor skus by sponsor id.
+     *
+     * @param sponsorId  sponsor id.
+     * @param giftId gift id.
+     * @param pricePerUnit unit price.
+     */
+    public void updateSponsorSkusBySponsorId(String sponsorId, String giftId, Long pricePerUnit) {
+        if (StringUtils.isEmpty(sponsorId) && StringUtils.isEmpty(giftId) && Objects.isNull(pricePerUnit)) {
+            return;
+        }
+
+        SkuServiceGrpc.SkuServiceBlockingStub stub = SkuServiceGrpc.newBlockingStub(this.channel);
+
+        UpdateSponsorSkusRequest.Builder requestBuilder = UpdateSponsorSkusRequest.newBuilder()
+                .setSponsorId(sponsorId);
+
+        if (!StringUtils.isEmpty(giftId)) {
+            requestBuilder.setGiftId(StringValue.of(giftId));
+        }
+
+        if (Objects.nonNull(pricePerUnit)) {
+            requestBuilder.setPriceInCentsPerUnit(UInt64Value.of(pricePerUnit));
+        }
+
+        SponsorSkusResponse response;
+        try {
+            response = stub.updateSponsorSkusBySponsorId(requestBuilder.build());
+        } catch (Exception e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Update sponsor skus returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
         }
     }
 

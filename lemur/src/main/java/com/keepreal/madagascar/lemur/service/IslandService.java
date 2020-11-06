@@ -19,6 +19,7 @@ import com.keepreal.madagascar.coua.CheckNewFeedsResponse;
 import com.keepreal.madagascar.coua.CreateOrUpdateSupportTargetRequest;
 import com.keepreal.madagascar.coua.DeleteSupportTargetRequest;
 import com.keepreal.madagascar.coua.DiscoverIslandMessage;
+import com.keepreal.madagascar.coua.DiscoverIslandsRequest;
 import com.keepreal.madagascar.coua.DiscoverIslandsResponse;
 import com.keepreal.madagascar.coua.DismissIntroductionRequest;
 import com.keepreal.madagascar.coua.IslandIdentitiesResponse;
@@ -738,12 +739,14 @@ public class IslandService {
      *
      * @return {@link DiscoverIslandMessage}.
      */
-    public List<DiscoverIslandMessage> retrieveIslandsInDiscovery() {
+    public List<DiscoverIslandMessage> retrieveIslandsInDiscovery(boolean isAuditMode) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
+
+        DiscoverIslandsRequest request = DiscoverIslandsRequest.newBuilder().setIsAuditMode(isAuditMode).build();
 
         DiscoverIslandsResponse response;
         try {
-            response = stub.discoverIslands(Empty.getDefaultInstance());
+            response = stub.discoverIslands(request);
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

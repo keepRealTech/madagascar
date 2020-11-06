@@ -6,10 +6,12 @@ import com.keepreal.madagascar.coua.IslandIdentityMessage;
 import com.keepreal.madagascar.coua.IslandProfileResponse;
 import com.keepreal.madagascar.lemur.config.GeneralConfiguration;
 import com.keepreal.madagascar.lemur.service.ChatService;
+import com.keepreal.madagascar.lemur.service.IncomeService;
 import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
 import com.keepreal.madagascar.lemur.service.PaymentService;
 import com.keepreal.madagascar.lemur.service.IslandService;
 import com.keepreal.madagascar.lemur.service.UserService;
+import com.keepreal.madagascar.vanga.IncomeProfileMessage;
 import com.keepreal.madagascar.vanga.SubscribeMembershipMessage;
 import com.keepreal.madagascar.vanga.IncomeMessage;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,7 @@ public class IslandDTOFactory {
     private final PaymentService paymentService;
     private final IslandService islandService;
     private final SupportTargetDTOFactory supportTargetDTOFactory;
+    private final IncomeService incomeService;
 
     /**
      * Constructs the island dto factory.
@@ -68,6 +71,7 @@ public class IslandDTOFactory {
      * @param paymentService             {@link PaymentService}.
      * @param islandService              {@link IslandService}
      * @param supportTargetDTOFactory    {@link SupportTargetDTOFactory}
+     * @param incomeService              {@link IncomeService}.
      */
     public IslandDTOFactory(ChatService chatService,
                             UserService userService,
@@ -76,7 +80,8 @@ public class IslandDTOFactory {
                             GeneralConfiguration generalConfiguration,
                             PaymentService paymentService,
                             IslandService islandService,
-                            SupportTargetDTOFactory supportTargetDTOFactory) {
+                            SupportTargetDTOFactory supportTargetDTOFactory,
+                            IncomeService incomeService) {
         this.chatService = chatService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
@@ -85,6 +90,7 @@ public class IslandDTOFactory {
         this.paymentService = paymentService;
         this.islandService = islandService;
         this.supportTargetDTOFactory = supportTargetDTOFactory;
+        this.incomeService = incomeService;
     }
 
     /**
@@ -161,10 +167,10 @@ public class IslandDTOFactory {
         recommendIslandDTO.setAccessType(this.convertAccessType(discoverIsland.getIsland().getIslandAccessType()));
         recommendIslandDTO.setMemberCount(discoverIsland.getIsland().getMemberCount());
         recommendIslandDTO.setShowIncome(discoverIsland.getIsland().getShowIncome());
-        IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(discoverIsland.getIsland().getHostId());
-        recommendIslandDTO.setSupportCount(incomeMessage.getSupportCount());
+        IncomeProfileMessage incomeMessage = this.incomeService.retrieveIncomeProfile(discoverIsland.getIsland().getHostId());
+        recommendIslandDTO.setSupportCount(incomeMessage.getTotalSupportCountShow());
         if (discoverIsland.getIsland().getShowIncome()) {
-            recommendIslandDTO.setCentsInMonth(incomeMessage.getCents());
+            recommendIslandDTO.setCentsInMonth(incomeMessage.getTotalIncome());
         } else {
             recommendIslandDTO.setCentsInMonth(0L);
         }
@@ -205,10 +211,10 @@ public class IslandDTOFactory {
         fullIslandDTO.setHost(this.userDTOFactory.briefValueOf(this.userService.retrieveUserById(island.getHostId())));
 
         fullIslandDTO.setShowIncome(island.getShowIncome());
-        IncomeMessage incomeMessage = this.paymentService.retrieveIncomeByUserId(island.getHostId());
-        fullIslandDTO.setSupportCount(incomeMessage.getSupportCount());
+        IncomeProfileMessage incomeMessage = this.incomeService.retrieveIncomeProfile(island.getHostId());
+        fullIslandDTO.setSupportCount(incomeMessage.getTotalSupportCountShow());
         if (island.getShowIncome()) {
-            fullIslandDTO.setCentsInMonth(incomeMessage.getCents());
+            fullIslandDTO.setCentsInMonth(incomeMessage.getTotalIncome());
         } else {
             fullIslandDTO.setCentsInMonth(0L);
         }

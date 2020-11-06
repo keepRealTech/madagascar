@@ -12,6 +12,8 @@ import com.keepreal.madagascar.vanga.model.Payment;
 import com.keepreal.madagascar.vanga.model.PaymentState;
 import com.keepreal.madagascar.vanga.model.WechatOrder;
 import com.keepreal.madagascar.vanga.model.OrderState;
+import com.keepreal.madagascar.vanga.settlementCalculator.DefaultSettlementCalculator;
+import com.keepreal.madagascar.vanga.settlementCalculator.SettlementCalculator;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,8 @@ public class FeedService {
     private final WechatPayService wechatPayService;
     private final BalanceService balanceService;
 
+    private final SettlementCalculator settlementCalculator;
+
     /**
      * Constructs the feed service.
      *
@@ -57,6 +61,7 @@ public class FeedService {
         this.wechatOrderService = wechatOrderService;
         this.wechatPayService = wechatPayService;
         this.balanceService = balanceService;
+        this.settlementCalculator = new DefaultSettlementCalculator();
     }
 
     /**
@@ -81,9 +86,7 @@ public class FeedService {
         ZonedDateTime currentTimestamp = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
         payment.setWithdrawPercent(hostBalance.getWithdrawPercent());
         payment.setState(PaymentState.PENDING.getValue());
-        payment.setValidAfter(currentTimestamp
-                .plusMonths(SubscribeMembershipService.PAYMENT_SETTLE_IN_MONTH)
-                .toInstant().toEpochMilli());
+        payment.setValidAfter(this.settlementCalculator.generateSettlementTimestamp(currentTimestamp, 0));
 
         this.balanceService.addOnCents(hostBalance, this.calculateAmount(payment.getAmountInCents(), hostBalance.getWithdrawPercent()));
         this.paymentService.updateAll(Collections.singletonList(payment));

@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.coua";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message RetrieveSponsorRequest {
+  string islandId = 1;
+}
+
+message RetrieveSponsorGiftsRequest {
+  bool onlyDefault = 1;
+}
+
+message RetrieveSingleSponsorGiftRequest {
+  string giftId = 1;
+}
+
+message RetrieveSponsorResponse {
+  CommonStatus status = 1;
+  SponsorMessage sponsorMessage = 2;
+}
+
+message RetrieveSponsorGiftsResponse {
+  CommonStatus status = 1;
+  repeated SponsorGiftMessage sponsorGifts = 2;
+}
+
+message RetrieveSingleSponsorGiftResponse {
+  CommonStatus status = 1;
+  SponsorGiftMessage sponsorGift = 2;
+}
+
+message SponsorMessage {
+  string id = 1;
+  string islandId = 2;
+  string hostId = 3;
+  string giftId = 4;
+  string description = 5;
+  uint64 pricePerUnit = 6;
+}
+
+message SponsorGiftMessage {
+  string id = 1;
+  string uri = 2;
+  string emoji = 3;
+  string name = 4;
+  string text = 5;
+}
+
+message UpdateSponsorByIslandIdRequest {
+  string islandId = 1;
+  google.protobuf.StringValue description = 2;
+  google.protobuf.StringValue giftId = 3;
+  google.protobuf.UInt64Value pricePerUnit = 4;
+}
+
+service SponsorService {
+  rpc RetrieveSponsor (RetrieveSponsorRequest) returns (RetrieveSponsorResponse) {};
+  rpc UpdateSponsorByIslandId (UpdateSponsorByIslandIdRequest) returns (RetrieveSponsorResponse) {};
+  rpc RetrieveSponsorGifts (RetrieveSponsorGiftsRequest) returns (RetrieveSponsorGiftsResponse) {};
+  rpc RetrieveSingleSponsorGift (RetrieveSingleSponsorGiftRequest) returns (RetrieveSingleSponsorGiftResponse) {};
+}

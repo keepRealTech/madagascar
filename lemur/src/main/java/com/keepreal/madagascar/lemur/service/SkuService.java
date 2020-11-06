@@ -2,15 +2,19 @@ package com.keepreal.madagascar.lemur.service;
 
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
+import com.keepreal.madagascar.coua.RetrieveSponsorRequest;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.MembershipSkusResponse;
 import com.keepreal.madagascar.vanga.RetrieveMembershipSkusByMembershipIdRequest;
 import com.keepreal.madagascar.vanga.RetrieveShellSkusRequest;
+import com.keepreal.madagascar.vanga.RetrieveSponsorSkusRequest;
 import com.keepreal.madagascar.vanga.RetrieveSupportSkusRequest;
 import com.keepreal.madagascar.vanga.RetrieveSupportSkusResponse;
 import com.keepreal.madagascar.vanga.ShellSkuMessage;
 import com.keepreal.madagascar.vanga.ShellSkusResponse;
 import com.keepreal.madagascar.vanga.SkuServiceGrpc;
+import com.keepreal.madagascar.vanga.SponsorSkuMessage;
+import com.keepreal.madagascar.vanga.SponsorSkusResponse;
 import com.keepreal.madagascar.vanga.SupportSkuMessage;
 import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
@@ -130,6 +134,35 @@ public class SkuService {
         }
 
         return response.getSupportSkusList();
+    }
+
+    /**
+     * 获取支持一下sku信息
+     *
+     * @return {@link SponsorSkusResponse}
+     */
+    public SponsorSkusResponse retrieveSponsorSkus(String islandId) {
+        SkuServiceGrpc.SkuServiceBlockingStub stub = SkuServiceGrpc.newBlockingStub(this.channel);
+
+        SponsorSkusResponse response;
+
+        try {
+            response = stub.retrieveSponsorSkusByIslandId(RetrieveSponsorSkusRequest.newBuilder().setIslandId(islandId).build());
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "Retrieve sponsor skus returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response;
     }
 
 }

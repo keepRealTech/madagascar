@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.lemur.controller;
 
+import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.lemur.config.IOSClientConfiguration;
 import com.keepreal.madagascar.lemur.dtoFactory.BalanceDTOFactory;
@@ -12,7 +13,6 @@ import com.keepreal.madagascar.vanga.BalanceMessage;
 import com.keepreal.madagascar.vanga.BillingInfoMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.BillingApi;
 import swagger.model.BalanceResponse;
@@ -46,12 +46,12 @@ public class BillingController implements BillingApi {
     /**
      * Constructs the billing controller.
      *
-     * @param billingInfoService     {@link BillingInfoService}.
-     * @param billingInfoDTOFactory  {@link BillingInfoDTOFactory}.
-     * @param iosClientConfiguration {@link IOSClientConfiguration}.
-     * @param balanceService         {@link BalanceService}.
-     * @param balanceDTOFactory      {@link BalanceDTOFactory}.
-     * @param paymentService         {@link PaymentService}.
+     * @param billingInfoService      {@link BillingInfoService}.
+     * @param billingInfoDTOFactory   {@link BillingInfoDTOFactory}.
+     * @param iosClientConfiguration  {@link IOSClientConfiguration}.
+     * @param balanceService          {@link BalanceService}.
+     * @param balanceDTOFactory       {@link BalanceDTOFactory}.
+     * @param paymentService          {@link PaymentService}.
      * @param iosClientConfiguration1 {@link IOSClientConfiguration}.
      */
     public BillingController(BillingInfoService billingInfoService,
@@ -75,7 +75,6 @@ public class BillingController implements BillingApi {
      *
      * @return {@link BalanceResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<BalanceResponse> apiV1BalancesMyWalletGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -110,7 +109,6 @@ public class BillingController implements BillingApi {
      *
      * @return {@link BillingInfoResponseV11}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<BillingInfoResponseV11> apiV11BillingInfoGet() {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -153,7 +151,6 @@ public class BillingController implements BillingApi {
      *
      * @return {@link BillingInfoResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<BillingInfoResponseV11> apiV11BillingInfoPut(PutBillingInfoRequestV11 putBillingInfoRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -177,7 +174,6 @@ public class BillingController implements BillingApi {
      * @param postWithdrawRequest (required) {@link PostWithdrawRequest}.
      * @return {@link BalanceResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<BalanceResponse> apiV1BalancesWithdrawPost(PostWithdrawRequest postWithdrawRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -197,14 +193,13 @@ public class BillingController implements BillingApi {
      * @param version (required) Version.
      * @return {@link H5RedirectResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<H5RedirectResponse> apiV1BalancesMyWalletIosGet(Integer version) {
         String userId = HttpContextUtils.getUserIdFromContext();
         ConfigurationDTO configurationDTO = this.iOSConfigVersionMap.get(version);
 
         H5RedirectDTO data = new H5RedirectDTO();
-        if (PaymentController.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
+        if (Constants.AUDIT_USER_IDS.contains(userId) || Objects.isNull(configurationDTO) || configurationDTO.getAudit()) {
             data.setUrl(String.format("%s/app/my/wallet/notsupport", this.iosClientConfiguration.getHtmlHostName()));
         } else {
             data.setUrl(String.format("%s/app/my/wallet", this.iosClientConfiguration.getHtmlHostName()));

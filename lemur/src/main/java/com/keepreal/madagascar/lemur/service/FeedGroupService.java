@@ -3,6 +3,8 @@ package com.keepreal.madagascar.lemur.service;
 import com.google.protobuf.StringValue;
 import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedGroupMessage;
+import com.keepreal.madagascar.common.MediaType;
+import com.keepreal.madagascar.common.MediaTypeValue;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.fossa.DeleteFeedGroupByIdRequest;
@@ -272,22 +274,26 @@ public class FeedGroupService {
      *
      * @param id       Feed group id.
      * @param userId   User id.
+     * @param type     {@link MediaType}.
      * @param page     Page.
      * @param pageSize Page size.
      * @return {@link FeedGroupFeedsResponse}.
      */
-    public FeedGroupFeedsResponse retrieveFeedGroupFeeds(String id, String userId, int page, int pageSize) {
+    public FeedGroupFeedsResponse retrieveFeedGroupFeeds(String id, String userId, MediaType type, int page, int pageSize) {
         FeedGroupServiceGrpc.FeedGroupServiceBlockingStub stub = FeedGroupServiceGrpc.newBlockingStub(this.fossaChannel);
 
-        RetrieveFeedGroupContentByIdRequest request = RetrieveFeedGroupContentByIdRequest.newBuilder()
+        RetrieveFeedGroupContentByIdRequest.Builder requestBuilder = RetrieveFeedGroupContentByIdRequest.newBuilder()
                 .setId(id)
                 .setUserId(userId)
-                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize))
-                .build();
+                .setPageRequest(PaginationUtils.buildPageRequest(page, pageSize));
+
+        if (Objects.nonNull(type)) {
+            requestBuilder.setMediaType(MediaTypeValue.newBuilder().setValue(type).build());
+        }
 
         FeedGroupFeedsResponse response;
         try {
-            response = stub.retrieveFeedGroupFeedsById(request);
+            response = stub.retrieveFeedGroupFeedsById(requestBuilder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }

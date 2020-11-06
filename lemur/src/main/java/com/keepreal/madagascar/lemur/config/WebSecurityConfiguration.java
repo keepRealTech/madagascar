@@ -1,5 +1,8 @@
 package com.keepreal.madagascar.lemur.config;
 
+import com.keepreal.madagascar.lemur.filters.AuditUserFilter;
+import com.keepreal.madagascar.lemur.service.GeoIpService;
+import com.keepreal.madagascar.lemur.service.UserService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +16,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.R
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler;
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -23,6 +27,21 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableResourceServer
 @EnableWebSecurity
 public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
+
+    private final GeoIpService geoIpService;
+    private final UserService userService;
+
+    /**
+     * Constructs the web security configuration.
+     *
+     * @param geoIpService {@link GeoIpService}.
+     * @param userService  {@link UserService}.
+     */
+    public WebSecurityConfiguration(GeoIpService geoIpService,
+                                    UserService userService) {
+        this.geoIpService = geoIpService;
+        this.userService = userService;
+    }
 
     /**
      * Configures the http security.
@@ -56,6 +75,7 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                         "/api/v1/memberships/{\\d+}**",
                         "/api/v1/membership/{\\d+}/skus**",
                         "/api/v1/islands/{\\d+}/support**",
+                        "/api/v2/islands/{\\d+}/support**",
                         "/api/v1/islands/{\\d+}/boxes**",
                         "/api/v1/islands/{\\d+}/reposts/generateCode**",
                         "/api/v1/islands/{\\d+}/feeds/snapshot**",
@@ -65,6 +85,9 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                 .anyRequest().authenticated();
 
         httpSecurity.headers().cacheControl();
+        httpSecurity.addFilterAfter(new AuditUserFilter(this.userService, this.geoIpService),
+                UsernamePasswordAuthenticationFilter.class);
+
     }
 
     /**
@@ -97,7 +120,9 @@ public class WebSecurityConfiguration extends ResourceServerConfigurerAdapter {
                         .allowedOrigins("https://tiaodaoapp.com",
                                 "https://www.tiaodaoapp.com",
                                 "https://h5.tiaodaoapp.com",
-                                "https://home.keepreal.cn")
+                                "https://home.keepreal.cn",
+                                "http://test.keepreal.cn",
+                                "http://122.152.196.164:3000")
                         .allowedMethods("*");
             }
         };

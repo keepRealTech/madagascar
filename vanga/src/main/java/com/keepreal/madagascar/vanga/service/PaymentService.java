@@ -91,9 +91,9 @@ public class PaymentService {
     /**
      * Creates new wechat payments for given order.
      *
-     * @param order         {@link Order}.
-     * @param sku           {@link MembershipSku}.
-     * @param paymentType   {@link PaymentType}.
+     * @param order       {@link Order}.
+     * @param sku         {@link MembershipSku}.
+     * @param paymentType {@link PaymentType}.
      * @return {@link Payment}.
      */
     @Transactional
@@ -147,10 +147,10 @@ public class PaymentService {
     /**
      * Creates the payments for one time support.
      *
-     * @param order         {@link Order}.
-     * @param payeeId       Payee id.
-     * @param priceInCents  Price in cents.
-     * @return  {@link Payment}.
+     * @param order        {@link Order}.
+     * @param payeeId      Payee id.
+     * @param priceInCents Price in cents.
+     * @return {@link Payment}.
      */
     @Transactional
     public Payment createNewSupportPayment(Order order, String payeeId, long priceInCents) {
@@ -197,6 +197,7 @@ public class PaymentService {
      * @param currentExpireTime {@link ZonedDateTime}.
      * @return {@link Payment}.
      */
+    @Deprecated
     @Transactional
     public List<Payment> createPayShellPayments(String userId, Integer withdrawPercent, MembershipSku sku, ZonedDateTime currentExpireTime) {
         String tradeNum = UUID.randomUUID().toString().replace("-", "");
@@ -231,6 +232,7 @@ public class PaymentService {
      * @param currentExpireTime {@link ZonedDateTime}.
      * @return {@link Payment}.
      */
+    @Deprecated
     @Transactional
     public List<Payment> createIOSPayPayments(String userId,
                                               IosOrder iosOrder,
@@ -358,8 +360,8 @@ public class PaymentService {
     /**
      * Retrieves valid user withdraws history.
      *
-     * @param userId    User id.
-     * @param pageable  {@link Pageable}.
+     * @param userId   User id.
+     * @param pageable {@link Pageable}.
      * @return {@link Payment}.
      */
     public Page<Payment> retrieveWithdrawsByUserId(String userId, Pageable pageable) {
@@ -369,12 +371,12 @@ public class PaymentService {
     /**
      * merge user payment
      *
-     * @param wechatUserId      wechat user id
-     * @param webMobileUserId   mobile user id
+     * @param wechatUserId    wechat user id
+     * @param webMobileUserId mobile user id
      */
     public void mergeUserPayment(String wechatUserId, String webMobileUserId) {
         this.paymentRepository.mergeUserPayment(wechatUserId, webMobileUserId);
-   }
+    }
 
     public int supportCount(String userId) {
         Integer count = this.paymentRepository.countByPayeeIdAndTypeAndStateInAndDeletedIsFalse(userId, PaymentType.SUPPORT.getValue(), Arrays.asList(PaymentState.OPEN.getValue(), PaymentState.CLOSED.getValue()));
@@ -407,4 +409,19 @@ public class PaymentService {
         return cents == null ? 0 : cents;
     }
 
+    public Page<Payment> retrievePaymentsByPayeeId(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable) {
+        return this.paymentRepository.findPaymentsByPayeeIdAndCreatedTimeBetweenAndStateInAndTypeNotAndDeletedIsFalse(payeeId, startTimestamp, endTimestamp, Arrays.asList(2, 3), 4, pageable);
+    }
+
+    public Page<Payment> retrieveMembershipPaymentsByPayeeId(String payeeId, long startTimestamp, long endTimestamp, List<String> membershipSkuIds, Pageable pageable) {
+        return this.paymentRepository.findPaymentsByPayeeIdAndCreatedTimeBetweenAndStateInAndMembershipSkuIdIn(payeeId, startTimestamp, endTimestamp, Arrays.asList(2, 3), membershipSkuIds, pageable);
+    }
+
+    public Page<Payment> retrieveSponsorPaymentsByPayeeId(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable) {
+        return this.paymentRepository.findPaymentsByPayeeIdAndCreatedTimeBetweenAndStateInAndType(payeeId, startTimestamp, endTimestamp, Arrays.asList(2, 3), 6, pageable);
+    }
+
+    public Page<Payment> retrieveFeedChargePaymentsByPayeeId(String payeeId, long startTimestamp, long endTimestamp, Pageable pageable) {
+        return this.paymentRepository.findPaymentsByPayeeIdAndCreatedTimeBetweenAndStateInAndTypeInAndMembershipSkuId(payeeId, startTimestamp, endTimestamp, Arrays.asList(2, 3), Arrays.asList(1, 7), "", pageable);
+    }
 }

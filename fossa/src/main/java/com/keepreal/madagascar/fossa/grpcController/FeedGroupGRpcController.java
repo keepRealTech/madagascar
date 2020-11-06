@@ -194,8 +194,15 @@ public class FeedGroupGRpcController extends FeedGroupServiceGrpc.FeedGroupServi
             responseObserver.onCompleted();
         }
 
-        Page<FeedInfo> feedInfoPage = this.feedInfoService.retrieveFeedsByFeedGroupId(request.getId(),
-                PageRequest.of(request.getPageRequest().getPage(), request.getPageRequest().getPageSize()));
+        Page<FeedInfo> feedInfoPage;
+        if (request.hasMediaType()) {
+            feedInfoPage = this.feedInfoService.retrieveFeedsByFeedGroupId(request.getId(),
+                    request.getMediaType().getValue().name(),
+                    PageRequest.of(request.getPageRequest().getPage(), request.getPageRequest().getPageSize()));
+        } else {
+            feedInfoPage = this.feedInfoService.retrieveFeedsByFeedGroupId(request.getId(),
+                    PageRequest.of(request.getPageRequest().getPage(), request.getPageRequest().getPageSize()));
+        }
 
         List<String> myMembershipIds = this.subscribeMembershipService.retrieveMembershipIds(request.getUserId(), null);
 

@@ -33,7 +33,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -174,9 +173,6 @@ public class IslandController implements IslandApi {
                                                                          Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
         String subscriberId = (Objects.nonNull(subscribed) && subscribed) ? HttpContextUtils.getUserIdFromContext() : null;
-        if (Objects.nonNull(subscriberId) && subscriberId.equals("99999999")) {
-            pageSize = 1000;
-        }
 
         IslandsResponse islandsResponse = this.islandService.retrieveIslands(
                 name, null, subscriberId, page, pageSize);
@@ -218,7 +214,6 @@ public class IslandController implements IslandApi {
      * @param refererId user id.
      * @return {@link IslandPosterResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<IslandPosterResponse> apiV1IslandsIdPosterGet(String id, @NotNull @Valid String refererId) {
         PosterIslandDTO posterIslandDTO = new PosterIslandDTO();
@@ -240,7 +235,6 @@ public class IslandController implements IslandApi {
      * @param id Island id.
      * @return {@link IslandProfileResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<IslandProfileResponse> apiV1IslandsIdProfileGet(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -264,7 +258,6 @@ public class IslandController implements IslandApi {
      * @param pageSize Page size.
      * @return {@link BriefIslandsResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<BriefIslandsResponse> apiV1IslandsMyIslandsGet(Integer page, Integer pageSize) {
         String hostId = HttpContextUtils.getUserIdFromContext();
@@ -686,7 +679,7 @@ public class IslandController implements IslandApi {
      */
     @Override
     public ResponseEntity<IslandDiscoveryResponse> apiV1IslandsDiscoveryGet() {
-        List<DiscoverIslandMessage> discoverIslandMessageList = this.islandService.retrieveIslandsInDiscovery();
+        List<DiscoverIslandMessage> discoverIslandMessageList = this.islandService.retrieveIslandsInDiscovery(false);
 
         IslandDiscoveryResponse response = new IslandDiscoveryResponse();
         response.setData(discoverIslandMessageList.stream()

@@ -15,18 +15,18 @@ allprojects {
     }
 }
 
-ext['lemur.version'] = '1.3.4-hf2'
+ext['lemur.version'] = '1.4.0'
 ext['baobob.version'] = '1.2.3'
 ext['brookesia.version'] = '1.0.3'
-ext['coua.version'] = '1.2.3'
-ext['fossa.version'] = '1.2.3'
+ext['coua.version'] = '1.2.4'
+ext['fossa.version'] = '1.2.4'
 ext['indri.version'] = '1.0.3'
 ext['mantella.version'] = '1.1.2'
-ext['marty.version'] = '1.0.7'
+ext['marty.version'] = '1.0.8'
 ext['tenrecs.version'] = '1.0.7'
-ext['vanga.version'] = '1.2.5'
-ext['asity.version'] = '1.0.6'
-ext['hoopoe.version'] = '1.0.0'
+ext['vanga.version'] = '1.2.6'
+ext['asity.version'] = '1.0.7'
+ext['hoopoe.version'] = '1.0.1'
 
 ext['settler.version'] = '1.1.0'
 ext['reconciliation.version'] = '1.0.1'
@@ -90,7 +90,8 @@ subprojects {
             tag 'staging', "registry.cn-beijing.aliyuncs.com/keepreal/${project.name.replace('_','-')}:$project.version-staging"
             dockerfile file("$projectDir/dockerfile")
             files "$projectDir/start.sh", "$projectDir/healthcheck.sh", "$projectDir/apiclient_cert.p12",
-                  "$projectDir/appCertPublicKey_2021001189642510.crt", "$projectDir/alipayCertPublicKey_RSA2.crt", "$projectDir/alipayRootCert.crt"
+                  "$projectDir/appCertPublicKey_2021001189642510.crt", "$projectDir/alipayCertPublicKey_RSA2.crt", "$projectDir/alipayRootCert.crt",
+                  "$projectDir/GeoLite2-Country.mmdb"
             copySpec.from(tasks.unpack.outputs).into("dependency")
             buildArgs(['DEPENDENCY': "dependency"])
             pull true
@@ -178,6 +179,7 @@ subprojects {
             dependency "com.squareup.okhttp3:okhttp:4.8.1"
             dependency "com.squareup.okio:okio:2.2.2"
             dependency "org.jetbrains.kotlin:kotlin-stdlib:1.4.10"
+            dependency "com.maxmind.geoip2:geoip2:2.15.0"
         }
     }
 }

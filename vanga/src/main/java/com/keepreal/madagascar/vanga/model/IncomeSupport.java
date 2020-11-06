@@ -1,9 +1,12 @@
-package com.keepreal.madagascar.asity.model;
+package com.keepreal.madagascar.vanga.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Column;
@@ -12,20 +15,26 @@ import javax.persistence.EntityListeners;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-/**
- *  Represents the special artist entity.
- */
+@Builder
 @Data
-@Table(name = "special_artists_temp")
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SpecialArtist {
+@EqualsAndHashCode
+@Table(name = "income_support")
+public class IncomeSupport {
+
     @Id
-    String id;
+    private String id;
+    private String userId;
+    private String supporterId;
+    private Long cents;
     @Column(name = "is_deleted")
     @Builder.Default
     private Boolean deleted = false;
+    @CreatedDate
+    private Long createdTime;
+    @LastModifiedDate
+    private Long updatedTime;
 }

@@ -18,9 +18,9 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.MembershipApi;
+import swagger.model.DeactivateMembershipRequest;
 import swagger.model.DummyResponse;
 import swagger.model.FeedMembershipsResponse;
 import swagger.model.MembershipResponse;
@@ -84,7 +84,6 @@ public class MembershipController implements MembershipApi {
      * @param id island id.
      * @return {@link FeedMembershipsResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<FeedMembershipsResponse> apiV1IslandsIdFeedMembershipsGet(String id) {
         List<FeedMembershipMessage> feedMembershipMessages = membershipService.retrieveFeedMembershipsByIslandId(id);
@@ -104,7 +103,7 @@ public class MembershipController implements MembershipApi {
      */
     @Override
     public ResponseEntity<MembershipsResponse> apiV1IslandsIdMembershipsGet(String id) {
-        List<MembershipMessage> membershipMessages = membershipService.retrieveMembershipsByIslandId(id, false);
+        List<MembershipMessage> membershipMessages = membershipService.retrieveMembershipsByIslandId(id, true);
 
         MembershipsResponse response = new MembershipsResponse();
         response.data(membershipMessages.stream().map(membershipDTOFactory::valueOf).collect(Collectors.toList()));
@@ -135,7 +134,11 @@ public class MembershipController implements MembershipApi {
                 userId,
                 Objects.nonNull(postMembershipRequest.getUseCustomMessage()) ? postMembershipRequest.getUseCustomMessage() : false,
                 Objects.nonNull(postMembershipRequest.getMessage()) ? postMembershipRequest.getMessage() : "",
-                Objects.nonNull(postMembershipRequest.getIsPermanent()) ? postMembershipRequest.getIsPermanent() : false);
+                Objects.nonNull(postMembershipRequest.getIsPermanent()) ? postMembershipRequest.getIsPermanent() : false,
+                Objects.nonNull(postMembershipRequest.getImageUri()) ? postMembershipRequest.getImageUri() : "",
+                Objects.nonNull(postMembershipRequest.getWidth()) ? postMembershipRequest.getWidth() : 0,
+                Objects.nonNull(postMembershipRequest.getHeight()) ? postMembershipRequest.getHeight() : 0,
+                Objects.nonNull(postMembershipRequest.getSize()) ? postMembershipRequest.getSize() : 0);
 
         MembershipResponse response = new MembershipResponse();
         response.data(membershipDTOFactory.briefValueOf(membershipMessage));
@@ -151,10 +154,10 @@ public class MembershipController implements MembershipApi {
      * @return {@link DummyResponse}.
      */
     @Override
-    public ResponseEntity<DummyResponse> apiV1MembershipsIdDeactivatePut(String id) {
+    public ResponseEntity<DummyResponse> apiV1MembershipsIdDeactivatePut(String id, @Valid DeactivateMembershipRequest deactivateMembershipRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        membershipService.deactivateMembershipById(id, userId);
 
+        membershipService.deactivateMembershipById(id, userId, deactivateMembershipRequest.getIsDeactivate());
         DummyResponse response = new DummyResponse();
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -182,7 +185,6 @@ public class MembershipController implements MembershipApi {
      * @param id membership id.
      * @return {@link MembershipResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<MembershipResponse> apiV1MembershipsIdGet(String id) {
         MembershipMessage membershipMessage = membershipService.retrieveMembershipById(id);
@@ -211,7 +213,11 @@ public class MembershipController implements MembershipApi {
                 userId,
                 putMembershipRequest.getUseCustomMessage(),
                 putMembershipRequest.getMessage(),
-                putMembershipRequest.getIsPermanent());
+                putMembershipRequest.getIsPermanent(),
+                putMembershipRequest.getImageUri(),
+                putMembershipRequest.getWidth(),
+                putMembershipRequest.getHeight(),
+                putMembershipRequest.getSize());
 
         MembershipResponse response = new MembershipResponse();
         response.data(membershipDTOFactory.briefValueOf(membershipMessage));
@@ -240,7 +246,7 @@ public class MembershipController implements MembershipApi {
     /**
      * Implements the get membership template api.
      *
-     * @return  {@link MembershipTemplatesResponse}.
+     * @return {@link MembershipTemplatesResponse}.
      */
     @Override
     public ResponseEntity<MembershipTemplatesResponse> apiV1MembershipsTemplatesGet() {
@@ -255,7 +261,7 @@ public class MembershipController implements MembershipApi {
      * Implements the get my membership api.
      *
      * @param id island id.
-     * @return  {@link MyMembershipsResponse}
+     * @return {@link MyMembershipsResponse}
      */
     @Override
     public ResponseEntity<MyMembershipsResponse> apiV1IslandsIdMyMembershipsGet(String id) {
@@ -271,11 +277,11 @@ public class MembershipController implements MembershipApi {
     /**
      * Implements the get membership feed api.
      *
-     * @param id island id
+     * @param id           island id
      * @param minTimestamp timestamp after (optional)
      * @param maxTimestamp timestamp before (optional)
-     * @param pageSize size of a page (optional, default to 10)
-     * @return  {@link TimelinesResponse}
+     * @param pageSize     size of a page (optional, default to 10)
+     * @return {@link TimelinesResponse}
      */
     @Override
     public ResponseEntity<TimelinesResponse> apiV1IslandsIdMembershipFeedsGet(String id, Long minTimestamp, Long maxTimestamp, Integer pageSize) {

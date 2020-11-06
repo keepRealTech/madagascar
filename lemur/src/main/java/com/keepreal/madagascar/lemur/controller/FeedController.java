@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.IslandAccessType;
 import com.keepreal.madagascar.common.IslandMessage;
+import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -29,11 +30,11 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,7 +52,9 @@ import swagger.model.PostCheckFeedsRequest;
 import swagger.model.PostCheckFeedsResponse;
 import swagger.model.PostFeedPayload;
 import swagger.model.PostFeedRequestV2;
+import swagger.model.PostIslandFeedRequest;
 import swagger.model.PutFeedFeedgroupRequest;
+import swagger.model.PutFeedRequest;
 import swagger.model.TimelinesResponse;
 import swagger.model.TopFeedRequest;
 import swagger.model.ToppedFeedsDTO;
@@ -147,7 +150,7 @@ public class FeedController implements FeedApi {
                 .map(this.imageService::uploadSingleImage)
                 .collect(Collectors.toList());
 
-        this.feedService.createFeed(payload.getIslandIds(), payload.getMembershipIds(), userId, payload.getContent(), imageUris);
+        this.feedService.createFeeds(payload.getIslandIds(), payload.getMembershipIds(), userId, payload.getContent(), imageUris);
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -184,7 +187,6 @@ public class FeedController implements FeedApi {
      * @param includeChargeable Whether includes chargeable feeds.
      * @return {@link FullFeedResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<FullFeedResponse> apiV1FeedsIdGet(String id, Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -404,7 +406,6 @@ public class FeedController implements FeedApi {
      * @param includeChargeable Whether includes the chargeable feeds.
      * @return {@link swagger.model.FeedsResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<FeedsResponseV2> apiV12IslandsIdFeedsGet(String id,
                                                                    Boolean fromHost,
@@ -544,6 +545,7 @@ public class FeedController implements FeedApi {
      * @param id                id (required) Feed group id.
      * @param page              page number (optional, default to 0) Page.
      * @param pageSize          size of a page (optional, default to 10) Page size.
+     * @param type              {@link MultiMediaType}.
      * @param includeChargeable Whether includes chargeable.
      * @return {@link FeedsResponse}.
      */
@@ -551,18 +553,27 @@ public class FeedController implements FeedApi {
     public ResponseEntity<swagger.model.FeedsResponse> apiV1FeedgroupsIdFeedsGet(String id,
                                                                                  Integer page,
                                                                                  Integer pageSize,
+                                                                                 MultiMediaType type,
                                                                                  Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
-        FeedGroupFeedsResponse feedGroupFeedsResponse = this.feedGroupService.retrieveFeedGroupFeeds(id, userId, page, pageSize);
+        FeedGroupFeedsResponse feedGroupFeedsResponse = this.feedGroupService.retrieveFeedGroupFeeds(id,
+                userId,
+                this.convertMediaType(type),
+                page,
+                pageSize);
 
         Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(feedGroupFeedsResponse.getFeedList());
+
+        Map<String, FeedGroupMessage> feedGroupMessageMap = this.generateFeedGroupMap(feedGroupFeedsResponse.getFeedList());
 
         swagger.model.FeedsResponse response = new swagger.model.FeedsResponse();
         response.setData(feedGroupFeedsResponse.getFeedList()
                 .stream()
                 .map(feed -> this.feedDTOFactory.valueOf(feed,
                         feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList()),
-                        includeChargeable))
+                        includeChargeable,
+                        feed.getCreatedAt(),
+                        feedGroupMessageMap.get(feed.getFeedgroupId())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setCurrentTime(System.currentTimeMillis());
@@ -578,7 +589,6 @@ public class FeedController implements FeedApi {
      * @param postFeedRequestV2 (required)
      * @return {@link DummyResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<DummyResponse> apiV11FeedsPost(PostFeedRequestV2 postFeedRequestV2) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -618,11 +628,13 @@ public class FeedController implements FeedApi {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        if (!CollectionUtils.isEmpty(postFeedRequestV2.getMembershipIds()) && postFeedRequestV2.getPriceInCents() != null && postFeedRequestV2.getPriceInCents() > 0L) {
+        if (!CollectionUtils.isEmpty(postFeedRequestV2.getMembershipIds())
+                && postFeedRequestV2.getPriceInCents() != null
+                && postFeedRequestV2.getPriceInCents() > 0L) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
         }
 
-        this.feedService.createFeedV2(postFeedRequestV2.getIslandIds(),
+        this.feedService.createFeedsV2(postFeedRequestV2.getIslandIds(),
                 postFeedRequestV2.getMembershipIds(),
                 userId,
                 MediaTypeConverter.convertToMediaType(mediaType),
@@ -636,12 +648,85 @@ public class FeedController implements FeedApi {
     }
 
     /**
+     * Implements the create feed on island.
+     *
+     * @param id                    id (required)      Island id.
+     * @param postIslandFeedRequest (required) {@link PostIslandFeedRequest}.
+     * @return {@link FeedResponse}.
+     */
+    @Override
+    public ResponseEntity<FeedResponse> apiV1IslandsIdFeedsPost(String id,
+                                                                PostIslandFeedRequest postIslandFeedRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        if (!this.islandService.checkIslandSubscription(id, userId)) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_ISLAND_USER_NOT_SUBSCRIBED_ERROR);
+        }
+
+        switch (postIslandFeedRequest.getMediaType()) {
+            case PICS:
+                if (postIslandFeedRequest.getMultimedia().size() > 9) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+                }
+                break;
+            case ALBUM:
+                if (postIslandFeedRequest.getMultimedia().size() > 18) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_IMAGE_NUMBER_TOO_LARGE);
+                }
+                break;
+            case VIDEO:
+            case AUDIO:
+                if (CollectionUtils.isEmpty(postIslandFeedRequest.getMultimedia()) ||
+                        StringUtils.isEmpty(postIslandFeedRequest.getMultimedia().get(0).getVideoId())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+                break;
+            case HTML:
+                if (StringUtils.isEmpty(postIslandFeedRequest.getTitle())
+                        || StringUtils.isEmpty(postIslandFeedRequest.getBrief())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+                break;
+            case TEXT:
+                break;
+            default:
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
+        if (!CollectionUtils.isEmpty(postIslandFeedRequest.getMembershipIds())
+                && postIslandFeedRequest.getPriceInCents() != null
+                && postIslandFeedRequest.getPriceInCents() > 0L) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
+        FeedMessage feed = this.feedService.createFeed(id,
+                postIslandFeedRequest.getMembershipIds(),
+                userId,
+                MediaTypeConverter.convertToMediaType(postIslandFeedRequest.getMediaType()),
+                postIslandFeedRequest.getMultimedia(),
+                postIslandFeedRequest.getText(),
+                postIslandFeedRequest.getTitle(),
+                postIslandFeedRequest.getBrief(),
+                postIslandFeedRequest.getFeedGroupId(),
+                postIslandFeedRequest.getPriceInCents());
+
+        Map<String, List<MembershipMessage>> feedMembershipMap =
+                this.generateFeedMembershipMap(Collections.singletonList(feed));
+
+        FeedResponse response = new FeedResponse();
+        response.setData(this.feedDTOFactory.valueOf(feed,
+                feedMembershipMap.getOrDefault(feed.getId(), Collections.emptyList())));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Implements the api for unsubscribed island feeds.
      *
      * @param id id (required) Island id.
      * @return {@link IslandFeedSnapshotResponse}.
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<IslandFeedSnapshotResponse> apiV1IslandsIdFeedsSnapshotGet(String id) {
         Integer count = this.feedService.retrieveFeedCountByIslandId(id);
@@ -705,6 +790,37 @@ public class FeedController implements FeedApi {
     }
 
     /**
+     * Implements the feed update api.
+     *
+     * @param id id (required) feed id
+     * @param putFeedRequest  (required) {@link PutFeedRequest}
+     * @return {@link FeedResponse}
+     */
+    @Override
+    public ResponseEntity<FeedResponse> apiV1FeedsIdPut(String id, @Valid PutFeedRequest putFeedRequest) {
+        String userId = HttpContextUtils.getUserIdFromContext();
+        FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
+        if (!userId.equals(feedMessage.getHostId())) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        FeedMessage feedMessageUpdated = this.feedService.updateFeedById(id,
+                putFeedRequest.getTitle(),
+                putFeedRequest.getText(),
+                putFeedRequest.getBrief());
+
+        Map<String, List<MembershipMessage>> feedMembershipMap =
+                this.generateFeedMembershipMap(Collections.singletonList(feedMessageUpdated));
+
+        FeedResponse response = new FeedResponse();
+        response.setData(this.feedDTOFactory.valueOf(feedMessageUpdated,
+                feedMembershipMap.getOrDefault(feedMessageUpdated.getId(), Collections.emptyList())));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
      * Generates the feed membership map.
      *
      * @param feeds {@link FeedMessage}.
@@ -754,6 +870,37 @@ public class FeedController implements FeedApi {
         }
 
         return feedgroupMap;
+    }
+
+    /**
+     * Converts the {@link MultiMediaType} into {@link MediaType}.
+     *
+     * @param type {@link MultiMediaType}.
+     * @return {@link MediaType}.
+     */
+    private MediaType convertMediaType(MultiMediaType type) {
+        if (Objects.isNull(type)) {
+            return null;
+        }
+
+        switch (type) {
+            case HTML:
+                return MediaType.MEDIA_HTML;
+            case PICS:
+                return MediaType.MEDIA_PICS;
+            case TEXT:
+                return MediaType.MEDIA_TEXT;
+            case ALBUM:
+                return MediaType.MEDIA_ALBUM;
+            case AUDIO:
+                return MediaType.MEDIA_AUDIO;
+            case VIDEO:
+                return MediaType.MEDIA_VIDEO;
+            case QUESTION:
+                return MediaType.MEDIA_QUESTION;
+            default:
+                return MediaType.MEDIA_NONE;
+        }
     }
 
 }

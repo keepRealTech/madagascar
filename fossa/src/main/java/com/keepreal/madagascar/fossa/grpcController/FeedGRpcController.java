@@ -36,6 +36,7 @@ import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
 import com.keepreal.madagascar.fossa.UpdateFeedFeedgroupRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdResponse;
+import com.keepreal.madagascar.fossa.UpdateFeedRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityResponse;
 import com.keepreal.madagascar.fossa.model.FeedGroup;
@@ -67,6 +68,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -202,6 +204,9 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.hostId(hostIdList.get(i));
             builder.fromHost(userId.equals(hostIdList.get(i)));
             builder.text(text);
+            if (MediaType.MEDIA_HTML.equals(mediaType)) {
+                builder.title(request.getText().getValue());
+            }
             builder.duplicateTag(duplicateTag);
             builder.multiMediaType(mediaType.name());
             builder.mediaInfos(this.buildMediaInfos(request));
@@ -238,6 +243,68 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
         responseObserver.onNext(newFeedsResponse);
+        responseObserver.onCompleted();
+    }
+
+    /**
+     * Creates feeds with multimedia.
+     *
+     * @param request          {@link NewFeedsRequestV2}.
+     * @param responseObserver {@link FeedResponse}.
+     */
+    @Override
+    public void createFeed(NewFeedsRequestV2 request,
+                           StreamObserver<FeedResponse> responseObserver) {
+        String userId = request.getUserId();
+        MediaType mediaType = request.getType();
+
+        long timestamp = Instant.now().toEpochMilli();
+        FeedInfo.FeedInfoBuilder builder = FeedInfo.builder();
+        builder.id(String.valueOf(this.idGenerator.nextId()));
+        builder.islandId(request.getIslandId(0));
+        builder.userId(userId);
+        builder.hostId(request.getHostId(0));
+        builder.fromHost(userId.equals(request.getHostId(0)));
+        builder.title(request.hasTitle() ? request.getTitle().getValue() : "");
+        builder.brief(request.hasBrief() ? request.getBrief().getValue() : "");
+        builder.text(request.hasText() ? request.getText().getValue() : "");
+        builder.duplicateTag(UUID.randomUUID().toString());
+        builder.multiMediaType(mediaType.name());
+        builder.mediaInfos(this.buildMediaInfos(request));
+        builder.membershipIds(request.getMembershipIdsList());
+        builder.createdTime(timestamp);
+        builder.toppedTime(timestamp);
+        builder.userMembershipIds(this.subscribeMembershipService.retrieveMembershipIds(userId, request.getHostId(0)));
+        if (request.hasPriceInCents()) {
+            builder.priceInCents(request.getPriceInCents().getValue());
+        }
+
+        FeedInfo feed = builder.build();
+
+        if (request.hasFeedGroupId()) {
+            FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(request.getFeedGroupId().getValue());
+            if (Objects.isNull(feedGroup)) {
+                FeedResponse response = FeedResponse.newBuilder()
+                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEEDGROUP_NOT_FOUND_ERROR))
+                        .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            }
+
+            this.assignFeedGroup(feed, feedGroup);
+            this.feedGroupService.updateFeedGroup(feedGroup);
+        }
+
+        feed = this.feedInfoService.insert(feed);
+        this.islandService.callCouaUpdateIslandLastFeedAt(Collections.singletonList(request.getIslandId(0)), timestamp);
+
+        this.feedEventProducerService.produceNewFeedEventAsync(feed);
+
+        FeedResponse response = FeedResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setFeed(this.feedInfoService.getFeedMessage(feed, userId))
+                .build();
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 
@@ -515,7 +582,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
 
         // 没有条件
-        return query.with(Sort.by(Sort.Order.desc("createdTime"), Sort.Order.desc("toppedTime")));
+        return query.with(Sort.by(Sort.Order.desc("updatedTime"), Sort.Order.desc("createdTime"), Sort.Order.desc("toppedTime")));
     }
 
     /**
@@ -658,8 +725,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     /**
      * Updates the feed's feed group.
      *
-     * @param request           {@link UpdateFeedFeedgroupRequest}.
-     * @param responseObserver  {@link FeedGroupFeedResponse}.
+     * @param request          {@link UpdateFeedFeedgroupRequest}.
+     * @param responseObserver {@link FeedGroupFeedResponse}.
      */
     @Override
     public void updateFeedFeedgroupById(UpdateFeedFeedgroupRequest request,
@@ -746,6 +813,46 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    /**
+     * Updates the feed.
+     *
+     * @param request {@link UpdateFeedRequest}
+     * @param responseObserver {@link FeedResponse}
+     */
+    @Override
+    public void updateFeed(UpdateFeedRequest request, StreamObserver<FeedResponse> responseObserver) {
+        FeedInfo feedInfo = this.feedInfoService.findFeedInfoById(request.getId(), false);
+        if (Objects.isNull(feedInfo)) {
+            FeedResponse response = FeedResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEED_NOT_FOUND_ERROR))
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+            return;
+        }
+
+        if (request.hasTitle()) {
+            feedInfo.setTitle(request.getTitle().getValue());
+        }
+
+        if (request.hasText()) {
+            feedInfo.setText(request.getText().getValue());
+        }
+
+        if (request.hasBrief()) {
+            feedInfo.setBrief(request.getBrief().getValue());
+        }
+
+        FeedInfo update = this.feedInfoService.update(feedInfo);
+
+        FeedResponse response = FeedResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setFeed(this.feedInfoService.getFeedMessage(update, feedInfo.getHostId()))
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
     private Query buildMyMembershipFeedQuery(RetrieveMembershipFeedsRequest request) {
         ProtocolStringList membershipIds = request.getMembershipIdsList();
         ProtocolStringList feedIds = request.getFeedIdsList();
@@ -774,7 +881,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             query.addCriteria(timeCriteria);
         }
 
-        return query.with(Sort.by(Sort.Order.desc("createdTime"), Sort.Order.desc("toppedTime")));
+        return query.with(Sort.by(Sort.Order.desc("updatedTime"), Sort.Order.desc("createdTime"), Sort.Order.desc("toppedTime")));
     }
 
     private List<MediaInfo> buildMediaInfos(NewFeedsRequestV2 request) {

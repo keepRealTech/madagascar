@@ -11,7 +11,6 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.FeedGroupApi;
 import swagger.model.DummyResponse;
@@ -53,7 +52,6 @@ public class FeedGroupController implements FeedGroupApi {
      * @param id id (required)
      * @return common response (status code 200)
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<DummyResponse> apiV1FeedgroupsIdDelete(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
@@ -77,7 +75,6 @@ public class FeedGroupController implements FeedGroupApi {
      * @param putFeedGroupRequest (required)
      * @return 单一作品集返回 (status code 200)
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<FeedGroupResponse> apiV1FeedgroupsIdPut(String id,
                                                                   PutFeedGroupRequest putFeedGroupRequest) {
@@ -108,7 +105,6 @@ public class FeedGroupController implements FeedGroupApi {
      * @param pageSize size of a page (optional, default to 10)
      * @return 用户所有作品集返回 (status code 200)
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<FeedGroupsResponse> apiV1IslandsIdFeedgroupsGet(String id,
                                                                           Integer page,
@@ -133,7 +129,6 @@ public class FeedGroupController implements FeedGroupApi {
      * @param postFeedGroupRequest (required)
      * @return 单一作品集返回 (status code 200)
      */
-    @CrossOrigin
     @Override
     public ResponseEntity<FeedGroupResponse> apiV1IslandsIdFeedgroupsPost(String id,
                                                                           PostFeedGroupRequest postFeedGroupRequest) {

@@ -93,7 +93,7 @@ public class IslandChatAccessService {
      */
     private IslandChatAccess createIslandChatAccess(String islandId) {
         IslandChatAccess islandChatAccess = IslandChatAccess.builder()
-                .id(String.valueOf(idGenerator.nextId()))
+                .id(String.valueOf(this.idGenerator.nextId()))
                 .islandId(islandId)
                 .build();
 

@@ -17,6 +17,8 @@ data:
   IOSPAY_ENABLESANDBOX: "true"
   GRPC_FOSSA_HOST: {{ .Values.fossa.host }}
   GRPC_FOSSA_PORT: '{{ .Values.fossa.port }}'
+  GRPC_COUA_HOST: {{ .Values.coua.host }}
+  GRPC_COUA_PORT: '{{ .Values.coua.port }}'
   SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'

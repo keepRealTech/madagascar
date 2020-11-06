@@ -52,6 +52,7 @@ public class MembershipDTOFactory {
     private final MembershipService membershipService;
     private final BoxService boxService;
     private final ChatService chatService;
+    private final MultiMediaDTOFactory multiMediaDTOFactory;
 
     /**
      * Constructs the membershipDTOFactory.
@@ -63,6 +64,7 @@ public class MembershipDTOFactory {
      * @param membershipService          {@link MembershipService}.
      * @param boxService                 {@link BoxService}.
      * @param chatService                {@link ChatService}.
+     * @param multiMediaDTOFactory       {@link MultiMediaDTOFactory}.
      */
     public MembershipDTOFactory(SubscribeMembershipService subscribeMembershipService,
                                 UserService userService,
@@ -70,7 +72,8 @@ public class MembershipDTOFactory {
                                 IslandService islandService,
                                 MembershipService membershipService,
                                 BoxService boxService,
-                                ChatService chatService) {
+                                ChatService chatService,
+                                MultiMediaDTOFactory multiMediaDTOFactory) {
         this.subscribeMembershipService = subscribeMembershipService;
         this.userService = userService;
         this.userDTOFactory = userDTOFactory;
@@ -78,6 +81,7 @@ public class MembershipDTOFactory {
         this.membershipService = membershipService;
         this.boxService = boxService;
         this.chatService = chatService;
+        this.multiMediaDTOFactory = multiMediaDTOFactory;
     }
 
     public SimpleMembershipDTO simpleValueOf(MembershipMessage membershipMessage) {
@@ -90,6 +94,7 @@ public class MembershipDTOFactory {
         dto.setMembershipName(membershipMessage.getName());
         dto.setColorType(membershipMessage.getColorType());
         dto.setPricePerMonthInCents((long) membershipMessage.getPricePerMonth());
+        dto.setIsActive(membershipMessage.getActivate());
         return dto;
     }
 
@@ -109,6 +114,8 @@ public class MembershipDTOFactory {
         dto.setUseCustomMessage(membershipMessage.getUseCustomMessage());
         dto.setMessage(membershipMessage.getMessage());
         dto.setIsPermanent(membershipMessage.getPermanent());
+        dto.setIsActive(membershipMessage.getActivate());
+        dto.setImage(this.multiMediaDTOFactory.valueOf(membershipMessage));
         return dto;
     }
 
@@ -123,6 +130,7 @@ public class MembershipDTOFactory {
         dto.setChargePerMonth(feedMembershipMessage.getPricePerMonth());
         dto.setMembershipName(feedMembershipMessage.getName());
         dto.setIsPermanent(feedMembershipMessage.getPermanent());
+        dto.setIsActive(feedMembershipMessage.getActive());
         return dto;
     }
 
@@ -144,6 +152,8 @@ public class MembershipDTOFactory {
         dto.setUseCustomMessage(membershipMessage.getUseCustomMessage());
         dto.setMessage(membershipMessage.getMessage());
         dto.setIsPermanent(membershipMessage.getPermanent());
+        dto.setImage(this.multiMediaDTOFactory.valueOf(membershipMessage));
+        dto.setIsActive(membershipMessage.getActivate());
         return dto;
     }
 
@@ -178,6 +188,7 @@ public class MembershipDTOFactory {
         dto.setIsPermanent(membershipMessage.getPermanent());
         dto.setExpireTime(message.getExpiredTime());
         dto.setHasExpired(message.getExpiredTime() < System.currentTimeMillis());
+        dto.setIsActive(membershipMessage.getActivate());
         return dto;
     }
 

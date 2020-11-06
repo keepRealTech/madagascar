@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.vanga.util;
 
+import com.google.protobuf.Int32Value;
 import com.keepreal.madagascar.common.PageRequest;
 import com.keepreal.madagascar.common.PageResponse;
 import lombok.Getter;
@@ -73,6 +74,7 @@ public class PaginationUtils {
                 .setPageSize(pageRequest.getPageSize())
                 .setHasContent(pageData.hasContent())
                 .setHasMore(!pageData.isLast())
+                .setTotalCount(Int32Value.of(pageData.getTotalPages()))
                 .build();
     }
 

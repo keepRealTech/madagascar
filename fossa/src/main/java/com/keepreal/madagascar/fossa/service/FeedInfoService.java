@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -208,6 +209,8 @@ public class FeedInfoService {
                 .setId(feedInfo.getId())
                 .setIslandId(feedInfo.getIslandId())
                 .setUserId(feedInfo.getUserId())
+                .setTitle(StringUtils.isEmpty(feedInfo.getTitle()) ? "" : feedInfo.getTitle())
+                .setBrief(StringUtils.isEmpty(feedInfo.getBrief()) ? "" : feedInfo.getBrief())
                 .setText(feedInfo.getText())
                 .addAllImageUris(feedInfo.getImageUrls() == null ? Collections.emptyList() : feedInfo.getImageUrls())
                 .setCreatedAt(feedInfo.getCreatedTime())
@@ -236,10 +239,11 @@ public class FeedInfoService {
         } else {
             builder.setIsMembership(true);
             builder.setIsAccess(false);
+            List<String> modifiable = new ArrayList<>(membershipIds);
             if (userId.equals(feedInfo.getHostId()) || membershipIds.stream().anyMatch(myMembershipIds::contains)) {
                 builder.setIsAccess(true);
             }
-            membershipIds.sort((o1, o2) -> {
+            modifiable.sort((o1, o2) -> {
                 boolean co1 = myMembershipIds.contains(o1);
                 boolean co2 = myMembershipIds.contains(o2);
                 if (co1 && !co2) {
@@ -250,7 +254,7 @@ public class FeedInfoService {
                     return 0;
                 }
             });
-            builder.addAllMembershipId(membershipIds);
+            builder.addAllMembershipId(modifiable);
         }
         this.processMedia(builder, feedInfo);
 
@@ -331,6 +335,17 @@ public class FeedInfoService {
      */
     public Page<FeedInfo> retrieveFeedsByFeedGroupId(String feedGroupId, Pageable pageable) {
         return this.feedInfoRepository.findAllByFeedGroupIdAndDeletedIsFalseOrderByCreatedTimeDesc(feedGroupId, pageable);
+    }
+
+    /**
+     * Retrieves feeds by feed group id.
+     *
+     * @param feedGroupId Feed group id.
+     * @param pageable    {@link Pageable}.
+     * @return {@link FeedInfo}.
+     */
+    public Page<FeedInfo> retrieveFeedsByFeedGroupId(String feedGroupId, String mediaTypeVal, Pageable pageable) {
+        return this.feedInfoRepository.findAllByFeedGroupIdAndMultiMediaTypeAndDeletedIsFalseOrderByCreatedTimeDesc(feedGroupId, mediaTypeVal, pageable);
     }
 
     /**
@@ -448,6 +463,9 @@ public class FeedInfoService {
             case MEDIA_HTML:
                 if (!feedInfo.getMediaInfos().isEmpty()) {
                     builder.setHtml(MediaMessageConvertUtils.toHtmlMessage(feedInfo.getMediaInfos().get(0)));
+                }
+                if (Objects.isNull(feedInfo.getTitle())) {
+                    builder.setTitle(feedInfo.getText());
                 }
                 break;
             case MEDIA_QUESTION:

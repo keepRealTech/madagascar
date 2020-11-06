@@ -17,10 +17,15 @@ public class HttpContextUtils {
     /**
      * Extracts the user id from the authentication context.
      *
-     * @return User id.
+     * @return User id. Null if no authentication.
      */
     public static String getUserIdFromContext() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (Objects.isNull(authentication)) {
+            return null;
+        }
+
         return String.valueOf(authentication.getPrincipal());
     }
 

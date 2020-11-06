@@ -32,12 +32,14 @@ message NewFeedsRequestV2 {
     google.protobuf.StringValue text = 6;
     google.protobuf.StringValue feedGroupId = 7;
     google.protobuf.Int64Value priceInCents = 8;
+    google.protobuf.StringValue title = 9;
+    google.protobuf.StringValue brief = 10;
     oneof message {
-        PicturesMessage pics = 9;
-        VideoMessage video = 10;
-        AudioMessage audio = 11;
-        HtmlMessage html = 12;
-        AnswerMessage question = 13;
+        PicturesMessage pics = 11;
+        VideoMessage video = 12;
+        AudioMessage audio = 13;
+        HtmlMessage html = 14;
+        AnswerMessage question = 15;
     }
 }
 
@@ -179,6 +181,13 @@ message RetrieveMembershipFeedsRequest {
     PageRequest pageRequest = 7;
 }
 
+message UpdateFeedRequest {
+    string id = 1;
+    google.protobuf.StringValue title = 2;
+    google.protobuf.StringValue text = 3;
+    google.protobuf.StringValue brief = 4;
+}
+
 service FeedService {
     rpc CreateFeeds (NewFeedsRequest) returns (NewFeedsResponse) {};
     rpc CreateFeedsV2 (NewFeedsRequestV2) returns (NewFeedsResponse) {};
@@ -197,4 +206,6 @@ service FeedService {
     rpc UpdateFeedSaveAuthority(UpdateFeedSaveAuthorityRequest) returns (UpdateFeedSaveAuthorityResponse) {};
     rpc UpdateFeedFeedgroupById(UpdateFeedFeedgroupRequest) returns (FeedGroupFeedResponse) {};
     rpc RetrieveMembershipFeeds(RetrieveMembershipFeedsRequest) returns (FeedsResponse) {};
+    rpc CreateFeed (NewFeedsRequestV2) returns (FeedResponse) {};
+    rpc UpdateFeed (UpdateFeedRequest) returns (FeedResponse) {};
 }

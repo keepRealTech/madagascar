@@ -1,5 +1,6 @@
 package com.keepreal.madagascar.hoopoe.service;
 
+import com.keepreal.madagascar.common.enums.BannerType;
 import com.keepreal.madagascar.hoopoe.dao.ActivityRepository;
 import com.keepreal.madagascar.hoopoe.model.Activity;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +23,9 @@ public class ActivityService {
      *
      * @return {@link List<Activity>}
      */
+    @Deprecated
     public List<Activity> findAllAccessActivities() {
-        return this.activityRepository.findAllByActiveIsTrueAndDeletedIsFalse();
+        return this.activityRepository.findAllByTypeAndActiveIsTrueAndDeletedIsFalse(BannerType.PUBLIC.getValue());
     }
 
 }
