@@ -20,4 +20,6 @@ public interface SponsorSkuRepository extends JpaRepository<SponsorSku, String> 
 
     SponsorSku findTopByIdAndDeletedIsFalse(String id);
 
+    List<SponsorSku> findAllByHostIdAndDeletedIsFalse(String hostId);
+
 }

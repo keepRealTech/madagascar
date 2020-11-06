@@ -356,6 +356,16 @@ public class SkuService {
     }
 
     /**
+     * Retrieves sponsor sku by host id.
+     *
+     * @param hostId host id
+     * @return {@link SponsorSku}
+     */
+    public List<SponsorSku> retrieveSponsorSkuByHostId(String hostId) {
+        return this.sponsorSkuRepository.findAllByHostIdAndDeletedIsFalse(hostId);
+    }
+
+    /**
      * Generates membership sku for given info.
      *
      * @param membershipId        Membership id.

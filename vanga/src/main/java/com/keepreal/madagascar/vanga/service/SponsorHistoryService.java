@@ -9,6 +9,7 @@ import com.keepreal.madagascar.vanga.model.SponsorHistory;
 import com.keepreal.madagascar.vanga.model.SponsorSku;
 import com.keepreal.madagascar.vanga.repository.SponsorHistoryRepository;
 import com.keepreal.madagascar.vanga.util.AutoRedisLock;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,18 +19,21 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.IntStream;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 /**
  * Represents the sponsor history service.
  */
 @Service
+@Slf4j
 public class SponsorHistoryService {
     private final SponsorHistoryRepository sponsorHistoryRepository;
     private final RedissonClient redissonClient;
     private final SkuService skuService;
     private final LongIdGenerator idGenerator;
+    private final List<String> outmodedSupportSkus = Stream.of("1", "2", "3", "4").collect(Collectors.toList());
 
     /**
      * Constructs the sponsor history service.
@@ -101,8 +105,18 @@ public class SponsorHistoryService {
         try (AutoRedisLock ignored = new AutoRedisLock(this.redissonClient, String.format("sponsor-%s", order.getUserId()))) {
 
             SponsorSku sku = this.skuService.retrieveSponsorSkuById(order.getPropertyId());
+
             if (Objects.isNull(sku)) {
-                return;
+                if (outmodedSupportSkus.contains(order.getPropertyId())) {
+                    sku = this.skuService.retrieveSponsorSkuByHostId(payment.getPayeeId())
+                            .stream()
+                            .filter(SponsorSku::getCustomSku)
+                            .collect(Collectors.toList())
+                            .get(0);
+                } else {
+                    log.error("no such support or sponsor sku id is {}", order.getPropertyId());
+                    return;
+                }
             }
 
             long quantity;
@@ -115,15 +129,16 @@ public class SponsorHistoryService {
 
             List<SponsorHistory> newSponsorHistory = new ArrayList<>();
 
+            final SponsorSku finalSku = sku;
             LongStream.range(0, quantity)
                     .forEach(i -> {
                         newSponsorHistory.add(SponsorHistory.builder()
                                 .id(String.valueOf(this.idGenerator.nextId()))
                                 .userId(payment.getUserId())
-                                .islandId(sku.getIslandId())
+                                .islandId(finalSku.getIslandId())
                                 .hostId(payment.getPayeeId())
-                                .sponsorId(sku.getSponsorId())
-                                .giftId(sku.getGiftId())
+                                .sponsorId(finalSku.getSponsorId())
+                                .giftId(finalSku.getGiftId())
                                 .costInCents(payment.getAmountInCents())
                                 .build());
                     });
