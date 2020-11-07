@@ -44,7 +44,7 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     /**
      * 计算创作者在指定时间范围内付费的用户数量
      */
-    @Query(value = "SELECT COUNT(DISTINCT user_id) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND type != 4", nativeQuery = true)
+    @Query(value = "SELECT COUNT(DISTINCT user_id) FROM balance_log WHERE payee_id = ?1 AND created_time > ?2 AND created_time < ?3 AND (state = 2 OR state = 3) AND amount_in_cents > 0 AND type != 4", nativeQuery = true)
     Integer countSupportCountByPayeeIdAndTimestamp(String payeeId, long startTimestamp, long endTimestamp);
 
     /**
