@@ -3310,6 +3310,7 @@ components:
       enum:
         - PAYMENT_TYPE_MEMBERSHIP
         - PAYMENT_TYPE_FEED
+        - PAYMENT_TYPE_SPONSOR
     SupportTargetType:
       type: string
       enum:
@@ -3979,6 +3980,8 @@ components:
           type: string
         brief:
           type: string
+        isWorks:
+          type: boolean
         imagesUris:
           type: array
           items:
@@ -4143,6 +4146,8 @@ components:
             $ref: '#/components/schemas/MultiMediaDTO'
         feedGroupId:
           type: string
+        isWorks:
+          type: boolean
     PutFeedRequest:
       type: object
       properties:
@@ -4176,6 +4181,8 @@ components:
             $ref: '#/components/schemas/MultiMediaDTO'
         feedGroupId:
           type: string
+        isWorks:
+          type: boolean
     CheckFeedsMessage:
       type: object
       properties:
@@ -5486,6 +5493,10 @@ components:
         createdAt:
           type: integer
           format: int64
+        gift:
+          $ref: '#/components/schemas/GiftImageDTO'
+        giftCount:
+          type: integer
     UserPaymentsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -6322,6 +6333,8 @@ components:
       properties:
         feedgroupId:
           type: string
+        isRemove:
+          type: boolean
     SupportTargetDTO:
       type: object
       properties:
