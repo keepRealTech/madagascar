@@ -412,6 +412,7 @@ public class FeedController implements FeedApi {
                                                                    Long minTimestamp,
                                                                    Long maxTimestamp,
                                                                    Integer pageSize,
+                                                                   Boolean isWorks,
                                                                    Boolean includeChargeable) {
         String userId = HttpContextUtils.getUserIdFromContext();
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
