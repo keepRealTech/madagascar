@@ -3348,6 +3348,12 @@ components:
       enum:
         - STATE_PROCESSING
         - STATE_SETTLED
+    FollowBotState:
+      type: string
+      enum:
+        - ENABLED
+        - SUSPEND
+        - NONE
     OrderState:
       type: string
       enum:
@@ -6741,6 +6747,8 @@ components:
     FollowDTO:
       type: object
       properties:
+        state:
+          $ref: '#/components/schemas/FollowBotState'
         name:
           type: string
         runningDays:
