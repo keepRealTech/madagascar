@@ -418,6 +418,7 @@ paths:
         - $ref: '#/components/parameters/timestampBefore'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/includeChargeableInQuery'
+        - $ref: '#/components/parameters/isWorksInQuery'
       tags:
         - Feed
       summary: retrieves a list of feeds with pagination
@@ -3232,6 +3233,12 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/IncomeType'
+    isWorksInQuery:
+      in: query
+      name: isWorks
+      required: false
+      schema:
+        type: boolean
   schemas:
     LoginType:
       type: string
