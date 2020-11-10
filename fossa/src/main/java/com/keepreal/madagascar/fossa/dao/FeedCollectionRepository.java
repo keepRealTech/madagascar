@@ -1,0 +1,17 @@
+package com.keepreal.madagascar.fossa.dao;
+
+import com.keepreal.madagascar.fossa.model.FeedCollection;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface FeedCollectionRepository extends MongoRepository<FeedCollection, String> {
+
+    FeedCollection findByUserIdAndFeedId(String userId, String feedId);
+
+    Page<FeedCollection> findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeGreaterThanEqualOrderByUpdatedTimeDesc(String userId, Long timestamp, Pageable pageable);
+
+    Page<FeedCollection> findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeLessThanEqualOrderByUpdatedTimeDesc(String userId, Long timestamp, Pageable pageable);
+}
