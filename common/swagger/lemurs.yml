@@ -55,6 +55,8 @@ tags:
     description: 收入 controller
   - name: Banner
     description: Banner controller
+  - name: Follow
+    description: 超级关注 controller
 
 paths:
   /api/healthcheck:
@@ -2921,6 +2923,74 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BannersResponse'
+  /api/v1/banners/follow:
+    get:
+      tags:
+        - Banner
+      summary: 获取超级关注banner
+      responses:
+        '200':
+          description: banner response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BannersResponse'
+  /api/v1/follow/profile/weibo:
+    get:
+      parameters:
+        - $ref:  "#/components/parameters/nickNameInQuery"
+      tags:
+        - Follow
+      summary: 根据微博昵称获取微博信息
+      responses:
+        '200':
+          description: weibo profile response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeiboProfileResponse'
+  /api/v1/follow/subscribe:
+    get:
+      tags:
+        - Follow
+      summary: 获取超级关注
+      responses:
+        '200':
+          description: subscribe response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowResponse'
+    post:
+      tags:
+        - Follow
+      summary: 创建超级关注
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref:  '#/components/schemas/PostFollowRequest'
+      responses:
+        '200':
+          description: subscribe response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+    delete:
+      parameters:
+        - $ref:  "#/components/parameters/followTypeInQuery"
+      tags:
+        - Follow
+      summary: 删除超级关注
+      responses:
+        '200':
+          description: unsubscribe response
+          content:
+            application/json:
+              schema:
+                $ref:   '#/components/schemas/DummyResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -3189,6 +3259,18 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/IncomeType'
+    followTypeInQuery:
+      in: query
+      name: type
+      required: true
+      schema:
+        $ref:  '#/components/schemas/FollowType'
+    nickNameInQuery:
+      in: query
+      name: name
+      required: true
+      schema:
+        type: string
   schemas:
     LoginType:
       type: string
@@ -3327,6 +3409,12 @@ components:
         - INCOME_MEMBERSHIP
         - INCOME_SUPPORT
         - INCOME_FEED_CHARGE
+    FollowType:
+      type: string
+      enum:
+        - WEIBO
+        - TIKTOK
+        - BILIBILI
     CommonResponse:
       type: object
       properties:
@@ -6322,6 +6410,24 @@ components:
       properties:
         feedgroupId:
           type: string
+    PostFollowRequest:
+      type: object
+      properties:
+        followType:
+          $ref: '#/components/schemas/FollowType'
+        data:
+          $ref: '#/components/schemas/FollowPayload'
+      required:
+        - followType
+        - data
+    FollowPayload:
+      oneOf:
+        - $ref: '#/components/schemas/WeiboFollowPayload'
+    WeiboFollowPayload:
+      type: object
+      properties:
+        id:
+          type: string
     SupportTargetDTO:
       type: object
       properties:
@@ -6597,3 +6703,50 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/BannerDTO'
+    WeiboProfileDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        followerCount:
+          type: integer
+          format: int64
+        avatarUrl:
+          type: string
+    WeiboProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref:  '#/components/schemas/WeiboProfileDTO'
+    FollowResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FollowInfoDTO'
+    FollowInfoDTO:
+      type: object
+      properties:
+        weibo:
+          $ref: '#/components/schemas/FollowDTO'
+        tiktok:
+          $ref: '#/components/schemas/FollowDTO'
+        bilibili:
+          $ref: '#/components/schemas/FollowDTO'
+    FollowDTO:
+      type: object
+      properties:
+        name:
+          type: string
+        runningDays:
+          type: integer
+          format: int64
+        code:
+          type: string
+        ticket:
+          type: string
