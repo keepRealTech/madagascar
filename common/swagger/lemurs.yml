@@ -55,6 +55,8 @@ tags:
     description: 收入 controller
   - name: Banner
     description: Banner controller
+  - name: FeedCollection
+    description: feed收藏 controller
 
 paths:
   /api/healthcheck:
@@ -2921,6 +2923,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BannersResponse'
+  /api/v1/feedCollection:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - FeedCollection
+      summary: 查看收藏夹的动态
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimelinesResponse'
+  /api/v1/feeds/{id}/feedCollection:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - FeedCollection
+      summary: 添加feed到收藏夹
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+    delete:
+      tags:
+        - FeedCollection
+      summary: 从收藏夹中移除feed
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
 components:
   securitySchemes:
     bearerAuth:
