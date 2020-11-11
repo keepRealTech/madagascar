@@ -12,7 +12,8 @@ public enum PushType {
     PUSH_MEMBER(1005L),
     PUSH_UPDATE_BULLETIN(1006L),
     PUSH_QUESTION(1007L),
-    PUSH_REPLY(1008L)
+    PUSH_REPLY(1008L),
+    PUSH_FEED_WORKS(1009L),
     ;
 
     private Long value;

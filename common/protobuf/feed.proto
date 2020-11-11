@@ -12,6 +12,7 @@ message QueryFeedCondition {
     google.protobuf.Int64Value timestampAfter = 3;
     google.protobuf.Int64Value timestampBefore = 4;
     google.protobuf.BoolValue excludeTopped = 5;
+    google.protobuf.BoolValue isWorks = 6;
 }
 
 message NewFeedsRequest {
@@ -41,6 +42,7 @@ message NewFeedsRequestV2 {
         HtmlMessage html = 14;
         AnswerMessage question = 15;
     }
+    bool isWorks = 16;
 }
 
 message NewFeedsResponse {

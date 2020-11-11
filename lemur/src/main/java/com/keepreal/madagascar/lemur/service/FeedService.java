@@ -138,7 +138,8 @@ public class FeedService {
                               List<MultiMediaDTO> multiMediaDTOList,
                               String text,
                               String feedGroupId,
-                              Long priceInCents) {
+                              Long priceInCents,
+                              Boolean isWorks) {
         if (Objects.isNull(islandIds) || islandIds.size() == 0) {
             log.error("param islandIds is invalid");
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
@@ -152,6 +153,7 @@ public class FeedService {
                 .addAllHostId(hostIdList)
                 .addAllMembershipIds(Objects.isNull(membershipIds) ? new ArrayList<>() : membershipIds)
                 .setUserId(userId)
+                .setIsWorks(isWorks == null ? false : isWorks)
                 .setType(mediaType);
 
         if (!Objects.isNull(feedGroupId)) {
@@ -440,6 +442,11 @@ public class FeedService {
      */
     public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, Long timestampAfter,
                                              Long timestampBefore, int page, int pageSize, Boolean excludeTopped) {
+        return retrieveIslandFeeds(islandId, fromHost, userId, timestampAfter, timestampBefore, page, pageSize, excludeTopped, null);
+    }
+
+    public FeedsResponse retrieveIslandFeeds(String islandId, Boolean fromHost, String userId, Long timestampAfter,
+                                             Long timestampBefore, int page, int pageSize, Boolean excludeTopped, Boolean isWorks) {
         Assert.hasText(islandId, "Island id is null.");
 
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
@@ -459,6 +466,10 @@ public class FeedService {
 
         if (Objects.nonNull(excludeTopped)) {
             conditionBuilder.setExcludeTopped(BoolValue.of(excludeTopped));
+        }
+
+        if (Objects.nonNull(isWorks)) {
+            conditionBuilder.setIsWorks(BoolValue.of(isWorks));
         }
 
         RetrieveMultipleFeedsRequest request = RetrieveMultipleFeedsRequest.newBuilder()

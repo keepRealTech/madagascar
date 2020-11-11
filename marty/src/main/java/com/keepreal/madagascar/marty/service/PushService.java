@@ -62,7 +62,7 @@ public class PushService {
         jpushService.pushIOSMessageByType(pushType, iosTokensList.toArray(new String[0]));
     }
 
-    public void pushNewFeed(FeedCreateEvent event, PushType pushType) {
+    public void pushNewFeed(FeedCreateEvent event) {
         int page = 0;
         int pageSize = 500;
         RetrieveDeviceTokensResponse response;
@@ -77,6 +77,8 @@ public class PushService {
             ProtocolStringList androidTokensList = response.getAndroidTokensList();
             ProtocolStringList iosTokensList = response.getIosTokensList();
 
+            PushType pushType;
+            pushType = event.getIsWorks() ? PushType.PUSH_FEED_WORKS : PushType.PUSH_FEED;
             umengPushService.pushNewFeedByType(String.join(",", androidTokensList), islandId, pushType);
             jpushService.pushIOSNewFeedMessage(islandId, pushType, iosTokensList.toArray(new String[0]));
             if (event.getFromHost()) {

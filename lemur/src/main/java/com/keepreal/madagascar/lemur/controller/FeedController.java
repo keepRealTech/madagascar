@@ -423,7 +423,7 @@ public class FeedController implements FeedApi {
         }
 
         com.keepreal.madagascar.fossa.FeedsResponse normalFeedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize, true);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize, true, isWorks);
 
         Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(normalFeedsResponse.getFeedList());
         Map<String, FeedGroupMessage> feedGroupMessageMap = this.generateFeedGroupMap(normalFeedsResponse.getFeedList());
@@ -642,7 +642,8 @@ public class FeedController implements FeedApi {
                 postFeedRequestV2.getMultimedia(),
                 postFeedRequestV2.getText(),
                 postFeedRequestV2.getFeedGroupId(),
-                postFeedRequestV2.getPriceInCents());
+                postFeedRequestV2.getPriceInCents(),
+                postFeedRequestV2.getIsWorks());
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
