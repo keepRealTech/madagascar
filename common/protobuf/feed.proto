@@ -169,6 +169,7 @@ message UpdateFeedFeedgroupRequest {
     string id = 1;
     string feedgroupId = 2;
     string userId = 3;
+    bool isRemove = 4;
 }
 
 message RetrieveMembershipFeedsRequest {
