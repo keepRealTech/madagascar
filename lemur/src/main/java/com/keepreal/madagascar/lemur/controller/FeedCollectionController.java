@@ -46,7 +46,7 @@ public class FeedCollectionController implements FeedCollectionApi {
     }
 
     @Override
-    public ResponseEntity<TimelinesResponse> apiV1FeedCollectionGet(Long minTimestamp, Long maxTimestamp, Integer pageSize) {
+    public ResponseEntity<TimelinesResponse> apiV1FeedCollectionsGet(Long minTimestamp, Long maxTimestamp, Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         CollectedFeedsResponse collectedFeedsResponse = this.feedCollectionService.retrieveFeedsByUserId(userId, pageSize, minTimestamp, maxTimestamp);
@@ -73,7 +73,7 @@ public class FeedCollectionController implements FeedCollectionApi {
     }
 
     @Override
-    public ResponseEntity<DummyResponse> apiV1FeedsIdFeedCollectionDelete(String id) {
+    public ResponseEntity<DummyResponse> apiV1FeedsIdFeedCollectionsDelete(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         this.feedCollectionService.removeFeedToCollection(userId, id);
@@ -84,7 +84,7 @@ public class FeedCollectionController implements FeedCollectionApi {
     }
 
     @Override
-    public ResponseEntity<DummyResponse> apiV1FeedsIdFeedCollectionPost(String id) {
+    public ResponseEntity<DummyResponse> apiV1FeedsIdFeedCollectionsPost(String id) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         this.feedCollectionService.addFeedToCollection(userId, id);
