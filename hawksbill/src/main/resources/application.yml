@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: hawksbill
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: GcrkNYTcST4PzlV@
+    ssl: false
+
+wechat:
+  mp:
+    host: https://api.weixin.qq.com
+    app-id:
+    app-secret:
+    server-token:
+    expiration-in-sec: 60
+    template-id:
+
+grpc:
+  port: 12010
+  coua:
+    host: 127.0.0.1
+    port: 12002
+  indri:
+    host: 127.0.0.1
+    port: 12000

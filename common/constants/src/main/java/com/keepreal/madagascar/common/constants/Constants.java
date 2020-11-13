@@ -53,4 +53,6 @@ public class Constants {
     public static final Long DEFAULT_SPONSOR_GIFT_UNIT_PRICE = 300L;
 
     public static final Long DEFAULT_SPONSOR_SKU_QUANTITY = 3L;
+
+    public static final String MP_WECHAT_DEDUPLICATION_KEY = "mp_wechat_msg_";
 }

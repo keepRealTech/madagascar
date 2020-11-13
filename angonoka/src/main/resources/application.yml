@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: angonoka
+
+snowflake:
+  nodeId: 0
+
+grpc:
+  port: 12009
+  hawksbill:
+    host: 127.0.0.1
+    port: 12003
+
+server:
+  port: 8090
+
+weibo:
+  app-key: 742529491
+  access-token: 2.00DOj3HI0HqZPo90d559728c0FPTyq
+  sub-id: 12201
+
+
