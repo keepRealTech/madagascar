@@ -20,6 +20,7 @@ import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
 import com.keepreal.madagascar.lemur.converter.MediaTypeConverter;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
+import com.keepreal.madagascar.lemur.service.ChatService;
 import com.keepreal.madagascar.lemur.service.FeedGroupService;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
@@ -30,7 +31,6 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -86,6 +86,7 @@ public class FeedController implements FeedApi {
     private final FeedService feedService;
     private final FeedGroupService feedGroupService;
     private final FeedDTOFactory feedDTOFactory;
+    private final ChatService chatService;
 
     /**
      * Constructs the feed controller.
@@ -96,19 +97,22 @@ public class FeedController implements FeedApi {
      * @param membershipService {@link MembershipService}.
      * @param feedGroupService  {@link FeedGroupService}.
      * @param feedDTOFactory    {@link FeedDTOFactory}.
+     * @param chatService       {@link ChatService}.
      */
     public FeedController(ImageService imageService,
                           FeedService feedService,
                           IslandService islandService,
                           MembershipService membershipService,
                           FeedGroupService feedGroupService,
-                          FeedDTOFactory feedDTOFactory) {
+                          FeedDTOFactory feedDTOFactory,
+                          ChatService chatService) {
         this.imageService = imageService;
         this.feedService = feedService;
         this.islandService = islandService;
         this.membershipService = membershipService;
         this.feedGroupService = feedGroupService;
         this.feedDTOFactory = feedDTOFactory;
+        this.chatService = chatService;
     }
 
     /**
@@ -710,6 +714,8 @@ public class FeedController implements FeedApi {
                 postIslandFeedRequest.getBrief(),
                 postIslandFeedRequest.getFeedGroupId(),
                 postIslandFeedRequest.getPriceInCents());
+
+        this.chatService.sendMessage(Constants.OFFICIAL_USER_ID, Collections.singletonList(userId), Templates.TRANS_CODE_START, 0);
 
         Map<String, List<MembershipMessage>> feedMembershipMap =
                 this.generateFeedMembershipMap(Collections.singletonList(feed));

@@ -279,6 +279,10 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.priceInCents(request.getPriceInCents().getValue());
         }
 
+        if (request.getType().equals(MediaType.MEDIA_VIDEO) && StringUtils.isEmpty(request.getVideo().getUrl())) {
+            builder.temped(true);
+        }
+
         FeedInfo feed = builder.build();
 
         if (request.hasFeedGroupId()) {
