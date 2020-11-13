@@ -21,6 +21,7 @@ message FeedCreateEvent {
     bool fromHost = 6;
     MediaType mediaType = 7;
     string hostId = 8;
+    bool isWorks = 9;
 }
 
 message FeedUpdateEvent {

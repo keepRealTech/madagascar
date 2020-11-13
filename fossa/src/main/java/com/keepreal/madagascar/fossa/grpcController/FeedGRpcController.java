@@ -213,6 +213,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.membershipIds(membershipIdsList);
             builder.createdTime(timestamp);
             builder.toppedTime(timestamp);
+            builder.isWorks(request.getIsWorks());
             if (request.hasPriceInCents()) {
                 builder.priceInCents(request.getPriceInCents().getValue());
             }
@@ -583,6 +584,14 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 criteria = Criteria.where("isTop").is(false);
             }
             query.addCriteria(criteria);
+        }
+
+        if (condition.hasIsWorks()) {
+            if (condition.getIsWorks().getValue()) {
+                query.addCriteria(Criteria.where("isWorks").is(true));
+            } else {
+                query.addCriteria(Criteria.where("isWorks").not().is(true));
+            }
         }
 
         // 没有条件
