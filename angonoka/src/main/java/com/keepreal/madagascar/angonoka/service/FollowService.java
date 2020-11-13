@@ -2,6 +2,7 @@ package com.keepreal.madagascar.angonoka.service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.keepreal.madagascar.angonoka.FollowState;
 import com.keepreal.madagascar.angonoka.FollowType;
@@ -15,6 +16,7 @@ import com.keepreal.madagascar.angonoka.dao.SuperFollowRepository;
 import com.keepreal.madagascar.angonoka.dao.SuperFollowSubscriptionRepository;
 import com.keepreal.madagascar.angonoka.model.SuperFollow;
 import com.keepreal.madagascar.angonoka.model.SuperFollowSubscription;
+import com.keepreal.madagascar.angonoka.util.AutoRedisLock;
 import com.keepreal.madagascar.angonoka.util.CommonStatusUtils;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.enums.SuperFollowState;
@@ -22,6 +24,8 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -50,6 +54,7 @@ public class FollowService {
     private final SuperFollowSubscriptionRepository superFollowSubscriptionRepository;
     private final MpWechatService mpWechatService;
     private final LongIdGenerator idGenerator;
+    private final RedissonClient redissonClient;
 
     /**
      * Constructs the follow service
@@ -60,18 +65,22 @@ public class FollowService {
      * @param superFollowSubscriptionRepository {@link SuperFollowSubscriptionRepository}
      * @param mpWechatService {@link MpWechatService}
      * @param idGenerator {@link LongIdGenerator}
+     * @param redissonClient {@link RedissonClient}
      */
     public FollowService(RestTemplate restTemplate,
                          WeiboBusinessConfig weiboBusinessConfig,
                          SuperFollowRepository superFollowRepository,
                          SuperFollowSubscriptionRepository superFollowSubscriptionRepository,
-                         MpWechatService mpWechatService, LongIdGenerator idGenerator) {
+                         MpWechatService mpWechatService,
+                         LongIdGenerator idGenerator,
+                         RedissonClient redissonClient) {
         this.restTemplate = restTemplate;
         this.weiboBusinessConfig = weiboBusinessConfig;
         this.superFollowRepository = superFollowRepository;
         this.superFollowSubscriptionRepository = superFollowSubscriptionRepository;
         this.mpWechatService = mpWechatService;
         this.idGenerator = idGenerator;
+        this.redissonClient = redissonClient;
         this.gson = new Gson();
         this.dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("ENGLISH", "CHINA"));
     }
@@ -124,6 +133,11 @@ public class FollowService {
      */
     public void handleWeiboSubscriptionMessage(String message) {
         JsonObject jsonObject = this.gson.fromJson(message, JsonObject.class);
+        long sinceId = jsonObject.get("id").getAsLong();
+        try (AutoRedisLock ignored = new AutoRedisLock(redissonClient, "try-set-weibo-sinceId")) {
+            RBucket<Long> bucket = redissonClient.getBucket("weibo-sinceId");
+            bucket.set(sinceId);
+        }
         JsonObject text = jsonObject.get("text").getAsJsonObject();
         String event = text.get("event").getAsString();
         if (!"add".equals(event)) {

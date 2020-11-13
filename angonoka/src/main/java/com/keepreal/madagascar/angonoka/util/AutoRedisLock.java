@@ -1,4 +1,4 @@
-package com.keepreal.madagascar.hawksbill.util;
+package com.keepreal.madagascar.angonoka.util;
 
 import lombok.Data;
 import lombok.SneakyThrows;

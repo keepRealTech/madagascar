@@ -3,7 +3,10 @@ package com.keepreal.madagascar.angonoka.service;
 
 import com.keepreal.madagascar.angonoka.api.WeiboApi;
 import com.keepreal.madagascar.angonoka.config.WeiboBusinessConfig;
+import com.keepreal.madagascar.angonoka.util.AutoRedisLock;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -27,11 +30,14 @@ public class ReceiveMessageService {
     private int recIndex;
     private final WeiboBusinessConfig weiboBusinessConfig;
     private final FollowService followService;
+    private final RedissonClient redissonClient;
 
     public ReceiveMessageService(WeiboBusinessConfig weiboBusinessConfig,
-                                 FollowService followService) {
+                                 FollowService followService,
+                                 RedissonClient redissonClient) {
         this.weiboBusinessConfig = weiboBusinessConfig;
         this.followService = followService;
+        this.redissonClient = redissonClient;
     }
 
     /**
@@ -58,17 +64,23 @@ public class ReceiveMessageService {
                 recIndex = 0;
                 recBuf = new byte[recBufSize];
                 try {
+                    try (AutoRedisLock ignored = new AutoRedisLock(redissonClient, "try-get-weibo-sinceId")) {
+                        RBucket<Long> bucket = redissonClient.getBucket("weibo-sinceId");
+                        if (bucket.isExists()) {
+                            sinceId = bucket.get();
+                        }
+                    }
                     connection = connectServer(sinceId);
                     while (true) {
                         processLine();
                     }
                 } catch (Exception e) {
                     // 当连接断开时，重新连接
-                    System.out.println("connection close: " + e.getMessage());
+                    log.info("connection close: " + e.getMessage());
                     if (e.getMessage().contains("errorCode")) {
                         hasError = true;
                     }
-                    System.out.println("last since_id: " + sinceId);
+                    log.info("last since_id: " + sinceId);
                 } finally {
 
                     if (inputStream != null) {
@@ -81,7 +93,7 @@ public class ReceiveMessageService {
                     if (connection != null) {
                         connection.disconnect();
                     }
-                    System.out.println(new Date().toString());
+                    log.info("connection close");
                 }
             }
         }
@@ -97,7 +109,7 @@ public class ReceiveMessageService {
             if (sinceId > 0L) {
                 targetURL = targetURL + "&since_id=" + sinceId;
             }
-            System.out.println("get url: " + targetURL);
+            log.info("get url: " + targetURL);
 
             URL url = new URL(targetURL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
