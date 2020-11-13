@@ -6,6 +6,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.MediaType;
+import com.keepreal.madagascar.common.VideoMessage;
 import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
@@ -28,6 +29,8 @@ import com.keepreal.madagascar.fossa.RetrieveMultipleFeedsRequest;
 import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
+import com.keepreal.madagascar.fossa.UpdateFeedByVideoRequest;
+import com.keepreal.madagascar.fossa.UpdateFeedByVideoResponse;
 import com.keepreal.madagascar.fossa.UpdateFeedFeedgroupRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
@@ -233,7 +236,7 @@ public class FeedService {
             builder.setBrief(StringValue.of(brief));
         }
 
-        this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
+        this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text, true);
 
         FeedResponse feedResponse;
         try {
@@ -738,9 +741,9 @@ public class FeedService {
     /**
      * Updates a feed by id
      *
-     * @param id feed id
+     * @param id    feed id
      * @param title title
-     * @param text text
+     * @param text  text
      * @param brief brief
      * @return {@link FeedMessage}
      */
@@ -773,6 +776,32 @@ public class FeedService {
 
         if (Objects.isNull(response) || !response.hasStatus()) {
             log.error(Objects.isNull(response) ? "update feed returns null" : response.toString());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getFeed();
+    }
+
+    public FeedMessage updateFeedByVideoId(String videoId, VideoMessage videoMessage) {
+        FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
+
+        UpdateFeedByVideoRequest request = UpdateFeedByVideoRequest.newBuilder()
+                .setVideoId(videoId)
+                .setMessage(videoMessage)
+                .build();
+
+        UpdateFeedByVideoResponse response;
+        try {
+            response = stub.updateFeedByVideoId(request);
+        } catch (StatusRuntimeException e) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, e.getMessage());
+        }
+
+        if (Objects.isNull(response) || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "update feed by video returns null" : response.toString());
         }
 
         if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
@@ -825,7 +854,8 @@ public class FeedService {
     private void buildMediaMessage(NewFeedsRequestV2.Builder builder,
                                    MediaType mediaType,
                                    List<MultiMediaDTO> multiMediaDTOList,
-                                   String text) {
+                                   String text,
+                                   boolean hasVideoTransCode) {
         switch (mediaType) {
             case MEDIA_PICS:
             case MEDIA_ALBUM:
@@ -835,7 +865,7 @@ public class FeedService {
                 builder.setHtml(mediaService.htmlMessage(multiMediaDTOList.get(0)));
                 break;
             case MEDIA_VIDEO:
-                builder.setVideo(mediaService.videoMessage(multiMediaDTOList.get(0)));
+                builder.setVideo(mediaService.videoMessage(multiMediaDTOList.get(0), hasVideoTransCode));
                 break;
             case MEDIA_AUDIO:
                 builder.setAudio(mediaService.audioMessage(multiMediaDTOList.get(0)));
@@ -844,5 +874,12 @@ public class FeedService {
         if (!StringUtils.isEmpty(text)) {
             builder.setText(StringValue.of(text));
         }
+    }
+
+    private void buildMediaMessage(NewFeedsRequestV2.Builder builder,
+                                   MediaType mediaType,
+                                   List<MultiMediaDTO> multiMediaDTOList,
+                                   String text) {
+        buildMediaMessage(builder, mediaType, multiMediaDTOList, text, false);
     }
 }

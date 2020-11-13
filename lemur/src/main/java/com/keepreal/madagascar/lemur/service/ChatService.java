@@ -24,6 +24,7 @@ import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembershipCountRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
+import com.keepreal.madagascar.asity.SendMessageRequest;
 import com.keepreal.madagascar.asity.UpdateChatSettingsRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.UserChatgroupsResponse;
@@ -566,6 +567,28 @@ public class ChatService {
         }
 
         return response.getChatSettings();
+    }
+
+    public void sendMessage(String senderId, List<String> targetIds, String text, int includeSender) {
+        ChatServiceGrpc.ChatServiceBlockingStub stub = ChatServiceGrpc.newBlockingStub(this.channel);
+
+        SendMessageRequest request = SendMessageRequest.newBuilder()
+                .setSenderId(senderId)
+                .addAllTargetIds(targetIds)
+                .setText(text)
+                .setIncludeSender(includeSender)
+                .build();
+
+        CommonStatus commonStatus;
+        try {
+            commonStatus = stub.sendMessage(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != commonStatus.getRtn()) {
+            throw new KeepRealBusinessException(commonStatus);
+        }
     }
 
     /**

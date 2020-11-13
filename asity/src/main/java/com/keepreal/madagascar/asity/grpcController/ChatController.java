@@ -22,6 +22,7 @@ import com.keepreal.madagascar.asity.RetrieveChatgroupMembersByGroupIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupMembershipCountRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByIslandIdRequest;
 import com.keepreal.madagascar.asity.RetrieveChatgroupsByUserIdRequest;
+import com.keepreal.madagascar.asity.SendMessageRequest;
 import com.keepreal.madagascar.asity.UpdateChatSettingsRequest;
 import com.keepreal.madagascar.asity.UpdateChatgroupRequest;
 import com.keepreal.madagascar.asity.UpdateRongCloudUserRequest;
@@ -565,4 +566,8 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
         responseObserver.onCompleted();
     }
 
+    @Override
+    public void sendMessage(SendMessageRequest request, StreamObserver<CommonStatus> responseObserver) {
+        this.rongCloudService.sendMessage(request.getSenderId(), request.getTargetIdsList().toArray(new String[0]), request.getText(), request.getIncludeSender());
+    }
 }
