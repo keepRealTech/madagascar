@@ -334,13 +334,14 @@ public class FeedService {
      * @param feedgroupId Feed group id.
      * @return {@link FeedGroupFeedResponse}.
      */
-    public FeedGroupFeedResponse updateFeedFeedgroupById(String id, String userId, String feedgroupId) {
+    public FeedGroupFeedResponse updateFeedFeedgroupById(String id, String userId, String feedgroupId, Boolean isRemove) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
 
         UpdateFeedFeedgroupRequest request = UpdateFeedFeedgroupRequest.newBuilder()
                 .setId(id)
                 .setUserId(userId)
                 .setFeedgroupId(feedgroupId)
+                .setIsRemove(isRemove == null ? false : isRemove)
                 .build();
 
         FeedGroupFeedResponse response;

@@ -770,7 +770,15 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             return;
         }
 
-        if (!request.getFeedgroupId().equals(feedInfo.getFeedGroupId())) {
+        if (request.getIsRemove()) {
+            FeedGroup originFeedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
+            if (Objects.nonNull(originFeedGroup)) {
+                feedInfo.setFeedGroupId("");
+                originFeedGroup.getFeedIds().remove(feedInfo.getId());
+                originFeedGroup.getImageFeedIds().remove(feedInfo.getId());
+                this.feedGroupService.updateFeedGroup(originFeedGroup);
+            }
+        }else if (!request.getFeedgroupId().equals(feedInfo.getFeedGroupId())) {
             if (!StringUtils.isEmpty(feedInfo.getFeedGroupId())) {
                 FeedGroup originFeedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
                 if (Objects.nonNull(originFeedGroup)) {

@@ -784,7 +784,7 @@ public class FeedController implements FeedApi {
     public ResponseEntity<FullFeedResponse> apiV1FeedsIdFeedgroupsPut(String id, PutFeedFeedgroupRequest putFeedFeedgroupRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedGroupFeedResponse feedGroupFeedResponse = this.feedService.updateFeedFeedgroupById(id,
-                userId, putFeedFeedgroupRequest.getFeedgroupId());
+                userId, putFeedFeedgroupRequest.getFeedgroupId(), putFeedFeedgroupRequest.getIsRemove());
 
         FullFeedResponse response = new FullFeedResponse();
         response.setData(this.feedDTOFactory.valueOf(feedGroupFeedResponse.getFeed(),
