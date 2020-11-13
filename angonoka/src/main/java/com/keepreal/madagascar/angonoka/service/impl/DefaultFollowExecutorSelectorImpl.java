@@ -44,21 +44,18 @@ public class DefaultFollowExecutorSelectorImpl implements FollowExecutorSelector
     @Override
     public FollowExecutor select(FollowType followType) {
         switch (followType) {
-            case FOLLOW_TYPE_NONE:
+            case FOLLOW_WEIBO:
                 return new WeiboFollowExecutor(
                         this.restTemplate,
                         this.weiboBusinessConfig,
                         this.gson,
                         this.followService);
-            case FOLLOW_WEIBO:
-                break;
             case FOLLOW_TIKTOK:
-                break;
+                return new DefaultFollowExecutor();
             case FOLLOW_BILIBILI:
-                break;
-            case UNRECOGNIZED:
-                break;
+                return new DefaultFollowExecutor();
+            default:
+                return new DefaultFollowExecutor();
         }
-        return null;
     }
 }

@@ -4,8 +4,6 @@ import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.EmptyMessage;
 import com.keepreal.madagascar.hawksbill.MpWechatServiceGrpc;
 import com.keepreal.madagascar.hawksbill.RetrievePermanentQRCodeResponse;
-import com.keepreal.madagascar.hawksbill.SendMsgToUserByOpenIdRequest;
-import com.keepreal.madagascar.hawksbill.SendMsgToUserByOpenIdResponse;
 import com.keepreal.madagascar.hawksbill.SendTemplateMessageRequest;
 import com.keepreal.madagascar.hawksbill.SendTemplateMessageResponse;
 import com.keepreal.madagascar.hawksbill.service.MpWechatService;

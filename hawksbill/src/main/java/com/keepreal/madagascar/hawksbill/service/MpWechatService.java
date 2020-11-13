@@ -79,7 +79,7 @@ public class MpWechatService {
         actionInfo.add("scene", scene);
         requestBody.add("action_info", actionInfo);
         ResponseEntity<String> responseEntity = this.restTemplate.postForEntity(String.format(MpWechatApi.POST_PERMANENT_QRCODE, accessToken),
-                requestBody,
+                requestBody.toString(),
                 String.class);
         JsonObject responseBody = this.gson.fromJson(responseEntity.getBody(), JsonObject.class);
         return responseBody.get("ticket").getAsString();

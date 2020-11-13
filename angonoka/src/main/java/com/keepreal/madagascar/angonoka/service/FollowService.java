@@ -151,6 +151,12 @@ public class FollowService {
         SuperFollow superFollow = this.superFollowRepository.findTopByPlatformIdAndTypeAndState(platformId,
                 FollowType.FOLLOW_WEIBO_VALUE,
                 SuperFollowState.ENABLED.getValue());
+
+        if (Objects.isNull(superFollow)) {
+            log.error("super follow not found platform id is {}", platformId);
+            return;
+        }
+
         if (superFollow.getLastPubTime() >= createdAt) {
             return;
         }
@@ -162,6 +168,7 @@ public class FollowService {
         if (follower.isEmpty()) {
             return;
         }
+
         String screenName = user.get("screen_name").getAsString();
         String mid = status.get("mid").getAsString();
         String content = status.get("text").getAsString();

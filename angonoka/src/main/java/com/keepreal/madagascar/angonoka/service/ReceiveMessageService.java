@@ -153,6 +153,7 @@ public class ReceiveMessageService {
          * @param message
          */
         private void handleMessage(String message) {
+            log.info(message);
             followService.handleWeiboSubscriptionMessage(message);
         }
 

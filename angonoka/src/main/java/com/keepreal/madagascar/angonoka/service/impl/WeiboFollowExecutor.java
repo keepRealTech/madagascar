@@ -122,6 +122,9 @@ public class WeiboFollowExecutor implements FollowExecutor {
         FollowType followType = cancelFollowRequest.getFollowType();
 
         SuperFollow superFollow = this.followService.retrieveSuperFollowByHostId(hostId, followType);
+        if (Objects.isNull(superFollow)) {
+            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUPER_FOLLOW_NOT_FOUND)).build();
+        }
         String weiboUid = superFollow.getPlatformId();
 
         ResponseEntity<HashMap> responseEntity = this.restTemplate.postForEntity(String.format(WeiboApi.DELETE_SUBSCRIBE,

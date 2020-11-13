@@ -92,5 +92,6 @@ public class Templates {
             "你还可以点击这里%s向%s匿名提问或支持TA～";
     public static final String H5_REPOST_URL = "https://tiaodaoapp.com/repost?islandId=%s&userId=%s";
     public static final String WEIBO_H5_URL = "https://m.weibo.cn/%s/%s";
+    public static final String MP_WECHAT_QRCODE_URL = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s";
 
 }

@@ -4,9 +4,11 @@ import com.keepreal.madagascar.angonoka.FollowState;
 import com.keepreal.madagascar.angonoka.RetrieveAllSuperFollowResponse;
 import com.keepreal.madagascar.angonoka.SuperFollowMessage;
 import com.keepreal.madagascar.angonoka.WeiboProfileMessage;
+import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.lemur.service.MpWechatService;
 import com.keepreal.madagascar.lemur.service.UserService;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import swagger.model.FollowBotState;
 import swagger.model.FollowDTO;
 import swagger.model.FollowInfoDTO;
@@ -56,15 +58,17 @@ public class FollowDTOFactory {
 
     public FollowDTO valueOf(SuperFollowMessage message) {
         FollowDTO followDTO = new FollowDTO();
-        if (Objects.isNull(message)) {
+
+        if (Objects.isNull(message) || StringUtils.isEmpty(message.getId())) {
             followDTO.setState(FollowBotState.NONE);
             return followDTO;
         }
+
         followDTO.setCode(message.getCode());
         followDTO.setState(this.valueOf(message.getState()));
         followDTO.setName(this.userService.retrieveUserById(message.getHostId()).getName());
         followDTO.setRunningDays(this.calculateRunningDays(message.getCreatedTime()));
-        followDTO.setTicket(this.mpWechatService.retrievePermanentQRCode());
+        followDTO.setTicket(String.format(Templates.MP_WECHAT_QRCODE_URL,this.mpWechatService.retrievePermanentQRCode()));
         return followDTO;
     }
 

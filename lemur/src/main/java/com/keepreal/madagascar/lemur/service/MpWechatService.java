@@ -9,6 +9,7 @@ import io.grpc.Channel;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -36,6 +37,7 @@ public class MpWechatService {
      *
      * @return 二维码ticket
      */
+    @Cacheable(value = "PermanentQrCodeMessage", key = "'QRcode'", cacheManager = "redisCacheManager")
     public String retrievePermanentQRCode() {
         MpWechatServiceGrpc.MpWechatServiceBlockingStub stub = MpWechatServiceGrpc.newBlockingStub(this.channel);
         RetrievePermanentQRCodeResponse response;
