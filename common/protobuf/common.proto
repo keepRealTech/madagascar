@@ -266,6 +266,7 @@ message FeedMessage {
     string brief = 29;
     string title = 30;
     bool isWorks = 31;
+    bool isCollected = 32;
 }
 
 message WechatOrderMessage {

@@ -6,6 +6,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Set;
+
 @Repository
 public interface FeedCollectionRepository extends MongoRepository<FeedCollection, String> {
 
@@ -14,4 +16,8 @@ public interface FeedCollectionRepository extends MongoRepository<FeedCollection
     Page<FeedCollection> findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeGreaterThanEqualOrderByUpdatedTimeDesc(String userId, Long timestamp, Pageable pageable);
 
     Page<FeedCollection> findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeLessThanEqualOrderByUpdatedTimeDesc(String userId, Long timestamp, Pageable pageable);
+
+    boolean existsByUserIdAndFeedIdAndDeletedIsFalse(String userId, String feedId);
+
+    Set<FeedCollection> findByFeedIdInAndUserIdAndDeletedIsFalse(Iterable<String> feedIds, String userId);
 }

@@ -130,6 +130,7 @@ public class PaymentDTOFactory {
             userPaymentDTO.setPrivileges(Arrays.asList(membershipMessage.getDescription().split(",")));
             userPaymentDTO.setTimeInMonths(membershipSkuMessage.getTimeInMonths());
             userPaymentDTO.setName(membershipMessage.getName());
+            userPaymentDTO.setIslandId(membershipMessage.getIslandId());
 
             ZonedDateTime expiration = ZonedDateTime.ofInstant(Instant.ofEpochMilli(userPaymentMessage.getExpiresAt()), ZoneId.systemDefault());
             userPaymentDTO.setExpiration(expiration.with(ChronoField.SECOND_OF_DAY, 0).toInstant().toEpochMilli());

@@ -569,5 +569,7 @@ public class ChatController extends ChatServiceGrpc.ChatServiceImplBase {
     @Override
     public void sendMessage(SendMessageRequest request, StreamObserver<CommonStatus> responseObserver) {
         this.rongCloudService.sendMessage(request.getSenderId(), request.getTargetIdsList().toArray(new String[0]), request.getText(), request.getIncludeSender());
+        responseObserver.onNext(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUCC));
+        responseObserver.onCompleted();
     }
 }

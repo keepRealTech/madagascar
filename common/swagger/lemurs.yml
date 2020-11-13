@@ -4126,6 +4126,8 @@ components:
           type: string
         isWorks:
           type: boolean
+        isCollected:
+          type: boolean
         imagesUris:
           type: array
           items:
@@ -5631,6 +5633,8 @@ components:
         expiration:
           type: integer
           format: int64
+        islandId:
+          type: string
         priceInCents:
           type: integer
           format: int64

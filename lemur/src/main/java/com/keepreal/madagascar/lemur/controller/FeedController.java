@@ -715,8 +715,9 @@ public class FeedController implements FeedApi {
                 postIslandFeedRequest.getBrief(),
                 postIslandFeedRequest.getFeedGroupId(),
                 postIslandFeedRequest.getPriceInCents());
-
-        this.chatService.sendMessage(Constants.OFFICIAL_USER_ID, Collections.singletonList(userId), Templates.TRANS_CODE_START, 0);
+        if (feed.getType().equals(MediaType.MEDIA_VIDEO)) {
+            this.chatService.sendMessage(Constants.OFFICIAL_USER_ID, Collections.singletonList(userId), Templates.TRANS_CODE_START, 0);
+        }
 
         Map<String, List<MembershipMessage>> feedMembershipMap =
                 this.generateFeedMembershipMap(Collections.singletonList(feed));

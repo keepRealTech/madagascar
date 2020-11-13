@@ -1,12 +1,13 @@
 package com.keepreal.madagascar.fossa.service;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
-import com.keepreal.madagascar.fossa.Feed;
 import com.keepreal.madagascar.fossa.dao.FeedCollectionRepository;
 import com.keepreal.madagascar.fossa.model.FeedCollection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
 
 @Service
 public class FeedCollectionService {
@@ -47,6 +48,14 @@ public class FeedCollectionService {
 
     public Page<FeedCollection> findFeedCollectionsUpdatedTimeGE(String userId, long timestamp, int pageSize) {
         return this.feedCollectionRepository.findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeGreaterThanEqualOrderByUpdatedTimeDesc(userId, timestamp, PageRequest.of(0, pageSize));
+    }
+
+    public boolean hasCollected(String userId, String feedId) {
+        return this.feedCollectionRepository.existsByUserIdAndFeedIdAndDeletedIsFalse(userId, feedId);
+    }
+
+    public Set<FeedCollection> findByFeedIdsAndUserId(Iterable<String> feedIds, String userId) {
+        return this.feedCollectionRepository.findByFeedIdInAndUserIdAndDeletedIsFalse(feedIds, userId);
     }
 
     private FeedCollection create(FeedCollection feedCollection) {
