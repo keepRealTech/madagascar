@@ -83,6 +83,8 @@ message UserPaymentMessage {
   uint64 createdAt = 7;
   uint64 priceInCents = 8;
   UserPaymentType type = 9;
+  int32 giftCount = 10;
+  string sponsorGiftId = 11;
 }
 
 message UserPaymentsResponse {

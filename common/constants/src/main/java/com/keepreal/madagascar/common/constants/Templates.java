@@ -31,6 +31,8 @@ public class Templates {
      */
     public static final String LEMUR_PAYMENT_TYPE_FEED = "单独解锁";
     public static final String LEMUR_PAYMENT_FEED_PRIVILEGE = "支付%d元立即解锁专属动态";
+    public static final String LEMUR_PAYMENT_TYPE_SPONSOR = "给你买了个%s";
+    public static final String LEMUR_PAYMENT_TYPE_OLD_SPONSOR = "支持一下";
 
     /**
      * User creation chat message templates.
