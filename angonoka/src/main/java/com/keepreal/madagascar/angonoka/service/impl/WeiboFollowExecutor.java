@@ -7,9 +7,13 @@ import com.keepreal.madagascar.angonoka.CancelFollowRequest;
 import com.keepreal.madagascar.angonoka.CancelFollowResponse;
 import com.keepreal.madagascar.angonoka.FollowRequest;
 import com.keepreal.madagascar.angonoka.FollowResponse;
+import com.keepreal.madagascar.angonoka.FollowState;
+import com.keepreal.madagascar.angonoka.FollowType;
 import com.keepreal.madagascar.angonoka.api.WeiboApi;
 import com.keepreal.madagascar.angonoka.config.WeiboBusinessConfig;
+import com.keepreal.madagascar.angonoka.model.SuperFollow;
 import com.keepreal.madagascar.angonoka.service.FollowExecutor;
+import com.keepreal.madagascar.angonoka.service.FollowService;
 import com.keepreal.madagascar.angonoka.util.CommonStatusUtils;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +33,7 @@ public class WeiboFollowExecutor implements FollowExecutor {
     private final RestTemplate restTemplate;
     private final WeiboBusinessConfig weiboBusinessConfig;
     private final Gson gson;
+    private final FollowService followService;
 
     /**
      * Constructs the follow executor.
@@ -39,10 +44,12 @@ public class WeiboFollowExecutor implements FollowExecutor {
      */
     WeiboFollowExecutor(RestTemplate restTemplate,
                         WeiboBusinessConfig weiboBusinessConfig,
-                        Gson gson) {
+                        Gson gson,
+                        FollowService followService) {
         this.restTemplate = restTemplate;
         this.weiboBusinessConfig = weiboBusinessConfig;
         this.gson = gson;
+        this.followService = followService;
     }
 
     /**
@@ -95,7 +102,7 @@ public class WeiboFollowExecutor implements FollowExecutor {
             return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR)).build();
         }
 
-        //TODO 本地增加订阅流程
+        this.followService.createSuperFollow(userId, islandId, id, FollowType.FOLLOW_WEIBO);
 
         return builder.setStatus(CommonStatusUtils.getSuccStatus()).build();
     }
@@ -112,9 +119,10 @@ public class WeiboFollowExecutor implements FollowExecutor {
 
         String hostId = cancelFollowRequest.getHostId();
         String islandId = cancelFollowRequest.getIslandId();
+        FollowType followType = cancelFollowRequest.getFollowType();
 
-        //todo 从关系表中根据userId 取出对应的微博id
-        String weiboUid = hostId;
+        SuperFollow superFollow = this.followService.retrieveSuperFollowByHostId(hostId, followType);
+        String weiboUid = superFollow.getPlatformId();
 
         ResponseEntity<HashMap> responseEntity = this.restTemplate.postForEntity(String.format(WeiboApi.DELETE_SUBSCRIBE,
                 weiboBusinessConfig.getAppKey(),
@@ -146,7 +154,8 @@ public class WeiboFollowExecutor implements FollowExecutor {
             return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR)).build();
         }
 
-        //TODO 本地删除订阅流程
+        superFollow.setState(FollowState.NONE_VALUE);
+        this.followService.updateSuperFollow(superFollow);
 
         return builder.setStatus(CommonStatusUtils.getSuccStatus()).build();
     }

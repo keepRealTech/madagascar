@@ -56,9 +56,7 @@ public class FollowService {
         FollowServiceGrpc.FollowServiceBlockingStub stub = FollowServiceGrpc.newBlockingStub(this.channel);
         RetrieveSuperFollowRequest.Builder builder = RetrieveSuperFollowRequest.newBuilder();
 
-        if (!StringUtils.isEmpty(code)) {
-            builder.setCode(StringValue.of(code));
-        }
+        builder.setCode(code);
 
         RetrieveSuperFollowResponse response;
 
@@ -173,10 +171,15 @@ public class FollowService {
      *
      * @param openId mp wechat open id
      * @param hostId host id
+     * @param superFollowId super follow id
      */
-    public void createSuperFollowSubscription(String openId, String hostId) {
+    public void createSuperFollowSubscription(String openId, String hostId, String superFollowId) {
         FollowServiceGrpc.FollowServiceBlockingStub stub = FollowServiceGrpc.newBlockingStub(this.channel);
-        CreateSuperFollowSubscriptionRequest request = CreateSuperFollowSubscriptionRequest.newBuilder().setOpenId(openId).setHostId(hostId).build();
+        CreateSuperFollowSubscriptionRequest request = CreateSuperFollowSubscriptionRequest.newBuilder()
+                .setOpenId(openId)
+                .setHostId(hostId)
+                .setSuperFollowId(superFollowId)
+                .build();
         CreateSuperFollowSubscriptionResponse response;
         try {
             response = stub.createSuperFollowSubscription(request);

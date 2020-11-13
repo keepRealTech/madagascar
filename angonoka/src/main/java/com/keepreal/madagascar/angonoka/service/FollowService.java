@@ -3,7 +3,10 @@ package com.keepreal.madagascar.angonoka.service;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.keepreal.madagascar.angonoka.FollowState;
 import com.keepreal.madagascar.angonoka.FollowType;
+import com.keepreal.madagascar.angonoka.RetrieveAllSuperFollowResponse;
+import com.keepreal.madagascar.angonoka.SuperFollowMessage;
 import com.keepreal.madagascar.angonoka.WeiboProfileMessage;
 import com.keepreal.madagascar.angonoka.WeiboProfileResponse;
 import com.keepreal.madagascar.angonoka.api.WeiboApi;
@@ -16,10 +19,13 @@ import com.keepreal.madagascar.angonoka.util.CommonStatusUtils;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.enums.SuperFollowState;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.SimpleDateFormat;
@@ -34,6 +40,7 @@ import java.util.stream.Collectors;
  * Represents the follow GRpc controller.
  */
 @Service
+@Slf4j
 public class FollowService {
     private final RestTemplate restTemplate;
     private final WeiboBusinessConfig weiboBusinessConfig;
@@ -42,6 +49,7 @@ public class FollowService {
     private final SuperFollowRepository superFollowRepository;
     private final SuperFollowSubscriptionRepository superFollowSubscriptionRepository;
     private final MpWechatService mpWechatService;
+    private final LongIdGenerator idGenerator;
 
     /**
      * Constructs the follow service
@@ -51,17 +59,19 @@ public class FollowService {
      * @param superFollowRepository {@link SuperFollowRepository}
      * @param superFollowSubscriptionRepository {@link SuperFollowSubscriptionRepository}
      * @param mpWechatService {@link MpWechatService}
+     * @param idGenerator {@link LongIdGenerator}
      */
     public FollowService(RestTemplate restTemplate,
                          WeiboBusinessConfig weiboBusinessConfig,
                          SuperFollowRepository superFollowRepository,
                          SuperFollowSubscriptionRepository superFollowSubscriptionRepository,
-                         MpWechatService mpWechatService) {
+                         MpWechatService mpWechatService, LongIdGenerator idGenerator) {
         this.restTemplate = restTemplate;
         this.weiboBusinessConfig = weiboBusinessConfig;
         this.superFollowRepository = superFollowRepository;
         this.superFollowSubscriptionRepository = superFollowSubscriptionRepository;
         this.mpWechatService = mpWechatService;
+        this.idGenerator = idGenerator;
         this.gson = new Gson();
         this.dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("ENGLISH", "CHINA"));
     }
@@ -146,6 +156,146 @@ public class FollowService {
         List<String> openIds = follower.stream().map(SuperFollowSubscription::getOpenId).collect(Collectors.toList());
 
         this.mpWechatService.sendTemplateMessageByOpenIds(openIds, screenName, url, content);
+    }
+
+    /**
+     * 根据暗号获取超级关注信息
+     *
+     * @param code 暗号
+     * @return {@link SuperFollow}
+     */
+    public SuperFollow retrieveSuperFollowMessageByCode(String code) {
+        return this.superFollowRepository.findTopByCodeAndState(code, FollowState.ENABLE_VALUE);
+    }
+
+    /**
+     * 根据host id 获取所有超级关注信息
+     *
+     * @param hostId hostId
+     * @return {@link SuperFollow}
+     */
+    public List<SuperFollow> retrieveAllSuperFollowMessageByCode(String hostId) {
+        return this.superFollowRepository.findAllByHostIdAndState(hostId, FollowState.ENABLE_VALUE);
+    }
+
+    public RetrieveAllSuperFollowResponse valueOf(List<SuperFollow> superFollowList) {
+        RetrieveAllSuperFollowResponse.Builder builder = RetrieveAllSuperFollowResponse.newBuilder();
+        superFollowList.forEach(superFollow -> {
+            switch (FollowType.forNumber(superFollow.getType())) {
+                case FOLLOW_WEIBO:
+                    builder.setWeibo(this.getSuperFollowMessage(superFollow));
+                    break;
+                case FOLLOW_TIKTOK:
+                    builder.setTiktok(this.getSuperFollowMessage(superFollow));
+                    break;
+                case FOLLOW_BILIBILI:
+                    builder.setBilibili(this.getSuperFollowMessage(superFollow));
+                    break;
+                default:
+                    break;
+            }
+        });
+        return builder.setStatus(CommonStatusUtils.getSuccStatus()).build();
+    }
+
+    public SuperFollowMessage getSuperFollowMessage(SuperFollow superFollow) {
+        if (Objects.isNull(superFollow)) {
+            return null;
+        }
+
+        // for now
+        if (superFollow.getType() == FollowType.FOLLOW_BILIBILI_VALUE || superFollow.getType() == FollowType.FOLLOW_TIKTOK_VALUE) {
+            return null;
+        }
+
+        return SuperFollowMessage.newBuilder()
+                .setId(superFollow.getId())
+                .setPlatformId(superFollow.getPlatformId())
+                .setHostId(superFollow.getHostId())
+                .setCreatedTime(superFollow.getCreatedTime())
+                .setIslandId(superFollow.getIslandId())
+                .setCode(superFollow.getCode())
+                .setState(FollowState.forNumber(superFollow.getState()))
+                .build();
+    }
+
+    /**
+     * 创建超级关注订阅消息
+     *
+     * @param hostId host id
+     * @param openId open id
+     * @param superFollowId super follow id
+     */
+    public void createSuperFollowSubscription(String hostId, String openId, String superFollowId) {
+        SuperFollow superFollow = this.superFollowRepository.findTopByIdAndState(superFollowId, FollowState.ENABLE_VALUE);
+        SuperFollowSubscription subscription = SuperFollowSubscription.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .openId(openId)
+                .hostId(hostId)
+                .platformId(superFollow.getPlatformId())
+                .type(superFollow.getType())
+                .build();
+        this.superFollowSubscriptionRepository.save(subscription);
+    }
+
+    /**
+     * 创建超级关注
+     *
+     * @param hostId host id
+     * @param islandId island id
+     * @param weiboUid weibo uid
+     * @param followType follow type
+     */
+    public void createSuperFollow(String hostId, String islandId, String weiboUid, FollowType followType) {
+        String code = this.superFollowRepository.selectTopCodeByStateOrderByCreatedTime(FollowState.ENABLE_VALUE);
+        SuperFollow superFollow = SuperFollow.builder()
+                .id(String.valueOf(this.idGenerator.nextId()))
+                .platformId(weiboUid)
+                .hostId(hostId)
+                .islandId(islandId)
+                .code(StringUtils.isEmpty(code) ? "0000" : this.generateCode(code))
+                .type(followType.getNumber())
+                .build();
+        this.superFollowRepository.save(superFollow);
+    }
+
+    public SuperFollow retrieveSuperFollowByHostId(String hostId, FollowType followType) {
+        return this.superFollowRepository.findTopByHostIdAndStateAndType(hostId, FollowState.ENABLE_VALUE, followType.getNumber());
+    }
+
+    public SuperFollow updateSuperFollow(SuperFollow superFollow) {
+        return this.superFollowRepository.save(superFollow);
+    }
+
+    /**
+     * 顺序生成code
+     *
+     * @param startCode start code
+     * @return code
+     */
+    private String generateCode(String startCode) {
+        char[] chars = startCode.toCharArray();
+        for (int i = chars.length - 1; i >= 0; i--) {
+
+            if (chars[i] < 57) {
+                chars[i] = (char)((int)chars[i] + 1);
+                return String.valueOf(chars);
+            }
+
+            if (chars[i] == 57) {
+                chars[i] = 'A';
+                return String.valueOf(chars);
+            }
+
+            if (chars[i] < 90) {
+                chars[i] = (char)((int)chars[i] + 1);
+                return String.valueOf(chars);
+            }
+
+            chars[i] = '0';
+        }
+        log.error("超出限制！");
+        return String.valueOf(10000);
     }
 
     /**

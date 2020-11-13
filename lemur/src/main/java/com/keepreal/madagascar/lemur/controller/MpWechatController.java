@@ -118,7 +118,7 @@ public class MpWechatController {
             SuperFollowMessage superFollowMessage = this.followService.retrieveSuperFollowByCode(content);
 
             if (Objects.nonNull(superFollowMessage)) {
-                this.followService.createSuperFollowSubscription(openId, superFollowMessage.getHostId());
+                this.followService.createSuperFollowSubscription(openId, superFollowMessage.getHostId(), superFollowMessage.getId());
                 String replyXml = this.generateSuccessReplyXml(superFollowMessage.getHostId(),
                         superFollowMessage.getIslandId(),
                         openId,

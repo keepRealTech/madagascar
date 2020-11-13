@@ -65,7 +65,7 @@ message CancelFollowResponse {
 }
 
 message RetrieveSuperFollowRequest {
-  google.protobuf.StringValue code = 1;
+  string code = 1;
 }
 
 message RetrieveSuperFollowResponse {
@@ -77,16 +77,16 @@ message SuperFollowMessage {
     string id = 1;
     string platformId = 2;
     string hostId = 3;
-    FollowType followType = 4;
-    int64 createdTime = 5;
-    string islandId = 6;
-    FollowState state = 7;
-    string code = 8;
+    int64 createdTime = 4;
+    string islandId = 5;
+    FollowState state = 6;
+    string code = 7;
 }
 
 message CreateSuperFollowSubscriptionRequest {
   string openId = 1;
   string hostId = 2;
+  string superFollowId = 3;
 }
 
 message CreateSuperFollowSubscriptionResponse {

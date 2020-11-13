@@ -27,12 +27,12 @@ public class SuperFollowSubscription {
     @Id
     private String id;
     private String openId;
-    private String unionId;
     private String hostId;
     private String platformId;
     private Integer type;
+    @Builder.Default
     @Column(name = "is_deleted")
-    private boolean deleted;
+    private boolean deleted = false;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate

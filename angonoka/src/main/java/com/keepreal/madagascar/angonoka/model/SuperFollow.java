@@ -28,11 +28,12 @@ public class SuperFollow {
     private String platformId;
     private String hostId;
     private String islandId;
+    private String code;
     @Builder.Default
     private Long lastPubTime = 0L;
     private Integer type;
     @Builder.Default
-    private Integer state = 0;
+    private Integer state = 1;
     @CreatedDate
     private Long createdTime;
     @LastModifiedDate
