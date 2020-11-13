@@ -2994,7 +2994,7 @@ paths:
             application/json:
               schema:
                 $ref:   '#/components/schemas/DummyResponse'
-  /api/v1/feedCollection:
+  /api/v1/feedCollections:
     get:
       parameters:
         - $ref: '#/components/parameters/timestampAfter'
@@ -3010,7 +3010,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimelinesResponse'
-  /api/v1/feeds/{id}/feedCollection:
+  /api/v1/feeds/{id}/feedCollections:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:

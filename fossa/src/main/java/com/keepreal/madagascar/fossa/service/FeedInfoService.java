@@ -327,6 +327,10 @@ public class FeedInfoService {
         return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
     }
 
+    public List<FeedInfo> findByIdsOrderByUpdateTime(Iterable<String> ids) {
+        return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
+    }
+
     /**
      * Retrieves feeds by feed group id.
      *
