@@ -6,6 +6,7 @@ import com.keepreal.madagascar.common.CommonStatus;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.PageResponse;
+import com.keepreal.madagascar.common.VideoMessage;
 import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
@@ -33,6 +34,8 @@ import com.keepreal.madagascar.fossa.RetrieveToppedFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TimelineFeedsResponse;
 import com.keepreal.madagascar.fossa.TopFeedByIdRequest;
 import com.keepreal.madagascar.fossa.TopFeedByIdResponse;
+import com.keepreal.madagascar.fossa.UpdateFeedByVideoRequest;
+import com.keepreal.madagascar.fossa.UpdateFeedByVideoResponse;
 import com.keepreal.madagascar.fossa.UpdateFeedFeedgroupRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdResponse;
@@ -44,6 +47,7 @@ import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.model.ReactionInfo;
+import com.keepreal.madagascar.fossa.model.VideoInfo;
 import com.keepreal.madagascar.fossa.service.CommentService;
 import com.keepreal.madagascar.fossa.service.FeedCollectionService;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
@@ -59,6 +63,7 @@ import com.keepreal.madagascar.fossa.util.PageRequestResponseUtils;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -97,6 +102,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     private final ReactionService reactionService;
     private final CommentService commentService;
     private final FeedCollectionService feedCollectionService;
+    private final RedissonClient redissonClient;
 
     /**
      * Constructs the feed grpc controller
@@ -112,6 +118,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      * @param reactionService            {@link ReactionService}.
      * @param commentService             {@link CommentService}.
      * @param feedCollectionService      {@link FeedCollectionService}.
+     * @param redissonClient             {@link RedissonClient}.
      */
     public FeedGRpcController(LongIdGenerator idGenerator,
                               IslandService islandService,
@@ -123,7 +130,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                               SubscribeMembershipService subscribeMembershipService,
                               ReactionService reactionService,
                               CommentService commentService,
-                              FeedCollectionService feedCollectionService) {
+                              FeedCollectionService feedCollectionService,
+                              RedissonClient redissonClient) {
         this.idGenerator = idGenerator;
         this.islandService = islandService;
         this.feedInfoService = feedInfoService;
@@ -135,6 +143,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         this.reactionService = reactionService;
         this.commentService = commentService;
         this.feedCollectionService = feedCollectionService;
+        this.redissonClient = redissonClient;
     }
 
     /**
@@ -293,17 +302,21 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         FeedInfo feed = builder.build();
 
         if (request.hasFeedGroupId()) {
-            FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(request.getFeedGroupId().getValue());
-            if (Objects.isNull(feedGroup)) {
-                FeedResponse response = FeedResponse.newBuilder()
-                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEEDGROUP_NOT_FOUND_ERROR))
-                        .build();
-                responseObserver.onNext(response);
-                responseObserver.onCompleted();
-            }
+            if (request.getType().equals(MediaType.MEDIA_VIDEO) && StringUtils.isEmpty(request.getVideo().getUrl())) {
+                feed.setFeedGroupId(request.getFeedGroupId().getValue());
+            } else {
+                FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(request.getFeedGroupId().getValue());
+                if (Objects.isNull(feedGroup)) {
+                    FeedResponse response = FeedResponse.newBuilder()
+                            .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEEDGROUP_NOT_FOUND_ERROR))
+                            .build();
+                    responseObserver.onNext(response);
+                    responseObserver.onCompleted();
+                }
 
-            this.assignFeedGroup(feed, feedGroup);
-            this.feedGroupService.updateFeedGroup(feedGroup);
+                this.assignFeedGroup(feed, feedGroup);
+                this.feedGroupService.updateFeedGroup(feedGroup);
+            }
         }
 
         feed = this.feedInfoService.insert(feed);
@@ -600,7 +613,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             if (condition.getIsWorks().getValue()) {
                 query.addCriteria(Criteria.where("isWorks").is(true));
             } else {
-                query.addCriteria(Criteria.where("isWorks").not().is(true));
+                query.addCriteria(new Criteria().orOperator(Criteria.where("isWorks").is(false), Criteria.where("isWorks").is(null)));
             }
         }
 
@@ -881,6 +894,32 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 .setFeed(this.feedInfoService.getFeedMessage(update, feedInfo.getHostId()))
                 .build();
         responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void updateFeedByVideoId(UpdateFeedByVideoRequest request, StreamObserver<UpdateFeedByVideoResponse> responseObserver) {
+        String videoId = request.getVideoId();
+        VideoMessage message = request.getMessage();
+        String feedId = (String) this.redissonClient.getBucket(Constants.VIDEO_PREFIX + videoId).get();
+        FeedInfo feedinfo = this.feedInfoService.findFeedInfoById(feedId, false);
+        VideoInfo mediaInfo = (VideoInfo) feedinfo.getMediaInfos().get(0);
+        mediaInfo.setTitle(message.getTitle());
+        mediaInfo.setUrl(message.getUrl());
+        mediaInfo.setDuration(message.getDuration());
+        mediaInfo.setHeight(message.getHeight());
+        mediaInfo.setWidth(message.getWidth());
+        if (StringUtils.isEmpty(mediaInfo.getThumbnailUrl())) {
+            mediaInfo.setThumbnailUrl(message.getThumbnailUrl());
+        }
+        feedinfo.setTemped(false);
+
+        FeedInfo update = this.feedInfoService.update(feedinfo);
+
+        responseObserver.onNext(UpdateFeedByVideoResponse.newBuilder()
+                .setStatus(CommonStatusUtils.getSuccStatus())
+                .setFeed(this.feedInfoService.getFeedMessage(update, feedinfo.getUserId()))
+                .build());
         responseObserver.onCompleted();
     }
 

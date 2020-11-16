@@ -53,4 +53,9 @@ public class Constants {
     public static final Long DEFAULT_SPONSOR_GIFT_UNIT_PRICE = 300L;
 
     public static final Long DEFAULT_SPONSOR_SKU_QUANTITY = 3L;
+
+    /**
+     * Redis key prefix
+     */
+    public static final String VIDEO_PREFIX = "video:";
 }
