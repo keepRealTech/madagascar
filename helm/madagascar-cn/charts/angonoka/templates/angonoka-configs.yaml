@@ -5,6 +5,9 @@ metadata:
   namespace: {{ .Values.global.common_configs.namespace }}
 data:
   aliyun_logs_madagascar-prod: stdout
-  ACTIVITY_SHOWLABEL: 'false'
+  WEIBO_SUBID: {{ .Values.weibo.sub_id }}
+  SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
+  GRPC_HAWKSBILL_HOST: {{ .Values.hawksbill.host }}
+  GRPC_HAWKSBILL_PORT: '{{ .Values.hawksbill.port }}'
   OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
   OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'

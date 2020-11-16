@@ -44,6 +44,26 @@ spec:
             - configMapRef:
                 name: angonoka
           env:
+            - name: WEIBO_APPKEY
+              valueFrom:
+                secretKeyRef:
+                  name: weibo
+                  key: app-key
+            - name: WEIBO_ACCESSTOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: weibo
+                  key: access-token
+            - name: SPRING_REDIS_HOST
+                valueFrom:
+                  secretKeyRef:
+                    name: aliyun-redis
+                    key: host
+            - name: SPRING_REDIS_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: aliyun-redis
+                    key: password
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:
@@ -58,7 +78,7 @@ spec:
               cpu: {{ .Values.common_configs.cpu }}
               memory: {{ .Values.common_configs.memory }}
           ports:
-            - containerPort: 12008
+            - containerPort: 12009
               name: angonoka-grpc
         {{ if .Values.deploy.opentracing.enable_jaeger }}
         - name: jaeger-agent
