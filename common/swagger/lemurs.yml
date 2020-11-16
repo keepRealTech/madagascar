@@ -4908,6 +4908,10 @@ components:
           type: integer
         nextVersion:
           type: integer
+        currentVersionStr:
+          type: string
+        nextVersionStr:
+          type: string
     IOSUpdateInfoResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
