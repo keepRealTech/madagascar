@@ -17,8 +17,5 @@ public interface SuperFollowRepository extends JpaRepository<SuperFollow, String
 
     SuperFollow findTopByIdAndState(String id, int state);
 
-    @Query(value = "SELECT DISTINCT code FROM super_follow WHERE `state` = ?1 ORDER BY created_time DESC LIMIT 1", nativeQuery = true)
-    String selectTopCodeByStateOrderByCreatedTime(int state);
-
     SuperFollow findTopByHostIdAndStateAndType(String hostId, int state, int type);
 }

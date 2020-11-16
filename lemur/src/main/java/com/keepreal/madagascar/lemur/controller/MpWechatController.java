@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.lemur.controller;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.google.gson.JsonObject;
 import com.keepreal.madagascar.angonoka.SuperFollowMessage;
 import com.keepreal.madagascar.baobob.CheckSignatureRequest;
 import com.keepreal.madagascar.common.UserMessage;
@@ -120,7 +121,11 @@ public class MpWechatController {
             String keepRealMpId = request.get("ToUserName");
             String content = request.get("Content");
 
-            SuperFollowMessage superFollowMessage = this.followService.retrieveSuperFollowByCode(content);
+            if (content.length() != 4) {
+                return "success";
+            }
+
+            SuperFollowMessage superFollowMessage = this.followService.retrieveSuperFollowByCode(content.toUpperCase());
 
             log.info("super follow {} ", Objects.isNull(superFollowMessage) ? "null" : superFollowMessage.toString());
 
@@ -161,13 +166,13 @@ public class MpWechatController {
                 hostId);
         String replyContent = String.format(Templates.FOLLOW_SUCCESS_CONTENTS, name, name, name, h5Url, name);
         XmlMapper xmlMapper = new XmlMapper();
-        Map<String, Object> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>();
         map.put("ToUserName", openId);
         map.put("FromUserName", keepRealMpId);
-        map.put("CreateTime", Instant.now().toEpochMilli());
+        map.put("CreateTime", String.valueOf(Instant.now().toEpochMilli()));
         map.put("MsgType", MpWechatMsgType.TEXT.getValue());
         map.put("Content", replyContent);
-        return xmlMapper.writeValueAsString(map);
+        return WXPayUtil.mapToXml(map);
     }
 
 }
