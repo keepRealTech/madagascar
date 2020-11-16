@@ -19,6 +19,8 @@ include 'marty'
 include 'vanga'
 include 'hoopoe'
 include 'asity'
+include 'angonoka'
+include 'hawksbill'
 
 include 'workflow:settler'
 include 'workflow:reconciliation'

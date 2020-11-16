@@ -324,45 +324,6 @@ public class LoginController implements LoginApi {
     }
 
     /**
-     * initialize and verify wechat official accounts server
-     *
-     * @param signature wechat server signature
-     * @param timestamp wechat server timestamp
-     * @param nonce     wechat server random number
-     * @param echostr   wechat server random string
-     * @return check successful return echostr
-     */
-    @GetMapping("/api/v1/events/wechatMp/callback")
-    public String verifyWechatServer(String signature, String timestamp, String nonce, String echostr) {
-        if (Objects.nonNull(signature) && Objects.nonNull(timestamp) && Objects.nonNull(nonce) && Objects.nonNull(echostr)) {
-            CheckSignatureRequest request = CheckSignatureRequest.newBuilder().setSignature(signature).setTimestamp(timestamp).setNonce(nonce).build();
-            if (this.loginService.checkSignature(request)) {
-                return echostr;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * receive wechat server event
-     */
-    @PostMapping("/api/v1/events/wechatMp/callback")
-    public String receiveWechatServerEventPush(HttpServletRequest httpServletRequest) throws Exception {
-        String requestXml = IOUtils.toString(httpServletRequest.getInputStream(), Charset.forName(httpServletRequest.getCharacterEncoding()));
-        Map<String, String> request = WXPayUtil.xmlToMap(requestXml);
-        String fromUserName = request.get("FromUserName");
-        String msgType = request.get("MsgType");
-        String event = request.get("Event");
-        String eventKey = request.get("EventKey");
-        if (Objects.nonNull(fromUserName) && Objects.nonNull(msgType) && Objects.nonNull(event) && Objects.nonNull(eventKey)) {
-            if ("event".equals(msgType)) {
-                this.loginService.handleEvent(fromUserName, event, eventKey);
-            }
-        }
-        return "success";
-    }
-
-    /**
      * Generates web login qrcode.
      *
      * @return {@link QrTicketResponse}.
