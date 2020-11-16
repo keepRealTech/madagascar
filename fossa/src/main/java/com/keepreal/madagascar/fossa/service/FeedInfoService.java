@@ -230,7 +230,7 @@ public class FeedInfoService {
                 .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop())
                 .setHostId(feedInfo.getHostId())
                 .setCanSave(feedInfo.getCanSave() == null ? false : feedInfo.getCanSave())
-                .setIsWorks(feedInfo.getIsWorks() == null ? false : feedInfo.getIsWorks())
+                .setIsWorks(feedInfo.getIsWorks() == null ? true : feedInfo.getIsWorks())
                 .setIsCollected(isCollected)
                 .setFeedgroupId(feedInfo.getFeedGroupId() == null ? "" : feedInfo.getFeedGroupId());
 

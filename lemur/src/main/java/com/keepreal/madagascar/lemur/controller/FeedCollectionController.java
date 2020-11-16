@@ -11,6 +11,7 @@ import com.keepreal.madagascar.lemur.service.FeedGroupService;
 import com.keepreal.madagascar.lemur.service.MembershipService;
 import com.keepreal.madagascar.lemur.util.DummyResponseUtils;
 import com.keepreal.madagascar.lemur.util.HttpContextUtils;
+import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -65,6 +66,7 @@ public class FeedCollectionController implements FeedCollectionApi {
                         feedGroupMessageMap.get(feedMessage.getFeedgroupId())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
+        response.setPageInfo(PaginationUtils.getPageInfo(collectedFeedsResponse.getPageResponse()));
         response.setCurrentTime(System.currentTimeMillis());
         response.setHasFeedgroup(Boolean.TRUE.equals(this.feedGroupService.existsFeedGroupsByUserId(userId)));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());

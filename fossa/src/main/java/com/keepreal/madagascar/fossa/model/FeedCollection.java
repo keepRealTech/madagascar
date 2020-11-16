@@ -18,7 +18,7 @@ import javax.persistence.EntityListeners;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(value = "feedGroup")
+@Document(value = "feedCollection")
 @EntityListeners(AuditingEntityListener.class)
 public class FeedCollection {
 

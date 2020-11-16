@@ -31,6 +31,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -87,6 +88,7 @@ public class FeedController implements FeedApi {
     private final FeedGroupService feedGroupService;
     private final FeedDTOFactory feedDTOFactory;
     private final ChatService chatService;
+    private final RedissonClient redissonClient;
 
     /**
      * Constructs the feed controller.
@@ -98,6 +100,7 @@ public class FeedController implements FeedApi {
      * @param feedGroupService  {@link FeedGroupService}.
      * @param feedDTOFactory    {@link FeedDTOFactory}.
      * @param chatService       {@link ChatService}.
+     * @param redissonClient    {@link RedissonClient}.
      */
     public FeedController(ImageService imageService,
                           FeedService feedService,
@@ -105,7 +108,8 @@ public class FeedController implements FeedApi {
                           MembershipService membershipService,
                           FeedGroupService feedGroupService,
                           FeedDTOFactory feedDTOFactory,
-                          ChatService chatService) {
+                          ChatService chatService,
+                          RedissonClient redissonClient) {
         this.imageService = imageService;
         this.feedService = feedService;
         this.islandService = islandService;
@@ -113,6 +117,7 @@ public class FeedController implements FeedApi {
         this.feedGroupService = feedGroupService;
         this.feedDTOFactory = feedDTOFactory;
         this.chatService = chatService;
+        this.redissonClient = redissonClient;
     }
 
     /**
@@ -717,6 +722,7 @@ public class FeedController implements FeedApi {
                 postIslandFeedRequest.getPriceInCents());
         if (feed.getType().equals(MediaType.MEDIA_VIDEO)) {
             this.chatService.sendMessage(Constants.OFFICIAL_USER_ID, Collections.singletonList(userId), Templates.TRANS_CODE_START, 0);
+            this.redissonClient.getBucket(Constants.VIDEO_PREFIX + postIslandFeedRequest.getMultimedia().get(0).getVideoId()).set(feed.getId());
         }
 
         Map<String, List<MembershipMessage>> feedMembershipMap =
