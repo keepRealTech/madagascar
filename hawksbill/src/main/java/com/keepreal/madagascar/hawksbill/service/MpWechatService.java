@@ -57,7 +57,7 @@ public class MpWechatService {
         String accessToken = this.getAccessToken();
 
         ResponseEntity<String> responseEntity = this.restTemplate.postForEntity(String.format(MpWechatApi.POST_TEMPLATE_MESSAGE, accessToken),
-                requestBody,
+                requestBody.toString(),
                 String.class);
         if (responseEntity.getStatusCodeValue() != 200) {
             log.error("send send Template Message Error!");

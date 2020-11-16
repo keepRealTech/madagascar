@@ -2,7 +2,6 @@ package com.keepreal.madagascar.angonoka.service;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.keepreal.madagascar.angonoka.FollowState;
 import com.keepreal.madagascar.angonoka.FollowType;
@@ -35,11 +34,13 @@ import org.springframework.web.client.RestTemplate;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -57,6 +58,10 @@ public class FollowService {
     private final MpWechatService mpWechatService;
     private final LongIdGenerator idGenerator;
     private final RedissonClient redissonClient;
+    private final List<String> codeList = Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+            "U", "V", "W", "X", "Y", "Z");
+    private final List<Integer> codePeriods = Stream.of(0, 1, 2, 3).collect(Collectors.toList());
 
     /**
      * Constructs the follow service
@@ -97,7 +102,7 @@ public class FollowService {
 
         WeiboProfileResponse.Builder builder = WeiboProfileResponse.newBuilder();
 
-        ResponseEntity<HashMap> responseEntity = this.restTemplate.getForEntity(
+        ResponseEntity< HashMap> responseEntity = this.restTemplate.getForEntity(
                 String.format(WeiboApi.SHOW_USER_URL, weiboBusinessConfig.getAccessToken(), name),
                 HashMap.class);
 
@@ -250,18 +255,39 @@ public class FollowService {
      *
      * @param hostId host id
      * @param openId open id
-     * @param superFollowId super follow id
+     * @param platformId platform id
+     * @param type platform type
      */
-    public void createSuperFollowSubscription(String hostId, String openId, String superFollowId) {
-        SuperFollow superFollow = this.superFollowRepository.findTopByIdAndState(superFollowId, FollowState.ENABLE_VALUE);
+    public void createSuperFollowSubscription(String hostId, String openId, String platformId, int type) {
         SuperFollowSubscription subscription = SuperFollowSubscription.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
                 .openId(openId)
                 .hostId(hostId)
-                .platformId(superFollow.getPlatformId())
-                .type(superFollow.getType())
+                .platformId(platformId)
+                .type(type)
                 .build();
         this.superFollowSubscriptionRepository.save(subscription);
+    }
+
+    /**
+     * 创建超级关注消息
+     *
+     * @param id 主键id
+     */
+    public SuperFollow retrieveSuperFollowById(String id) {
+        return this.superFollowRepository.findTopByIdAndState(id, FollowState.ENABLE_VALUE);
+    }
+
+    /**
+     * 获取超级关注订阅消息
+     *
+     * @param hostId host id
+     * @param openId open id
+     * @param platformId platform id
+     * @param type platform type
+     */
+    public SuperFollowSubscription retrieveSuperFollowSubscription(String hostId, String openId, String platformId, int type) {
+        return this.superFollowSubscriptionRepository.findTopByOpenIdAndHostIdAndPlatformIdAndType(openId, hostId, platformId, type);
     }
 
     /**
@@ -273,16 +299,17 @@ public class FollowService {
      * @param followType follow type
      */
     public SuperFollow createSuperFollow(String hostId, String islandId, String weiboUid, FollowType followType) {
-        String code = this.superFollowRepository.selectTopCodeByStateOrderByCreatedTime(FollowState.ENABLE_VALUE);
-        SuperFollow superFollow = SuperFollow.builder()
-                .id(String.valueOf(this.idGenerator.nextId()))
-                .platformId(weiboUid)
-                .hostId(hostId)
-                .islandId(islandId)
-                .code(StringUtils.isEmpty(code) ? "0000" : this.generateCode(code))
-                .type(followType.getNumber())
-                .build();
-        return this.superFollowRepository.save(superFollow);
+        try (AutoRedisLock ignored = new AutoRedisLock(redissonClient, "try-create-super-follow")) {
+            SuperFollow superFollow = SuperFollow.builder()
+                    .id(String.valueOf(this.idGenerator.nextId()))
+                    .platformId(weiboUid)
+                    .hostId(hostId)
+                    .islandId(islandId)
+                    .code(this.generateCodeV2())
+                    .type(followType.getNumber())
+                    .build();
+            return this.superFollowRepository.save(superFollow);
+        }
     }
 
     /**
@@ -312,6 +339,7 @@ public class FollowService {
      * @param startCode start code
      * @return code
      */
+    @Deprecated
     private String generateCode(String startCode) {
         char[] chars = startCode.toCharArray();
         for (int i = chars.length - 1; i >= 0; i--) {
@@ -335,6 +363,24 @@ public class FollowService {
         }
         log.error("超出限制！");
         return String.valueOf(10000);
+    }
+
+    /**
+     * 随机生成code
+     *
+     * @return code
+     */
+    private String generateCodeV2() {
+        StringBuilder code = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            code.append(this.codeList.get((int) (Math.floor(Math.random() * 36))));
+        }
+        SuperFollow superFollow = this.retrieveSuperFollowMessageByCode(code.toString());
+        if (Objects.isNull(superFollow)) {
+            return code.toString();
+        } else {
+            return this.generateCodeV2();
+        }
     }
 
     /**

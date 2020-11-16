@@ -4873,12 +4873,16 @@ components:
           type: integer
         audit:
           type: boolean
+        showSuperFollowBot:
+          type: boolean
     AndroidConfigurationDTO:
       type: object
       properties:
         audit:
           type: boolean
         isAccountLogin:
+          type: boolean
+        showSuperFollowBot:
           type: boolean
     ConfigurationDTO:
       oneOf:
@@ -4927,6 +4931,8 @@ components:
           type: integer
         address:
           type: string
+        showSuperFollowBot:
+          type: boolean
     AndroidSetupInfoResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

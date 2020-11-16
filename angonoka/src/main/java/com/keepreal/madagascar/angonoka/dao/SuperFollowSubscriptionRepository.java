@@ -8,5 +8,9 @@ import java.util.List;
 
 @Repository
 public interface SuperFollowSubscriptionRepository extends JpaRepository<SuperFollowSubscription, String> {
+
     List<SuperFollowSubscription> findAllByHostIdAndTypeAndDeletedIsFalse(String hostId, int type);
+
+    SuperFollowSubscription findTopByOpenIdAndHostIdAndPlatformIdAndType(String openId, String hostId, String platformId, int type);
+
 }

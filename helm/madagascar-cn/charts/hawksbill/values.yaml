@@ -13,7 +13,7 @@ deploy:
 wechat:
   mp:
     server_token: keeprealmpserver
-    template_id: MnY_utvg4elsfyPY5n3I5bAmRCsKpBg8ejw8l7DfzWU
+    template_id: Vn0FmAN-StKvJE5-yjDLeok_1HyoqfzdLPgvKnCeeFs
 
 redis:
   port: 6379

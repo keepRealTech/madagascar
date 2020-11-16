@@ -7,6 +7,7 @@ import com.keepreal.madagascar.angonoka.CreateSuperFollowSubscriptionResponse;
 import com.keepreal.madagascar.angonoka.FollowRequest;
 import com.keepreal.madagascar.angonoka.FollowResponse;
 import com.keepreal.madagascar.angonoka.FollowServiceGrpc;
+import com.keepreal.madagascar.angonoka.FollowState;
 import com.keepreal.madagascar.angonoka.RetrieveAllSuperFollowRequest;
 import com.keepreal.madagascar.angonoka.RetrieveAllSuperFollowResponse;
 import com.keepreal.madagascar.angonoka.RetrieveSuperFollowRequest;
@@ -15,15 +16,19 @@ import com.keepreal.madagascar.angonoka.RetrieveWeiboProfileRequest;
 import com.keepreal.madagascar.angonoka.WeiboProfileMessage;
 import com.keepreal.madagascar.angonoka.WeiboProfileResponse;
 import com.keepreal.madagascar.angonoka.model.SuperFollow;
+import com.keepreal.madagascar.angonoka.model.SuperFollowSubscription;
 import com.keepreal.madagascar.angonoka.service.FollowExecutorSelector;
 import com.keepreal.madagascar.angonoka.service.FollowService;
 import com.keepreal.madagascar.angonoka.service.impl.DefaultFollowExecutorSelectorImpl;
 import com.keepreal.madagascar.angonoka.util.CommonStatusUtils;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import org.lognet.springboot.grpc.GRpcService;
 
+import java.io.ObjectInputStream;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents the follow GRpc controller.
@@ -94,9 +99,15 @@ public class FollowGRpcController extends FollowServiceGrpc.FollowServiceImplBas
      */
     @Override
     public void retrieveSuperFollowMessage(RetrieveSuperFollowRequest request, StreamObserver<RetrieveSuperFollowResponse> responseObserver) {
+        RetrieveSuperFollowResponse.Builder builder = RetrieveSuperFollowResponse.newBuilder();
         SuperFollow superFollow = this.followService.retrieveSuperFollowMessageByCode(request.getCode());
-        responseObserver.onNext(RetrieveSuperFollowResponse.newBuilder()
-                .setStatus(CommonStatusUtils.getSuccStatus())
+        if (Objects.isNull(superFollow)) {
+            responseObserver.onNext(builder
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_SUPER_FOLLOW_NOT_FOUND)).build());
+            responseObserver.onCompleted();
+            return;
+        }
+        responseObserver.onNext(builder.setStatus(CommonStatusUtils.getSuccStatus())
                 .setSuperFollowMessage(this.followService.getSuperFollowMessage(superFollow))
                 .build());
         responseObserver.onCompleted();
@@ -126,7 +137,20 @@ public class FollowGRpcController extends FollowServiceGrpc.FollowServiceImplBas
         String hostId = request.getHostId();
         String openId = request.getOpenId();
         String superFollowId = request.getSuperFollowId();
-        this.followService.createSuperFollowSubscription(hostId, openId, superFollowId);
+        SuperFollow superFollow = this.followService.retrieveSuperFollowById(superFollowId);
+        SuperFollowSubscription subscription = this.followService.retrieveSuperFollowSubscription(hostId,
+                openId,
+                superFollow.getPlatformId(),
+                superFollow.getType());
+
+        if (Objects.nonNull(subscription)) {
+            responseObserver.onNext(CreateSuperFollowSubscriptionResponse.newBuilder().setStatus(CommonStatusUtils.getSuccStatus()).build());
+            responseObserver.onCompleted();
+            return;
+        }
+
+        this.followService.createSuperFollowSubscription(hostId, openId, superFollow.getPlatformId(), superFollow.getType());
+
         responseObserver.onNext(CreateSuperFollowSubscriptionResponse.newBuilder().setStatus(CommonStatusUtils.getSuccStatus()).build());
         responseObserver.onCompleted();
     }

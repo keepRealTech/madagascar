@@ -152,6 +152,7 @@ public class ConfigurationController implements ConfigApi {
     private ConfigurationDTO createAndroidConfigurationDTO() {
         ConfigurationDTO configurationDTO = new ConfigurationDTO();
         configurationDTO.setIsAccountLogin(true);
+        configurationDTO.setShowSuperFollowBot(this.androidSetupInfoDTO.getShowSuperFollowBot());
         return configurationDTO;
     }
 
