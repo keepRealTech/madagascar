@@ -15,7 +15,9 @@ import swagger.model.AndroidSetupInfoResponse;
 import swagger.model.AndroidUpdateInfoResponse;
 import swagger.model.ConfigType;
 import swagger.model.ConfigurationDTO;
+import swagger.model.ConfigurationDTOV2;
 import swagger.model.ConfigurationResponse;
+import swagger.model.ConfigurationResponseV2;
 import swagger.model.IOSUpdateInfoResponse;
 import swagger.model.SetupInfoDTO;
 import swagger.model.UpdateInfoDTO;
@@ -61,24 +63,25 @@ public class ConfigurationController implements ConfigApi {
      */
     @Cacheable(value = "config")
     @Override
-    public ResponseEntity<ConfigurationResponse> apiV1ConfigsGet(ConfigType configType, Integer version, String channel) {
-        ConfigurationDTO configurationDTO = new ConfigurationDTO();
+    public ResponseEntity<ConfigurationResponseV2> apiV1ConfigsGet(ConfigType configType, Integer version, String channel) {
+        ConfigurationDTOV2 configurationDTOV2 = new ConfigurationDTOV2();
         switch (configType) {
             case IOS:
-                configurationDTO = this.iOSConfigVersionMap.get(version);
+                ConfigurationDTO ios = this.iOSConfigVersionMap.get(version);
+                configurationDTOV2.setShowSuperFollowBot(ios.getShowSuperFollowBot());
                 break;
             case ANDROID:
-                configurationDTO = this.createAndroidConfigurationDTO();
+                configurationDTOV2 = this.createAndroidConfigurationDTO();
                 break;
             default:
         }
 
-        if (Objects.isNull(configurationDTO)) {
+        if (Objects.isNull(configurationDTOV2)) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
         }
 
-        ConfigurationResponse response = new ConfigurationResponse();
-        response.setData(configurationDTO);
+        ConfigurationResponseV2 response = new ConfigurationResponseV2();
+        response.setData(configurationDTOV2);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -149,11 +152,10 @@ public class ConfigurationController implements ConfigApi {
      *
      * @return {@link ConfigurationDTO}.
      */
-    private ConfigurationDTO createAndroidConfigurationDTO() {
-        ConfigurationDTO configurationDTO = new ConfigurationDTO();
-        configurationDTO.setIsAccountLogin(true);
-        configurationDTO.setShowSuperFollowBot(this.androidSetupInfoDTO.getShowSuperFollowBot());
-        return configurationDTO;
+    private ConfigurationDTOV2 createAndroidConfigurationDTO() {
+        ConfigurationDTOV2 configurationDTOV2 = new ConfigurationDTOV2();
+        configurationDTOV2.setShowSuperFollowBot(this.androidSetupInfoDTO.getShowSuperFollowBot());
+        return configurationDTOV2;
     }
 
 }

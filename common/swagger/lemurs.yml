@@ -899,7 +899,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConfigurationResponse'
+                $ref: '#/components/schemas/ConfigurationResponseV2'
   /api/v1/updateInfo/ios:
     get:
       parameters:
@@ -4888,6 +4888,11 @@ components:
       oneOf:
         - $ref: '#/components/schemas/IOSConfigurationDTO'
         - $ref: '#/components/schemas/AndroidConfigurationDTO'
+    ConfigurationDTOV2:
+      type: object
+      properties:
+        showSuperFollowBot:
+          type: boolean
     ConfigurationResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -4895,6 +4900,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ConfigurationDTO'
+    ConfigurationResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ConfigurationDTOV2'
     UpdateInfoDTO:
       type: object
       properties:
