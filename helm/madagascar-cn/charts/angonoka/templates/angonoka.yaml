@@ -55,15 +55,15 @@ spec:
                   name: weibo
                   key: access-token
             - name: SPRING_REDIS_HOST
-                valueFrom:
-                  secretKeyRef:
-                    name: aliyun-redis
-                    key: host
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-redis
+                  key: host
             - name: SPRING_REDIS_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: aliyun-redis
-                    key: password
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-redis
+                  key: password
             - name: SPRING_DATASOURCE_URL
               valueFrom:
                 secretKeyRef:

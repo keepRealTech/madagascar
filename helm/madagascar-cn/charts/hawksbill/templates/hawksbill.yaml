@@ -45,25 +45,25 @@ spec:
                 name: hawksbill
           env:
             - name: WECHAT_MP_APPID
-                valueFrom:
-                  secretKeyRef:
-                    name: wechat-mp
-                    key: app-id
+              valueFrom:
+                secretKeyRef:
+                  name: wechat-mp
+                  key: app-id
             - name: WECHAT_MP_APPSECRET
-                valueFrom:
-                  secretKeyRef:
-                      name: wechat-mp
-                      key: app-secret
+              valueFrom:
+                secretKeyRef:
+                    name: wechat-mp
+                    key: app-secret
             - name: SPRING_REDIS_HOST
-                valueFrom:
-                  secretKeyRef:
-                    name: aliyun-redis
-                    key: host
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-redis
+                  key: host
             - name: SPRING_REDIS_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: aliyun-redis
-                    key: password
+              valueFrom:
+                secretKeyRef:
+                  name: aliyun-redis
+                  key: password
             - name: RESTART
               value: "1"
           resources:
