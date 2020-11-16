@@ -23,6 +23,7 @@ global:
       asity: 1
       hoopoe: 1
       angonoka: 1
+      hawksbill: 1
     short_code_base: https://staging.keepreal.cn/s/%s
     image_host: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com
     html_host: http://test.keepreal.cn
@@ -82,6 +83,10 @@ global:
       imagePullPolicy: Always
     angonoka:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/angonoka
+      tag: 1.0.0-staging
+      imagePullPolicy: Always
+    hawksbill:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/hawksbill
       tag: 1.0.0-staging
       imagePullPolicy: Always
     settler:
