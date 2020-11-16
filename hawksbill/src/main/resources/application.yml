@@ -12,7 +12,7 @@ wechat:
     app-id:
     app-secret:
     server-token:
-    expiration-in-sec:
+    expiration-in-sec: 60
     template-id:
 
 grpc:
