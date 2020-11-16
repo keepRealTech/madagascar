@@ -64,4 +64,27 @@ public class BannerController implements BannerApi {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+    /**
+     * Implements the super follow banner get api.
+     *
+     * @return {@link BannersResponse}
+     */
+    @Override
+    public ResponseEntity<BannersResponse> apiV1BannersFollowGet() {
+        String userId = HttpContextUtils.getUserIdFromContext();
+
+        List<IslandMessage> islandMessages = this.islandService.retrieveIslandsByHostId(userId);
+        if (CollectionUtils.isEmpty(islandMessages)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        List<BannerMessage> bannerMessages = this.bannerService.retrieveBanners(userId, BannerType.SUPER_FOLLOW);
+
+        BannersResponse response = new BannersResponse();
+        response.setData(bannerMessages.stream().map(this.bannerDTOFactory::valueOf).collect(Collectors.toList()));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

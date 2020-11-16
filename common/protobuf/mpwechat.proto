@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.hawksbill";
+
+import "common.proto";
+
+message SendTemplateMessageRequest {
+  repeated string openIds = 1;
+  string name = 2;
+  string text = 3;
+  string url = 4;
+}
+
+message SendTemplateMessageResponse {
+  CommonStatus status = 1;
+}
+
+message RetrievePermanentQRCodeResponse {
+  CommonStatus status = 1;
+  string ticket = 2;
+}
+
+service MpWechatService {
+  rpc SendTemplateMessage(SendTemplateMessageRequest) returns (SendTemplateMessageResponse) {};
+  rpc RetrievePermanentQRCode(EmptyMessage) returns (RetrievePermanentQRCodeResponse) {};
+}

@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.angonoka";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message RetrieveWeiboProfileRequest {
+  string name = 1;
+}
+
+message WeiboProfileResponse {
+  CommonStatus status = 1;
+  WeiboProfileMessage weiboMessage = 2;
+}
+
+message WeiboProfileMessage {
+  string id = 1;
+  string name = 2;
+  int64 followerCount = 3;
+  string avatarUrl = 4;
+}
+
+enum FollowType {
+  FOLLOW_TYPE_NONE = 0;
+  FOLLOW_WEIBO = 1;
+  FOLLOW_TIKTOK = 2;
+  FOLLOW_BILIBILI = 3;
+}
+
+enum FollowState {
+  UNDEFINED = 0;
+  ENABLE = 1;
+  SUSPEND = 2;
+  NONE = 3;
+}
+
+message WeiboFollowPayload {
+  string id = 1;
+  string userId = 2;
+  string islandId = 3;
+}
+
+message FollowRequest {
+  FollowType followType = 1;
+  oneof payload {
+    WeiboFollowPayload weiboFollowPayload = 2;
+  }
+}
+
+message FollowResponse {
+  CommonStatus status = 1;
+  SuperFollowMessage superFollowMessage = 2;
+}
+
+message CancelFollowRequest {
+  string hostId = 1;
+  string islandId = 2;
+  FollowType followType = 3;
+}
+
+message CancelFollowResponse {
+  CommonStatus status = 1;
+}
+
+message RetrieveSuperFollowRequest {
+  string code = 1;
+}
+
+message RetrieveSuperFollowResponse {
+  CommonStatus status = 1;
+  SuperFollowMessage superFollowMessage = 2;
+}
+
+message SuperFollowMessage {
+    string id = 1;
+    string platformId = 2;
+    string hostId = 3;
+    int64 createdTime = 4;
+    string islandId = 5;
+    FollowState state = 6;
+    string code = 7;
+}
+
+message CreateSuperFollowSubscriptionRequest {
+  string openId = 1;
+  string hostId = 2;
+  string superFollowId = 3;
+}
+
+message CreateSuperFollowSubscriptionResponse {
+  CommonStatus status = 1;
+}
+
+message RetrieveAllSuperFollowRequest {
+  string hostId = 1;
+}
+
+message RetrieveAllSuperFollowResponse {
+  CommonStatus status = 1;
+  SuperFollowMessage weibo = 2;
+  SuperFollowMessage tiktok = 3;
+  SuperFollowMessage bilibili = 4;
+}
+
+service FollowService {
+  rpc RetrieveWeiboProfile(RetrieveWeiboProfileRequest) returns (WeiboProfileResponse) {};
+  rpc FollowSocialPlatform(FollowRequest) returns (FollowResponse) {};
+  rpc CancelFollowSocialPlatform(CancelFollowRequest) returns (CancelFollowResponse) {};
+  rpc RetrieveSuperFollowMessage(RetrieveSuperFollowRequest) returns (RetrieveSuperFollowResponse) {};
+  rpc RetrieveAllSuperFollowMessage(RetrieveAllSuperFollowRequest) returns (RetrieveAllSuperFollowResponse) {};
+  rpc CreateSuperFollowSubscription(CreateSuperFollowSubscriptionRequest) returns (CreateSuperFollowSubscriptionResponse) {};
+}

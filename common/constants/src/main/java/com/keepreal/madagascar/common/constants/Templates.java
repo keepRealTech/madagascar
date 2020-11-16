@@ -89,4 +89,17 @@ public class Templates {
      */
     public static final String TRANS_CODE_START = "视频上传成功，服务器正在努力转码中，转码成功后可正常播放";
     public static final String TRANS_CODE_COMPLETE = "你在%s发布的视频已经转码处理成功，现在视频可以正常观看啦";
+
+    /**
+     * Super follow templates.
+     */
+    public static final String FOLLOW_SUCCESS_CONTENTS = "恭喜你已成功订阅%s的超级关注bot，当%s更新时，岛蛋会在这里第一时间通知你。\n" +
+            "\n" +
+            "从此不再错过，%s每一次的沙发都是你的！\n" +
+            "\n" +
+            "你还可以点击这里%s向%s匿名提问或支持TA～";
+    public static final String H5_REPOST_URL = "https://tiaodaoapp.com/repost?islandId=%s&userId=%s";
+    public static final String WEIBO_H5_URL = "https://m.weibo.cn/%s/%s";
+    public static final String MP_WECHAT_QRCODE_URL = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s";
+
 }

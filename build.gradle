@@ -27,6 +27,8 @@ ext['tenrecs.version'] = '1.0.7'
 ext['vanga.version'] = '1.2.7'
 ext['asity.version'] = '1.0.8'
 ext['hoopoe.version'] = '1.0.1'
+ext['angonoka.version'] = '1.0.0'
+ext['hawksbill.version'] = '1.0.0'
 
 ext['settler.version'] = '1.1.0'
 ext['reconciliation.version'] = '1.0.1'
@@ -148,6 +150,7 @@ subprojects {
             dependency "com.fasterxml.jackson.core:jackson-core:${ext['jackson.version']}"
             dependency "com.fasterxml.jackson.core:jackson-annotations:${ext['jackson.version']}"
             dependency "com.fasterxml.jackson.core:jackson-databind:${ext['jackson.version']}"
+            dependency "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${ext['jackson.version']}"
             dependency "com.fasterxml.jackson.datatype:jackson-datatype-joda:${ext['jackson.version']}"
             dependency "org.glassfish.jersey.core:jersey-client:${ext['jersey.version']}"
             dependency "org.glassfish.jersey.media:jersey-media-multipart:${ext['jersey.version']}"

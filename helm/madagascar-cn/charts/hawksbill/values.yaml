@@ -1,0 +1,19 @@
+# Default values for test.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+common_configs:
+  memory: 2Gi
+  cpu: 500m
+
+deploy:
+  opentracing:
+    enable_jaeger: false
+
+wechat:
+  mp:
+    server_token: keeprealmpserver
+    template_id: MnY_utvg4elsfyPY5n3I5bAmRCsKpBg8ejw8l7DfzWU
+
+redis:
+  port: 6379

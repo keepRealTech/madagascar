@@ -109,4 +109,26 @@ public class GrpcConfigurationFactory {
         return new GrpcConfiguration();
     }
 
+    /**
+     * Represents configurations for angonoka.
+     *
+     * @return Grpc configuration.
+     */
+    @Bean(name = "angonokaConfiguration")
+    @ConfigurationProperties(prefix = "grpc.angonoka", ignoreUnknownFields = false)
+    public GrpcConfiguration angonokaConfiguration() {
+        return new GrpcConfiguration();
+    }
+
+    /**
+     * Represents configurations for hawksbill.
+     *
+     * @return Grpc configuration.
+     */
+    @Bean(name = "hawksbillConfiguration")
+    @ConfigurationProperties(prefix = "grpc.hawksbill", ignoreUnknownFields = false)
+    public GrpcConfiguration hawksbillConfiguration() {
+        return new GrpcConfiguration();
+    }
+
 }

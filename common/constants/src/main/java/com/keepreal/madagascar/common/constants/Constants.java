@@ -54,6 +54,8 @@ public class Constants {
 
     public static final Long DEFAULT_SPONSOR_SKU_QUANTITY = 3L;
 
+    public static final String MP_WECHAT_DEDUPLICATION_KEY = "mp_wechat_msg_";
+
     /**
      * Redis key prefix
      */

@@ -26,6 +26,12 @@ grpc:
   hoopoe:
     host: 127.0.0.1
     port: 12008
+  angonoka:
+    host: 127.0.0.1
+    port: 12009
+  hawksbill:
+    host: 127.0.0.1
+    port: 12010
 
 system-notification:
   name: test-user
