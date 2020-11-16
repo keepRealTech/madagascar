@@ -180,7 +180,11 @@ public class FollowService {
                 .setHostId(hostId)
                 .setSuperFollowId(superFollowId)
                 .build();
+
+        log.info("{}, {}, superFollowId {}", openId, hostId, superFollowId);
+
         CreateSuperFollowSubscriptionResponse response;
+
         try {
             response = stub.createSuperFollowSubscription(request);
         } catch (StatusRuntimeException exception) {

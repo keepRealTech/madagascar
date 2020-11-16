@@ -89,6 +89,9 @@ public class MpWechatController {
     public String receiveWechatServerEventPush(HttpServletRequest httpServletRequest) throws Exception {
         String requestXml = IOUtils.toString(httpServletRequest.getInputStream(), Charset.forName(httpServletRequest.getCharacterEncoding()));
         Map<String, String> request = WXPayUtil.xmlToMap(requestXml);
+
+        log.info("request info {}", request.toString());
+
         String fromUserName = request.get("FromUserName");
         String msgType = request.get("MsgType");
         String event = request.get("Event");
@@ -106,7 +109,9 @@ public class MpWechatController {
         if (MpWechatMsgType.TEXT.getValue().equals(msgType)) {
             String msgId = request.get("MsgId");
 
-            RBucket<Object> bucket = this.redissonClient.getBucket(Constants.MP_WECHAT_DEDUPLICATION_KEY + msgId);
+            log.info("msg id is {}", msgId);
+
+            RBucket<String> bucket = this.redissonClient.getBucket(Constants.MP_WECHAT_DEDUPLICATION_KEY + msgId);
             if (bucket.isExists()) {
                 bucket.delete();
                 return "success";
@@ -117,13 +122,21 @@ public class MpWechatController {
 
             SuperFollowMessage superFollowMessage = this.followService.retrieveSuperFollowByCode(content);
 
+            log.info("super follow {} ", Objects.isNull(superFollowMessage) ? "null" : superFollowMessage.toString());
+
             if (Objects.nonNull(superFollowMessage)) {
                 this.followService.createSuperFollowSubscription(openId, superFollowMessage.getHostId(), superFollowMessage.getId());
+
+                log.info("reply");
+
                 String replyXml = this.generateSuccessReplyXml(superFollowMessage.getHostId(),
                         superFollowMessage.getIslandId(),
                         openId,
                         keepRealMpId);
-                RBucket<Object> flag = this.redissonClient.getBucket(Constants.MP_WECHAT_DEDUPLICATION_KEY + msgId);
+
+                log.info("reply is {}", replyXml);
+
+                RBucket<String> flag = this.redissonClient.getBucket(Constants.MP_WECHAT_DEDUPLICATION_KEY + msgId);
                 flag.set("true", 30, TimeUnit.SECONDS);
                 return replyXml;
             }
