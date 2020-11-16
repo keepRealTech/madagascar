@@ -11,7 +11,7 @@ deploy:
     enable_jaeger: false
 
 weibo:
-  sub_id: '12201'
+  sub_id: 12201
 
 redis:
   port: 6379
