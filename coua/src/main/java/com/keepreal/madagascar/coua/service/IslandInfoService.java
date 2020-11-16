@@ -291,6 +291,10 @@ public class IslandInfoService {
         return islandInfoRepository.findIslandIdAndLastFeedAtByIslandIdList(islandIdList);
     }
 
+    public List<Map<String, Long>> findIslandIdAndLastWorksFeedAtByIslandIdList(List<String> islandIdList) {
+        return islandInfoRepository.findIslandIdAndLastWorksFeedAtByIslandIdList(islandIdList);
+    }
+
     /**
      * Update lastFeedAt by islandIdList.
      *
@@ -299,6 +303,16 @@ public class IslandInfoService {
      */
     public void updateLastFeedAtByIslandIdList(List<String> islandIdList, long timestamps) {
         islandInfoRepository.updateLastFeedAtByIslandIdList(islandIdList, timestamps);
+    }
+
+    /**
+     * Update lastWorksFeedAt by islandIdList.
+     *
+     * @param islandIdList islandIdList.
+     * @param timestamps   timestamps.
+     */
+    public void updateLastWorksFeedAtByIslandIdList(List<String> islandIdList, long timestamps) {
+        islandInfoRepository.updateLastWorksFeedAtByIslandIdList(islandIdList, timestamps);
     }
 
     /**

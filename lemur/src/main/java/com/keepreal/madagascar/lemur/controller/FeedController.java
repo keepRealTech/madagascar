@@ -489,7 +489,8 @@ public class FeedController implements FeedApi {
     public ResponseEntity<PostCheckFeedsResponse> apiV1FeedsCheckPost(PostCheckFeedsRequest postCheckFeedsRequest) {
         List<CheckNewFeedsMessage> checkNewFeedsMessages = this.islandService.checkNewFeeds(
                 postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getIslandId).collect(Collectors.toList()),
-                postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getTimestamp).collect(Collectors.toList()));
+                postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getTimestamp).collect(Collectors.toList()),
+                postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getIsWorks).collect(Collectors.toList()));
 
         PostCheckFeedsResponse response = new PostCheckFeedsResponse();
         response.setData(checkNewFeedsMessages

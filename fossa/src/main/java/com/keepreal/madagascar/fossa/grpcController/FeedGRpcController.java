@@ -181,7 +181,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         });
 
         List<FeedInfo> feedInfos = feedInfoService.saveAll(feedInfoList);
-        islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp);
+        islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp, false);
 
         feedInfos.forEach(this.feedEventProducerService::produceNewFeedEventAsync);
 
@@ -251,7 +251,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
 
         List<FeedInfo> feedInfos = this.feedInfoService.saveAll(feedInfoList);
-        this.islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp);
+        this.islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp, false);
 
         feedInfos.forEach(this.feedEventProducerService::produceNewFeedEventAsync);
 
@@ -290,6 +290,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         builder.membershipIds(request.getMembershipIdsList());
         builder.createdTime(timestamp);
         builder.toppedTime(timestamp);
+        builder.isWorks(request.getIsWorks());
         builder.userMembershipIds(this.subscribeMembershipService.retrieveMembershipIds(userId, request.getHostId(0)));
         if (request.hasPriceInCents()) {
             builder.priceInCents(request.getPriceInCents().getValue());
@@ -320,7 +321,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
 
         feed = this.feedInfoService.insert(feed);
-        this.islandService.callCouaUpdateIslandLastFeedAt(Collections.singletonList(request.getIslandId(0)), timestamp);
+        this.islandService.callCouaUpdateIslandLastFeedAt(Collections.singletonList(request.getIslandId(0)), timestamp, request.getIsWorks());
 
         this.feedEventProducerService.produceNewFeedEventAsync(feed);
 

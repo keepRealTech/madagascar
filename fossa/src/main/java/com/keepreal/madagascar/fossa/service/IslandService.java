@@ -40,10 +40,11 @@ public class IslandService {
      * @param islandIdList  the islandIdList to be updated.
      * @param timestamp     the timestamp.
      */
-    public void callCouaUpdateIslandLastFeedAt(List<String> islandIdList, long timestamp) {
+    public void callCouaUpdateIslandLastFeedAt(List<String> islandIdList, long timestamp, boolean isWorks) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
         UpdateLastFeedAtRequest request = UpdateLastFeedAtRequest.newBuilder()
                 .addAllIslandIds(islandIdList)
+                .setIsWorks(isWorks)
                 .setTimestamps(timestamp)
                 .build();
 

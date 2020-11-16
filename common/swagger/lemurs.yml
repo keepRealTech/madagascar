@@ -4337,6 +4337,8 @@ components:
         timestamp:
           type: integer
           format: int64
+        isWorks:
+          type: boolean
     PostCheckFeedsRequest:
       type: object
       properties:

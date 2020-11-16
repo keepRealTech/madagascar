@@ -520,14 +520,23 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     public void checkNewFeeds(CheckNewFeedsRequest request, StreamObserver<CheckNewFeedsResponse> responseObserver) {
         List<String> islandIdList = request.getIslandIdsList();
         List<Long> timestampsList = request.getTimestampsList();
+        List<Boolean> isWorksList = request.getIsWorksList();
         List<CheckNewFeedsMessage> messageList = new ArrayList<>();
         if (islandIdList != null && timestampsList != null && islandIdList.size() > 0) {
             List<Map<String, Long>> resList = islandInfoService.findIslandIdAndLastFeedAtByIslandIdList(islandIdList);
+            List<Map<String, Long>> resWorksList = islandInfoService.findIslandIdAndLastWorksFeedAtByIslandIdList(islandIdList);
             Map<String, Long> map = new HashMap<>();
             resList.forEach(m -> map.put(m.get("id").toString(), m.get("lastFeedAt")));
+            Map<String, Long> worksMap = new HashMap<>();
+            resWorksList.forEach(m -> worksMap.put(m.get("id").toString(), m.get("lastWorksFeedAt")));
             for (int i = 0; i < islandIdList.size(); i++) {
                 String islandId = islandIdList.get(i);
-                CheckNewFeedsMessage feedMessage = islandInfoService.buildFeedMessage(islandId, map.get(islandId), timestampsList.get(i));
+                CheckNewFeedsMessage feedMessage;
+                if (isWorksList.get(i)) {
+                    feedMessage = islandInfoService.buildFeedMessage(islandId, worksMap.get(islandId), timestampsList.get(i));
+                } else {
+                    feedMessage = islandInfoService.buildFeedMessage(islandId, map.get(islandId), timestampsList.get(i));
+                }
                 messageList.add(feedMessage);
             }
         }
@@ -549,7 +558,11 @@ public class IslandGRpcController extends IslandServiceGrpc.IslandServiceImplBas
     public void updateLastFeedAtById(UpdateLastFeedAtRequest request, StreamObserver<UpdateLastFeedAtResponse> responseObserver) {
         List<String> islandIdList = request.getIslandIdsList();
         long timestamps = request.getTimestamps();
-        this.islandInfoService.updateLastFeedAtByIslandIdList(islandIdList, timestamps);
+        if (request.getIsWorks()) {
+            this.islandInfoService.updateLastWorksFeedAtByIslandIdList(islandIdList, timestamps);
+        } else {
+            this.islandInfoService.updateLastFeedAtByIslandIdList(islandIdList, timestamps);
+        }
 
         UpdateLastFeedAtResponse response = UpdateLastFeedAtResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())

@@ -108,6 +108,7 @@ message SubscribeIslandResponse {
 message CheckNewFeedsRequest {
     repeated string islandIds = 1;
     repeated uint64 timestamps = 2;
+    repeated bool isWorks = 3;
 }
 
 message CheckNewFeedsMessage {
@@ -123,6 +124,7 @@ message CheckNewFeedsResponse {
 message UpdateLastFeedAtRequest {
     repeated string islandIds = 1;
     uint64 timestamps = 2;
+    bool isWorks = 3;
 }
 
 message UpdateLastFeedAtResponse {
