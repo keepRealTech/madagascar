@@ -2994,7 +2994,7 @@ paths:
             application/json:
               schema:
                 $ref:   '#/components/schemas/DummyResponse'
-  /api/v1/feedCollection:
+  /api/v1/feedCollections:
     get:
       parameters:
         - $ref: '#/components/parameters/timestampAfter'
@@ -3010,7 +3010,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TimelinesResponse'
-  /api/v1/feeds/{id}/feedCollection:
+  /api/v1/feeds/{id}/feedCollections:
     parameters:
       - $ref: '#/components/parameters/idInPath'
     post:
@@ -4125,6 +4125,8 @@ components:
         brief:
           type: string
         isWorks:
+          type: boolean
+        isCollected:
           type: boolean
         imagesUris:
           type: array
@@ -5631,6 +5633,8 @@ components:
         expiration:
           type: integer
           format: int64
+        islandId:
+          type: string
         priceInCents:
           type: integer
           format: int64

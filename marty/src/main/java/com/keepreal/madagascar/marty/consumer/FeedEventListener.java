@@ -47,6 +47,7 @@ public class FeedEventListener implements MessageListener {
             }
             FeedEventMessage feedEventMessage = FeedEventMessage.parseFrom(message.getBody());
 
+            // 提问箱-提问
             if (feedEventMessage.getType().equals(FEED_EVENT_CREATE)
                     && MediaType.MEDIA_QUESTION_VALUE == feedEventMessage.getFeedCreateEvent().getMediaTypeValue()) {
                 String hostId = feedEventMessage.getFeedCreateEvent().getHostId();
@@ -55,6 +56,7 @@ public class FeedEventListener implements MessageListener {
                 return Action.CommitMessage;
             }
 
+            // 提问箱-回答
             if (feedEventMessage.getType().equals(FEED_EVENT_UPDATE)) {
                 pushService.pushMessageByType(feedEventMessage.getFeedUpdateEvent().getAuthorId(), PushType.PUSH_REPLY);
                 pushService.pushNewReply(feedEventMessage.getFeedUpdateEvent());
@@ -62,7 +64,7 @@ public class FeedEventListener implements MessageListener {
             }
 
             if (feedEventMessage.getType().equals(FEED_EVENT_CREATE)) {
-                pushService.pushNewFeed(feedEventMessage.getFeedCreateEvent(), PushType.PUSH_FEED);
+                pushService.pushNewFeed(feedEventMessage.getFeedCreateEvent());
             }
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {

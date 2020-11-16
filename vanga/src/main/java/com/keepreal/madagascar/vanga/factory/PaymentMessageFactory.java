@@ -4,8 +4,15 @@ import com.keepreal.madagascar.common.PaymentState;
 import com.keepreal.madagascar.common.UserPaymentType;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
 import com.keepreal.madagascar.vanga.UserWithdrawMessage;
+import com.keepreal.madagascar.vanga.model.AlipayOrder;
 import com.keepreal.madagascar.vanga.model.MembershipSku;
 import com.keepreal.madagascar.vanga.model.Payment;
+import com.keepreal.madagascar.vanga.model.PaymentType;
+import com.keepreal.madagascar.vanga.model.SponsorSku;
+import com.keepreal.madagascar.vanga.model.WechatOrder;
+import com.keepreal.madagascar.vanga.service.AlipayOrderService;
+import com.keepreal.madagascar.vanga.service.SkuService;
+import com.keepreal.madagascar.vanga.service.WechatOrderService;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -17,14 +24,26 @@ import java.util.Objects;
 public class PaymentMessageFactory {
 
     private final SkuMessageFactory skuMessageFactory;
+    private final AlipayOrderService alipayOrderService;
+    private final WechatOrderService wechatOrderService;
+    private final SkuService skuService;
 
     /**
      * Constructs the payment message factory.
      *
-     * @param skuMessageFactory {@link SkuMessageFactory}.
+     * @param skuMessageFactory  {@link SkuMessageFactory}.
+     * @param alipayOrderService
+     * @param wechatOrderService
+     * @param skuService
      */
-    public PaymentMessageFactory(SkuMessageFactory skuMessageFactory) {
+    public PaymentMessageFactory(SkuMessageFactory skuMessageFactory,
+                                 AlipayOrderService alipayOrderService,
+                                 WechatOrderService wechatOrderService,
+                                 SkuService skuService) {
         this.skuMessageFactory = skuMessageFactory;
+        this.alipayOrderService = alipayOrderService;
+        this.wechatOrderService = wechatOrderService;
+        this.skuService = skuService;
     }
 
     /**
@@ -51,6 +70,25 @@ public class PaymentMessageFactory {
                     .setIslandId(membershipSku.getIslandId())
                     .setMembershipSku(this.skuMessageFactory.valueOf(membershipSku))
                     .setPriceInCents(membershipSku.getPriceInCents());
+        } else if (PaymentType.SUPPORT.getValue() == payment.getType()) {
+            paymentBuilder.setType(UserPaymentType.PAYMENT_TYPE_SUPPORT)
+                    .setPriceInCents(payment.getAmountInCents());
+            String orderId = payment.getOrderId();
+            AlipayOrder alipayOrder = alipayOrderService.retrieveById(orderId);
+            SponsorSku sponsorSku = null;
+            if (alipayOrder != null) {
+                sponsorSku = this.skuService.retrieveSponsorSkuById(alipayOrder.getPropertyId());
+            } else {
+                WechatOrder wechatOrder = wechatOrderService.retrieveById(orderId);
+                if (wechatOrder != null) {
+                    sponsorSku = this.skuService.retrieveSponsorSkuById(wechatOrder.getPropertyId());
+                }
+            }
+            if (sponsorSku != null) {
+                paymentBuilder.setSponsorGiftId(sponsorSku.getGiftId());
+                paymentBuilder.setGiftCount(sponsorSku.getQuantity().intValue());
+            }
+
         } else {
             paymentBuilder.setType(UserPaymentType.PAYMENT_TYPE_FEED)
                     .setPriceInCents(payment.getAmountInCents());
@@ -62,7 +100,7 @@ public class PaymentMessageFactory {
     /**
      * Builds the {@link UserWithdrawMessage}.
      *
-     * @param payment       {@link Payment}.
+     * @param payment {@link Payment}.
      * @return {@link UserWithdrawMessage}.
      */
     public UserWithdrawMessage withdrawValueOf(Payment payment) {

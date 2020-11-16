@@ -39,11 +39,13 @@ import com.keepreal.madagascar.fossa.UpdateFeedPaidByIdResponse;
 import com.keepreal.madagascar.fossa.UpdateFeedRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityRequest;
 import com.keepreal.madagascar.fossa.UpdateFeedSaveAuthorityResponse;
+import com.keepreal.madagascar.fossa.model.FeedCollection;
 import com.keepreal.madagascar.fossa.model.FeedGroup;
 import com.keepreal.madagascar.fossa.model.FeedInfo;
 import com.keepreal.madagascar.fossa.model.MediaInfo;
 import com.keepreal.madagascar.fossa.model.ReactionInfo;
 import com.keepreal.madagascar.fossa.service.CommentService;
+import com.keepreal.madagascar.fossa.service.FeedCollectionService;
 import com.keepreal.madagascar.fossa.service.FeedEventProducerService;
 import com.keepreal.madagascar.fossa.service.FeedGroupService;
 import com.keepreal.madagascar.fossa.service.FeedInfoService;
@@ -94,6 +96,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     private final SubscribeMembershipService subscribeMembershipService;
     private final ReactionService reactionService;
     private final CommentService commentService;
+    private final FeedCollectionService feedCollectionService;
 
     /**
      * Constructs the feed grpc controller
@@ -108,6 +111,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param reactionService            {@link ReactionService}.
      * @param commentService             {@link CommentService}.
+     * @param feedCollectionService      {@link FeedCollectionService}.
      */
     public FeedGRpcController(LongIdGenerator idGenerator,
                               IslandService islandService,
@@ -118,7 +122,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                               PaymentService paymentService,
                               SubscribeMembershipService subscribeMembershipService,
                               ReactionService reactionService,
-                              CommentService commentService) {
+                              CommentService commentService,
+                              FeedCollectionService feedCollectionService) {
         this.idGenerator = idGenerator;
         this.islandService = islandService;
         this.feedInfoService = feedInfoService;
@@ -129,6 +134,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         this.subscribeMembershipService = subscribeMembershipService;
         this.reactionService = reactionService;
         this.commentService = commentService;
+        this.feedCollectionService = feedCollectionService;
     }
 
     /**
@@ -213,6 +219,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.membershipIds(membershipIdsList);
             builder.createdTime(timestamp);
             builder.toppedTime(timestamp);
+            builder.isWorks(request.getIsWorks());
             if (request.hasPriceInCents()) {
                 builder.priceInCents(request.getPriceInCents().getValue());
             }
@@ -277,6 +284,10 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         builder.userMembershipIds(this.subscribeMembershipService.retrieveMembershipIds(userId, request.getHostId(0)));
         if (request.hasPriceInCents()) {
             builder.priceInCents(request.getPriceInCents().getValue());
+        }
+
+        if (request.getType().equals(MediaType.MEDIA_VIDEO) && StringUtils.isEmpty(request.getVideo().getUrl())) {
+            builder.temped(true);
         }
 
         FeedInfo feed = builder.build();
@@ -492,6 +503,9 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         Set<String> likedFeedIds = this.reactionService.retrieveReactionsByFeedIdsAndUserId(request.getIdsList(), request.getUserId()).stream()
                 .map(ReactionInfo::getFeedId).collect(Collectors.toSet());
 
+        Set<String> collectedFeedIds = this.feedCollectionService.findByFeedIdsAndUserId(request.getIdsList(), request.getUserId()).stream()
+                .map(FeedCollection::getFeedId).collect(Collectors.toSet());
+
         Map<String, List<CommentMessage>> commentMap = this.commentService.getLastCommentsByFeedIds(request.getIdsList(), Constants.DEFAULT_FEED_LAST_COMMENT_COUNT);
 
         List<FeedMessage> feedMessageList = feedInfoList.stream()
@@ -499,7 +513,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                         request.getUserId(),
                         myMembershipIds,
                         commentMap.getOrDefault(info.getId(), new ArrayList<>()),
-                        likedFeedIds.contains(info.getId())))
+                        likedFeedIds.contains(info.getId()),
+                        collectedFeedIds.contains(info.getId())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
@@ -579,6 +594,14 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 criteria = Criteria.where("isTop").is(false);
             }
             query.addCriteria(criteria);
+        }
+
+        if (condition.hasIsWorks()) {
+            if (condition.getIsWorks().getValue()) {
+                query.addCriteria(Criteria.where("isWorks").is(true));
+            } else {
+                query.addCriteria(Criteria.where("isWorks").not().is(true));
+            }
         }
 
         // 没有条件
@@ -757,7 +780,15 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             return;
         }
 
-        if (!request.getFeedgroupId().equals(feedInfo.getFeedGroupId())) {
+        if (request.getIsRemove()) {
+            FeedGroup originFeedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
+            if (Objects.nonNull(originFeedGroup)) {
+                feedInfo.setFeedGroupId("");
+                originFeedGroup.getFeedIds().remove(feedInfo.getId());
+                originFeedGroup.getImageFeedIds().remove(feedInfo.getId());
+                this.feedGroupService.updateFeedGroup(originFeedGroup);
+            }
+        }else if (!request.getFeedgroupId().equals(feedInfo.getFeedGroupId())) {
             if (!StringUtils.isEmpty(feedInfo.getFeedGroupId())) {
                 FeedGroup originFeedGroup = this.feedGroupService.retrieveFeedGroupById(feedInfo.getFeedGroupId());
                 if (Objects.nonNull(originFeedGroup)) {

@@ -175,6 +175,8 @@ public class FeedDTOFactory {
             feedDTO.setPriceInCents(feed.getPriceInCents());
             feedDTO.setCanSave(feed.getCanSave());
             feedDTO.setRecommendatedAt(recommendatedAt);
+            feedDTO.setIsWorks(feed.getIsWorks());
+            feedDTO.setIsCollected(feed.getIsCollected());
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
                 feedDTO.setImagesUris(feed.getImageUrisList());
@@ -235,6 +237,8 @@ public class FeedDTOFactory {
             briefFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             briefFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
             briefFeedDTO.setPriceInCents(feed.getPriceInCents());
+            briefFeedDTO.setIsWorks(feed.getIsWorks());
+            briefFeedDTO.setIsCollected(feed.getIsCollected());
 
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
@@ -285,6 +289,8 @@ public class FeedDTOFactory {
 
         snapshotFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
         snapshotFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+        snapshotFeedDTO.setIsWorks(feed.getIsWorks());
+        snapshotFeedDTO.setIsCollected(feed.getIsCollected());
 
         boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
         if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
@@ -386,6 +392,8 @@ public class FeedDTOFactory {
             fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed, false));
             fullFeedDTO.setPriceInCents(feed.getPriceInCents());
             fullFeedDTO.setCanSave(feed.getCanSave());
+            fullFeedDTO.setIsWorks(feed.getIsWorks());
+            fullFeedDTO.setIsCollected(feed.getIsCollected());
             if (!StringUtils.isEmpty(feedGroup.getId())) {
                 FeedGroupInfo feedGroupInfo = new FeedGroupInfo();
                 feedGroupInfo.setId(feedGroup.getId());
