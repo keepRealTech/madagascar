@@ -21,6 +21,7 @@ import com.keepreal.madagascar.angonoka.util.CommonStatusUtils;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.enums.SuperFollowState;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -168,6 +170,9 @@ public class FollowService {
         if (follower.isEmpty()) {
             return;
         }
+
+        superFollow.setLastPubTime(createdAt);
+        this.updateSuperFollow(superFollow);
 
         String screenName = user.get("screen_name").getAsString();
         String mid = status.get("mid").getAsString();

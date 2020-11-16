@@ -1,6 +1,16 @@
 spring:
   application:
     name: angonoka
+  datasource:
+    url: jdbc:mysql://root:123456@localhost:3306/guns_advanced?autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    jpa:
+      database-platform: org.hibernate.dialect.MySQLDialect
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: GcrkNYTcST4PzlV@
+    ssl: false
 
 snowflake:
   nodeId: 0
@@ -9,14 +19,14 @@ grpc:
   port: 12009
   hawksbill:
     host: 127.0.0.1
-    port: 12003
+    port: 12010
 
 server:
-  port: 8090
+  port: 8091
 
 weibo:
-  app-key: 742529491
-  access-token: 2.00DOj3HI0HqZPo90d559728c0FPTyq
-  sub-id: 12201
+  app-key:
+  access-token:
+  sub-id:
 
 

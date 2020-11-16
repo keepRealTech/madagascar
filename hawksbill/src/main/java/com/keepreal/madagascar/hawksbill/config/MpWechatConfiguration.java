@@ -11,7 +11,6 @@ public class MpWechatConfiguration {
 
     String appId;
     String appSecret;
-    String host;
     String serverToken;
     String expirationInSec;
     String templateId;

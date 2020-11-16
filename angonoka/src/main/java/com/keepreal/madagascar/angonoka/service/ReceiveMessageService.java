@@ -4,6 +4,7 @@ package com.keepreal.madagascar.angonoka.service;
 import com.keepreal.madagascar.angonoka.api.WeiboApi;
 import com.keepreal.madagascar.angonoka.config.WeiboBusinessConfig;
 import com.keepreal.madagascar.angonoka.util.AutoRedisLock;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
@@ -75,12 +76,12 @@ public class ReceiveMessageService {
                         processLine();
                     }
                 } catch (Exception e) {
-                    // 当连接断开时，重新连接
-                    log.info("connection close: " + e.getMessage());
-                    if (e.getMessage().contains("errorCode")) {
-                        hasError = true;
+                    if (e instanceof KeepRealBusinessException) {
+                        KeepRealBusinessException exception = (KeepRealBusinessException) e;
+                        log.info("connection close: {}" ,exception.getErrorCode());
+                    } else {
+                        log.info("connection close: " + e.getMessage());
                     }
-                    log.info("last since_id: " + sinceId);
                 } finally {
 
                     if (inputStream != null) {
@@ -153,7 +154,6 @@ public class ReceiveMessageService {
          * @param message
          */
         private void handleMessage(String message) {
-            log.info(message);
             followService.handleWeiboSubscriptionMessage(message);
         }
 

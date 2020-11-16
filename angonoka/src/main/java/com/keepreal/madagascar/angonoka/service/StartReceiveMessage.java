@@ -1,6 +1,5 @@
 package com.keepreal.madagascar.angonoka.service;
 
-import com.keepreal.madagascar.angonoka.config.WeiboBusinessConfig;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 

@@ -23,6 +23,12 @@ public class MpWechatGRpcController extends MpWechatServiceGrpc.MpWechatServiceI
         this.mpWechatService = mpWechatService;
     }
 
+    /**
+     * 发送模板消息
+     *
+     * @param request {@link SendTemplateMessageRequest}
+     * @param responseObserver {@link SendTemplateMessageResponse}
+     */
     @Override
     public void sendTemplateMessage(SendTemplateMessageRequest request, StreamObserver<SendTemplateMessageResponse> responseObserver) {
         String name = request.getName();

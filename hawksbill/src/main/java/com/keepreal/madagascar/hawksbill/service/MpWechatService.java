@@ -42,16 +42,16 @@ public class MpWechatService {
         JsonObject data = new JsonObject();
         JsonObject first = new JsonObject();
         first.addProperty("value", "您关注的创作者有新的微博");
-        JsonObject keyword1 = new JsonObject();
-        keyword1.addProperty("value", name);
-        JsonObject keyword2 = new JsonObject();
+        JsonObject creatorName = new JsonObject();
+        creatorName.addProperty("value", name);
+        JsonObject content = new JsonObject();
         if (text.length() > 10) {
             text = text.substring(0, 9) + "...";
         }
-        keyword2.addProperty("value", text);
+        content.addProperty("value", text);
         data.add("first",first);
-        data.add("keyword1",keyword1);
-        data.add("keyword2",keyword2);
+        data.add("keyword1",content);
+        data.add("keyword2",creatorName);
         requestBody.add("data", data);
 
         String accessToken = this.getAccessToken();

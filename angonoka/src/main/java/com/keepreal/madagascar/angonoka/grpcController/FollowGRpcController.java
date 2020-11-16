@@ -86,6 +86,12 @@ public class FollowGRpcController extends FollowServiceGrpc.FollowServiceImplBas
         responseObserver.onCompleted();
     }
 
+    /**
+     * 根据暗号获取超级关注信息
+     *
+     * @param request {@link RetrieveSuperFollowRequest}
+     * @param responseObserver {@link RetrieveSuperFollowResponse}
+     */
     @Override
     public void retrieveSuperFollowMessage(RetrieveSuperFollowRequest request, StreamObserver<RetrieveSuperFollowResponse> responseObserver) {
         SuperFollow superFollow = this.followService.retrieveSuperFollowMessageByCode(request.getCode());
@@ -96,6 +102,12 @@ public class FollowGRpcController extends FollowServiceGrpc.FollowServiceImplBas
         responseObserver.onCompleted();
     }
 
+    /**
+     * 获取用户所有超级关注信息
+     *
+     * @param request {@link RetrieveAllSuperFollowRequest}
+     * @param responseObserver {@link RetrieveAllSuperFollowResponse}
+     */
     @Override
     public void retrieveAllSuperFollowMessage(RetrieveAllSuperFollowRequest request, StreamObserver<RetrieveAllSuperFollowResponse> responseObserver) {
         List<SuperFollow> superFollowList = this.followService.retrieveAllSuperFollowMessageByCode(request.getHostId());
@@ -103,6 +115,12 @@ public class FollowGRpcController extends FollowServiceGrpc.FollowServiceImplBas
         responseObserver.onCompleted();
     }
 
+    /**
+     * 创建超级关注订阅
+     *
+     * @param request {@link CreateSuperFollowSubscriptionRequest}
+     * @param responseObserver {@link CreateSuperFollowSubscriptionResponse}
+     */
     @Override
     public void createSuperFollowSubscription(CreateSuperFollowSubscriptionRequest request, StreamObserver<CreateSuperFollowSubscriptionResponse> responseObserver) {
         String hostId = request.getHostId();
