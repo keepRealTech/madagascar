@@ -272,7 +272,7 @@ public class FollowService {
      * @param weiboUid weibo uid
      * @param followType follow type
      */
-    public void createSuperFollow(String hostId, String islandId, String weiboUid, FollowType followType) {
+    public SuperFollow createSuperFollow(String hostId, String islandId, String weiboUid, FollowType followType) {
         String code = this.superFollowRepository.selectTopCodeByStateOrderByCreatedTime(FollowState.ENABLE_VALUE);
         SuperFollow superFollow = SuperFollow.builder()
                 .id(String.valueOf(this.idGenerator.nextId()))
@@ -282,13 +282,26 @@ public class FollowService {
                 .code(StringUtils.isEmpty(code) ? "0000" : this.generateCode(code))
                 .type(followType.getNumber())
                 .build();
-        this.superFollowRepository.save(superFollow);
+        return this.superFollowRepository.save(superFollow);
     }
 
+    /**
+     * retrieve super follow
+     *
+     * @param hostId host id
+     * @param followType {@link FollowType}
+     * @return {@link SuperFollow}
+     */
     public SuperFollow retrieveSuperFollowByHostId(String hostId, FollowType followType) {
         return this.superFollowRepository.findTopByHostIdAndStateAndType(hostId, FollowState.ENABLE_VALUE, followType.getNumber());
     }
 
+    /**
+     * update super follow
+     *
+     * @param superFollow {@link SuperFollow}
+     * @return {@link SuperFollow}
+     */
     public SuperFollow updateSuperFollow(SuperFollow superFollow) {
         return this.superFollowRepository.save(superFollow);
     }

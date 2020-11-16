@@ -72,6 +72,14 @@ public class WeiboFollowExecutor implements FollowExecutor {
         String userId = followRequest.getWeiboFollowPayload().getUserId();
         String islandId = followRequest.getWeiboFollowPayload().getIslandId();
 
+        SuperFollow superFollowExisted = this.followService.retrieveSuperFollowByHostId(userId, FollowType.FOLLOW_WEIBO);
+
+        if (Objects.nonNull(superFollowExisted)) {
+            return FollowResponse.newBuilder()
+                    .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FORBIDDEN))
+                    .build();
+        }
+
         ResponseEntity<HashMap> responseEntity = this.restTemplate.postForEntity(String.format(WeiboApi.ADD_SUBSCRIBE,
                 weiboBusinessConfig.getAppKey(),
                 weiboBusinessConfig.getSubId(),
@@ -102,9 +110,11 @@ public class WeiboFollowExecutor implements FollowExecutor {
             return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR)).build();
         }
 
-        this.followService.createSuperFollow(userId, islandId, id, FollowType.FOLLOW_WEIBO);
+        SuperFollow superFollow = this.followService.createSuperFollow(userId, islandId, id, FollowType.FOLLOW_WEIBO);
 
-        return builder.setStatus(CommonStatusUtils.getSuccStatus()).build();
+        return builder.setStatus(CommonStatusUtils.getSuccStatus())
+                .setSuperFollowMessage(this.followService.getSuperFollowMessage(superFollow))
+                .build();
     }
 
     /**
