@@ -22,6 +22,7 @@ public class RestTemplateConfiguration {
     public RestTemplate restTemplate() {
         RestTemplate restTemplate = new RestTemplate();
         restTemplate.getMessageConverters().set(1,new StringHttpMessageConverter(StandardCharsets.UTF_8));
+        restTemplate.getMessageConverters().add(new WeiboMappingJackson2HttpMessageConverter());
         return restTemplate;
     }
 
