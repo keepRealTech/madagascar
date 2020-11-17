@@ -53,6 +53,8 @@ public class IslandInfo {
     @Builder.Default
     private Long lastFeedAt = 0L; //用户客户端判断是否有未读feed消息（客户端轮询模式下使用）
     @Builder.Default
+    private Long lastWorksFeedAt = 0L;
+    @Builder.Default
     private Boolean showIncome = true;
     @Builder.Default
     private String customUrl = "";
