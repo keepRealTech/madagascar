@@ -6856,3 +6856,5 @@ components:
           type: string
         ticket:
           type: string
+        description:
+          type: string

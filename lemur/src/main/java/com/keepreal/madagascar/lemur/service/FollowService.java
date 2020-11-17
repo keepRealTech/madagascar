@@ -137,25 +137,35 @@ public class FollowService {
     }
 
     /**
-     * 根据昵称获取微博信息
+     * 获取微博信息
      *
      * @param name 微博昵称
+     * @param uid 微博uid
      * @return {@link WeiboProfileMessage}
      */
-    public WeiboProfileMessage retrieveWeiboProfileByNickName(String name) {
+    public WeiboProfileMessage retrieveWeiboProfileByCondition(String name, String uid) {
         FollowServiceGrpc.FollowServiceBlockingStub stub = FollowServiceGrpc.newBlockingStub(this.channel);
-        RetrieveWeiboProfileRequest request = RetrieveWeiboProfileRequest.newBuilder().setName(name).build();
+        RetrieveWeiboProfileRequest.Builder builder = RetrieveWeiboProfileRequest.newBuilder();
+
+        if (!StringUtils.isEmpty(name)) {
+            builder.setName(StringValue.of(name));
+        }
+
+        if (!StringUtils.isEmpty(uid)) {
+            builder.setUid(StringValue.of(uid));
+        }
+
         WeiboProfileResponse response;
 
         try {
-            response = stub.retrieveWeiboProfile(request);
+            response = stub.retrieveWeiboProfile(builder.build());
         } catch (StatusRuntimeException exception) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
         }
 
         if (Objects.isNull(response)
                 || !response.hasStatus()) {
-            log.error(Objects.isNull(response) ? "Retrieve weibo profile by name returned null." : response.toString());
+            log.error(Objects.isNull(response) ? "Retrieve weibo profile returned null." : response.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 

@@ -53,15 +53,25 @@ public class FollowGRpcController extends FollowServiceGrpc.FollowServiceImplBas
     }
 
     /**
-     * 根据昵称获取微博信息
+     * 根据昵称 / weibo uid 获取微博信息
      *
      * @param request {@link RetrieveWeiboProfileRequest}
      * @param responseObserver {@link WeiboProfileResponse}
      */
     @Override
     public void retrieveWeiboProfile(RetrieveWeiboProfileRequest request, StreamObserver<WeiboProfileResponse> responseObserver) {
-        WeiboProfileResponse response = this.followService.retrieveWeiboProfileByName(request.getName());
-        responseObserver.onNext(response);
+
+        WeiboProfileResponse.Builder builder = WeiboProfileResponse.newBuilder();
+
+        if (request.hasName()) {
+            builder = this.followService.retrieveWeiboProfileByName(request.getName().getValue());
+        }
+
+        if (request.hasUid()) {
+            builder = this.followService.retrieveWeiboProfileByUid(request.getUid().getValue());
+        }
+
+        responseObserver.onNext(builder.build());
         responseObserver.onCompleted();
     }
 
