@@ -3,6 +3,7 @@ package com.keepreal.madagascar.fossa.grpcController;
 import com.google.protobuf.ProtocolStringList;
 import com.keepreal.madagascar.common.CommentMessage;
 import com.keepreal.madagascar.common.CommonStatus;
+import com.keepreal.madagascar.common.FeedGroupMessage;
 import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.common.PageResponse;
@@ -801,6 +802,11 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 originFeedGroup.getFeedIds().remove(feedInfo.getId());
                 originFeedGroup.getImageFeedIds().remove(feedInfo.getId());
                 this.feedGroupService.updateFeedGroup(originFeedGroup);
+                this.feedInfoService.update(feedInfo);
+                responseBuilder
+                        .setStatus(CommonStatusUtils.getSuccStatus())
+                        .setFeed(this.feedInfoService.getFeedMessage(feedInfo, request.getUserId()))
+                        .setFeedGroup(FeedGroupMessage.getDefaultInstance());
             }
         }else if (!request.getFeedgroupId().equals(feedInfo.getFeedGroupId())) {
             if (!StringUtils.isEmpty(feedInfo.getFeedGroupId())) {
@@ -816,16 +822,16 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
             this.feedGroupService.updateFeedGroup(feedGroup);
             this.feedInfoService.update(feedInfo);
-        }
 
-        String lastFeedId = feedGroup.getFeedIds().lower(request.getId());
-        String nextFeedId = feedGroup.getFeedIds().higher(request.getId());
-        responseBuilder
-                .setStatus(CommonStatusUtils.getSuccStatus())
-                .setFeed(this.feedInfoService.getFeedMessage(feedInfo, request.getUserId()))
-                .setFeedGroup(this.feedGroupService.getFeedGroupMessage(feedGroup))
-                .setLastFeedId(Objects.isNull(lastFeedId) ? "" : lastFeedId)
-                .setNextFeedId(Objects.isNull(nextFeedId) ? "" : nextFeedId);
+            String lastFeedId = feedGroup.getFeedIds().lower(request.getId());
+            String nextFeedId = feedGroup.getFeedIds().higher(request.getId());
+            responseBuilder
+                    .setStatus(CommonStatusUtils.getSuccStatus())
+                    .setFeed(this.feedInfoService.getFeedMessage(feedInfo, request.getUserId()))
+                    .setFeedGroup(this.feedGroupService.getFeedGroupMessage(feedGroup))
+                    .setLastFeedId(Objects.isNull(lastFeedId) ? "" : lastFeedId)
+                    .setNextFeedId(Objects.isNull(nextFeedId) ? "" : nextFeedId);
+        }
 
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();

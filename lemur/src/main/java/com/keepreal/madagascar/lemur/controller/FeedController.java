@@ -720,7 +720,8 @@ public class FeedController implements FeedApi {
                 postIslandFeedRequest.getTitle(),
                 postIslandFeedRequest.getBrief(),
                 postIslandFeedRequest.getFeedGroupId(),
-                postIslandFeedRequest.getPriceInCents());
+                postIslandFeedRequest.getPriceInCents(),
+                postIslandFeedRequest.getIsWorks());
         if (feed.getType().equals(MediaType.MEDIA_VIDEO)) {
             this.chatService.sendMessage(Constants.OFFICIAL_USER_ID, Collections.singletonList(userId), Templates.TRANS_CODE_START, 0);
             this.redissonClient.getBucket(Constants.VIDEO_PREFIX + postIslandFeedRequest.getMultimedia().get(0).getVideoId()).set(feed.getId());
