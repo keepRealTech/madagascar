@@ -28,6 +28,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.SimpleDateFormat;
@@ -99,12 +100,18 @@ public class FollowService {
 
         WeiboProfileResponse.Builder builder = WeiboProfileResponse.newBuilder();
 
-        ResponseEntity<HashMap> responseEntity = this.restTemplate.getForEntity(
-                String.format(WeiboApi.SHOW_USER_URL_BY_NAME, weiboBusinessConfig.getAccessToken(), name),
-                HashMap.class);
+        ResponseEntity<HashMap> responseEntity;
 
-        if (!HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR));
+        try {
+            responseEntity = this.restTemplate.getForEntity(
+                    String.format(WeiboApi.SHOW_USER_URL_BY_NAME, weiboBusinessConfig.getAccessToken(), name),
+                    HashMap.class);
+        } catch (HttpClientErrorException exception) {
+            if (exception instanceof HttpClientErrorException.Forbidden) {
+                return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_FORBIDDEN));
+            } else {
+                return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR));
+            }
         }
 
         JsonObject body = this.gson.toJsonTree(responseEntity.getBody()).getAsJsonObject();
@@ -140,12 +147,18 @@ public class FollowService {
 
         WeiboProfileResponse.Builder builder = WeiboProfileResponse.newBuilder();
 
-        ResponseEntity<HashMap> responseEntity = this.restTemplate.getForEntity(
-                String.format(WeiboApi.SHOW_USER_URL_BY_UID, weiboBusinessConfig.getAccessToken(), uid),
-                HashMap.class);
+        ResponseEntity<HashMap> responseEntity;
 
-        if (!HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR));
+        try {
+            responseEntity = this.restTemplate.getForEntity(
+                    String.format(WeiboApi.SHOW_USER_URL_BY_UID, weiboBusinessConfig.getAccessToken(), uid),
+                    HashMap.class);
+        } catch (HttpClientErrorException exception) {
+            if (exception instanceof HttpClientErrorException.Forbidden) {
+                return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_FORBIDDEN));
+            } else {
+                return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR));
+            }
         }
 
         JsonObject body = this.gson.toJsonTree(responseEntity.getBody()).getAsJsonObject();
