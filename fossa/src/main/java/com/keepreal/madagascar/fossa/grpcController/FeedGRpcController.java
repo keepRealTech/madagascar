@@ -802,6 +802,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
                 originFeedGroup.getFeedIds().remove(feedInfo.getId());
                 originFeedGroup.getImageFeedIds().remove(feedInfo.getId());
                 this.feedGroupService.updateFeedGroup(originFeedGroup);
+                this.feedInfoService.update(feedInfo);
                 responseBuilder
                         .setStatus(CommonStatusUtils.getSuccStatus())
                         .setFeed(this.feedInfoService.getFeedMessage(feedInfo, request.getUserId()))
