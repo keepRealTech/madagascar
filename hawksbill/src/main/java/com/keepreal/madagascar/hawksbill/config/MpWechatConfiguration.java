@@ -14,5 +14,6 @@ public class MpWechatConfiguration {
     String serverToken;
     String expirationInSec;
     String templateId;
+    String templateColor;
 
 }

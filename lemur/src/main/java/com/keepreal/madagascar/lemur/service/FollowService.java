@@ -110,6 +110,36 @@ public class FollowService {
     }
 
     /**
+     * 更新超级关注
+     *
+     * @param request {@link FollowRequest}
+     * @return {@link SuperFollowMessage}
+     */
+    public SuperFollowMessage updateFollowSocialPlatform(FollowRequest request) {
+        FollowServiceGrpc.FollowServiceBlockingStub stub = FollowServiceGrpc.newBlockingStub(this.channel);
+
+        FollowResponse response;
+
+        try {
+            response = stub.followSocialPlatform(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(response)
+                || !response.hasStatus()) {
+            log.error(Objects.isNull(response) ? "follow social platform returned null." : response.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(response.getStatus());
+        }
+
+        return response.getSuperFollowMessage();
+    }
+
+    /**
      * 删除超级关注超级关注
      *
      * @param request {@link CancelFollowRequest}
