@@ -2981,6 +2981,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SingleFollowResponse'
+    put:
+      tags:
+        - Follow
+      summary: 修改超级关注
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutFollowRequest'
+      responses:
+        '200':
+          description: subscribe response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleFollowResponse'
     delete:
       parameters:
         - $ref:  "#/components/parameters/followTypeInQuery"
@@ -6508,6 +6525,16 @@ components:
         isRemove:
           type: boolean
     PostFollowRequest:
+      type: object
+      properties:
+        followType:
+          $ref: '#/components/schemas/FollowType'
+        data:
+          $ref: '#/components/schemas/FollowPayload'
+      required:
+        - followType
+        - data
+    PutFollowRequest:
       type: object
       properties:
         followType:
