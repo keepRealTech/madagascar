@@ -211,7 +211,8 @@ public class FeedService {
                                   String title,
                                   String brief,
                                   String feedGroupId,
-                                  Long priceInCents) {
+                                  Long priceInCents,
+                                  Boolean isWorks) {
         FeedServiceGrpc.FeedServiceBlockingStub stub = FeedServiceGrpc.newBlockingStub(this.fossaChannel);
         String hostId = this.islandService.retrieveIslandById(islandId).getHostId();
 
@@ -236,6 +237,10 @@ public class FeedService {
 
         if (Objects.nonNull(brief)) {
             builder.setBrief(StringValue.of(brief));
+        }
+
+        if (Objects.nonNull(isWorks)) {
+            builder.setIsWorks(isWorks);
         }
 
         this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text, true);
