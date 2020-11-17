@@ -62,7 +62,7 @@ public class FollowController implements FollowApi {
      */
     @Override
     public ResponseEntity<WeiboProfileResponse> apiV1FollowProfileWeiboGet(@NotNull @Valid String name) {
-        WeiboProfileMessage weiboProfileMessage = this.followService.retrieveWeiboProfileByNickName(name);
+        WeiboProfileMessage weiboProfileMessage = this.followService.retrieveWeiboProfileByCondition(name, null);
         WeiboProfileResponse response = new WeiboProfileResponse();
         response.setData(this.followDTOFactory.valueOf(weiboProfileMessage));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
@@ -160,10 +160,23 @@ public class FollowController implements FollowApi {
 
         SuperFollowMessage superFollowMessage = this.followService.followSocialPlatform(followRequest);
         SingleFollowResponse response = new SingleFollowResponse();
-        response.setData(this.followDTOFactory.valueOf(superFollowMessage));
+        response.setData(this.followDTOFactory.valueOf(superFollowMessage, this.convertFollowType(postFollowRequest.getFollowType())));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    private com.keepreal.madagascar.angonoka.FollowType convertFollowType(FollowType followType) {
+        switch (followType) {
+            case WEIBO:
+                return com.keepreal.madagascar.angonoka.FollowType.FOLLOW_WEIBO;
+            case TIKTOK:
+                return com.keepreal.madagascar.angonoka.FollowType.FOLLOW_TIKTOK;
+            case BILIBILI:
+                return com.keepreal.madagascar.angonoka.FollowType.FOLLOW_BILIBILI;
+            default:
+                return null;
+        }
     }
 
 }

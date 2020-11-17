@@ -20,7 +20,6 @@ import com.keepreal.madagascar.angonoka.util.CommonStatusUtils;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.enums.SuperFollowState;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
-import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -29,11 +28,9 @@ import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -98,27 +95,27 @@ public class FollowService {
      * @param name 昵称
      * @return {@link WeiboProfileResponse}
      */
-    public WeiboProfileResponse retrieveWeiboProfileByName(String name) {
+    public WeiboProfileResponse.Builder retrieveWeiboProfileByName(String name) {
 
         WeiboProfileResponse.Builder builder = WeiboProfileResponse.newBuilder();
 
-        ResponseEntity< HashMap> responseEntity = this.restTemplate.getForEntity(
-                String.format(WeiboApi.SHOW_USER_URL, weiboBusinessConfig.getAccessToken(), name),
+        ResponseEntity<HashMap> responseEntity = this.restTemplate.getForEntity(
+                String.format(WeiboApi.SHOW_USER_URL_BY_NAME, weiboBusinessConfig.getAccessToken(), name),
                 HashMap.class);
 
         if (!HttpStatus.OK.equals(responseEntity.getStatusCode())) {
-            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR)).build();
+            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR));
         }
 
         JsonObject body = this.gson.toJsonTree(responseEntity.getBody()).getAsJsonObject();
 
         if (Objects.isNull(body)) {
-            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR)).build();
+            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR));
         }
 
         long totalNumber = body.get("total_number").getAsLong();
         if (totalNumber == 0) {
-            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_ACCOUNT_NOT_FOUND)).build();
+            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_ACCOUNT_NOT_FOUND));
         }
 
         JsonArray jsonArray = body.get("users").getAsJsonArray();
@@ -129,8 +126,47 @@ public class FollowService {
                         .setName(jsonUser.get("screen_name").getAsString())
                         .setFollowerCount(jsonUser.get("followers_count").getAsLong())
                         .setAvatarUrl(jsonUser.get("avatar_hd").getAsString())
-                        .build())
-                .build();
+                        .build());
+    }
+
+    /**
+     * 根据uid获取微博信息
+     *
+     * @param uid 微博唯一uid
+     * @return {@link WeiboProfileResponse}
+     */
+    public WeiboProfileResponse.Builder retrieveWeiboProfileByUid(String uid) {
+
+        WeiboProfileResponse.Builder builder = WeiboProfileResponse.newBuilder();
+
+        ResponseEntity<HashMap> responseEntity = this.restTemplate.getForEntity(
+                String.format(WeiboApi.SHOW_USER_URL_BY_UID, weiboBusinessConfig.getAccessToken(), uid),
+                HashMap.class);
+
+        if (!HttpStatus.OK.equals(responseEntity.getStatusCode())) {
+            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR));
+        }
+
+        JsonObject body = this.gson.toJsonTree(responseEntity.getBody()).getAsJsonObject();
+
+        if (Objects.isNull(body)) {
+            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR));
+        }
+
+        long totalNumber = body.get("total_number").getAsLong();
+        if (totalNumber == 0) {
+            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_ACCOUNT_NOT_FOUND));
+        }
+
+        JsonArray jsonArray = body.get("users").getAsJsonArray();
+        JsonObject jsonUser = jsonArray.get(0).getAsJsonObject();
+        return builder.setStatus(CommonStatusUtils.getSuccStatus())
+                .setWeiboMessage(WeiboProfileMessage.newBuilder()
+                        .setId(jsonUser.get("idstr").getAsString())
+                        .setName(jsonUser.get("screen_name").getAsString())
+                        .setFollowerCount(jsonUser.get("followers_count").getAsLong())
+                        .setAvatarUrl(jsonUser.get("avatar_hd").getAsString())
+                        .build());
     }
 
     /**

@@ -101,5 +101,6 @@ public class Templates {
     public static final String H5_REPOST_URL = "https://tiaodaoapp.com/repost?islandId=%s&userId=%s";
     public static final String WEIBO_H5_URL = "https://m.weibo.cn/%s/%s";
     public static final String MP_WECHAT_QRCODE_URL = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s";
+    public static final String GET_FOLLOW_CONTENT = "当%s更新时，第一时间提醒";
 
 }
