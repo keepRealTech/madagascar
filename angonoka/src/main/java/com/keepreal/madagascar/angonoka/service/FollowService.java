@@ -135,6 +135,7 @@ public class FollowService {
      * @param uid 微博唯一uid
      * @return {@link WeiboProfileResponse}
      */
+    @Deprecated
     public WeiboProfileResponse.Builder retrieveWeiboProfileByUid(String uid) {
 
         WeiboProfileResponse.Builder builder = WeiboProfileResponse.newBuilder();
@@ -153,19 +154,12 @@ public class FollowService {
             return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR));
         }
 
-        long totalNumber = body.get("total_number").getAsLong();
-        if (totalNumber == 0) {
-            return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_ACCOUNT_NOT_FOUND));
-        }
-
-        JsonArray jsonArray = body.get("users").getAsJsonArray();
-        JsonObject jsonUser = jsonArray.get(0).getAsJsonObject();
         return builder.setStatus(CommonStatusUtils.getSuccStatus())
                 .setWeiboMessage(WeiboProfileMessage.newBuilder()
-                        .setId(jsonUser.get("idstr").getAsString())
-                        .setName(jsonUser.get("screen_name").getAsString())
-                        .setFollowerCount(jsonUser.get("followers_count").getAsLong())
-                        .setAvatarUrl(jsonUser.get("avatar_hd").getAsString())
+                        .setId(body.get("idstr").getAsString())
+                        .setName(body.get("screen_name").getAsString())
+                        .setFollowerCount(body.get("followers_count").getAsLong())
+                        .setAvatarUrl(body.get("avatar_hd").getAsString())
                         .build());
     }
 
