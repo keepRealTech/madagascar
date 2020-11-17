@@ -490,7 +490,7 @@ public class FeedController implements FeedApi {
         List<CheckNewFeedsMessage> checkNewFeedsMessages = this.islandService.checkNewFeeds(
                 postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getIslandId).collect(Collectors.toList()),
                 postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getTimestamp).collect(Collectors.toList()),
-                postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getIsWorks).collect(Collectors.toList()));
+                postCheckFeedsRequest.getCheckFeedsMessage().stream().map(message -> message.getIsWorks() == null ? false : message.getIsWorks()).collect(Collectors.toList()));
 
         PostCheckFeedsResponse response = new PostCheckFeedsResponse();
         response.setData(checkNewFeedsMessages
