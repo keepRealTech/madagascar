@@ -82,6 +82,7 @@ message SuperFollowMessage {
     string islandId = 5;
     FollowState state = 6;
     string code = 7;
+    string platformName = 8;
 }
 
 message CreateSuperFollowSubscriptionRequest {

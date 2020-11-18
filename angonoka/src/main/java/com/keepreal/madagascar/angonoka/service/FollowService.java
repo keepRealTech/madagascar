@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -60,6 +61,7 @@ public class FollowService {
             "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
             "U", "V", "W", "X", "Y", "Z");
     private final List<Integer> codePeriods = Stream.of(0, 1, 2, 3).collect(Collectors.toList());
+    private static final String WEIBO_PROFILE_KEY = "weibo_profile_";
 
     /**
      * Constructs the follow service
@@ -127,10 +129,15 @@ public class FollowService {
 
         JsonArray jsonArray = body.get("users").getAsJsonArray();
         JsonObject jsonUser = jsonArray.get(0).getAsJsonObject();
+        String idStr = jsonUser.get("idstr").getAsString();
+        String screenName = jsonUser.get("screen_name").getAsString();
+        RBucket<String> bucket = this.redissonClient.getBucket(WEIBO_PROFILE_KEY + idStr);
+        bucket.set(screenName, 1, TimeUnit.DAYS);
+
         return builder.setStatus(CommonStatusUtils.getSuccStatus())
                 .setWeiboMessage(WeiboProfileMessage.newBuilder()
-                        .setId(jsonUser.get("idstr").getAsString())
-                        .setName(jsonUser.get("screen_name").getAsString())
+                        .setId(idStr)
+                        .setName(screenName)
                         .setFollowerCount(jsonUser.get("followers_count").getAsLong())
                         .setAvatarUrl(jsonUser.get("avatar_hd").getAsString())
                         .build());
@@ -290,6 +297,7 @@ public class FollowService {
                 .setIslandId(superFollow.getIslandId())
                 .setCode(superFollow.getCode())
                 .setState(FollowState.forNumber(superFollow.getState()))
+                .setPlatformName(superFollow.getPlatformName())
                 .build();
     }
 
@@ -343,14 +351,17 @@ public class FollowService {
      */
     public SuperFollow createSuperFollow(String hostId, String islandId, String weiboUid, FollowType followType) {
         try (AutoRedisLock ignored = new AutoRedisLock(redissonClient, "try-create-super-follow")) {
+            RBucket<String> bucket = this.redissonClient.getBucket(WEIBO_PROFILE_KEY + weiboUid);
             SuperFollow superFollow = SuperFollow.builder()
                     .id(String.valueOf(this.idGenerator.nextId()))
                     .platformId(weiboUid)
+                    .platformName(bucket.isExists() ? bucket.get() : "")
                     .hostId(hostId)
                     .islandId(islandId)
                     .code(this.generateCodeV2())
                     .type(followType.getNumber())
                     .build();
+            bucket.delete();
             return this.superFollowRepository.save(superFollow);
         }
     }
