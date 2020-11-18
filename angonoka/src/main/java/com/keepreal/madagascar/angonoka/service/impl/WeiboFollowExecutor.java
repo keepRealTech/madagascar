@@ -19,6 +19,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -80,12 +81,23 @@ public class WeiboFollowExecutor implements FollowExecutor {
                     .build();
         }
 
-        ResponseEntity<HashMap> responseEntity = this.restTemplate.postForEntity(String.format(WeiboApi.ADD_SUBSCRIBE,
-                weiboBusinessConfig.getAppKey(),
-                weiboBusinessConfig.getSubId(),
-                id),
-                null,
-                HashMap.class);
+
+        ResponseEntity<HashMap> responseEntity;
+
+        try {
+            responseEntity = this.restTemplate.postForEntity(String.format(WeiboApi.ADD_SUBSCRIBE,
+                    weiboBusinessConfig.getAppKey(),
+                    weiboBusinessConfig.getSubId(),
+                    id),
+                    null,
+                    HashMap.class);
+        } catch (HttpClientErrorException exception) {
+            if (exception instanceof HttpClientErrorException.Forbidden) {
+                return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_FORBIDDEN)).build();
+            } else {
+                return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR)).build();
+            }
+        }
 
         if (!HttpStatus.OK.equals(responseEntity.getStatusCode())) {
             return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR)).build();
@@ -137,12 +149,22 @@ public class WeiboFollowExecutor implements FollowExecutor {
         }
         String weiboUid = superFollow.getPlatformId();
 
-        ResponseEntity<HashMap> responseEntity = this.restTemplate.postForEntity(String.format(WeiboApi.DELETE_SUBSCRIBE,
-                weiboBusinessConfig.getAppKey(),
-                weiboBusinessConfig.getSubId(),
-                weiboUid),
-                null,
-                HashMap.class);
+        ResponseEntity<HashMap> responseEntity;
+
+        try {
+            responseEntity = this.restTemplate.postForEntity(String.format(WeiboApi.DELETE_SUBSCRIBE,
+                    weiboBusinessConfig.getAppKey(),
+                    weiboBusinessConfig.getSubId(),
+                    weiboUid),
+                    null,
+                    HashMap.class);
+        } catch (HttpClientErrorException exception) {
+            if (exception instanceof HttpClientErrorException.Forbidden) {
+                return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_FORBIDDEN)).build();
+            } else {
+                return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR)).build();
+            }
+        }
 
         if (!HttpStatus.OK.equals(responseEntity.getStatusCode())) {
             return builder.setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_WEIBO_RPC_ERROR)).build();
