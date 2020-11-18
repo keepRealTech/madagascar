@@ -76,6 +76,8 @@ public class DefaultErrorMessageTranslater implements ErrorMessageTranslator {
                 return "主页链接已被占用，请换一个";
             case REQUEST_MEMBERSHIP_NAME_TOO_LONG_ERROR:
                 return "会员名字过长，请换一个";
+            case REQUEST_WEIBO_ACCOUNT_NOT_FOUND:
+                return "抱歉，未找到相关结果";
             default:
                 return errorCode.getValueDescriptor().getName();
         }
