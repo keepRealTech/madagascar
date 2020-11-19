@@ -14,6 +14,7 @@ public enum PushType {
     PUSH_QUESTION(1007L),
     PUSH_REPLY(1008L),
     PUSH_FEED_WORKS(1009L),
+    PUSH_FEED_TRANS_CODE_COMPLETE(1010L),
     ;
 
     private Long value;

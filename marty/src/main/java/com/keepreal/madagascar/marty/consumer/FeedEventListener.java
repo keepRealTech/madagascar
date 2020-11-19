@@ -7,6 +7,7 @@ import com.aliyun.openservices.ons.api.MessageListener;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.keepreal.madagascar.common.MediaType;
 import com.keepreal.madagascar.coua.IslandResponse;
+import com.keepreal.madagascar.mantella.FeedCreateEvent;
 import com.keepreal.madagascar.mantella.FeedEventMessage;
 import com.keepreal.madagascar.marty.model.PushType;
 import com.keepreal.madagascar.marty.service.IslandService;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 import static com.keepreal.madagascar.mantella.FeedEventType.FEED_EVENT_CREATE;
+import static com.keepreal.madagascar.mantella.FeedEventType.FEED_EVENT_TRANS_CODE_COMPLETE;
 import static com.keepreal.madagascar.mantella.FeedEventType.FEED_EVENT_UPDATE;
 
 /**
@@ -64,7 +66,14 @@ public class FeedEventListener implements MessageListener {
             }
 
             if (feedEventMessage.getType().equals(FEED_EVENT_CREATE)) {
-                pushService.pushNewFeed(feedEventMessage.getFeedCreateEvent());
+                FeedCreateEvent event = feedEventMessage.getFeedCreateEvent();
+                PushType pushType = event.getIsWorks() ? PushType.PUSH_FEED_WORKS : PushType.PUSH_FEED;
+                pushService.pushNewFeed(event, pushType);
+                return Action.CommitMessage;
+            }
+
+            if (feedEventMessage.getType().equals(FEED_EVENT_TRANS_CODE_COMPLETE)) {
+                pushService.pushMessageByType(feedEventMessage.getFeedTransCodeCompleteEvent().getUserId(), PushType.PUSH_FEED_TRANS_CODE_COMPLETE);
             }
             return Action.CommitMessage;
         } catch (InvalidProtocolBufferException e) {
