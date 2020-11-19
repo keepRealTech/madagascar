@@ -10,6 +10,7 @@ import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Mono;
 
@@ -26,8 +27,7 @@ public class MpWechatService {
 
     public MpWechatService(MpWechatConfiguration mpWechatConfiguration,
                            RestTemplate restTemplate,
-                           RedissonClient redissonClient,
-                           Gson gson) {
+                           RedissonClient redissonClient) {
         this.mpWechatConfiguration = mpWechatConfiguration;
         this.restTemplate = restTemplate;
         this.redissonClient = redissonClient;
@@ -58,11 +58,24 @@ public class MpWechatService {
 
         String accessToken = this.getAccessToken();
 
-        ResponseEntity<String> responseEntity = this.restTemplate.postForEntity(String.format(MpWechatApi.POST_TEMPLATE_MESSAGE, accessToken),
-                requestBody.toString(),
-                String.class);
-        if (responseEntity.getStatusCodeValue() != 200) {
-            log.error("send send Template Message Error!");
+        ResponseEntity<String> responseEntity;
+
+        try {
+            responseEntity = this.restTemplate.postForEntity(String.format(MpWechatApi.POST_TEMPLATE_MESSAGE, accessToken),
+                    requestBody.toString(),
+                    String.class);
+        } catch (HttpClientErrorException exception) {
+            log.error("send template message error code = {}, message = {}, openId = {}",
+                    exception.getStatusCode().getReasonPhrase(),
+                    exception.getMessage(),
+                    openId);
+            return;
+        }
+
+        JsonObject responseBody = this.gson.fromJson(responseEntity.getBody(), JsonObject.class);
+
+        if (responseBody.get("errcode").getAsInt() != 0) {
+            log.error("send template msg error! response is {}", requestBody.toString());
         }
     }
 
