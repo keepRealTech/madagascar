@@ -1,12 +1,15 @@
 package com.keepreal.madagascar.lemur.dtoFactory;
 
+import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.PaymentState;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.UserPaymentType;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.coua.SponsorGiftMessage;
+import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.SponsorService;
+import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
 import com.keepreal.madagascar.vanga.MembershipSkuMessage;
 import com.keepreal.madagascar.vanga.UserPaymentMessage;
 import com.keepreal.madagascar.vanga.UserWithdrawMessage;
@@ -23,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,28 +40,36 @@ public class PaymentDTOFactory {
     private final SkuDTOFactory skuDTOFactory;
     private final SponsorDTOFactory sponsorDTOFactory;
     private final SponsorService sponsorService;
+    private final FeedService feedService;
+    private final SubscribeMembershipService subscribeMembershipService;
 
     private static final long PERMANENT_TIMESTAMP = 4070880000000L; // 2099-01-01 00:00:00
 
     /**
      * Constructs the {@link PaymentDTOFactory}.
      *
-     * @param userDTOFactory       {@link UserDTOFactory}.
-     * @param membershipDTOFactory {@link MembershipDTOFactory}.
-     * @param skuDTOFactory        {@link SkuDTOFactory}.
-     * @param sponsorDTOFactory    {@link SponsorDTOFactory}.
-     * @param sponsorService       {@link SponsorService}.
+     * @param userDTOFactory             {@link UserDTOFactory}.
+     * @param membershipDTOFactory       {@link MembershipDTOFactory}.
+     * @param skuDTOFactory              {@link SkuDTOFactory}.
+     * @param sponsorDTOFactory          {@link SponsorDTOFactory}.
+     * @param sponsorService             {@link SponsorService}.
+     * @param feedService                {@link FeedService}.
+     * @param subscribeMembershipService {@link SubscribeMembershipService}.
      */
     public PaymentDTOFactory(UserDTOFactory userDTOFactory,
                              MembershipDTOFactory membershipDTOFactory,
                              SkuDTOFactory skuDTOFactory,
                              SponsorDTOFactory sponsorDTOFactory,
-                             SponsorService sponsorService) {
+                             SponsorService sponsorService,
+                             FeedService feedService,
+                             SubscribeMembershipService subscribeMembershipService) {
         this.userDTOFactory = userDTOFactory;
         this.membershipDTOFactory = membershipDTOFactory;
         this.skuDTOFactory = skuDTOFactory;
         this.sponsorDTOFactory = sponsorDTOFactory;
         this.sponsorService = sponsorService;
+        this.feedService = feedService;
+        this.subscribeMembershipService = subscribeMembershipService;
     }
 
     /**
@@ -110,7 +122,8 @@ public class PaymentDTOFactory {
     public UserPaymentDTOV11 valueOfV11(UserPaymentMessage userPaymentMessage,
                                         UserMessage userMessage,
                                         MembershipSkuMessage membershipSkuMessage,
-                                        MembershipMessage membershipMessage) {
+                                        MembershipMessage membershipMessage,
+                                        String userId) {
         if (Objects.isNull(userPaymentMessage)) {
             return null;
         }
@@ -142,6 +155,12 @@ public class PaymentDTOFactory {
             userPaymentDTO.setType(PaymentType.FEED);
             userPaymentDTO.setName(Templates.LEMUR_PAYMENT_TYPE_FEED);
             userPaymentDTO.setPrivileges(Collections.singletonList(String.format(Templates.LEMUR_PAYMENT_FEED_PRIVILEGE, userPaymentDTO.getPriceInCents() / 100L)));
+            FeedMessage feedMessage = this.feedService.retrieveFeedById(userPaymentMessage.getFeedId(), userId);
+
+            List<String> memberships = this.subscribeMembershipService.retrieveSubscribedMembershipsByIslandIdAndUserId(feedMessage.getIslandId(), userId);
+            if (memberships.size() > 0) {
+                userPaymentDTO.setIslandId(feedMessage.getIslandId());
+            }
         } else if (UserPaymentType.PAYMENT_TYPE_SUPPORT.equals(userPaymentMessage.getType())) {
             userPaymentDTO.setType(PaymentType.SPONSOR);
             if (userPaymentMessage.getGiftCount() <= 0) {

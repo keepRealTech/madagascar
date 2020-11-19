@@ -299,7 +299,8 @@ public class PaymentController implements PaymentApi {
                         userPaymentMessage,
                         userMessageMap.getOrDefault(userPaymentMessage.getPayeeId(), null),
                         userPaymentMessage.getMembershipSku(),
-                        membershipMessageMap.getOrDefault(userPaymentMessage.getMembershipSku().getMembershipId(), null)
+                        membershipMessageMap.getOrDefault(userPaymentMessage.getMembershipSku().getMembershipId(), null),
+                        userId
                 ))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
