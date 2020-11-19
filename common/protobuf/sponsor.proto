@@ -10,6 +10,10 @@ message RetrieveSponsorRequest {
   string islandId = 1;
 }
 
+message RetrieveSponsorByHostIdRequest {
+  string hostId = 1;
+}
+
 message RetrieveSponsorGiftsRequest {
   bool onlyDefault = 1;
 }
@@ -59,6 +63,7 @@ message UpdateSponsorByIslandIdRequest {
 
 service SponsorService {
   rpc RetrieveSponsor (RetrieveSponsorRequest) returns (RetrieveSponsorResponse) {};
+  rpc RetrieveSponsorByHostId (RetrieveSponsorByHostIdRequest) returns (RetrieveSponsorResponse) {};
   rpc UpdateSponsorByIslandId (UpdateSponsorByIslandIdRequest) returns (RetrieveSponsorResponse) {};
   rpc RetrieveSponsorGifts (RetrieveSponsorGiftsRequest) returns (RetrieveSponsorGiftsResponse) {};
   rpc RetrieveSingleSponsorGift (RetrieveSingleSponsorGiftRequest) returns (RetrieveSingleSponsorGiftResponse) {};
