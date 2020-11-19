@@ -66,7 +66,7 @@ public class FeedCollectionGRpcController extends FeedCollectionServiceGrpc.Feed
         }
 
         List<String> feedIdList = feedCollectionPage.getContent().stream().map(FeedCollection::getFeedId).collect(Collectors.toList());
-        List<FeedInfo> feedInfoList = this.feedInfoService.findByIdsOrderByUpdateTime(feedIdList);
+        List<FeedInfo> feedInfoList = this.feedInfoService.findByIds(feedIdList, false);
         List<String> myMembershipIds = this.subscribeMembershipService.retrieveMembershipIds(request.getUserId(), null);
 
         Set<String> likedFeedIds = this.reactionService.retrieveReactionsByFeedIdsAndUserId(feedIdList, request.getUserId()).stream()

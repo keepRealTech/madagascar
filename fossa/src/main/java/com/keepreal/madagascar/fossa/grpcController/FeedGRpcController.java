@@ -322,9 +322,12 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
 
         feed = this.feedInfoService.insert(feed);
-        this.islandService.callCouaUpdateIslandLastFeedAt(Collections.singletonList(request.getIslandId(0)), timestamp, request.getIsWorks());
 
-        this.feedEventProducerService.produceNewFeedEventAsync(feed);
+        if (!request.getType().equals(MediaType.MEDIA_VIDEO)) {
+            this.islandService.callCouaUpdateIslandLastFeedAt(Collections.singletonList(request.getIslandId(0)), timestamp, request.getIsWorks());
+
+            this.feedEventProducerService.produceNewFeedEventAsync(feed);
+        }
 
         FeedResponse response = FeedResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
@@ -493,6 +496,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         builder.hostId(request.getHostId());
         builder.fromHost(request.getUserId().equals(request.getHostId()));
         builder.text(text);
+        builder.isWorks(true);
         builder.createdTime(System.currentTimeMillis());
         feedInfoService.insert(builder.build());
 
@@ -613,7 +617,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         if (condition.hasIsWorks()) {
             if (condition.getIsWorks().getValue()) {
-                query.addCriteria(Criteria.where("isWorks").is(true));
+                query.addCriteria(new Criteria().orOperator(Criteria.where("isWorks").is(true), Criteria.where("isWorks").is(null)));
             } else {
                 query.addCriteria(new Criteria().orOperator(Criteria.where("isWorks").is(false), Criteria.where("isWorks").is(null)));
             }
@@ -908,7 +912,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
     public void updateFeedByVideoId(UpdateFeedByVideoRequest request, StreamObserver<UpdateFeedByVideoResponse> responseObserver) {
         String videoId = request.getVideoId();
         VideoMessage message = request.getMessage();
-        String feedId = (String) this.redissonClient.getBucket(Constants.VIDEO_PREFIX + videoId).get();
+        String feedId = (String) this.redissonClient.getBucket(Constants.VIDEO_PREFIX + videoId).getAndDelete();
         FeedInfo feedinfo = this.feedInfoService.findFeedInfoById(feedId, false);
         VideoInfo mediaInfo = (VideoInfo) feedinfo.getMediaInfos().get(0);
         mediaInfo.setTitle(message.getTitle());
@@ -922,6 +926,11 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         feedinfo.setTemped(false);
 
         FeedInfo update = this.feedInfoService.update(feedinfo);
+
+        this.islandService.callCouaUpdateIslandLastFeedAt(Collections.singletonList(update.getIslandId()), update.getCreatedTime(), update.getIsWorks());
+
+        this.feedEventProducerService.produceNewFeedEventAsync(update);
+        this.feedEventProducerService.produceFeedTransCodeCompleteEventAsync(update);
 
         responseObserver.onNext(UpdateFeedByVideoResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())

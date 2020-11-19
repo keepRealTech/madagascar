@@ -85,6 +85,7 @@ message UserPaymentMessage {
   UserPaymentType type = 9;
   int32 giftCount = 10;
   string sponsorGiftId = 11;
+  string feedId = 12;
 }
 
 message UserPaymentsResponse {

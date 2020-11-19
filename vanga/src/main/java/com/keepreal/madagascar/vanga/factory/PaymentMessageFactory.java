@@ -90,8 +90,20 @@ public class PaymentMessageFactory {
             }
 
         } else {
+            String feedId = "";
+            AlipayOrder alipayOrder = alipayOrderService.retrieveById(payment.getOrderId());
+            if (alipayOrder != null) {
+                feedId = alipayOrder.getPropertyId();
+            } else {
+                WechatOrder wechatOrder = wechatOrderService.retrieveById(payment.getOrderId());
+                if (wechatOrder != null) {
+                    feedId = wechatOrder.getPropertyId();
+                }
+            }
+
             paymentBuilder.setType(UserPaymentType.PAYMENT_TYPE_FEED)
-                    .setPriceInCents(payment.getAmountInCents());
+                    .setPriceInCents(payment.getAmountInCents())
+                    .setFeedId(feedId);
         }
 
         return paymentBuilder.build();
