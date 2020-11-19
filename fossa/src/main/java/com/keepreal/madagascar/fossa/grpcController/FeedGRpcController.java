@@ -496,6 +496,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         builder.hostId(request.getHostId());
         builder.fromHost(request.getUserId().equals(request.getHostId()));
         builder.text(text);
+        builder.isWorks(true);
         builder.createdTime(System.currentTimeMillis());
         feedInfoService.insert(builder.build());
 
@@ -617,10 +618,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         if (condition.hasIsWorks()) {
             if (condition.getIsWorks().getValue()) {
                 query.addCriteria(new Criteria().orOperator(Criteria.where("isWorks").is(true), Criteria.where("isWorks").is(null)));
-                query.addCriteria(Criteria.where("fromHost").is(true));
             } else {
                 query.addCriteria(new Criteria().orOperator(Criteria.where("isWorks").is(false), Criteria.where("isWorks").is(null)));
-                query.addCriteria(Criteria.where("fromHost").is(false));
             }
         }
 

@@ -333,6 +333,11 @@ public class FeedInfoService {
         return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
     }
 
+    public List<FeedInfo> findByIds(Iterable<String> ids, boolean order) {
+        return order ? this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids) :
+                this.feedInfoRepository.findAllByIdInAndDeletedIsFalse(ids);
+    }
+
     public List<FeedInfo> findByIdsOrderByUpdateTime(Iterable<String> ids) {
         return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
     }
