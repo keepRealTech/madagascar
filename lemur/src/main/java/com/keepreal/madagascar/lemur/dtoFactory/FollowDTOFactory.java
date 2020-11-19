@@ -76,8 +76,9 @@ public class FollowDTOFactory {
 
         followDTO.setCode(message.getCode());
         followDTO.setState(this.valueOf(message.getState()));
-        //暂时只有微博有
-        String name = this.followService.retrieveWeiboProfileByCondition(null, message.getPlatformId()).getName();
+        //正式接入微博API后改回原来方案
+        //String name = this.followService.retrieveWeiboProfileByCondition(null, message.getPlatformId()).getName();
+        String name = message.getPlatformName();
         followDTO.setName(name);
         followDTO.setDescription(String.format(Templates.GET_FOLLOW_CONTENT, this.convertStateEnabled(followType, name)));
         followDTO.setRunningDays(this.calculateRunningDays(message.getCreatedTime()));

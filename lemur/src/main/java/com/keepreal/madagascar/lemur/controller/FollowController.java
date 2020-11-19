@@ -22,6 +22,7 @@ import swagger.model.DummyResponse;
 import swagger.model.FollowResponse;
 import swagger.model.FollowType;
 import swagger.model.PostFollowRequest;
+import swagger.model.PutFollowRequest;
 import swagger.model.SingleFollowResponse;
 import swagger.model.WeiboProfileResponse;
 
@@ -161,6 +162,67 @@ public class FollowController implements FollowApi {
         SuperFollowMessage superFollowMessage = this.followService.followSocialPlatform(followRequest);
         SingleFollowResponse response = new SingleFollowResponse();
         response.setData(this.followDTOFactory.valueOf(superFollowMessage, this.convertFollowType(postFollowRequest.getFollowType())));
+        response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
+        response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    /**
+     * Implements the follow put api.
+     *
+     * @param putFollowRequest  (required) {@link PutFollowRequest}
+     * @return {@link SingleFollowResponse}
+     */
+    @Override
+    public ResponseEntity<SingleFollowResponse> apiV1FollowSubscribePut(@Valid PutFollowRequest putFollowRequest) {
+        CancelFollowRequest.Builder builder = CancelFollowRequest.newBuilder();
+        String userId = HttpContextUtils.getUserIdFromContext();
+        List<IslandMessage> islandMessages = this.islandService.retrieveIslandsByHostId(userId);
+        if (islandMessages.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        switch (putFollowRequest.getFollowType()) {
+            case WEIBO:
+                builder.setFollowType(com.keepreal.madagascar.angonoka.FollowType.FOLLOW_WEIBO)
+                        .setHostId(userId)
+                        .setIslandId(islandMessages.get(0).getId());
+                break;
+            case TIKTOK:
+                break;
+            case BILIBILI:
+                break;
+            default:
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
+        this.followService.cancelFollowSocialPlatform(builder.build());
+
+        FollowRequest followRequest = null;
+
+        switch (putFollowRequest.getFollowType()) {
+            case WEIBO:
+                if (StringUtils.isEmpty(putFollowRequest.getData().getId())) {
+                    throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+                }
+                followRequest = FollowRequest.newBuilder()
+                        .setFollowType(com.keepreal.madagascar.angonoka.FollowType.FOLLOW_WEIBO)
+                        .setWeiboFollowPayload(WeiboFollowPayload.newBuilder()
+                                .setId(putFollowRequest.getData().getId())
+                                .setIslandId(islandMessages.get(0).getId())
+                                .setUserId(userId)
+                                .build())
+                        .build();
+                break;
+            case TIKTOK:
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+            case BILIBILI:
+                throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
+        }
+
+        SuperFollowMessage superFollowMessage = this.followService.followSocialPlatform(followRequest);
+        SingleFollowResponse response = new SingleFollowResponse();
+        response.setData(this.followDTOFactory.valueOf(superFollowMessage, this.convertFollowType(putFollowRequest.getFollowType())));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

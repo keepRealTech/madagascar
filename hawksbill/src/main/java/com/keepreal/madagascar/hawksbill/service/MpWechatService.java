@@ -44,11 +44,13 @@ public class MpWechatService {
         first.addProperty("value", "您关注的创作者有新的微博");
         JsonObject creatorName = new JsonObject();
         creatorName.addProperty("value", name);
+        creatorName.addProperty("color", "#" + this.mpWechatConfiguration.getTemplateColor());
         JsonObject content = new JsonObject();
         if (text.length() > 10) {
             text = text.substring(0, 9) + "...";
         }
         content.addProperty("value", text);
+        content.addProperty("color", "#" + this.mpWechatConfiguration.getTemplateColor());
         data.add("first",first);
         data.add("keyword1",content);
         data.add("keyword2",creatorName);

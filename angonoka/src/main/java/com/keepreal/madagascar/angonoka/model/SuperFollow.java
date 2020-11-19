@@ -26,6 +26,7 @@ public class SuperFollow {
     @Id
     private String id;
     private String platformId;
+    private String platformName;
     private String hostId;
     private String islandId;
     private String code;
