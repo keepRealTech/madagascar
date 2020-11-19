@@ -1,13 +1,14 @@
 package com.keepreal.madagascar.lemur.controller;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import com.google.gson.JsonObject;
+import com.keepreal.madagascar.angonoka.RetrieveSuperFollowResponse;
 import com.keepreal.madagascar.angonoka.SuperFollowMessage;
 import com.keepreal.madagascar.baobob.CheckSignatureRequest;
 import com.keepreal.madagascar.common.UserMessage;
 import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.common.enums.MpWechatMsgType;
+import com.keepreal.madagascar.common.exceptions.ErrorCode;
+import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.lemur.service.FollowService;
 import com.keepreal.madagascar.lemur.service.LoginService;
 import com.keepreal.madagascar.lemur.service.MpWechatService;
@@ -91,8 +92,6 @@ public class MpWechatController {
         String requestXml = IOUtils.toString(httpServletRequest.getInputStream(), Charset.forName(httpServletRequest.getCharacterEncoding()));
         Map<String, String> request = WXPayUtil.xmlToMap(requestXml);
 
-        log.info("request info {}", request.toString());
-
         String fromUserName = request.get("FromUserName");
         String msgType = request.get("MsgType");
         String event = request.get("Event");
@@ -109,14 +108,12 @@ public class MpWechatController {
         //普通消息
         if (MpWechatMsgType.TEXT.getValue().equals(msgType)) {
             String msgId = request.get("MsgId");
-
-            log.info("msg id is {}", msgId);
-
             RBucket<String> bucket = this.redissonClient.getBucket(Constants.MP_WECHAT_DEDUPLICATION_KEY + msgId);
             if (bucket.isExists()) {
                 bucket.delete();
                 return "success";
             }
+
             String openId = request.get("FromUserName");
             String keepRealMpId = request.get("ToUserName");
             String content = request.get("Content");
@@ -125,21 +122,25 @@ public class MpWechatController {
                 return "success";
             }
 
-            SuperFollowMessage superFollowMessage = this.followService.retrieveSuperFollowByCode(content.toUpperCase());
+            RetrieveSuperFollowResponse retrieveSuperFollowResponse = this.followService.retrieveSuperFollowByCode(content.toUpperCase());
 
-            log.info("super follow {} ", Objects.isNull(superFollowMessage) ? "null" : superFollowMessage.toString());
+            if (retrieveSuperFollowResponse.getStatus().getRtn() == ErrorCode.REQUEST_SUPER_FOLLOW_NOT_FOUND_VALUE) {
+                return this.generateTextReplyXml(openId, keepRealMpId, Constants.CODE_NOT_FOUND);
+            }
+
+            if (ErrorCode.REQUEST_SUCC_VALUE != retrieveSuperFollowResponse.getStatus().getRtn()) {
+                throw new KeepRealBusinessException(retrieveSuperFollowResponse.getStatus());
+            }
+
+            SuperFollowMessage superFollowMessage = retrieveSuperFollowResponse.getSuperFollowMessage();
 
             if (Objects.nonNull(superFollowMessage)) {
                 this.followService.createSuperFollowSubscription(openId, superFollowMessage.getHostId(), superFollowMessage.getId());
 
-                log.info("reply");
-
-                String replyXml = this.generateSuccessReplyXml(superFollowMessage.getHostId(),
+                String replyXml = this.generateSubscribeSuccessReplyXml(superFollowMessage.getHostId(),
                         superFollowMessage.getIslandId(),
                         openId,
                         keepRealMpId);
-
-                log.info("reply is {}", replyXml);
 
                 RBucket<String> flag = this.redissonClient.getBucket(Constants.MP_WECHAT_DEDUPLICATION_KEY + msgId);
                 flag.set("true", 30, TimeUnit.SECONDS);
@@ -158,17 +159,30 @@ public class MpWechatController {
      * @return 文案
      */
     @SneakyThrows
-    private String generateSuccessReplyXml (String hostId, String islandId, String openId, String keepRealMpId) {
+    private String generateSubscribeSuccessReplyXml(String hostId, String islandId, String openId, String keepRealMpId) {
         UserMessage userMessage = this.userService.retrieveUserById(hostId);
         String name = userMessage.getName();
         String h5Url = String.format(Templates.H5_REPOST_URL,
                 islandId,
                 hostId);
         String replyContent = String.format(Templates.FOLLOW_SUCCESS_CONTENTS, name, name, name, h5Url, name);
-        XmlMapper xmlMapper = new XmlMapper();
+
+        return this.generateTextReplyXml(openId, keepRealMpId, replyContent);
+    }
+
+    /**
+     * 微信公众号文本回复
+     *
+     * @param openId 用户open id
+     * @param keepRealMpWechatId 公众号 id
+     * @param replyContent 文本回复内容
+     * @return 文案
+     */
+    @SneakyThrows
+    private String generateTextReplyXml(String openId, String keepRealMpWechatId, String replyContent) {
         Map<String, String> map = new HashMap<>();
         map.put("ToUserName", openId);
-        map.put("FromUserName", keepRealMpId);
+        map.put("FromUserName", keepRealMpWechatId);
         map.put("CreateTime", String.valueOf(Instant.now().toEpochMilli()));
         map.put("MsgType", MpWechatMsgType.TEXT.getValue());
         map.put("Content", replyContent);

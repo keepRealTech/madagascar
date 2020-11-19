@@ -60,4 +60,9 @@ public class Constants {
      * Redis key prefix
      */
     public static final String VIDEO_PREFIX = "video:";
+
+    /**
+     * Mp wechat reply
+     */
+    public static final String CODE_NOT_FOUND = "暗号错误或已被删除，请重新输入";
 }
