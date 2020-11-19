@@ -52,7 +52,7 @@ public class FollowService {
      * @param code 暗号
      * @return {@link SuperFollowMessage}
      */
-    public SuperFollowMessage retrieveSuperFollowByCode(String code) {
+    public RetrieveSuperFollowResponse retrieveSuperFollowByCode(String code) {
         FollowServiceGrpc.FollowServiceBlockingStub stub = FollowServiceGrpc.newBlockingStub(this.channel);
         RetrieveSuperFollowRequest.Builder builder = RetrieveSuperFollowRequest.newBuilder();
 
@@ -72,11 +72,7 @@ public class FollowService {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 
-        if (ErrorCode.REQUEST_SUCC_VALUE != response.getStatus().getRtn()) {
-            throw new KeepRealBusinessException(response.getStatus());
-        }
-
-        return response.getSuperFollowMessage();
+        return response;
     }
 
     /**
