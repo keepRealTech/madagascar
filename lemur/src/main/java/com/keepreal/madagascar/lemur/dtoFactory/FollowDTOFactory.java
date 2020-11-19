@@ -124,11 +124,11 @@ public class FollowDTOFactory {
     private String convertStateEnabled(FollowType followType, String name) {
         switch (followType) {
             case FOLLOW_WEIBO:
-                return "微博账号@" + name;
+                return "微博账号 @" + name + " ";
             case FOLLOW_TIKTOK:
-                return "抖音账号@" + name;
+                return "抖音账号 @" + name + " ";
             case FOLLOW_BILIBILI:
-                return "B站账号@" + name;
+                return "B站账号 @" + name + " ";
             default:
                 return "";
         }
