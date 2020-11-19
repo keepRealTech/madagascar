@@ -4,6 +4,7 @@ import com.keepreal.madagascar.common.constants.Constants;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.RetrieveSingleSponsorGiftRequest;
 import com.keepreal.madagascar.coua.RetrieveSingleSponsorGiftResponse;
+import com.keepreal.madagascar.coua.RetrieveSponsorByHostIdRequest;
 import com.keepreal.madagascar.coua.RetrieveSponsorGiftsRequest;
 import com.keepreal.madagascar.coua.RetrieveSponsorGiftsResponse;
 import com.keepreal.madagascar.coua.RetrieveSponsorRequest;
@@ -63,6 +64,19 @@ public class SponsorGRpcController extends SponsorServiceGrpc.SponsorServiceImpl
         String islandId = request.getIslandId();
         Sponsor sponsor;
         sponsor = this.sponsorService.retrieveSponsorByIslandId(islandId);
+
+        responseObserver.onNext(builder.setStatus(CommonStatusUtils.getSuccStatus()).
+                setSponsorMessage(this.sponsorService.getSponsorMessage(sponsor))
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void retrieveSponsorByHostId(RetrieveSponsorByHostIdRequest request, StreamObserver<RetrieveSponsorResponse> responseObserver) {
+        RetrieveSponsorResponse.Builder builder = RetrieveSponsorResponse.newBuilder();
+        String hostId = request.getHostId();
+
+        Sponsor sponsor = this.sponsorService.retrieveSponsorByHostId(hostId);
 
         responseObserver.onNext(builder.setStatus(CommonStatusUtils.getSuccStatus()).
                 setSponsorMessage(this.sponsorService.getSponsorMessage(sponsor))
