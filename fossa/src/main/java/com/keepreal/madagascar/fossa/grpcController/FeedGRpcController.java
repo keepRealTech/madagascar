@@ -616,9 +616,11 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
 
         if (condition.hasIsWorks()) {
             if (condition.getIsWorks().getValue()) {
-                query.addCriteria(Criteria.where("isWorks").is(true));
+                query.addCriteria(new Criteria().orOperator(Criteria.where("isWorks").is(true), Criteria.where("isWorks").is(null)));
+                query.addCriteria(Criteria.where("fromHost").is(true));
             } else {
                 query.addCriteria(new Criteria().orOperator(Criteria.where("isWorks").is(false), Criteria.where("isWorks").is(null)));
+                query.addCriteria(Criteria.where("fromHost").is(false));
             }
         }
 
