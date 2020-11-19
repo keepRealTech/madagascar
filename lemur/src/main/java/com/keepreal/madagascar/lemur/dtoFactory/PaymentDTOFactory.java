@@ -7,6 +7,7 @@ import com.keepreal.madagascar.common.UserPaymentType;
 import com.keepreal.madagascar.common.constants.Templates;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.coua.SponsorGiftMessage;
+import com.keepreal.madagascar.coua.SponsorMessage;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.SponsorService;
 import com.keepreal.madagascar.lemur.service.SubscribeMembershipService;
@@ -167,7 +168,8 @@ public class PaymentDTOFactory {
                 userPaymentDTO.setName(Templates.LEMUR_PAYMENT_TYPE_OLD_SPONSOR);
             } else {
                 SponsorGiftMessage sponsorGiftMessage = this.sponsorService.retrieveSponsorGiftByGiftId(userPaymentMessage.getSponsorGiftId());
-                userPaymentDTO.setName(String.format(Templates.LEMUR_PAYMENT_TYPE_SPONSOR, sponsorGiftMessage.getName()));
+                SponsorMessage sponsorMessage = this.sponsorService.retrieveSponsorByHostId(userMessage.getId());
+                userPaymentDTO.setName(String.format(Templates.LEMUR_PAYMENT_TYPE_SPONSOR, sponsorMessage.getDescription()));
                 userPaymentDTO.setGift(this.sponsorDTOFactory.valueOf(sponsorGiftMessage));
                 userPaymentDTO.setGiftCount(userPaymentMessage.getGiftCount());
             }

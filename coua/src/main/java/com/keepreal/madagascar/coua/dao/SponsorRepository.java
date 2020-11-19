@@ -11,4 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SponsorRepository extends JpaRepository<Sponsor, String> {
     Sponsor findTopByIslandIdAndActiveIsTrueAndDeletedIsFalse(String islandId);
+
+    Sponsor findTopByHostIdAndActiveIsTrueAndDeletedIsFalse(String hostId);
 }
