@@ -10,6 +10,7 @@ import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import reactor.core.publisher.Mono;
@@ -75,7 +76,7 @@ public class MpWechatService {
         JsonObject responseBody = this.gson.fromJson(responseEntity.getBody(), JsonObject.class);
 
         if (responseBody.get("errcode").getAsInt() != 0) {
-            log.error("send template msg error! response is {}", requestBody.toString());
+            log.error("send template msg error! request is {} response is {}", requestBody.toString(), responseBody.toString());
         }
     }
 
@@ -107,7 +108,7 @@ public class MpWechatService {
      */
     public String getAccessToken() {
         RBucket<String> accessToken = this.redissonClient.getBucket("wechat-mp-access-token");
-        if (accessToken.isExists()) {
+        if (accessToken.isExists() && !StringUtils.isEmpty(accessToken.get())) {
             return accessToken.get();
         }
         return this.retrieveNewAccessToken(accessToken);
