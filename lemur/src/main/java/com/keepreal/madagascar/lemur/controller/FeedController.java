@@ -817,7 +817,7 @@ public class FeedController implements FeedApi {
     public ResponseEntity<FeedResponse> apiV1FeedsIdPut(String id, @Valid PutFeedRequest putFeedRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
-        if (!userId.equals(feedMessage.getHostId())) {
+        if (!userId.equals(feedMessage.getUserId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
