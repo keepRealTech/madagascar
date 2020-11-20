@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -84,7 +85,7 @@ public class FeedInfoService {
     public void deleteFeedById(String id) {
         mongoTemplate.updateFirst(
                 Query.query(Criteria.where("id").is(id)),
-                Update.update("deleted", true),
+                Update.update("deleted", true).set("updatedTime", Instant.now().toEpochMilli()),
                 FeedInfo.class);
     }
 
