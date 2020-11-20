@@ -55,7 +55,7 @@ public class FeedInfo {
     private Integer repostCount = 0;
     private Integer state;
     @Builder.Default
-    private Boolean isWorks = false;
+    private Boolean isWorks = null;
     @Builder.Default
     private Boolean deleted = false;
     @Builder.Default

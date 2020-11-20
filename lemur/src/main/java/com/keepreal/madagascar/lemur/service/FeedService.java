@@ -156,7 +156,6 @@ public class FeedService {
                 .addAllHostId(hostIdList)
                 .addAllMembershipIds(Objects.isNull(membershipIds) ? new ArrayList<>() : membershipIds)
                 .setUserId(userId)
-                .setIsWorks(isWorks == null ? false : isWorks)
                 .setType(mediaType);
 
         if (!Objects.isNull(feedGroupId)) {
@@ -165,6 +164,10 @@ public class FeedService {
 
         if (priceInCents != null && priceInCents > 0) {
             builder.setPriceInCents(Int64Value.of(priceInCents));
+        }
+
+        if (isWorks != null) {
+            builder.setIsWorks(BoolValue.of(isWorks));
         }
 
         this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
@@ -240,7 +243,7 @@ public class FeedService {
         }
 
         if (Objects.nonNull(isWorks)) {
-            builder.setIsWorks(isWorks);
+            builder.setIsWorks(BoolValue.of(isWorks));
         }
 
         this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text, true);

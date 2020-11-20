@@ -42,7 +42,7 @@ message NewFeedsRequestV2 {
         HtmlMessage html = 14;
         AnswerMessage question = 15;
     }
-    bool isWorks = 16;
+    google.protobuf.BoolValue isWorks = 16;
 }
 
 message NewFeedsResponse {
