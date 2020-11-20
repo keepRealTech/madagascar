@@ -67,6 +67,11 @@ public class FeedCollectionGRpcController extends FeedCollectionServiceGrpc.Feed
 
         List<String> feedIdList = feedCollectionPage.getContent().stream().map(FeedCollection::getFeedId).collect(Collectors.toList());
         List<FeedInfo> feedInfoList = this.feedInfoService.findByIds(feedIdList, false);
+
+        List<FeedInfo> resultList = new ArrayList<>();
+        Map<String, FeedInfo> feedInfoMap = feedInfoList.stream().collect(Collectors.toMap(FeedInfo::getId, f -> f, (k1, k2) -> k1));
+        feedIdList.forEach(id -> resultList.add(feedInfoMap.get(id)));
+
         List<String> myMembershipIds = this.subscribeMembershipService.retrieveMembershipIds(request.getUserId(), null);
 
         Set<String> likedFeedIds = this.reactionService.retrieveReactionsByFeedIdsAndUserId(feedIdList, request.getUserId()).stream()
@@ -77,7 +82,7 @@ public class FeedCollectionGRpcController extends FeedCollectionServiceGrpc.Feed
 
         Map<String, List<CommentMessage>> commentMap = this.commentService.getLastCommentsByFeedIds(feedIdList, Constants.DEFAULT_FEED_LAST_COMMENT_COUNT);
 
-        List<FeedMessage> feedMessageList = feedInfoList.stream()
+        List<FeedMessage> feedMessageList = resultList.stream()
                 .map(info -> this.feedInfoService.getFeedMessage(info,
                         request.getUserId(),
                         myMembershipIds,
