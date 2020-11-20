@@ -127,7 +127,7 @@ public class FeedEventProducerService {
                 .setFromHost(feedInfo.getFromHost())
                 .setHostId(feedInfo.getHostId())
                 .setMediaType(MediaType.valueOf(feedInfo.getMultiMediaType()))
-                .setIsWorks(feedInfo.getIsWorks())
+                .setIsWorks(feedInfo.getIsWorks() == null ? false : feedInfo.getIsWorks())
                 .build();
         String uuid = UUID.randomUUID().toString();
         FeedEventMessage event = FeedEventMessage.newBuilder()

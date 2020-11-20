@@ -229,7 +229,9 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.membershipIds(membershipIdsList);
             builder.createdTime(timestamp);
             builder.toppedTime(timestamp);
-            builder.isWorks(request.getIsWorks());
+            if (request.hasIsWorks()) {
+                builder.isWorks(request.getIsWorks().getValue());
+            }
             if (request.hasPriceInCents()) {
                 builder.priceInCents(request.getPriceInCents().getValue());
             }
@@ -291,7 +293,9 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         builder.membershipIds(request.getMembershipIdsList());
         builder.createdTime(timestamp);
         builder.toppedTime(timestamp);
-        builder.isWorks(request.getIsWorks());
+        if (request.hasIsWorks()) {
+            builder.isWorks(request.getIsWorks().getValue());
+        }
         builder.userMembershipIds(this.subscribeMembershipService.retrieveMembershipIds(userId, request.getHostId(0)));
         if (request.hasPriceInCents()) {
             builder.priceInCents(request.getPriceInCents().getValue());
@@ -324,7 +328,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         feed = this.feedInfoService.insert(feed);
 
         if (!request.getType().equals(MediaType.MEDIA_VIDEO)) {
-            this.islandService.callCouaUpdateIslandLastFeedAt(Collections.singletonList(request.getIslandId(0)), timestamp, request.getIsWorks());
+            this.islandService.callCouaUpdateIslandLastFeedAt(Collections.singletonList(request.getIslandId(0)), timestamp, request.hasIsWorks() && request.getIsWorks().getValue());
 
             this.feedEventProducerService.produceNewFeedEventAsync(feed);
         }
