@@ -96,6 +96,7 @@ public class FeedCollectionGRpcController extends FeedCollectionServiceGrpc.Feed
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .setPageResponse(PageRequestResponseUtils.buildPageResponse(feedCollectionPage))
                 .addAllFeed(feedMessageList)
+                .addAllFeedCollection(feedCollectionPage.getContent().stream().map(this.feedCollectionService::buildMessage).collect(Collectors.toList()))
                 .build());
         responseObserver.onCompleted();
     }

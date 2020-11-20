@@ -3026,7 +3026,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TimelinesResponse'
+                $ref: '#/components/schemas/FeedCollectionsResponse'
   /api/v1/feeds/{id}/feedCollections:
     parameters:
       - $ref: '#/components/parameters/idInPath'
@@ -4260,6 +4260,14 @@ components:
           properties:
             host:
               $ref: '#/components/schemas/BriefUserDTO'
+    CollectionFeedDTO:
+      allOf:
+        - $ref: '#/components/schemas/FeedDTO'
+        - type: object
+          properties:
+            collectedAt:
+              type: integer
+              format: int64
     PostFeedPayload:
       type: object
       properties:
@@ -4402,6 +4410,22 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedDTO'
+    FeedCollectionsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            currentTime:
+              type: integer
+              format: int64
+            hasFeedgroup:
+              type: boolean
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CollectionFeedDTO'
     FeedsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'

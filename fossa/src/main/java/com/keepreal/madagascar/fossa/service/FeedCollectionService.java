@@ -1,6 +1,7 @@
 package com.keepreal.madagascar.fossa.service;
 
 import com.keepreal.madagascar.common.snowflake.generator.LongIdGenerator;
+import com.keepreal.madagascar.fossa.FeedCollectionMessage;
 import com.keepreal.madagascar.fossa.dao.FeedCollectionRepository;
 import com.keepreal.madagascar.fossa.model.FeedCollection;
 import org.springframework.data.domain.Page;
@@ -56,6 +57,17 @@ public class FeedCollectionService {
 
     public Set<FeedCollection> findByFeedIdsAndUserId(Iterable<String> feedIds, String userId) {
         return this.feedCollectionRepository.findByFeedIdInAndUserIdAndDeletedIsFalse(feedIds, userId);
+    }
+
+    public FeedCollectionMessage buildMessage(FeedCollection feedCollection) {
+        if (feedCollection == null) {
+            return FeedCollectionMessage.getDefaultInstance();
+        }
+        return FeedCollectionMessage.newBuilder()
+                .setUserId(feedCollection.getUserId())
+                .setFeedId(feedCollection.getFeedId())
+                .setUpdatedTime(feedCollection.getUpdatedTime())
+                .build();
     }
 
     private FeedCollection create(FeedCollection feedCollection) {
