@@ -229,6 +229,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             builder.membershipIds(membershipIdsList);
             builder.createdTime(timestamp);
             builder.toppedTime(timestamp);
+            builder.updatedTime(timestamp);
             if (request.hasIsWorks()) {
                 builder.isWorks(request.getIsWorks().getValue());
             }
@@ -293,6 +294,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         builder.membershipIds(request.getMembershipIdsList());
         builder.createdTime(timestamp);
         builder.toppedTime(timestamp);
+        builder.updatedTime(timestamp);
         if (request.hasIsWorks()) {
             builder.isWorks(request.getIsWorks().getValue());
         }
@@ -901,6 +903,8 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         if (request.hasBrief()) {
             feedInfo.setBrief(request.getBrief().getValue());
         }
+
+        feedInfo.setUpdatedTime(Instant.now().toEpochMilli());
 
         FeedInfo update = this.feedInfoService.update(feedInfo);
 
