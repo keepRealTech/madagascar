@@ -27,6 +27,13 @@ message CollectedFeedsResponse {
     CommonStatus status = 1;
     PageResponse pageResponse = 2;
     repeated FeedMessage feed = 3;
+    repeated FeedCollectionMessage feedCollection = 4;
+}
+
+message FeedCollectionMessage {
+    string userId = 1;
+    string feedId = 2;
+    int64 updatedTime = 3;
 }
 
 service FeedCollectionService {

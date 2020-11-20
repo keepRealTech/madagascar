@@ -5,6 +5,7 @@ import com.keepreal.madagascar.common.FeedMessage;
 import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.coua.MembershipMessage;
 import com.keepreal.madagascar.fossa.CollectedFeedsResponse;
+import com.keepreal.madagascar.fossa.FeedCollectionMessage;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
 import com.keepreal.madagascar.lemur.service.FeedCollectionService;
 import com.keepreal.madagascar.lemur.service.FeedGroupService;
@@ -17,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import swagger.api.FeedCollectionApi;
 import swagger.model.DummyResponse;
-import swagger.model.TimelinesResponse;
+import swagger.model.FeedCollectionsResponse;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -47,7 +48,7 @@ public class FeedCollectionController implements FeedCollectionApi {
     }
 
     @Override
-    public ResponseEntity<TimelinesResponse> apiV1FeedCollectionsGet(Long minTimestamp, Long maxTimestamp, Integer pageSize) {
+    public ResponseEntity<FeedCollectionsResponse> apiV1FeedCollectionsGet(Long minTimestamp, Long maxTimestamp, Integer pageSize) {
         String userId = HttpContextUtils.getUserIdFromContext();
 
         CollectedFeedsResponse collectedFeedsResponse = this.feedCollectionService.retrieveFeedsByUserId(userId, pageSize, minTimestamp, maxTimestamp);
@@ -55,15 +56,17 @@ public class FeedCollectionController implements FeedCollectionApi {
         Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(collectedFeedsResponse.getFeedList());
 
         Map<String, FeedGroupMessage> feedGroupMessageMap = this.generateFeedGroupMap(collectedFeedsResponse.getFeedList());
+        Map<String, Long> feedCollectionMessageMap = collectedFeedsResponse.getFeedCollectionList().stream().collect(Collectors.toMap(FeedCollectionMessage::getFeedId, FeedCollectionMessage::getUpdatedTime, (k1, k2) -> k1));
 
-        TimelinesResponse response = new TimelinesResponse();
+        FeedCollectionsResponse response = new FeedCollectionsResponse();
         response.setData(collectedFeedsResponse.getFeedList()
                 .stream()
-                .map(feedMessage -> this.feedDTOFactory.valueOf(feedMessage,
+                .map(feedMessage -> this.feedDTOFactory.collectionValueOf(feedMessage,
                         feedMembershipMap.getOrDefault(feedMessage.getId(), Collections.emptyList()),
                         true,
                         feedMessage.getCreatedAt(),
-                        feedGroupMessageMap.get(feedMessage.getFeedgroupId())))
+                        feedGroupMessageMap.get(feedMessage.getFeedgroupId()),
+                        feedCollectionMessageMap.get(feedMessage.getId())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList()));
         response.setPageInfo(PaginationUtils.getPageInfo(collectedFeedsResponse.getPageResponse()));
