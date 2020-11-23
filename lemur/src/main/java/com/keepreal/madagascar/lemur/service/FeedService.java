@@ -170,7 +170,7 @@ public class FeedService {
             builder.setIsWorks(BoolValue.of(isWorks));
         }
 
-        this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text);
+        this.buildMediaMessage(builder, mediaType, multiMediaDTOList, text, true);
 
         NewFeedsResponse newFeedsResponse;
         try {
