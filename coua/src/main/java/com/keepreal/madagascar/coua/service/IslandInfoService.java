@@ -175,6 +175,7 @@ public class IslandInfoService {
      * @return {@link IslandInfo}.
      */
     public List<IslandInfo> getIslandByName(String name, Pageable pageable, IslandsResponse.Builder builder) {
+        log.error("搜索记录: {}", name);
         Page<String> userIdListPageable = this.userInfoRepository.findUserIdByNameOrderByIdentity(name, pageable);
         List<IslandInfo> islandInfosWithV = this.islandInfoRepository.findIslandInfosByHostIdIn(userIdListPageable.getContent());
         List<IslandInfo> sortedIslandWithV = islandInfosWithV.stream().sorted(Comparator.comparing(IslandInfo::getIslanderNumber).reversed()).collect(Collectors.toList());
