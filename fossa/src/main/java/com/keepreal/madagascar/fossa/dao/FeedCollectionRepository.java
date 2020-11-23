@@ -13,9 +13,9 @@ public interface FeedCollectionRepository extends MongoRepository<FeedCollection
 
     FeedCollection findByUserIdAndFeedId(String userId, String feedId);
 
-    Page<FeedCollection> findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeGreaterThanEqualOrderByUpdatedTimeDesc(String userId, Long timestamp, Pageable pageable);
+    Page<FeedCollection> findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeGreaterThanOrderByUpdatedTimeDesc(String userId, Long timestamp, Pageable pageable);
 
-    Page<FeedCollection> findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeLessThanEqualOrderByUpdatedTimeDesc(String userId, Long timestamp, Pageable pageable);
+    Page<FeedCollection> findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeLessThanOrderByUpdatedTimeDesc(String userId, Long timestamp, Pageable pageable);
 
     boolean existsByUserIdAndFeedIdAndDeletedIsFalse(String userId, String feedId);
 
