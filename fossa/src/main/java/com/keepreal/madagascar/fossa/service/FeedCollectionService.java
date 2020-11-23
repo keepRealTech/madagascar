@@ -44,11 +44,11 @@ public class FeedCollectionService {
     }
 
     public Page<FeedCollection> findFeedCollectionsUpdatedTimeLE(String userId, long timestamp, int pageSize) {
-        return this.feedCollectionRepository.findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeLessThanEqualOrderByUpdatedTimeDesc(userId, timestamp, PageRequest.of(0, pageSize));
+        return this.feedCollectionRepository.findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeLessThanOrderByUpdatedTimeDesc(userId, timestamp, PageRequest.of(0, pageSize));
     }
 
     public Page<FeedCollection> findFeedCollectionsUpdatedTimeGE(String userId, long timestamp, int pageSize) {
-        return this.feedCollectionRepository.findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeGreaterThanEqualOrderByUpdatedTimeDesc(userId, timestamp, PageRequest.of(0, pageSize));
+        return this.feedCollectionRepository.findFeedCollectionsByUserIdAndDeletedIsFalseAndUpdatedTimeGreaterThanOrderByUpdatedTimeDesc(userId, timestamp, PageRequest.of(0, pageSize));
     }
 
     public boolean hasCollected(String userId, String feedId) {
