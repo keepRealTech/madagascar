@@ -630,7 +630,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
         }
 
         // 没有条件
-        return query.with(Sort.by(Sort.Order.desc("updatedTime"), Sort.Order.desc("createdTime"), Sort.Order.desc("toppedTime")));
+        return query.with(Sort.by(Sort.Order.desc("createdTime"), Sort.Order.desc("toppedTime")));
     }
 
     /**
@@ -975,7 +975,7 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             query.addCriteria(timeCriteria);
         }
 
-        return query.with(Sort.by(Sort.Order.desc("updatedTime"), Sort.Order.desc("createdTime"), Sort.Order.desc("toppedTime")));
+        return query.with(Sort.by(Sort.Order.desc("createdTime"), Sort.Order.desc("toppedTime")));
     }
 
     private List<MediaInfo> buildMediaInfos(NewFeedsRequestV2 request) {

@@ -68,7 +68,7 @@ public class FeedInfo {
     private Long createdTime;
     @CreatedDate
     private Long toppedTime;
-
+    @LastModifiedDate
     private Long updatedTime;
 
 }
