@@ -55,6 +55,8 @@ public class FeedInfo {
     private Integer repostCount = 0;
     private Integer state;
     @Builder.Default
+    private Boolean isWorks = null;
+    @Builder.Default
     private Boolean deleted = false;
     @Builder.Default
     private Boolean isTop = false;
@@ -66,7 +68,7 @@ public class FeedInfo {
     private Long createdTime;
     @CreatedDate
     private Long toppedTime;
-    @LastModifiedDate
+
     private Long updatedTime;
 
 }

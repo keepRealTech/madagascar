@@ -20,10 +20,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import swagger.model.BriefFeedDTO;
 import swagger.model.CheckFeedsDTO;
+import swagger.model.CollectionFeedDTO;
 import swagger.model.FeedDTO;
 import swagger.model.FeedGroupInfo;
 import swagger.model.FullFeedDTO;
-import swagger.model.MultiMediaType;
 import swagger.model.PosterFeedDTO;
 import swagger.model.SnapshotFeedDTO;
 
@@ -175,6 +175,8 @@ public class FeedDTOFactory {
             feedDTO.setPriceInCents(feed.getPriceInCents());
             feedDTO.setCanSave(feed.getCanSave());
             feedDTO.setRecommendatedAt(recommendatedAt);
+            feedDTO.setIsWorks(feed.getIsWorks());
+            feedDTO.setIsCollected(feed.getIsCollected());
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
                 feedDTO.setImagesUris(feed.getImageUrisList());
@@ -235,6 +237,8 @@ public class FeedDTOFactory {
             briefFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
             briefFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
             briefFeedDTO.setPriceInCents(feed.getPriceInCents());
+            briefFeedDTO.setIsWorks(feed.getIsWorks());
+            briefFeedDTO.setIsCollected(feed.getIsCollected());
 
             boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
             if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
@@ -285,6 +289,8 @@ public class FeedDTOFactory {
 
         snapshotFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
         snapshotFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+        snapshotFeedDTO.setIsWorks(feed.getIsWorks());
+        snapshotFeedDTO.setIsCollected(feed.getIsCollected());
 
         boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
         if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
@@ -386,6 +392,8 @@ public class FeedDTOFactory {
             fullFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed, false));
             fullFeedDTO.setPriceInCents(feed.getPriceInCents());
             fullFeedDTO.setCanSave(feed.getCanSave());
+            fullFeedDTO.setIsWorks(feed.getIsWorks());
+            fullFeedDTO.setIsCollected(feed.getIsCollected());
             if (!StringUtils.isEmpty(feedGroup.getId())) {
                 FeedGroupInfo feedGroupInfo = new FeedGroupInfo();
                 feedGroupInfo.setId(feedGroup.getId());
@@ -432,6 +440,84 @@ public class FeedDTOFactory {
             log.error("Failed to serialize feed {}, cause {}.", feed.getId(), exception.getErrorCode());
             return null;
         }
+    }
+
+    public CollectionFeedDTO collectionValueOf(FeedMessage feed,
+                                               List<MembershipMessage> memberships,
+                                               Boolean includeChargeable,
+                                               Long recommendatedAt,
+                                               FeedGroupMessage feedgroup,
+                                               Long updatedTime) {
+        if (Objects.isNull(feed)
+                || (!includeChargeable && feed.getPriceInCents() > 0L)) {
+            return null;
+        }
+
+        try {
+            IslandMessage islandMessage = this.islandService.retrieveIslandById(feed.getIslandId());
+            UserMessage userMessage = this.userService.retrieveUserById(feed.getUserId());
+
+            CollectionFeedDTO collectionFeedDTO = new CollectionFeedDTO();
+            collectionFeedDTO.setId(feed.getId());
+            collectionFeedDTO.setTitle(feed.getTitle());
+            collectionFeedDTO.setBrief(feed.getBrief());
+            collectionFeedDTO.setText(feed.getText());
+            collectionFeedDTO.setFromHost(feed.getFromHost());
+            collectionFeedDTO.setLikesCount(feed.getLikesCount());
+            collectionFeedDTO.setCommentsCount(feed.getCommentsCount());
+            collectionFeedDTO.setComments(feed.getLastCommentsList()
+                    .stream()
+                    .map(this.commentDTOFactory::valueOf)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList()));
+            collectionFeedDTO.setRepostCount(feed.getRepostCount());
+            collectionFeedDTO.setCreatedAt(feed.getCreatedAt());
+            collectionFeedDTO.setIsLiked(feed.getIsLiked());
+            collectionFeedDTO.setIsMembership(feed.getIsMembership());
+            collectionFeedDTO.setIsChargeable(feed.getPriceInCents() > 0L);
+            collectionFeedDTO.setIsTop(feed.getIsTop());
+            collectionFeedDTO.setMediaType(MediaTypeConverter.converToMultiMediaType(feed.getType()));
+            collectionFeedDTO.setMultimedia(this.multiMediaDTOFactory.listValueOf(feed));
+            collectionFeedDTO.setPriceInCents(feed.getPriceInCents());
+            collectionFeedDTO.setCanSave(feed.getCanSave());
+            collectionFeedDTO.setRecommendatedAt(recommendatedAt);
+            collectionFeedDTO.setIsWorks(feed.getIsWorks());
+            collectionFeedDTO.setIsCollected(feed.getIsCollected());
+            boolean isPicType = feed.getType().equals(MediaType.MEDIA_PICS) || feed.getType().equals(MediaType.MEDIA_ALBUM);
+            if (!CollectionUtils.isEmpty(feed.getImageUrisList())) {
+                collectionFeedDTO.setImagesUris(feed.getImageUrisList());
+            }
+
+            if (CollectionUtils.isEmpty(feed.getImageUrisList()) && isPicType) {
+                collectionFeedDTO.setImagesUris(feed.getPics().getPictureList().stream().map(Picture::getImgUrl).collect(Collectors.toList()));
+            }
+
+            if (Objects.nonNull(feedgroup)) {
+                FeedGroupInfo feedGroupInfo = new FeedGroupInfo();
+                feedGroupInfo.setId(feedgroup.getId());
+                feedGroupInfo.setName(feedgroup.getName());
+                collectionFeedDTO.setFeedGroupInfo(feedGroupInfo);
+            }
+
+            collectionFeedDTO.setIsAccess(feed.getIsAccess());
+            if (!memberships.isEmpty()) {
+                collectionFeedDTO.setIsMembership(true);
+                collectionFeedDTO.setMembership(this.membershipDTOFactory.simpleValueOf(memberships.get(0)));
+                collectionFeedDTO.setMembershipList(memberships.stream().map(this.membershipDTOFactory::simpleValueOf).collect(Collectors.toList()));
+            } else if (!feed.getMembershipIdList().isEmpty()) {
+                collectionFeedDTO.setIsAccess(true);
+            }
+
+            collectionFeedDTO.setUser(this.userDTOFactory.briefValueOf(userMessage));
+            collectionFeedDTO.setIsland(this.islandDTOFactory.briefValueOf(islandMessage));
+            collectionFeedDTO.setCollectedAt(updatedTime);
+
+            return collectionFeedDTO;
+        } catch (KeepRealBusinessException exception) {
+            log.error("Failed to serialize feed {}, cause {}.", feed.getId(), exception.getErrorCode());
+            return null;
+        }
+
     }
 
 }

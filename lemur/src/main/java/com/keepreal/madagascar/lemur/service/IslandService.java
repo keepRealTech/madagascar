@@ -504,12 +504,13 @@ public class IslandService {
      * @param timestamps Timestamps in milli-seconds.
      * @return List of {@link CheckNewFeedsMessage}.
      */
-    public List<CheckNewFeedsMessage> checkNewFeeds(List<String> islandIds, List<Long> timestamps) {
+    public List<CheckNewFeedsMessage> checkNewFeeds(List<String> islandIds, List<Long> timestamps, List<Boolean> isWorksList) {
         IslandServiceGrpc.IslandServiceBlockingStub stub = IslandServiceGrpc.newBlockingStub(this.channel);
 
         CheckNewFeedsRequest request = CheckNewFeedsRequest.newBuilder()
                 .addAllIslandIds(islandIds)
                 .addAllTimestamps(timestamps)
+                .addAllIsWorks(isWorksList)
                 .build();
 
         CheckNewFeedsResponse checkNewFeedsResponse;

@@ -53,4 +53,16 @@ public class Constants {
     public static final Long DEFAULT_SPONSOR_GIFT_UNIT_PRICE = 300L;
 
     public static final Long DEFAULT_SPONSOR_SKU_QUANTITY = 3L;
+
+    public static final String MP_WECHAT_DEDUPLICATION_KEY = "mp_wechat_msg_";
+
+    /**
+     * Redis key prefix
+     */
+    public static final String VIDEO_PREFIX = "video:";
+
+    /**
+     * Mp wechat reply
+     */
+    public static final String CODE_NOT_FOUND = "暗号错误或已被删除，请重新输入";
 }

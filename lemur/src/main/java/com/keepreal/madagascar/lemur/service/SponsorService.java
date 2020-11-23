@@ -8,6 +8,7 @@ import com.keepreal.madagascar.common.exceptions.ErrorCode;
 import com.keepreal.madagascar.common.exceptions.KeepRealBusinessException;
 import com.keepreal.madagascar.coua.RetrieveSingleSponsorGiftRequest;
 import com.keepreal.madagascar.coua.RetrieveSingleSponsorGiftResponse;
+import com.keepreal.madagascar.coua.RetrieveSponsorByHostIdRequest;
 import com.keepreal.madagascar.coua.RetrieveSponsorGiftsRequest;
 import com.keepreal.madagascar.coua.RetrieveSponsorGiftsResponse;
 import com.keepreal.madagascar.coua.RetrieveSponsorRequest;
@@ -73,6 +74,33 @@ public class SponsorService {
         if (Objects.isNull(retrieveSponsorResponse)
                 || !retrieveSponsorResponse.hasStatus()) {
             log.error(Objects.isNull(retrieveSponsorResponse) ? "Retrieve sponsor returned null." : retrieveSponsorResponse.toString());
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
+        }
+
+        if (ErrorCode.REQUEST_SUCC_VALUE != retrieveSponsorResponse.getStatus().getRtn()) {
+            throw new KeepRealBusinessException(retrieveSponsorResponse.getStatus());
+        }
+
+        return retrieveSponsorResponse.getSponsorMessage();
+    }
+
+    public SponsorMessage retrieveSponsorByHostId(String hostId) {
+        SponsorServiceGrpc.SponsorServiceBlockingStub stub = SponsorServiceGrpc.newBlockingStub(this.couaChannel);
+
+        RetrieveSponsorByHostIdRequest request = RetrieveSponsorByHostIdRequest.newBuilder()
+                .setHostId(hostId)
+                .build();
+
+        RetrieveSponsorResponse retrieveSponsorResponse;
+        try {
+            retrieveSponsorResponse = stub.retrieveSponsorByHostId(request);
+        } catch (StatusRuntimeException exception) {
+            throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR, exception.getMessage());
+        }
+
+        if (Objects.isNull(retrieveSponsorResponse)
+                || !retrieveSponsorResponse.hasStatus()) {
+            log.error(Objects.isNull(retrieveSponsorResponse) ? "Retrieve sponsor by hostId returned null." : retrieveSponsorResponse.toString());
             throw new KeepRealBusinessException(ErrorCode.REQUEST_UNEXPECTED_ERROR);
         }
 

@@ -10,6 +10,7 @@ enum FeedEventType {
     FEED_EVENT_CREATE= 1;
     FEED_EVENT_DELETE = 2;
     FEED_EVENT_UPDATE = 3;
+    FEED_EVENT_TRANS_CODE_COMPLETE = 4;
 }
 
 message FeedCreateEvent {
@@ -21,6 +22,7 @@ message FeedCreateEvent {
     bool fromHost = 6;
     MediaType mediaType = 7;
     string hostId = 8;
+    bool isWorks = 9;
 }
 
 message FeedUpdateEvent {
@@ -34,6 +36,11 @@ message FeedDeleteEvent {
    string feedId = 1;
 }
 
+message FeedTransCodeCompleteEvent {
+    string feedId = 1;
+    string userId = 2;
+}
+
 message FeedEventMessage {
     FeedEventType type = 1;
     uint64 timestamp = 2;
@@ -42,5 +49,6 @@ message FeedEventMessage {
       FeedCreateEvent feedCreateEvent = 4;
       FeedDeleteEvent feedDeleteEvent = 5;
       FeedUpdateEvent feedUpdateEvent = 6;
+      FeedTransCodeCompleteEvent feedTransCodeCompleteEvent = 7;
     }
 }

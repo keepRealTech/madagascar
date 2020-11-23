@@ -12,6 +12,7 @@ message QueryFeedCondition {
     google.protobuf.Int64Value timestampAfter = 3;
     google.protobuf.Int64Value timestampBefore = 4;
     google.protobuf.BoolValue excludeTopped = 5;
+    google.protobuf.BoolValue isWorks = 6;
 }
 
 message NewFeedsRequest {
@@ -41,6 +42,7 @@ message NewFeedsRequestV2 {
         HtmlMessage html = 14;
         AnswerMessage question = 15;
     }
+    google.protobuf.BoolValue isWorks = 16;
 }
 
 message NewFeedsResponse {
@@ -169,6 +171,7 @@ message UpdateFeedFeedgroupRequest {
     string id = 1;
     string feedgroupId = 2;
     string userId = 3;
+    bool isRemove = 4;
 }
 
 message RetrieveMembershipFeedsRequest {
@@ -186,6 +189,16 @@ message UpdateFeedRequest {
     google.protobuf.StringValue title = 2;
     google.protobuf.StringValue text = 3;
     google.protobuf.StringValue brief = 4;
+}
+
+message UpdateFeedByVideoRequest {
+    string videoId = 1;
+    VideoMessage message = 2;
+}
+
+message UpdateFeedByVideoResponse {
+    CommonStatus status = 1;
+    FeedMessage feed = 2;
 }
 
 service FeedService {
@@ -208,4 +221,5 @@ service FeedService {
     rpc RetrieveMembershipFeeds(RetrieveMembershipFeedsRequest) returns (FeedsResponse) {};
     rpc CreateFeed (NewFeedsRequestV2) returns (FeedResponse) {};
     rpc UpdateFeed (UpdateFeedRequest) returns (FeedResponse) {};
+    rpc UpdateFeedByVideoId(UpdateFeedByVideoRequest) returns (UpdateFeedByVideoResponse) {};
 }

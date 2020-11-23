@@ -22,6 +22,8 @@ global:
       vanga: 1
       asity: 1
       hoopoe: 1
+      angonoka: 1
+      hawksbill: 1
     short_code_base: https://staging.keepreal.cn/s/%s
     image_host: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com
     html_host: http://test.keepreal.cn
@@ -33,7 +35,7 @@ global:
   images:
     lemur:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/lemur
-      tag: 1.4.0-staging
+      tag: 1.4.1-staging
       imagePullPolicy: Always
     baobob:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/baobob
@@ -45,11 +47,11 @@ global:
       imagePullPolicy: Always
     coua:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/coua
-      tag: 1.2.4-staging
+      tag: 1.2.5-staging
       imagePullPolicy: Always
     fossa:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/fossa
-      tag: 1.2.4-staging
+      tag: 1.2.5-staging
       imagePullPolicy: Always
     indri:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/indri
@@ -61,7 +63,7 @@ global:
       imagePullPolicy: Always
     marty:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/marty
-      tag: 1.0.8-staging
+      tag: 1.0.9-staging
       imagePullPolicy: Always
     tenrecs:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/tenrecs
@@ -69,15 +71,23 @@ global:
       imagePullPolicy: Always
     vanga:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/vanga
-      tag: 1.2.6-staging
+      tag: 1.2.7-staging
       imagePullPolicy: Always
     asity:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/asity
-      tag: 1.0.7-staging
+      tag: 1.0.8-staging
       imagePullPolicy: Always
     hoopoe:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/hoopoe
       tag: 1.0.1-staging
+      imagePullPolicy: Always
+    angonoka:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/angonoka
+      tag: 1.0.0-staging
+      imagePullPolicy: Always
+    hawksbill:
+      name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/hawksbill
+      tag: 1.0.0-staging
       imagePullPolicy: Always
     settler:
       name: registry-vpc.cn-beijing.aliyuncs.com/keepreal/settler

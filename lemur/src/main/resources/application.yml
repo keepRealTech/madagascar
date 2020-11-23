@@ -26,6 +26,12 @@ grpc:
   hoopoe:
     host: 127.0.0.1
     port: 12008
+  angonoka:
+    host: 127.0.0.1
+    port: 12009
+  hawksbill:
+    host: 127.0.0.1
+    port: 12010
 
 system-notification:
   name: test-user
@@ -94,6 +100,7 @@ client:
     setupInfo:
       version: 1
       address: https://kr-thumbnail-staging-cn2-01.oss-cn-beijing.aliyuncs.com/app-debug02.apk
+      show-super-follow-bot: true
     updateInfoMap:
       1:
         currentVersion: 1
@@ -111,6 +118,7 @@ client:
         island-check-interval: 10
         config-timeout: 1000
         audit: false
+        show-super-follow-bot: true
     updateInfoMap:
       100:
         currentVersion: 100

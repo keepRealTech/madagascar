@@ -23,6 +23,8 @@ public class GrpcChannelFactory {
     private final GrpcConfiguration mantellaConfiguration;
     private final GrpcConfiguration vangaConfiguration;
     private final GrpcConfiguration hoopoeConfiguration;
+    private final GrpcConfiguration angonokaConfiguration;
+    private final GrpcConfiguration hawksbillConfiguration;
     private final TracingClientInterceptor interceptor;
 
     /**
@@ -36,6 +38,8 @@ public class GrpcChannelFactory {
      * @param tenrecsConfiguration  Tencres grpc configuration.
      * @param mantellaConfiguration Mantella grpc configuration.
      * @param vangaConfiguration    Vanga grpc configuration.
+     * @param angonokaConfiguration Angonoka grpc configuration.
+     * @param hawksbillConfiguration Hawksbill grpc configuration.
      * @param tracer                {@link Tracer}.
      */
     public GrpcChannelFactory(@Qualifier("asityConfiguration") GrpcConfiguration asityConfiguration,
@@ -47,6 +51,8 @@ public class GrpcChannelFactory {
                               @Qualifier("mantellaConfiguration") GrpcConfiguration mantellaConfiguration,
                               @Qualifier("vangaConfiguration") GrpcConfiguration vangaConfiguration,
                               @Qualifier("hoopoeConfiguration") GrpcConfiguration hoopoeConfiguration,
+                              @Qualifier("angonokaConfiguration") GrpcConfiguration angonokaConfiguration,
+                              @Qualifier("hawksbillConfiguration") GrpcConfiguration hawksbillConfiguration,
                               Tracer tracer) {
         this.asityConfiguration = asityConfiguration;
         this.couaConfiguration = couaConfiguration;
@@ -57,6 +63,8 @@ public class GrpcChannelFactory {
         this.mantellaConfiguration = mantellaConfiguration;
         this.vangaConfiguration = vangaConfiguration;
         this.hoopoeConfiguration = hoopoeConfiguration;
+        this.angonokaConfiguration = angonokaConfiguration;
+        this.hawksbillConfiguration = hawksbillConfiguration;
         this.interceptor = TracingClientInterceptor
                 .newBuilder()
                 .withTracer(tracer)
@@ -170,14 +178,40 @@ public class GrpcChannelFactory {
     }
 
     /**
-     * Represents the coua grpc channel.
+     * Represents the hoopoe grpc channel.
      *
-     * @return Coua grpc channel.
+     * @return Hoopoe grpc channel.
      */
     @Bean(name = "hoopoeChannel")
     public Channel getHoopoeChannel() {
         return this.interceptor.intercept(ManagedChannelBuilder
                 .forAddress(this.hoopoeConfiguration.getHost(), this.hoopoeConfiguration.getPort())
+                .usePlaintext()
+                .build());
+    }
+
+    /**
+     * Represents the angonoka grpc channel.
+     *
+     * @return Angonoka grpc channel.
+     */
+    @Bean(name = "angonokaChannel")
+    public Channel getAngonokaChannel() {
+        return this.interceptor.intercept(ManagedChannelBuilder
+                .forAddress(this.angonokaConfiguration.getHost(), this.angonokaConfiguration.getPort())
+                .usePlaintext()
+                .build());
+    }
+
+    /**
+     * Represents the hawksbill grpc channel.
+     *
+     * @return Hawksbill grpc channel.
+     */
+    @Bean(name = "hawksbillChannel")
+    public Channel getHawksbillChannel() {
+        return this.interceptor.intercept(ManagedChannelBuilder
+                .forAddress(this.hawksbillConfiguration.getHost(), this.hawksbillConfiguration.getPort())
                 .usePlaintext()
                 .build());
     }

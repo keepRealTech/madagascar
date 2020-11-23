@@ -13,7 +13,7 @@ public class Templates {
     /**
      * Advanced publish hints.
      */
-    public static final String LEMUR_POSTING_INSTRUCTION_TITLE = "高清原图、长篇文章、音频和视频发布指南:";
+    public static final String LEMUR_POSTING_INSTRUCTION_TITLE = "高清图、长文章、音频和长视频发布指南:";
     public static final String LEMUR_POSTING_INSTRUCTION_CONTENT = "1.在电脑端打开跳岛官网 tiaodaoapp.com\r\n" +
             "2.微信扫码登录\r\n" +
             "3.点击\"发布\"按钮";
@@ -24,13 +24,15 @@ public class Templates {
     public final static String LEMUR_NOTICE_SUPPORT_CONTENT = "支持了你";
     public final static String LEMUR_NOTICE_MEMBER_CONTENT = "支持了%d个月\"%s\"";
     public final static String LEMUR_NOTICE_MEMBER_PERMANENT_CONTENT = "支持了你的永久方案\"%s\"";
-    public final static String LEMUR_NOTICE_FEED_PAYMENT_CONTENT = "刚刚解锁了你的动态";
+    public final static String LEMUR_NOTICE_FEED_PAYMENT_CONTENT = "解锁了你的动态";
 
     /**
      * Payment history templates.
      */
     public static final String LEMUR_PAYMENT_TYPE_FEED = "单独解锁";
     public static final String LEMUR_PAYMENT_FEED_PRIVILEGE = "支付%d元立即解锁专属动态";
+    public static final String LEMUR_PAYMENT_TYPE_SPONSOR = "给TA买了个%s";
+    public static final String LEMUR_PAYMENT_TYPE_OLD_SPONSOR = "支持一下";
 
     /**
      * User creation chat message templates.
@@ -81,4 +83,24 @@ public class Templates {
     public static final String INCOME_DTO_SPONSOR = "支持一下";
     public static final String INCOME_DTO_FEED_CHARGE = "单独解锁";
     public static final String INCOME_GREETINGS_CONTENTS = "早上好！,下午好！,晚上好！,夜深了！";
+
+    /**
+     * Video trans code templates
+     */
+    public static final String TRANS_CODE_START = "视频上传成功，服务器正在努力转码中，转码成功后可正常播放";
+    public static final String TRANS_CODE_COMPLETE = "你在%s发布的视频已经转码处理成功，现在视频可以正常观看啦";
+
+    /**
+     * Super follow templates.
+     */
+    public static final String FOLLOW_SUCCESS_CONTENTS = "恭喜你已成功订阅%s的超级关注bot，当%s更新时，岛蛋会在这里第一时间通知你。\n" +
+            "\n" +
+            "从此不再错过，%s每一次的沙发都是你的！\n" +
+            "\n" +
+            "你还可以点击这里%s向%s匿名提问或支持TA～";
+    public static final String H5_REPOST_URL = "https://tiaodaoapp.com/repost?islandId=%s&userId=%s";
+    public static final String WEIBO_H5_URL = "https://m.weibo.cn/%s/%s";
+    public static final String MP_WECHAT_QRCODE_URL = "https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=%s";
+    public static final String GET_FOLLOW_CONTENT = "当%s更新时，第一时间提醒";
+
 }

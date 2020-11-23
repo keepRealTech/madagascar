@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: hawksbill
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: GcrkNYTcST4PzlV@
+    ssl: false
+
+wechat:
+  mp:
+    app-id:
+    app-secret:
+    server-token:
+    expiration-in-sec: 60
+    template-id:
+    template-color: FA9E25
+
+grpc:
+  port: 12010
+
+server:
+  port: 8092

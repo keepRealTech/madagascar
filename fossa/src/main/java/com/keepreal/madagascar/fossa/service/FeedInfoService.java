@@ -26,9 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -48,6 +48,7 @@ public class FeedInfoService {
     private final ReactionRepository reactionRepository;
     private final SubscribeMembershipService subscribeMembershipService;
     private final FeedChargeService feedChargeService;
+    private final FeedCollectionService feedCollectionService;
 
     /**
      * Constructs the feed service
@@ -58,19 +59,22 @@ public class FeedInfoService {
      * @param reactionRepository         {@link ReactionRepository}.
      * @param subscribeMembershipService {@link SubscribeMembershipService}.
      * @param feedChargeService          {@link FeedChargeService}.
+     * @param feedCollectionService      {@link FeedCollectionService}.
      */
     public FeedInfoService(MongoTemplate mongoTemplate,
                            CommentService commentService,
                            FeedInfoRepository feedInfoRepository,
                            ReactionRepository reactionRepository,
                            SubscribeMembershipService subscribeMembershipService,
-                           FeedChargeService feedChargeService) {
+                           FeedChargeService feedChargeService,
+                           FeedCollectionService feedCollectionService) {
         this.mongoTemplate = mongoTemplate;
         this.commentService = commentService;
         this.feedInfoRepository = feedInfoRepository;
         this.reactionRepository = reactionRepository;
         this.subscribeMembershipService = subscribeMembershipService;
         this.feedChargeService = feedChargeService;
+        this.feedCollectionService = feedCollectionService;
     }
 
     /**
@@ -81,7 +85,7 @@ public class FeedInfoService {
     public void deleteFeedById(String id) {
         mongoTemplate.updateFirst(
                 Query.query(Criteria.where("id").is(id)),
-                Update.update("deleted", true),
+                Update.update("deleted", true).set("updatedTime", Instant.now().toEpochMilli()),
                 FeedInfo.class);
     }
 
@@ -180,10 +184,11 @@ public class FeedInfoService {
         }
 
         boolean isLiked = reactionRepository.existsByFeedIdAndUserIdAndReactionTypeListContains(feedInfo.getId(), userId, ReactionType.REACTION_LIKE_VALUE);
+        boolean isCollected = this.feedCollectionService.hasCollected(userId, feedInfo.getId());
 
         List<CommentMessage> lastCommentMessage = this.commentService.getCommentsMessage(feedInfo.getId(), Constants.DEFAULT_FEED_LAST_COMMENT_COUNT);
 
-        return this.getFeedMessage(feedInfo, userId, myMembershipIds, lastCommentMessage, isLiked);
+        return this.getFeedMessage(feedInfo, userId, myMembershipIds, lastCommentMessage, isLiked, isCollected);
     }
 
     /**
@@ -200,7 +205,8 @@ public class FeedInfoService {
                                       String userId,
                                       List<String> myMembershipIds,
                                       List<CommentMessage> lastCommentMessages,
-                                      boolean isLiked) {
+                                      boolean isLiked,
+                                      boolean isCollected) {
         if (Objects.isNull(feedInfo)) {
             return null;
         }
@@ -225,6 +231,8 @@ public class FeedInfoService {
                 .setIsTop(feedInfo.getIsTop() == null ? false : feedInfo.getIsTop())
                 .setHostId(feedInfo.getHostId())
                 .setCanSave(feedInfo.getCanSave() == null ? false : feedInfo.getCanSave())
+                .setIsWorks(feedInfo.getIsWorks() == null ? true : feedInfo.getIsWorks())
+                .setIsCollected(isCollected)
                 .setFeedgroupId(feedInfo.getFeedGroupId() == null ? "" : feedInfo.getFeedGroupId());
 
         List<String> membershipIds = feedInfo.getMembershipIds();
@@ -323,6 +331,15 @@ public class FeedInfoService {
      * @return List of {@link FeedInfo}.
      */
     public List<FeedInfo> findByIds(Iterable<String> ids) {
+        return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
+    }
+
+    public List<FeedInfo> findByIds(Iterable<String> ids, boolean order) {
+        return order ? this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids) :
+                this.feedInfoRepository.findAllByIdInAndDeletedIsFalse(ids);
+    }
+
+    public List<FeedInfo> findByIdsOrderByUpdateTime(Iterable<String> ids) {
         return this.feedInfoRepository.findAllByIdInAndDeletedIsFalseOrderByCreatedTimeDesc(ids);
     }
 

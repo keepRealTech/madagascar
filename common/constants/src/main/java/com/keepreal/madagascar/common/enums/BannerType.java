@@ -6,7 +6,8 @@ package com.keepreal.madagascar.common.enums;
 public enum BannerType {
     UNSORTED(0),
     PUBLIC(1),
-    CREATOR(2);
+    CREATOR(2),
+    SUPER_FOLLOW(3);
 
     private final int value;
     BannerType(int value) {

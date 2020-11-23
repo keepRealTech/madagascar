@@ -56,6 +56,10 @@ public class SponsorService {
         return this.sponsorRepository.findTopByIslandIdAndActiveIsTrueAndDeletedIsFalse(islandId);
     }
 
+    public Sponsor retrieveSponsorByHostId(String hostId) {
+        return this.sponsorRepository.findTopByHostIdAndActiveIsTrueAndDeletedIsFalse(hostId);
+    }
+
     /**
      * 创建默认的支持一下信息
      *

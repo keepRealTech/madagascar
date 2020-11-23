@@ -162,6 +162,13 @@ message ChatSettingsResponse {
   ChatSettingsMessage chatSettings = 2;
 }
 
+message SendMessageRequest {
+  string senderId = 1;
+  repeated string targetIds = 2;
+  string text = 3;
+  int32 includeSender = 4;
+}
+
 service ChatService {
   rpc RegisterUser(RegisterRequest) returns (RegisterResponse) {};
   rpc EnableChatAccess(EnableChatAccessRequest) returns (CommonStatus) {};
@@ -179,4 +186,5 @@ service ChatService {
   rpc RetrieveChatgroupMembershipCountByMembershipIds(RetrieveChatgroupMembershipCountRequest) returns (ChatgroupMembershipCountResponse) {};
   rpc RetrieveChatSettingsByUserId(RetrieveChatSettingsByUserIdRequest) returns (ChatSettingsResponse) {};
   rpc UpdateChatSettingsByUserId(UpdateChatSettingsRequest) returns (ChatSettingsResponse) {};
+  rpc sendMessage(SendMessageRequest) returns (CommonStatus) {};
 }

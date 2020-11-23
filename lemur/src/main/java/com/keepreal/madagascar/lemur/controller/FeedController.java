@@ -20,6 +20,7 @@ import com.keepreal.madagascar.fossa.FeedsResponse;
 import com.keepreal.madagascar.lemur.converter.DefaultErrorMessageTranslater;
 import com.keepreal.madagascar.lemur.converter.MediaTypeConverter;
 import com.keepreal.madagascar.lemur.dtoFactory.FeedDTOFactory;
+import com.keepreal.madagascar.lemur.service.ChatService;
 import com.keepreal.madagascar.lemur.service.FeedGroupService;
 import com.keepreal.madagascar.lemur.service.FeedService;
 import com.keepreal.madagascar.lemur.service.ImageService;
@@ -30,7 +31,7 @@ import com.keepreal.madagascar.lemur.util.HttpContextUtils;
 import com.keepreal.madagascar.lemur.util.PaginationUtils;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
+import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
@@ -86,6 +87,8 @@ public class FeedController implements FeedApi {
     private final FeedService feedService;
     private final FeedGroupService feedGroupService;
     private final FeedDTOFactory feedDTOFactory;
+    private final ChatService chatService;
+    private final RedissonClient redissonClient;
 
     /**
      * Constructs the feed controller.
@@ -96,19 +99,25 @@ public class FeedController implements FeedApi {
      * @param membershipService {@link MembershipService}.
      * @param feedGroupService  {@link FeedGroupService}.
      * @param feedDTOFactory    {@link FeedDTOFactory}.
+     * @param chatService       {@link ChatService}.
+     * @param redissonClient    {@link RedissonClient}.
      */
     public FeedController(ImageService imageService,
                           FeedService feedService,
                           IslandService islandService,
                           MembershipService membershipService,
                           FeedGroupService feedGroupService,
-                          FeedDTOFactory feedDTOFactory) {
+                          FeedDTOFactory feedDTOFactory,
+                          ChatService chatService,
+                          RedissonClient redissonClient) {
         this.imageService = imageService;
         this.feedService = feedService;
         this.islandService = islandService;
         this.membershipService = membershipService;
         this.feedGroupService = feedGroupService;
         this.feedDTOFactory = feedDTOFactory;
+        this.chatService = chatService;
+        this.redissonClient = redissonClient;
     }
 
     /**
@@ -412,7 +421,8 @@ public class FeedController implements FeedApi {
                                                                    Long minTimestamp,
                                                                    Long maxTimestamp,
                                                                    Integer pageSize,
-                                                                   Boolean includeChargeable) {
+                                                                   Boolean includeChargeable,
+                                                                   Boolean isWorks) {
         String userId = HttpContextUtils.getUserIdFromContext();
         IslandMessage islandMessage = this.islandService.retrieveIslandById(id);
 
@@ -422,7 +432,7 @@ public class FeedController implements FeedApi {
         }
 
         com.keepreal.madagascar.fossa.FeedsResponse normalFeedsResponse =
-                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize, true);
+                this.feedService.retrieveIslandFeeds(id, fromHost, userId, minTimestamp, maxTimestamp, 0, pageSize, true, isWorks);
 
         Map<String, List<MembershipMessage>> feedMembershipMap = this.generateFeedMembershipMap(normalFeedsResponse.getFeedList());
         Map<String, FeedGroupMessage> feedGroupMessageMap = this.generateFeedGroupMap(normalFeedsResponse.getFeedList());
@@ -479,7 +489,8 @@ public class FeedController implements FeedApi {
     public ResponseEntity<PostCheckFeedsResponse> apiV1FeedsCheckPost(PostCheckFeedsRequest postCheckFeedsRequest) {
         List<CheckNewFeedsMessage> checkNewFeedsMessages = this.islandService.checkNewFeeds(
                 postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getIslandId).collect(Collectors.toList()),
-                postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getTimestamp).collect(Collectors.toList()));
+                postCheckFeedsRequest.getCheckFeedsMessage().stream().map(CheckFeedsMessage::getTimestamp).collect(Collectors.toList()),
+                postCheckFeedsRequest.getCheckFeedsMessage().stream().map(message -> message.getIsWorks() == null ? false : message.getIsWorks()).collect(Collectors.toList()));
 
         PostCheckFeedsResponse response = new PostCheckFeedsResponse();
         response.setData(checkNewFeedsMessages
@@ -641,7 +652,8 @@ public class FeedController implements FeedApi {
                 postFeedRequestV2.getMultimedia(),
                 postFeedRequestV2.getText(),
                 postFeedRequestV2.getFeedGroupId(),
-                postFeedRequestV2.getPriceInCents());
+                postFeedRequestV2.getPriceInCents(),
+                postFeedRequestV2.getIsWorks());
 
         DummyResponseUtils.setRtnAndMessage(response, ErrorCode.REQUEST_SUCC);
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -708,7 +720,12 @@ public class FeedController implements FeedApi {
                 postIslandFeedRequest.getTitle(),
                 postIslandFeedRequest.getBrief(),
                 postIslandFeedRequest.getFeedGroupId(),
-                postIslandFeedRequest.getPriceInCents());
+                postIslandFeedRequest.getPriceInCents(),
+                postIslandFeedRequest.getIsWorks());
+        if (feed.getType().equals(MediaType.MEDIA_VIDEO)) {
+            this.chatService.sendMessage(Constants.OFFICIAL_USER_ID, Collections.singletonList(userId), Templates.TRANS_CODE_START, 0);
+            this.redissonClient.getBucket(Constants.VIDEO_PREFIX + postIslandFeedRequest.getMultimedia().get(0).getVideoId()).set(feed.getId());
+        }
 
         Map<String, List<MembershipMessage>> feedMembershipMap =
                 this.generateFeedMembershipMap(Collections.singletonList(feed));
@@ -776,7 +793,7 @@ public class FeedController implements FeedApi {
     public ResponseEntity<FullFeedResponse> apiV1FeedsIdFeedgroupsPut(String id, PutFeedFeedgroupRequest putFeedFeedgroupRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedGroupFeedResponse feedGroupFeedResponse = this.feedService.updateFeedFeedgroupById(id,
-                userId, putFeedFeedgroupRequest.getFeedgroupId());
+                userId, putFeedFeedgroupRequest.getFeedgroupId(), putFeedFeedgroupRequest.getIsRemove());
 
         FullFeedResponse response = new FullFeedResponse();
         response.setData(this.feedDTOFactory.valueOf(feedGroupFeedResponse.getFeed(),
@@ -800,7 +817,7 @@ public class FeedController implements FeedApi {
     public ResponseEntity<FeedResponse> apiV1FeedsIdPut(String id, @Valid PutFeedRequest putFeedRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
-        if (!userId.equals(feedMessage.getHostId())) {
+        if (!userId.equals(feedMessage.getUserId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hawksbill
+  namespace: {{ .Values.global.common_configs.namespace }}
+data:
+  aliyun_logs_madagascar-prod: stdout
+  WECHAT_MP_SERVERTOKEN: {{ .Values.wechat.mp.server_token }}
+  WECHAT_MP_TEMPLATEID: {{ .Values.wechat.mp.template_id }}
+  SPRING_REDIS_PORT: '{{ .Values.redis.port }}'
+  OPENTRACING_JAEGER_CONSTSAMPLER_DECISION: '{{ .Values.deploy.opentracing.enable_jaeger }}'
+  OPENTRACING_JAEGER_GRPCSERVERINTERCEPTOR: '{{ .Values.deploy.opentracing.enable_jaeger }}'

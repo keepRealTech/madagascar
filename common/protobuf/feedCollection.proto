@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.keepreal.madagascar.fossa";
+
+import "common.proto";
+import "google/protobuf/wrappers.proto";
+
+message RetrieveFeedsByUserIdRequest {
+    string userId = 1;
+    int32 pageSize = 2;
+    google.protobuf.Int64Value timestampAfter = 3;
+    google.protobuf.Int64Value timestampBefore = 4;
+}
+
+message AddFeedToCollectionRequest {
+    string userId = 1;
+    string feedId = 2;
+}
+
+message RemoveFeedToCollectionRequest {
+    string userId = 1;
+    string feedId = 2;
+}
+
+message CollectedFeedsResponse {
+    CommonStatus status = 1;
+    PageResponse pageResponse = 2;
+    repeated FeedMessage feed = 3;
+    repeated FeedCollectionMessage feedCollection = 4;
+}
+
+message FeedCollectionMessage {
+    string userId = 1;
+    string feedId = 2;
+    int64 updatedTime = 3;
+}
+
+service FeedCollectionService {
+    rpc retrieveFeedsByUserId(RetrieveFeedsByUserIdRequest) returns(CollectedFeedsResponse) {};
+    rpc addFeedToCollection(AddFeedToCollectionRequest) returns(CommonStatus) {};
+    rpc removeFeedToCollection(RemoveFeedToCollectionRequest) returns(CommonStatus) {};
+}

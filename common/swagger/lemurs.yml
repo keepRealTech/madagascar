@@ -55,6 +55,10 @@ tags:
     description: 收入 controller
   - name: Banner
     description: Banner controller
+  - name: FeedCollection
+    description: feed收藏 controller
+  - name: Follow
+    description: 超级关注 controller
 
 paths:
   /api/healthcheck:
@@ -416,6 +420,7 @@ paths:
         - $ref: '#/components/parameters/timestampBefore'
         - $ref: '#/components/parameters/pageSize'
         - $ref: '#/components/parameters/includeChargeableInQuery'
+        - $ref: '#/components/parameters/isWorksInQuery'
       tags:
         - Feed
       summary: retrieves a list of feeds with pagination
@@ -894,7 +899,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConfigurationResponse'
+                $ref: '#/components/schemas/ConfigurationResponseV2'
   /api/v1/updateInfo/ios:
     get:
       parameters:
@@ -2921,6 +2926,132 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BannersResponse'
+  /api/v1/banners/follow:
+    get:
+      tags:
+        - Banner
+      summary: 获取超级关注banner
+      responses:
+        '200':
+          description: banner response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BannersResponse'
+  /api/v1/follow/profile/weibo:
+    get:
+      parameters:
+        - $ref:  "#/components/parameters/nickNameInQuery"
+      tags:
+        - Follow
+      summary: 根据微博昵称获取微博信息
+      responses:
+        '200':
+          description: weibo profile response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeiboProfileResponse'
+  /api/v1/follow/subscribe:
+    get:
+      tags:
+        - Follow
+      summary: 获取超级关注
+      responses:
+        '200':
+          description: subscribe response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowResponse'
+    post:
+      tags:
+        - Follow
+      summary: 创建超级关注
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref:  '#/components/schemas/PostFollowRequest'
+      responses:
+        '200':
+          description: subscribe response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleFollowResponse'
+    put:
+      tags:
+        - Follow
+      summary: 修改超级关注
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutFollowRequest'
+      responses:
+        '200':
+          description: subscribe response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SingleFollowResponse'
+    delete:
+      parameters:
+        - $ref:  "#/components/parameters/followTypeInQuery"
+      tags:
+        - Follow
+      summary: 删除超级关注
+      responses:
+        '200':
+          description: unsubscribe response
+          content:
+            application/json:
+              schema:
+                $ref:   '#/components/schemas/DummyResponse'
+  /api/v1/feedCollections:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/timestampAfter'
+        - $ref: '#/components/parameters/timestampBefore'
+        - $ref: '#/components/parameters/pageSize'
+      tags:
+        - FeedCollection
+      summary: 查看收藏夹的动态
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedCollectionsResponse'
+  /api/v1/feeds/{id}/feedCollections:
+    parameters:
+      - $ref: '#/components/parameters/idInPath'
+    post:
+      tags:
+        - FeedCollection
+      summary: 添加feed到收藏夹
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
+    delete:
+      tags:
+        - FeedCollection
+      summary: 从收藏夹中移除feed
+      responses:
+        '200':
+          description: common response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DummyResponse'
 components:
   securitySchemes:
     bearerAuth:
@@ -3189,6 +3320,24 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/IncomeType'
+    followTypeInQuery:
+      in: query
+      name: type
+      required: true
+      schema:
+        $ref:  '#/components/schemas/FollowType'
+    nickNameInQuery:
+      in: query
+      name: name
+      required: true
+      schema:
+        type: string
+    isWorksInQuery:
+      in: query
+      name: isWorks
+      required: false
+      schema:
+        type: boolean
   schemas:
     LoginType:
       type: string
@@ -3266,6 +3415,12 @@ components:
       enum:
         - STATE_PROCESSING
         - STATE_SETTLED
+    FollowBotState:
+      type: string
+      enum:
+        - ENABLED
+        - SUSPEND
+        - NONE
     OrderState:
       type: string
       enum:
@@ -3310,6 +3465,7 @@ components:
       enum:
         - PAYMENT_TYPE_MEMBERSHIP
         - PAYMENT_TYPE_FEED
+        - PAYMENT_TYPE_SPONSOR
     SupportTargetType:
       type: string
       enum:
@@ -3327,6 +3483,12 @@ components:
         - INCOME_MEMBERSHIP
         - INCOME_SUPPORT
         - INCOME_FEED_CHARGE
+    FollowType:
+      type: string
+      enum:
+        - WEIBO
+        - TIKTOK
+        - BILIBILI
     CommonResponse:
       type: object
       properties:
@@ -3979,6 +4141,10 @@ components:
           type: string
         brief:
           type: string
+        isWorks:
+          type: boolean
+        isCollected:
+          type: boolean
         imagesUris:
           type: array
           items:
@@ -4094,6 +4260,14 @@ components:
           properties:
             host:
               $ref: '#/components/schemas/BriefUserDTO'
+    CollectionFeedDTO:
+      allOf:
+        - $ref: '#/components/schemas/FeedDTO'
+        - type: object
+          properties:
+            collectedAt:
+              type: integer
+              format: int64
     PostFeedPayload:
       type: object
       properties:
@@ -4143,6 +4317,8 @@ components:
             $ref: '#/components/schemas/MultiMediaDTO'
         feedGroupId:
           type: string
+        isWorks:
+          type: boolean
     PutFeedRequest:
       type: object
       properties:
@@ -4176,6 +4352,8 @@ components:
             $ref: '#/components/schemas/MultiMediaDTO'
         feedGroupId:
           type: string
+        isWorks:
+          type: boolean
     CheckFeedsMessage:
       type: object
       properties:
@@ -4184,6 +4362,8 @@ components:
         timestamp:
           type: integer
           format: int64
+        isWorks:
+          type: boolean
     PostCheckFeedsRequest:
       type: object
       properties:
@@ -4230,6 +4410,22 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/FeedDTO'
+    FeedCollectionsResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            currentTime:
+              type: integer
+              format: int64
+            hasFeedgroup:
+              type: boolean
+            pageInfo:
+              $ref: '#/components/schemas/PageInfo'
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CollectionFeedDTO'
     FeedsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -4720,6 +4916,8 @@ components:
           type: integer
         audit:
           type: boolean
+        showSuperFollowBot:
+          type: boolean
     AndroidConfigurationDTO:
       type: object
       properties:
@@ -4727,10 +4925,17 @@ components:
           type: boolean
         isAccountLogin:
           type: boolean
+        showSuperFollowBot:
+          type: boolean
     ConfigurationDTO:
       oneOf:
         - $ref: '#/components/schemas/IOSConfigurationDTO'
         - $ref: '#/components/schemas/AndroidConfigurationDTO'
+    ConfigurationDTOV2:
+      type: object
+      properties:
+        showSuperFollowBot:
+          type: boolean
     ConfigurationResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -4738,6 +4943,13 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/ConfigurationDTO'
+    ConfigurationResponseV2:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/ConfigurationDTOV2'
     UpdateInfoDTO:
       type: object
       properties:
@@ -4753,6 +4965,10 @@ components:
           type: integer
         nextVersion:
           type: integer
+        currentVersionStr:
+          type: string
+        nextVersionStr:
+          type: string
     IOSUpdateInfoResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -4774,6 +4990,8 @@ components:
           type: integer
         address:
           type: string
+        showSuperFollowBot:
+          type: boolean
     AndroidSetupInfoResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -5480,12 +5698,18 @@ components:
         expiration:
           type: integer
           format: int64
+        islandId:
+          type: string
         priceInCents:
           type: integer
           format: int64
         createdAt:
           type: integer
           format: int64
+        gift:
+          $ref: '#/components/schemas/GiftImageDTO'
+        giftCount:
+          type: integer
     UserPaymentsResponse:
       allOf:
         - $ref: '#/components/schemas/CommonResponse'
@@ -6322,6 +6546,36 @@ components:
       properties:
         feedgroupId:
           type: string
+        isRemove:
+          type: boolean
+    PostFollowRequest:
+      type: object
+      properties:
+        followType:
+          $ref: '#/components/schemas/FollowType'
+        data:
+          $ref: '#/components/schemas/FollowPayload'
+      required:
+        - followType
+        - data
+    PutFollowRequest:
+      type: object
+      properties:
+        followType:
+          $ref: '#/components/schemas/FollowType'
+        data:
+          $ref: '#/components/schemas/FollowPayload'
+      required:
+        - followType
+        - data
+    FollowPayload:
+      oneOf:
+        - $ref: '#/components/schemas/WeiboFollowPayload'
+    WeiboFollowPayload:
+      type: object
+      properties:
+        id:
+          type: string
     SupportTargetDTO:
       type: object
       properties:
@@ -6597,3 +6851,61 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/BannerDTO'
+    WeiboProfileDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        followerCount:
+          type: integer
+          format: int64
+        avatarUrl:
+          type: string
+    WeiboProfileResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref:  '#/components/schemas/WeiboProfileDTO'
+    FollowResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FollowInfoDTO'
+    SingleFollowResponse:
+      allOf:
+        - $ref: '#/components/schemas/CommonResponse'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/FollowDTO'
+    FollowInfoDTO:
+      type: object
+      properties:
+        weibo:
+          $ref: '#/components/schemas/FollowDTO'
+        tiktok:
+          $ref: '#/components/schemas/FollowDTO'
+        bilibili:
+          $ref: '#/components/schemas/FollowDTO'
+    FollowDTO:
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/FollowBotState'
+        name:
+          type: string
+        runningDays:
+          type: integer
+          format: int64
+        code:
+          type: string
+        ticket:
+          type: string
+        description:
+          type: string

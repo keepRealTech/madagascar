@@ -29,24 +29,31 @@ public class MediaService {
         this.host = clientConfiguration.getOssPrefix();
     }
 
-    public VideoMessage videoMessage(MultiMediaDTO multiMediaDTO) {
+    public VideoMessage videoMessage(MultiMediaDTO multiMediaDTO, boolean hasTransCode) {
         if (Objects.isNull(multiMediaDTO)) {
             return null;
         }
 
         String videoId = multiMediaDTO.getVideoId();
 
-        VideoInfo videoInfo = this.uploadService.retrieveVideoInfo(videoId);
-        this.uploadService.submitAIMediaJob(videoId);
-        return VideoMessage.newBuilder()
-                .setUrl(videoInfo.getPlayURL())
-                .setTitle(this.processTitle(videoInfo.getTitle()))
-                .setThumbnailUrl(this.getThumbnailUrl(multiMediaDTO, videoInfo))
-                .setDuration(this.toMilliseconds(videoInfo.getDuration()))
-                .setWidth(videoInfo.getWidth())
-                .setHeight(videoInfo.getHeight())
-                .setVideoId(videoId)
-                .build();
+        if (hasTransCode) {
+            return VideoMessage.newBuilder()
+                    .setVideoId(multiMediaDTO.getVideoId())
+                    .setThumbnailUrl(StringUtils.isEmpty(multiMediaDTO.getThumbnailUrl()) ? "" : multiMediaDTO.getThumbnailUrl())
+                    .build();
+        } else {
+            VideoInfo videoInfo = this.uploadService.retrieveVideoInfo(videoId);
+            this.uploadService.submitAIMediaJob(videoId);
+            return VideoMessage.newBuilder()
+                    .setUrl(videoInfo.getPlayURL())
+                    .setTitle(this.processTitle(videoInfo.getTitle()))
+                    .setThumbnailUrl(this.getThumbnailUrl(multiMediaDTO, videoInfo))
+                    .setDuration(this.toMilliseconds(videoInfo.getDuration()))
+                    .setWidth(videoInfo.getWidth())
+                    .setHeight(videoInfo.getHeight())
+                    .setVideoId(videoId)
+                    .build();
+        }
     }
 
     public AudioMessage audioMessage(MultiMediaDTO multiMediaDTO) {
@@ -96,7 +103,7 @@ public class MediaService {
                 .build();
     }
 
-    private long toMilliseconds(String duration) {
+    public long toMilliseconds(String duration) {
         return (long) (Float.parseFloat(duration) * MILLISECONDS);
     }
 
@@ -104,7 +111,7 @@ public class MediaService {
         return StringUtils.isEmpty(multiMediaDTO.getThumbnailUrl()) ? videoInfo.getCoverURL() : this.host + multiMediaDTO.getThumbnailUrl();
     }
 
-    private String processTitle(String title) {
+    public String processTitle(String title) {
         int index = title.lastIndexOf('.');
 
         return index == -1 ? title : title.substring(0, index);

@@ -10,6 +10,7 @@ import com.keepreal.madagascar.mantella.FeedCreateEvent;
 import com.keepreal.madagascar.mantella.FeedDeleteEvent;
 import com.keepreal.madagascar.mantella.FeedEventMessage;
 import com.keepreal.madagascar.mantella.FeedEventType;
+import com.keepreal.madagascar.mantella.FeedTransCodeCompleteEvent;
 import com.keepreal.madagascar.mantella.FeedUpdateEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
@@ -79,6 +80,11 @@ public class FeedEventProducerService {
         this.sendAsync(message, feedInfo.getId());
     }
 
+    public void produceFeedTransCodeCompleteEventAsync(FeedInfo feedInfo) {
+        Message message = this.createFeedTransCodeCompleteEventMessage(feedInfo);
+        this.sendAsync(message, feedInfo.getId());
+    }
+
     /**
      * Sends a message in async manner.
      *
@@ -121,6 +127,7 @@ public class FeedEventProducerService {
                 .setFromHost(feedInfo.getFromHost())
                 .setHostId(feedInfo.getHostId())
                 .setMediaType(MediaType.valueOf(feedInfo.getMultiMediaType()))
+                .setIsWorks(feedInfo.getIsWorks() == null ? false : feedInfo.getIsWorks())
                 .build();
         String uuid = UUID.randomUUID().toString();
         FeedEventMessage event = FeedEventMessage.newBuilder()
@@ -174,6 +181,26 @@ public class FeedEventProducerService {
         FeedEventMessage event = FeedEventMessage.newBuilder()
                 .setType(FeedEventType.FEED_EVENT_DELETE)
                 .setFeedDeleteEvent(feedDeleteEvent)
+                .setTimestamp(System.currentTimeMillis())
+                .setEventId(uuid)
+                .build();
+        return new Message(this.feedEventProducerConfiguration.getTopic(),
+                this.feedEventProducerConfiguration.getTag(), uuid, event.toByteArray());
+    }
+
+    private Message createFeedTransCodeCompleteEventMessage(FeedInfo feedInfo) {
+        if (StringUtils.isEmpty(feedInfo)) {
+            return null;
+        }
+
+        FeedTransCodeCompleteEvent feedTransCodeCompleteEvent = FeedTransCodeCompleteEvent.newBuilder()
+                .setFeedId(feedInfo.getId())
+                .setUserId(feedInfo.getUserId())
+                .build();
+        String uuid = UUID.randomUUID().toString();
+        FeedEventMessage event = FeedEventMessage.newBuilder()
+                .setType(FeedEventType.FEED_EVENT_TRANS_CODE_COMPLETE)
+                .setFeedTransCodeCompleteEvent(feedTransCodeCompleteEvent)
                 .setTimestamp(System.currentTimeMillis())
                 .setEventId(uuid)
                 .build();
