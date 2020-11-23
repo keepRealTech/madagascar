@@ -236,33 +236,47 @@ public class FeedGRpcController extends FeedServiceGrpc.FeedServiceImplBase {
             if (request.hasPriceInCents()) {
                 builder.priceInCents(request.getPriceInCents().getValue());
             }
+            if (request.getType().equals(MediaType.MEDIA_VIDEO) && StringUtils.isEmpty(request.getVideo().getUrl())) {
+                builder.temped(true);
+            }
             builder.userMembershipIds(this.subscribeMembershipService.retrieveMembershipIds(userId, islandIdList.get(i)));
             feedInfoList.add(builder.build());
         });
 
-        if (request.hasFeedGroupId() && 1 == islandIdList.size()) {
-            FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(request.getFeedGroupId().getValue());
-            if (Objects.isNull(feedGroup)) {
-                NewFeedsResponse response = NewFeedsResponse.newBuilder()
-                        .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEEDGROUP_NOT_FOUND_ERROR))
-                        .build();
-                responseObserver.onNext(response);
-                responseObserver.onCompleted();
-            }
+        FeedInfo feed = feedInfoList.get(0);
 
-            this.assignFeedGroup(feedInfoList.get(0), feedGroup);
-            this.feedGroupService.updateFeedGroup(feedGroup);
+        if (request.hasFeedGroupId()) {
+            if (request.getType().equals(MediaType.MEDIA_VIDEO) && StringUtils.isEmpty(request.getVideo().getUrl())) {
+                feed.setFeedGroupId(request.getFeedGroupId().getValue());
+            } else {
+                FeedGroup feedGroup = this.feedGroupService.retrieveFeedGroupById(request.getFeedGroupId().getValue());
+                if (Objects.isNull(feedGroup)) {
+                    NewFeedsResponse response = NewFeedsResponse.newBuilder()
+                            .setStatus(CommonStatusUtils.buildCommonStatus(ErrorCode.REQUEST_FEEDGROUP_NOT_FOUND_ERROR))
+                            .build();
+                    responseObserver.onNext(response);
+                    responseObserver.onCompleted();
+                }
+
+                this.assignFeedGroup(feed, feedGroup);
+                this.feedGroupService.updateFeedGroup(feedGroup);
+            }
         }
 
-        List<FeedInfo> feedInfos = this.feedInfoService.saveAll(feedInfoList);
-        this.islandService.callCouaUpdateIslandLastFeedAt(islandIdList, timestamp, false);
+        feed = this.feedInfoService.insert(feed);
 
-        feedInfos.forEach(this.feedEventProducerService::produceNewFeedEventAsync);
+        if (!request.getType().equals(MediaType.MEDIA_VIDEO)) {
+            this.islandService.callCouaUpdateIslandLastFeedAt(Collections.singletonList(request.getIslandId(0)), timestamp, request.hasIsWorks() && request.getIsWorks().getValue());
 
-        NewFeedsResponse newFeedsResponse = NewFeedsResponse.newBuilder()
+            this.feedEventProducerService.produceNewFeedEventAsync(feed);
+        } else {
+            this.redissonClient.getBucket(Constants.VIDEO_PREFIX + ((VideoInfo) feed.getMediaInfos().get(0)).getVideoId()).set(feed.getId());
+        }
+
+        NewFeedsResponse response = NewFeedsResponse.newBuilder()
                 .setStatus(CommonStatusUtils.getSuccStatus())
                 .build();
-        responseObserver.onNext(newFeedsResponse);
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 
