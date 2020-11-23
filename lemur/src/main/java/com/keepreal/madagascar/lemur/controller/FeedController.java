@@ -814,24 +814,26 @@ public class FeedController implements FeedApi {
      * @return {@link FeedResponse}
      */
     @Override
-    public ResponseEntity<FeedResponse> apiV1FeedsIdPut(String id, @Valid PutFeedRequest putFeedRequest) {
+    public ResponseEntity<FullFeedResponse> apiV1FeedsIdPut(String id, @Valid PutFeedRequest putFeedRequest) {
         String userId = HttpContextUtils.getUserIdFromContext();
         FeedMessage feedMessage = this.feedService.retrieveFeedById(id, userId);
         if (!userId.equals(feedMessage.getUserId())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        FeedMessage feedMessageUpdated = this.feedService.updateFeedById(id,
+        this.feedService.updateFeedById(id,
                 putFeedRequest.getTitle(),
                 putFeedRequest.getText(),
                 putFeedRequest.getBrief());
 
-        Map<String, List<MembershipMessage>> feedMembershipMap =
-                this.generateFeedMembershipMap(Collections.singletonList(feedMessageUpdated));
+        FeedGroupFeedResponse feedGroupFeedResponse = this.feedService.retrieveFeedGroupFeedById(id, userId);
 
-        FeedResponse response = new FeedResponse();
-        response.setData(this.feedDTOFactory.valueOf(feedMessageUpdated,
-                feedMembershipMap.getOrDefault(feedMessageUpdated.getId(), Collections.emptyList())));
+        FullFeedResponse response = new FullFeedResponse();
+        response.setData(this.feedDTOFactory.valueOf(feedGroupFeedResponse.getFeed(),
+                feedGroupFeedResponse.getFeedGroup(),
+                feedGroupFeedResponse.getLastFeedId(),
+                feedGroupFeedResponse.getNextFeedId(),
+                true));
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);

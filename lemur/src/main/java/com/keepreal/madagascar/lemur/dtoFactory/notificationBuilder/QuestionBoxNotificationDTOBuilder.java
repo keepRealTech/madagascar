@@ -92,7 +92,7 @@ public class QuestionBoxNotificationDTOBuilder implements NotificationDTOBuilder
                 }
                 questionDTO.setNoticeType(NoticeType.BOX_NOTICE_NEW_ANSWER);
                 questionDTO.setFeedId(message.getNewAnswerNotice().getFeedId());
-                questionDTO.setText(this.feedMessage.getText());
+                questionDTO.setText(this.feedMessage == null ? "" : this.feedMessage.getText());
                 return questionDTO;
             default:
         }
