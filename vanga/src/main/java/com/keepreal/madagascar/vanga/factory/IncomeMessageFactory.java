@@ -54,7 +54,7 @@ public class IncomeMessageFactory {
         }
         Long currentMonthIncome = this.paymentRepository.countAmountByPayeeIdAndValidAfter(userId, DateUtils.startOfMonthTimestamp(1), DateUtils.endOfMonthTimestamp(1));
         Long nextMonthIncome = this.paymentRepository.countAmountByPayeeIdAndValidAfter(userId, DateUtils.startOfMonthTimestamp(2), DateUtils.endOfMonthTimestamp(2));
-        Integer currentMonthSupportCount = this.paymentRepository.countSupportCountByPayeeIdAndValidAfter(userId, DateUtils.startOfMonthTimestamp(1), DateUtils.endOfMonthTimestamp(1));
+        Integer currentMonthSupportCount = this.paymentRepository.countSupportCountByPayeeIdAndTimestamp(userId, DateUtils.startOfMonthTimestamp(), DateUtils.endOfMonthTimestamp());
 
         return IncomeProfileMessage.newBuilder()
                 .setTotalIncome(incomeProfile.getAmountInCents())
