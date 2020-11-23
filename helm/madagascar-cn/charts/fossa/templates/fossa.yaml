@@ -110,7 +110,7 @@ spec:
                   key: password
                   name: aliyun-redis
             - name: RESTART
-              value: "1"
+              value: "2"
           resources:
             limits:
               memory: {{ .Values.common_configs.memory }}
