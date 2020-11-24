@@ -78,7 +78,7 @@ client:
   android:
     setup_info:
       version: 1100
-      address: https://images.keepreal.cn/tiaodao_v1100_kr.apk
+      address: https://images.keepreal.cn/tiaodao_v1101_kr.apk
 
 security:
   oauth2:
