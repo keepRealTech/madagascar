@@ -899,7 +899,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConfigurationResponseV2'
+                $ref: '#/components/schemas/ConfigurationResponse'
   /api/v1/updateInfo/ios:
     get:
       parameters:
