@@ -63,25 +63,27 @@ public class ConfigurationController implements ConfigApi {
      */
     @Cacheable(value = "config")
     @Override
-    public ResponseEntity<ConfigurationResponseV2> apiV1ConfigsGet(ConfigType configType, Integer version, String channel) {
-        ConfigurationDTOV2 configurationDTOV2 = new ConfigurationDTOV2();
+    public ResponseEntity<ConfigurationResponse> apiV1ConfigsGet(ConfigType configType, Integer version, String channel) {
+        ConfigurationDTO configurationDTO = new ConfigurationDTO();
         switch (configType) {
             case IOS:
                 ConfigurationDTO ios = this.iOSConfigVersionMap.get(version);
-                configurationDTOV2.setShowSuperFollowBot(ios.getShowSuperFollowBot());
+                configurationDTO.setShowSuperFollowBot(ios.getShowSuperFollowBot());
+                configurationDTO.setAudit(false);
                 break;
             case ANDROID:
-                configurationDTOV2 = this.createAndroidConfigurationDTO();
+                ConfigurationDTOV2 androidConfigurationDTO = this.createAndroidConfigurationDTO();
+                configurationDTO.setShowSuperFollowBot(androidConfigurationDTO.getShowSuperFollowBot());
                 break;
             default:
         }
 
-        if (Objects.isNull(configurationDTOV2)) {
+        if (Objects.isNull(configurationDTO)) {
             throw new KeepRealBusinessException(ErrorCode.REQUEST_INVALID_ARGUMENT);
         }
 
-        ConfigurationResponseV2 response = new ConfigurationResponseV2();
-        response.setData(configurationDTOV2);
+        ConfigurationResponse response = new ConfigurationResponse();
+        response.setData(configurationDTO);
         response.setRtn(ErrorCode.REQUEST_SUCC.getNumber());
         response.setMsg(ErrorCode.REQUEST_SUCC.getValueDescriptor().getName());
         return new ResponseEntity<>(response, HttpStatus.OK);
